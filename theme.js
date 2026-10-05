@@ -2,7 +2,33 @@
   const storageKey = 'custom-home-theme';
   const root = document.documentElement;
 
+  function readCookieTheme() {
+    try {
+      const prefix = `${encodeURIComponent(storageKey)}=`;
+      const savedCookie = document.cookie
+        .split('; ')
+        .find((cookie) => cookie.startsWith(prefix));
+      if (!savedCookie) {
+        return null;
+      }
+
+      const theme = decodeURIComponent(savedCookie.slice(prefix.length));
+      if (theme === 'light' || theme === 'dark') {
+        return theme;
+      }
+      console.warn(`Ignoring unsupported theme cookie: ${theme}`);
+    } catch (error) {
+      console.warn('Unable to read the theme cookie.', error);
+    }
+    return null;
+  }
+
   function readTheme() {
+    const cookieTheme = readCookieTheme();
+    if (cookieTheme) {
+      return cookieTheme;
+    }
+
     try {
       const theme = localStorage.getItem(storageKey);
       if (theme === 'light' || theme === 'dark') {
@@ -23,6 +49,13 @@
     } catch (error) {
       console.warn('Unable to save the theme preference.', error);
     }
+
+    try {
+      const secure = location.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = `${encodeURIComponent(storageKey)}=${encodeURIComponent(theme)}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`;
+    } catch (error) {
+      console.warn('Unable to save the theme cookie.', error);
+    }
   }
 
   function applyTheme(theme, button) {
@@ -37,7 +70,9 @@
     button.setAttribute('aria-pressed', String(isDark));
   }
 
-  applyTheme(readTheme());
+  const initialTheme = readTheme();
+  applyTheme(initialTheme);
+  saveTheme(initialTheme);
 
   document.addEventListener('DOMContentLoaded', function () {
     const header = document.querySelector('.site-head');
