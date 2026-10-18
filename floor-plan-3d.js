@@ -290,6 +290,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     }
   }
 
+  const casingSideWidth = 3.5 / 12;
+  const casingReveal = 0.125 / 12;
   function openingCasing(parent, x, bottom, width, height, faceDepth, side = 1, window = false, sillOptions = {}) {
     const casing = new THREE.Group();
     casing.name = window ? 'Craftsman window casing' : 'Craftsman opening casing';
@@ -297,8 +299,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     casing.rotation.y = side === -1 ? Math.PI : 0;
     casing.userData = { width, height, window, side, sideWidthInches: 3.5, headerHeightInches: 5.5 };
     parent.add(casing);
-    const sideWidth = 3.5 / 12;
-    const reveal = 0.125 / 12;
+    const sideWidth = casingSideWidth;
+    const reveal = casingReveal;
     const outerWidth = width + 2 * (sideWidth + reveal);
     function part(name, x, y, z, w, h, d, material = windowTrim) {
       const mesh = box(casing, x, y, z, w, h, d, material);
@@ -838,15 +840,21 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   sinkBacksplash.userData = { bottom: sinkBacksplashBottom, top: sinkBacksplashTop };
   walls.push(sinkBacksplash);
   const kitchenCenterZ = (8 + 26.9) / 2;
-  const cooktopRunWidth = 84 / 12;
-  const cooktopCounterWidth = cooktopRunWidth + 0.1;
+  const cooktopRunWidth = kitchenSideOpenings[1][0] - kitchenSideOpenings[0][1] - 2 * (casingSideWidth + casingReveal);
+  const cooktopEndFillerWidth = 1.5 / 12;
+  const cooktopSideBayWidth = (cooktopRunWidth - 3) / 2;
+  const cooktopSideDrawerWidth = cooktopSideBayWidth - cooktopEndFillerWidth - 0.04;
+  const cooktopSideDrawerOffset = 1.5 + (cooktopSideBayWidth - cooktopEndFillerWidth) / 2;
   const cooktopCabinetry = new THREE.Group();
   cooktopCabinetry.name = 'Extended cooktop base cabinetry';
-  cooktopCabinetry.userData = { widthInches: cooktopRunWidth * 12, sideDrawerWidthInches: 24, provisional: true };
+  cooktopCabinetry.userData = { widthInches: cooktopRunWidth * 12, sideDrawerWidthInches: cooktopSideDrawerWidth * 12, endFillerWidthInches: cooktopEndFillerWidth * 12, provisional: true };
   kitchen.add(cooktopCabinetry);
   box(cooktopCabinetry, 37, 1.44, cooktopCenterZ, 2, 2.85, cooktopRunWidth, cabinetFinish).name = 'Cooktop base cabinet run';
-  box(cooktopCabinetry, 37, 2.96, cooktopCenterZ, 2.05, 0.18, cooktopCounterWidth, countertop, true).name = 'Extended cooktop quartz counter';
-  for (const z of [cooktopCenterZ - 2.375, cooktopCenterZ + 2.375]) drawerFront(36, z, 24 / 12, -Math.PI / 2, cooktopCabinetry);
+  box(cooktopCabinetry, 37, 2.96, cooktopCenterZ, 2.05, 0.18, cooktopRunWidth, countertop, true).name = 'Extended cooktop quartz counter';
+  for (const side of [-1, 1]) {
+    drawerFront(36, cooktopCenterZ + side * cooktopSideDrawerOffset, cooktopSideDrawerWidth, -Math.PI / 2, cooktopCabinetry);
+    box(cooktopCabinetry, 35.98, 1.44, cooktopCenterZ + side * (cooktopRunWidth - cooktopEndFillerWidth) / 2, 0.08, 2.85, cooktopEndFillerWidth, cabinetFinish).name = 'Cooktop casing-side scribe filler';
+  }
   const cooktop = box(kitchen, 37, 3.075, cooktopCenterZ, 1.75, 0.05, 3, black, true);
   cooktop.name = '36 inch induction cooktop';
   for (const [x, z] of [[36.58, cooktopCenterZ - 0.75], [37.42, cooktopCenterZ - 0.75], [36.58, cooktopCenterZ + 0.75], [37.42, cooktopCenterZ + 0.75], [37, cooktopCenterZ]]) {
@@ -1314,12 +1322,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   }
 
   const prep = furnishing('Prep kitchen cabinetry', 0, 0);
-  for (const [x, width] of [[prepSinkX - 3.45, 3.9], [prepSinkX + 3.225, 3.45]]) cabinet(prep, x, 9.25, width);
-  const prepExtension = furnishing('Prep counter extension with six drawers', 40.25, 9.25);
-  prepExtension.userData = { widthInches: 42, depthInches: 24, drawerBanks: 2, drawers: 6, provisional: true };
-  box(prepExtension, 0, 1.475, 0, 3.5, 2.85, 2, cabinetFinish).name = 'Prep extension cabinet carcass';
-  box(prepExtension, 0, 2.97, 0, 3.56, 0.14, 2.05, countertop).name = 'Prep extension quartz counter';
-  for (const x of [-0.875, 0.875]) drawerFront(x, 1.04, 1.71, 0, prepExtension);
+  for (const [x, width] of [[prepSinkX - 3.775, 4.55], [prepSinkX + 3.225, 3.45]]) cabinet(prep, x, 9.25, width);
+  const prepExtension = furnishing('Prep counter extension with six drawers', 53.775, 9.25);
+  prepExtension.userData = { widthInches: 34.2, depthInches: 24, drawerBanks: 2, drawers: 6, provisional: true };
+  box(prepExtension, 0, 1.475, 0, 2.85, 2.85, 2, cabinetFinish).name = 'Prep extension cabinet carcass';
+  box(prepExtension, 0, 2.97, 0, 2.91, 0.14, 2.05, countertop).name = 'Prep extension quartz counter';
+  for (const x of [-0.7125, 0.7125]) drawerFront(x, 1.04, 1.385, 0, prepExtension);
   const prepSink = new THREE.Group();
   prepSink.name = 'Prep single-bowl sink and base';
   prepSink.position.set(prepSinkX, 0, 9.25);
@@ -1340,11 +1348,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   cylinder(prepSink, 0, 3.55, -0.88, 0.045, 1.16, steel).name = 'Prep sink faucet stem';
   box(prepSink, 0, 4.08, -0.57, 0.09, 0.09, 0.64, steel, true).name = 'Prep sink faucet spout';
   cylinder(prepSink, 0, 3.98, -0.28, 0.045, 0.2, steel).name = 'Prep sink faucet outlet';
-  box(prep, 45.425, 3.45, 8.22, 13.85, 0.82, 0.08, countertop).name = 'Prep quartz backsplash';
+  box(prep, 48.275, 3.45, 8.22, 13.85, 0.82, 0.08, countertop).name = 'Prep quartz backsplash';
   for (const [index, x] of prepWindowCenters.entries()) {
     windowFrame(`Prep counter window ${index + 1}`, x, 8, prepWindowWidth, prepWindowHeight, prepWindowSill, 0, rest);
   }
-  const prepTower = furnishing('Prep microwave and wall oven tower', 53.825, 8.25 + 25 / 24);
+  const prepTower = furnishing('Prep microwave and wall oven tower', 39.875, 8.25 + 25 / 24);
   const prepTowerWidth = 33 / 12;
   const prepTowerDepth = 25 / 12;
   const prepTowerSide = 0.75 / 12;
