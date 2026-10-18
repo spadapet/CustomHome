@@ -35,17 +35,22 @@ document.querySelectorAll('.furniture-photo img').forEach((image) => {
   if (image.complete && !image.naturalWidth) showPhotoError();
 });
 
-try {
-  const [THREE, { OrbitControls }, { RoundedBoxGeometry }] = await Promise.all([
-    import('three'),
-    import('three/addons/controls/OrbitControls.js'),
-    import('three/addons/geometries/RoundedBoxGeometry.js')
-  ]);
-  buildPreview(THREE, OrbitControls, RoundedBoxGeometry);
-} catch (error) {
-  console.error('The 3D floor plan could not start.', error);
-  showModelError('The 3D preview could not load. WebGL and an internet connection to jsDelivr are required.');
+// A classic entry script also runs from file URLs; remote dependencies remain modules.
+async function initializePreview() {
+  try {
+    const [THREE, { OrbitControls }, { RoundedBoxGeometry }] = await Promise.all([
+      import('three'),
+      import('three/addons/controls/OrbitControls.js'),
+      import('three/addons/geometries/RoundedBoxGeometry.js')
+    ]);
+    buildPreview(THREE, OrbitControls, RoundedBoxGeometry);
+  } catch (error) {
+    console.error('The 3D floor plan could not start.', error);
+    showModelError('The 3D preview could not load. WebGL and an internet connection to jsDelivr are required.');
+  }
 }
+
+initializePreview();
 
 function showModelError(text) {
   message.replaceChildren(document.createTextNode(text));
@@ -1180,11 +1185,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       const recessedBookcase = !upper && step >= 3;
       const enclosureDepth = recessedBookcase ? flightWidth - stairBookcaseDepth : flightWidth;
       const enclosureZ = centerZ + (recessedBookcase ? stairBookcaseDepth / 2 : 0);
-      box(flight, x, height - 0.15, enclosureZ, stairGoing, 0.1, enclosureDepth, wallMaterial).name = 'Hollow stairwell soffit';
+      const backingX = x + direction * 0.04;
+      const backingLength = stairGoing - 0.08;
+      box(flight, backingX, height - 0.15, enclosureZ, backingLength, 0.1, enclosureDepth, wallMaterial).name = 'Hollow stairwell soffit';
       if (recessedBookcase) {
         const caseHeight = stairBookcaseHeight(Math.floor(step / 3) * 3 * stairGoing);
         const infillHeight = height - 0.1 - caseHeight;
-        box(flight, x, caseHeight + infillHeight / 2, stairBookcaseDepth / 2, stairGoing, infillHeight, stairBookcaseDepth, wallMaterial).name = 'Bookcase stair-slope infill';
+        box(flight, backingX, caseHeight + infillHeight / 2, stairBookcaseDepth / 2, backingLength, infillHeight, stairBookcaseDepth, wallMaterial).name = 'Bookcase stair-slope infill';
       }
       box(flight, x, height - 0.05, centerZ, stairGoing, 0.1, flightWidth, oak).name = 'Upstairs oak tread';
       box(flight, x - direction * (stairGoing / 2 - 0.02), height + 0.003, centerZ, 0.04, 0.006, flightWidth, walnut).name = 'Stair tread nosing';
@@ -1195,12 +1202,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     box(flight, endX + direction * 0.04, endHeight - (stairRise + 0.1) / 2, centerZ, 0.08, stairRise - 0.1, flightWidth, cream).name = 'Landing riser';
     for (const side of [-1, 1]) {
       const stringerZ = centerZ + side * (flightWidth / 2 - 0.12);
-      stairBeam('Stair stringer', [startX, baseHeight + 0.05, stringerZ], [endX, endHeight - stairRise + 0.05, stringerZ], 0.12, 0.3, oak);
+      stairBeam('Stair stringer', [startX, baseHeight - 0.2, stringerZ], [endX, endHeight - stairRise - 0.2, stringerZ], 0.12, 0.3, oak);
       const railZ = upper && side === 1 ? outerStairRailZ : centerZ + side * (flightWidth / 2 + 0.08);
       const firstX = startX + direction * stairGoing / 2;
       const lastX = endX - direction * stairGoing / 2;
-      const wallSide = !upper && side === 1;
-      if (wallSide) continue;
       stairBeam('Sloped stair handrail', [firstX, baseHeight + stairRise + 3, railZ], [lastX, endHeight - stairRise + 3, railZ], 0.12, 0.12, oak);
       for (let rail = 1; rail <= 8; rail++) {
         const height = rail / 3;
@@ -1213,7 +1218,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       }
     }
   }
-  box(stairs, stairRun / 2, (landingHeight + 3) / 2, stairWidth + 0.08, stairRun, landingHeight + 3, 0.08, wallMaterial).name = 'Lower flight continuous backing wall';
   box(stairs, (stairRun + landingEndX) / 2, landingHeight - 0.1, stairDepth / 2, landingEndX - stairRun, 0.2, stairDepth, oak).name = 'U-turn stair landing';
   box(stairs, -stairWidth / 2, 2 * landingHeight - 0.1, stairWidth + stairGap + wallSideStairWidth / 2, stairWidth, 0.2, wallSideStairWidth, oak).name = 'Upper stair arrival landing';
   box(stairs, (stairRun + landingEndX) / 2, landingHeight - 0.25, (stairDepth + stairBookcaseDepth) / 2, landingEndX - stairRun, 0.1, stairDepth - stairBookcaseDepth, wallMaterial).name = 'Hollow turning-landing soffit';
@@ -1279,10 +1283,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       const x = startX + direction * (step + 0.5) * stairGoing;
       const y = baseY - (step + 1) * stairRise;
       box(flight, x, y - 0.05, centerZ, stairGoing, 0.1, flightWidth, oak).name = 'Basement oak tread';
-      box(flight, x - direction * (stairGoing / 2 - 0.04), y + (stairRise - 0.1) / 2, centerZ, 0.08, stairRise + 0.1, flightWidth, cream).name = 'Basement closed riser';
+      box(flight, x - direction * (stairGoing / 2 - 0.04), y + (stairRise - 0.1) / 2, centerZ, 0.08, stairRise - 0.1, flightWidth, cream).name = 'Basement closed riser';
     }
     const endX = startX + direction * stairRun;
-    box(flight, endX + direction * 0.04, baseY - landingHeight + (stairRise - 0.1) / 2, centerZ, 0.08, stairRise + 0.1, flightWidth, cream).name = 'Basement landing riser';
+    box(flight, endX + direction * 0.04, baseY - landingHeight + (stairRise - 0.1) / 2, centerZ, 0.08, stairRise - 0.1, flightWidth, cream).name = 'Basement landing riser';
     for (const side of [-1, 1]) {
       const railZ = !returning && side === 1 ? outerStairRailZ : centerZ + side * (flightWidth / 2 + 0.08);
       stairBeam('Basement stair stringer', [startX, baseY - stairRise - 0.2, railZ], [endX, baseY - landingHeight - 0.2, railZ], 0.12, 0.3, oak, flight);
@@ -1295,20 +1299,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   }
   box(basementStairs, (stairRun + landingEndX) / 2, -landingHeight - 0.1, stairDepth / 2, landingEndX - stairRun, 0.2, stairDepth, oak).name = 'Basement turning landing';
   box(basementStairs, -stairWidth / 2, -2 * landingHeight - 0.1, stairWidth / 2, stairWidth, 0.2, stairWidth, oak).name = 'Basement arrival landing';
-  box(basementStairs, landingEndX + 0.08, -landingHeight, stairDepth / 2, 0.16, 2 * landingHeight, stairDepth, wallMaterial).name = 'Basement stairwell end wall';
-  for (const z of [-0.08, stairDepth + 0.08]) box(basementStairs, landingEndX / 2, -landingHeight, z, landingEndX, 2 * landingHeight, 0.16, wallMaterial).name = 'Basement stairwell side wall';
-  for (const [start, end] of [
-    [[0, 0, outerStairRailZ], [landingEndX, 0, outerStairRailZ]],
-    [[landingEndX, 0, -0.08], [landingEndX, 0, outerStairRailZ]]
-  ]) {
-    stairBeam('Basement opening oak guard cap', [start[0], 3, start[2]], [end[0], 3, end[2]], 0.12, 0.12, oak, basementStairs);
-    for (let rail = 1; rail <= 8; rail++) stairBeam('Basement opening horizontal guard', [start[0], rail / 3, start[2]], [end[0], rail / 3, end[2]], 0.045, 0.045, black, basementStairs);
-    const count = Math.ceil(Math.hypot(end[0] - start[0], end[2] - start[2]) / 3);
-    for (let post = 0; post <= count; post++) {
-      const t = post / count;
-      box(basementStairs, start[0] + t * (end[0] - start[0]), 1.5, start[2] + t * (end[2] - start[2]), 0.09, 3, 0.09, black).name = 'Basement opening guard post';
-    }
-  }
+  // Meet the floor slab's underside instead of duplicating its opening-edge faces.
+  const stairwellWallTop = -0.24 - 0.45 / 2;
+  const stairwellWallHeight = 2 * landingHeight + stairwellWallTop;
+  const stairwellWallCenterY = -2 * landingHeight + stairwellWallHeight / 2;
+  box(basementStairs, landingEndX + 0.08, stairwellWallCenterY, stairDepth / 2, 0.16, stairwellWallHeight, stairDepth, wallMaterial).name = 'Basement stairwell end wall';
+  for (const z of [-0.08, stairDepth + 0.08]) box(basementStairs, landingEndX / 2, stairwellWallCenterY, z, landingEndX, stairwellWallHeight, 0.16, wallMaterial).name = 'Basement stairwell side wall';
 
   function cabinet(parent, x, z, width, depth = 2, height = 2.85) {
     box(parent, x, height / 2 + 0.05, z, width, height, depth, cabinetFinish);
