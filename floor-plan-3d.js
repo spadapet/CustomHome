@@ -290,7 +290,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     }
   }
 
-  function openingCasing(parent, x, bottom, width, height, faceDepth, side = 1, window = false) {
+  function openingCasing(parent, x, bottom, width, height, faceDepth, side = 1, window = false, sillOptions = {}) {
     const casing = new THREE.Group();
     casing.name = window ? 'Craftsman window casing' : 'Craftsman opening casing';
     casing.position.set(x, bottom, side * faceDepth);
@@ -300,8 +300,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     const sideWidth = 3.5 / 12;
     const reveal = 0.125 / 12;
     const outerWidth = width + 2 * (sideWidth + reveal);
-    function part(name, x, y, z, w, h, d) {
-      const mesh = box(casing, x, y, z, w, h, d, windowTrim);
+    function part(name, x, y, z, w, h, d, material = windowTrim) {
+      const mesh = box(casing, x, y, z, w, h, d, material);
       mesh.name = name;
       const worldY = mesh.getWorldPosition(new THREE.Vector3()).y;
       mesh.userData = { bottom: worldY - h / 2, top: worldY + h / 2, offsetY: worldY - y };
@@ -314,7 +314,18 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     part('White casing header bead', 0, height + reveal + 0.03125, 0.05, outerWidth + 0.0625, 0.0625, 0.1);
     part('White casing projecting cap', 0, height + reveal + 5.5 / 12 + 0.0416667, 0.0625, outerWidth + 0.125, 1 / 12, 0.125);
     if (window) {
-      part('White window projecting sill', 0, -0.5 / 12, 0.0625, outerWidth + 0.125, 1 / 12, 0.25);
+      const { material = windowTrim, depth = 0.25, notchWidth = 0 } = sillOptions;
+      const sillWidth = outerWidth + 0.125;
+      const sillZ = sillOptions.material ? depth / 2 - faceDepth : 0.0625;
+      const sillName = sillOptions.material ? 'Quartz plant window sill' : 'White window projecting sill';
+      if (notchWidth > 0) {
+        const wingWidth = (sillWidth - notchWidth) / 2;
+        for (const edge of [-1, 1]) part(sillName, edge * (notchWidth + wingWidth) / 2, -0.5 / 12, sillZ, wingWidth, 1 / 12, depth, material);
+        const rearDepth = 1.5 / 12;
+        part('Quartz sill behind faucet notch', 0, -0.5 / 12, -faceDepth + rearDepth / 2, notchWidth, 1 / 12, rearDepth, material);
+      } else {
+        part(sillName, 0, -0.5 / 12, sillZ, sillWidth, 1 / 12, depth, material);
+      }
       part('White window apron', 0, -1 / 12 - sideWidth / 2, 0.03125, outerWidth, sideWidth, 0.0625);
     }
   }
@@ -418,7 +429,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const kitchenSinkX = (kitchenWallLeft + kitchenWallRight) / 2;
   const kitchenSinkWindowWidth = 5.5;
   const kitchenPassageWidth = 2.5;
-  const kitchenSideOpenings = [[2.725, 2.725 + kitchenPassageWidth, 0, 8], [13.175, 13.175 + kitchenPassageWidth, 0, 8]];
+  const kitchenSideOpenings = [[2.725, 2.725 + kitchenPassageWidth, 0, 8], [13.675, 13.675 + kitchenPassageWidth, 0, 8]];
   const cooktopCenterZ = 8 + (kitchenSideOpenings[0][1] + kitchenSideOpenings[1][0]) / 2;
   const kitchenSinkWindowHeight = 3.5;
   const kitchenSinkWindowSill = 4.25;
@@ -427,16 +438,32 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     { name: 'Kitchen sink window', x: kitchenSinkX, width: kitchenSinkWindowWidth },
     { name: 'Kitchen right counter window', x: kitchenSinkX + 4.5, width: 1.5 }
   ];
+  const prepSinkX = 47.4;
+  const prepWindowWidth = 2.5;
+  const prepWindowHeight = 3.5;
+  const prepWindowSill = 4.25;
+  const prepWindowCenters = [prepSinkX - 1.75, prepSinkX + 1.75];
+
+  const stairWidth = 44 / 12;
+  const stairGap = 0.25;
+  const stairWallFaceZ = 34.6 - 0.175;
+  const wallSideStairWidth = stairWallFaceZ - (26.6 + stairWidth + stairGap);
+  const stairOpening = { x: 17.4, z: 26.6, width: 29 - 0.175 - 17.4, depth: stairWallFaceZ - 26.6 };
 
   // Stepped footprint and room adjacencies follow the user's attached plan.
   floor(0, 8, 13.2, 17.7, true, scene);
   floor(13.2, -2.1, 13.3, 10.1, true, scene);
   floor(13.2, 8, 13.3, 17.7, true, scene);
-  floor(26.5, 8, 11.5, 18.9, true, scene);
+  floor(26.5, 8, 11.5, stairOpening.z - 8, true, scene);
+  floor(stairOpening.x + stairOpening.width, stairOpening.z, 38 - stairOpening.x - stairOpening.width, 26.9 - stairOpening.z, true, scene);
   floor(38, 8, 17.5, 7, true, scene);
   [
     [38, 15, 7.4, 11.9], [45.4, 15, 10.1, 11.9, false, false], [29, 26.9, 26.5, 7.7, false, false],
-    [31.2, 34.6, 24.3, 14.4, false, false], [0, 25.7, 12.2, 10.4, true], [12.2, 25.7, 16.8, 8.9, true],
+    [31.2, 34.6, 24.3, 14.4, false, false], [0, 25.7, 12.2, 10.4, true],
+    [12.2, 25.7, stairOpening.x - 12.2, 8.9, true],
+    [stairOpening.x + stairOpening.width, 25.7, 29 - stairOpening.x - stairOpening.width, 8.9, true],
+    [stairOpening.x, 25.7, stairOpening.width, stairOpening.z - 25.7, true],
+    [stairOpening.x, stairOpening.z + stairOpening.depth, stairOpening.width, 34.6 - stairOpening.z - stairOpening.depth, true],
     [12.2, 34.6, 6.8, 19.6, true], [0, 36.1, 7.1, 4.9], [7.1, 38.5, 5.1, 2.5],
     [0, 41, 12.2, 13.2, true], [19, 34.6, 6, 7.4, true], [25, 34.6, 6.2, 4.6],
     [25, 39.2, 6.2, 2.8], [19, 42, 12.2, 12.2, true], [0, 54.2, 31.2, 7, false, false],
@@ -448,7 +475,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     [13.2, -2.1, 26.5, -2.1, true, [[3.65, 9.65, 3, 8]]],
     [26.5, -2.1, 26.5, 8, true, [[2.1, 8.1, 0, 8]], ceilingHeight, [1]],
     [kitchenWallLeft, 8, kitchenWallRight, 8, true, kitchenSinkWindows.map(({ x, width }) => [x - width / 2 - kitchenWallLeft, x + width / 2 - kitchenWallLeft, kitchenSinkWindowSill, kitchenSinkWindowSill + kitchenSinkWindowHeight])],
-    [38, 8, 55.5, 8],
+    [38, 8, 55.5, 8, false, prepWindowCenters.map((x) => [x - prepWindowWidth / 2 - 38, x + prepWindowWidth / 2 - 38, prepWindowSill, prepWindowSill + prepWindowHeight])],
     [55.5, 8, 55.5, 49, false, [[36, 39, 0, 7]], ceilingHeight, [1]], [55.5, 49, 31.2, 49, false, [[2.5, 11.5, 0, 8], [14, 23, 0, 8]], ceilingHeight, [1]],
     [31.2, 49, 31.2, 54.2], [31.2, 54.2, 31.2, 61.2, false, [], 2.6], [31.2, 61.2, 0, 61.2, false, [], 2.6],
     [0, 61.2, 0, 54.2, false, [], 2.6], [0, 54.2, 0, 25.7, false, [[3.2, 7.2, 3, 8], [22.2, 26.2, 3, 8]]],
@@ -463,7 +490,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     [29.6875, 26.9, 37.8, 26.9, true, [], ceilingHeight, [1]],
     [37.8, 26.9, 38, 26.9, true],
     [38, 8, 38, 25.3, true, kitchenSideOpenings],
-    [38, 25.3, 38, 26.9, true, [], ceilingHeight, [-1]], [38, 15, 55.5, 15, false, [[4, 7, 0, 7]]],
+    [38, 25.3, 38, 26.9, true, [], ceilingHeight, [-1]], [38, 15, 55.5, 15],
     [45.4, 15, 45.4, 26.9], [38, 26.9, 45.4, 26.9, false, [[3, 6, 0, 7]]]
   ].forEach((segment) => wall(...segment));
 
@@ -525,12 +552,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   box(scene, 0.66, 2.12, 16.8, 0.06, 0.12, 4.1, ember);
   box(scene, 0.62, 5.8, 16.8, 0.15, 2.7, 4.6, black, true).name = 'Fireplace television';
   const glass = new THREE.MeshStandardMaterial({ color: '#b3cad0', roughness: 0.15, metalness: 0.15, transparent: true, opacity: 0.52 });
-  function windowFrame(name, x, z, width, height, sill, rotation = 0, parent = scene, interiorSide = 1) {
+  function windowFrame(name, x, z, width, height, sill, rotation = 0, parent = scene, interiorSide = 1, sillOptions = {}) {
     const frame = new THREE.Group();
     frame.name = name;
     frame.position.set(x, sill, z);
     frame.rotation.y = rotation;
-    frame.userData = { interiorTrim: 'white', interiorSide };
+    frame.userData = { interiorTrim: 'white', interiorSide, sillDepthInches: (sillOptions.depth ?? 0.25) * 12, sillMaterial: sillOptions.material ? 'quartz' : 'white trim', faucetNotchWidthInches: (sillOptions.notchWidth ?? 0) * 12 };
     parent.add(frame);
     const frameMaterials = [black, black, black, black, interiorSide === 1 ? windowTrim : black, interiorSide === -1 ? windowTrim : black];
     for (const side of [-1, 1]) {
@@ -539,7 +566,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     }
     box(frame, 0, height / 2, 0, width - 0.24, height - 0.24, 0.06, glass);
     box(frame, 0, height / 2, interiorSide * 0.04, 0.07, height - 0.24, 0.08, frameMaterials);
-    openingCasing(frame, 0, 0, width, height, 0.2, interiorSide, sill > 0);
+    openingCasing(frame, 0, 0, width, height, 0.2, interiorSide, sill > 0, sillOptions);
   }
   windowFrame('Living side window', 6.7, 8.1, 5, 5, 3);
   windowFrame('Dining rear window', 19.85, -2, 6, 5, 3);
@@ -802,7 +829,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   cylinder(soapDispenser, 0, 0.15, 0, 0.045, 0.26, steel);
   box(soapDispenser, 0, 0.29, 0.13, 0.1, 0.06, 0.34, steel, true).name = 'Soap dispenser pump';
   for (const { name, x, width } of kitchenSinkWindows) {
-    windowFrame(name, x, 8.1, width, kitchenSinkWindowHeight, kitchenSinkWindowSill);
+    windowFrame(name, x, 8.1, width, kitchenSinkWindowHeight, kitchenSinkWindowSill, 0, scene, 1, { material: countertop, depth: 8 / 12, notchWidth: x === kitchenSinkX ? 4 / 12 : 0 });
   }
   const sinkBacksplashBottom = 3.05;
   const sinkBacksplashTop = kitchenSinkWindowSill - (1 + 3.5) / 12;
@@ -811,15 +838,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   sinkBacksplash.userData = { bottom: sinkBacksplashBottom, top: sinkBacksplashTop };
   walls.push(sinkBacksplash);
   const kitchenCenterZ = (8 + 26.9) / 2;
-  const cooktopRunWidth = 78 / 12;
+  const cooktopRunWidth = 84 / 12;
   const cooktopCounterWidth = cooktopRunWidth + 0.1;
   const cooktopCabinetry = new THREE.Group();
   cooktopCabinetry.name = 'Extended cooktop base cabinetry';
-  cooktopCabinetry.userData = { widthInches: cooktopRunWidth * 12, sideDrawerWidthInches: 21, provisional: true };
+  cooktopCabinetry.userData = { widthInches: cooktopRunWidth * 12, sideDrawerWidthInches: 24, provisional: true };
   kitchen.add(cooktopCabinetry);
   box(cooktopCabinetry, 37, 1.44, cooktopCenterZ, 2, 2.85, cooktopRunWidth, cabinetFinish).name = 'Cooktop base cabinet run';
   box(cooktopCabinetry, 37, 2.96, cooktopCenterZ, 2.05, 0.18, cooktopCounterWidth, countertop, true).name = 'Extended cooktop quartz counter';
-  for (const z of [cooktopCenterZ - 2.25, cooktopCenterZ + 2.25]) drawerFront(36, z, 21 / 12, -Math.PI / 2, cooktopCabinetry);
+  for (const z of [cooktopCenterZ - 2.375, cooktopCenterZ + 2.375]) drawerFront(36, z, 24 / 12, -Math.PI / 2, cooktopCabinetry);
   const cooktop = box(kitchen, 37, 3.075, cooktopCenterZ, 1.75, 0.05, 3, black, true);
   cooktop.name = '36 inch induction cooktop';
   for (const [x, z] of [[36.58, cooktopCenterZ - 0.75], [37.42, cooktopCenterZ - 0.75], [36.58, cooktopCenterZ + 0.75], [37.42, cooktopCenterZ + 0.75], [37, cooktopCenterZ]]) {
@@ -918,15 +945,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const bottomRunCenterX = (bottomRunCabinetLeft + bottomRunRight) / 2;
   const bottomRunWidth = bottomRunRight - bottomRunCabinetLeft;
   const wallFillerWidth = 2.85 / 12;
-  const columnsLeft = bottomRunLeft + columnPanel;
-  const columnsRight = columnsLeft + 2 * columnWidth;
-  const pantryLeft = columnsRight + columnPanel;
-  const pantryRight = bottomRunRight - wallFillerWidth - columnPanel;
+  const fridgeLeft = bottomRunLeft + columnPanel;
+  const freezerRight = bottomRunRight - wallFillerWidth - columnPanel;
+  const pantryLeft = fridgeLeft + columnWidth + columnPanel;
+  const pantryRight = freezerRight - columnWidth - columnPanel;
   const pantryWidth = pantryRight - pantryLeft;
   const pantryCenterX = (pantryLeft + pantryRight) / 2;
   const upperStorageBottom = columnHeight + 0.15;
   const upperStorageTop = ceilingHeight - 0.15;
-  bottomRun.userData = { layout: 'Adjacent refrigeration columns with steam-oven storage tower and stair-side pull-out', pantryWidthInches: pantryWidth * 12, endStorageWidthInches: endStorageWidth * 12, ceilingHeight, provisional: true };
+  bottomRun.userData = { layout: 'Wall-side freezer separated from stair-side fridge by steam-oven storage tower', pantryWidthInches: pantryWidth * 12, endStorageWidthInches: endStorageWidth * 12, wallFillerWidthInches: wallFillerWidth * 12, ceilingHeight, provisional: true };
   const refrigerationPantry = new THREE.Group();
   refrigerationPantry.name = 'Steam oven and pantry tower';
   refrigerationPantry.position.x = pantryCenterX;
@@ -978,14 +1005,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   box(steamOven, 0, -0.14, 0.06, 2.2, 1.28, 0.02, black).name = 'Steam-oven glass door';
   box(steamOven, 0, 0.76, 0.06, 2.2, 0.28, 0.02, black).name = 'Steam-oven control panel';
   box(steamOven, 0, 0.47, 0.14, 2.1, 0.07, 0.1, steel).name = 'Steam-oven handle';
-  box(bottomRun, bottomRunRight - wallFillerWidth / 2, upperStorageTop / 2, 26, wallFillerWidth, upperStorageTop, 1.4, cabinetFinish).name = 'Recessed pantry wall-clearance filler';
-  for (const x of [columnsLeft - columnPanel / 2, columnsRight + columnPanel / 2, pantryRight + columnPanel / 2]) {
+  box(bottomRun, bottomRunRight - wallFillerWidth / 2, upperStorageTop / 2, 26, wallFillerWidth, upperStorageTop, 1.4, cabinetFinish).name = 'Recessed freezer wall-clearance filler';
+  for (const x of [fridgeLeft - columnPanel / 2, fridgeLeft + columnWidth + columnPanel / 2, pantryRight + columnPanel / 2, freezerRight + columnPanel / 2]) {
     box(bottomRun, x, upperStorageTop / 2, 26.725 - 25 / 24, columnPanel, upperStorageTop, 25 / 12, cabinetFinish).name = 'Full-height refrigeration side panel';
   }
-  box(bottomRun, columnsLeft + columnWidth, columnHeight + 0.075, 26.725 - 25 / 24, columnWidth * 2, 0.15, 25 / 12, cabinetRailFinish).name = 'Paired refrigeration upper rail';
+  for (const x of [fridgeLeft + columnWidth / 2, freezerRight - columnWidth / 2]) {
+    box(bottomRun, x, columnHeight + 0.075, 26.725 - 25 / 24, columnWidth, 0.15, 25 / 12, cabinetRailFinish).name = 'Individual refrigeration upper rail';
+  }
   for (const [name, x, width, depth] of [
-    ['Freezer overhead cabinet', columnsRight - columnWidth / 2, columnWidth, 25 / 12],
-    ['Fridge overhead cabinet', columnsLeft + columnWidth / 2, columnWidth, 25 / 12],
+    ['Freezer overhead cabinet', freezerRight - columnWidth / 2, columnWidth, 25 / 12],
+    ['Fridge overhead cabinet', fridgeLeft + columnWidth / 2, columnWidth, 25 / 12],
     ['Pantry overhead cabinet', pantryCenterX, pantryWidth, pantryDepth]
   ]) {
     const upper = new THREE.Group();
@@ -1005,8 +1034,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   freezerDoor.name = 'Freezer conceptual hinged door';
   freezerDoor.userData = { openAngleDegrees: 0, conceptualHinge: true };
   for (const [name, model, x, handleX] of [
-    ['Column freezer', 'RS3084FLJK1', columnsRight - columnWidth / 2, 1.05],
-    ['Column fridge', 'RS3084SRHK1', columnsLeft + columnWidth / 2, -1.05]
+    ['Column freezer', 'RS3084FLJK1', freezerRight - columnWidth / 2, 1.05],
+    ['Column fridge', 'RS3084SRHK1', fridgeLeft + columnWidth / 2, -1.05]
   ]) {
     const appliance = new THREE.Group();
     appliance.name = name;
@@ -1027,7 +1056,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       doorParent = freezerDoor;
     }
     box(doorParent, -hingeX, (columnHeight + 4 / 12) / 2, 1 + 0.75 / 24 - hingeZ, 29.75 / 12, columnHeight - 4 / 12, 0.75 / 12, steel).name = 'Column stainless door panel';
-    box(doorParent, handleX - hingeX, 3.9, 1.13 - hingeZ, 0.065, 2.6, 0.1, black).name = 'Column pair-facing handle';
+    box(doorParent, handleX - hingeX, 3.9, 1.13 - hingeZ, 0.065, 2.6, 0.1, black).name = 'Column tower-facing handle';
     box(appliance, 0, 2 / 12, 1.01, 29.5 / 12, 4 / 12, 0.04, black).name = 'Column ventilation toe-kick';
     for (const y of [0.08, 0.16, 0.24]) box(appliance, 0, y, 1.035, 29 / 12, 0.025, 0.015, steel).name = 'Column ventilation grille';
   }
@@ -1096,27 +1125,27 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     for (let row = 2; row < depth; row += 2) box(rest, x + width / 2, 0.038, z + row, width, 0.005, 0.015, cream);
   }
 
-  const stairs = furnishing('U-shaped hall staircase', 17.4, 26.6);
+  const stairs = furnishing('U-shaped hall staircase', stairOpening.x, stairOpening.z);
   scene.add(stairs);
-  const stairWidth = 44 / 12;
-  const stairGap = 0.25;
   const stairRisers = 10;
   const stairRise = 11 / (2 * stairRisers);
   const stairGoing = 10 / 12;
   const stairRun = (stairRisers - 1) * stairGoing;
-  const stairDepth = 2 * stairWidth + stairGap;
+  const stairDepth = stairOpening.depth;
+  const outerStairRailZ = stairDepth - 0.08;
   const landingHeight = stairRisers * stairRise;
   const landingEndX = 29 - 0.175 - stairs.position.x;
   const stairBookcaseDepth = 11 / 12;
   const stairBookcaseSplitX = 26.6 - stairs.position.x;
-  stairs.userData = { flightWidthInches: 44, risersPerFlight: stairRisers, riseInches: stairRise * 12, treadDepthInches: 10, floorToFloorFeet: 11, provisional: true };
-  roomDimensions('Stairs (each flight)', stairWidth, stairRun);
+  stairs.userData = { flightWidthInches: 44, wallSideFlightWidthInches: wallSideStairWidth * 12, risersPerFlight: stairRisers, riseInches: stairRise * 12, treadDepthInches: 10, floorToFloorFeet: 11, provisional: true };
+  roomDimensions('Stairs (kitchen-side flight)', stairWidth, stairRun);
+  roomDimensions('Stairs (wall-side flight)', wallSideStairWidth, stairRun);
 
-  function stairBeam(name, start, end, width, depth, material) {
+  function stairBeam(name, start, end, width, depth, material, parent = stairs) {
     const from = new THREE.Vector3(...start);
     const to = new THREE.Vector3(...end);
     const direction = to.clone().sub(from);
-    const beam = box(stairs, 0, 0, 0, width, direction.length(), depth, material);
+    const beam = box(parent, 0, 0, 0, width, direction.length(), depth, material);
     beam.name = name;
     beam.position.copy(from).add(to).multiplyScalar(0.5);
     beam.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
@@ -1130,35 +1159,36 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   for (const upper of [false, true]) {
     const flight = new THREE.Group();
     flight.name = upper ? 'Upper stair flight' : 'Lower stair flight';
-    flight.userData = { clearWidthInches: 44, risers: stairRisers };
+    const flightWidth = upper ? wallSideStairWidth : stairWidth;
+    flight.userData = { treadWidthInches: flightWidth * 12, risers: stairRisers };
     stairs.add(flight);
     const direction = upper ? -1 : 1;
     const startX = upper ? stairRun : 0;
     const baseHeight = upper ? landingHeight : 0;
-    const centerZ = (upper ? stairWidth + stairGap : 0) + stairWidth / 2;
+    const centerZ = (upper ? stairWidth + stairGap : 0) + flightWidth / 2;
     for (let step = 0; step < stairRisers - 1; step++) {
       const x = startX + direction * (step + 0.5) * stairGoing;
       const height = baseHeight + (step + 1) * stairRise;
       const recessedBookcase = !upper && step >= 3;
-      const enclosureDepth = recessedBookcase ? stairWidth - stairBookcaseDepth : stairWidth;
+      const enclosureDepth = recessedBookcase ? flightWidth - stairBookcaseDepth : flightWidth;
       const enclosureZ = centerZ + (recessedBookcase ? stairBookcaseDepth / 2 : 0);
-      box(flight, x, (height - 0.1) / 2, enclosureZ, stairGoing, height - 0.1, enclosureDepth, wallMaterial).name = 'Under-stair enclosure';
+      box(flight, x, height - 0.15, enclosureZ, stairGoing, 0.1, enclosureDepth, wallMaterial).name = 'Hollow stairwell soffit';
       if (recessedBookcase) {
         const caseHeight = stairBookcaseHeight(Math.floor(step / 3) * 3 * stairGoing);
         const infillHeight = height - 0.1 - caseHeight;
         box(flight, x, caseHeight + infillHeight / 2, stairBookcaseDepth / 2, stairGoing, infillHeight, stairBookcaseDepth, wallMaterial).name = 'Bookcase stair-slope infill';
       }
-      box(flight, x, height - 0.05, centerZ, stairGoing, 0.1, stairWidth, oak).name = '44-inch stair tread';
-      box(flight, x - direction * (stairGoing / 2 - 0.02), height + 0.003, centerZ, 0.04, 0.006, stairWidth, walnut).name = 'Stair tread nosing';
-      box(flight, x - direction * (stairGoing / 2 - 0.04), height - (stairRise + 0.1) / 2, centerZ, 0.08, stairRise - 0.1, stairWidth, cream).name = 'Stair riser';
+      box(flight, x, height - 0.05, centerZ, stairGoing, 0.1, flightWidth, oak).name = 'Upstairs oak tread';
+      box(flight, x - direction * (stairGoing / 2 - 0.02), height + 0.003, centerZ, 0.04, 0.006, flightWidth, walnut).name = 'Stair tread nosing';
+      box(flight, x - direction * (stairGoing / 2 - 0.04), height - (stairRise + 0.1) / 2, centerZ, 0.08, stairRise - 0.1, flightWidth, cream).name = 'Stair riser';
     }
     const endX = startX + direction * stairRun;
     const endHeight = baseHeight + landingHeight;
-    box(flight, endX + direction * 0.04, endHeight - (stairRise + 0.1) / 2, centerZ, 0.08, stairRise - 0.1, stairWidth, cream).name = 'Landing riser';
+    box(flight, endX + direction * 0.04, endHeight - (stairRise + 0.1) / 2, centerZ, 0.08, stairRise - 0.1, flightWidth, cream).name = 'Landing riser';
     for (const side of [-1, 1]) {
-      const stringerZ = centerZ + side * (stairWidth / 2 - 0.12);
+      const stringerZ = centerZ + side * (flightWidth / 2 - 0.12);
       stairBeam('Stair stringer', [startX, baseHeight + 0.05, stringerZ], [endX, endHeight - stairRise + 0.05, stringerZ], 0.12, 0.3, oak);
-      const railZ = centerZ + side * (stairWidth / 2 + 0.08);
+      const railZ = upper && side === 1 ? outerStairRailZ : centerZ + side * (flightWidth / 2 + 0.08);
       const firstX = startX + direction * stairGoing / 2;
       const lastX = endX - direction * stairGoing / 2;
       const wallSide = !upper && side === 1;
@@ -1177,8 +1207,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   }
   box(stairs, stairRun / 2, (landingHeight + 3) / 2, stairWidth + 0.08, stairRun, landingHeight + 3, 0.08, wallMaterial).name = 'Lower flight continuous backing wall';
   box(stairs, (stairRun + landingEndX) / 2, landingHeight - 0.1, stairDepth / 2, landingEndX - stairRun, 0.2, stairDepth, oak).name = 'U-turn stair landing';
-  box(stairs, -stairWidth / 2, 2 * landingHeight - 0.1, stairWidth + stairGap + stairWidth / 2, stairWidth, 0.2, stairWidth, oak).name = 'Upper stair arrival landing';
-  box(stairs, (stairRun + landingEndX) / 2, (landingHeight - 0.2) / 2, (stairDepth + stairBookcaseDepth) / 2, landingEndX - stairRun, landingHeight - 0.2, stairDepth - stairBookcaseDepth, wallMaterial).name = 'Under-landing enclosure';
+  box(stairs, -stairWidth / 2, 2 * landingHeight - 0.1, stairWidth + stairGap + wallSideStairWidth / 2, stairWidth, 0.2, wallSideStairWidth, oak).name = 'Upper stair arrival landing';
+  box(stairs, (stairRun + landingEndX) / 2, landingHeight - 0.25, (stairDepth + stairBookcaseDepth) / 2, landingEndX - stairRun, 0.1, stairDepth - stairBookcaseDepth, wallMaterial).name = 'Hollow turning-landing soffit';
   const landingCaseHeight = stairBookcaseHeight(stairRun);
   const landingInfillHeight = landingHeight - 0.2 - landingCaseHeight;
   box(stairs, (stairRun + landingEndX) / 2, landingCaseHeight + landingInfillHeight / 2, stairBookcaseDepth / 2, landingEndX - stairRun, landingInfillHeight, stairBookcaseDepth, wallMaterial).name = 'Bookcase landing infill';
@@ -1212,12 +1242,64 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       }
     }
   }
-  for (const z of [-0.08, stairDepth + 0.08]) {
+  for (const z of [-0.08, outerStairRailZ]) {
     stairBeam('Turning landing side handrail', [stairRun, landingHeight + 3, z], [landingEndX, landingHeight + 3, z], 0.12, 0.12, oak);
     for (let rail = 1; rail <= 8; rail++) {
       stairBeam('Horizontal landing guard rail', [stairRun, landingHeight + rail / 3, z], [landingEndX, landingHeight + rail / 3, z], 0.045, 0.045, black);
     }
     for (const x of [stairRun, landingEndX - 0.05]) box(stairs, x, landingHeight + 1.5, z, 0.09, 3, 0.09, black).name = 'Landing guard post';
+  }
+
+  const upstairsStairParts = stairs.children.slice();
+  const basementStairs = new THREE.Group();
+  basementStairs.name = 'Basement U-shaped staircase';
+  basementStairs.userData = { flightWidthInches: 44, entryFlightWidthInches: wallSideStairWidth * 12, floorToFloorFeet: 11, risersPerFlight: stairRisers, riseInches: stairRise * 12, treadDepthInches: 10, entry: 'Hall beneath upper stair arrival', provisional: true };
+  stairs.add(basementStairs);
+  roomDimensions('Basement stairs (entry flight)', wallSideStairWidth, stairRun);
+  roomDimensions('Basement stairs (return flight)', stairWidth, stairRun);
+  for (const returning of [false, true]) {
+    const flight = new THREE.Group();
+    flight.name = returning ? 'Basement returning flight' : 'Basement descending entry flight';
+    const flightWidth = returning ? stairWidth : wallSideStairWidth;
+    flight.userData = { treadWidthInches: flightWidth * 12 };
+    basementStairs.add(flight);
+    const direction = returning ? -1 : 1;
+    const startX = returning ? stairRun : 0;
+    const baseY = returning ? -landingHeight : 0;
+    const centerZ = (returning ? 0 : stairWidth + stairGap) + flightWidth / 2;
+    for (let step = 0; step < stairRisers - 1; step++) {
+      const x = startX + direction * (step + 0.5) * stairGoing;
+      const y = baseY - (step + 1) * stairRise;
+      box(flight, x, y - 0.05, centerZ, stairGoing, 0.1, flightWidth, oak).name = 'Basement oak tread';
+      box(flight, x - direction * (stairGoing / 2 - 0.04), y + (stairRise - 0.1) / 2, centerZ, 0.08, stairRise + 0.1, flightWidth, cream).name = 'Basement closed riser';
+    }
+    const endX = startX + direction * stairRun;
+    box(flight, endX + direction * 0.04, baseY - landingHeight + (stairRise - 0.1) / 2, centerZ, 0.08, stairRise + 0.1, flightWidth, cream).name = 'Basement landing riser';
+    for (const side of [-1, 1]) {
+      const railZ = !returning && side === 1 ? outerStairRailZ : centerZ + side * (flightWidth / 2 + 0.08);
+      stairBeam('Basement stair stringer', [startX, baseY - stairRise - 0.2, railZ], [endX, baseY - landingHeight - 0.2, railZ], 0.12, 0.3, oak, flight);
+      stairBeam('Basement sloped handrail', [startX, baseY + 3, railZ], [endX, baseY - landingHeight + 3, railZ], 0.12, 0.12, oak, flight);
+      for (let rail = 1; rail <= 8; rail++) stairBeam('Basement sloped guard rail', [startX, baseY + rail / 3, railZ], [endX, baseY - landingHeight + rail / 3, railZ], 0.045, 0.045, black, flight);
+      for (const step of [0, 4, 8]) {
+        box(flight, startX + direction * step * stairGoing, baseY - step * stairRise + 1.5, railZ, 0.09, 3, 0.09, black).name = 'Basement stair guard post';
+      }
+    }
+  }
+  box(basementStairs, (stairRun + landingEndX) / 2, -landingHeight - 0.1, stairDepth / 2, landingEndX - stairRun, 0.2, stairDepth, oak).name = 'Basement turning landing';
+  box(basementStairs, -stairWidth / 2, -2 * landingHeight - 0.1, stairWidth / 2, stairWidth, 0.2, stairWidth, oak).name = 'Basement arrival landing';
+  box(basementStairs, landingEndX + 0.08, -landingHeight, stairDepth / 2, 0.16, 2 * landingHeight, stairDepth, wallMaterial).name = 'Basement stairwell end wall';
+  for (const z of [-0.08, stairDepth + 0.08]) box(basementStairs, landingEndX / 2, -landingHeight, z, landingEndX, 2 * landingHeight, 0.16, wallMaterial).name = 'Basement stairwell side wall';
+  for (const [start, end] of [
+    [[0, 0, outerStairRailZ], [landingEndX, 0, outerStairRailZ]],
+    [[landingEndX, 0, -0.08], [landingEndX, 0, outerStairRailZ]]
+  ]) {
+    stairBeam('Basement opening oak guard cap', [start[0], 3, start[2]], [end[0], 3, end[2]], 0.12, 0.12, oak, basementStairs);
+    for (let rail = 1; rail <= 8; rail++) stairBeam('Basement opening horizontal guard', [start[0], rail / 3, start[2]], [end[0], rail / 3, end[2]], 0.045, 0.045, black, basementStairs);
+    const count = Math.ceil(Math.hypot(end[0] - start[0], end[2] - start[2]) / 3);
+    for (let post = 0; post <= count; post++) {
+      const t = post / count;
+      box(basementStairs, start[0] + t * (end[0] - start[0]), 1.5, start[2] + t * (end[2] - start[2]), 0.09, 3, 0.09, black).name = 'Basement opening guard post';
+    }
   }
 
   function cabinet(parent, x, z, width, depth = 2, height = 2.85) {
@@ -1232,24 +1314,90 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   }
 
   const prep = furnishing('Prep kitchen cabinetry', 0, 0);
-  cabinet(prep, 47.4, 9.25, 10.8);
-  for (const x of [43.8, 47.4, 51]) {
-    box(prep, x, 6.2, 8.75, 3.4, 2.7, 1.1, cabinetFinish);
+  for (const [x, width] of [[prepSinkX - 3.45, 3.9], [prepSinkX + 3.225, 3.45]]) cabinet(prep, x, 9.25, width);
+  const prepExtension = furnishing('Prep counter extension with six drawers', 40.25, 9.25);
+  prepExtension.userData = { widthInches: 42, depthInches: 24, drawerBanks: 2, drawers: 6, provisional: true };
+  box(prepExtension, 0, 1.475, 0, 3.5, 2.85, 2, cabinetFinish).name = 'Prep extension cabinet carcass';
+  box(prepExtension, 0, 2.97, 0, 3.56, 0.14, 2.05, countertop).name = 'Prep extension quartz counter';
+  for (const x of [-0.875, 0.875]) drawerFront(x, 1.04, 1.71, 0, prepExtension);
+  const prepSink = new THREE.Group();
+  prepSink.name = 'Prep single-bowl sink and base';
+  prepSink.position.set(prepSinkX, 0, 9.25);
+  prepSink.userData = { nominalSinkWidthInches: 30, sinkDepthInches: 18, baseWidthInches: 36, provisional: true };
+  prep.add(prepSink);
+  box(prepSink, 0, 1.1, 0, 3, 2.1, 2, cabinetFinish).name = 'Prep sink low cabinet carcass';
+  for (const side of [-1, 1]) {
+    box(prepSink, side * (1.5 - 0.03125), 2.5, 0, 0.0625, 0.7, 2, cabinetFinish).name = 'Prep sink cabinet side';
+    const front = shakerFront(prepSink, side * 0.75, 1.475, 1.04, 1.46, 2.81);
+    cabinetPull(front, -side * 0.55, 0.9, 0.09, 0.6, true);
+    box(prepSink, side * 1.375, 2.97, 0, 0.25, 0.14, 2.05, countertop).name = 'Prep sink side counter';
+    box(prepSink, 0, 2.97, side * 0.8875, 2.5, 0.14, 0.275, countertop).name = 'Prep sink front or rear counter';
+    box(prepSink, side * 1.22, 2.68, 0, 0.06, 0.6, 1.5, steel).name = 'Prep sink basin side';
+    box(prepSink, 0, 2.68, side * 0.72, 2.38, 0.6, 0.06, steel).name = 'Prep sink basin end';
+  }
+  box(prepSink, 0, 2.345, 0, 2.5, 0.07, 1.5, steel).name = 'Prep sink basin floor';
+  cylinder(prepSink, 0, 2.386, 0, 0.09, 0.012, black).name = 'Prep sink drain';
+  cylinder(prepSink, 0, 3.55, -0.88, 0.045, 1.16, steel).name = 'Prep sink faucet stem';
+  box(prepSink, 0, 4.08, -0.57, 0.09, 0.09, 0.64, steel, true).name = 'Prep sink faucet spout';
+  cylinder(prepSink, 0, 3.98, -0.28, 0.045, 0.2, steel).name = 'Prep sink faucet outlet';
+  box(prep, 45.425, 3.45, 8.22, 13.85, 0.82, 0.08, countertop).name = 'Prep quartz backsplash';
+  for (const [index, x] of prepWindowCenters.entries()) {
+    windowFrame(`Prep counter window ${index + 1}`, x, 8, prepWindowWidth, prepWindowHeight, prepWindowSill, 0, rest);
+  }
+  const prepTower = furnishing('Prep microwave and wall oven tower', 53.825, 8.25 + 25 / 24);
+  const prepTowerWidth = 33 / 12;
+  const prepTowerDepth = 25 / 12;
+  const prepTowerSide = 0.75 / 12;
+  const prepApplianceBottom = 2;
+  const prepApplianceTop = 6;
+  const prepTowerFront = prepTowerDepth / 2 + 0.04;
+  prepTower.userData = { widthInches: 33, depthInches: 25, nominalApplianceWidthInches: 30, allowanceHeightInches: 48, modelSelected: false, provisional: true };
+  for (const side of [-1, 1]) {
+    box(prepTower, side * (prepTowerWidth - prepTowerSide) / 2, 4.575, 0, prepTowerSide, 8.55, prepTowerDepth, cabinetFinish).name = 'Prep appliance tower side';
+  }
+  box(prepTower, 0, 4.575, -prepTowerDepth / 2 + 0.025, prepTowerWidth - 2 * prepTowerSide, 8.55, 0.05, cabinetFinish).name = 'Prep appliance tower backing';
+  box(prepTower, 0, 0.15, 0, prepTowerWidth - 0.2, 0.3, prepTowerDepth - 0.2, black).name = 'Prep appliance tower toe-kick';
+  for (const y of [prepApplianceBottom - prepTowerSide / 2, prepApplianceTop + prepTowerSide / 2]) {
+    box(prepTower, 0, y, 0, prepTowerWidth - 2 * prepTowerSide, prepTowerSide, prepTowerDepth, cabinetRailFinish).name = 'Prep appliance support shelf';
+  }
+  for (const [bottom, top] of [[0.3, prepApplianceBottom - prepTowerSide], [prepApplianceTop + prepTowerSide, 8.85]]) {
     for (const side of [-1, 1]) {
-      const front = shakerFront(prep, x + side * 0.85, 6.2, 9.34, 1.66, 2.66);
-      cabinetPull(front, -side * 0.65, -0.8, 0.09, 0.6, true);
+      const front = shakerFront(prepTower, side * prepTowerWidth / 4, (bottom + top) / 2, prepTowerFront, prepTowerWidth / 2 - 0.04, top - bottom - 0.04);
+      cabinetPull(front, -side * (prepTowerWidth / 4 - 0.15), bottom < prepApplianceBottom ? (top - bottom) / 2 - 0.35 : -(top - bottom) / 2 + 0.35, 0.09, 0.6, true);
     }
   }
-  const pantry = furnishing('Prep tall pantry', 54.1, 9.45);
-  box(pantry, 0, 4.1, 0, 2, 8.2, 2.3, cabinetFinish);
-  const prepPantryFront = shakerFront(pantry, 0, 4.1, 1.2, 1.96, 8.16);
-  cabinetPull(prepPantryFront, -0.65, 0.5, 0.09, 1, true);
-  const coffeeStation = furnishing('Prep coffee station', 43.8, 10);
+  box(prepTower, 0, 8.925, 0, prepTowerWidth, 0.15, prepTowerDepth, cabinetRailFinish).name = 'Prep appliance tower cornice';
+  const prepCombination = new THREE.Group();
+  prepCombination.name = '30-inch microwave and wall oven combination';
+  prepCombination.userData = { nominalWidthInches: 30, allowanceHeightInches: 48, allowanceDepthInches: 24, bottomInches: 24, modelSelected: false, provisional: true };
+  prepTower.add(prepCombination);
+  box(prepCombination, 0, 4, 0, 2.5, 4, 2, steel).name = 'Prep combination appliance envelope';
+  for (const [name, y, height, handleY] of [['Wall oven', 3.25, 2.1, 4.15], ['Microwave', 5.2, 1.15, 4.72]]) {
+    box(prepCombination, 0, y, prepTowerFront + 0.03, 2.25, height, 0.02, black).name = `Prep ${name} glass door`;
+    box(prepCombination, 0, handleY, prepTowerFront + 0.12, 2.1, 0.07, 0.1, steel).name = `Prep ${name} handle`;
+  }
+  box(prepCombination, 0, 5.9, prepTowerFront + 0.03, 2.25, 0.15, 0.02, black).name = 'Prep combination appliance controls';
+  const coffeeStation = furnishing('Prep coffee station', 43.8, 9.45);
   box(coffeeStation, 0, 3.765, 0, 1.1, 1.45, 1.1, black, true);
   cylinder(coffeeStation, 0.75, 3.19, 0.1, 0.16, 0.3, porcelain);
-  const prepOven = furnishing('Prep countertop oven', 51, 10);
-  box(prepOven, 0, 3.64, 0, 1.8, 1.2, 1.2, steel, true);
-  box(prepOven, 0, 3.64, 0.64, 1.5, 0.85, 0.05, black);
+
+  const prepShelves = furnishing('Prep open pantry shelves', 47, 14.15);
+  const prepShelfWidth = 15;
+  const prepShelfDepth = 1;
+  const prepShelfThickness = 0.75 / 12;
+  const prepShelfBays = 5;
+  prepShelves.userData = { widthInches: 180, depthInches: 12, bays: prepShelfBays, shelfLevels: 6, provisional: true };
+  for (let support = 0; support <= prepShelfBays; support++) {
+    const x = -prepShelfWidth / 2 + prepShelfThickness / 2 + support * (prepShelfWidth - prepShelfThickness) / prepShelfBays;
+    box(prepShelves, x, 4.375, 0, prepShelfThickness, 7.25, prepShelfDepth, cabinetFinish).name = 'Pantry shelf upright';
+  }
+  for (const y of [1, 2.3, 3.6, 4.9, 6.2, 7.5]) {
+    for (let bay = 0; bay < prepShelfBays; bay++) {
+      const bayWidth = (prepShelfWidth - prepShelfThickness) / prepShelfBays;
+      const x = -prepShelfWidth / 2 + prepShelfThickness / 2 + (bay + 0.5) * bayWidth;
+      box(prepShelves, x, y, 0, bayWidth - prepShelfThickness, prepShelfThickness, prepShelfDepth, cabinetRailFinish).name = 'Open pantry shelf';
+    }
+  }
 
   tiledFloor('Mudroom tile', 38, 15, 7.4, 11.9);
   const mudBench = furnishing('Six-cubby mudroom bench', 44.25, 22.75, -Math.PI / 2);
@@ -1480,8 +1628,23 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   windowFrame('Kids side window', 0.1, 30, 4, 5, 3, -Math.PI / 2, rest, -1);
   windowFrame('Bedroom porch window', 25, 54.1, 7.6, 5, 3, 0, rest, -1);
 
-  const ground = box(scene, 25, -0.75, 28, 240, 0.5, 240, mat('#eeeee6'));
-  ground.castShadow = false;
+  const ground = new THREE.Group();
+  ground.name = 'Site ground around basement stairwell';
+  scene.add(ground);
+  const groundMaterial = mat('#eeeee6');
+  const excavationLeft = stairOpening.x - stairWidth;
+  const excavationRight = stairOpening.x + stairOpening.width;
+  const excavationBack = stairOpening.z + stairOpening.depth;
+  for (const [x, z, width, depth] of [
+    [-95, -92, excavationLeft + 95, 240],
+    [excavationRight, -92, 145 - excavationRight, 240],
+    [excavationLeft, -92, excavationRight - excavationLeft, stairOpening.z + 92],
+    [excavationLeft, excavationBack, excavationRight - excavationLeft, 148 - excavationBack]
+  ]) {
+    const part = box(ground, x + width / 2, -0.75, z + depth / 2, width, 0.5, depth, groundMaterial);
+    part.name = 'Site ground outside stair excavation';
+    part.castShadow = false;
+  }
   const presets = {
     social: { target: [19, 2, 12], offset: [27, 55, 32], span: 43 },
     living: { target: [6.7, 1, 16.4], offset: [24, 23, 22], span: 24 },
@@ -1494,6 +1657,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     garage: { target: [43, 1, 33], offset: [28, 48, 36], span: 42 },
     prep: { target: [44, 1, 16], offset: [-28, 44, 30], span: 28 },
     private: { target: [15.6, 1, 43], offset: [32, 49, 37], span: 40 },
+    basement: { target: [22, -3, 30.4], offset: [-4, 30, 5], span: 21 },
     top: { target: [27, 0, 29], offset: [0, 110, 0.1], span: 72 }
   };
   let currentView = 'whole';
@@ -1532,8 +1696,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     camera.position.copy(controls.target).add(offset);
     controls.update();
     const showWholeFloor = !['social', 'living', 'dining', 'kitchen', 'cooktop', 'island', 'fridge'].includes(name);
-    shell.visible = showWholeFloor;
+    const basementCutaway = name === 'basement';
+    shell.visible = showWholeFloor && !basementCutaway;
     stairs.visible = showWholeFloor || ['kitchen', 'fridge'].includes(name);
+    for (const part of upstairsStairParts) part.visible = !basementCutaway;
     island.visible = !elevationView;
     cooktopHood.visible = name !== 'fridge';
     updatePendantVisibility();
@@ -1544,7 +1710,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     document.querySelectorAll('.furniture-card').forEach((card) => {
       card.classList.toggle('selected', card.dataset.room === name);
     });
-    renderer.domElement.setAttribute('aria-label', `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
+    renderer.domElement.setAttribute('aria-label', basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
     render();
   }
 
