@@ -7,12 +7,12 @@
   <meta name="description" content="An interactive furnished ground floor with family rooms, prep kitchen, mudroom, office, bedroom, and a garage for a GMC Sierra EV and BMW i4.">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23263b35'/%3E%3Cpath d='M10 32 32 14l22 18v23H10z' fill='none' stroke='%23efdfc3' stroke-width='4'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="floor-plan-3d.css">
+  <link rel="stylesheet" href="floor-plan-3d.css?v=walk-tour">
   <script src="theme.js"></script>
   <script type="importmap">
     {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
   </script>
-  <script defer src="floor-plan-3d.js"></script>
+  <script defer src="floor-plan-3d.js?v=walk-tour"></script>
 </head>
 <body class="studio-page">
   <header class="site-head">
@@ -39,9 +39,10 @@
             <button type="button" data-view="top" aria-pressed="false">Top view</button>
           </div>
           <div class="toolbar-actions">
-            <div class="view-tabs" role="group" aria-label="Drag mode">
+            <div class="view-tabs" role="group" aria-label="Navigation mode">
               <button type="button" data-navigation="rotate" aria-pressed="true" disabled>Rotate</button>
               <button type="button" data-navigation="move" aria-pressed="false" disabled>Move</button>
+              <button type="button" data-navigation="walk" aria-pressed="false" aria-controls="walk-controls" title="Walk at eye level: WASD or arrow keys to move, drag to look, Q/E to turn, Escape to exit." disabled>Walk</button>
             </div>
             <details class="visibility-menu">
               <summary class="wall-toggle">Visibility</summary>
@@ -53,9 +54,17 @@
         </div>
         <div id="model-viewport" aria-label="3D ground floor. Drag to orbit, scroll to zoom, or use the camera buttons." tabindex="0">
           <div class="model-message" role="status">Building your 3D preview...</div>
+          <div class="walk-controls" id="walk-controls" role="group" aria-label="Walking controls" hidden>
+            <button type="button" data-walk="turn-left" aria-label="Turn left" title="Turn left (Q)">&#x21B6;</button>
+            <button type="button" data-walk="forward" aria-label="Walk forward" title="Walk forward (W or Up)">&uarr;</button>
+            <button type="button" data-walk="turn-right" aria-label="Turn right" title="Turn right (E)">&#x21B7;</button>
+            <button type="button" data-walk="left" aria-label="Step left" title="Step left (A or Left)">&larr;</button>
+            <button type="button" data-walk="backward" aria-label="Walk backward" title="Walk backward (S or Down)">&darr;</button>
+            <button type="button" data-walk="right" aria-label="Step right" title="Step right (D or Right)">&rarr;</button>
+          </div>
           <div class="viewport-caption"><span class="live-dot"></span> GROUND FLOOR <span class="caption-divider">/</span> CONCEPT 01</div>
           <div class="compass" aria-label="North is toward the rear of the plan">N<span>&uarr;</span></div>
-          <div class="model-help">Choose Move or Rotate, then drag <span>&middot;</span> Scroll or pinch to zoom</div>
+          <div class="model-help">Choose Walk for an eye-level tour, or drag to rotate <span>&middot;</span> Scroll or pinch to zoom</div>
         </div>
         <div class="model-footer"><span><i class="legend-dot furnished"></i> Furnished concept</span><span>Dimensions approximate</span><button type="button" id="reset-view" disabled>Reset view &nearr;</button></div>
       </div>

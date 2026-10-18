@@ -5,6 +5,7 @@ const islandLightsInput = document.getElementById('show-island-lights');
 const resetButton = document.getElementById('reset-view');
 const freezerButton = document.getElementById('freezer-swing');
 const navigationButtons = document.querySelectorAll('[data-navigation]');
+const walkControls = document.getElementById('walk-controls');
 const notesButton = document.getElementById('toggle-design-notes');
 const notes = document.getElementById('design-notes');
 
@@ -64,6 +65,8 @@ function showModelError(text) {
   resetButton.disabled = true;
   freezerButton.disabled = true;
   navigationButtons.forEach((button) => { button.disabled = true; });
+  walkControls.hidden = true;
+  viewport.classList.remove('walking');
 }
 
 function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
@@ -85,6 +88,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   renderer.domElement.setAttribute('role', 'img');
   renderer.domElement.setAttribute('aria-describedby', 'room-dimension-summary');
   const controls = new OrbitControls(camera, renderer.domElement);
+  let navigationMode = 'rotate';
   controls.enableDamping = false;
   controls.minDistance = 12;
   controls.maxDistance = 250;
@@ -92,17 +96,30 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   controls.target.set(14, 0, 12);
   controls.addEventListener('change', render);
   function setNavigationMode(mode) {
+    const wasWalking = navigationMode === 'walk';
+    if (mode === 'walk' && !wasWalking && !startWalking()) return;
+    navigationMode = mode;
+    if (wasWalking && mode !== 'walk') stopWalking();
+    const walking = mode === 'walk';
     const moving = mode === 'move';
+    controls.enabled = !walking;
     controls.mouseButtons.LEFT = moving ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
     controls.mouseButtons.RIGHT = moving ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
     controls.touches.ONE = moving ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE;
     navigationButtons.forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.navigation === mode));
     });
-    viewport.querySelector('.model-help').textContent = moving
+    walkControls.hidden = !walking;
+    viewport.classList.toggle('walking', walking);
+    viewport.querySelector('.model-help').textContent = walking
+      ? 'WASD / arrows: walk | Drag: look | Q / E: turn | Escape: exit | Hold the on-screen arrows on touch'
+      : moving
       ? 'Drag to move | Right-drag to rotate | Scroll or pinch to zoom'
-      : 'Drag to rotate | Right-drag to move | Scroll or pinch to zoom';
-    viewport.setAttribute('aria-label', `3D ground floor. Drag to ${moving ? 'move' : 'rotate'}; scroll or pinch to zoom. Keyboard: left/right arrows rotate, plus/minus zoom, Home resets.`);
+      : 'Drag to rotate | Right-drag to move | Scroll or pinch to zoom | Choose Walk for an eye-level tour';
+    viewport.setAttribute('aria-label', walking
+      ? '3D ground floor walking tour. WASD or arrow keys move, drag to look, Q and E turn, Escape exits, Home resets.'
+      : `3D ground floor. Drag to ${moving ? 'move' : 'rotate'}; scroll or pinch to zoom. Keyboard: left/right arrows rotate, plus/minus zoom, Home resets.`);
+    if (walking) viewport.focus({ preventScroll: true });
   }
   navigationButtons.forEach((button) => {
     button.addEventListener('click', () => setNavigationMode(button.dataset.navigation));
@@ -131,6 +148,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const shellFloor = mat('#d9dcd1');
   const walls = [];
   const interiorFloorAreas = [];
+  const walkFloorAreas = [];
   const shell = new THREE.Group();
   scene.add(shell);
 
@@ -313,6 +331,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   }
 
   function floor(x, z, w, d, furnished = false, parent = shell, interior = true) {
+    walkFloorAreas.push({ x, z, w, d });
     if (interior) interiorFloorAreas.push({ x, z, w, d });
     box(parent, x + w / 2, -0.24, z + d / 2, w, 0.45, d, furnished ? oak : shellFloor);
     if (furnished) {
@@ -1931,6 +1950,198 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     top: { target: [27, 0, 29], offset: [0, 110, 0.1], span: 72 }
   };
   let currentView = 'whole';
+  const walkEyeHeight = 5.4;
+  const walkRadius = 0.5;
+  const walkSpeed = 4;
+  const walkKeys = new Set();
+  const walkPointers = new Map();
+  const walkObstacles = [];
+  const walkKeyActions = { KeyW: 'forward', ArrowUp: 'forward', KeyS: 'backward', ArrowDown: 'backward', KeyA: 'left', ArrowLeft: 'left', KeyD: 'right', ArrowRight: 'right', KeyQ: 'turn-left', KeyE: 'turn-right' };
+  let walkFrame = 0;
+  let walkLastTime = null;
+  let walkYaw = 0;
+  let walkPitch = 0;
+  let walkDrag = null;
+  let orbitSnapshot = null;
+
+  function buildWalkObstacles() {
+    walkObstacles.length = 0;
+    scene.updateMatrixWorld(true);
+    scene.traverse((object) => {
+      if (!object.isMesh || object.geometry.type !== 'BoxGeometry') return;
+      const bounds = new THREE.Box3().setFromObject(object);
+      const size = bounds.getSize(new THREE.Vector3());
+      if (bounds.max.y <= 0.5 || bounds.min.y >= walkEyeHeight || Math.min(size.x, size.z) < 0.05 || Math.max(size.x, size.z) < 0.5) return;
+      walkObstacles.push(bounds);
+    });
+  }
+
+  function canWalkAt(x, z) {
+    for (const [dx, dz] of [[-walkRadius, -walkRadius], [-walkRadius, walkRadius], [walkRadius, -walkRadius], [walkRadius, walkRadius]]) {
+      if (!walkFloorAreas.some((area) => x + dx >= area.x && x + dx <= area.x + area.w && z + dz >= area.z && z + dz <= area.z + area.d)) return false;
+    }
+    return !walkObstacles.some((bounds) => {
+      const dx = x - THREE.MathUtils.clamp(x, bounds.min.x, bounds.max.x);
+      const dz = z - THREE.MathUtils.clamp(z, bounds.min.z, bounds.max.z);
+      return dx * dx + dz * dz < walkRadius * walkRadius;
+    });
+  }
+
+  function findWalkStart(x, z) {
+    if (canWalkAt(x, z)) return [x, z];
+    for (let radius = 0.5; radius <= 4; radius += 0.5) {
+      for (let step = 0; step < 16; step++) {
+        const angle = step * Math.PI / 8;
+        const candidate = [x + Math.cos(angle) * radius, z + Math.sin(angle) * radius];
+        if (canWalkAt(...candidate)) return candidate;
+      }
+    }
+    return null;
+  }
+
+  function updateWalkCamera() {
+    camera.position.y = walkEyeHeight;
+    camera.rotation.set(walkPitch, walkYaw, 0, 'YXZ');
+    camera.updateMatrixWorld();
+    render();
+  }
+
+  function clearWalkInput() {
+    walkKeys.clear();
+    walkPointers.clear();
+    walkControls.querySelectorAll('[data-held]').forEach((button) => button.removeAttribute('data-held'));
+    if (walkDrag && renderer.domElement.hasPointerCapture(walkDrag.id)) renderer.domElement.releasePointerCapture(walkDrag.id);
+    walkDrag = null;
+    walkLastTime = null;
+  }
+
+  function startWalking() {
+    const starts = {
+      whole: [15.6, 50, 15.6, 42], top: [15.6, 50, 15.6, 42], social: [20, 18, 20, 3],
+      living: [10.5, 22, 5, 16], dining: [23, 7, 19.8, 2.6], kitchen: [33, 19.5, 32.25, 8],
+      cooktop: [33, 17.45, 37, 17.45], fridge: [33, 23, 33, 26.9], island: [33, 17.45, 28.65, 17.45],
+      prep: [43, 12, 48, 9.25], pantry: [47, 12, 47, 14.15], 'prep-counter': [47, 12, 47, 9.25],
+      private: [15.6, 46, 15.6, 41], basement: [15.6, 32, 20, 30], garage: [43, 29, 43, 38]
+    };
+    const [x, z, lookX, lookZ] = starts[currentView];
+    buildWalkObstacles();
+    const start = findWalkStart(x, z);
+    if (!start) {
+      console.error(`No clear walking start was found for the ${currentView} view.`);
+      viewport.querySelector('.model-help').textContent = 'No clear walking start here. Choose Whole floor, then Walk.';
+      return false;
+    }
+    orbitSnapshot = { view: currentView, navigationMode, position: camera.position.clone(), target: controls.target.clone(), zoom: camera.zoom, fov: perspectiveCamera.fov };
+    setView('whole');
+    currentView = 'walk';
+    camera = perspectiveCamera;
+    controls.object = camera;
+    camera.fov = 70;
+    camera.aspect = viewport.clientWidth / viewport.clientHeight;
+    camera.updateProjectionMatrix();
+    camera.position.set(start[0], walkEyeHeight, start[1]);
+    walkYaw = Math.atan2(start[0] - lookX, start[1] - lookZ);
+    walkPitch = 0;
+    clearWalkInput();
+    viewButtons.forEach((button) => button.setAttribute('aria-pressed', 'false'));
+    renderer.domElement.setAttribute('aria-label', '3D floor plan: eye-level walking tour');
+    updateWalkCamera();
+    walkFrame = requestAnimationFrame(animateWalk);
+    return true;
+  }
+
+  function stopWalking() {
+    cancelAnimationFrame(walkFrame);
+    clearWalkInput();
+    perspectiveCamera.fov = orbitSnapshot.fov;
+    setView(orbitSnapshot.view);
+    camera.position.copy(orbitSnapshot.position);
+    camera.zoom = orbitSnapshot.zoom;
+    camera.updateProjectionMatrix();
+    controls.target.copy(orbitSnapshot.target);
+    controls.update();
+    render();
+  }
+
+  function moveWalking(actions, delta) {
+    const forward = Number(actions.has('forward')) - Number(actions.has('backward'));
+    const sideways = Number(actions.has('right')) - Number(actions.has('left'));
+    const turning = Number(actions.has('turn-left')) - Number(actions.has('turn-right'));
+    walkYaw += turning * delta * 1.4;
+    const length = Math.hypot(forward, sideways);
+    if (length) {
+      const distance = walkSpeed * delta / length;
+      const dx = (-Math.sin(walkYaw) * forward + Math.cos(walkYaw) * sideways) * distance;
+      const dz = (-Math.cos(walkYaw) * forward - Math.sin(walkYaw) * sideways) * distance;
+      const steps = Math.max(1, Math.ceil(Math.hypot(dx, dz) / 0.1));
+      for (let step = 0; step < steps; step++) {
+        if (canWalkAt(camera.position.x + dx / steps, camera.position.z)) camera.position.x += dx / steps;
+        if (canWalkAt(camera.position.x, camera.position.z + dz / steps)) camera.position.z += dz / steps;
+      }
+    }
+    if (length || turning) updateWalkCamera();
+  }
+
+  function animateWalk(time) {
+    if (navigationMode !== 'walk') return;
+    const delta = walkLastTime === null ? 0 : Math.min((time - walkLastTime) / 1000, 0.1);
+    walkLastTime = time;
+    const actions = new Set([...walkKeys].map((key) => walkKeyActions[key]).concat([...walkPointers.values()]));
+    moveWalking(actions, delta);
+    walkFrame = requestAnimationFrame(animateWalk);
+  }
+
+  renderer.domElement.addEventListener('pointerdown', (event) => {
+    if (navigationMode !== 'walk' || event.button !== 0 || walkDrag) return;
+    event.preventDefault();
+    viewport.focus({ preventScroll: true });
+    walkDrag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    renderer.domElement.setPointerCapture(event.pointerId);
+  });
+  renderer.domElement.addEventListener('pointermove', (event) => {
+    if (!walkDrag || walkDrag.id !== event.pointerId) return;
+    walkYaw -= (event.clientX - walkDrag.x) * 0.004;
+    walkPitch = THREE.MathUtils.clamp(walkPitch - (event.clientY - walkDrag.y) * 0.003, -Math.PI * 0.42, Math.PI * 0.42);
+    walkDrag.x = event.clientX;
+    walkDrag.y = event.clientY;
+    updateWalkCamera();
+  });
+  for (const eventName of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+    renderer.domElement.addEventListener(eventName, (event) => {
+      if (walkDrag?.id === event.pointerId) walkDrag = null;
+    });
+  }
+  walkControls.querySelectorAll('button').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      if (navigationMode === 'walk' && event.detail === 0) moveWalking(new Set([button.dataset.walk]), 0.15);
+    });
+    button.addEventListener('pointerdown', (event) => {
+      if (navigationMode !== 'walk' || event.button !== 0) return;
+      event.preventDefault();
+      viewport.focus({ preventScroll: true });
+      button.setPointerCapture(event.pointerId);
+      walkPointers.set(event.pointerId, button.dataset.walk);
+      button.setAttribute('data-held', '');
+    });
+    for (const eventName of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+      button.addEventListener(eventName, (event) => {
+        walkPointers.delete(event.pointerId);
+        button.toggleAttribute('data-held', [...walkPointers.values()].includes(button.dataset.walk));
+      });
+    }
+  });
+  window.addEventListener('keydown', (event) => {
+    if (navigationMode !== 'walk' || event.key !== 'Escape') return;
+    setNavigationMode(orbitSnapshot.navigationMode);
+    viewport.focus({ preventScroll: true });
+    event.preventDefault();
+  });
+  window.addEventListener('keyup', (event) => walkKeys.delete(event.code));
+  window.addEventListener('blur', clearWalkInput);
+  document.addEventListener('visibilitychange', clearWalkInput);
+  viewport.addEventListener('focusout', (event) => {
+    if (!viewport.contains(event.relatedTarget)) clearWalkInput();
+  });
 
   function updatePendantVisibility() {
     const showPendants = currentView !== 'top' && currentView !== 'fridge' && currentView !== 'cooktop';
@@ -1939,6 +2150,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   }
 
   function setView(name) {
+    if (navigationMode === 'walk') setNavigationMode('rotate');
     currentView = name;
     const prepElevationView = name === 'pantry' || name === 'prep-counter';
     const elevationView = name === 'fridge' || name === 'cooktop' || prepElevationView;
@@ -1997,6 +2209,21 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     freezerDoor.userData.openAngleDegrees = angle;
     freezerButton.textContent = angle ? `Left freezer: ${angle}\u00b0 (concept)` : 'Left freezer: closed';
     freezerButton.setAttribute('aria-pressed', String(angle !== 0));
+    if (navigationMode === 'walk') {
+      buildWalkObstacles();
+      if (!canWalkAt(camera.position.x, camera.position.z)) {
+        const start = findWalkStart(camera.position.x, camera.position.z);
+        if (start) {
+          camera.position.set(start[0], walkEyeHeight, start[1]);
+          updateWalkCamera();
+          viewport.querySelector('.model-help').textContent = 'Stepped clear of the freezer door. WASD / arrows: walk | Drag: look | Escape: exit';
+        } else {
+          setNavigationMode(orbitSnapshot.navigationMode);
+          console.warn('Walking stopped because the freezer door left no clear position nearby.');
+          viewport.querySelector('.model-help').textContent = 'Walking stopped to keep clear of the freezer. Close the door, then choose Walk.';
+        }
+      }
+    }
   }
   freezerButton.addEventListener('click', () => {
     const angles = [0, 90, 115];
@@ -2014,6 +2241,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   });
   viewport.addEventListener('keydown', (event) => {
     if (event.target !== viewport) return;
+    if (navigationMode === 'walk' && event.key !== 'Home') {
+      if (!event.altKey && !event.ctrlKey && !event.metaKey && walkKeyActions[event.code]) walkKeys.add(event.code);
+      else return;
+      event.preventDefault();
+      return;
+    }
     const moves = { ArrowLeft: -0.15, ArrowRight: 0.15 };
     if (event.key in moves) {
       const offset = camera.position.clone().sub(controls.target);
@@ -2041,12 +2274,18 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   setNavigationMode('rotate');
   renderer.domElement.addEventListener('webglcontextlost', (event) => {
     event.preventDefault();
+    cancelAnimationFrame(walkFrame);
+    clearWalkInput();
     console.error('The 3D floor plan lost its WebGL context.');
     showModelError('The 3D renderer lost its graphics connection. Reload this page to try again.');
   });
   function resize() {
     renderer.setSize(viewport.clientWidth, viewport.clientHeight);
-    setView(currentView);
+    if (navigationMode === 'walk') {
+      camera.aspect = viewport.clientWidth / viewport.clientHeight;
+      camera.updateProjectionMatrix();
+      render();
+    } else setView(currentView);
   }
   function render() {
     renderer.render(scene, camera);
