@@ -250,6 +250,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   cabinetPanelFinish.color.set('#e6dccb');
   const brass = new THREE.MeshStandardMaterial({ color: '#b99a60', metalness: 0.65, roughness: 0.35 });
   brass.name = 'Satin gold hardware';
+  const cupHardware = brass.clone();
+  cupHardware.name = 'Top Knobs Honey Bronze - screen approximation';
+  cupHardware.side = THREE.DoubleSide;
 
   function shakerFront(parent, x, y, z, width, height, rotation = 0) {
     const front = new THREE.Group();
@@ -274,6 +277,39 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     parent.add(pull);
     box(pull, 0, 0, 0.05, vertical ? 0.045 : length, vertical ? length : 0.045, 0.045, brass);
     for (const side of [-1, 1]) box(pull, vertical ? 0 : side * length * 0.38, vertical ? side * length * 0.38 : 0, 0, 0.04, 0.04, 0.1, brass);
+  }
+
+  function cabinetCupPull(parent, x, y, z) {
+    const pull = new THREE.Group();
+    pull.name = 'Top Knobs Dakota Charlotte M2223 cup pull';
+    pull.position.set(x, y, z);
+    pull.userData = { manufacturer: 'Top Knobs', model: 'M2223', finish: 'Honey Bronze', centerToCenterInches: 2 + 9 / 16, overallWidthInches: 3.75, heightInches: 1.125, projectionInches: 15 / 16, simplifiedGeometry: true };
+    parent.add(pull);
+    const height = 1.125 / 12;
+    const projection = 15 / 16 / 12;
+    const lipRadius = 0.03 / 12;
+    const shellBottom = -height / 2 + lipRadius;
+    const shell = new THREE.Mesh(new THREE.SphereGeometry(1, 32, 12, 0, Math.PI, 0, Math.PI / 2), cupHardware);
+    shell.name = 'Downward-open bronze cup shell';
+    shell.scale.set(1.5 / 12, height - lipRadius, projection - lipRadius);
+    shell.position.y = shellBottom;
+    pull.add(shell);
+    const lipPoints = [];
+    for (let step = 0; step <= 24; step++) {
+      const angle = step * Math.PI / 24;
+      lipPoints.push(new THREE.Vector3(Math.cos(angle) * 1.5 / 12, shellBottom, Math.sin(angle) * (projection - lipRadius)));
+    }
+    const lip = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(lipPoints), 32, lipRadius, 8, false), cupHardware);
+    lip.name = 'Rounded cup finger lip';
+    pull.add(lip);
+    for (const side of [-1, 1]) {
+      box(pull, side * 1.5 / 12, 0, 0.03 / 12, 0.75 / 12, 0.5 / 12, 0.06 / 12, cupHardware, true).name = 'Cup pull mounting ear';
+      const screw = cylinder(pull, side * 1.625 / 12, 0, 0.08 / 12, 0.09 / 12, 0.04 / 12, cupHardware);
+      screw.name = 'Decorative cup pull screw';
+      screw.rotation.x = Math.PI / 2;
+      const slot = box(pull, side * 1.625 / 12, 0, 0.105 / 12, 0.13 / 12, 0.018 / 12, 0.01 / 12, black);
+      slot.rotation.z = -0.5;
+    }
   }
 
   function floor(x, z, w, d, furnished = false, parent = shell, interior = true) {
@@ -307,8 +343,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     const sideWidth = casingSideWidth;
     const reveal = casingReveal;
     const outerWidth = width + 2 * (sideWidth + reveal);
-    function part(name, x, y, z, w, h, d, material = windowTrim) {
-      const mesh = box(casing, x, y, z, w, h, d, material);
+    function part(name, x, y, z, w, h, d, material = sillOptions.casingMaterial ?? windowTrim, rounded = false) {
+      const mesh = box(casing, x, y, z, w, h, d, material, rounded);
       mesh.name = name;
       const worldY = mesh.getWorldPosition(new THREE.Vector3()).y;
       mesh.userData = { bottom: worldY - h / 2, top: worldY + h / 2, offsetY: worldY - y };
@@ -321,23 +357,18 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     part('White casing header bead', 0, height + reveal + 0.03125, 0.05, outerWidth + 0.0625, 0.0625, 0.1);
     part('White casing projecting cap', 0, height + reveal + 5.5 / 12 + 0.0416667, 0.0625, outerWidth + 0.125, 1 / 12, 0.125);
     if (window) {
-      const { material = windowTrim, depth = 0.25, notchWidth = 0 } = sillOptions;
-      const sillWidth = outerWidth + 0.125;
+      const { material = windowTrim, depth = 0.25, thickness = 1 / 12, apronHeight = sideWidth, extraWidth = 0.125, rounded = false } = sillOptions;
+      const sillWidth = outerWidth + extraWidth;
       const sillZ = sillOptions.material ? depth / 2 - faceDepth : 0.0625;
       const sillName = sillOptions.material ? 'Quartz plant window sill' : 'White window projecting sill';
-      if (notchWidth > 0) {
-        const wingWidth = (sillWidth - notchWidth) / 2;
-        for (const edge of [-1, 1]) part(sillName, edge * (notchWidth + wingWidth) / 2, -0.5 / 12, sillZ, wingWidth, 1 / 12, depth, material);
-        const rearDepth = 1.5 / 12;
-        part('Quartz sill behind faucet notch', 0, -0.5 / 12, -faceDepth + rearDepth / 2, notchWidth, 1 / 12, rearDepth, material);
-      } else {
-        part(sillName, 0, -0.5 / 12, sillZ, sillWidth, 1 / 12, depth, material);
-      }
-      part('White window apron', 0, -1 / 12 - sideWidth / 2, 0.03125, outerWidth, sideWidth, 0.0625);
+      part(sillName, 0, -thickness / 2, sillZ, sillWidth, thickness, depth, material, rounded);
+      const apronMaterial = sillOptions.apronMaterial ?? sillOptions.casingMaterial ?? windowTrim;
+      const apronName = sillOptions.apronMaterial ? 'Quartz window apron' : 'White window apron';
+      part(apronName, 0, -thickness - apronHeight / 2, 0.03125 - (sillOptions.apronInset ?? 0), outerWidth, apronHeight, 0.0625, apronMaterial);
     }
   }
 
-  function wall(x1, z1, x2, z2, furnished = false, openings = [], height = ceilingHeight, trimSides = [-1, 1]) {
+  function wall(x1, z1, x2, z2, furnished = false, openings = [], height = ceilingHeight, trimSides = [-1, 1], quartzSide = 0) {
     const length = Math.hypot(x2 - x1, z2 - z1);
     const group = new THREE.Group();
     group.position.set(x1, 0, z1);
@@ -353,6 +384,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       const depth = 0.75 / 12;
       const radius = 0.75 / 12;
       for (const side of trimSides) {
+        if (side === quartzSide) continue;
         const sampleX = x1 - dz * side * 0.3;
         const sampleZ = z1 + dx * side * 0.3;
         const runs = [];
@@ -402,7 +434,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       if (end <= start || top <= bottom) return;
       const mesh = box(group, (start + end) / 2, (bottom + top) / 2, 0, end - start, top - bottom, 0.35, wallMaterial);
       mesh.name = 'House wall';
-      mesh.userData = { bottom, top };
+      mesh.userData = { bottom, top, quartzSide };
       walls.push(mesh);
       if (bottom === 0 && top >= 8 / 12) baseTrim(start, end);
     }
@@ -439,7 +471,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const kitchenSideOpenings = [[2.725, 2.725 + kitchenPassageWidth, 0, 8], [13.675, 13.675 + kitchenPassageWidth, 0, 8]];
   const cooktopCenterZ = 8 + (kitchenSideOpenings[0][1] + kitchenSideOpenings[1][0]) / 2;
   const kitchenSinkWindowHeight = 3.5;
-  const kitchenSinkWindowSill = 4.25;
+  const kitchenSinkWindowSill = 53 / 12;
   const kitchenSinkWindows = [
     { name: 'Kitchen left counter window', x: kitchenSinkX - 4.5, width: 1.5 },
     { name: 'Kitchen sink window', x: kitchenSinkX, width: kitchenSinkWindowWidth },
@@ -454,6 +486,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const diningSideWindowWidth = 6;
   const diningSideWindowHeight = 5;
   const diningSideWindowSill = 3;
+  const prepEndWindowZ = 12;
+  const prepEndWindowWidth = 2;
 
   const stairWidth = 44 / 12;
   const stairGap = 0.25;
@@ -487,9 +521,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     [13.2, -2.1, 13.2, 8, true, diningSideWindowCenters.map((z) => [z - diningSideWindowWidth / 2 + 2.1, z + diningSideWindowWidth / 2 + 2.1, diningSideWindowSill, diningSideWindowSill + diningSideWindowHeight])],
     [13.2, -2.1, 26.5, -2.1, true, [[3.65, 9.65, 3, 8]]],
     [26.5, -2.1, 26.5, 8, true, [[2.1, 8.1, 0, 8]], ceilingHeight, [1]],
-    [kitchenWallLeft, 8, kitchenWallRight, 8, true, kitchenSinkWindows.map(({ x, width }) => [x - width / 2 - kitchenWallLeft, x + width / 2 - kitchenWallLeft, kitchenSinkWindowSill, kitchenSinkWindowSill + kitchenSinkWindowHeight])],
+    [kitchenWallLeft, 8, kitchenWallRight, 8, true, kitchenSinkWindows.map(({ x, width }) => [x - width / 2 - kitchenWallLeft, x + width / 2 - kitchenWallLeft, kitchenSinkWindowSill, kitchenSinkWindowSill + kitchenSinkWindowHeight]), ceilingHeight, [-1, 1], 1],
     [38, 8, 55.5, 8, false, prepWindowCenters.map((x) => [x - prepWindowWidth / 2 - 38, x + prepWindowWidth / 2 - 38, prepWindowSill, prepWindowSill + prepWindowHeight])],
-    [55.5, 8, 55.5, 49, false, [[36, 39, 0, 7]], ceilingHeight, [1]], [55.5, 49, 31.2, 49, false, [[2.5, 11.5, 0, 8], [14, 23, 0, 8]], ceilingHeight, [1]],
+    [55.5, 8, 55.5, 49, false, [[prepEndWindowZ - prepEndWindowWidth / 2 - 8, prepEndWindowZ + prepEndWindowWidth / 2 - 8, prepWindowSill, prepWindowSill + prepWindowHeight], [36, 39, 0, 7]], ceilingHeight, [1]], [55.5, 49, 31.2, 49, false, [[2.5, 11.5, 0, 8], [14, 23, 0, 8]], ceilingHeight, [1]],
     [31.2, 49, 31.2, 54.2], [31.2, 54.2, 31.2, 61.2, false, [], 2.6], [31.2, 61.2, 0, 61.2, false, [], 2.6],
     [0, 61.2, 0, 54.2, false, [], 2.6], [0, 54.2, 0, 25.7, false, [[3.2, 7.2, 3, 8], [22.2, 26.2, 3, 8]]],
     [0, 25.7, 0, 8, true, [[1.7, 4.7, 2.6, 8.4], [13.3, 16.3, 2.6, 8.4]]],
@@ -499,11 +533,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     [19, 34.6, 19, 54.2, false, [[7.4, 10.4, 0, 7]]], [19, 34.6, 25, 34.6],
     [25, 34.6, 25, 42], [19, 42, 25, 42, false, [[1.4, 4.6, 0, 7]]], [25, 39.2, 31.2, 39.2, false, [[2, 4.7, 0, 7]]],
     [25, 34.6, 31.2, 34.6], [31.2, 34.6, 31.2, 49], [29, 26.9, 29, 34.6],
-    [29, 26.9, 29.6875, 26.9, true],
-    [29.6875, 26.9, 37.8, 26.9, true, [], ceilingHeight, [1]],
-    [37.8, 26.9, 38, 26.9, true],
-    [38, 8, 38, 25.3, true, kitchenSideOpenings],
-    [38, 25.3, 38, 26.9, true, [], ceilingHeight, [-1]], [38, 15, 55.5, 15],
+    [29, 26.9, 29.6875, 26.9, true, [], ceilingHeight, [-1, 1], -1],
+    [29.6875, 26.9, 37.8, 26.9, true, [], ceilingHeight, [1], -1],
+    [37.8, 26.9, 38, 26.9, true, [], ceilingHeight, [-1, 1], -1],
+    [38, 8, 38, 25.3, true, kitchenSideOpenings, ceilingHeight, [-1, 1], 1],
+    [38, 25.3, 38, 26.9, true, [], ceilingHeight, [-1], 1], [38, 15, 55.5, 15],
     [45.4, 15, 45.4, 26.9], [38, 26.9, 45.4, 26.9, false, [[3, 6, 0, 7]]]
   ].forEach((segment) => wall(...segment));
 
@@ -570,7 +604,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     frame.name = name;
     frame.position.set(x, sill, z);
     frame.rotation.y = rotation;
-    frame.userData = { interiorTrim: 'white', interiorSide, sillDepthInches: (sillOptions.depth ?? 0.25) * 12, sillMaterial: sillOptions.material ? 'quartz' : 'white trim', faucetNotchWidthInches: (sillOptions.notchWidth ?? 0) * 12 };
+    frame.userData = { interiorTrim: 'white', interiorSide, sillDepthInches: (sillOptions.depth ?? 0.25) * 12, sillMaterial: sillOptions.material ? 'quartz' : 'white trim' };
+    frame.userData.casingMaterial = (sillOptions.casingMaterial ?? windowTrim).name;
     parent.add(frame);
     const frameMaterials = [black, black, black, black, interiorSide === 1 ? windowTrim : black, interiorSide === -1 ? windowTrim : black];
     for (const side of [-1, 1]) {
@@ -720,12 +755,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const kitchen = new THREE.Group();
   kitchen.name = 'Kitchen furnishings';
   scene.add(kitchen);
-  function quartzTexture() {
+  function quartzTexture(baseColor = '#c8b99d', veinColor = 'rgba(133, 124, 109, 0.3)') {
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 1024;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('A 2D canvas is required to create the quartz finish.');
-    ctx.fillStyle = '#c8b99d';
+    ctx.fillStyle = baseColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     let seed = 42;
     for (let i = 0; i < 2400; i++) {
@@ -751,7 +786,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       ctx.strokeStyle = 'rgba(157, 143, 121, 0.12)';
       ctx.lineWidth = index < 3 ? 11 : 5;
       ctx.stroke();
-      ctx.strokeStyle = 'rgba(133, 124, 109, 0.3)';
+      ctx.strokeStyle = veinColor;
       ctx.lineWidth = index < 3 ? 2.8 : 1.2;
       ctx.stroke();
     }
@@ -762,6 +797,17 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   }
   const countertop = new THREE.MeshPhysicalMaterial({ map: quartzTexture(), roughness: 0.48, metalness: 0, clearcoat: 0.1, clearcoatRoughness: 0.5 });
   countertop.name = 'Warm ivory quartz with soft warm-gray veining';
+  for (const mesh of walls) {
+    const { quartzSide } = mesh.userData;
+    if (!quartzSide) continue;
+    mesh.material = [wallMaterial, wallMaterial, wallMaterial, wallMaterial, quartzSide === 1 ? countertop : wallMaterial, quartzSide === -1 ? countertop : wallMaterial];
+    mesh.name = 'Kitchen wall with floor-to-ceiling quartz face';
+  }
+  const kitchenSillQuartz = countertop.clone();
+  kitchenSillQuartz.name = 'Smoky blue-gray quartz kitchen window sills with pale veining';
+  kitchenSillQuartz.map = quartzTexture('#98a9b0', 'rgba(235, 239, 240, 0.65)');
+  kitchenSillQuartz.roughness = 0.32;
+  kitchenSillQuartz.clearcoat = 0.18;
   const steel = new THREE.MeshStandardMaterial({ color: '#a9afad', metalness: 0.7, roughness: 0.32 });
   const light = new THREE.MeshStandardMaterial({ color: '#fff0c9', emissive: '#ffe3a3', emissiveIntensity: 0.5 });
 
@@ -772,7 +818,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     parent.add(cabinet);
     for (let row = 0; row < 3; row++) {
       const front = shakerFront(cabinet, 0, 0.65 + row * 0.79, 0, width, 0.74);
-      cabinetPull(front, 0, 0.22, 0.09, width * 0.55);
+      const pullOffsets = width >= 30 / 12 ? [-width / 4, width / 4] : [0];
+      front.userData.hardware = 'Top Knobs Dakota Charlotte M2223 cup pull';
+      front.userData.pullCount = pullOffsets.length;
+      for (const offset of pullOffsets) cabinetCupPull(front, offset, 0.22, 0.045);
     }
   }
 
@@ -844,15 +893,90 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   cylinder(soapDispenser, 0, 0.02, 0, 0.085, 0.04, steel).name = 'Soap dispenser deck base';
   cylinder(soapDispenser, 0, 0.15, 0, 0.045, 0.26, steel);
   box(soapDispenser, 0, 0.29, 0.13, 0.1, 0.06, 0.34, steel, true).name = 'Soap dispenser pump';
-  for (const { name, x, width } of kitchenSinkWindows) {
-    windowFrame(name, x, 8.1, width, kitchenSinkWindowHeight, kitchenSinkWindowSill, 0, scene, 1, { material: countertop, depth: 8 / 12, notchWidth: x === kitchenSinkX ? 4 / 12 : 0 });
+  const dishRack = new THREE.Group();
+  dishRack.name = 'Compact dish rack right of main sink';
+  dishRack.position.set(kitchenSinkX + 2.35, 3.05, 9.3);
+  dishRack.userData = { trayWidthInches: 16, trayDepthInches: 14, removableCatchPan: true, manualEmptying: true, drainSpout: false, provisional: true };
+  kitchen.add(dishRack);
+  const catchPanFinish = mat('#b8b8ae', 0.65);
+  const catchPan = new THREE.Group();
+  catchPan.name = 'Removable dish rack catch pan';
+  catchPan.userData = { removable: true, manualEmptying: true, closedBottom: true };
+  dishRack.add(catchPan);
+  box(catchPan, 0, 0.03, 0, 16 / 12, 0.06, 14 / 12, catchPanFinish).name = 'Dish rack catch pan base';
+  for (const side of [-1, 1]) {
+    box(catchPan, side * (8 / 12 - 0.015), 0.09, 0, 0.03, 0.06, 14 / 12 - 0.06, catchPanFinish).name = 'Catch pan side rim';
+    box(catchPan, 0, 0.09, side * (7 / 12 - 0.015), 16 / 12, 0.06, 0.03, catchPanFinish).name = 'Catch pan end rim';
   }
-  const sinkBacksplashBottom = 3.05;
-  const sinkBacksplashTop = kitchenSinkWindowSill - (1 + 3.5) / 12;
-  const sinkBacksplash = box(kitchen, kitchenSinkX, (sinkBacksplashBottom + sinkBacksplashTop) / 2, 8.22, 11.1, sinkBacksplashTop - sinkBacksplashBottom, 0.08, countertop);
-  sinkBacksplash.name = 'Sink quartz backsplash';
-  sinkBacksplash.userData = { bottom: sinkBacksplashBottom, top: sinkBacksplashTop };
-  walls.push(sinkBacksplash);
+  for (const side of [-1, 1]) {
+    for (const y of [0.16, 0.42]) {
+      box(dishRack, 0, y, side * 0.5, 1.18, 0.025, 0.025, steel);
+      box(dishRack, side * 0.58, y, 0, 0.025, 0.025, 1, steel);
+    }
+    for (const z of [-0.5, 0.5]) cylinder(dishRack, side * 0.58, 0.25, z, 0.014, 0.38, steel);
+  }
+  for (let slot = 0; slot < 6; slot++) {
+    const x = -0.45 + slot * 0.16;
+    box(dishRack, x, 0.14, 0, 0.018, 0.018, 0.92, steel);
+    for (const side of [-1, 1]) cylinder(dishRack, x, 0.26, side * 0.38, 0.01, 0.24, steel);
+  }
+  for (const x of [-0.37, -0.13, 0.11]) {
+    const plate = cylinder(dishRack, x, 0.43, -0.05, 0.29, 0.025, porcelain);
+    plate.name = 'Dish rack small white plate';
+    plate.rotation.z = Math.PI / 2 - 0.12;
+  }
+  cylinder(dishRack, 0.43, 0.22, 0.28, 0.11, 0.3, catchPanFinish).name = 'Dish rack utensil cup';
+  for (const x of [0.38, 0.43, 0.48]) cylinder(dishRack, x, 0.4, 0.28, 0.012, 0.45, steel);
+  for (const { name, x, width } of kitchenSinkWindows) {
+    windowFrame(name, x, 8.1, width, kitchenSinkWindowHeight, kitchenSinkWindowSill, 0, scene, 1, {
+      material: kitchenSillQuartz, rounded: true,
+      depth: 4.5 / 12, thickness: 0.75 / 12, apronHeight: 2 / 12, apronInset: 1.5 / 12, extraWidth: 1 / 12
+    });
+  }
+  const sillFlowers = new THREE.Group();
+  sillFlowers.name = 'Three small kitchen windowsill flower pots';
+  kitchen.add(sillFlowers);
+  const potCream = mat('#e8e1d5', 0.8);
+  const potClay = mat('#b77e66', 0.95);
+  const potSoil = mat('#493b30');
+  const leafGreen = mat('#667653');
+  const flowerIvory = mat('#f1e8d4');
+  const flowerPink = mat('#d4afa5');
+  const flowerCenter = mat('#b69a54');
+  for (const [index, x] of [kitchenSinkX - 4.5, kitchenSinkX + 1.75, kitchenSinkX + 4.5].entries()) {
+    const pot = new THREE.Group();
+    pot.name = `Kitchen sill flower pot ${index + 1}`;
+    pot.position.set(x, kitchenSinkWindowSill, 8 + 1 / 3);
+    pot.scale.setScalar(0.55);
+    pot.userData = { saucerDiameterInches: 3.168, provisional: true };
+    sillFlowers.add(pot);
+    const ceramic = index === 1 ? potClay : potCream;
+    cylinder(pot, 0, 0.015, 0, 0.24, 0.03, ceramic).name = 'Plant drip saucer';
+    cylinder(pot, 0, 0.19, 0, 0.14, 0.32, ceramic, 0.205).name = 'Small ceramic flower pot';
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.205, 0.018, 8, 32), ceramic);
+    rim.rotation.x = Math.PI / 2;
+    rim.position.y = 0.35;
+    pot.add(rim);
+    cylinder(pot, 0, 0.35, 0, 0.185, 0.012, potSoil);
+    for (const [stemIndex, [offsetX, offsetZ, height]] of [[-0.09, -0.04, 0.78], [0.08, 0.02, 0.91], [0, 0.1, 0.71]].entries()) {
+      cylinder(pot, offsetX, (0.35 + height) / 2, offsetZ, 0.009, height - 0.35, leafGreen);
+      for (const side of [-1, 1]) {
+        const leaf = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 6), leafGreen);
+        leaf.scale.set(0.045, 0.11, 0.02);
+        leaf.rotation.z = side * 0.65;
+        leaf.position.set(offsetX + side * 0.05, 0.48 + stemIndex * 0.04, offsetZ);
+        pot.add(leaf);
+      }
+      for (let petal = 0; petal < 5; petal++) {
+        const angle = petal * Math.PI * 2 / 5;
+        const bloom = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 6), index === 1 ? flowerPink : flowerIvory);
+        bloom.scale.y = 0.5;
+        bloom.position.set(offsetX + Math.cos(angle) * 0.05, height, offsetZ + Math.sin(angle) * 0.05);
+        pot.add(bloom);
+      }
+      cylinder(pot, offsetX, height + 0.012, offsetZ, 0.027, 0.02, flowerCenter);
+    }
+  }
   const kitchenCenterZ = (8 + 26.9) / 2;
   const cooktopRunWidth = kitchenSideOpenings[1][0] - kitchenSideOpenings[0][1] - 2 * (casingSideWidth + casingReveal);
   const cooktopEndFillerWidth = 1.5 / 12;
@@ -908,12 +1032,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const cookingDetails = new THREE.Group();
   cookingDetails.name = 'Cooktop finishing details';
   kitchen.add(cookingDetails);
-  const cooktopBacksplashBottom = 3.05;
-  const cooktopBacksplashWidth = kitchenSideOpenings[1][0] - kitchenSideOpenings[0][1];
-  const cooktopBacksplash = box(cookingDetails, 37.795, (cooktopBacksplashBottom + ceilingHeight) / 2, cooktopCenterZ, 0.06, ceilingHeight - cooktopBacksplashBottom, cooktopBacksplashWidth, countertop);
-  cooktopBacksplash.name = 'Full-height cooktop quartz backsplash';
-  cooktopBacksplash.userData = { bottom: cooktopBacksplashBottom, top: ceilingHeight };
-  walls.push(cooktopBacksplash);
 
   const cuttingBoard = new THREE.Group();
   cuttingBoard.name = 'Walnut cutting board';
@@ -1358,6 +1476,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   for (const [index, x] of prepWindowCenters.entries()) {
     windowFrame(`Prep counter window ${index + 1}`, x, 8, prepWindowWidth, prepWindowHeight, prepWindowSill, 0, rest);
   }
+  windowFrame('Prep end-wall window', 55.5, prepEndWindowZ, prepEndWindowWidth, prepWindowHeight, prepWindowSill, -Math.PI / 2, rest);
   const prepTower = furnishing('Prep microwave and wall oven tower', 39.875, 8.25 + 25 / 24);
   const prepTowerWidth = 33 / 12;
   const prepTowerDepth = 25 / 12;
@@ -1391,25 +1510,136 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     box(prepCombination, 0, handleY, prepTowerFront + 0.12, 2.1, 0.07, 0.1, steel).name = `Prep ${name} handle`;
   }
   box(prepCombination, 0, 5.9, prepTowerFront + 0.03, 2.25, 0.15, 0.02, black).name = 'Prep combination appliance controls';
-  const coffeeStation = furnishing('Prep coffee station', 43.8, 9.45);
-  box(coffeeStation, 0, 3.765, 0, 1.1, 1.45, 1.1, black, true);
-  cylinder(coffeeStation, 0.75, 3.19, 0.1, 0.16, 0.3, porcelain);
+  const prepCounterAppliances = new THREE.Group();
+  prepCounterAppliances.name = 'Prep countertop appliances';
+  rest.add(prepCounterAppliances);
+  const blenderGlass = new THREE.MeshStandardMaterial({ color: '#d8e5df', transparent: true, opacity: 0.45, roughness: 0.15, depthWrite: false });
+  const mixerPaint = mat('#ded8c9', 0.35);
+  const prepApplianceSpecs = [
+    ['Prep stand mixer', 41.65 + 12.6 / 24, 12.6, 16.8, 16.8],
+    ['Breville Super Q blender', 41.65 + (12.6 + 2 + 8.1 / 2) / 12, 8.1, 10.5, 18.1],
+    ['Prep rice cooker', 52.858333333333334, 12, 14.4, 12.6],
+    ['Prep Ninja air fryer', 54.225, 16.8, 15.6, 13.2]
+  ];
+  const prepApplianceRearZ = 8.55;
+  for (const [name, x, widthInches, depthInches, heightInches] of prepApplianceSpecs) {
+    const appliance = new THREE.Group();
+    appliance.name = name;
+    appliance.userData = { widthInches, depthInches, heightInches, provisional: true, operatingClearancesVerified: false };
+    prepCounterAppliances.add(appliance);
+    const w = widthInches / 12;
+    const d = depthInches / 12;
+    const h = heightInches / 12;
+    appliance.position.set(x, 3.04, prepApplianceRearZ + d / 2);
+    if (name === 'Breville Super Q blender') {
+      box(appliance, 0, 0.25, 0, w, 0.5, d, steel, true).name = 'Super Q motor base';
+      box(appliance, 0, 0.27, d / 2 + 0.01, w * 0.8, 0.19, 0.02, black).name = 'Super Q control panel';
+      const dial = cylinder(appliance, 0, 0, 0, 0.075, 0.035, steel);
+      dial.rotation.x = Math.PI / 2;
+      dial.position.set(0, 0.27, d / 2 + 0.04);
+      cylinder(appliance, -0.04, 0.91, 0, 0.23, 0.82, blenderGlass, 0.28).name = 'Super Q blender jug';
+      cylinder(appliance, -0.04, h - 0.07, 0, 0.29, 0.14, black).name = 'Super Q jug lid';
+      box(appliance, 0.285, 0.94, 0, 0.07, 0.55, 0.13, black).name = 'Blender handle grip';
+      for (const y of [0.7, 1.18]) box(appliance, 0.23, y, 0, 0.17, 0.055, 0.13, black);
+    } else if (name === 'Prep rice cooker') {
+      cylinder(appliance, 0, 0.45, 0, w / 2, 0.9, porcelain).scale.z = d / w;
+      const lid = cylinder(appliance, 0, h - 0.075, 0, w / 2, 0.15, steel);
+      lid.scale.z = d / w;
+      box(appliance, 0, h - 0.025, 0, 0.32, 0.05, 0.18, black).name = 'Rice cooker lid grip';
+      box(appliance, 0, 0.4, d / 2 - 0.02, 0.45, 0.24, 0.06, black).name = 'Rice cooker controls';
+    } else if (name === 'Prep Ninja air fryer') {
+      box(appliance, 0, h / 2, 0, w, h, d, black, true).name = 'Provisional Ninja air fryer body';
+      box(appliance, 0, h * 0.84, d / 2 + 0.01, w * 0.8, 0.15, 0.02, steel).name = 'Air fryer control strip';
+      for (const side of [-1, 1]) {
+        box(appliance, side * w / 4, h * 0.38, d / 2 + 0.02, w * 0.43, h * 0.55, 0.04, steel).name = 'Air fryer drawer front';
+        box(appliance, side * w / 4, h * 0.51, d / 2 + 0.09, 0.1, 0.28, 0.12, black).name = 'Air fryer drawer handle';
+      }
+    } else {
+      box(appliance, 0, 0.065, 0, w, 0.13, d, mixerPaint, true).name = 'Stand mixer foot';
+      box(appliance, 0, h * 0.48, -d * 0.32, 0.32, h * 0.85, 0.35, mixerPaint, true).name = 'Mixer pedestal';
+      box(appliance, 0, h - 0.16, 0, 0.5, 0.32, d * 0.9, mixerPaint, true).name = 'Mixer motor head';
+      cylinder(appliance, 0, 0.43, d * 0.16, 0.25, 0.6, steel, 0.42).name = 'Mixer stainless bowl';
+      cylinder(appliance, 0, 0.86, d * 0.16, 0.035, 0.38, steel).name = 'Mixer beater shaft';
+    }
+  }
 
-  const prepShelves = furnishing('Prep open pantry shelves', 47, 14.15);
-  const prepShelfWidth = 15;
+  const prepShelfStart = 38 + 0.175;
+  const prepShelfEnd = 55.5 - 0.175;
+  const prepShelves = furnishing('Prep open pantry shelves', (prepShelfStart + prepShelfEnd) / 2, 14.15);
+  const prepShelfWidth = prepShelfEnd - prepShelfStart;
   const prepShelfDepth = 1;
   const prepShelfThickness = 0.75 / 12;
+  const prepShelfBottom = 0.75;
+  const prepShelfLevels = [1, 2.3, 3.6, 4.9, 6.2, 7.5, ceilingHeight - prepShelfThickness / 2];
   const prepShelfBays = 5;
-  prepShelves.userData = { widthInches: 180, depthInches: 12, bays: prepShelfBays, shelfLevels: 6, provisional: true };
+  prepShelves.userData = { widthInches: prepShelfWidth * 12, depthInches: 12, bays: prepShelfBays, shelfLevels: prepShelfLevels.length, ceilingHeight, provisional: true };
   for (let support = 0; support <= prepShelfBays; support++) {
     const x = -prepShelfWidth / 2 + prepShelfThickness / 2 + support * (prepShelfWidth - prepShelfThickness) / prepShelfBays;
-    box(prepShelves, x, 4.375, 0, prepShelfThickness, 7.25, prepShelfDepth, cabinetFinish).name = 'Pantry shelf upright';
+    box(prepShelves, x, (prepShelfBottom + ceilingHeight) / 2, 0, prepShelfThickness, ceilingHeight - prepShelfBottom, prepShelfDepth, cabinetFinish).name = 'Pantry shelf upright';
   }
-  for (const y of [1, 2.3, 3.6, 4.9, 6.2, 7.5]) {
+  for (const y of prepShelfLevels) {
     for (let bay = 0; bay < prepShelfBays; bay++) {
       const bayWidth = (prepShelfWidth - prepShelfThickness) / prepShelfBays;
       const x = -prepShelfWidth / 2 + prepShelfThickness / 2 + (bay + 0.5) * bayWidth;
       box(prepShelves, x, y, 0, bayWidth - prepShelfThickness, prepShelfThickness, prepShelfDepth, cabinetRailFinish).name = 'Open pantry shelf';
+    }
+  }
+
+  const pantryContents = new THREE.Group();
+  pantryContents.name = 'Prep pantry contents';
+  prepShelves.add(pantryContents);
+  const pantryGrains = [mat('#dfc795'), mat('#be925f'), mat('#eee4ca')];
+  const pantryPackages = [mat('#ac684b'), mat('#71846a'), mat('#c4a25b')];
+  const pantryWicker = mat('#b48b5c');
+  const pantryGlass = new THREE.MeshStandardMaterial({ color: '#e2ede6', transparent: true, opacity: 0.25, roughness: 0.18, depthWrite: false });
+  const pantryBottle = mat('#526342', 0.28);
+  for (let level = 0; level < prepShelfLevels.length - 1; level++) {
+    for (let bay = 0; bay < prepShelfBays; bay++) {
+      const bayWidth = (prepShelfWidth - prepShelfThickness) / prepShelfBays;
+      const supplies = new THREE.Group();
+      supplies.name = `Pantry supplies bay ${bay + 1} level ${level + 1}`;
+      supplies.position.set(-prepShelfWidth / 2 + prepShelfThickness / 2 + (bay + 0.5) * bayWidth, prepShelfLevels[level] + prepShelfThickness / 2, 0);
+      pantryContents.add(supplies);
+      const style = (bay + level) % 4;
+      if (style === 0) {
+        for (const x of [-0.74, 0.74]) {
+          box(supplies, x, 0.035, 0, 1.2, 0.07, 0.78, pantryWicker).name = 'Pantry basket bottom';
+          for (const side of [-1, 1]) {
+            box(supplies, x + side * 0.575, 0.35, 0, 0.05, 0.7, 0.78, pantryWicker);
+            for (let row = 0; row < 6; row++) box(supplies, x, 0.1 + row * 0.11, side * 0.37, 1.2, 0.055, 0.04, pantryWicker);
+            for (let slat = 0; slat < 8; slat++) box(supplies, x - 0.53 + slat * 0.15, 0.35, side * 0.38, 0.025, 0.7, 0.025, oak);
+          }
+          box(supplies, x, 0.36, -0.41, 0.4, 0.18, 0.025, cream).name = 'Basket label';
+          for (const dx of [-0.25, 0.25]) box(supplies, x + dx, 0.53, 0, 0.33, 0.6, 0.42, pantryPackages[bay % 3]).name = 'Bagged pantry staples';
+        }
+      } else {
+        for (let item = 0; item < 4; item++) {
+          const x = (item - 1.5) * 0.68;
+          const h = 0.7 + ((bay + item) % 3) * 0.13;
+          const color = pantryPackages[(bay + item) % 3];
+          if (style === 1) {
+            cylinder(supplies, x, h / 2, 0, 0.23, h, pantryGlass).name = 'Clear dry-goods jar';
+            cylinder(supplies, x, (h - 0.12) / 2, 0, 0.205, h - 0.12, pantryGrains[item % 3]).name = 'Jar grains and pasta';
+            cylinder(supplies, x, h + 0.025, 0, 0.245, 0.05, oak).name = 'Wood jar lid';
+            box(supplies, x, h / 2, -0.235, 0.25, 0.22, 0.02, cream).name = 'Jar label';
+          } else if (style === 2) {
+            box(supplies, x, h / 2, 0, 0.47, h, 0.55, color).name = 'Cereal and pasta package';
+            box(supplies, x, h * 0.58, -0.285, 0.33, h * 0.4, 0.02, cream).name = 'Dry-goods package label';
+          } else if (item < 2) {
+            cylinder(supplies, x, 0.37, 0, 0.18, 0.74, pantryBottle).name = 'Pantry oil bottle';
+            cylinder(supplies, x, 0.85, 0, 0.07, 0.22, pantryBottle);
+            cylinder(supplies, x, 0.98, 0, 0.075, 0.06, brass).name = 'Bottle cap';
+            box(supplies, x, 0.36, -0.185, 0.23, 0.3, 0.02, cream).name = 'Bottle label';
+          } else {
+            for (let stack = 0; stack < 2; stack++) {
+              const y = 0.19 + stack * 0.39;
+              cylinder(supplies, x, y, 0, 0.23, 0.38, color).name = 'Stacked pantry can';
+              cylinder(supplies, x, y + 0.18, 0, 0.235, 0.025, steel).name = 'Can lid';
+              box(supplies, x, y, -0.235, 0.28, 0.18, 0.02, cream).name = 'Can label';
+            }
+          }
+        }
+      }
     }
   }
 
@@ -1672,6 +1902,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     whole: { target: [27, 0, 29], offset: [35, 75, 50], span: 78 },
     garage: { target: [43, 1, 33], offset: [28, 48, 36], span: 42 },
     prep: { target: [44, 1, 16], offset: [-28, 44, 30], span: 28 },
+    pantry: { target: [46.75, 4.5, 14.15], offset: [0, 0.2, -2.5], span: 12.5 },
+    'prep-counter': { target: [46.75, 4.5, 9.25], offset: [0, 0.4, 2.6], span: 12.5 },
     private: { target: [15.6, 1, 43], offset: [32, 49, 37], span: 40 },
     basement: { target: [22, -3, 30.4], offset: [-4, 30, 5], span: 21 },
     top: { target: [27, 0, 29], offset: [0, 110, 0.1], span: 72 }
@@ -1686,13 +1918,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
 
   function setView(name) {
     currentView = name;
-    const elevationView = name === 'fridge' || name === 'cooktop';
+    const prepElevationView = name === 'pantry' || name === 'prep-counter';
+    const elevationView = name === 'fridge' || name === 'cooktop' || prepElevationView;
+    controls.minDistance = prepElevationView ? 1 : 12;
     controls.maxPolarAngle = elevationView ? Math.PI / 2 : Math.PI / 2.12;
     const preset = presets[name];
     const aspect = viewport.clientWidth / viewport.clientHeight;
     const offset = new THREE.Vector3(...preset.offset);
     const portraitPadding = aspect < 1 ? 1.25 : 1;
-    camera = name === 'cooktop' ? cooktopElevationCamera : perspectiveCamera;
+    camera = name === 'cooktop' || prepElevationView ? cooktopElevationCamera : perspectiveCamera;
     controls.object = camera;
     camera.zoom = 1;
     if (camera.isOrthographicCamera) {
