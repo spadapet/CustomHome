@@ -599,22 +599,56 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   box(scene, 0.66, 2.12, 16.8, 0.06, 0.12, 4.1, ember);
   box(scene, 0.62, 5.8, 16.8, 0.15, 2.7, 4.6, black, true).name = 'Fireplace television';
   const glass = new THREE.MeshStandardMaterial({ color: '#b3cad0', roughness: 0.15, metalness: 0.15, transparent: true, opacity: 0.52 });
-  function windowFrame(name, x, z, width, height, sill, rotation = 0, parent = scene, interiorSide = 1, sillOptions = {}) {
+  const windowExterior = mat('#181818');
+  windowExterior.name = 'Andersen Black exterior - screen approximation';
+  function windowFrame(name, x, z, width, height, sill, rotation = 0, parent = scene, interiorSide = 1, options = {}) {
     const frame = new THREE.Group();
     frame.name = name;
     frame.position.set(x, sill, z);
     frame.rotation.y = rotation;
-    frame.userData = { interiorTrim: 'white', interiorSide, sillDepthInches: (sillOptions.depth ?? 0.25) * 12, sillMaterial: sillOptions.material ? 'quartz' : 'white trim' };
-    frame.userData.casingMaterial = (sillOptions.casingMaterial ?? windowTrim).name;
+    const fixed = options.fixed === true;
+    const exteriorFinish = options.whiteExterior ? 'White' : 'Black';
+    const exteriorMaterial = options.whiteExterior ? windowTrim : windowExterior;
+    // Group large openings without claiming these concept dimensions are catalog sizes.
+    const columns = fixed ? 1 : Math.ceil(width / 3);
+    const rows = fixed ? 1 : Math.ceil(height / 6);
+    frame.userData = { manufacturer: fixed ? null : 'Andersen', series: fixed ? null : '100 Series', operation: fixed ? 'fixed door sidelight' : 'casement', geometry: 'simplified concept, not manufacturer CAD', standardSizeVerified: false, exteriorFinish, interiorFinish: 'White', interiorTrim: 'white', interiorSide, columns, rows, widthFeet: width, heightFeet: height, sillDepthInches: (options.depth ?? 0.25) * 12, sillMaterial: options.material ? 'quartz' : 'white trim', faucetNotchWidthInches: (options.notchWidth ?? 0) * 12 };
+    frame.userData.casingMaterial = (options.casingMaterial ?? windowTrim).name;
     parent.add(frame);
-    const frameMaterials = [black, black, black, black, interiorSide === 1 ? windowTrim : black, interiorSide === -1 ? windowTrim : black];
-    for (const side of [-1, 1]) {
-      box(frame, side * (width - 0.12) / 2, height / 2, 0, 0.12, height, 0.18, frameMaterials);
-      box(frame, 0, side < 0 ? 0.06 : height - 0.06, 0, width, 0.12, 0.18, frameMaterials);
+    function ring(parent, w, h, border, depth, offset, material, name) {
+      for (const side of [-1, 1]) {
+        box(parent, side * (w - border) / 2, h / 2, offset, border, h, depth, material).name = name;
+        box(parent, 0, side < 0 ? border / 2 : h - border / 2, offset, w - 2 * border, border, depth, material).name = name;
+      }
     }
-    box(frame, 0, height / 2, 0, width - 0.24, height - 0.24, 0.06, glass);
-    box(frame, 0, height / 2, interiorSide * 0.04, 0.07, height - 0.24, 0.08, frameMaterials);
-    openingCasing(frame, 0, 0, width, height, 0.2, interiorSide, sill > 0, sillOptions);
+    for (let row = 0; row < rows; row++) {
+      for (let column = 0; column < columns; column++) {
+        const unit = new THREE.Group();
+        unit.name = fixed ? 'Fixed sidelight unit' : 'Andersen 100 Series casement concept';
+        const unitWidth = width / columns;
+        const unitHeight = height / rows;
+        unit.position.set(-width / 2 + (column + 0.5) * unitWidth, row * unitHeight, 0);
+        unit.userData = { operation: fixed ? 'fixed' : 'outward casement', shownClosed: true, widthFeet: unitWidth, heightFeet: unitHeight, provisional: true };
+        frame.add(unit);
+        ring(unit, unitWidth, unitHeight, 0.12, 0.12, -interiorSide * 0.06, exteriorMaterial, `${exteriorFinish} exterior window frame`);
+        ring(unit, unitWidth, unitHeight, 0.12, 0.12, interiorSide * 0.06, windowTrim, 'White interior window frame');
+        const sash = new THREE.Group();
+        sash.name = fixed ? 'Fixed glazing surround' : 'Closed side-hinged casement sash';
+        sash.position.y = 0.135;
+        unit.add(sash);
+        const sashWidth = unitWidth - 0.27;
+        const sashHeight = unitHeight - 0.27;
+        ring(sash, sashWidth, sashHeight, 0.1, 0.08, -interiorSide * 0.04, exteriorMaterial, `${exteriorFinish} exterior sash`);
+        ring(sash, sashWidth, sashHeight, 0.1, 0.08, interiorSide * 0.04, windowTrim, 'White interior sash');
+        box(sash, 0, sashHeight / 2, 0, sashWidth - 0.2, sashHeight - 0.2, 0.04, glass).name = 'Single casement glazing pane';
+        if (!fixed) {
+          box(unit, 0, 0.2, interiorSide * 0.16, 0.28, 0.07, 0.08, windowTrim).name = 'White casement crank housing';
+          box(unit, 0.08, 0.2, interiorSide * 0.23, 0.16, 0.045, 0.06, windowTrim).name = 'Casement crank handle';
+          box(unit, unitWidth / 2 - 0.18, unitHeight * 0.4, interiorSide * 0.15, 0.05, 0.22, 0.06, windowTrim).name = 'Casement sash lock';
+        }
+      }
+    }
+    if (options.casing !== false) openingCasing(frame, 0, 0, width, height, 0.2, interiorSide, sill > 0, options);
   }
   windowFrame('Living side window', 6.7, 8.1, 5, 5, 3);
   windowFrame('Dining rear window', 19.85, -2, 6, 5, 3);
@@ -622,57 +656,36 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     windowFrame(`Dining left window ${index + 1}`, 13.2, z, diningSideWindowWidth, diningSideWindowHeight, diningSideWindowSill, -Math.PI / 2, scene, -1);
   }
   const patioDoor = new THREE.Group();
-  patioDoor.name = 'Dining picture window and inswing patio door';
+  patioDoor.name = 'Dining casement windows and inswing patio door';
   patioDoor.position.set(26.5, 0, 3);
   patioDoor.rotation.y = -Math.PI / 2;
   patioDoor.userData = { widthFeet: 6, heightFeet: 8, sliding: false, provisional: true, exteriorDirection: 'increasing x' };
   scene.add(patioDoor);
   for (const side of [-1, 1]) {
-    box(patioDoor, side * 2.94, 4, 0, 0.12, 8, 0.3, black).name = 'Patio door jamb';
+    box(patioDoor, side * 2.94, 4, 0, 0.12, 8, 0.3, windowTrim).name = 'Patio door jamb';
   }
-  box(patioDoor, 0, 7.94, 0, 6, 0.12, 0.3, black).name = 'Patio door header';
+  box(patioDoor, 0, 7.94, 0, 6, 0.12, 0.3, windowTrim).name = 'Patio door header';
   box(patioDoor, 0, 0.04, 0, 6, 0.08, 0.4, black).name = 'Patio door threshold';
-  box(patioDoor, 0, 4, 0, 0.12, 8, 0.3, black).name = 'Picture window and door mullion';
-  const pictureWindow = new THREE.Group();
-  pictureWindow.name = 'Dining tall fixed picture window';
-  pictureWindow.position.x = 1.47;
-  pictureWindow.userData = { fixed: true, interiorTrim: 'white', interiorSide: -1 };
-  patioDoor.add(pictureWindow);
-  const pictureWindowMaterials = [black, black, black, black, black, windowTrim];
-  for (const edge of [-1, 1]) {
-    box(pictureWindow, edge * 1.37, 4, 0, 0.08, 7.76, 0.12, pictureWindowMaterials).name = 'Picture window stile';
-    box(pictureWindow, 0, edge < 0 ? 0.16 : 7.84, 0, 2.82, 0.08, 0.12, pictureWindowMaterials).name = 'Picture window rail';
-  }
-  box(pictureWindow, 0, 4, 0, 2.66, 7.6, 0.05, glass).name = 'Uninterrupted picture window glazing';
+  box(patioDoor, 0, 4, 0, 0.12, 8, 0.3, windowTrim).name = 'Picture window and door mullion';
+  windowFrame('Dining patio-side stacked casements', 1.47, 0, 2.82, 7.76, 0.12, 0, patioDoor, -1, { casing: false, whiteExterior: true });
   const doorLeaf = new THREE.Group();
   doorLeaf.name = 'Inward-opening hinged patio door';
   doorLeaf.position.x = -2.88;
   doorLeaf.rotation.y = -Math.PI / 6;
-  doorLeaf.userData = { outswing: false, openAngleDegrees: 30, nominalWidthFeet: 3 };
+  doorLeaf.userData = { outswing: false, openAngleDegrees: 30, nominalWidthFeet: 3, finish: 'White' };
   patioDoor.add(doorLeaf);
   for (const edge of [0.04, 2.78]) {
-    box(doorLeaf, edge, 3.98, 0, 0.08, 7.76, 0.14, black).name = 'Hinged patio door stile';
+    box(doorLeaf, edge, 3.98, 0, 0.08, 7.76, 0.14, windowTrim).name = 'Hinged patio door stile';
   }
-  for (const y of [0.16, 7.8]) box(doorLeaf, 1.41, y, 0, 2.82, 0.12, 0.14, black).name = 'Hinged patio door rail';
+  for (const y of [0.16, 7.8]) box(doorLeaf, 1.41, y, 0, 2.82, 0.12, 0.14, windowTrim).name = 'Hinged patio door rail';
   box(doorLeaf, 1.41, 3.98, 0, 2.66, 7.52, 0.05, glass).name = 'Hinged patio door glazing';
   for (const y of [0.6, 4, 7.3]) cylinder(doorLeaf, 0, y, 0, 0.045, 0.25, black).name = 'Patio door hinge';
   for (const side of [-1, 1]) {
     box(doorLeaf, 2.65, 3.5, side * 0.1, 0.08, 0.3, 0.08, black).name = 'Patio door handle plate';
     box(doorLeaf, 2.53, 3.5, side * 0.16, 0.3, 0.06, 0.06, black).name = 'Patio door lever';
   }
-  const livingWindowMaterials = [windowTrim, black, black, black, black, black];
-  for (const z of [10.9, 22.5]) {
-    const casing = new THREE.Group();
-    casing.position.set(0.22, 2.6, z);
-    casing.rotation.y = Math.PI / 2;
-    scene.add(casing);
-    openingCasing(casing, 0, 0, 3, 5.8, 0.32, 1, true);
-    for (const side of [-1, 1]) {
-      box(scene, 0.22, 5.5, z + side * 1.43, 0.28, 5.8, 0.14, livingWindowMaterials).name = 'Living window white interior frame';
-      box(scene, 0.22, 5.5 + side * 2.83, z, 0.28, 0.14, 3, livingWindowMaterials).name = 'Living window white interior frame';
-    }
-    box(scene, 0.4, 5.5, z, 0.08, 5.5, 2.7, glass);
-    box(scene, 0.47, 5.5, z, 0.1, 0.07, 2.7, livingWindowMaterials).name = 'Living window white interior mullion';
+  for (const [index, z] of [10.9, 22.5].entries()) {
+    windowFrame(`Living fireplace-side casement ${index + 1}`, 0.1, z, 3, 5.8, 2.6, -Math.PI / 2, scene, -1);
   }
 
   const sofa = new THREE.Group();
@@ -1315,10 +1328,17 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       const backingX = x + direction * 0.04;
       const backingLength = stairGoing - 0.08;
       box(flight, backingX, height - 0.15, enclosureZ, backingLength, 0.1, enclosureDepth, wallMaterial).name = 'Hollow stairwell soffit';
-      if (recessedBookcase) {
-        const caseHeight = stairBookcaseHeight(Math.floor(step / 3) * 3 * stairGoing);
-        const infillHeight = height - 0.1 - caseHeight;
-        box(flight, backingX, caseHeight + infillHeight / 2, stairBookcaseDepth / 2, backingLength, infillHeight, stairBookcaseDepth, wallMaterial).name = 'Bookcase stair-slope infill';
+      if (!upper) {
+        const caseHeight = recessedBookcase ? stairBookcaseHeight(Math.floor(step / 3) * 3 * stairGoing) : 0;
+        const infillDepth = recessedBookcase ? stairBookcaseDepth : 0.08;
+        const riserBottom = height - stairRise;
+        const lowerHeight = riserBottom - caseHeight;
+        // Only recess the infill beside the riser; keep the enclosure below it continuous.
+        if (lowerHeight > 0) {
+          box(flight, x, caseHeight + lowerHeight / 2, infillDepth / 2, stairGoing, lowerHeight, infillDepth, wallMaterial).name = 'Continuous stair-side enclosure';
+        }
+        const upperHeight = stairRise - 0.1;
+        box(flight, backingX, riserBottom + upperHeight / 2, infillDepth / 2, backingLength, upperHeight, infillDepth, wallMaterial).name = 'Bookcase stair-slope infill';
       }
       box(flight, x, height - 0.05, centerZ, stairGoing, 0.1, flightWidth, oak).name = 'Upstairs oak tread';
       box(flight, x - direction * (stairGoing / 2 - 0.02), height + 0.003, centerZ, 0.04, 0.006, flightWidth, walnut).name = 'Stair tread nosing';
@@ -1369,12 +1389,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     const height = stairBookcaseHeight(start);
     bay.userData = { widthFeet: width, heightFeet: height, depthInches: 11 };
     stairBookcases.add(bay);
-    box(bay, width / 2, height / 2, stairBookcaseDepth - 0.03, width, height, 0.06, cream).name = 'Bookcase backing';
-    for (const x of [0.04, width - 0.04]) box(bay, x, height / 2, stairBookcaseDepth / 2, 0.08, height, stairBookcaseDepth, cream).name = 'Bookcase side';
-    box(bay, width / 2, 0.1, stairBookcaseDepth / 2, width - 0.16, 0.2, stairBookcaseDepth - 0.04, cream).name = 'Bookcase plinth';
+    const panelHeight = height - 0.1;
+    const shelfDepth = stairBookcaseDepth - 0.06;
+    box(bay, width / 2, panelHeight / 2, stairBookcaseDepth - 0.03, width - 0.16, panelHeight, 0.06, cream).name = 'Bookcase backing';
+    for (const x of [0.04, width - 0.04]) box(bay, x, panelHeight / 2, stairBookcaseDepth / 2, 0.08, panelHeight, stairBookcaseDepth, cream).name = 'Bookcase side';
+    box(bay, width / 2, 0.1, shelfDepth / 2, width - 0.16, 0.2, shelfDepth, cream).name = 'Bookcase plinth';
     box(bay, width / 2, height - 0.05, stairBookcaseDepth / 2, width, 0.1, stairBookcaseDepth, oak).name = 'Bookcase top';
     for (let shelfY = 0.26; shelfY < height - 0.5; shelfY += 1.05) {
-      box(bay, width / 2, shelfY, stairBookcaseDepth / 2 - 0.02, width - 0.16, 0.08, stairBookcaseDepth - 0.04, oak).name = 'Open bookcase shelf';
+      box(bay, width / 2, shelfY, shelfDepth / 2, width - 0.16, 0.08, shelfDepth, oak).name = 'Open bookcase shelf';
       const availableHeight = Math.min(1.05, height - 0.1 - shelfY) - 0.08;
       for (let book = 0; book < 4; book++) {
         const bookHeight = Math.min(0.6 + (book % 3) * 0.1, availableHeight - 0.08);
@@ -1859,7 +1881,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     box(frontDoor, side * 1.25, 3.45, 0, 2.45, 6.9, 0.12, oak);
     box(frontDoor, side * 1.25, 4.15, -0.08, 1.65, 3.6, 0.04, glass);
     box(frontDoor, side * 0.22, 3.15, -0.14, 0.06, 1, 0.08, brass);
-    windowFrame('Entry sidelight', side * 2.825, 0, 0.7, 6.9, 0, 0, frontDoor, -1);
+    windowFrame('Entry sidelight', side * 2.825, 0, 0.7, 6.9, 0, 0, frontDoor, -1, { fixed: true });
   }
   tiledFloor('Porch paving', 0, 54.2, 31.2, 7, mat('#c9c7bc'));
   for (const x of [5, 26.2]) {
