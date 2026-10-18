@@ -1,8 +1,9 @@
 const viewport = document.getElementById('model-viewport');
 const message = viewport.querySelector('.model-message');
 const viewButtons = document.querySelectorAll('[data-view]');
-const wallButton = document.querySelector('.wall-toggle');
+const islandLightsInput = document.getElementById('show-island-lights');
 const resetButton = document.getElementById('reset-view');
+const freezerButton = document.getElementById('freezer-swing');
 const navigationButtons = document.querySelectorAll('[data-navigation]');
 const notesButton = document.getElementById('toggle-design-notes');
 const notes = document.getElementById('design-notes');
@@ -54,16 +55,20 @@ function showModelError(text) {
   message.append(link);
   message.hidden = false;
   viewButtons.forEach((button) => { button.disabled = true; });
-  wallButton.disabled = true;
+  islandLightsInput.disabled = true;
   resetButton.disabled = true;
+  freezerButton.disabled = true;
   navigationButtons.forEach((button) => { button.disabled = true; });
 }
 
 function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   // Model coordinates are feet; the supplied raster is a concept trace, not CAD.
+  const ceilingHeight = 9;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#eeeee6');
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 500);
+  const perspectiveCamera = new THREE.PerspectiveCamera(38, 1, 0.1, 500);
+  const cooktopElevationCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 500);
+  let camera = perspectiveCamera;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = false;
@@ -120,6 +125,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const stone = mat('#c6c2af');
   const shellFloor = mat('#d9dcd1');
   const walls = [];
+  const interiorFloorAreas = [];
   const shell = new THREE.Group();
   scene.add(shell);
 
@@ -147,7 +153,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const woodTileWidth = 32;
   const woodTileDepth = plankRows * plankWidth;
 
-  function woodTexture() {
+  function woodTexture(planks = true) {
     const canvas = document.createElement('canvas');
     canvas.width = 2048;
     canvas.height = 1024;
@@ -158,36 +164,41 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       seed = (seed * 1664525 + 1013904223) >>> 0;
       return seed / 4294967296;
     }
-    const rowHeight = canvas.height / plankRows;
-    ctx.fillStyle = '#88704e';
+    const rows = planks ? plankRows : 1;
+    const rowHeight = canvas.height / rows;
+    ctx.fillStyle = planks ? '#88704e' : '#bca581';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    for (let row = 0; row < plankRows; row++) {
+    for (let row = 0; row < rows; row++) {
       const y = row * rowHeight;
-      let x = -random() * 420;
+      let x = planks ? -random() * 420 : 0;
       while (x < canvas.width) {
-        const length = (4 + random() * 4) / woodTileWidth * canvas.width;
-        const lightness = 42 + random() * 3;
+        const length = planks ? (4 + random() * 4) / woodTileWidth * canvas.width : canvas.width;
+        const lightness = (planks ? 42 : 52) + random() * 3;
         const hue = 33 + random() * 3;
+        const saturation = planks ? 29 : 26;
         const wash = ctx.createLinearGradient(0, y, 0, y + rowHeight);
-        wash.addColorStop(0, `hsl(${hue}, 29%, ${lightness - 0.8}%)`);
-        wash.addColorStop(0.45, `hsl(${hue}, 28%, ${lightness + 0.6}%)`);
-        wash.addColorStop(1, `hsl(${hue}, 29%, ${lightness - 0.4}%)`);
+        wash.addColorStop(0, `hsl(${hue}, ${saturation}%, ${lightness - 0.8}%)`);
+        wash.addColorStop(0.45, `hsl(${hue}, ${saturation - 1}%, ${lightness + 0.6}%)`);
+        wash.addColorStop(1, `hsl(${hue}, ${saturation}%, ${lightness - 0.4}%)`);
+        const endGap = planks ? 0.7 : 0;
+        const rowGap = planks ? 0.6 : 0;
         ctx.fillStyle = wash;
-        ctx.fillRect(x, y, length - 0.7, rowHeight - 0.6);
+        ctx.fillRect(x, y, length - endGap, rowHeight - rowGap);
         ctx.save();
         ctx.beginPath();
-        ctx.rect(x, y, length - 0.7, rowHeight - 0.6);
+        ctx.rect(x, y, length - endGap, rowHeight - rowGap);
         ctx.clip();
         const knotX = length * (0.2 + random() * 0.6);
         const knotY = rowHeight * (0.25 + random() * 0.5);
         const phase = random() * Math.PI * 2;
-        const hasKnot = random() < 0.24;
-        for (let line = 0; line < 85; line++) {
+        const hasKnot = planks && random() < 0.24;
+        const grainCount = planks ? 85 : 96;
+        for (let line = 0; line < grainCount; line++) {
           const lane = random() * rowHeight;
           const distance = lane - knotY;
           const bend = (distance < 0 ? -1 : 1) * Math.exp(-Math.abs(distance) / 13) * (hasKnot ? 10 : 4);
-          ctx.strokeStyle = `rgba(69, 47, 25, ${0.025 + random() * 0.09})`;
-          ctx.lineWidth = 0.45 + random() * 0.6;
+          ctx.strokeStyle = `rgba(69, 47, 25, ${(planks ? 0.025 : 0.08) + random() * (planks ? 0.09 : 0.14)})`;
+          ctx.lineWidth = (planks ? 0.45 : 1.5) + random() * (planks ? 0.6 : 2);
           ctx.beginPath();
           for (let step = 0; step <= 40; step++) {
             const u = step / 40 * length;
@@ -220,8 +231,48 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   }
   const wood = new THREE.MeshStandardMaterial({ map: woodTexture(), roughness: 0.95 });
   wood.name = 'Muted honey oak - photo-inspired screen approximation';
+  const cabinetGrain = woodTexture(false);
+  cabinetGrain.center.set(0.5, 0.5);
+  cabinetGrain.rotation = Math.PI / 2;
+  const cabinetFinish = new THREE.MeshStandardMaterial({ map: cabinetGrain, roughness: 0.6 });
+  cabinetFinish.name = 'Stained white oak - vertical grain';
+  const cabinetRailFinish = cabinetFinish.clone();
+  cabinetRailFinish.name = 'Stained white oak - horizontal grain';
+  cabinetRailFinish.map = cabinetGrain.clone();
+  cabinetRailFinish.map.rotation = 0;
+  const cabinetPanelFinish = cabinetFinish.clone();
+  cabinetPanelFinish.name = 'Stained white oak - recessed panel';
+  cabinetPanelFinish.color.set('#e6dccb');
+  const brass = new THREE.MeshStandardMaterial({ color: '#b99a60', metalness: 0.65, roughness: 0.35 });
+  brass.name = 'Satin gold hardware';
 
-  function floor(x, z, w, d, furnished = false, parent = shell) {
+  function shakerFront(parent, x, y, z, width, height, rotation = 0) {
+    const front = new THREE.Group();
+    front.name = 'Full-overlay Shaker cabinet front';
+    front.userData = { construction: 'Frameless', style: 'Shaker', finish: 'Stained white oak', width, height };
+    front.position.set(x, y, z);
+    front.rotation.y = rotation;
+    parent.add(front);
+    const rail = Math.min(2.25 / 12, width / 4, height / 4);
+    box(front, 0, 0, -0.015, width - 2 * rail, height - 2 * rail, 0.05, cabinetPanelFinish).name = 'Shaker recessed center panel';
+    for (const side of [-1, 1]) {
+      box(front, side * (width - rail) / 2, 0, 0, rail, height, 0.08, cabinetFinish).name = 'Shaker vertical stile';
+      box(front, 0, side * (height - rail) / 2, 0, width - 2 * rail, rail, 0.08, cabinetRailFinish).name = 'Shaker horizontal rail';
+    }
+    return front;
+  }
+
+  function cabinetPull(parent, x, y, z, length, vertical = false) {
+    const pull = new THREE.Group();
+    pull.name = 'Gold cabinet pull';
+    pull.position.set(x, y, z);
+    parent.add(pull);
+    box(pull, 0, 0, 0.05, vertical ? 0.045 : length, vertical ? length : 0.045, 0.045, brass);
+    for (const side of [-1, 1]) box(pull, vertical ? 0 : side * length * 0.38, vertical ? side * length * 0.38 : 0, 0, 0.04, 0.04, 0.1, brass);
+  }
+
+  function floor(x, z, w, d, furnished = false, parent = shell, interior = true) {
+    if (interior) interiorFloorAreas.push({ x, z, w, d });
     box(parent, x + w / 2, -0.24, z + d / 2, w, 0.45, d, furnished ? oak : shellFloor);
     if (furnished) {
       const texture = wood.map.clone();
@@ -268,18 +319,74 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     }
   }
 
-  function wall(x1, z1, x2, z2, furnished = false, openings = [], height = 10, trimSides = [-1, 1]) {
+  function wall(x1, z1, x2, z2, furnished = false, openings = [], height = ceilingHeight, trimSides = [-1, 1]) {
     const length = Math.hypot(x2 - x1, z2 - z1);
     const group = new THREE.Group();
     group.position.set(x1, 0, z1);
     group.rotation.y = -Math.atan2(z2 - z1, x2 - x1);
     (furnished ? scene : shell).add(group);
+    function baseTrim(start, end) {
+      const casingWidth = (3.5 + 0.125) / 12;
+      if (openings.some(([a, b, bottom]) => bottom === 0 && Math.abs(b - start) < 0.001)) start += casingWidth;
+      if (openings.some(([a, b, bottom]) => bottom === 0 && Math.abs(a - end) < 0.001)) end -= casingWidth;
+      if (end <= start) return;
+      const dx = (x2 - x1) / length;
+      const dz = (z2 - z1) / length;
+      const depth = 0.75 / 12;
+      const radius = 0.75 / 12;
+      for (const side of trimSides) {
+        const sampleX = x1 - dz * side * 0.3;
+        const sampleZ = z1 + dx * side * 0.3;
+        const runs = [];
+        for (const area of interiorFloorAreas) {
+          let from = start;
+          let to = end;
+          for (const [origin, direction, min, max] of [[sampleX, dx, area.x, area.x + area.w], [sampleZ, dz, area.z, area.z + area.d]]) {
+            if (Math.abs(direction) < 0.0001) {
+              if (origin <= min || origin >= max) to = from;
+            } else {
+              const a = (min - origin) / direction;
+              const b = (max - origin) / direction;
+              from = Math.max(from, Math.min(a, b));
+              to = Math.min(to, Math.max(a, b));
+            }
+          }
+          if (to > from) runs.push([from, to]);
+        }
+        runs.sort((a, b) => a[0] - b[0]);
+        const merged = [];
+        for (const run of runs) {
+          const previous = merged[merged.length - 1];
+          if (previous && run[0] <= previous[1] + 0.001) previous[1] = Math.max(previous[1], run[1]);
+          else merged.push([...run]);
+        }
+        for (const [from, to] of merged) {
+          const board = box(group, (from + to) / 2, 0.005 + 8 / 24, side * (0.175 + depth / 2), to - from, 8 / 12, depth, windowTrim);
+          board.name = '8 inch interior baseboard';
+          board.userData = { heightInches: 8, thicknessInches: 0.75, side, start: from, end: to };
+          const profile = new THREE.Shape();
+          profile.moveTo(0, 0);
+          profile.lineTo(-side * radius, 0);
+          profile.absarc(0, 0, radius, side === 1 ? Math.PI : 0, Math.PI / 2, side === 1);
+          profile.closePath();
+          const geometry = new THREE.ExtrudeGeometry(profile, { depth: to - from, bevelEnabled: false, curveSegments: 8 });
+          geometry.rotateY(Math.PI / 2);
+          const shoe = new THREE.Mesh(geometry, windowTrim);
+          shoe.name = 'Quarter-round baseboard shoe';
+          shoe.position.set(from, 0.005, side * (0.175 + depth));
+          shoe.userData = { radiusInches: 0.75, side, start: from, end: to };
+          shoe.castShadow = shoe.receiveShadow = true;
+          group.add(shoe);
+        }
+      }
+    }
     function part(start, end, bottom, top) {
       if (end <= start || top <= bottom) return;
       const mesh = box(group, (start + end) / 2, (bottom + top) / 2, 0, end - start, top - bottom, 0.35, wallMaterial);
       mesh.name = 'House wall';
       mesh.userData = { bottom, top };
       walls.push(mesh);
+      if (bottom === 0 && top >= 8 / 12) baseTrim(start, end);
     }
     let cursor = 0;
     openings.forEach(([start, end, bottom, top]) => {
@@ -310,6 +417,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const kitchenWallRight = 38;
   const kitchenSinkX = (kitchenWallLeft + kitchenWallRight) / 2;
   const kitchenSinkWindowWidth = 5.5;
+  const kitchenPassageWidth = 2.5;
+  const kitchenSideOpenings = [[2.725, 2.725 + kitchenPassageWidth, 0, 8], [13.175, 13.175 + kitchenPassageWidth, 0, 8]];
+  const cooktopCenterZ = 8 + (kitchenSideOpenings[0][1] + kitchenSideOpenings[1][0]) / 2;
+  const kitchenSinkWindowHeight = 3.5;
+  const kitchenSinkWindowSill = 4.25;
+  const kitchenSinkWindows = [
+    { name: 'Kitchen left counter window', x: kitchenSinkX - 4.5, width: 1.5 },
+    { name: 'Kitchen sink window', x: kitchenSinkX, width: kitchenSinkWindowWidth },
+    { name: 'Kitchen right counter window', x: kitchenSinkX + 4.5, width: 1.5 }
+  ];
 
   // Stepped footprint and room adjacencies follow the user's attached plan.
   floor(0, 8, 13.2, 17.7, true, scene);
@@ -318,32 +435,35 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   floor(26.5, 8, 11.5, 18.9, true, scene);
   floor(38, 8, 17.5, 7, true, scene);
   [
-    [38, 15, 7.4, 11.9], [45.4, 15, 10.1, 11.9], [29, 26.9, 26.5, 7.7],
-    [31.2, 34.6, 24.3, 14.4], [0, 25.7, 12.2, 10.4, true], [12.2, 25.7, 16.8, 8.9, true],
+    [38, 15, 7.4, 11.9], [45.4, 15, 10.1, 11.9, false, false], [29, 26.9, 26.5, 7.7, false, false],
+    [31.2, 34.6, 24.3, 14.4, false, false], [0, 25.7, 12.2, 10.4, true], [12.2, 25.7, 16.8, 8.9, true],
     [12.2, 34.6, 6.8, 19.6, true], [0, 36.1, 7.1, 4.9], [7.1, 38.5, 5.1, 2.5],
     [0, 41, 12.2, 13.2, true], [19, 34.6, 6, 7.4, true], [25, 34.6, 6.2, 4.6],
-    [25, 39.2, 6.2, 2.8], [19, 42, 12.2, 12.2, true], [0, 54.2, 31.2, 7],
+    [25, 39.2, 6.2, 2.8], [19, 42, 12.2, 12.2, true], [0, 54.2, 31.2, 7, false, false],
     [7.1, 36.1, 5.1, 2.4, true]
-  ].forEach(([x, z, w, d, hardwood = false]) => floor(x, z, w, d, hardwood));
+  ].forEach(([x, z, w, d, hardwood = false, interior = true]) => floor(x, z, w, d, hardwood, shell, interior));
 
   [
     [0, 8, 13.2, 8, true, [[4.2, 9.2, 3, 8]]], [13.2, -2.1, 13.2, 8, true],
     [13.2, -2.1, 26.5, -2.1, true, [[3.65, 9.65, 3, 8]]],
-    [26.5, -2.1, 26.5, 8, true, [[2.1, 8.1, 0, 8]], 10, [1]],
-    [kitchenWallLeft, 8, kitchenWallRight, 8, true, [[kitchenSinkX - kitchenSinkWindowWidth / 2 - kitchenWallLeft, kitchenSinkX + kitchenSinkWindowWidth / 2 - kitchenWallLeft, 3.75, 7.25]]],
+    [26.5, -2.1, 26.5, 8, true, [[2.1, 8.1, 0, 8]], ceilingHeight, [1]],
+    [kitchenWallLeft, 8, kitchenWallRight, 8, true, kitchenSinkWindows.map(({ x, width }) => [x - width / 2 - kitchenWallLeft, x + width / 2 - kitchenWallLeft, kitchenSinkWindowSill, kitchenSinkWindowSill + kitchenSinkWindowHeight])],
     [38, 8, 55.5, 8],
-    [55.5, 8, 55.5, 49, false, [[36, 39, 0, 7]], 10, [1]], [55.5, 49, 31.2, 49, false, [[2.5, 11.5, 0, 8], [14, 23, 0, 8]], 10, [1]],
+    [55.5, 8, 55.5, 49, false, [[36, 39, 0, 7]], ceilingHeight, [1]], [55.5, 49, 31.2, 49, false, [[2.5, 11.5, 0, 8], [14, 23, 0, 8]], ceilingHeight, [1]],
     [31.2, 49, 31.2, 54.2], [31.2, 54.2, 31.2, 61.2, false, [], 2.6], [31.2, 61.2, 0, 61.2, false, [], 2.6],
     [0, 61.2, 0, 54.2, false, [], 2.6], [0, 54.2, 0, 25.7, false, [[3.2, 7.2, 3, 8], [22.2, 26.2, 3, 8]]],
     [0, 25.7, 0, 8, true, [[1.7, 4.7, 2.6, 8.4], [13.3, 16.3, 2.6, 8.4]]],
     [0, 25.7, 13.2, 25.7, true, [[9, 13.2, 0, 7]]], [12.2, 25.7, 12.2, 36.1, false, [[0, 3, 0, 7]]], [0, 36.1, 7.1, 36.1, false, [[4, 6.8, 0, 7]]],
     [7.1, 36.1, 7.1, 38.5], [7.1, 38.5, 12.2, 38.5], [12.2, 38.5, 12.2, 54.2, false, [[5, 8.5, 0, 7]]],
-    [0, 41, 12.2, 41], [0, 54.2, 31.2, 54.2, false, [[12.2, 19, 0, 7], [21.2, 28.8, 3, 8]], 10, [-1]],
+    [0, 41, 12.2, 41], [0, 54.2, 31.2, 54.2, false, [[12.2, 19, 0, 7], [21.2, 28.8, 3, 8]], ceilingHeight, [-1]],
     [19, 34.6, 19, 54.2, false, [[7.4, 10.4, 0, 7]]], [19, 34.6, 25, 34.6],
     [25, 34.6, 25, 42], [19, 42, 25, 42, false, [[1.4, 4.6, 0, 7]]], [25, 39.2, 31.2, 39.2, false, [[2, 4.7, 0, 7]]],
     [25, 34.6, 31.2, 34.6], [31.2, 34.6, 31.2, 49], [29, 26.9, 29, 34.6],
-    [29, 26.9, 38, 26.9, true],
-    [38, 8, 38, 26.9, true, [[2.725, 5.225, 0, 8], [13.175, 16.175, 0, 8]]], [38, 15, 55.5, 15, false, [[4, 7, 0, 7]]],
+    [29, 26.9, 29.6875, 26.9, true],
+    [29.6875, 26.9, 37.8, 26.9, true, [], ceilingHeight, [1]],
+    [37.8, 26.9, 38, 26.9, true],
+    [38, 8, 38, 25.3, true, kitchenSideOpenings],
+    [38, 25.3, 38, 26.9, true, [], ceilingHeight, [-1]], [38, 15, 55.5, 15, false, [[4, 7, 0, 7]]],
     [45.4, 15, 45.4, 26.9], [38, 26.9, 45.4, 26.9, false, [[3, 6, 0, 7]]]
   ].forEach((segment) => wall(...segment));
 
@@ -361,7 +481,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   fireplace.name = 'Floor-to-ceiling stone fireplace';
   scene.add(fireplace);
   const mortar = mat('#a9a394');
-  box(fireplace, 0.28, 5, 16.8, 0.52, 10, 6, mortar).name = 'Fireplace stone backing';
+  box(fireplace, 0.28, ceilingHeight / 2, 16.8, 0.52, ceilingHeight, 6, mortar).name = 'Fireplace stone backing';
   const stoneCanvas = document.createElement('canvas');
   stoneCanvas.width = stoneCanvas.height = 128;
   const stoneContext = stoneCanvas.getContext('2d');
@@ -385,7 +505,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     material.name = 'Warm limestone fireplace veneer';
     return material;
   });
-  for (let row = 0; row < 20; row++) {
+  for (let row = 0; row < ceilingHeight / 0.5; row++) {
     const y = row * 0.5 + 0.25;
     let start = 13.8;
     for (let column = 0; start < 19.8; column++) {
@@ -399,7 +519,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       box(fireplace, 0.28, y, z, 0.52, 0.475, 0.06, fireplaceStones[row % fireplaceStones.length]).name = 'Fireplace stone side return';
     }
   }
-  box(fireplace, 0.28, 9.985, 16.8, 0.52, 0.03, 6, fireplaceStones[0]).name = 'Fireplace stone top cap';
+  box(fireplace, 0.28, ceilingHeight - 0.015, 16.8, 0.52, 0.03, 6, fireplaceStones[0]).name = 'Fireplace stone top cap';
   box(scene, 0.58, 2.4, 16.8, 0.12, 1.25, 4.6, black).name = 'Fireplace firebox';
   const ember = new THREE.MeshStandardMaterial({ color: '#c7793e', emissive: '#c65c20', emissiveIntensity: 1 });
   box(scene, 0.66, 2.12, 16.8, 0.06, 0.12, 4.1, ember);
@@ -551,7 +671,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   cylinder(scene, tableX, 2.8, tableZ, 0.22, 0.55, stone, 0.14);
   const pendant = new THREE.Group();
   scene.add(pendant);
-  cylinder(pendant, tableX, 7.4, tableZ, 0.025, 4.8, black);
+  cylinder(pendant, tableX, (ceilingHeight + 5) / 2, tableZ, 0.025, ceilingHeight - 5, black).name = 'Dining pendant cord';
   cylinder(pendant, tableX, 5.2, tableZ, 1.05, 0.65, cream, 0.3);
 
   const kitchen = new THREE.Group();
@@ -602,27 +722,27 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const steel = new THREE.MeshStandardMaterial({ color: '#a9afad', metalness: 0.7, roughness: 0.32 });
   const light = new THREE.MeshStandardMaterial({ color: '#fff0c9', emissive: '#ffe3a3', emissiveIntensity: 0.5 });
 
-  function drawerFront(x, z, width, rotation = 0, finish = oak, parent = kitchen) {
+  function drawerFront(x, z, width, rotation = 0, parent = kitchen) {
     const cabinet = new THREE.Group();
     cabinet.position.set(x, 0, z);
     cabinet.rotation.y = rotation;
     parent.add(cabinet);
     for (let row = 0; row < 3; row++) {
-      box(cabinet, 0, 0.65 + row * 0.79, 0, width, 0.74, 0.08, finish, true);
-      box(cabinet, 0, 0.87 + row * 0.79, 0.065, width * 0.55, 0.045, 0.045, black);
+      const front = shakerFront(cabinet, 0, 0.65 + row * 0.79, 0, width, 0.74);
+      cabinetPull(front, 0, 0.22, 0.09, width * 0.55);
     }
   }
 
-  for (const [x, width] of [[kitchenSinkX - 3.525, 4.05], [kitchenSinkX + 4.525, 2.05]]) box(kitchen, x, 1.44, 9.2, width, 2.85, 2, oak);
+  for (const [x, width] of [[kitchenSinkX - 3.525, 4.05], [kitchenSinkX + 4.525, 2.05]]) box(kitchen, x, 1.44, 9.2, width, 2.85, 2, cabinetFinish);
   for (const x of [kitchenSinkX - 3.525, kitchenSinkX + 3.525]) box(kitchen, x, 2.96, 9.2, 4.05, 0.18, 2.05, countertop, true).name = 'Top kitchen quartz counter';
-  box(kitchen, kitchenSinkX, 1.1, 9.2, 3, 2, 2, oak);
+  box(kitchen, kitchenSinkX, 1.1, 9.2, 3, 2, 2, cabinetFinish);
   for (const [x, width] of [[kitchenSinkX - 4.25, 2.45], [kitchenSinkX + 4.525, 1.9]]) drawerFront(x, 10.23, width);
   const trash = new THREE.Group();
   trash.name = 'Pull-out trash left of sink';
   trash.position.set(kitchenSinkX - 2.25, 0, 9.2);
   kitchen.add(trash);
-  box(trash, 0, 1.45, 1.055, 1.45, 2.65, 0.1, oak, true);
-  box(trash, 0, 2.45, 1.13, 0.9, 0.06, 0.06, black);
+  const trashFront = shakerFront(trash, 0, 1.45, 1.055, 1.45, 2.65);
+  cabinetPull(trashFront, 0, 1, 0.09, 0.9);
   const dishwasher = new THREE.Group();
   dishwasher.name = '24 inch dishwasher right of sink';
   dishwasher.position.set(kitchenSinkX + 2.5, 0, 9.2);
@@ -633,53 +753,158 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   box(dishwasher, 0, 2.4, 1.15, 1.4, 0.07, 0.07, steel);
   box(dishwasher, 0, 0.23, 1.1, 1.8, 0.12, 0.04, black);
   for (const x of [kitchenSinkX - 0.74, kitchenSinkX + 0.74]) {
-    box(kitchen, x, 1.15, 10.23, 1.43, 1.8, 0.08, oak, true);
-    box(kitchen, x + (x < kitchenSinkX ? 0.5 : -0.5), 1.65, 10.3, 0.05, 0.4, 0.05, black);
+    const front = shakerFront(kitchen, x, 1.15, 10.23, 1.43, 1.8);
+    cabinetPull(front, x < kitchenSinkX ? 0.5 : -0.5, 0.5, 0.09, 0.4, true);
   }
   const porcelain = mat('#fbfaf5', 0.22);
   const sink = new THREE.Group();
-  sink.name = '36 inch farmhouse sink';
+  sink.name = '36 inch unequal-bowl farmhouse sink';
+  const sinkSmallBowlFraction = 10.3125 / (10.3125 + 18.8125);
+  const sinkClearBowlWidth = 2.72 - 0.12;
+  const sinkDividerX = -1.36 + sinkClearBowlWidth * sinkSmallBowlFraction + 0.06;
+  const sinkBowlCenters = [
+    -1.36 + sinkClearBowlWidth * sinkSmallBowlFraction / 2,
+    sinkDividerX + 0.06 + sinkClearBowlWidth * (1 - sinkSmallBowlFraction) / 2
+  ];
+  sink.userData = { candidate: 'Kohler Whitehaven K-6427-0', bowlWidthRatio: [sinkSmallBowlFraction, 1 - sinkSmallBowlFraction], smallBowlSide: 'left', lowDivider: true, provisional: true };
   sink.position.set(kitchenSinkX, 0, 9.2);
   kitchen.add(sink);
   box(sink, 0, 2.65, 1, 3, 0.85, 0.18, porcelain, true).name = 'Farmhouse apron front';
-  box(sink, 0, 2.65, -0.93, 3, 0.85, 0.14, porcelain, true);
-  for (const x of [-1.43, 1.43]) box(sink, x, 2.65, 0, 0.14, 0.85, 1.9, porcelain, true);
-  box(sink, 0, 2.25, 0, 2.72, 0.12, 1.8, porcelain, true);
-  cylinder(sink, 0, 2.315, 0, 0.09, 0.012, steel);
-  cylinder(kitchen, kitchenSinkX, 3.65, 8.65, 0.055, 1.3, steel);
-  box(kitchen, kitchenSinkX, 4.25, 8.95, 0.11, 0.11, 0.65, steel, true);
-  windowFrame('Kitchen sink window', kitchenSinkX, 8.1, kitchenSinkWindowWidth, 3.5, 3.75);
-  box(kitchen, kitchenSinkX, 3.4, 8.22, 11.1, 0.6, 0.08, countertop);
-  const kitchenUpperOffset = kitchenSinkWindowWidth / 2 + 4 / 12 + 1.5 / 2;
-  for (const x of [kitchenSinkX - kitchenUpperOffset, kitchenSinkX + kitchenUpperOffset]) {
-    const upper = new THREE.Group();
-    upper.name = 'Matching window upper cabinet';
-    upper.position.set(x, 0, 8.7);
-    kitchen.add(upper);
-    box(upper, 0, 6, 0, 1.5, 2.5, 1, oak);
-    box(upper, 0, 6, 0.54, 1.42, 2.42, 0.08, cream, true);
-    box(upper, x < kitchenSinkX ? 0.48 : -0.48, 5.55, 0.61, 0.045, 0.6, 0.05, black);
-    box(upper, 0, 4.71, 0.05, 1.3, 0.04, 0.8, light);
+  box(sink, 0, 2.65, -0.635, 3, 0.85, 0.14, porcelain, true).name = 'Farmhouse sink rear wall';
+  for (const x of [-1.43, 1.43]) box(sink, x, 2.65, 0.1925, 0.14, 0.85, 1.795, porcelain, true);
+  box(sink, 0, 2.25, 0.1725, 2.72, 0.12, 1.475, porcelain, true);
+  box(sink, sinkDividerX, 2.535, 0.1725, 0.12, 0.45, 1.475, porcelain, true).name = 'Unequal-bowl low divider';
+  for (const [index, x] of sinkBowlCenters.entries()) {
+    cylinder(sink, x, 2.315, 0.1725, 0.09, 0.012, steel).name = index === 0 ? 'Small basin drain' : 'Large basin drain';
   }
+  box(kitchen, kitchenSinkX, 2.96, 8.335, 3, 0.18, 0.32, countertop).name = 'Sink faucet and dispenser mounting deck';
+  cylinder(kitchen, kitchenSinkX, 3.65, 8.36, 0.055, 1.3, steel).name = 'Main sink faucet stem';
+  box(kitchen, kitchenSinkX, 4.25, 8.68, 0.11, 0.11, 0.65, steel, true).name = 'Main sink faucet spout';
+  const waterDispenser = new THREE.Group();
+  waterDispenser.name = 'Hot and cold filtered water dispenser';
+  waterDispenser.position.set(kitchenSinkX - 1.05, 3.05, 8.36);
+  waterDispenser.userData = { supplies: ['hot', 'cold'], filtered: true, separateFromMainFaucet: true, provisional: true };
+  kitchen.add(waterDispenser);
+  cylinder(waterDispenser, 0, 0.02, 0, 0.085, 0.04, steel).name = 'Water dispenser deck base';
+  cylinder(waterDispenser, 0, 0.26, 0, 0.035, 0.48, steel);
+  box(waterDispenser, 0, 0.49, 0.22, 0.07, 0.07, 0.44, steel, true).name = 'Water dispenser spout';
+  cylinder(waterDispenser, 0, 0.455, 0.42, 0.035, 0.07, steel);
+  for (const [side, name, color] of [[-1, 'Hot', '#a54f43'], [1, 'Cold', '#4b779a']]) {
+    box(waterDispenser, side * 0.105, 0.16, 0, 0.18, 0.045, 0.05, steel, true).name = `${name} water lever`;
+    cylinder(waterDispenser, side * 0.17, 0.188, 0, 0.025, 0.012, mat(color)).name = `${name} water indicator`;
+  }
+  const soapDispenser = new THREE.Group();
+  soapDispenser.name = 'Built-in sink soap dispenser';
+  soapDispenser.position.set(kitchenSinkX + 1.05, 3.05, 8.36);
+  soapDispenser.userData = { underCounterReservoir: true, provisional: true };
+  kitchen.add(soapDispenser);
+  cylinder(soapDispenser, 0, 0.02, 0, 0.085, 0.04, steel).name = 'Soap dispenser deck base';
+  cylinder(soapDispenser, 0, 0.15, 0, 0.045, 0.26, steel);
+  box(soapDispenser, 0, 0.29, 0.13, 0.1, 0.06, 0.34, steel, true).name = 'Soap dispenser pump';
+  for (const { name, x, width } of kitchenSinkWindows) {
+    windowFrame(name, x, 8.1, width, kitchenSinkWindowHeight, kitchenSinkWindowSill);
+  }
+  const sinkBacksplashBottom = 3.05;
+  const sinkBacksplashTop = kitchenSinkWindowSill - (1 + 3.5) / 12;
+  const sinkBacksplash = box(kitchen, kitchenSinkX, (sinkBacksplashBottom + sinkBacksplashTop) / 2, 8.22, 11.1, sinkBacksplashTop - sinkBacksplashBottom, 0.08, countertop);
+  sinkBacksplash.name = 'Sink quartz backsplash';
+  sinkBacksplash.userData = { bottom: sinkBacksplashBottom, top: sinkBacksplashTop };
+  walls.push(sinkBacksplash);
   const kitchenCenterZ = (8 + 26.9) / 2;
-  // Keep the centered cooktop run below the prep-kitchen boundary at z = 15.
-  box(kitchen, 37, 1.44, kitchenCenterZ, 2, 2.85, 4.4, oak);
-  box(kitchen, 37, 2.96, kitchenCenterZ, 2.05, 0.18, 4.5, countertop, true);
-  for (const z of [kitchenCenterZ - 1.8, kitchenCenterZ + 1.8]) drawerFront(36, z, 0.55, -Math.PI / 2);
-  const cooktop = box(kitchen, 37, 3.075, kitchenCenterZ, 1.75, 0.05, 3, black, true);
+  const cooktopRunWidth = 78 / 12;
+  const cooktopCounterWidth = cooktopRunWidth + 0.1;
+  const cooktopCabinetry = new THREE.Group();
+  cooktopCabinetry.name = 'Extended cooktop base cabinetry';
+  cooktopCabinetry.userData = { widthInches: cooktopRunWidth * 12, sideDrawerWidthInches: 21, provisional: true };
+  kitchen.add(cooktopCabinetry);
+  box(cooktopCabinetry, 37, 1.44, cooktopCenterZ, 2, 2.85, cooktopRunWidth, cabinetFinish).name = 'Cooktop base cabinet run';
+  box(cooktopCabinetry, 37, 2.96, cooktopCenterZ, 2.05, 0.18, cooktopCounterWidth, countertop, true).name = 'Extended cooktop quartz counter';
+  for (const z of [cooktopCenterZ - 2.25, cooktopCenterZ + 2.25]) drawerFront(36, z, 21 / 12, -Math.PI / 2, cooktopCabinetry);
+  const cooktop = box(kitchen, 37, 3.075, cooktopCenterZ, 1.75, 0.05, 3, black, true);
   cooktop.name = '36 inch induction cooktop';
-  for (const [x, z] of [[36.58, kitchenCenterZ - 0.75], [37.42, kitchenCenterZ - 0.75], [36.58, kitchenCenterZ + 0.75], [37.42, kitchenCenterZ + 0.75], [37, kitchenCenterZ]]) {
+  for (const [x, z] of [[36.58, cooktopCenterZ - 0.75], [37.42, cooktopCenterZ - 0.75], [36.58, cooktopCenterZ + 0.75], [37.42, cooktopCenterZ + 0.75], [37, cooktopCenterZ]]) {
     const ring = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.018, 8, 32), steel);
     ring.rotation.x = Math.PI / 2;
     ring.position.set(x, 3.12, z);
     kitchen.add(ring);
   }
-  drawerFront(36, kitchenCenterZ, 2.7, -Math.PI / 2);
+  drawerFront(36, cooktopCenterZ, 2.7, -Math.PI / 2, cooktopCabinetry);
   const cooktopHood = new THREE.Group();
   cooktopHood.name = 'Kitchen cooktop hood';
+  cooktopHood.userData = { style: 'Tapered warm-white plaster with walnut lower band', widthInches: 48, topWidthInches: 36, concealedInsertAllowanceInches: 46, provisional: true };
   kitchen.add(cooktopHood);
-  box(cooktopHood, 37, 6.5, kitchenCenterZ, 2, 0.4, 3.5, steel, true);
-  box(cooktopHood, 37.6, 8.1, kitchenCenterZ, 0.8, 2.8, 1.5, steel);
+  const hoodWidth = 48 / 12;
+  const hoodTopWidth = 36 / 12;
+  const hoodDepth = 24 / 12;
+  const hoodTopDepth = hoodDepth * hoodTopWidth / hoodWidth;
+  const hoodBack = 37.8;
+  const hoodBottom = 6.3;
+  const hoodBodyBottom = hoodBottom + 0.2;
+  const hoodBodyHeight = ceilingHeight - hoodBodyBottom;
+  const hoodCenterShift = (hoodDepth - hoodTopDepth) / 2;
+  const hoodGeometry = new THREE.CylinderGeometry(hoodTopWidth / Math.SQRT2, hoodWidth / Math.SQRT2, hoodBodyHeight, 4, 1, false, Math.PI / 4).toNonIndexed();
+  hoodGeometry.scale(hoodDepth / hoodWidth, 1, 1);
+  const hoodVertices = hoodGeometry.getAttribute('position');
+  // Shear the taper so the rear face stays flush with the wall.
+  for (let i = 0; i < hoodVertices.count; i++) hoodVertices.setX(i, hoodVertices.getX(i) + hoodVertices.getY(i) / hoodBodyHeight * hoodCenterShift);
+  hoodGeometry.computeVertexNormals();
+  const hoodSurround = new THREE.Mesh(hoodGeometry, mat('#e9e4d8', 1));
+  hoodSurround.name = 'Plaster tapered hood surround';
+  hoodSurround.position.set(hoodBack - (hoodDepth + hoodTopDepth) / 4, (hoodBodyBottom + ceilingHeight) / 2, cooktopCenterZ);
+  hoodSurround.castShadow = hoodSurround.receiveShadow = true;
+  cooktopHood.add(hoodSurround);
+  box(cooktopHood, hoodBack - hoodDepth / 2, hoodBottom + 0.1, cooktopCenterZ, hoodDepth, 0.2, hoodWidth, walnut).name = 'Hood walnut lower band';
+  box(cooktopHood, hoodBack - hoodDepth / 2, hoodBottom - 0.015, cooktopCenterZ, 20 / 12, 0.03, 46 / 12, black).name = 'Concealed hood insert underside';
+  box(cooktopHood, 36.65, hoodBottom - 0.045, cooktopCenterZ, 0.12, 0.025, 2.6, light).name = 'Cooktop hood task-light strip';
+  const cookingDetails = new THREE.Group();
+  cookingDetails.name = 'Cooktop finishing details';
+  kitchen.add(cookingDetails);
+  const cooktopBacksplashBottom = 3.05;
+  const cooktopBacksplashWidth = kitchenSideOpenings[1][0] - kitchenSideOpenings[0][1];
+  const cooktopBacksplash = box(cookingDetails, 37.795, (cooktopBacksplashBottom + ceilingHeight) / 2, cooktopCenterZ, 0.06, ceilingHeight - cooktopBacksplashBottom, cooktopBacksplashWidth, countertop);
+  cooktopBacksplash.name = 'Full-height cooktop quartz backsplash';
+  cooktopBacksplash.userData = { bottom: cooktopBacksplashBottom, top: ceilingHeight };
+  walls.push(cooktopBacksplash);
+
+  const cuttingBoard = new THREE.Group();
+  cuttingBoard.name = 'Walnut cutting board';
+  cuttingBoard.position.set(37.64, 3.05, cooktopCenterZ - 1.9);
+  cookingDetails.add(cuttingBoard);
+  box(cuttingBoard, 0, 0.43, 0, 0.08, 0.86, 0.58, walnut, true);
+  box(cuttingBoard, 0, 0.95, 0, 0.08, 0.24, 0.17, walnut, true);
+  const boardHole = cylinder(cuttingBoard, -0.045, 0.99, 0, 0.035, 0.012, black);
+  boardHole.rotation.z = Math.PI / 2;
+
+  const utensilCrock = new THREE.Group();
+  utensilCrock.name = 'Ceramic utensil crock';
+  utensilCrock.position.set(36.8, 3.05, cooktopCenterZ - 1.9);
+  cookingDetails.add(utensilCrock);
+  const crockFinish = mat('#a79881');
+  cylinder(utensilCrock, 0, 0.24, 0, 0.18, 0.48, crockFinish);
+  cylinder(utensilCrock, 0, 0.481, 0, 0.145, 0.008, black);
+  for (const [index, offset] of [-0.09, 0, 0.09].entries()) {
+    const utensil = new THREE.Group();
+    utensil.position.set(offset, 0.4, index === 1 ? 0.06 : -0.03);
+    utensil.rotation.z = (index - 1) * 0.13;
+    utensilCrock.add(utensil);
+    cylinder(utensil, 0, 0.29, 0, 0.018, 0.58, oak);
+    box(utensil, 0, 0.63, 0, index === 1 ? 0.14 : 0.09, 0.17, 0.035, oak, true);
+  }
+
+  const seasoningTray = new THREE.Group();
+  seasoningTray.name = 'Cooking oil and seasoning tray';
+  seasoningTray.position.set(37.03, 3.05, cooktopCenterZ + 1.92);
+  cookingDetails.add(seasoningTray);
+  box(seasoningTray, 0, 0.035, 0, 1.2, 0.07, 0.55, walnut, true);
+  const oilGlass = mat('#596344', 0.3);
+  cylinder(seasoningTray, -0.35, 0.28, 0, 0.09, 0.42, oilGlass);
+  cylinder(seasoningTray, -0.35, 0.55, 0, 0.045, 0.12, oilGlass);
+  cylinder(seasoningTray, -0.35, 0.63, 0, 0.05, 0.04, black);
+  cylinder(seasoningTray, 0, 0.28, 0, 0.1, 0.42, walnut, 0.065);
+  cylinder(seasoningTray, 0, 0.54, 0, 0.095, 0.1, walnut);
+  cylinder(seasoningTray, 0, 0.602, 0, 0.022, 0.024, steel);
+  cylinder(seasoningTray, 0.36, 0.14, 0, 0.12, 0.14, porcelain);
+  cylinder(seasoningTray, 0.36, 0.23, 0, 0.125, 0.04, oak);
   const bottomRun = new THREE.Group();
   bottomRun.name = 'Bottom kitchen cabinet run';
   kitchen.add(bottomRun);
@@ -688,39 +913,80 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const columnPanel = 0.75 / 12;
   const bottomRunLeft = 29.6875;
   const bottomRunRight = 37.8;
-  const bottomRunCenterX = (bottomRunLeft + bottomRunRight) / 2;
-  const bottomRunWidth = bottomRunRight - bottomRunLeft;
+  const endStorageWidth = 6 / 12;
+  const bottomRunCabinetLeft = bottomRunLeft - endStorageWidth;
+  const bottomRunCenterX = (bottomRunCabinetLeft + bottomRunRight) / 2;
+  const bottomRunWidth = bottomRunRight - bottomRunCabinetLeft;
   const wallFillerWidth = 2.85 / 12;
-  const freezerLeft = bottomRunLeft + columnPanel;
-  const fridgeRight = bottomRunRight - wallFillerWidth - columnPanel;
-  const nicheLeft = freezerLeft + columnWidth + columnPanel;
-  const nicheRight = fridgeRight - columnWidth - columnPanel;
-  const nicheWidth = nicheRight - nicheLeft;
-  const nicheCenterX = (nicheLeft + nicheRight) / 2;
-  const drawerWidth = 30 / 12;
-  const nicheFillerWidth = (nicheWidth - drawerWidth) / 2;
-  const backsplashBottom = 3.05;
+  const columnsLeft = bottomRunLeft + columnPanel;
+  const columnsRight = columnsLeft + 2 * columnWidth;
+  const pantryLeft = columnsRight + columnPanel;
+  const pantryRight = bottomRunRight - wallFillerWidth - columnPanel;
+  const pantryWidth = pantryRight - pantryLeft;
+  const pantryCenterX = (pantryLeft + pantryRight) / 2;
   const upperStorageBottom = columnHeight + 0.15;
-  const upperStorageTop = 9.6;
-  const backsplash = box(bottomRun, nicheCenterX, (backsplashBottom + upperStorageBottom) / 2, 26.4, nicheWidth, upperStorageBottom - backsplashBottom, 0.06, countertop);
-  backsplash.name = 'Refrigeration niche quartz backsplash';
-  backsplash.userData = { bottom: backsplashBottom, top: upperStorageBottom };
-  walls.push(backsplash);
-  bottomRun.userData = { layout: 'Separated columns with central landing niche', nicheWidthInches: nicheWidth * 12, drawerWidthInches: 30, provisional: true };
-  box(bottomRun, nicheCenterX, 1.44, 25.7, nicheWidth, 2.85, 2, oak).name = 'Central refrigeration landing cabinet';
-  box(bottomRun, nicheCenterX, 2.96, 25.7, nicheWidth, 0.18, 2.05, countertop, true).name = 'Central refrigeration landing counter';
-  drawerFront(nicheCenterX, 24.67, drawerWidth - 0.02, Math.PI, oak, bottomRun);
+  const upperStorageTop = ceilingHeight - 0.15;
+  bottomRun.userData = { layout: 'Adjacent refrigeration columns with steam-oven storage tower and stair-side pull-out', pantryWidthInches: pantryWidth * 12, endStorageWidthInches: endStorageWidth * 12, ceilingHeight, provisional: true };
+  const refrigerationPantry = new THREE.Group();
+  refrigerationPantry.name = 'Steam oven and pantry tower';
+  refrigerationPantry.position.x = pantryCenterX;
+  bottomRun.add(refrigerationPantry);
+  const pantryDepth = 25 / 12;
+  const pantryDoorHeight = upperStorageBottom - 0.3;
+  const pantryDoorCenterY = (upperStorageBottom + 0.3) / 2;
+  const endStorage = new THREE.Group();
+  endStorage.name = 'Stair-side narrow pull-out cabinet';
+  endStorage.position.x = bottomRunCabinetLeft + endStorageWidth / 2;
+  endStorage.userData = { widthInches: endStorageWidth * 12, depthInches: 25, pullOut: true, provisional: true };
+  bottomRun.add(endStorage);
+  box(endStorage, 0, pantryDoorCenterY, 26.725 - pantryDepth / 2, endStorageWidth, pantryDoorHeight, pantryDepth, cabinetFinish).name = 'Narrow pull-out carcass';
+  box(endStorage, 0, 0.15, 25.8, endStorageWidth - 0.1, 0.3, 1.7, black).name = 'Narrow pull-out recessed toe-kick';
+  const endStorageFront = shakerFront(endStorage, 0, pantryDoorCenterY, 26.725 - pantryDepth - 0.04, endStorageWidth - 0.04, pantryDoorHeight - 0.06, Math.PI);
+  cabinetPull(endStorageFront, 0, 3.9 - pantryDoorCenterY, 0.09, 2.6, true);
+  const endUpperHeight = upperStorageTop - upperStorageBottom;
+  const endUpperCenterY = (upperStorageTop + upperStorageBottom) / 2;
+  box(endStorage, 0, endUpperCenterY, 26.725 - pantryDepth / 2, endStorageWidth, endUpperHeight, pantryDepth, cabinetFinish).name = 'Narrow end overhead cabinet';
+  const endUpperFront = shakerFront(endStorage, 0, endUpperCenterY, 26.725 - pantryDepth - 0.04, endStorageWidth - 0.04, endUpperHeight - 0.06, Math.PI);
+  cabinetPull(endUpperFront, 0, upperStorageBottom + 0.45 - endUpperCenterY, 0.09, 0.55, true);
+  const steamOvenBottom = 3;
+  const steamOvenTop = 5;
+  const towerSideThickness = 0.75 / 12;
+  refrigerationPantry.userData = { widthInches: pantryWidth * 12, clearWidthInches: (pantryWidth - 2 * towerSideThickness) * 12, depthInches: pantryDepth * 12, provisional: true };
   for (const side of [-1, 1]) {
-    box(bottomRun, nicheCenterX + side * (nicheWidth - nicheFillerWidth) / 2, 1.45, 24.67, nicheFillerWidth, 2.65, 0.08, oak).name = 'Niche drawer filler';
+    box(refrigerationPantry, side * (pantryWidth - towerSideThickness) / 2, pantryDoorCenterY, 26.725 - pantryDepth / 2, towerSideThickness, pantryDoorHeight, pantryDepth, cabinetFinish).name = 'Steam-oven tower side';
   }
-  box(bottomRun, bottomRunRight - wallFillerWidth / 2, upperStorageTop / 2, 26, wallFillerWidth, upperStorageTop, 1.4, oak).name = 'Recessed refrigerator wall-clearance filler';
-  for (const x of [freezerLeft - columnPanel / 2, freezerLeft + columnWidth + columnPanel / 2, fridgeRight - columnWidth - columnPanel / 2, fridgeRight + columnPanel / 2]) {
-    box(bottomRun, x, upperStorageTop / 2, 26.725 - 25 / 24, columnPanel, upperStorageTop, 25 / 12, oak).name = 'Full-height refrigeration side panel';
+  box(refrigerationPantry, 0, pantryDoorCenterY, 26.7, pantryWidth - 2 * towerSideThickness, pantryDoorHeight, 0.05, cabinetFinish).name = 'Steam-oven tower backing';
+  for (const y of [steamOvenBottom - towerSideThickness / 2, steamOvenTop + towerSideThickness / 2]) {
+    box(refrigerationPantry, 0, y, 26.725 - pantryDepth / 2, pantryWidth - 2 * towerSideThickness, towerSideThickness, pantryDepth, cabinetRailFinish).name = 'Steam-oven compartment shelf';
   }
+  box(refrigerationPantry, 0, 0.15, 25.8, pantryWidth - 0.2, 0.3, 1.7, black).name = 'Pantry recessed toe-kick';
+  for (const [bottom, top] of [[0.3, steamOvenBottom - towerSideThickness], [steamOvenTop + towerSideThickness, upperStorageBottom]]) {
+    const centerY = (bottom + top) / 2;
+    for (const side of [-1, 1]) {
+      const front = shakerFront(refrigerationPantry, side * pantryWidth / 4, centerY, 26.725 - pantryDepth - 0.04, pantryWidth / 2 - 0.04, top - bottom - 0.04, Math.PI);
+      cabinetPull(front, side * (pantryWidth / 4 - 0.12), bottom < steamOvenBottom ? (top - bottom) / 2 - 0.45 : -(top - bottom) / 2 + 0.45, 0.09, 0.6, true);
+    }
+  }
+  const steamOven = new THREE.Group();
+  steamOven.name = '30-inch steam oven concept';
+  steamOven.userData = { nominalWidthInches: 30, allowanceHeightInches: 24, allowanceDepthInches: 24, bottomInches: 36, modelSelected: false, provisional: true };
+  steamOven.position.set(0, (steamOvenBottom + steamOvenTop) / 2, 26.725 - pantryDepth - 0.04);
+  steamOven.rotation.y = Math.PI;
+  refrigerationPantry.add(steamOven);
+  box(steamOven, 0, 0, -1, 2.5, 2, 2, steel).name = 'Steam-oven provisional envelope';
+  box(steamOven, 0, 0, 0.025, 2.5, 2, 0.05, steel).name = 'Steam-oven stainless front';
+  box(steamOven, 0, -0.14, 0.06, 2.2, 1.28, 0.02, black).name = 'Steam-oven glass door';
+  box(steamOven, 0, 0.76, 0.06, 2.2, 0.28, 0.02, black).name = 'Steam-oven control panel';
+  box(steamOven, 0, 0.47, 0.14, 2.1, 0.07, 0.1, steel).name = 'Steam-oven handle';
+  box(bottomRun, bottomRunRight - wallFillerWidth / 2, upperStorageTop / 2, 26, wallFillerWidth, upperStorageTop, 1.4, cabinetFinish).name = 'Recessed pantry wall-clearance filler';
+  for (const x of [columnsLeft - columnPanel / 2, columnsRight + columnPanel / 2, pantryRight + columnPanel / 2]) {
+    box(bottomRun, x, upperStorageTop / 2, 26.725 - 25 / 24, columnPanel, upperStorageTop, 25 / 12, cabinetFinish).name = 'Full-height refrigeration side panel';
+  }
+  box(bottomRun, columnsLeft + columnWidth, columnHeight + 0.075, 26.725 - 25 / 24, columnWidth * 2, 0.15, 25 / 12, cabinetRailFinish).name = 'Paired refrigeration upper rail';
   for (const [name, x, width, depth] of [
-    ['Freezer overhead cabinet', freezerLeft + columnWidth / 2, columnWidth, 25 / 12],
-    ['Recessed niche upper cabinet', nicheCenterX, nicheWidth, 1],
-    ['Fridge overhead cabinet', fridgeRight - columnWidth / 2, columnWidth, 25 / 12]
+    ['Freezer overhead cabinet', columnsRight - columnWidth / 2, columnWidth, 25 / 12],
+    ['Fridge overhead cabinet', columnsLeft + columnWidth / 2, columnWidth, 25 / 12],
+    ['Pantry overhead cabinet', pantryCenterX, pantryWidth, pantryDepth]
   ]) {
     const upper = new THREE.Group();
     upper.name = name;
@@ -728,17 +994,19 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     bottomRun.add(upper);
     const height = upperStorageTop - upperStorageBottom;
     const centerY = (upperStorageTop + upperStorageBottom) / 2;
-    box(upper, 0, centerY, 26.725 - depth / 2, width, height, depth, oak).name = 'Refrigeration upper carcass';
+    box(upper, 0, centerY, 26.725 - depth / 2, width, height, depth, cabinetFinish).name = 'Refrigeration upper carcass';
     for (const side of [-1, 1]) {
-      box(upper, side * width / 4, centerY, 26.725 - depth - 0.04, width / 2 - 0.04, height - 0.06, 0.08, cream).name = 'Refrigeration upper door';
-      box(upper, side * 0.12, upperStorageBottom + 0.45, 26.725 - depth - 0.11, 0.045, 0.55, 0.05, black).name = 'Refrigeration upper pull';
+      const front = shakerFront(upper, side * width / 4, centerY, 26.725 - depth - 0.04, width / 2 - 0.04, height - 0.06, Math.PI);
+      cabinetPull(front, side * (width / 4 - 0.12), upperStorageBottom + 0.45 - centerY, 0.09, 0.55, true);
     }
   }
-  box(bottomRun, bottomRunCenterX, 9.675, 25.65, bottomRunWidth, 0.15, 2.15, oak).name = 'Continuous refrigeration cabinet cornice';
-  box(bottomRun, nicheCenterX, 5.1, 25.91, nicheWidth, 0.1, 0.9, oak).name = 'Refrigeration niche display shelf';
+  box(bottomRun, bottomRunCenterX, upperStorageTop + 0.075, 25.65, bottomRunWidth, 0.15, 2.15, cabinetRailFinish).name = 'Continuous refrigeration cabinet cornice';
+  const freezerDoor = new THREE.Group();
+  freezerDoor.name = 'Freezer conceptual hinged door';
+  freezerDoor.userData = { openAngleDegrees: 0, conceptualHinge: true };
   for (const [name, model, x, handleX] of [
-    ['Column freezer', 'RS3084FLJK1', freezerLeft + columnWidth / 2, -1.05],
-    ['Column fridge', 'RS3084SRHK1', fridgeRight - columnWidth / 2, 1.05]
+    ['Column freezer', 'RS3084FLJK1', columnsRight - columnWidth / 2, 1.05],
+    ['Column fridge', 'RS3084SRHK1', columnsLeft + columnWidth / 2, -1.05]
   ]) {
     const appliance = new THREE.Group();
     appliance.name = name;
@@ -747,92 +1015,63 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     appliance.rotation.y = Math.PI;
     kitchen.add(appliance);
     box(appliance, 0, columnHeight / 2, 0, 29.75 / 12, columnHeight, 2, steel).name = 'Fisher & Paykel column body';
-    box(appliance, 0, (columnHeight + 4 / 12) / 2, 1 + 0.75 / 24, 29.75 / 12, columnHeight - 4 / 12, 0.75 / 12, steel).name = 'Column stainless door panel';
-    box(appliance, handleX, 3.9, 1.13, 0.065, 2.6, 0.1, black).name = 'Column niche-facing handle';
+    let doorParent = appliance;
+    let hingeX = 0;
+    let hingeZ = 0;
+    if (name === 'Column freezer') {
+      // Approximate an articulating hinge ahead of the panel; this is not manufacturer hinge CAD.
+      hingeX = -29.75 / 24;
+      hingeZ = 1.13;
+      freezerDoor.position.set(hingeX, 0, hingeZ);
+      appliance.add(freezerDoor);
+      doorParent = freezerDoor;
+    }
+    box(doorParent, -hingeX, (columnHeight + 4 / 12) / 2, 1 + 0.75 / 24 - hingeZ, 29.75 / 12, columnHeight - 4 / 12, 0.75 / 12, steel).name = 'Column stainless door panel';
+    box(doorParent, handleX - hingeX, 3.9, 1.13 - hingeZ, 0.065, 2.6, 0.1, black).name = 'Column pair-facing handle';
     box(appliance, 0, 2 / 12, 1.01, 29.5 / 12, 4 / 12, 0.04, black).name = 'Column ventilation toe-kick';
     for (const y of [0.08, 0.16, 0.24]) box(appliance, 0, y, 1.035, 29 / 12, 0.025, 0.015, steel).name = 'Column ventilation grille';
   }
 
   const island = new THREE.Group();
   island.name = 'Kitchen island';
-  island.userData = { width: 3.5, length: 7, kneeOverhang: 1.25 };
-  island.position.z = kitchenCenterZ - 18.5;
+  island.userData = { width: 3.5, length: 7, kneeOverhang: 1.25, seats: 4, sideSeatSpacingInches: 20, finish: 'White-oak cabinetry with quartz waterfall ends' };
+  island.position.set(-2, 0, kitchenCenterZ - 18.5);
   kitchen.add(island);
-  const islandFinish = mat('#e8e2d6');
-  const islandInset = mat('#dcd6ca');
-  box(island, 31.15, 0.19, 18.5, 1.7, 0.36, 4.2, black).name = 'Island recessed toe-kick';
-  box(island, 31.15, 1.59, 18.5, 2, 2.46, 4.5, islandFinish).name = 'Island warm-white storage carcass';
+  const islandCabinetLength = 7 - 4 / 12;
+  box(island, 31.15, 0.19, 18.5, 1.7, 0.36, islandCabinetLength - 0.2, black).name = 'Island recessed toe-kick';
+  box(island, 31.15, 1.59, 18.5, 2, 2.46, islandCabinetLength, cabinetFinish).name = 'Island simple white-oak storage base';
   box(island, 30.65, 2.935, 18.5, 3.5, 0.23, 7, countertop, true).name = 'Island light quartz slab';
-  for (const z of [17.04, 18.5, 19.96]) box(island, 30.12, 1.59, z, 0.08, 1.86, 1.26, islandInset).name = 'Island recessed back panel';
-  for (const y of [0.57, 2.61]) box(island, 30.075, y, 18.5, 0.15, 0.18, 4.5, islandFinish).name = 'Island back panel rail';
-  for (const z of [16.33, 17.77, 19.23, 20.67]) box(island, 30.075, 1.59, z, 0.15, 2.22, 0.16, islandFinish).name = 'Island back panel stile';
-  for (const [z, facing] of [[16.23, -1], [20.77, 1]]) {
-    box(island, 31.15, 1.59, z, 2.12, 2.46, 0.12, islandFinish).name = 'Island painted end panel';
-    box(island, 31.15, 1.59, z + facing * 0.07, 1.68, 1.86, 0.04, islandInset).name = 'Island recessed end panel';
-    for (const y of [0.57, 2.61]) box(island, 31.15, y, z + facing * 0.1, 2.12, 0.18, 0.08, islandFinish).name = 'Island end panel rail';
-    for (const x of [30.17, 32.13]) box(island, x, 1.59, z + facing * 0.1, 0.16, 2.22, 0.08, islandFinish).name = 'Island end panel stile';
+  for (const z of [15 + 1 / 12, 22 - 1 / 12]) {
+    box(island, 30.65, 1.41, z, 3.5, 2.82, 2 / 12, countertop).name = 'Island quartz waterfall end';
   }
-  const islandSupport = new THREE.Group();
-  islandSupport.name = 'Island traditional corner posts and apron';
-  island.add(islandSupport);
-  for (const x of [29.25, 32.05]) {
-    box(islandSupport, x, 2.67, 18.5, 0.18, 0.3, 6.2, islandFinish).name = 'Island painted side apron';
-    for (const z of [15.4, 21.6]) {
-      box(islandSupport, x, 1.57, z, 0.42, 2.5, 0.42, islandFinish).name = 'Island square support post';
-      box(islandSupport, x, 0.17, z, 0.55, 0.34, 0.55, islandFinish).name = 'Island post plinth';
-      box(islandSupport, x, 0.04, z, 0.62, 0.08, 0.62, islandFinish).name = 'Island post base molding';
-      box(islandSupport, x, 2.73, z, 0.52, 0.18, 0.52, islandFinish).name = 'Island post capital';
-    }
-  }
-  for (const z of [15.4, 21.6]) box(islandSupport, 30.65, 2.67, z, 2.8, 0.3, 0.18, islandFinish).name = 'Island painted end apron';
-  for (const z of [17.35, 19.65]) drawerFront(32.2, z, 2.1, Math.PI / 2, islandFinish, island);
+  for (const offset of [-1, 0, 1]) drawerFront(32.2, 18.5 + offset * islandCabinetLength / 3, islandCabinetLength / 3 - 0.08, Math.PI / 2, island);
   const stoolFabric = mat('#a17c57', 0.98);
-  stoolFabric.name = 'Light brown stool upholstery';
+  stoolFabric.name = 'Brown stool upholstery';
   const stoolWood = mat('#98704e', 0.6);
-  const brass = new THREE.MeshStandardMaterial({ color: '#b99a60', metalness: 0.65, roughness: 0.35 });
-  const stoolCushionGeometry = new THREE.LatheGeometry([
-    new THREE.Vector2(0, -0.11), new THREE.Vector2(0.59, -0.11), new THREE.Vector2(0.65, -0.085),
-    new THREE.Vector2(0.675, -0.03), new THREE.Vector2(0.675, 0.045), new THREE.Vector2(0.65, 0.095),
-    new THREE.Vector2(0.6, 0.11), new THREE.Vector2(0, 0.11)
-  ], 48);
-  // Seat rims stop just short of the island's back stiles and end panels.
-  for (const [x, z, rotation] of [[29.28, 16.5, Math.PI / 2], [29.28, 18.5, Math.PI / 2], [29.28, 20.5, Math.PI / 2], [30.65, 15.45, 0], [30.65, 21.55, Math.PI]]) {
+  for (const offset of [-1.5, -0.5, 0.5, 1.5]) {
     const stool = new THREE.Group();
     stool.name = 'Kitchen stool';
-    stool.position.set(x, 0, z);
-    stool.rotation.y = rotation;
+    stool.userData = { widthInches: 18, centerSpacingInches: 20, reference: 'Dark-frame stool with brown seat and wood back' };
+    stool.position.set(29.28, 0, 18.5 + offset * 20 / 12);
+    stool.rotation.y = Math.PI / 2;
     island.add(stool);
-    cylinder(stool, 0, 2, 0, 0.7, 0.12, stoolWood).name = 'Stool round wood seat rim';
-    const cushion = new THREE.Mesh(stoolCushionGeometry, stoolFabric);
-    cushion.name = 'Stool round light brown upholstered cushion';
-    cushion.position.y = 2.16;
-    cushion.castShadow = cushion.receiveShadow = true;
-    stool.add(cushion);
-    for (let i = 0; i < 4; i++) {
-      const angle = Math.PI / 4 + i * Math.PI / 2;
-      const foot = new THREE.Vector3(Math.cos(angle) * 0.64, 0.04, Math.sin(angle) * 0.64);
-      const top = new THREE.Vector3(Math.cos(angle) * 0.44, 1.96, Math.sin(angle) * 0.44);
-      const direction = top.clone().sub(foot);
-      const length = direction.length();
-      const leg = new THREE.Group();
-      leg.name = 'Stool splayed tapered leg';
-      leg.position.copy(foot).add(top).multiplyScalar(0.5);
-      leg.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
-      stool.add(leg);
-      cylinder(leg, 0, 0, 0, 0.048, length, stoolWood, 0.075).name = 'Stool tapered wood leg';
-      cylinder(leg, 0, -length / 2 + 0.16, 0, 0.052, 0.32, brass, 0.057).name = 'Stool brass leg cap';
-      cylinder(leg, 0, -length / 2 - 0.02, 0, 0.05, 0.04, black).name = 'Stool protective foot glide';
+    box(stool, 0, 2.12, 0, 1.5, 0.12, 1.5, black, true).name = 'Stool dark seat frame';
+    box(stool, 0, 2.225, 0, 1.46, 0.09, 1.46, stoolFabric, true).name = 'Stool brown upholstered seat';
+    for (const x of [-0.62, 0.62]) {
+      for (const z of [-0.62, 0.62]) box(stool, x, 1.08, z, 0.065, 2.08, 0.065, black).name = 'Stool straight dark leg';
+      box(stool, x, 2.55, -0.67, 0.065, 1.22, 0.065, black).name = 'Stool dark back upright';
+      box(stool, x, 0.75, 0, 0.055, 0.055, 1.24, black).name = 'Stool side stretcher';
     }
-    const footRing = new THREE.Mesh(new THREE.TorusGeometry(0.575, 0.025, 12, 64), brass);
-    footRing.name = 'Stool circular brass footrest';
-    footRing.rotation.x = Math.PI / 2;
-    footRing.position.y = 0.67;
-    footRing.castShadow = footRing.receiveShadow = true;
-    stool.add(footRing);
+    box(stool, 0, 0.75, 0.62, 1.24, 0.065, 0.065, black).name = 'Stool front footrest';
+    box(stool, 0, 2.94, -0.685, 1.22, 0.3, 0.085, stoolWood, true).name = 'Stool brown wood backrest';
   }
+  const islandPendants = new THREE.Group();
+  islandPendants.name = 'Island pendant lights';
+  islandPendants.position.x = island.position.x;
+  scene.add(islandPendants);
   for (const z of [kitchenCenterZ - 2.25, kitchenCenterZ + 2.25]) {
-    cylinder(pendant, 30.65, 8.8, z, 0.025, 2, black);
-    cylinder(pendant, 30.65, 7.8, z, 0.65, 0.45, cream, 0.2);
+    cylinder(islandPendants, 30.65, (ceilingHeight + 7.8) / 2, z, 0.025, ceilingHeight - 7.8, black).name = 'Island pendant cord';
+    cylinder(islandPendants, 30.65, 7.8, z, 0.65, 0.45, cream, 0.2);
   }
 
   const rest = new THREE.Group();
@@ -982,26 +1221,29 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   }
 
   function cabinet(parent, x, z, width, depth = 2, height = 2.85) {
-    box(parent, x, height / 2 + 0.05, z, width, height, depth, oak);
+    box(parent, x, height / 2 + 0.05, z, width, height, depth, cabinetFinish);
     box(parent, x, height + 0.12, z, width + 0.06, 0.14, depth + 0.05, countertop);
     const doors = Math.max(1, Math.round(width / 1.5));
     for (let i = 0; i < doors; i++) {
       const center = x - width / 2 + (i + 0.5) * width / doors;
-      box(parent, center, height / 2 + 0.1, z + depth / 2 + 0.04, width / doors - 0.05, height - 0.18, 0.08, cream, true);
-      box(parent, center, Math.min(height - 0.3, 4), z + depth / 2 + 0.11, 0.65, 0.04, 0.05, brass);
+      const front = shakerFront(parent, center, height / 2 + 0.05, z + depth / 2 + 0.04, width / doors - 0.04, height - 0.04);
+      cabinetPull(front, 0, Math.min(height - 0.3, 4) - (height / 2 + 0.05), 0.09, 0.65);
     }
   }
 
   const prep = furnishing('Prep kitchen cabinetry', 0, 0);
   cabinet(prep, 47.4, 9.25, 10.8);
   for (const x of [43.8, 47.4, 51]) {
-    box(prep, x, 6.2, 8.75, 3.4, 2.7, 1.1, oak);
-    box(prep, x, 6.2, 9.34, 3.3, 2.6, 0.08, cream, true);
+    box(prep, x, 6.2, 8.75, 3.4, 2.7, 1.1, cabinetFinish);
+    for (const side of [-1, 1]) {
+      const front = shakerFront(prep, x + side * 0.85, 6.2, 9.34, 1.66, 2.66);
+      cabinetPull(front, -side * 0.65, -0.8, 0.09, 0.6, true);
+    }
   }
   const pantry = furnishing('Prep tall pantry', 54.1, 9.45);
-  box(pantry, 0, 4.1, 0, 2, 8.2, 2.3, oak);
-  box(pantry, 0, 4.1, 1.2, 1.9, 8, 0.08, cream, true);
-  box(pantry, -0.65, 4.6, 1.28, 0.05, 1, 0.05, brass);
+  box(pantry, 0, 4.1, 0, 2, 8.2, 2.3, cabinetFinish);
+  const prepPantryFront = shakerFront(pantry, 0, 4.1, 1.2, 1.96, 8.16);
+  cabinetPull(prepPantryFront, -0.65, 0.5, 0.09, 1, true);
   const coffeeStation = furnishing('Prep coffee station', 43.8, 10);
   box(coffeeStation, 0, 3.765, 0, 1.1, 1.45, 1.1, black, true);
   cylinder(coffeeStation, 0.75, 3.19, 0.1, 0.16, 0.3, porcelain);
@@ -1031,8 +1273,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     box(laundry, 0, y + 1, 1.55, 2.5, 0.12, 0.06, cream);
   }
   const mudCoats = furnishing('Mudroom coat and vacuum closet', 39.25, 19.6, Math.PI / 2);
-  box(mudCoats, 0, 4, 0, 2.25, 8, 2, oak);
-  box(mudCoats, 0, 4, 1.05, 2.15, 7.8, 0.08, cream);
+  box(mudCoats, 0, 4, 0, 2.25, 8, 2, cabinetFinish);
+  const mudCoatFront = shakerFront(mudCoats, 0, 4, 1.05, 2.21, 7.96);
+  cabinetPull(mudCoatFront, -0.85, 0.3, 0.09, 1, true);
   const dropZone = furnishing('Mudroom drop zone', 43.3, 16.1);
   cabinet(dropZone, 0, 0, 1.7, 1.4);
   box(dropZone, 0, 4.5, -0.65, 1.5, 1.8, 0.08, black);
@@ -1244,8 +1487,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     living: { target: [6.7, 1, 16.4], offset: [24, 23, 22], span: 24 },
     dining: { target: [19.8, 1, 2.6], offset: [16, 19, 23], span: 20 },
     kitchen: { target: [32.2, 2, kitchenCenterZ], offset: [-22, 35, 27], span: 26 },
+    cooktop: { target: [37, 5.3, cooktopCenterZ], offset: [-18, 0, 0], span: 11 },
     fridge: { target: [bottomRunCenterX, 5, 26.9], offset: [0, 0, -18], span: 12 },
-    island: { target: [30.65, 1.5, kitchenCenterZ], offset: [-12, 9, 10], span: 15 },
+    island: { target: [30.65 + island.position.x, 1.5, kitchenCenterZ], offset: [-12, 9, 10], span: 15 },
     whole: { target: [27, 0, 29], offset: [35, 75, 50], span: 78 },
     garage: { target: [43, 1, 33], offset: [28, 48, 36], span: 42 },
     prep: { target: [44, 1, 16], offset: [-28, 44, 30], span: 28 },
@@ -1253,34 +1497,54 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     top: { target: [27, 0, 29], offset: [0, 110, 0.1], span: 72 }
   };
   let currentView = 'whole';
-  let fullHeight = true;
+
+  function updatePendantVisibility() {
+    const showPendants = currentView !== 'top' && currentView !== 'fridge' && currentView !== 'cooktop';
+    pendant.visible = showPendants;
+    islandPendants.visible = showPendants && islandLightsInput.checked;
+  }
 
   function setView(name) {
     currentView = name;
-    controls.maxPolarAngle = name === 'fridge' ? Math.PI / 2 : Math.PI / 2.12;
+    const elevationView = name === 'fridge' || name === 'cooktop';
+    controls.maxPolarAngle = elevationView ? Math.PI / 2 : Math.PI / 2.12;
     const preset = presets[name];
     const aspect = viewport.clientWidth / viewport.clientHeight;
     const offset = new THREE.Vector3(...preset.offset);
-    const verticalFov = THREE.MathUtils.degToRad(camera.fov);
     const portraitPadding = aspect < 1 ? 1.25 : 1;
-    const minimumDistance = preset.span * portraitPadding / (2 * Math.tan(verticalFov / 2) * Math.min(aspect, 1));
-    offset.setLength(Math.max(offset.length(), minimumDistance));
+    camera = name === 'cooktop' ? cooktopElevationCamera : perspectiveCamera;
+    controls.object = camera;
+    camera.zoom = 1;
+    if (camera.isOrthographicCamera) {
+      const halfHeight = preset.span * portraitPadding / (2 * Math.min(aspect, 1));
+      camera.left = -halfHeight * aspect;
+      camera.right = halfHeight * aspect;
+      camera.top = halfHeight;
+      camera.bottom = -halfHeight;
+    } else {
+      camera.aspect = aspect;
+      const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+      const minimumDistance = preset.span * portraitPadding / (2 * Math.tan(verticalFov / 2) * Math.min(aspect, 1));
+      offset.setLength(Math.max(offset.length(), minimumDistance));
+    }
+    camera.updateProjectionMatrix();
     controls.target.set(...preset.target);
     camera.position.copy(controls.target).add(offset);
     controls.update();
-    const showWholeFloor = !['social', 'living', 'dining', 'kitchen', 'island', 'fridge'].includes(name);
+    const showWholeFloor = !['social', 'living', 'dining', 'kitchen', 'cooktop', 'island', 'fridge'].includes(name);
     shell.visible = showWholeFloor;
     stairs.visible = showWholeFloor || ['kitchen', 'fridge'].includes(name);
-    island.visible = name !== 'fridge';
+    island.visible = !elevationView;
     cooktopHood.visible = name !== 'fridge';
-    pendant.visible = !['top', 'fridge'].includes(name);
+    updatePendantVisibility();
+    for (const accessory of [cuttingBoard, utensilCrock, seasoningTray]) accessory.visible = name !== 'cooktop';
     viewButtons.forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.view === name));
     });
     document.querySelectorAll('.furniture-card').forEach((card) => {
       card.classList.toggle('selected', card.dataset.room === name);
     });
-    renderer.domElement.setAttribute('aria-label', `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, ${fullHeight ? 'full-height' : 'cutaway'} walls`);
+    renderer.domElement.setAttribute('aria-label', `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
     render();
   }
 
@@ -1290,23 +1554,26 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       if (button.closest('.furniture-card')) viewport.scrollIntoView({ block: 'center', behavior: 'instant' });
     });
   });
-  wallButton.disabled = false;
-  wallButton.addEventListener('click', () => {
-    fullHeight = !fullHeight;
-    wallButton.setAttribute('aria-pressed', String(fullHeight));
-    const height = fullHeight ? 10 : 2.6;
-    walls.forEach((mesh) => {
-      const { bottom, top } = mesh.userData;
-      const visibleHeight = Math.max(0, Math.min(top, height) - bottom);
-      mesh.visible = visibleHeight > 0;
-      mesh.scale.y = visibleHeight / (top - bottom);
-      mesh.position.y = bottom + visibleHeight / 2 - (mesh.userData.offsetY ?? 0);
-    });
-    renderer.domElement.setAttribute('aria-label', `3D floor plan: ${currentView} view, ${fullHeight ? 'full-height' : 'cutaway'} walls`);
+  function setFreezerAngle(angle) {
+    freezerDoor.rotation.y = -THREE.MathUtils.degToRad(angle);
+    freezerDoor.userData.openAngleDegrees = angle;
+    freezerButton.textContent = angle ? `Left freezer: ${angle}\u00b0 (concept)` : 'Left freezer: closed';
+    freezerButton.setAttribute('aria-pressed', String(angle !== 0));
+  }
+  freezerButton.addEventListener('click', () => {
+    const angles = [0, 90, 115];
+    setFreezerAngle(angles[(angles.indexOf(freezerDoor.userData.openAngleDegrees) + 1) % angles.length]);
+    render();
+  });
+  islandLightsInput.addEventListener('change', () => {
+    updatePendantVisibility();
     render();
   });
   resetButton.disabled = false;
-  resetButton.addEventListener('click', () => setView('whole'));
+  resetButton.addEventListener('click', () => {
+    setFreezerAngle(0);
+    setView('whole');
+  });
   viewport.addEventListener('keydown', (event) => {
     if (event.target !== viewport) return;
     const moves = { ArrowLeft: -0.15, ArrowRight: 0.15 };
@@ -1315,10 +1582,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), moves[event.key]);
       camera.position.copy(controls.target).add(offset);
     } else if (event.key === '+' || event.key === '-' || event.key === '=') {
-      const offset = camera.position.clone().sub(controls.target);
-      offset.setLength(THREE.MathUtils.clamp(offset.length() * (event.key === '-' ? 1.1 : 0.9), controls.minDistance, controls.maxDistance));
-      camera.position.copy(controls.target).add(offset);
+      if (camera.isOrthographicCamera) {
+        camera.zoom = THREE.MathUtils.clamp(camera.zoom * (event.key === '-' ? 0.9 : 1.1), 0.1, 20);
+        camera.updateProjectionMatrix();
+      } else {
+        const offset = camera.position.clone().sub(controls.target);
+        offset.setLength(THREE.MathUtils.clamp(offset.length() * (event.key === '-' ? 1.1 : 0.9), controls.minDistance, controls.maxDistance));
+        camera.position.copy(controls.target).add(offset);
+      }
     } else if (event.key === 'Home') {
+      setFreezerAngle(0);
       setView('whole');
     } else {
       return;
@@ -1334,8 +1607,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     showModelError('The 3D renderer lost its graphics connection. Reload this page to try again.');
   });
   function resize() {
-    camera.aspect = viewport.clientWidth / viewport.clientHeight;
-    camera.updateProjectionMatrix();
     renderer.setSize(viewport.clientWidth, viewport.clientHeight);
     setView(currentView);
   }
@@ -1346,5 +1617,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   resize();
   message.hidden = true;
   viewport.dataset.ready = 'true';
+  freezerButton.disabled = false;
+  islandLightsInput.disabled = false;
   navigationButtons.forEach((button) => { button.disabled = false; });
 }
