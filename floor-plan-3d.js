@@ -1299,8 +1299,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
 
   const stairs = furnishing('U-shaped hall staircase', stairOpening.x, stairOpening.z);
   scene.add(stairs);
-  const stairRisers = 10;
-  const stairRise = 11 / (2 * stairRisers);
+  const floorAssemblyDepth = 1; // Provisional 12-inch allowance; confirm the actual structural assembly.
+  const stairFloorToFloor = ceilingHeight + floorAssemblyDepth;
+  const stairRisers = Math.ceil(stairFloorToFloor / (2 * 7.5 / 12));
+  const stairRise = stairFloorToFloor / (2 * stairRisers);
   const stairGoing = 10 / 12;
   const stairRun = (stairRisers - 1) * stairGoing;
   const stairDepth = stairOpening.depth;
@@ -1309,7 +1311,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const landingEndX = 29 - 0.175 - stairs.position.x;
   const stairBookcaseDepth = 11 / 12;
   const stairBookcaseSplitX = 26.6 - stairs.position.x;
-  stairs.userData = { flightWidthInches: 44, wallSideFlightWidthInches: wallSideStairWidth * 12, risersPerFlight: stairRisers, riseInches: stairRise * 12, treadDepthInches: 10, floorToFloorFeet: 11, provisional: true };
+  const stairBookcaseFlightSplitStep = Math.floor((stairRisers + 2) / 2);
+  stairs.userData = { flightWidthInches: 44, wallSideFlightWidthInches: wallSideStairWidth * 12, risersPerFlight: stairRisers, riseInches: stairRise * 12, treadDepthInches: 10, floorToFloorFeet: stairFloorToFloor, floorAssemblyInches: floorAssemblyDepth * 12, provisional: true };
   roomDimensions('Stairs (kitchen-side flight)', stairWidth, stairRun);
   roomDimensions('Stairs (wall-side flight)', wallSideStairWidth, stairRun);
 
@@ -1348,7 +1351,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       const backingLength = stairGoing - 0.08;
       box(flight, backingX, height - 0.15, enclosureZ, backingLength, 0.1, enclosureDepth, wallMaterial).name = 'Hollow stairwell soffit';
       if (!upper) {
-        const caseHeight = recessedBookcase ? stairBookcaseHeight(Math.floor(step / 3) * 3 * stairGoing) : 0;
+        const caseHeight = recessedBookcase ? stairBookcaseHeight((step < stairBookcaseFlightSplitStep ? 3 : stairBookcaseFlightSplitStep) * stairGoing) : 0;
         const infillDepth = recessedBookcase ? stairBookcaseDepth : 0.08;
         const riserBottom = height - stairRise;
         const lowerHeight = riserBottom - caseHeight;
@@ -1396,8 +1399,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   stairBookcases.userData = { bays: 4, depthInches: 11, recessed: true, provisional: true };
   stairs.add(stairBookcases);
   const bookcaseBays = [
-    { start: 3 * stairGoing, width: 3 * stairGoing },
-    { start: 6 * stairGoing, width: 3 * stairGoing },
+    { start: 3 * stairGoing, width: (stairBookcaseFlightSplitStep - 3) * stairGoing },
+    { start: stairBookcaseFlightSplitStep * stairGoing, width: stairRun - stairBookcaseFlightSplitStep * stairGoing },
     { start: stairRun, width: stairBookcaseSplitX - stairRun },
     { start: stairBookcaseSplitX, width: landingEndX - stairBookcaseSplitX }
   ];
@@ -1434,7 +1437,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const upstairsStairParts = stairs.children.slice();
   const basementStairs = new THREE.Group();
   basementStairs.name = 'Basement U-shaped staircase';
-  basementStairs.userData = { flightWidthInches: 44, entryFlightWidthInches: wallSideStairWidth * 12, floorToFloorFeet: 11, risersPerFlight: stairRisers, riseInches: stairRise * 12, treadDepthInches: 10, entry: 'Hall beneath upper stair arrival', provisional: true };
+  basementStairs.userData = { flightWidthInches: 44, entryFlightWidthInches: wallSideStairWidth * 12, floorToFloorFeet: stairFloorToFloor, floorAssemblyInches: floorAssemblyDepth * 12, risersPerFlight: stairRisers, riseInches: stairRise * 12, treadDepthInches: 10, entry: 'Hall beneath upper stair arrival', provisional: true };
   stairs.add(basementStairs);
   roomDimensions('Basement stairs (entry flight)', wallSideStairWidth, stairRun);
   roomDimensions('Basement stairs (return flight)', stairWidth, stairRun);
@@ -1461,7 +1464,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
       stairBeam('Basement stair stringer', [startX, baseY - stairRise - 0.2, railZ], [endX, baseY - landingHeight - 0.2, railZ], 0.12, 0.3, oak, flight);
       stairBeam('Basement sloped handrail', [startX, baseY + 3, railZ], [endX, baseY - landingHeight + 3, railZ], 0.12, 0.12, oak, flight);
       for (let rail = 1; rail <= 8; rail++) stairBeam('Basement sloped guard rail', [startX, baseY + rail / 3, railZ], [endX, baseY - landingHeight + rail / 3, railZ], 0.045, 0.045, black, flight);
-      for (const step of [0, 4, 8]) {
+      for (const step of [0, 4, stairRisers - 2]) {
         box(flight, startX + direction * step * stairGoing, baseY - step * stairRise + 1.5, railZ, 0.09, 3, 0.09, black).name = 'Basement stair guard post';
       }
     }
