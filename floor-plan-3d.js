@@ -450,9 +450,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const prepWindowHeight = 3.5;
   const prepWindowSill = 4.25;
   const prepWindowCenters = [prepSinkX - 1.75, prepSinkX + 1.75];
+  const diningSideWindowCenters = [2.95];
+  const diningSideWindowWidth = 6;
+  const diningSideWindowHeight = 5;
+  const diningSideWindowSill = 3;
 
   const stairWidth = 44 / 12;
   const stairGap = 0.25;
+  const stairwellWallThickness = 0.16;
   const stairWallFaceZ = 34.6 - 0.175;
   const wallSideStairWidth = stairWallFaceZ - (26.6 + stairWidth + stairGap);
   const stairOpening = { x: 17.4, z: 26.6, width: 29 - 0.175 - 17.4, depth: stairWallFaceZ - 26.6 };
@@ -478,7 +483,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   ].forEach(([x, z, w, d, hardwood = false, interior = true]) => floor(x, z, w, d, hardwood, shell, interior));
 
   [
-    [0, 8, 13.2, 8, true, [[4.2, 9.2, 3, 8]]], [13.2, -2.1, 13.2, 8, true],
+    [0, 8, 13.2, 8, true, [[4.2, 9.2, 3, 8]]],
+    [13.2, -2.1, 13.2, 8, true, diningSideWindowCenters.map((z) => [z - diningSideWindowWidth / 2 + 2.1, z + diningSideWindowWidth / 2 + 2.1, diningSideWindowSill, diningSideWindowSill + diningSideWindowHeight])],
     [13.2, -2.1, 26.5, -2.1, true, [[3.65, 9.65, 3, 8]]],
     [26.5, -2.1, 26.5, 8, true, [[2.1, 8.1, 0, 8]], ceilingHeight, [1]],
     [kitchenWallLeft, 8, kitchenWallRight, 8, true, kitchenSinkWindows.map(({ x, width }) => [x - width / 2 - kitchenWallLeft, x + width / 2 - kitchenWallLeft, kitchenSinkWindowSill, kitchenSinkWindowSill + kitchenSinkWindowHeight])],
@@ -577,8 +583,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   }
   windowFrame('Living side window', 6.7, 8.1, 5, 5, 3);
   windowFrame('Dining rear window', 19.85, -2, 6, 5, 3);
+  for (const [index, z] of diningSideWindowCenters.entries()) {
+    windowFrame(`Dining left window ${index + 1}`, 13.2, z, diningSideWindowWidth, diningSideWindowHeight, diningSideWindowSill, -Math.PI / 2, scene, -1);
+  }
   const patioDoor = new THREE.Group();
-  patioDoor.name = 'Dining picture window and outswing patio door';
+  patioDoor.name = 'Dining picture window and inswing patio door';
   patioDoor.position.set(26.5, 0, 3);
   patioDoor.rotation.y = -Math.PI / 2;
   patioDoor.userData = { widthFeet: 6, heightFeet: 8, sliding: false, provisional: true, exteriorDirection: 'increasing x' };
@@ -601,10 +610,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   }
   box(pictureWindow, 0, 4, 0, 2.66, 7.6, 0.05, glass).name = 'Uninterrupted picture window glazing';
   const doorLeaf = new THREE.Group();
-  doorLeaf.name = 'Outward-opening hinged patio door';
+  doorLeaf.name = 'Inward-opening hinged patio door';
   doorLeaf.position.x = -2.88;
-  doorLeaf.rotation.y = Math.PI / 6;
-  doorLeaf.userData = { outswing: true, openAngleDegrees: 30, nominalWidthFeet: 3 };
+  doorLeaf.rotation.y = -Math.PI / 6;
+  doorLeaf.userData = { outswing: false, openAngleDegrees: 30, nominalWidthFeet: 3 };
   patioDoor.add(doorLeaf);
   for (const edge of [0.04, 2.78]) {
     box(doorLeaf, edge, 3.98, 0, 0.08, 7.76, 0.14, black).name = 'Hinged patio door stile';
@@ -1199,7 +1208,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
     }
     const endX = startX + direction * stairRun;
     const endHeight = baseHeight + landingHeight;
-    box(flight, endX + direction * 0.04, endHeight - (stairRise + 0.1) / 2, centerZ, 0.08, stairRise - 0.1, flightWidth, cream).name = 'Landing riser';
+    // The top riser sits before the landing and stops beneath its 0.2 ft slab.
+    box(flight, endX - direction * 0.04, endHeight - (stairRise + 0.2) / 2, centerZ, 0.08, stairRise - 0.2, flightWidth, cream).name = 'Landing riser';
     for (const side of [-1, 1]) {
       const stringerZ = centerZ + side * (flightWidth / 2 - 0.12);
       stairBeam('Stair stringer', [startX, baseHeight - 0.2, stringerZ], [endX, endHeight - stairRise - 0.2, stringerZ], 0.12, 0.3, oak);
@@ -1303,8 +1313,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   const stairwellWallTop = -0.24 - 0.45 / 2;
   const stairwellWallHeight = 2 * landingHeight + stairwellWallTop;
   const stairwellWallCenterY = -2 * landingHeight + stairwellWallHeight / 2;
-  box(basementStairs, landingEndX + 0.08, stairwellWallCenterY, stairDepth / 2, 0.16, stairwellWallHeight, stairDepth, wallMaterial).name = 'Basement stairwell end wall';
-  for (const z of [-0.08, stairDepth + 0.08]) box(basementStairs, landingEndX / 2, stairwellWallCenterY, z, landingEndX, stairwellWallHeight, 0.16, wallMaterial).name = 'Basement stairwell side wall';
+  box(basementStairs, landingEndX + stairwellWallThickness / 2, stairwellWallCenterY, stairDepth / 2, stairwellWallThickness, stairwellWallHeight, stairDepth, wallMaterial).name = 'Basement stairwell end wall';
+  for (const z of [-stairwellWallThickness / 2, stairDepth + stairwellWallThickness / 2]) box(basementStairs, landingEndX / 2, stairwellWallCenterY, z, landingEndX, stairwellWallHeight, stairwellWallThickness, wallMaterial).name = 'Basement stairwell side wall';
 
   function cabinet(parent, x, z, width, depth = 2, height = 2.85) {
     box(parent, x, height / 2 + 0.05, z, width, height, depth, cabinetFinish);
@@ -1637,12 +1647,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry) {
   scene.add(ground);
   const groundMaterial = mat('#eeeee6');
   const excavationLeft = stairOpening.x - stairWidth;
-  const excavationRight = stairOpening.x + stairOpening.width;
-  const excavationBack = stairOpening.z + stairOpening.depth;
+  // Soil meets the retaining walls' outer faces, not their visible stairwell faces.
+  const excavationRight = stairOpening.x + stairOpening.width + stairwellWallThickness;
+  const excavationFront = stairOpening.z - stairwellWallThickness;
+  const excavationBack = stairOpening.z + stairOpening.depth + stairwellWallThickness;
   for (const [x, z, width, depth] of [
     [-95, -92, excavationLeft + 95, 240],
     [excavationRight, -92, 145 - excavationRight, 240],
-    [excavationLeft, -92, excavationRight - excavationLeft, stairOpening.z + 92],
+    [excavationLeft, -92, excavationRight - excavationLeft, excavationFront + 92],
     [excavationLeft, excavationBack, excavationRight - excavationLeft, 148 - excavationBack]
   ]) {
     const part = box(ground, x + width / 2, -0.75, z + depth / 2, width, 0.5, depth, groundMaterial);
