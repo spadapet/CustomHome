@@ -411,6 +411,7 @@ Physical samples must confirm stain, sheen, upholstery durability, quartz color,
 ## Preview behavior and future edits
 
 - Main toolbar: Whole floor, Living + dining, Kitchen, Prep + mud, Garage, Top view. Room menu retains additional room views; specialized inspection presets also exist in code, but not all have toolbar shortcuts.
+- The toolbar's **1 ft grid** checkbox toggles a floor grid of 1 ft squares, on by default. It follows ground-floor/garage elevations, upstairs and edited floor shapes; furniture hides the lines beneath it. The choice lasts for the page visit, including Reset/Home. Exterior and basement-stair views temporarily hide the grid.
 - Room dimensions live in the on-demand room menu, not labels floating in the model. Full-height walls stay; no general wall-height/cutaway toggle. A special basement preset hides the surrounding shell/upstairs stair geometry for inspection.
 - Rotate/Move control overview navigation. Tour is third person; clicking clear ground-floor space can enter it. Routes use a 6 in grid, collision-checked smoothing and 4 ft/sec travel. No stair/basement/upstairs travel.
 - Tour toggle/Escape restores the prior view/mode; room changes, Reset and Home exit. Dragging, focus loss or moving freezer pauses travel. Floor plan opens the small destination map; inaccessible destinations show a notice.

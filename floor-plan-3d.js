@@ -3,6 +3,7 @@ const message = viewport.querySelector('.model-message');
 const viewButtons = document.querySelectorAll('[data-view]');
 const islandLightsInput = document.getElementById('show-island-lights');
 const bikeStorageInput = document.getElementById('show-bike-storage');
+const floorGridInput = document.getElementById('show-floor-grid');
 const resetButton = document.getElementById('reset-view');
 const navigationButtons = document.querySelectorAll('[data-navigation]');
 const walkControls = document.getElementById('walk-controls');
@@ -78,6 +79,7 @@ function showModelError(text) {
   viewButtons.forEach((button) => { button.disabled = true; });
   islandLightsInput.disabled = true;
   bikeStorageInput.disabled = true;
+  floorGridInput.disabled = true;
   resetButton.disabled = true;
   navigationButtons.forEach((button) => { button.disabled = true; });
   walkControls.hidden = true;
@@ -2892,6 +2894,32 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   scene.add(upstairs.group);
   const exterior = buildExteriorModel(THREE, { box, mat }, stairFloorToFloor, garageFloorY);
   scene.add(exterior);
+  const floorGrid = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: '#2c6975', transparent: true, opacity: 0.65, depthWrite: false }));
+  floorGrid.name = 'One-foot floor grid';
+  floorGrid.userData = { spacingFeet: 1, tourDecoration: true };
+  floorGrid.visible = false;
+  scene.add(floorGrid);
+  let gridAreas = null;
+  function updateFloorGrid() {
+    floorGridInput.disabled = activeFloor === 'exterior' || currentView === 'basement';
+    floorGrid.visible = floorGridInput.checked && !floorGridInput.disabled;
+    if (!floorGrid.visible) return;
+    const areas = activeFloor === 'upstairs' ? upstairs.areas : groundLayoutPreview?.plan.floors ?? walkFloorAreas;
+    if (areas === gridAreas) return;
+    const positions = [];
+    for (const area of areas) {
+      const right = area.x + area.w;
+      const bottom = area.z + area.d;
+      const y = (area.elevation ?? 0) + 0.025;
+      for (let x = Math.ceil(area.x); x <= right; x++) positions.push(x, y, area.z, x, y, bottom);
+      for (let z = Math.ceil(area.z); z <= bottom; z++) positions.push(area.x, y, z, right, y, z);
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    floorGrid.geometry.dispose();
+    floorGrid.geometry = geometry;
+    gridAreas = areas;
+  }
   const groundVisibility = new Map();
   function floorAreas() {
     return activeFloor === 'upstairs' ? upstairs.areas : walkFloorAreas;
@@ -3639,6 +3667,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     document.querySelector('.model-footer span').lastChild.textContent = groundLayoutPreview && activeFloor === 'ground' ? ' Structure-only concept' : ' Furnished concept';
     renderer.domElement.setAttribute('aria-label', outside ? `3D English-country exterior concept: ${exteriorLabel}, provisional stone facade and roof` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
+    updateFloorGrid();
     render();
   }
 
@@ -3654,6 +3683,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   });
   bikeStorageInput.addEventListener('change', () => {
     bikeStorage.visible = bikeStorageInput.checked;
+    render();
+  });
+  floorGridInput.addEventListener('change', () => {
+    updateFloorGrid();
     render();
   });
   resetButton.disabled = false;
