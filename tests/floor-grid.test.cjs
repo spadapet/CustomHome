@@ -107,8 +107,22 @@ test('grid is occluded by furniture and excluded from tour collision and floor p
   assert.equal(grid.material.depthWrite, false);
   assert.equal(grid.userData.tourDecoration, true);
   const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
-  assert.match(html, /<label[^>]*><input type="checkbox" id="show-floor-grid" checked disabled> 1 ft grid<\/label>/);
+  assert.match(html, /<label[^>]*><input type="checkbox" id="show-floor-grid" disabled> 1 ft grid<\/label>/);
   assert.match(source, /floorGridInput\.addEventListener\('change', \(\) => \{\s*updateFloorGrid\(\);\s*render\(\);/);
   const errorSource = source.slice(source.indexOf('function showModelError('), source.indexOf('function buildPreview('));
   assert.match(errorSource, /floorGridInput\.disabled = true/);
+});
+
+test('grid starts hidden with the page default and can be enabled', () => {
+  const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
+  const input = html.match(/<input\b[^>]*\bid="show-floor-grid"[^>]*>/)[0];
+  const { context, grid, update } = createGrid();
+  context.floorGridInput.checked = /\bchecked\b/.test(input);
+  update();
+  assert.equal(context.floorGridInput.checked, false);
+  assert.equal(context.floorGridInput.disabled, false);
+  assert.equal(grid.visible, false);
+  context.floorGridInput.checked = true;
+  update();
+  assert.equal(grid.visible, true);
 });
