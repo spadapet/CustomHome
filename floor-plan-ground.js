@@ -23,10 +23,23 @@
     };
   }
 
+  function getGuestSuiteLayout() {
+    return {
+      closet: { x: 19, z: 34.6, w: 6, d: 7.4 },
+      bathroom: { x: 25, z: 34.6, w: 6.2, d: 7.4 },
+      closetDoor: { x: 21.95, z: 42, width: 2.5, height: 7 },
+      bathroomDoor: { x: 25.65, z: 42, width: 2.5, height: 7 },
+      shower: { x: 25.175, z: 34.775, w: 3.2, d: 4.2, clearWidth: 3, clearDepth: 4, doorWidth: 2.5 },
+      toilet: { x: 29.7, z: 35.9 },
+      vanity: { x: 30.2, z: 39.9, width: 2.5, rotation: -Math.PI / 2 }
+    };
+  }
+
   function getGroundFloorDefaultPlan() {
     const stairs = UpstairsLayout.stairOpening();
     const livingFeatureWall = getLivingRoomFeatureLayout(stairs);
     const guestEntry = getGuestEntryLayout(stairs);
+    const guestSuite = getGuestSuiteLayout();
     const powderZ = guestEntry.powder.z;
     const entryZ = guestEntry.alcove.z, officeZ = guestEntry.officeNorthZ;
     const kidsNorthZ = 26.725 - 25 / 12 - 0.08 + 0.175;
@@ -37,8 +50,8 @@
       ['Kids room', 19, kidsNorthZ, 10, 34.6 - kidsNorthZ], ['Powder room', 0, powderZ, 7.1, guestEntry.powder.d],
       ['Guest coat closet', 7.1, powderZ, 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 7.1, entryZ, 5.1, guestEntry.alcove.d],
       ['Office', 0, officeZ, 12.2, 54.2 - officeZ], ['Entry hall', 12.2, 34.6, 6.8, 19.6],
-      ['Closet', 19, 34.6, 6, 7.4], ['Bathroom', 25, 34.6, 6.2, 4.6],
-      ['Laundry', 25, 39.2, 6.2, 2.8], ['Guest room', 19, 42, 12.2, 12.2],
+      ['Closet', 19, 34.6, 6, 7.4], ['Bathroom', 25, 34.6, 6.2, guestSuite.bathroom.d],
+      ['Guest room', 19, 42, 12.2, 12.2],
       ['Garage', 29, 15, 26.5, 34], ['Front porch', 0, 54.2, 31.2, 7]
     ].map(([name, x, z, w, d]) => ({ name, x, z, w, d }));
     const floors = [
@@ -52,8 +65,8 @@
       [12.2, 25.7, 6.8, 8.9], [19, kidsNorthZ, 10, 34.6 - kidsNorthZ, 'Kids room'],
       [12.2, 34.6, 6.8, 19.6, 'Entry hall'], [0, powderZ, 7.1, guestEntry.powder.d, 'Powder room'],
       [7.1, entryZ, 5.1, guestEntry.alcove.d, 'Guest entry alcove'], [0, officeZ, 12.2, 54.2 - officeZ, 'Office'],
-      [19, 34.6, 6, 7.4, 'Closet'], [25, 34.6, 6.2, 4.6, 'Bathroom'],
-      [25, 39.2, 6.2, 2.8, 'Laundry'], [19, 42, 12.2, 12.2, 'Guest room'],
+      [19, 34.6, 6, 7.4, 'Closet'], [25, 34.6, 6.2, guestSuite.bathroom.d, 'Bathroom'],
+      [19, 42, 12.2, 12.2, 'Guest room'],
       [7.1, powderZ, 5.1, guestEntry.coatCloset.d, 'Guest coat closet'],
       [45.4, 15, 10.1, 11.9, 'Garage', -1.25], [29, 26.9, 26.5, 7.7, 'Garage', -1.25],
       [31.2, 34.6, 24.3, 14.4, 'Garage', -1.25], [0, 54.2, 31.2, 7, 'Front porch']
@@ -84,8 +97,8 @@
       ['House south', 0, 54.2, 31.2, 54.2, [[3, 9, 3, 8], [13.1, 18.1, 0, 7], [21.2, 28.8, 3, 8]]],
       ['Guest west', 19, 34.6, 19, 54.2, [[7.4, 10.4, 0, 7]]],
       ['Closet north', 19, 34.6, 25, 34.6], ['Closet east', 25, 34.6, 25, 42],
-      ['Closet south', 19, 42, 25, 42, [[1.4, 4.6, 0, 7]]],
-      ['Laundry north', 25, 39.2, 31.2, 39.2, [[2, 4.7, 0, 7]]],
+      ['Closet south', 19, 42, 25, 42, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x - 19 + guestSuite.closetDoor.width, 0, 7]]],
+      ['Bathroom south', 25, 42, 31.2, 42, [[guestSuite.bathroomDoor.x - 25, guestSuite.bathroomDoor.x - 25 + guestSuite.bathroomDoor.width, 0, 7]]],
       ['Bathroom north', 25, 34.6, 29, 34.6], ['Garage southwest return', 29, 34.6, 31.2, 34.6],
       ['Garage west', 31.2, 34.6, 31.2, 49], ['Garage west return', 29, 26.9, 29, 34.6],
       ['Kitchen south left', 29, 26.9, 29.6875, 26.9], ['Kitchen south', 29.6875, 26.9, 37.8, 26.9],
@@ -100,6 +113,7 @@
 
   root.getLivingRoomFeatureLayout = getLivingRoomFeatureLayout;
   root.getGuestEntryLayout = getGuestEntryLayout;
+  root.getGuestSuiteLayout = getGuestSuiteLayout;
   root.getGroundFloorDefaultPlan = getGroundFloorDefaultPlan;
   root.buildGroundLayoutPreview = function (THREE, baseline, edits) {
     const plan = UpstairsLayout.resolve(baseline, edits);
@@ -144,5 +158,5 @@
       }
     };
   };
-  if (typeof module !== 'undefined' && module.exports) module.exports = { getGroundFloorDefaultPlan, getLivingRoomFeatureLayout, getGuestEntryLayout };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { getGroundFloorDefaultPlan, getLivingRoomFeatureLayout, getGuestEntryLayout, getGuestSuiteLayout };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

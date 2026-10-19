@@ -2,6 +2,7 @@ const viewport = document.getElementById('model-viewport');
 const message = viewport.querySelector('.model-message');
 const viewButtons = document.querySelectorAll('[data-view]');
 const islandLightsInput = document.getElementById('show-island-lights');
+const bikeStorageInput = document.getElementById('show-bike-storage');
 const resetButton = document.getElementById('reset-view');
 const navigationButtons = document.querySelectorAll('[data-navigation]');
 const walkControls = document.getElementById('walk-controls');
@@ -76,6 +77,7 @@ function showModelError(text) {
   message.hidden = false;
   viewButtons.forEach((button) => { button.disabled = true; });
   islandLightsInput.disabled = true;
+  bikeStorageInput.disabled = true;
   resetButton.disabled = true;
   navigationButtons.forEach((button) => { button.disabled = true; });
   walkControls.hidden = true;
@@ -720,6 +722,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const stairOpening = UpstairsLayout.stairOpening(stairFloorToFloor);
   const wallSideStairWidth = stairOpening.depth - stairWidth - stairGap;
   const guestEntry = getGuestEntryLayout(stairOpening);
+  const guestSuite = getGuestSuiteLayout();
   const powderNorthZ = guestEntry.powder.z;
   const powderEntryWallZ = guestEntry.alcove.z;
   const officeNorthZ = guestEntry.officeNorthZ;
@@ -742,8 +745,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [12.2, 25.7, kidsRoom.x - 12.2, 8.9, true],
     [kidsRoom.x, kidsRoom.z, kidsRoom.width, kidsRoom.depth, true],
     [12.2, 34.6, 6.8, 19.6, true], [0, powderNorthZ, 7.1, guestEntry.powder.d], [7.1, powderEntryWallZ, 5.1, guestEntry.alcove.d, true],
-    [0, officeNorthZ, 12.2, 54.2 - officeNorthZ, true], [19, 34.6, 6, 7.4, true], [25, 34.6, 6.2, 4.6],
-    [25, 39.2, 6.2, 2.8], [19, 42, 12.2, 12.2, true], [0, 54.2, 31.2, 7, false, false],
+    [0, officeNorthZ, 12.2, 54.2 - officeNorthZ, true], [19, 34.6, 6, 7.4, true], [25, 34.6, 6.2, guestSuite.bathroom.d],
+    [19, 42, 12.2, 12.2, true], [0, 54.2, 31.2, 7, false, false],
     [7.1, powderNorthZ, 5.1, guestEntry.coatCloset.d, true]
   ].forEach(([x, z, w, d, hardwood = false, interior = true]) => floor(x, z, w, d, hardwood, shell, interior));
 
@@ -769,7 +772,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [officeEntry.x, officeNorthZ, officeEntry.x, 54.2, false, [[officeEntry.z - officeEntry.width / 2 - officeNorthZ, officeEntry.z + officeEntry.width / 2 - officeNorthZ, 0, officeEntry.height]]],
     [0, officeNorthZ, 12.2, officeNorthZ], [0, 54.2, 31.2, 54.2, false, [[3, 9, 3, 8], [13.1, 18.1, 0, 7], [21.2, 28.8, 3, 8]], ceilingHeight, [-1]],
     [19, 34.6, 19, 54.2, false, [[7.4, 10.4, 0, 7]]], [19, 34.6, 25, 34.6],
-    [25, 34.6, 25, 42], [19, 42, 25, 42, false, [[1.4, 4.6, 0, 7]]], [25, 39.2, 31.2, 39.2, false, [[2, 4.7, 0, 7]]],
+    [25, 34.6, 25, 42],
+    [19, 42, 25, 42, false, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x - 19 + guestSuite.closetDoor.width, 0, 7]]],
+    [25, 42, 31.2, 42, false, [[guestSuite.bathroomDoor.x - 25, guestSuite.bathroomDoor.x - 25 + guestSuite.bathroomDoor.width, 0, 7]]],
     [25, 34.6, 29, 34.6], [29, 34.6, 31.2, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
     [31.2, 34.6, 31.2, 49, false, [], ceilingHeight, [-1, 1], 0, garageFloorY], [29, 26.9, 29, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
     [29, 26.9, 29.6875, 26.9, true, [], ceilingHeight, [-1, 1], -1, garageFloorY],
@@ -790,7 +795,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     ['Hall', 13.3, kidsRoom.z - 8], ['Prep kitchen', 17.5, 15 - kitchenWindowWallZ], ['Mudroom', 7.4, 11.9],
     ['Garage', 26.5, 34, true], ['Kids room', kidsRoom.width, kidsRoom.depth],
     ['Powder room', 7.1, guestEntry.powder.d], ['Guest coat closet', 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 5.1, guestEntry.alcove.d], ['Office', 12.2, 54.2 - officeNorthZ],
-    ['Closet', 6, 7.4], ['Bath', 6.2, 4.6],
+    ['Guest walk-in closet', 6, 7.4], ['Guest shower bathroom', 6.2, guestSuite.bathroom.d],
     ['Bedroom', 12.2, 12.2], ['Porch', 31.2, 7]
   ].forEach((room) => roomDimensions(...room));
 
@@ -1047,6 +1052,67 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(sofa, x, 2.35, -sofaDepth / 2 + 0.5, seatWidth - 0.05, (sofaHeight - 2.35) * 2, 0.65, tanLeatherCushion, true).name = 'Lounge-style loose back cushion';
   }
 
+  const sectional = new THREE.Group();
+  sectional.name = 'U-shaped double-chaise sectional concept';
+  sectional.userData = {
+    widthInches: 132, depthInches: 68, baseDepthInches: 42, heightInches: 36, armWidthInches: 4,
+    modules: ['chaise', 'seat', 'seat', 'chaise'], sectional: true, purchaseSelected: false, provisional: true
+  };
+  sectional.position.set(11.25, 0, livingCenterZ);
+  sectional.rotation.y = -Math.PI / 2;
+  scene.add(sectional);
+  const sectionalWidth = sectional.userData.widthInches / 12;
+  const sectionalBaseDepth = sectional.userData.baseDepthInches / 12;
+  const sectionalDepth = sectional.userData.depthInches / 12;
+  const sectionalArm = sectional.userData.armWidthInches / 12;
+  const sectionalSeatWidth = (sectionalWidth - 2 * sectionalArm) / sectional.userData.modules.length;
+  box(sectional, 0, 0.75, 0, sectionalWidth, 0.95, sectionalBaseDepth, tanLeather, true).name = 'Sectional main base';
+  box(sectional, 0, 1.8, -sectionalBaseDepth / 2 + 0.2, sectionalWidth, 2.4, 0.4, tanLeather, true).name = 'Sectional continuous back';
+  const sectionalExtension = sectionalDepth - sectionalBaseDepth;
+  for (const side of [-1, 1]) {
+    box(sectional, side * (sectionalWidth - sectionalSeatWidth - sectionalArm) / 2, 0.75, sectionalBaseDepth / 2 + sectionalExtension / 2, sectionalSeatWidth + sectionalArm, 0.95, sectionalExtension, tanLeather, true).name = 'Sectional chaise extension';
+    box(sectional, side * (sectionalWidth - sectionalArm) / 2, 1.3, sectionalExtension / 2, sectionalArm, 1.8, sectionalDepth, tanLeather, true).name = 'Sectional outer arm';
+  }
+  sectional.userData.modules.forEach((type, index) => {
+    const x = (index - 1.5) * sectionalSeatWidth;
+    const depth = (type === 'chaise' ? sectionalDepth : sectionalBaseDepth) - 0.5;
+    const rear = -sectionalBaseDepth / 2 + 0.4;
+    const cushion = box(sectional, x, 1.35, rear + depth / 2, sectionalSeatWidth - 0.04, 0.45, depth, tanLeatherCushion, true);
+    cushion.name = `Sectional ${type} cushion ${index + 1}`;
+    cushion.userData = { moduleIndex: index, type };
+    box(sectional, x, 2.3, -sectionalBaseDepth / 2 + 0.5, sectionalSeatWidth - 0.05, 1.4, 0.65, tanLeatherCushion, true).name = 'Sectional loose back cushion';
+  });
+
+  const strandmonWidth = 32.25 / 12;
+  const strandmonDepth = 37.75 / 12;
+  const strandmonHeight = 39.75 / 12;
+  const strandmonFabric = mat('#c2b09a', 0.98);
+  const strandmonChairs = [0, 1].map((index) => {
+    const chair = new THREE.Group();
+    chair.name = `IKEA STRANDMON wing chair ${index + 1}`;
+    chair.userData = { seats: 1, manufacturer: 'IKEA', model: 'STRANDMON', widthInches: 32.25, depthInches: 37.75, heightInches: 39.75, seatHeightInches: 17.75, productURL: 'https://www.ikea.com/us/en/p/strandmon-wing-chair-talliden-beige-brown-30628943/', finish: 'Warm beige screen approximation; fabric not selected', manufacturerCAD: false };
+    scene.add(chair);
+    for (const x of [-strandmonWidth / 2 + 0.25, strandmonWidth / 2 - 0.25]) {
+      for (const z of [-strandmonDepth / 2 + 0.3, strandmonDepth / 2 - 0.3]) cylinder(chair, x, 0.25, z, 0.065, 0.5, walnut, 0.045).name = 'STRANDMON dark tapered leg';
+    }
+    box(chair, 0, 0.84, 0, strandmonWidth, 0.8, strandmonDepth, strandmonFabric, true).name = 'STRANDMON upholstered base';
+    box(chair, 0, 17.75 / 12 - 0.125, 0.35, 19.25 / 12, 0.25, 21.25 / 12, strandmonFabric, true).name = 'STRANDMON seat cushion';
+    box(chair, 0, (1.25 + strandmonHeight) / 2, -strandmonDepth / 2 + 0.22, strandmonWidth - 0.4, strandmonHeight - 1.25, 0.44, strandmonFabric, true).name = 'STRANDMON high upholstered back';
+    for (const side of [-1, 1]) {
+      box(chair, side * (strandmonWidth / 2 - 0.12), (1.85 + strandmonHeight) / 2, -strandmonDepth / 2 + 0.36, 0.24, strandmonHeight - 1.85, 0.72, strandmonFabric, true).name = 'STRANDMON high back wing';
+      box(chair, side * (strandmonWidth / 2 - 0.18), 1.55, 0.06, 0.36, 0.8, strandmonDepth - 0.12, strandmonFabric, true).name = 'STRANDMON padded arm';
+    }
+    for (const x of [-0.42, 0.42]) {
+      for (const y of [2.05, 2.65]) {
+        const button = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), strandmonFabric);
+        button.position.set(x, y, -strandmonDepth / 2 + 0.455);
+        button.name = 'STRANDMON back upholstery button';
+        chair.add(button);
+      }
+    }
+    return chair;
+  });
+
   function loungeChair(x, z, rotation) {
     const chair = new THREE.Group();
     chair.name = 'Upholstered lounge chair';
@@ -1128,7 +1194,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const livingLayouts = [
     {
-      id: 'centered', title: 'E / Conversation pair', recommended: true,
+      id: 'double-chaise', title: 'F / Double-chaise sectional', recommended: true,
+      note: 'Double-chaise sectional plus two IKEA STRANDMON wing chairs in the window corners beside the media built-ins, angled inward. No ottomans or tables. Chair sizes follow IKEA; upholstery and occupied access remain to be confirmed.',
+      sectional: [11.25, livingCenterZ, -Math.PI / 2], sofa: null, chairs: [null, null],
+      strandmon: [[4.2, 10.65, Math.PI / 3], [4.2, 2 * livingCenterZ - 10.65, 2 * Math.PI / 3]]
+    },
+    {
+      id: 'centered', title: 'E / Earlier corner-chair layout',
       note: 'Move the dining-side chair toward the window corner with a matching ottoman. Keep the stair-side reading chair, its ottoman and book, centered sofa and flush closed media cabinets fixed.',
       sofa: [11.6, livingCenterZ, -Math.PI / 2], chairs: [[3.6, 10.9, Math.PI / 3], [2.9, livingFeatureWall.wallEndZ - 2.175, 2 * Math.PI / 3]],
     },
@@ -2055,18 +2127,74 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const prepShelfBottom = 0.75;
   const prepShelfLevels = [1, 2.3, 3.6, 4.9, 6.2, 7.5, ceilingHeight - prepShelfThickness / 2];
   const prepShelfBays = 5;
-  prepShelves.userData = { widthInches: prepShelfWidth * 12, depthInches: 12, bays: prepShelfBays, shelfLevels: prepShelfLevels.length, ceilingHeight, provisional: true };
+  const prepCleaningBay = 0;
+  const prepRobotBay = prepShelfBays - 1;
+  prepShelves.userData = { widthInches: prepShelfWidth * 12, depthInches: 12, bays: prepShelfBays, foodBays: 4, cleaningBays: 1, cleaningBayDepthInches: 12, robotDockBay: 5, shelfLevels: prepShelfLevels.length, ceilingHeight, provisional: true };
   for (let support = 0; support <= prepShelfBays; support++) {
     const x = -prepShelfWidth / 2 + prepShelfThickness / 2 + support * (prepShelfWidth - prepShelfThickness) / prepShelfBays;
     box(prepShelves, x, (prepShelfBottom + ceilingHeight) / 2, 0, prepShelfThickness, ceilingHeight - prepShelfBottom, prepShelfDepth, cabinetFinish).name = 'Pantry shelf upright';
   }
   for (const y of prepShelfLevels) {
     for (let bay = 0; bay < prepShelfBays; bay++) {
+      if (bay === prepCleaningBay || (bay === prepRobotBay && y === prepShelfLevels[0])) continue;
       const bayWidth = (prepShelfWidth - prepShelfThickness) / prepShelfBays;
       const x = -prepShelfWidth / 2 + prepShelfThickness / 2 + (bay + 0.5) * bayWidth;
       box(prepShelves, x, y, 0, bayWidth - prepShelfThickness, prepShelfThickness, prepShelfDepth, cabinetRailFinish).name = 'Open pantry shelf';
     }
   }
+
+  const prepCleaningLeft = prepShelfStart + 0.175;
+  const prepCleaningRight = prepShelfStart + (prepShelfWidth - prepShelfThickness) / prepShelfBays;
+  const prepCleaningWidth = prepCleaningRight - prepCleaningLeft;
+  const prepCleaningDepth = prepShelfDepth;
+  const prepCleaningRearZ = 14.65;
+  const cleaningStation = furnishing('Prep cleaning station', (prepCleaningLeft + prepCleaningRight) / 2, prepCleaningRearZ - prepCleaningDepth / 2);
+  cleaningStation.userData = { convertedPantryBay: 1, widthInches: prepCleaningWidth * 12, clearWidthInches: (prepCleaningWidth - 2 * prepShelfThickness) * 12, depthInches: 12, tallOpeningHeightInches: (6.2 - prepShelfThickness / 2) * 12, upperShelfLevels: 2, doors: false, equipmentSelected: false, provisional: true };
+  for (const side of [-1, 1]) {
+    box(cleaningStation, side * (prepCleaningWidth - prepShelfThickness) / 2, ceilingHeight / 2, 0, prepShelfThickness, ceilingHeight, prepCleaningDepth, cabinetFinish).name = 'Cleaning station full-height side panel';
+  }
+  box(cleaningStation, 0, ceilingHeight / 2, prepCleaningDepth / 2 - 0.03, prepCleaningWidth - 2 * prepShelfThickness, ceilingHeight, 0.06, cabinetFinish).name = 'Cleaning station backing';
+  for (const y of [6.2, 7.5, ceilingHeight - prepShelfThickness / 2]) {
+    box(cleaningStation, 0, y, 0, prepCleaningWidth - 2 * prepShelfThickness, prepShelfThickness, prepCleaningDepth - 0.12, cabinetRailFinish).name = y > 8 ? 'Cleaning station ceiling cap' : 'Cleaning station upper shelf';
+  }
+  const cleaningVacuum = new THREE.Group();
+  cleaningVacuum.name = 'Prep stored stick vacuum';
+  cleaningVacuum.position.set(-1.05, 0, -0.05);
+  cleaningVacuum.userData = { widthInches: 10.2, depthInches: 9, heightInches: 48, productSelected: false, provisional: true };
+  cleaningStation.add(cleaningVacuum);
+  box(cleaningVacuum, 0, 0.14, 0, 0.85, 0.28, 0.75, black, true).name = 'Stored vacuum floor head';
+  cylinder(cleaningVacuum, 0, 1.9, 0, 0.045, 3.4, steel).name = 'Stored vacuum wand';
+  box(cleaningVacuum, 0, 3.45, 0, 0.4, 0.75, 0.45, black, true).name = 'Stored vacuum motor and battery';
+  box(cleaningVacuum, 0, 3.85, 0.1, 0.3, 0.3, 0.12, steel).name = 'Stored vacuum grip';
+  box(cleaningStation, -1.05, 3.25, 0.35, 0.38, 0.65, 0.16, black).name = 'Vacuum wall charging mount allowance';
+  box(cleaningStation, -1.05, 3.25, 0.22, 0.12, 0.12, 0.42, black).name = 'Vacuum mount support';
+  const cleaningBroom = new THREE.Group();
+  cleaningBroom.name = 'Prep stored broom';
+  cleaningBroom.position.set(-0.25, 0, 0.1);
+  cleaningStation.add(cleaningBroom);
+  cylinder(cleaningBroom, 0, 2.35, 0, 0.035, 4.1, oak).name = 'Stored broom handle';
+  box(cleaningBroom, 0, 0.35, 0, 0.5, 0.2, 0.2, black).name = 'Stored broom head';
+  for (let bristle = 0; bristle < 6; bristle++) box(cleaningBroom, (bristle - 2.5) * 0.08, 0.15, 0, 0.065, 0.3, 0.18, linen).name = 'Broom bristles';
+  box(cleaningStation, -0.25, 4.25, 0.28, 0.12, 0.14, 0.32, brass).name = 'Broom retaining clip allowance';
+  box(cleaningStation, 0.2, 1.3, 0.42, 0.25, 0.4, 0.03, cream).name = 'Cleaning station power outlet allowance';
+  for (const x of [-0.75, 0.75]) {
+    box(cleaningStation, x, 6.55, 0, 1.15, 0.63, 0.75, linen, true).name = 'Cleaning accessory storage bin';
+  }
+
+  const prepRobotBayWidth = (prepShelfWidth - prepShelfThickness) / prepShelfBays;
+  const prepRobotX = prepShelfStart + prepShelfThickness / 2 + (prepRobotBay + 0.5) * prepRobotBayWidth;
+  const robotDock = furnishing('Prep robot docking station', prepRobotX, prepCleaningRearZ - 0.6, Math.PI / 2);
+  robotDock.userData = { pantryBay: prepRobotBay + 1, orientation: 'Sideways, facing west along the shelves', floorLevelRobotAccess: true, threshold: false, doors: false, depthAllowanceInches: 14, overheadClearHeightInches: (prepShelfLevels[1] - prepShelfThickness / 2) * 12, dockingClearancesVerified: false, provisional: true };
+  const cleaningRobot = new THREE.Group();
+  cleaningRobot.name = 'Prep iRobot vacuum allowance';
+  cleaningRobot.position.set(0, 0, -0.15);
+  cleaningRobot.userData = { manufacturerReference: 'iRobot', modelSelected: false, diameterInches: 14, heightInches: 4, dockType: 'Compact charging base only; no self-emptying tower', dockingClearancesVerified: false, provisional: true };
+  robotDock.add(cleaningRobot);
+  cylinder(cleaningRobot, 0, 2 / 12, 0, 7 / 12, 4 / 12, black).name = 'Robot vacuum body allowance';
+  cylinder(cleaningRobot, 0, 4 / 12 - 0.005, 0, 0.14, 0.01, steel).name = 'Robot vacuum top control';
+  box(robotDock, 0, 1 / 3, 0.64, 14 / 12, 2 / 3, 0.25, black, true).name = 'Compact robot charging base allowance';
+  box(robotDock, 0, 0.12, 0.48, 0.8, 0.12, 0.08, steel).name = 'Robot charging contacts allowance';
+  box(prepShelves, prepRobotX - prepShelves.position.x + 0.9, 0.75, 0.46, 0.25, 0.4, 0.03, cream).name = 'Robot dock power outlet allowance';
 
   const pantryContents = new THREE.Group();
   pantryContents.name = 'Prep pantry contents';
@@ -2078,6 +2206,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const pantryBottle = mat('#526342', 0.28);
   for (let level = 0; level < prepShelfLevels.length - 1; level++) {
     for (let bay = 0; bay < prepShelfBays; bay++) {
+      if (bay === prepCleaningBay || (bay === prepRobotBay && level === 0)) continue;
       const bayWidth = (prepShelfWidth - prepShelfThickness) / prepShelfBays;
       const supplies = new THREE.Group();
       supplies.name = `Pantry supplies bay ${bay + 1} level ${level + 1}`;
@@ -2127,33 +2256,78 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   tiledFloor('Mudroom tile', 38, 15, 7.4, 11.9);
-  const mudBench = furnishing('Six-cubby mudroom bench', 44.25, 21.75, -Math.PI / 2);
-  mudBench.userData = { cubbies: 6, hooks: 12 };
-  box(mudBench, 0, 1.55, 0, 7.8, 0.18, 1.8, oak);
-  box(mudBench, 0, 0.2, 0, 7.8, 0.15, 1.65, oak);
-  box(mudBench, 0, 4.2, -0.82, 7.8, 5, 0.12, cream);
-  for (let i = 0; i <= 6; i++) box(mudBench, -3.9 + i * 1.3, 0.88, 0, 0.08, 1.3, 1.65, oak);
-  for (let i = 0; i < 6; i++) {
-    const x = -3.25 + i * 1.3;
-    for (const dx of [-0.25, 0.25]) cylinder(mudBench, x + dx, 4.2, -0.66, 0.07, 0.18, brass);
-    box(mudBench, x, 6.45, -0.2, 1.22, 0.1, 1.3, oak);
+  const mudBench = furnishing('Five-cubby mudroom bench', 44.325, 22.35, -Math.PI / 2);
+  const mudStorageTop = ceilingHeight - 0.25;
+  const mudBenchWidth = 7.5;
+  const mudPanel = 0.75 / 12;
+  const mudCubbyPitch = (mudBenchWidth - mudPanel) / 5;
+  mudBench.userData = { cubbies: 5, hooks: 10, hooksPerCubby: 2, shoeOpenings: 10, widthInches: 90, depthInches: 18, seatHeightInches: 18, heightInches: mudStorageTop * 12, provisional: true };
+  box(mudBench, 0, 1.425, 0, mudBenchWidth, 0.15, 1.5, cabinetRailFinish).name = 'Mudroom oak bench seat';
+  box(mudBench, 0, (1.5 + mudStorageTop) / 2, -0.7, mudBenchWidth, mudStorageTop - 1.5, 0.1, cream).name = 'Washable mudroom cubby backing';
+  for (let i = 0; i <= 5; i++) {
+    const x = -mudBenchWidth / 2 + mudPanel / 2 + i * mudCubbyPitch;
+    box(mudBench, x, 0.675, 0, mudPanel, 1.35, 1.5, cabinetFinish).name = 'Open shoe bay divider';
+    box(mudBench, x, (1.5 + mudStorageTop) / 2, -0.175, mudPanel, mudStorageTop - 1.5, 1.15, cabinetFinish).name = 'Mudroom cubby partition';
   }
-  const laundry = furnishing('Future stacked laundry reservation', 39.8, 16.7);
-  laundry.userData = { reserved: true, width: 3, depth: 3, height: 7 };
-  box(laundry, 0, 3.5, 0, 3, 7, 3, linen);
-  for (const y of [1.85, 5.05]) {
-    const drum = cylinder(laundry, 0, 0, 0, 0.8, 0.08, black);
-    drum.rotation.x = Math.PI / 2;
-    drum.position.set(0, y, 1.55);
-    box(laundry, 0, y + 1, 1.55, 2.5, 0.12, 0.06, cream);
+  for (let i = 0; i < 5; i++) {
+    const cubby = new THREE.Group();
+    cubby.name = 'Mudroom family cubby';
+    cubby.position.x = -mudBenchWidth / 2 + mudPanel / 2 + (i + 0.5) * mudCubbyPitch;
+    cubby.userData = { hooks: 2, clearWidthInches: (mudCubbyPitch - mudPanel) * 12, shoeLevels: 2 };
+    mudBench.add(cubby);
+    for (const y of [0.12, 0.74]) box(cubby, 0, y, 0, mudCubbyPitch - mudPanel, 0.08, 1.4, cabinetRailFinish).name = 'Open cubby shoe shelf';
+    for (const x of [-0.3, 0.3]) {
+      const hook = new THREE.Group();
+      hook.name = 'Mudroom gold coat hook';
+      hook.position.set(x, 4.2, -0.57);
+      cubby.add(hook);
+      box(hook, 0, 0, 0, 0.1, 0.25, 0.06, brass).name = 'Hook mounting plate';
+      box(hook, 0, -0.05, 0.12, 0.055, 0.055, 0.24, brass).name = 'Coat hook arm';
+      box(hook, 0, 0.025, 0.225, 0.055, 0.15, 0.055, brass).name = 'Coat hook upturn';
+    }
+    for (const y of [6.35, 7.5, mudStorageTop - 0.04]) box(cubby, 0, y, -0.175, mudCubbyPitch - mudPanel, 0.08, 1.15, cabinetRailFinish).name = 'Mudroom upper cubby shelf';
   }
-  const mudCoats = furnishing('Mudroom coat and vacuum closet', 39.25, 19.6, Math.PI / 2);
-  box(mudCoats, 0, 4, 0, 2.25, 8, 2, cabinetFinish);
-  const mudCoatFront = shakerFront(mudCoats, 0, 4, 1.05, 2.21, 7.96);
-  cabinetPull(mudCoatFront, -0.85, 0.3, 0.09, 1, true);
-  const dropZone = furnishing('Mudroom drop zone', 43.3, 16.1);
-  cabinet(dropZone, 0, 0, 1.7, 1.4);
-  box(dropZone, 0, 4.5, -0.65, 1.5, 1.8, 0.08, black);
+
+  const laundry = furnishing('Mudroom stacked washer and dryer', 39.825, 16.925, Math.PI / 2);
+  laundry.userData = { reserved: true, bayWidthInches: 36, bayDepthInches: 36, applianceWidthInches: 27, applianceDepthInches: 32, stackHeightInches: 80, modelSelected: false, serviceClearancesVerified: false, provisional: true };
+  for (const x of [-1.5 + mudPanel / 2, 1.5 - mudPanel / 2]) box(laundry, x, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 3, cabinetFinish).name = 'Laundry reservation side panel';
+  box(laundry, 0, 7.1, 0, 3 - 2 * mudPanel, 0.1, 3, cabinetRailFinish).name = 'Laundry overhead compartment floor';
+  box(laundry, 0, mudStorageTop - 0.04, 0, 3 - 2 * mudPanel, 0.08, 3, cabinetRailFinish).name = 'Laundry overhead compartment top';
+  const laundryUpper = shakerFront(laundry, 0, (7.15 + mudStorageTop - 0.08) / 2, 1.5, 3 - 2 * mudPanel - 0.04, mudStorageTop - 0.08 - 7.15 - 0.04);
+  cabinetPull(laundryUpper, 0, -0.45, 0.09, 0.4);
+  for (const [index, bottom] of [0.08, 3.4].entries()) {
+    const machine = new THREE.Group();
+    machine.name = index === 0 ? 'Mudroom washer concept' : 'Mudroom dryer concept';
+    machine.position.set(0, bottom, 0.04);
+    laundry.add(machine);
+    box(machine, 0, 1.625, 0, 2.25, 3.25, 32 / 12, porcelain, true).name = 'Stacked laundry appliance body';
+    for (const [radius, depth, z, finish] of [[0.84, 0.08, 1.36, steel], [0.7, 0.035, 1.415, black]]) {
+      const door = cylinder(machine, 0, 1.45, z, radius, depth, finish);
+      door.name = 'Laundry front-loading door';
+      door.rotation.x = Math.PI / 2;
+    }
+    box(machine, 0, 2.9, 1.35, 1.85, 0.22, 0.04, black).name = 'Laundry control panel';
+  }
+  box(laundry, 0, 3.365, 0.04, 2.25, 0.07, 32 / 12, steel).name = 'Provisional laundry stacking kit';
+
+  const mudCoats = furnishing('Mudroom hanging coat closet', 39.325, 19.9, Math.PI / 2);
+  mudCoats.userData = { widthInches: 30, depthInches: 24, heightInches: mudStorageTop * 12, lowerFrontOpen: true, hangingRail: true, shoeShelves: 6, integratedDropZone: true, provisional: true };
+  for (const x of [-1.25 + mudPanel / 2, 1.25 - mudPanel / 2]) box(mudCoats, x, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 2, cabinetFinish).name = 'Coat closet side panel';
+  box(mudCoats, 0, mudStorageTop / 2, -0.97, 2.5 - 2 * mudPanel, mudStorageTop, 0.06, cabinetFinish).name = 'Coat closet backing';
+  for (const y of [0.15, 1.15, 6.4, mudStorageTop - 0.04]) box(mudCoats, 0, y, 0, 2.5 - 2 * mudPanel, 0.08, 1.88, cabinetRailFinish).name = y < 2 ? 'Closet open shoe shelf' : 'Coat closet upper shelf';
+  box(mudCoats, 0.3, (1.19 + 6.36) / 2, 0, mudPanel, 6.36 - 1.19, 1.88, cabinetFinish).name = 'Coat and shoe tower divider';
+  const mudCoatRail = cylinder(mudCoats, -0.459375, 5.7, 0, 0.035, 1.45625, brass);
+  mudCoatRail.name = 'Mudroom coat hanging rail';
+  mudCoatRail.rotation.z = Math.PI / 2;
+  for (const x of [-0.85, -0.3]) {
+    box(mudCoats, x, 3.9, 0, 0.5, 3, 1.2, x < -0.5 ? linen : cream, true).name = 'Mudroom hanging coat';
+    box(mudCoats, x, 5.55, 0, 0.03, 0.3, 0.03, brass).name = 'Mudroom coat hanger';
+  }
+  for (const y of [2.1, 4.4, 5.3, 6.3]) box(mudCoats, 0.759375, y, 0.2, 0.85625, 0.08, 1.4, cabinetRailFinish).name = 'Extra open shoe shelf';
+  box(mudCoats, 0.759375, 3.35, 0.2, 0.85625, 0.1, 1.4, countertop).name = 'Mudroom keys and charging drop zone';
+  box(mudCoats, 0.759375, 3.9, -0.92, 0.25, 0.35, 0.03, cream).name = 'Mudroom charging outlet allowance';
+  const mudCoatUpper = shakerFront(mudCoats, 0, (6.44 + mudStorageTop - 0.08) / 2, 1.02, 2.5 - 2 * mudPanel - 0.04, mudStorageTop - 0.08 - 6.44 - 0.04);
+  cabinetPull(mudCoatUpper, 0, -0.65, 0.09, 0.4);
 
   const epoxy = mat('#a7aaa6', 0.55);
   for (const { x, z, w, d } of garageFloorAreas) {
@@ -2274,6 +2448,30 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   bikeRack.traverse((object) => { if (object.isMesh) object.userData.tourObstacle = true; });
 
+  const bikeStorage = furnishing('Over-bike storage lift concept', 50.4, 18.5, 0, garageFloorY);
+  const bikeStorageHeight = 7.5;
+  bikeStorage.userData = { widthFeet: 8, depthFeet: 4, deckTopAboveGarageFeet: bikeStorageHeight, undersideAboveGarageFeet: 7.25, access: 'Goods-only lowering platform; clear all bikes and people from the lowering zone before operation', walkOnPlatform: false, engineered: false, ratedLoadPounds: null, provisional: true };
+  bikeStorage.visible = bikeStorageInput.checked;
+  box(bikeStorage, 0, bikeStorageHeight - 0.125, 0, 8, 0.25, 4, steel).name = 'Storage lift raised goods platform';
+  for (const side of [-1, 1]) {
+    box(bikeStorage, side * 3.96, bikeStorageHeight + 0.16, 0, 0.08, 0.32, 4, black).name = 'Storage tray side lip';
+    box(bikeStorage, 0, bikeStorageHeight + 0.16, side * 1.96, 8, 0.32, 0.08, black).name = 'Storage tray end lip';
+  }
+  const bikeStorageAnchorY = ceilingHeight - garageFloorY - 0.2;
+  for (const x of [-3.75, 3.75]) {
+    for (const z of [-1.75, 1.75]) {
+      box(bikeStorage, x, bikeStorageAnchorY, z, 0.5, 0.12, 0.5, black).name = 'Storage lift schematic ceiling attachment';
+      stairBeam('Storage lift schematic suspension', [x, bikeStorageHeight, z], [x, bikeStorageAnchorY - 0.06, z], 0.035, 0.035, steel, bikeStorage);
+    }
+  }
+  box(bikeStorage, 0, bikeStorageAnchorY - 0.1, -1.75, 1.2, 0.25, 0.5, black).name = 'Storage lift schematic drive housing';
+  for (const x of [-3, -1, 1, 3]) {
+    for (const z of [-0.95, 0.95]) {
+      box(bikeStorage, x, bikeStorageHeight + 0.7, z, 1.6, 1.4, 1.5, linen, true).name = 'Over-bike seasonal storage bin';
+      box(bikeStorage, x, bikeStorageHeight + 1.43, z, 1.66, 0.06, 1.56, black).name = 'Over-bike storage bin lid';
+    }
+  }
+
   const yardTools = furnishing('Garage yard-tool storage', 32.95, 27.115, 0, garageFloorY);
   yardTools.userData = { location: 'House-side wall in front of the BMW, clear of the house-entry steps', storage: 'Upright-storage battery mower and rolling shop vac; wall rail, hand-tool board, and battery shelf', provisional: true };
   const toolGreen = mat('#67826a');
@@ -2326,9 +2524,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const kidsClay = mat('#b98369');
   const kidsBlue = mat('#78949a');
-  const kidsRug = furnishing('Kids play rug', 24.5, 29.8);
-  kidsRug.userData = { widthInches: 90, depthInches: 72, finish: 'Muted sage, washable low-pile direction', provisional: true };
-  box(kidsRug, 0, 0.07, 0, 7.5, 0.06, 6, linen, true);
+  const kidsRug = furnishing('Kids play rug', 23.4, 30.5);
+  kidsRug.userData = { widthInches: 78, depthInches: 42, finish: 'Muted sage, washable low-pile direction', provisional: true };
+  box(kidsRug, 0, 0.07, 0, 6.5, 0.06, 3.5, linen, true);
   const toyStorage = furnishing('Kids low toy storage', 24, 33.65, Math.PI);
   toyStorage.userData = { widthInches: 96, depthInches: 15, heightInches: 24, closedStorage: true, wallAnchorageRequired: true, provisional: true };
   box(toyStorage, 0, 0.15, -0.1, 7.9, 0.3, 1.05, cabinetFinish).name = 'Toy storage recessed plinth';
@@ -2338,7 +2536,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const front = shakerFront(toyStorage, (door - 1.5) * 2, 1.1, 0.665, 1.96, 1.66);
     cabinetPull(front, 0, 0.55, 0.09, 0.35);
   }
-  const readingBench = furnishing('Kids reading bench', 23.5, 26.75);
+  const readingBench = furnishing('Kids reading bench', 27.9, 30.1, -Math.PI / 2);
   readingBench.userData = { widthInches: 60, depthInches: 18, seatHeightInches: 18, upholstery: 'Washable sage direction', wallAnchorageRequired: true, provisional: true };
   box(readingBench, 0, 0.7, 0, 5, 1.25, 1.5, cabinetFinish).name = 'Reading bench storage base';
   box(readingBench, 0, 1.4, 0, 5, 0.2, 1.5, linen, true).name = 'Sage reading bench cushion';
@@ -2347,7 +2545,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     cabinetPull(front, 0, 0.4, 0.09, 0.35);
     box(readingBench, side * 1.25, 1.85, -0.55, 1.5, 0.7, 0.3, side < 0 ? kidsClay : linen, true).name = 'Reading nook back cushion';
   }
-  const kidsBooks = furnishing('Kids face-out book display', 28.4, 31.8, -Math.PI / 2);
+  const kidsBooks = furnishing('Kids face-out book display', 19.65, 32.7, Math.PI / 2);
   kidsBooks.userData = { widthInches: 18, depthInches: 6, heightInches: 36, wallAnchorageRequired: true, provisional: true };
   box(kidsBooks, 0, 1.5, -0.2, 1.5, 3, 0.08, cabinetFinish).name = 'Low book display backing';
   for (const y of [0.5, 1.7]) {
@@ -2367,16 +2565,27 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(artDisplay, x - 0.2, 4.65, 0.08, 0.6, 0.5, 0.015, material);
     box(artDisplay, x + 0.2, 4.2, 0.08, 0.5, 0.3, 0.015, material);
   }
-  const activityTable = furnishing('Kids activity table', 23.5, 29.6);
-  activityTable.userData = { diameterInches: 32, heightInches: 20, shape: 'Round', provisional: true };
-  const activityTop = cylinder(activityTable, 0, 20 / 12 - 0.06, 0, 16 / 12, 0.12, cabinetRailFinish);
-  activityTop.name = 'Round kids activity tabletop';
-  activityTop.userData.tourObstacle = true;
-  for (const x of [-0.8, 0.8]) for (const z of [-0.8, 0.8]) box(activityTable, x, 0.75, z, 0.12, 1.5, 0.12, oak);
-  for (const x of [-2, 2]) {
-    const seat = furnishing('Kids activity stool', 23.5 + x, 29.6);
-    cylinder(seat, 0, 1.05, 0, 0.55, 0.18, cream);
-    for (const dx of [-0.3, 0.3]) box(seat, dx, 0.5, 0, 0.1, 1, 0.6, oak);
+  const kidsDeskWidth = 28.75 / 12;
+  const kidsDeskDepth = 19.625 / 12;
+  const kidsDeskHeight = 29.5 / 12;
+  const kidsDeskZ = kidsRoom.z + 0.35 + kidsDeskDepth / 2;
+  for (let index = 0; index < 3; index++) {
+    const x = kidsRoom.x + 0.65 + kidsDeskWidth / 2 + index * 2.5;
+    const desk = furnishing(`IKEA MICKE kids desk ${index + 1}`, x, kidsDeskZ);
+    desk.userData = { manufacturer: 'IKEA', model: 'MICKE', articleNumber: '302.130.76', widthInches: 28.75, depthInches: 19.625, heightInches: 29.5, productURL: 'https://www.ikea.com/us/en/p/micke-desk-white-30213076/', finish: 'White', manufacturerCAD: false, chairAllowanceInches: 30 };
+    box(desk, 0, kidsDeskHeight - 0.05, 0, kidsDeskWidth, 0.1, kidsDeskDepth, porcelain).name = 'MICKE white desktop';
+    box(desk, -kidsDeskWidth / 2 + 0.04, (kidsDeskHeight - 0.1) / 2, 0, 0.08, kidsDeskHeight - 0.1, kidsDeskDepth, porcelain).name = 'MICKE solid side support';
+    for (const z of [-kidsDeskDepth / 2 + 0.04, kidsDeskDepth / 2 - 0.04]) box(desk, kidsDeskWidth / 2 - 0.04, (kidsDeskHeight - 0.1) / 2, z, 0.06, kidsDeskHeight - 0.1, 0.06, porcelain).name = 'MICKE metal frame upright';
+    box(desk, kidsDeskWidth / 2 - 0.04, 0.03, 0, 0.06, 0.06, kidsDeskDepth, porcelain).name = 'MICKE metal frame foot';
+    box(desk, 0, 2.15, kidsDeskDepth / 2 - 0.03, kidsDeskWidth - 0.16, 0.35, 0.06, porcelain).name = 'MICKE drawer front';
+    box(desk, 0, 2.27, kidsDeskDepth / 2 - 0.003, 0.4, 0.06, 0.006, black).name = 'MICKE drawer finger recess';
+    box(desk, 0, 2, -kidsDeskDepth / 2 + 0.12, kidsDeskWidth - 0.16, 0.08, 0.24, porcelain).name = 'MICKE rear cable tray';
+    cylinder(desk, 0.75, kidsDeskHeight - 0.003, -0.5, 0.045, 0.006, black).name = 'MICKE cable outlet';
+    const chair = furnishing(`Kids desk chair ${index + 1}`, x, kidsDeskZ + kidsDeskDepth / 2 + 0.95, Math.PI);
+    chair.userData = { widthInches: 18, depthInches: 18, seatHeightInches: 18, productSelected: false, provisional: true };
+    box(chair, 0, 1.425, 0, 1.5, 0.15, 1.5, index === 1 ? kidsBlue : linen, true).name = 'Kids desk chair seat';
+    box(chair, 0, 2.05, -0.67, 1.5, 1.2, 0.1, index === 1 ? kidsBlue : linen, true).name = 'Kids desk chair back';
+    for (const dx of [-0.55, 0.55]) for (const z of [-0.5, 0.5]) box(chair, dx, 0.7, z, 0.1, 1.4, 0.1, oak).name = 'Kids desk chair leg';
   }
 
   for (const [index, [deskX, deskZ, rotation]] of [[3.8, officeNorthZ + 1.35, 0], [6, 52.8, Math.PI]].entries()) {
@@ -2503,9 +2712,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     cylinder(nightstand, 0, 3, 0, 0.4, 0.45, cream, 0.25);
   }
   const wardrobe = furnishing('Walk-in closet fittings', 0, 0);
-  box(wardrobe, 20.25, 7.6, 37.8, 1.8, 0.15, 5.8, oak);
+  wardrobe.userData = { nominalWidthInches: 72, nominalDepthInches: 88.8, hangingDepthInches: 24, openAisleInches: 36.6, provisional: true };
+  box(wardrobe, 20.25, 7.6, 37.8, 1.8, 0.15, 5.8, oak).name = 'Walk-in hanging shelf';
   const closetRail = cylinder(wardrobe, 20.25, 5.8, 37.8, 0.045, 5.8, brass);
   closetRail.rotation.x = Math.PI / 2;
+  closetRail.name = 'Continuous long and short hanging rail';
   for (let i = 0; i < 8; i++) {
     const longHang = i < 4;
     box(wardrobe, 20.25, longHang ? 3.2 : 4.6, 35.6 + i * 0.62, 1.25, longHang ? 4.8 : 2, 0.12, i % 2 ? cream : linen);
@@ -2513,9 +2724,20 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   const shortHangRail = cylinder(wardrobe, 20.25, 3.1, 39.15, 0.045, 2.7, brass);
   shortHangRail.rotation.x = Math.PI / 2;
+  shortHangRail.name = 'Continuous lower short-hang rail';
   cabinet(wardrobe, 23.2, 35.5, 2.8, 1.3, 2.85);
-  const linenStorage = furnishing('Bathroom linen cabinet', 30.4, 40.55, -Math.PI / 2);
-  cabinet(linenStorage, 0, 0, 2.1, 1.2, 6.8);
+  for (const y of [4, 5.5, 7]) box(wardrobe, 23.2, y, 35.5, 2.8, 0.1, 1.3, oak).name = 'Walk-in folded-clothes shelf';
+  for (const [name, opening, eastHinge] of [
+    ['Guest walk-in closet', guestSuite.closetDoor, true],
+    ['Guest bathroom', guestSuite.bathroomDoor, false]
+  ]) {
+    const door = furnishing(`${name} inward-opening door`, opening.x + (eastHinge ? opening.width : 0), opening.z, eastHinge ? -Math.PI / 2 : Math.PI / 2);
+    door.userData = { nominalWidthInches: opening.width * 12, heightInches: opening.height * 12, openAngleDegrees: 90, inwardSwing: true, hinge: eastHinge ? 'East jamb' : 'West jamb', provisional: true };
+    const side = eastHinge ? -1 : 1;
+    box(door, side * opening.width / 2, 3.5, 0, opening.width - 0.04, 6.96, 0.13, windowTrim).name = `${name} painted-white door leaf`;
+    for (const y of [1.8, 5.15]) for (const face of [-1, 1]) box(door, side * opening.width / 2, y, face * 0.075, opening.width - 0.4, 2.7, 0.025, cream).name = `${name} recessed panel`;
+    for (const face of [-1, 1]) box(door, side * (opening.width - 0.3), 3, face * 0.14, 0.15, 0.15, 0.16, brass, true).name = `${name} satin-gold knob`;
+  }
   const guestCoats = furnishing('Guest coat closet', 9.65, powderNorthZ + 1.2);
   guestCoats.userData = { purpose: 'Guest coats, separate from powder room', nominalWidthInches: 61.2, nominalDepthInches: 28.8, clearDepthInches: 24.6, doorWidthInches: 48, provisional: true };
   box(guestCoats, 0, 6.5, 0, 4.65, 0.1, 1.95, cabinetFinish).name = 'Guest coat closet upper shelf';
@@ -2560,9 +2782,35 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   tiledFloor('Powder room tile', guestEntry.powder.x, powderNorthZ, guestEntry.powder.w, guestEntry.powder.d);
   toilet('Powder toilet', guestEntry.toilet.x, guestEntry.toilet.z);
   vanity('Powder vanity', guestEntry.vanity.x, guestEntry.vanity.z, guestEntry.vanity.width, guestEntry.vanity.rotation);
-  tiledFloor('Guest bathroom tile', 25, 34.6, 6.2, 4.6);
-  vanity('Guest bathroom vanity', 29.8, 36, 2.2, -Math.PI / 2);
-  toilet('Guest bathroom toilet', 26.55, 36.3);
+  tiledFloor('Guest bathroom tile', guestSuite.bathroom.x, guestSuite.bathroom.z, guestSuite.bathroom.w, guestSuite.bathroom.d);
+  vanity('Guest bathroom vanity', guestSuite.vanity.x, guestSuite.vanity.z, guestSuite.vanity.width, guestSuite.vanity.rotation);
+  toilet('Guest bathroom toilet', guestSuite.toilet.x, guestSuite.toilet.z);
+  const showerLayout = guestSuite.shower;
+  const guestShower = furnishing('Guest bathroom shower', showerLayout.x, showerLayout.z);
+  guestShower.userData = { clearWidthInches: showerLayout.clearWidth * 12, clearDepthInches: showerLayout.clearDepth * 12, doorOpeningInches: showerLayout.doorWidth * 12, provisional: true };
+  box(guestShower, showerLayout.w / 2, 0.1, showerLayout.d / 2, showerLayout.w, 0.2, showerLayout.d, porcelain).name = 'Guest shower pan';
+  for (const x of [0.05, showerLayout.w - 0.05]) box(guestShower, x, 0.22, showerLayout.d / 2, 0.1, 0.24, showerLayout.d, countertop).name = 'Guest shower side curb';
+  for (const z of [0.05, showerLayout.d - 0.05]) box(guestShower, showerLayout.w / 2, 0.22, z, showerLayout.w, 0.24, 0.1, countertop).name = 'Guest shower end curb';
+  box(guestShower, 0.05, 3.5, showerLayout.d / 2, 0.08, 6.6, showerLayout.d, cream).name = 'Guest shower west tile';
+  box(guestShower, showerLayout.w / 2, 3.5, 0.05, showerLayout.w, 6.6, 0.08, cream).name = 'Guest shower north tile';
+  box(guestShower, showerLayout.w / 2, 3.4, showerLayout.d - 0.05, showerLayout.w, 6.4, 0.06, glass).name = 'Guest shower fixed south glass';
+  const showerHingeZ = showerLayout.d - 0.25;
+  const showerOpeningStart = showerHingeZ - showerLayout.doorWidth;
+  box(guestShower, showerLayout.w - 0.05, 3.4, showerOpeningStart / 2, 0.06, 6.4, showerOpeningStart, glass).name = 'Guest shower fixed east glass';
+  box(guestShower, showerLayout.w - 0.05, 3.4, (showerHingeZ + showerLayout.d) / 2, 0.06, 6.4, showerLayout.d - showerHingeZ, glass).name = 'Guest shower hinge-side glass';
+  const showerDoor = new THREE.Group();
+  showerDoor.name = 'Guest shower inward-opening glass door';
+  showerDoor.position.set(showerLayout.w - 0.05, 0, showerHingeZ);
+  showerDoor.rotation.y = Math.PI / 2;
+  showerDoor.userData = { nominalWidthInches: 30, openAngleDegrees: 90, inwardSwing: true, provisional: true };
+  guestShower.add(showerDoor);
+  box(showerDoor, 0, 3.4, -showerLayout.doorWidth / 2, 0.06, 6.36, showerLayout.doorWidth - 0.04, glass).name = 'Guest shower glass door leaf';
+  cylinder(showerDoor, 0.09, 3.4, -showerLayout.doorWidth + 0.25, 0.035, 0.65, brass).name = 'Guest shower gold door pull';
+  box(guestShower, showerLayout.w / 2, 0.21, 0.65, 0.55, 0.02, 0.18, steel).name = 'Guest shower drain';
+  cylinder(guestShower, 1.6, 5.8, 0.16, 0.035, 2.2, brass).name = 'Guest shower riser';
+  box(guestShower, 1.6, 6.85, 0.42, 0.07, 0.07, 0.6, brass).name = 'Guest shower head arm';
+  box(guestShower, 1.6, 6.8, 0.65, 0.6, 0.06, 0.6, brass).name = 'Guest shower rain head';
+  box(guestShower, 2.85, 3.5, 0.16, 0.18, 0.35, 0.12, brass).name = 'Guest shower mixer control';
 
   const frontDoor = furnishing('Double front entry', 15.6, 54.2);
   frontDoor.userData = { lockBrand: 'Wyze', lockModel: null, activeLeafHandingVerified: false, hardwareCompatibilityVerified: false };
@@ -2708,7 +2956,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     'upstairs-top': { target: [27, stairFloorToFloor, 28], offset: [0, 110, 0.1], span: 70 },
     social: { target: [19, 2, 12], offset: [27, 55, 32], span: 43 },
     living: { target: [12.5, 1.5, livingCenterZ], offset: [28, 27, 7], span: 32 },
-    kids: { target: [24, 1, 30.15], offset: [12, 38, -9], span: 17 },
+    kids: { target: [24, 1, 30.15], offset: [-12, 30, 18], span: 17 },
     dining: { target: [19.8, 1, 2.6], offset: [16, 19, 23], span: 20 },
     kitchen: { target: [32.2, 2, kitchenCenterZ], offset: [-22, 35, 27], span: 26 },
     cooktop: { target: [37, 5.3, cooktopCenterZ], offset: [-18, 0, 0], span: 11 },
@@ -2716,10 +2964,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     island: { target: [30.65 + island.position.x, 1.5, kitchenCenterZ], offset: [-12, 9, 10], span: 15 },
     whole: { target: [27, 0, 29], offset: [35, 75, 50], span: 78 },
     garage: { target: [43, 0, 33], offset: [15, 58, 10], span: 42 },
+    'bike-storage': { target: [50.4, 3.5, 18.5], offset: [0, 9, 12], span: 18 },
     prep: { target: [44, 1, 16], offset: [-28, 44, 30], span: 28 },
-    pantry: { target: [46.75, 4.5, 14.15], offset: [0, 0.2, -2.5], span: 12.5 },
+    pantry: { target: [46.75, 4.5, 14.15], offset: [0, 0.2, -2.5], span: 14 },
     'prep-counter': { target: [46.75, 4.5, prepCounterZ], offset: [0, 0.4, 2.6], span: 12.5 },
     powder: { target: [6.1, 0, powderNorthZ + 2.95], offset: [0, 30, 4], span: 17 },
+    'guest-suite': { target: [25.1, 0, 39.7], offset: [0, 36, 4], span: 18 },
     private: { target: [15.6, 1, 43], offset: [32, 49, 37], span: 40 },
     basement: { target: [stairOpening.x + stairOpening.width / 2, -3, stairOpening.z + stairOpening.depth / 2], offset: [4, 30, 5], span: 21 },
     top: { target: [27, 0, 29], offset: [0, 110, 0.1], span: 72 }
@@ -3091,7 +3341,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const starts = {
       upstairs: [...upstairs.start, 16.5, 23], 'upstairs-top': [...upstairs.start, 16.5, 23],
       whole: [15.6, 50, 15.6, 42], top: [15.6, 50, 15.6, 42], social: [20, 18, 20, 3],
-      living: [14.8, 23.9, 5, 16], kids: [20.1, 29, 23.5, 29.6], dining: [23, 7, 19.8, 2.6], kitchen: [33, 19.5, 32.25, 8],
+      living: [14.8, 23.9, 5, 16], kids: [20.1, 30, 24, 26], dining: [23, 7, 19.8, 2.6], kitchen: [33, 19.5, 32.25, 8],
       cooktop: [33, cooktopCenterZ, 37, cooktopCenterZ], fridge: [33, 23, 33, 26.9], island: [33, kitchenCenterZ, 28.65, kitchenCenterZ],
       prep: [43, 12, 48, prepCounterZ], pantry: [47, 12, 47, 14.15], 'prep-counter': [47, 12, 47, prepCounterZ],
       private: [15.6, 46, 15.6, 41], basement: [11.5, 33, 5, 30], garage: [43, 29, 43, 38]
@@ -3402,6 +3652,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     updatePendantVisibility();
     render();
   });
+  bikeStorageInput.addEventListener('change', () => {
+    bikeStorage.visible = bikeStorageInput.checked;
+    render();
+  });
   resetButton.disabled = false;
   resetButton.addEventListener('click', () => {
     setView('whole');
@@ -3472,7 +3726,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       if (placement.length === 3) object.rotation.y = placement[2];
     }
     place(sofa, layout.sofa);
+    place(sectional, layout.sectional ?? null);
     loungeChairs.forEach((chair, index) => place(chair, layout.chairs[index]));
+    strandmonChairs.forEach((chair, index) => place(chair, layout.strandmon?.[index] ?? null));
     [cornerOttoman, readingOttoman].forEach((ottoman, index) => {
       ottoman.visible = layout.id === 'centered' && loungeChairs[index].visible;
       ottoman.traverse((part) => { part.userData.livingLayoutHidden = !ottoman.visible; });
@@ -3508,14 +3764,29 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const islandCenterX = 30.65 + island.position.x;
     element(plan, 'rect', { x: islandCenterX - island.userData.width / 2, y: kitchenCenterZ - 8 - island.userData.length / 2, width: island.userData.width, height: island.userData.length, fill: '#e3ddcf' });
     element(plan, 'text', { x: islandCenterX, y: kitchenCenterZ - 8, 'font-size': 0.65, 'text-anchor': 'middle', stroke: 'none', fill: '#6d675b' }).textContent = 'Island';
-    function seat(placement, width, depth) {
+    function seat(placement, width, depth, color = '#b88558') {
       if (!placement) return;
       const group = element(plan, 'g', { transform: `translate(${placement[0]} ${placement[1] - 8}) rotate(${-placement[2] * 180 / Math.PI})` });
-      element(group, 'rect', { x: -width / 2, y: -depth / 2, width, height: depth, rx: 0.12, fill: '#b88558' });
+      element(group, 'rect', { x: -width / 2, y: -depth / 2, width, height: depth, rx: 0.12, fill: color });
       element(group, 'line', { x1: -width / 2 + 0.12, x2: width / 2 - 0.12, y1: -depth / 2 + 0.14, y2: -depth / 2 + 0.14, stroke: '#68452e', 'stroke-width': 0.16 });
+      return group;
     }
     seat(layout.sofa, 105 / 12, 46 / 12);
+    if (layout.sectional) {
+      const [x, z, rotation] = layout.sectional;
+      const group = element(plan, 'g', { transform: `translate(${x} ${z - 8}) rotate(${-rotation * 180 / Math.PI})`, 'data-double-chaise': 'true' });
+      element(group, 'rect', { x: -sectionalWidth / 2, y: -sectionalBaseDepth / 2, width: sectionalWidth, height: sectionalBaseDepth, rx: 0.12, fill: '#b88558' });
+      for (const side of [-1, 1]) {
+        element(group, 'rect', { x: side === -1 ? -sectionalWidth / 2 : sectionalWidth / 2 - sectionalSeatWidth - sectionalArm, y: sectionalBaseDepth / 2, width: sectionalSeatWidth + sectionalArm, height: sectionalExtension, rx: 0.12, fill: '#b88558' });
+      }
+      sectional.userData.modules.forEach((type, index) => {
+        const depth = (type === 'chaise' ? sectionalDepth : sectionalBaseDepth) - 0.5;
+        element(group, 'rect', { x: (index - 1.5) * sectionalSeatWidth - (sectionalSeatWidth - 0.04) / 2, y: -sectionalBaseDepth / 2 + 0.4, width: sectionalSeatWidth - 0.04, height: depth, rx: 0.1, fill: '#c89969', 'data-sectional-module': type });
+      });
+      element(group, 'line', { x1: -sectionalWidth / 2 + 0.12, x2: sectionalWidth / 2 - 0.12, y1: -sectionalBaseDepth / 2 + 0.14, y2: -sectionalBaseDepth / 2 + 0.14, stroke: '#68452e', 'stroke-width': 0.16 });
+    }
     layout.chairs.forEach((placement) => seat(placement, 34 / 12, 34.5 / 12));
+    for (const placement of layout.strandmon ?? []) seat(placement, strandmonWidth, strandmonDepth, '#c2b09a').setAttribute('data-strandmon-chair', 'true');
     if (layout.id === 'centered') {
       [cornerOttoman, readingOttoman].forEach((ottoman, index) => {
         const [x, z, rotation] = layout.chairs[index];
@@ -3646,5 +3917,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (new URLSearchParams(window.location.search).get('designer') === 'ground') document.getElementById('ground-designer-open').click();
   }
   islandLightsInput.disabled = false;
+  bikeStorageInput.disabled = false;
   navigationButtons.forEach((button) => { button.disabled = button.dataset.navigation === 'walk' && (activeFloor === 'exterior' || (activeFloor === 'ground' && Boolean(groundLayoutPreview))); });
 }

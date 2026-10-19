@@ -100,15 +100,15 @@ Dimensions include nominal room envelopes, not guaranteed usable clear rectangle
 | Main kitchen | 26.5-38 / 7-26.9 | 11 ft 6 in x 19 ft 11 in | North sink wall, east cooktop/passages, south refrigeration; island shifts into open living-side space |
 | Hall / circulation zone | Nominal 13.3 x 17.7 ft schedule | 13 ft 4 in x 17 ft 8 in | Irregular connected route around stairs/private rooms, not a separate unobstructed rectangle |
 | Prep kitchen | 38-55.5 / 7-15 | 17 ft 6 in x 8 ft | North counter/tower, south pantry shelves; entry from main kitchen, not directly from mudroom |
-| Mudroom | 38-45.4 / 15-26.9 | 7 ft 5 in x 11 ft 11 in | Kitchen passage, garage entry, bench/hooks, coat/vacuum closet, drop zone, future laundry |
+| Mudroom | 38-45.4 / 15-26.9 | 7 ft 5 in x 11 ft 11 in | Kitchen passage, garage entry, five-cubby bench, coat/shoe closet, integrated drop zone, stacked-laundry bay |
 | Garage | 45.4-55.5 / 15-26.9 plus 29-55.5 / 26.9-34.6 plus 31.2-55.5 / 34.6-49 | 26 ft 6 in x 34 ft maximum | Stepped footprint; narrow forward bike alcove, two parking bays, lower slab |
-| Kids' room | 19-29 / 25.7-34.6 | 10 ft x 8 ft 11 in | Former central stair area; 54 x 96 in doorless west hall entry; no exterior window or direct living-room opening |
+| Kids' room | 19-29 / 24.7367-34.6 | Approximately 10 ft x 9 ft 10 in | Former central stair area; three MICKE desks; 54 x 96 in doorless west hall entry; no exterior window or direct living-room opening |
 | Powder room | 0-7.1 / 35.1-41 | 7 ft 1 in x 5 ft 11 in | Hall-facing east-wall door via guest alcove; toilet retained, vanity on south wall; tile extends 1 ft south |
 | Guest coat closet | 7.1-12.2 / 35.1-37.5 | 5 ft 1 in x 2 ft 5 in | Separate reach-in closet; 24.6 in clear depth, upper shelf/hanging rail, closed 48 in oak door pair facing alcove |
 | Guest entry alcove | 7.1-12.2 / 37.5-41 | 5 ft 1 in x 3 ft 6 in | Open east to entry hall; 37.8 in between finished north/south wall faces, not occupied/accessibility approval |
 | Office | 0-12.2 / 41-54.2 | 12 ft 2 in x 13 ft 2 in | 161.04 sq ft nominal; return prior 12.2 sq ft expansion to guest-entry band; north desk/chair move 1 ft south, other furniture and French doors retained |
-| Walk-in closet | 19-25 / 34.6-42 | 6 ft x 7 ft 5 in | Long/short hanging, shelf and closed storage |
-| Small guest bath | 25-31.2 / 34.6-39.2 | 6 ft 2 in x 4 ft 7 in | Toilet/vanity only; adjoining vestibule is separate, z = 39.2-42 |
+| Walk-in closet | 19-25 / 34.6-42 | 6 ft x 7 ft 5 in | Separate bedroom entry; west long/short hanging, north closed storage and shelves |
+| Guest shower bathroom | 25-31.2 / 34.6-42 | 6 ft 2 in x 7 ft 5 in | Absorbs former linen/unused Laundry strip; northwest shower, northeast toilet, east vanity; separate bedroom entry |
 | Ground-floor bedroom | 19-31.2 / 42-54.2 | 12 ft 2 in x 12 ft 2 in | Queen headboard on east wall, entry on west, porch-facing window |
 | Front porch | 0-31.2 / 54.2-61.2 | 31 ft 2 in x 7 ft | Paving, two benches, centered double front entry; low perimeter edges |
 
@@ -184,11 +184,14 @@ The freezer stays closed; its state button and swing interaction are removed. Th
 | Microwave / wall-oven tower | x = 38.5-41.25; rear z = 7.25; 33 in wide x 25 in deep; reaches 9 ft ceiling |
 | Tower appliance allowance | 30 x 48 x 24 in W/H/D, y = 2-6; microwave above oven, storage above/below; no selected product |
 | Tower-to-left-base gap | 1.2 in body gap, about 0.84 in to counter overhang |
-| Opposite pantry shelves | x = 38.175-55.325, z = 13.65-14.65; 205.8 in (17 ft 1.8 in) wide x 12 in deep |
-| Shelf organization | Five bays; six usable shelf levels at y = 1 / 2.3 / 3.6 / 4.9 / 6.2 / 7.5 ft; ceiling-height seventh cap; uprights start y = 0.75 |
-| Prep aisle | 52.5 in at counter, about 50.4 in at pulls, about 49.3 in at closed tower appliance handles |
+| Opposite pantry shelves | x = 38.175-55.325, z = 13.65-14.65; 205.8 in (17 ft 1.8 in) overall; four food bays plus one cleaning end bay, all 12 in deep |
+| Food shelf organization | Three bays retain six usable levels at y = 1 / 2.3 / 3.6 / 4.9 / 6.2 / 7.5 ft; east-end robot bay omits y = 1 shelf and contents, retaining five food levels; empty ceiling caps and original uprights remain |
+| Cleaning bay | x = 38.35-41.5925, z = 13.65-14.65; 38.91 in wide x 12 in deep, 37.41 in clear width; open lower height 74.025 in, upper shelves y = 6.2 / 7.5 ft and ceiling cap; slim vacuum and broom stay behind shelf-front line |
+| Robot dock | Opposite east-end bay 5; assembly center (53.585, 14.05), rotated 90 degrees, facing west along shelves; provisional 14-inch robot and compact 8-inch-high base turn together; rear-wall outlet stays fixed; no threshold, deeper cabinet or self-emptying tower |
+| Robot shelf clearance | Bottom shelf and its contents removed in bay 5 only; next shelf underside y = 2.26875 ft (27.225 in); higher shelving/contents remain; sideways robot projects about 2.2 in beyond shelf-front z = 13.65, reduced from 6.8 in |
+| Prep aisle | Restored to 52.5 in at counter, about 50.4 in at pulls, and 49.28 in at closed oven handles; robot floor projection occurs at the opposite end, not in front of the oven |
 
-No cooktop or upper cabinets above the prep sink. Keep dry-goods jars, packages, baskets, oil, and cans on the six usable shelf levels; ceiling cap remains empty. Contents do not specify shelf capacity.
+No cooktop or upper cabinets above the prep sink. Food contents occupy only the four food bays; cleaning accessories stay in the separate cleaning bay. Ceiling caps remain empty. Contents do not specify shelf capacity. Equipment models, charging services/cord containment, manufacturer docking/approach clearances, oven heat/open-door access, and child-safe storage remain unverified; the static aisle does not approve robot operation.
 
 Countertop appliance envelopes, left to right; dimensions are W x D x H:
 
@@ -203,10 +206,10 @@ Rear edges are at backsplash face z = 7.26, bottoms y = 3.04. This is **stored p
 
 Mudroom details, coordinated with [family-entry requirements](mud-room.html):
 
-- Six-cubby bench at (44.25, 21.75), facing decreasing x: 93.6 in long x 21.6 in seat depth; six roughly 15.6 in bays, twelve hooks, shoe storage and upper shelf. Bay widths are nominal, not clear widths between partitions.
-- Future laundry reservation at (39.8, 16.7): 36 x 36 x 84 in W/D/H; not a selected washer/dryer or a verified service enclosure.
-- Coat/vacuum closet at (39.25, 19.6): 27 in along z x 24 in deep x 96 in high; z = 18.475-20.725, clear of the kitchen-entry casing.
-- Drop zone at (43.3, 16.1), facing increasing z: approximately 20.4 x 16.8 in base; storage, quartz top and wall panel.
+- Five-cubby bench at (44.325, 22.35), facing decreasing x: 90 in long x 18 in deep, seat top 18 in, z = 18.6-26.1. Each bay has approximately 17.1 in clear width, two gold hooks, two open shoe levels below the seat, and three upper shelves. Case top is 105 in beneath the 108-inch ceiling.
+- Stacked-laundry bay at (39.825, 16.925), facing increasing x: 36 x 36 in W/D reservation, z = 15.425-18.425. White-oak surround and overhead Shaker compartment rise to 105 in; the provisional stack is 27 in wide x 32 in deep x approximately 80 in high. No product or service enclosure is approved.
+- Coat/shoe closet at (39.325, 19.9), facing increasing x: 30 in along z x 24 in deep x 105 in high; z = 18.65-21.15, clear of kitchen-entry casing. The lower front remains open to show the hanging rail and coats, two full-width shoe shelves, four extra side shelves, and a small quartz key/charging tray. Closed Shaker storage is above.
+- Closed-case aisle, including the closet pull: approximately 36.8 in between x = 40.5075 and 43.575. Laundry-front space to the east wall is approximately 44.9 in beyond x = 41.4875. These are static geometry checks, not open-door or occupied operating clearances.
 - Direct prep-to-mudroom opening at z = 15, x = 42-45 is closed with wall/baseboard. Access is via the main kitchen or garage route.
 - Tile stays in the mudroom; prep remains hardwood. Future laundry services, vacuum charging, washable bench-wall finish and motion-sensor lighting are requirements, not fully coordinated installations.
 
@@ -222,16 +225,17 @@ Select Upstairs, then Top view or Tour. Ground camera buttons return downstairs;
 
 | Item | Current model and context |
 |---|---|
-| Living layout | E is default; reload restores E. Sofa (11.6, 17.475), facing decreasing x, retains 2 ft move toward fireplace; shares feature-wall midpoint between finished return z = 8.175 and stair edge z = 26.775 |
-| Sofa | Crate & Barrel Lounge Deep reference, 105 x 46 x 37 in W/D/H; warm tan leather, no chaise/sectional; not a purchase selection or certified four-person seat |
-| Lounge chairs | Approximately 34 x 34.5 in; dining-side chair moved toward window corner from (5.5, 12.675) to (3.6, 10.9), turned 60 degrees. Stair-side reading chair remains at (2.9, 24.6), turned 120 degrees, with its seat book. Gabriola is shape/size reference only |
-| Ottomans | Matching tan 24 x 20 x 16 in ottoman for each chair, centers 2.7 ft ahead in chair-local coordinates, approximately 5.15 in clear from chair front. Both appear only in default E, including its thumbnail; tour obstacles follow them |
-| Tables | Square walnut sofa-side table removed from the 3D model and all five layout previews. No living-room coffee/end/drink tables or floor lamp; chair ottomans and dining table are unchanged |
-| Seating clearance | Dining-side chair clears the cabinet front and return-wall trim in the model; its ottoman does not intersect the sofa. Reading chair clears the narrowed cabinet and stair guard but is tightly tucked. These are not walking aisles or cabinet-access approvals; occupied comfort and fireplace heat clearances remain unverified |
+| Living layout | F / Double-chaise sectional plus two IKEA STRANDMON wing chairs is default; reload restores F. Sectional back/body center (11.25, 17.475), facing decreasing x, aligned with the feature-wall midpoint. A-E remain earlier comparisons without STRANDMONs |
+| Sectional | Provisional warm-tan 132 x 68 x 36 in W/D/H; 42 in center-body depth, 4 in arms and four 31 in seating modules: chaise-seat-seat-chaise. End chaises extend 26 in beyond center seats. Four primary positions, not verified seating for six; no product selected |
+| STRANDMON pair | [IKEA dimensions](https://www.ikea.com/us/en/p/strandmon-wing-chair-talliden-beige-brown-30628943/): each 32.25 x 37.75 x 39.75 in W/D/H; seat 19.25 x 21.25 in, 17.75 in high. One chair in each window corner beside the built-ins, centers (4.2, 10.65) / (4.2, 24.3), turns 60 / 120 degrees. Simplified high-back/wing/padded-arm models with dark legs; warm beige screen approximation, fabric not selected. F only; thumbnails and tour obstacles follow the same placements |
+| Earlier sofa/chairs | Hidden in F. A-E retain the 105 x 46 x 37 in Lounge Deep reference and their chair arrangements. E retains corner chairs at (3.6, 10.9) / (2.9, 24.6), turns 60 / 120 degrees, with reading book |
+| Ottomans | Hidden in F; E alone shows both matching tan 24 x 20 x 16 in ottomans and their thumbnail footprints. Switching updates hidden-furniture tour-obstacle flags |
+| Tables | Square walnut sofa-side table remains removed from every layout. No living-room coffee/end/drink tables or floor lamp; dining table unchanged |
+| Seating clearance | Modeled sectional bounds x = 7.333-13, z = 11.975-22.975, outside stair opening and more than 3 ft from fireplace stone. STRANDMON bounds x = 2.166-6.234, z = 8.700-12.600 / 22.350-26.250, height 3.3125 ft; no overlap with sectional, closed cabinets, projecting window sills or stair guard. These are rigid geometry checks, not occupied circulation, cabinet-door/window operation, six-person comfort, product fit or fireplace heat-clearance approvals |
 | Fireplace | Taupe-brown stacked-stone concept, 72 in wide x 108 in high, centered z = 17.475 on the 18.6 ft visible wall span; stone, TV, mantel, firebox and flames move together, 8.1 in toward stairs from former center. Finished face approximately x = 1.38 |
 | Fireplace details | Dark firebox, ember bed, 17 static flame shapes and TV; illustrative, not an actual installed appliance/heat analysis |
 | Mantel | White oak, 74.4 in wide x 3.6 in thick; underside 48 in high; approximately 6.9 in projection beyond stone |
-| Media/charging cabinets | Matching white-oak 24 x 11.76 x 26 in W/D/H cabinets, reduced from 36 in wide, directly adjoining both stone returns; centers z = 13.415 / 21.535, no lateral gaps. Rear edges x = 0.4 retain 3 in service gaps; closed door rails and top leading edges are flush with stone face x = 1.38, not mantel. Two narrower Shaker doors per cabinet with concealed push latches, internal equipment/charging shelves, clear tops below window aprons. All five layout thumbnails use the narrower footprints; under-stair bookcases unchanged |
+| Media/charging cabinets | Matching white-oak 24 x 11.76 x 26 in W/D/H cabinets, reduced from 36 in wide, directly adjoining both stone returns; centers z = 13.415 / 21.535, no lateral gaps. Rear edges x = 0.4 retain 3 in service gaps; closed door rails and top leading edges are flush with stone face x = 1.38, not mantel. Two narrower Shaker doors per cabinet with concealed push latches, internal equipment/charging shelves, clear tops below window aprons. All six layout thumbnails use the narrower footprints; under-stair bookcases unchanged |
 | Dining table | Article Seno walnut reference, 71 x 37.5 x 29 in L/D/H, center (19.35, 3.95). Rotate the complete set 90 degrees, long axis along z; retain the 1 ft rear-wall shift and move 6 in west away from the patio door |
 | Dining chairs | Six Article Nosh walnut/black-leather references, about 20 x 21 x 31 in W/D/H with 19 in seat height; two per long side, one each end |
 | Chair placement | Every chair moved 2 in outward from fully tucked; side-pair centers 21 in apart; seat centers remain 5.2 in inside table edges. This is stowed seating, not occupied pull-back clearance |
@@ -279,16 +283,17 @@ Basement retaining walls follow the opening, stop beneath the ground-floor slab 
 
 | Room | Furniture / fittings | Layout and constraints |
 |---|---|---|
-| Kids | 60 x 18 in reading bench, 18 in seat height at (23.5, 26.75), clear of north baseboard; face-out book display at (28.4, 31.8), 18 x 6 x 36 in W/D/H | Sage upholstery, books; former exterior window stays at west stairwell |
+| Kids | Three white IKEA MICKE desks, article 302.130.76, each 28.75 x 19.625 x 29.5 in W/D/H; centers x = 20.8479 / 23.3479 / 25.8479, z = 25.9044 | North-wall row, facing south; 1.25 in between desks; three provisional 18 x 18 in chairs centered z = 27.6721; [official product](https://www.ikea.com/us/en/p/micke-desk-white-30213076/) |
+| Kids | 60 x 18 in reading bench, 18 in seat height at (27.9, 30.1), facing west; face-out book display at (19.65, 32.7), facing east, 18 x 6 x 36 in W/D/H | Sage upholstery; book display clears the west-entry casing; former exterior window stays at west stairwell |
 | Kids | 96 x 15 x 24 in toy console at (24, 33.65), art display above at (24, 34.34) | Four oak Shaker doors; south wall; anchor storage/art safely |
-| Kids | Round 32 in table, 20 in high at (23.5, 29.6); stools at (21.5, 29.6) / (25.5, 29.6); 7.5 x 6 ft rug at (24.5, 29.8) | Keep west doorway approach clear; smaller room does not retain former 4 x 6 ft empty play-zone allowance |
+| Kids | 6.5 x 3.5 ft rug at (23.4, 30.5); round activity table and stools removed | Approximately 43.2 in from the end of a 30-inch desk-chair allowance to closed toy-console pulls; west-entry route remains open; occupied use and child ergonomics are unverified |
 | Office | Two 60 x 24 in desks at (3.8, 42.35) / (6, 52.8), latter rotated 180 degrees | North desk/chair move 1 ft south with returned wall; two monitors and task chair each; face opposite walls, no bookcase |
 | Office | Loveseat 60 x 33.6 in at (10.45, 50.4); SOLE E20 reference 65 x 22 x 64 in L/W/H at (1.65, 50.3) | Verify chair pull-back, window reach, pedal/user movement and headroom; no operating envelope certified |
 | Bedroom | Article Lenia queen reference 63.5 x 82.75 in W/D; center approximately (27.427083, 49.395), rotated -90 degrees | Headboard/rear edge x = 30.875 on east wall opposite west entry; faces decreasing x, not the porch |
 | Bedroom | Two nightstands, approximately 18 x 15.6 in, at (30.2, 45.695) / (30.2, 53.095) | Shifted toward porch with bed; porch-end stand limits further movement; keep trim/window clear |
-| Closet | Continuous long-hang rail and shorter lower hanging rail, upper shelf, closed cabinet | Requirement is smooth continuous rails without sliding-obstructing joints; fittings are conceptual |
+| Closet | Continuous long-hang rail and shorter lower hanging rail, upper shelf, north closed cabinet and three open shelves | Reserve 24 in hanging depth; at least 36 in remains beside the modeled fully open door/knob; fittings and occupied use need verification |
 | Powder | Toilet retained at (1.6, 36.65); 27.6 in vanity moved to (3.25, 39.95), rotated 180 degrees | South-wall vanity clears the inward-opening door; tiled room extends to z = 41; verify sanitary and occupied clearances |
-| Small guest bath | Toilet at (26.55, 36.3), 26.4 in vanity at (29.8, 36), tall linen storage in adjoining vestibule | No shower/tub modeled; do not label it a completed full bathroom |
+| Guest shower bathroom | Toilet at (29.7, 35.9), 30 in vanity at (30.2, 39.9), rotated -90 degrees; shower pan x = 25.175-28.375, z = 34.775-38.975 | Shower curb interiors 36 x 48 in, nominal 30 in inward glass door, drain/head/mixer; tall linen cabinet and vestibule partition removed; not an approved installation |
 | Guest coats | Reach-in closet centered (9.65, 36.3), upper shelf, continuous hanging rail, four illustrative coats | Replaces powder linen cabinet; separate closed oak door pair faces the open hall alcove, not the bathroom |
 | Porch | Two 60 x 20.4 in benches at (5, 55.4) / (26.2, 55.4) | No entry runner indoors; no sidelights/transom around the front doors |
 
@@ -345,13 +350,14 @@ Kitchen window piers and corner returns are 12 in; outer trim-cap returns are 7.
 | Kitchen to mudroom | 30 x 96 in, x = 38, z = 21.675-24.175 | Doorless; both openings mirror about z = 16.95 |
 | Hall to kids | 54 x 96 in, x = 19, z = 27-31.5 | Doorless west entry into relocated room; no direct living-side opening or sofa supervision |
 | Hall to office | Nominal 60 x 96 in envelope, x = 12.2, z = 42.75-47.75 | Two nominal 30 in white French leaves, each 2 columns x 5 rows of clear lites, white muntins, gold round knobs and dark hinges; white casing. Both stay fully open inward at 90 degrees into the office, perpendicular to the opening, on reload and view changes. Unit/jamb/rough opening, true/simulated divisions, safety glazing, handing and hardware unselected; see [office doors](office.html#doors) |
-| Hall to bedroom | 42 x 84 in, x = 19, z = 42-45 | Opening only; final door leaf/swing not detailed |
-| Closet-side connection | 38.4 x 84 in, x = 25, z = 40.2-43.4 | Traced conceptual connection; coordinate vestibule/bedroom boundaries and finished opening |
-| Bath to vestibule | 32.4 x 84 in, z = 39.2, x = 27-29.7 | No detailed door leaf/swing |
+| Hall to bedroom | 36 x 84 in, x = 19, z = 42-45 | Opening only; final door leaf/swing not detailed |
+| Bedroom to walk-in closet | Nominal 30 x 84 in, z = 42, x = 21.95-24.45 | White paneled leaf, east-jamb hinge, 90 degrees inward; west hanging zone stays clear |
+| Bedroom to shower bathroom | Nominal 30 x 84 in, z = 42, x = 25.65-28.15 | White paneled leaf, west-jamb hinge, 90 degrees inward; replaces former bath-to-vestibule opening |
+| Guest shower | Nominal 30 in glass door on east side, x = 28.325, z = 36.225-38.725 | South-end hinge, displayed 90 degrees inward; product/finished clear opening and water containment unverified |
 | Front entry | 60 x 84 in, z = 54.2, x = 13.1-18.1 | Two oak/glass leaves shown closed, no sidelights/transom; final door unit unselected |
 | Front entry lock | Wyze brand selected; exact model/finish unconfirmed | One schematic interior smart-lock body above the existing pull, positive-x leaf provisionally active; exterior keypad/reader and product dimensions not assumed. Verify stile/glazing, bore/backset, latch/strike, inactive leaf, and egress with supplier; see [lock notes](front-entry.html#smart-lock) |
 | Dining patio | 72 x 96 in combined assembly, x = 26.5, z = 0-6 | Higher-z nominal 36 in inward-hinged door shown closed; other half stacked casements |
-| Mudroom to garage | 36 x 84 in, z = 26.9, x = 41-44 | Two straight steps outside; rated door, landing and swing not resolved |
+| Mudroom to garage | 36 x 84 in, z = 26.9, x = 40-43 | Two straight steps outside; rated door, landing and swing not resolved |
 | Garage side pedestrian opening | 36 x 84 in, x = 55.5, z = 44-47 | Opening rises from garage datum, not house datum |
 | Garage vehicle doors, 2 | Each 108 x 96 in, z = 49, x = 32.5-41.5 / 44-53 | Heights rise from garage datum; proposed, not zoning approval |
 | Powder entry | Nominal 30 x 84 in, x = 7.1, z = 38-40.5 | Opening centered between finished alcove walls with casing room at both jambs; painted-white leaf, south-jamb hinge, displayed 90 degrees open inward, clear of hall alcove and vanity |
@@ -370,6 +376,7 @@ See [garage working layout](garage.html#working-layout). Vehicles are closed-obj
 | Parking gaps | Approximately 43.4 in center mirror aisle; Sierra nose/rear about 14.4 / 13.2 in; BMW rear about 5.7 in. Rear gaps are not routes |
 | EV charger | (42.75, 48.65), on the interior pier between garage doors; cable coiled off floor; supply/reach unverified |
 | Five-bike floor rack | Center (50.4, 18.5), 22.2 in nominal stand centers; both wheels on floor, no lifting/hooks |
+| Over-bike storage lift concept | 8 x 4 ft deck (32 sq ft), center (50.4, 18.5); deck top 7.5 ft / underside 7.25 ft above garage slab; eight illustrative bins; independent Visibility checkbox. Raised position only; goods-only, not walkable or load-rated. Bikes/people must clear the full lowering zone before real operation; structure, mechanism, safety controls and manufacturer requirements unverified |
 | Equipment station | Center (32.95, 27.115), against house-side wall in front of BMW; approximate x = 29.45-36.35, z = 27.075-29.105 |
 | Equipment contents | Upright-storage mower, rolling shop vac, blower, wall rail/hand-tool board, battery shelf and upper bins; no fixed workbench |
 | Equipment approach | Previously checked conservative BMW-front gap about 42.5 in; aim to keep 36 in retrieval route. Removing east-wall storage restored about 40 in beside truck mirror |
@@ -418,7 +425,7 @@ Physical samples must confirm stain, sheen, upholstery durability, quartz color,
 4. **Garage safety/access:** actual levels, rated door, required landings/rails, door tracks, vehicle/equipment movement and charger reach remain unverified; the two-step/no-rail concept is not approval.
 5. **Kitchen installation:** select actual steam oven, prep combination, hood/liner and fixture accessories; resolve cutouts, tower tolerance, appliance/door/drawer operation, services and quartz build-up/support.
 6. **Windows/exterior:** dealer/architect must confirm standard sizes, combinations, rough openings, structure/bracing, egress/safety glass, weatherproofing and sash operation. Exterior-wall extension needs site/elevation/foundation/roof review.
-7. **Bathroom completeness:** the small bath contains no shower/tub; do not count it as an approved full-bath arrangement. Fixture clearances/ventilation are not demonstrated.
+7. **Guest bathroom detailing:** shower/toilet/vanity are now modeled in the combined room. Actual sanitary clearances, finished openings, occupied use, waterproofing, safety glazing, exhaust and plumbing still require professional review; this is not an approved installation.
 8. **Furniture/use:** seating counts and object gaps are not occupied-clearance or accessibility certifications; verify chair/stool pull-back, bed/nightstand circulation, exercise use and kids' safety with real products.
 
 ### Audit evidence

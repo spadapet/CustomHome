@@ -42,13 +42,15 @@ function createUpstairsDesigner({ baseline, initialDocument, enter, preview, flo
   }
 
   function updateSaveStatus() {
+    const pending = dirty() || saving || Boolean(saveError);
+    saveStatus.hidden = !pending;
     saveStatus.textContent = saveError ? `Not saved: ${saveError} Keep this tab open; your edit is still here.`
       : saving ? 'Saving changes to the project...'
       : dirty() ? 'Changes waiting to save automatically...'
-      : 'Project layout saved. Edits save automatically as you design.';
+      : '';
     saveStatus.dataset.error = String(Boolean(saveError));
     saveStatus.setAttribute('aria-label', `${title} save status`);
-    element('upstairs-designer-open').textContent = dirty() || saving || saveError ? `${title} *` : title;
+    element('upstairs-designer-open').textContent = pending ? `${title} *` : title;
   }
 
   function queueSave() {

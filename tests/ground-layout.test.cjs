@@ -5,8 +5,114 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const layout = require('../upstairs-layout.js');
-const { getGroundFloorDefaultPlan, getLivingRoomFeatureLayout, getGuestEntryLayout } = require('../floor-plan-ground.js');
+const { getGroundFloorDefaultPlan, getLivingRoomFeatureLayout, getGuestEntryLayout, getGuestSuiteLayout } = require('../floor-plan-ground.js');
 const baseline = getGroundFloorDefaultPlan();
+
+test('guest suite has independent bedroom entries, a walk-in closet and a shower bathroom', () => {
+  const suite = getGuestSuiteLayout();
+  const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} differs from ${expected}`);
+  const bathroom = baseline.rooms.find((room) => room.name === 'Bathroom');
+  assert.deepEqual(bathroom, { name: 'Bathroom', ...suite.bathroom });
+  assert.deepEqual(baseline.rooms.find((room) => room.name === 'Guest room'), { name: 'Guest room', x: 19, z: 42, w: 12.2, d: 12.2 });
+  assert.deepEqual(baseline.rooms.find((room) => room.name === 'Closet'), { name: 'Closet', ...suite.closet });
+  assert.ok(!baseline.rooms.some((room) => room.name === 'Laundry'));
+  assert.ok(!baseline.walls.some(([name]) => name === 'Laundry north'));
+  close(baseline.floors.filter((floor) => ['Closet', 'Bathroom'].includes(floor.room)).reduce((area, floor) => area + floor.w * floor.d, 0), 12.2 * 7.4);
+  for (const [name, door, west, east] of [
+    ['Closet south', suite.closetDoor, 19, 25],
+    ['Bathroom south', suite.bathroomDoor, 25, 31.2]
+  ]) {
+    const wall = baseline.walls.find(([wallName]) => wallName === name);
+    close(wall[1] + wall[5][0][0], door.x);
+    close(wall[1] + wall[5][0][1], door.x + door.width);
+    close(wall[2], 42);
+    close(door.width * 12, 30);
+    const casing = (3.5 + 0.125) / 12;
+    assert.ok(door.x - west - 0.175 >= casing);
+    assert.ok(east - 0.175 - door.x - door.width >= casing);
+  }
+  close(suite.shower.clearWidth * 12, 36);
+  close(suite.shower.clearDepth * 12, 48);
+  close((suite.shower.w - 0.2) * 12, 36);
+  close((suite.shower.d - 0.2) * 12, 48);
+  assert.ok(suite.toilet.x - (suite.shower.x + suite.shower.w) >= 15 / 12, 'Toilet center clears shower side by 15 inches');
+  assert.ok(bathroom.x + bathroom.w - 0.175 - suite.toilet.x >= 15 / 12, 'Toilet center clears east wall by 15 inches');
+  assert.ok(suite.vanity.z - (suite.vanity.width + 0.06) / 2 - (suite.toilet.z + 0.85) >= 21 / 12, 'Toilet has at least 21 inches ahead before vanity');
+  assert.ok(suite.bathroomDoor.z - suite.bathroomDoor.width - (suite.shower.z + suite.shower.d) >= 0.5, 'Bathroom door sweep stays south of shower');
+  assert.ok(suite.closetDoor.x + suite.closetDoor.width - 0.22 - (19.175 + 2) >= 3, 'Closet retains a 36-inch aisle beside the fully open door and knob');
+  assert.deepEqual(baseline.walls.find(([name]) => name === 'Garage west').slice(1), [31.2, 34.6, 31.2, 49]);
+});
+
+test('furnished guest suite uses the shared fixtures, shower enclosure and inward doors', () => {
+  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  class Group {
+    constructor() {
+      this.children = [];
+      this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } };
+      this.rotation = {};
+      this.userData = {};
+    }
+    add(child) { this.children.push(child); }
+  }
+  const items = [];
+  const context = {
+    THREE: { Group }, guestSuite: getGuestSuiteLayout(),
+    windowTrim: {}, cream: {}, brass: {}, porcelain: {}, countertop: {}, glass: {}, steel: {},
+    furnishing(name, x, z, rotation = 0) {
+      const group = new Group();
+      Object.assign(group, { name, x, z });
+      group.rotation.y = rotation;
+      items.push(group);
+      return group;
+    },
+    box(parent, x, y, z, w, h, d, material) {
+      assert.ok(material, 'All shower and door parts use a defined material');
+      const mesh = { x, y, z, w, h, d, material };
+      parent.add(mesh);
+      return mesh;
+    },
+    cylinder(parent, x, y, z, radius, height, material) {
+      const mesh = { x, y, z, radius, height, material };
+      parent.add(mesh);
+      return mesh;
+    },
+    tiledFloor(name, x, z, w, d) { items.push({ name, x, z, w, d }); },
+    vanity(name, x, z, width, rotation) { items.push({ name, x, z, width, rotation }); },
+    toilet(name, x, z) { items.push({ name, x, z }); }
+  };
+  vm.runInNewContext(source.slice(source.indexOf('  for (const [name, opening, eastHinge] of ['), source.indexOf("  const guestCoats =")), context);
+  vm.runInNewContext(source.slice(source.indexOf("  tiledFloor('Guest bathroom tile'"), source.indexOf("  const frontDoor =")), context);
+  const suite = context.guestSuite;
+  const find = (name) => items.find((item) => item.name === name);
+  assert.deepEqual(find('Guest bathroom tile'), { name: 'Guest bathroom tile', ...suite.bathroom });
+  assert.equal(find('Guest bathroom vanity').x, suite.vanity.x);
+  assert.equal(find('Guest bathroom vanity').z, suite.vanity.z);
+  assert.equal(find('Guest bathroom vanity').width, suite.vanity.width);
+  assert.equal(find('Guest bathroom vanity').rotation, suite.vanity.rotation);
+  assert.equal(find('Guest bathroom toilet').x, suite.toilet.x);
+  assert.equal(find('Guest bathroom toilet').z, suite.toilet.z);
+  const shower = find('Guest bathroom shower');
+  const pan = shower.children.find((part) => part.name === 'Guest shower pan');
+  assert.equal(shower.x, suite.shower.x);
+  assert.equal(shower.z, suite.shower.z);
+  assert.equal(pan.w, suite.shower.w);
+  assert.equal(pan.d, suite.shower.d);
+  for (const name of ['Guest shower drain', 'Guest shower rain head', 'Guest shower mixer control', 'Guest shower fixed south glass', 'Guest shower fixed east glass']) {
+    assert.ok(shower.children.some((part) => part.name === name), name);
+  }
+  const glassDoor = shower.children.find((part) => part.name === 'Guest shower inward-opening glass door');
+  assert.equal(glassDoor.rotation.y, Math.PI / 2);
+  assert.equal(glassDoor.userData.nominalWidthInches, 30);
+  for (const [name, opening, sign] of [
+    ['Guest walk-in closet', suite.closetDoor, -1], ['Guest bathroom', suite.bathroomDoor, 1]
+  ]) {
+    const door = find(`${name} inward-opening door`);
+    assert.equal(door.rotation.y, sign * Math.PI / 2);
+    assert.equal(door.z, 42);
+    assert.equal(door.userData.nominalWidthInches, opening.width * 12);
+    assert.equal(door.children.filter((part) => part.name === `${name} painted-white door leaf`).length, 1);
+  }
+});
 
 test('guest powder room and coat closet have separate doors off an open hall alcove', () => {
   const entry = getGuestEntryLayout();
@@ -162,7 +268,105 @@ test('closed media cabinets adjoin both fireplace sides with no projection beyon
   });
 });
 
-test('fireplace and sofa stay centered while the reading chair sits near the stair corner', () => {
+test('double-chaise sectional has exactly chaise-seat-seat-chaise modules and fits the living area', () => {
+  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  class Group {
+    constructor() {
+      this.children = [];
+      this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } };
+      this.rotation = {};
+    }
+    add(child) { this.children.push(child); }
+  }
+  const scene = new Group();
+  const context = {
+    THREE: { Group }, scene, livingCenterZ: getLivingRoomFeatureLayout().centerZ, tanLeather: {}, tanLeatherCushion: {},
+    box(parent, x, y, z, width, height, depth) {
+      const mesh = { x, y, z, width, height, depth };
+      parent.add(mesh);
+      return mesh;
+    }
+  };
+  vm.runInNewContext(source.slice(source.indexOf('  const sectional ='), source.indexOf('  const strandmonWidth =')), context);
+  const sectional = scene.children[0];
+  const modules = sectional.children.filter((part) => part.userData);
+  assert.deepEqual(modules.map((part) => part.userData.type), ['chaise', 'seat', 'seat', 'chaise']);
+  assert.deepEqual(modules.map((part) => part.userData.moduleIndex), [0, 1, 2, 3]);
+  assert.ok(modules.every((part, index) => index === 0 || part.x > modules[index - 1].x));
+  assert.equal(modules[0].depth, modules[3].depth);
+  assert.equal(modules[1].depth, modules[2].depth);
+  assert.ok(Math.abs((modules[0].depth - modules[1].depth) * 12 - 26) < 1e-9);
+  assert.equal(sectional.children.filter((part) => part.name === 'Sectional chaise extension').length, 2);
+  const minX = Math.min(...sectional.children.map((part) => part.x - part.width / 2));
+  const maxX = Math.max(...sectional.children.map((part) => part.x + part.width / 2));
+  const minZ = Math.min(...sectional.children.map((part) => part.z - part.depth / 2));
+  const maxZ = Math.max(...sectional.children.map((part) => part.z + part.depth / 2));
+  assert.ok(Math.abs((maxX - minX) * 12 - 132) < 1e-9);
+  assert.ok(Math.abs((maxZ - minZ) * 12 - 68) < 1e-9);
+  assert.equal(Math.max(...sectional.children.map((part) => part.y + part.height / 2)) * 12, 36);
+  assert.equal(sectional.rotation.y, -Math.PI / 2);
+  assert.ok(sectional.position.x - maxZ - 1.38 > 3, 'Chaise tips leave more than three feet to fireplace face, not heat-clearance approval');
+  assert.ok(sectional.position.x - minZ <= 13.2, 'Sectional back remains inside living area');
+  assert.ok(sectional.position.z - maxX > getLivingRoomFeatureLayout().wallStartZ);
+  assert.ok(sectional.position.z - minX < baseline.stairs.z, 'Sectional stays outside stair opening');
+});
+
+test('sectional default replaces chairs and sofa, and comparison switching restores visibility and obstacle flags', () => {
+  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  function object(children = []) {
+    return {
+      children, userData: {}, visible: true, position: { set() {} }, rotation: {},
+      traverse(callback) { callback(this); this.children.forEach((child) => child.traverse(callback)); }
+    };
+  }
+  const cornerOttoman = object([object()]);
+  const readingOttoman = object([object()]);
+  const book = object();
+  const context = {
+    livingCenterZ: getLivingRoomFeatureLayout().centerZ, livingFeatureWall: getLivingRoomFeatureLayout(),
+    navigationMode: 'rotate', activeFloor: 'ground',
+    sofa: object([object()]), sectional: object([object()]),
+    strandmonChairs: [object([object()]), object([object()])],
+    loungeChairs: [object([cornerOttoman]), object([readingOttoman, book])], cornerOttoman, readingOttoman,
+    document: { querySelectorAll: () => [], getElementById: () => ({}) },
+    viewport: { dataset: {} }, buildWalkObstacles() {}
+  };
+  const layouts = source.slice(source.indexOf('  const livingLayouts ='), source.indexOf('  const tableX ='));
+  const apply = source.slice(source.indexOf('  function applyLivingLayout('), source.indexOf('  function livingPlan('));
+  vm.runInNewContext(`${layouts}\n${apply}\nglobalThis.layouts = livingLayouts;`, context);
+  const current = context.layouts[0];
+  assert.equal(current.id, 'double-chaise');
+  assert.equal(current.recommended, true);
+  assert.equal(current.sofa, null);
+  assert.ok(current.chairs.every((chair) => chair === null));
+  assert.equal(current.sectional[1], getLivingRoomFeatureLayout().centerZ);
+  const previous = context.layouts.find((layout) => layout.id === 'centered');
+  assert.ok(!previous.recommended);
+  assert.equal(context.layouts.length, 6);
+  for (const layout of [current, previous, current]) {
+    context.applyLivingLayout(layout, false);
+    const showingSectional = layout === current;
+    assert.equal(context.sectional.visible, showingSectional);
+    assert.equal(context.sofa.visible, !showingSectional);
+    for (const chair of context.strandmonChairs) {
+      assert.equal(chair.visible, showingSectional);
+      chair.traverse((part) => {
+        assert.equal(part.userData.livingLayoutHidden, !showingSectional, 'Wing chairs block tours only in their active layout');
+      });
+    }
+    for (const chair of context.loungeChairs) {
+      assert.equal(chair.visible, !showingSectional);
+      chair.traverse((part) => {
+        assert.equal(part.userData.livingLayoutHidden, showingSectional, 'Hidden seating and descendants do not block tours');
+      });
+    }
+    assert.equal(cornerOttoman.visible, !showingSectional);
+    assert.equal(readingOttoman.visible, !showingSectional);
+    assert.equal(context.sectional.children[0].userData.livingLayoutHidden, !showingSectional);
+  }
+});
+
+test('earlier corner-chair comparison preserves centered fireplace and sofa', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
   const context = { getLivingRoomFeatureLayout };
   const feature = getLivingRoomFeatureLayout();
@@ -170,9 +374,9 @@ test('fireplace and sofa stay centered while the reading chair sits near the sta
   const layoutData = source.slice(source.indexOf('  const livingLayouts ='), source.indexOf('  const tableX ='));
   vm.runInNewContext(`${windowData}\n${layoutData}\nglobalThis.windows = livingWindowCenters; globalThis.layouts = livingLayouts;`, context);
   const midpoint = (context.windows[0] + context.windows[1]) / 2;
-  const layout = context.layouts[0];
+  const layout = context.layouts.find((option) => option.id === 'centered');
   assert.equal(layout.id, 'centered');
-  assert.equal(layout.recommended, true);
+  assert.ok(!layout.recommended);
   assert.equal(feature.wallStartZ, 8.175);
   assert.equal(feature.wallEndZ, baseline.stairs.z);
   assert.equal(baseline.walls.find(([name]) => name === 'Living west')[4], feature.wallEndZ);
@@ -195,7 +399,7 @@ test('fireplace and sofa stay centered while the reading chair sits near the sta
   assert.ok(context.layouts.every((option) => !('tables' in option)), 'No living layout restores the removed sofa-side table');
   assert.doesNotMatch(source, /livingTables|Square walnut sofa end table|Walnut end-table leg/, 'Removed table geometry and preview wiring stay absent');
   assert.equal(layout.sofa[0], 11.6);
-  assert.equal(context.layouts.length, 5);
+  assert.equal(context.layouts.length, 6);
   const readingChair = layout.chairs[1];
   const halfDepth = (Math.abs(Math.sin(readingChair[2])) * 34 / 12 + Math.abs(Math.cos(readingChair[2])) * 34.5 / 12) / 2;
   const cabinetEndZ = midpoint + 3.06 + 24 / 12;
@@ -242,7 +446,7 @@ test('first-floor baseline matches the furnished model floors and canonical wall
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
   const floors = [], walls = [];
   const context = {
-    UpstairsLayout: layout, getLivingRoomFeatureLayout, getGuestEntryLayout, ceilingHeight: 9, garageFloorY: -1.25, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
+    UpstairsLayout: layout, getLivingRoomFeatureLayout, getGuestEntryLayout, getGuestSuiteLayout, ceilingHeight: 9, garageFloorY: -1.25, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
     garageEntry: { x: 40, width: 3 },
     garageFloorAreas: [{ x: 45.4, z: 15, w: 10.1, d: 11.9 }, { x: 29, z: 26.9, w: 26.5, d: 7.7 }, { x: 31.2, z: 34.6, w: 24.3, d: 14.4 }],
     scene: {}, shell: {},
