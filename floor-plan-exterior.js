@@ -261,6 +261,24 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   function patioRoofUndersideAt(z) {
     return patioRoofY + (z - patioRoofCenterZ) * patioRoofPitch - patioRoofThickness / (2 * Math.cos(patioRoofAngle));
   }
+  wall('Patio roof raised headwall', 55.5, 7, 26.5, 7, 9, patioRoofUndersideAt(7 + wallThickness / 2) + 0.02);
+  wall('Patio roof upper-wall return', 54, 10, 55.5, 10, 9, patioRoofUndersideAt(10) + 0.02);
+  for (const { x, rear, name } of [
+    { x: 26.5, rear: 2.75, name: 'Patio roof west tapered closure' },
+    { x: 55.5, rear: 7, name: 'Patio roof east tapered closure' }
+  ]) {
+    const geometry = new THREE.BoxGeometry(wallThickness, 1, patioRoofFront - rear);
+    const positions = geometry.attributes.position;
+    const centerZ = (rear + patioRoofFront) / 2;
+    for (let i = 0; i < positions.count; i++) {
+      positions.setY(i, positions.getY(i) > 0 ? patioRoofUndersideAt(centerZ + positions.getZ(i)) + 0.02 - 9 : 0);
+    }
+    geometry.computeVertexNormals();
+    const closure = new THREE.Mesh(geometry, limestone);
+    closure.name = name;
+    closure.position.set(x, 9, centerZ);
+    group.add(closure);
+  }
   for (const z of [patioBounds.rear + 0.6, patioBounds.front - 0.6]) {
     const beamTop = patioRoofUndersideAt(z);
     const middlePostX = z < patioCenterZ ? patioCenterX + 3.5 : patioCenterX;
@@ -279,6 +297,43 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     box(patio, x + (x < patioTableX ? -0.75 : 0.75), 2.05, z, 0.12, 1.2, 1.7, wood).name = 'Outdoor dining chair back';
     for (const side of [-0.65, 0.65]) box(patio, x, 0.65, z + side, 1.4, 1.3, 0.1, dark).name = 'Outdoor dining chair side frame';
   }
+  const portableFirepit = new THREE.Group();
+  portableFirepit.name = 'Portable firepit - rear-yard cold storage only';
+  portableFirepit.position.set(40, -1.6, -15);
+  portableFirepit.userData = { diameterInches: 30.72, heightInches: 19.56, provisional: true, modelSelected: false, fuel: 'Wood assumed; model unconfirmed', coldStorageOnly: true, operationApproved: false, useClearanceSatisfied: false, localPortableClearanceFeet: 15, instruction: 'Requested rear-yard location is for fully extinguished, cold storage only. It does not meet the checked Birmingham operating clearances between the house/patio and cedar fence. Do not light here or under the patio roof. No approved burn location is established; confirm the actual unit and site with the Fire Department.' };
+  group.add(portableFirepit);
+  box(group, 40, -1.635, -15, 4, 0.06, 4, stepStone).name = 'Rear firepit cold-storage pad, not a burn area';
+  const firepitBody = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1, 1.1, 32, 1, true), dark);
+  firepitBody.name = 'Unlit portable firepit open bowl';
+  firepitBody.position.y = 0.9;
+  portableFirepit.add(firepitBody);
+  const firepitGrate = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 0.04, 24), dark);
+  firepitGrate.name = 'Empty firepit grate, no fire shown';
+  firepitGrate.position.y = 0.38;
+  portableFirepit.add(firepitGrate);
+  const firepitLid = new THREE.Mesh(new THREE.CylinderGeometry(1.28, 1.28, 0.08, 32), dark);
+  firepitLid.name = 'Portable firepit closed cold-storage lid';
+  firepitLid.position.y = 1.49;
+  portableFirepit.add(firepitLid);
+  box(portableFirepit, 0, 1.58, 0, 0.35, 0.1, 0.12, dark).name = 'Firepit lid handle';
+  for (const x of [-0.7, 0.7]) for (const z of [-0.7, 0.7]) box(portableFirepit, x, 0.175, z, 0.12, 0.35, 0.12, dark).name = 'Portable firepit foot';
+  const firewoodRack = new THREE.Group();
+  firewoodRack.name = 'Side-yard firewood rack beside waste bins - clearance review required';
+  firewoodRack.position.set(56.65, -1.35, 22);
+  firewoodRack.userData = { widthFeet: 8, depthFeet: 16 / 12, stackHeightFeet: 4, raisedBaseFeet: 0.5, openSides: true, topCovered: true, location: 'Along the garage wall immediately north of the waste-bin storage', requestedStorageLocation: true, houseSeparationApproved: false, localStorageApprovalRequired: true, maximumLogLengthInches: 16, neighboringHazardsVerified: false, provisional: true, instruction: 'Requested storage position only, not fire-safety approval. Wood is close to the house and does not meet the preferred 30-foot woodpile separation. Verify fire/pest/moisture risk, local rules, actual logs, cart-lid travel and passage before construction.' };
+  group.add(firewoodRack);
+  box(group, (55.825 + 56.645) / 2, -1.5, 22, 56.645 - 55.825, 0.3, 8.5, stepStone).name = 'Firewood rack infill pad beside existing walkway';
+  for (const x of [-0.606, 0.606]) for (const z of [-3.94, 3.94]) box(firewoodRack, x, 2.1, z, 0.12, 4.2, 0.12, dark).name = 'Firewood rack upright';
+  box(firewoodRack, 0, 0.45, 0, 16 / 12, 0.1, 8, dark).name = 'Firewood rack raised ventilated base';
+  box(firewoodRack, 0, 4.25, 0, 1.5, 0.1, 8.2, dark).name = 'Firewood rack rain cover, open sides';
+  for (let row = 0; row < 7; row++) for (let log = 0; log < 16; log++) {
+    const splitLog = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.19, 16 / 12, 7), wood);
+    splitLog.name = 'Seasoned firewood placeholder';
+    splitLog.rotation.z = Math.PI / 2;
+    splitLog.position.set(0, 0.72 + row * 0.43, -3.5 + log * 0.46);
+    firewoodRack.add(splitLog);
+  }
+
   function exteriorSteps(parent, name, x, startZ, direction, width) {
     const steps = new THREE.Group();
     steps.name = name;

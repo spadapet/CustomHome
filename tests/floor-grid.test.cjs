@@ -45,12 +45,12 @@ test('floor grid has exactly one-foot spacing in both directions, clipped to flo
   assert.equal(grid.userData.spacingFeet, 1);
   assert.equal(grid.geometry.position.itemSize, 3);
   assert.deepEqual(Array.from(grid.geometry.position.array), [
-    -1, 0.025, 0.2, -1, 0.025, 2.3000000000000003,
-    0, 0.025, 0.2, 0, 0.025, 2.3000000000000003,
-    1, 0.025, 0.2, 1, 0.025, 2.3000000000000003,
-    2, 0.025, 0.2, 2, 0.025, 2.3000000000000003,
-    -1.4, 0.025, 1, 2.4, 0.025, 1,
-    -1.4, 0.025, 2, 2.4, 0.025, 2
+    -1, 0.05, 0.2, -1, 0.05, 2.3000000000000003,
+    0, 0.05, 0.2, 0, 0.05, 2.3000000000000003,
+    1, 0.05, 0.2, 1, 0.05, 2.3000000000000003,
+    2, 0.05, 0.2, 2, 0.05, 2.3000000000000003,
+    -1.4, 0.05, 1, 2.4, 0.05, 1,
+    -1.4, 0.05, 2, 2.4, 0.05, 2
   ]);
 });
 
@@ -60,7 +60,7 @@ test('grid follows garage elevation and edited floor shapes without changing geo
   update();
   const original = grid.geometry;
   const heights = new Set(original.position.array.filter((_, index) => index % 3 === 1));
-  assert.deepEqual([...heights], [0.025, -1.225]);
+  assert.deepEqual([...heights], [0.05, -1.2]);
   update();
   assert.equal(grid.geometry, original);
   context.groundLayoutPreview = { plan: { floors: [{ x: 7, z: 8, w: 2, d: 3 }] } };
@@ -98,7 +98,7 @@ test('checkbox choice survives floor changes and temporarily unsupported views',
   update();
   assert.equal(grid.visible, true);
   assert.equal(context.floorGridInput.disabled, false);
-  assert.equal(grid.geometry.position.array[1], 0.025);
+  assert.equal(grid.geometry.position.array[1], 0.05);
 });
 
 test('grid is occluded by furniture and excluded from tour collision and floor picking', () => {
@@ -124,5 +124,18 @@ test('grid starts hidden with the page default and can be enabled', () => {
   assert.equal(grid.visible, false);
   context.floorGridInput.checked = true;
   update();
+  assert.equal(grid.visible, true);
+});
+
+test('one-foot mudroom grid clears the actual modeled tile and grout surfaces', () => {
+  const { context, grid, update } = createGrid();
+  context.walkFloorAreas = [{ x: 38, z: 15, w: 7.4, d: 11.9 }];
+  context.currentView = 'mudroom';
+  update();
+  const vertices = grid.geometry.position.array;
+  assert.ok(vertices.filter((_, index) => index % 3 === 1).every((y) => y > 0.038 + 0.005 / 2), 'Grid lies above grout, not buried under it');
+  const parallel = [];
+  for (let i = 0; i < vertices.length; i += 6) if (vertices[i] === vertices[i + 3]) parallel.push(vertices[i]);
+  assert.ok(parallel.every((x, index) => index === 0 || x - parallel[index - 1] === 1));
   assert.equal(grid.visible, true);
 });

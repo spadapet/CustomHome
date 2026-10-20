@@ -1,14 +1,18 @@
 # Ground-floor plan reference
 
-## Editable upstairs layout
+## Viewing saved layouts
 
-Use **Upstairs designer** in the [viewer](floor-plan-3d.html?view=upstairs) to drag walls up/down/left/right, adjust room position/width/depth and wall length/thickness, then preview in 3D. [Designer and automatic-saving guide](upstairs.html#designer-workflow).
+The [viewer](floor-plan-3d.html?view=upstairs) no longer includes either floor designer. Camera views, tours, visibility controls and the one-foot grid remain.
 
-Run `node preview-server.cjs` for direct project saving. Each completed edit automatically persists version-1 named overrides in [upstairs-layout.json](upstairs-layout.json); empty arrays retain [the original baseline](floor-plan-upstairs.js). The loopback-only [preview server](preview-server.cjs) shares [layout validation](upstairs-layout.js), serializes writes, replaces the file atomically, verifies it, and rejects stale edits. No save/download/import controls or automatic Git commits. A plain static server cannot save. Stair registration is shared and fixed; ground floor/exterior elevations are unchanged. Live room labels, dimensions and tour floors update with preview. The schedules below remain baseline context and require reconciliation after geometry changes.
+Serve over HTTP to read the existing [upstairs](upstairs-layout.json) and [ground-floor](ground-layout.json) saved layout data; removing the designers does not erase it. Empty overrides retain the furnished baseline. Saved ground edits still display structure only, with a warning; saved upstairs edits retain coordination warnings. The page no longer edits or automatically saves layouts. [Viewing guide](upstairs.html#model-study). Written schedules remain baseline context and require reconciliation after geometry changes.
+
+Every bathroom and powder room on every floor requires built-in warm, dim night lighting independent of the main lights. A switch-integrated night light is one option; product and controls remain undecided. See [electrical requirements](electrical.html#bathroom-night-lighting).
+
+No firepit or firewood remains in front. The closed firepit at rear (40, -15), on a 4 ft-square pad, is fully cold storage only; the checked rear arrangement does not meet Birmingham's 15 ft portable-unit operating separation. The requested 8 ft-long x 16 in-deep covered wood rack is beside the garage wall north of the waste bins, center (56.65, 22), cover z = 17.9-26.1. It leaves about 33 in of existing paving / 40 in to the fence locally, not a new narrower pinch than the carts. Close house separation needs fire/pest/moisture and local review; neither storage approval nor permission to light is implied. See [storage limits](patio.html#portable-firepit).
 
 The freezer remains closed in the model. Its open/closed status button and swing interaction have been removed; verify actual appliance operation separately.
 
-Current model audit: October 18, 2026. This is the consolidated reference for the [interactive floor plan](floor-plan-3d.html), checked against [model geometry](floor-plan-3d.js). Update it, [design context](design-context.md), and affected room requirements whenever the design changes.
+Current model audit: October 19, 2026. This is the consolidated reference for the [interactive floor plan](floor-plan-3d.html), checked against [model geometry](floor-plan-3d.js). Update it, [design context](design-context.md), and affected room requirements whenever the design changes.
 
 ## Scope and measurement rules
 
@@ -100,15 +104,16 @@ Dimensions include nominal room envelopes, not guaranteed usable clear rectangle
 | Main kitchen | 26.5-38 / 7-26.9 | 11 ft 6 in x 19 ft 11 in | North sink wall, east cooktop/passages, south refrigeration; island shifts into open living-side space |
 | Hall / circulation zone | Nominal 13.3 x 17.7 ft schedule | 13 ft 4 in x 17 ft 8 in | Irregular connected route around stairs/private rooms, not a separate unobstructed rectangle |
 | Prep kitchen | 38-55.5 / 7-15 | 17 ft 6 in x 8 ft | North counter/tower, south pantry shelves; entry from main kitchen, not directly from mudroom |
-| Mudroom | 38-45.4 / 15-26.9 | 7 ft 5 in x 11 ft 11 in | Kitchen passage, garage entry, five-cubby bench, coat/shoe closet, integrated drop zone, stacked-laundry bay |
+| Mudroom | 38-45.4 / 15-26.9 | 7 ft 5 in x 11 ft 11 in | Connected matcha built-ins; five cubbies, enclosed coat closet, five personal shelf positions with removable containers, 21-pair shoe shelves; fixed kitchen opening, shifted 8 ft garage entry |
 | Garage | 45.4-55.5 / 15-26.9 plus 29-55.5 / 26.9-34.6 plus 31.2-55.5 / 34.6-49 | 26 ft 6 in x 34 ft maximum | Stepped footprint; narrow forward bike alcove, two parking bays, lower slab |
 | Kids' room | 19-29 / 24.7367-34.6 | Approximately 10 ft x 9 ft 10 in | Former central stair area; three MICKE desks; 54 x 96 in doorless west hall entry; no exterior window or direct living-room opening |
 | Powder room | 0-7.1 / 35.1-41 | 7 ft 1 in x 5 ft 11 in | Hall-facing east-wall door via guest alcove; toilet retained, vanity on south wall; tile extends 1 ft south |
 | Guest coat closet | 7.1-12.2 / 35.1-37.5 | 5 ft 1 in x 2 ft 5 in | Separate reach-in closet; 24.6 in clear depth, upper shelf/hanging rail, closed 48 in oak door pair facing alcove |
 | Guest entry alcove | 7.1-12.2 / 37.5-41 | 5 ft 1 in x 3 ft 6 in | Open east to entry hall; 37.8 in between finished north/south wall faces, not occupied/accessibility approval |
 | Office | 0-12.2 / 41-54.2 | 12 ft 2 in x 13 ft 2 in | 161.04 sq ft nominal; return prior 12.2 sq ft expansion to guest-entry band; north desk/chair move 1 ft south, other furniture and French doors retained |
-| Walk-in closet | 19-25 / 34.6-42 | 6 ft x 7 ft 5 in | Separate bedroom entry; west long/short hanging, north closed storage and shelves |
-| Guest shower bathroom | 25-31.2 / 34.6-42 | 6 ft 2 in x 7 ft 5 in | Absorbs former linen/unused Laundry strip; northwest shower, northeast toilet, east vanity; separate bedroom entry |
+| Walk-in closet | 17-25 / 34.6-42 | 8 ft x 7 ft 5 in | Borrows 2 ft from hall; doorless centered entry, left/right hanging, five rear shelves; 43.8 in middle aisle |
+| Closet hall | 12.2-17 / 34.6-42 | 4 ft 10 in x 7 ft 5 in | North hall remains approximately 53.4 in between finished wall faces; southern hall keeps its original width |
+| Guest shower bathroom | 25-31.2 / 34.6-42 | 6 ft 2 in x 7 ft 5 in | Northwest shower, northeast toilet, southwest 24 in vanity; 31.8 in toilet approach and outward-opening bedroom door |
 | Ground-floor bedroom | 19-31.2 / 42-54.2 | 12 ft 2 in x 12 ft 2 in | Queen headboard on east wall, entry on west, porch-facing window |
 | Front porch | 0-31.2 / 54.2-61.2 | 31 ft 2 in x 7 ft | Paving, two benches, centered double front entry; low perimeter edges |
 
@@ -128,8 +133,9 @@ See [kitchen requirements](kitchen.html), [sink candidate and dispensers](kitche
 | Dish rack | 16 x 14 in pan, center (34.6, 8.3), base y = 3.05 | Stainless-look wire rack, three plates and utensil cup; closed catch pan is emptied manually, no drain/spout |
 | Cooktop run | Center (37, 16.95); z = 12.527083-21.372917 | 106.15 in long, 24 in body depth; two approximately 33.1 in side drawer fronts and 1.5 in casing-end fillers |
 | Induction cooktop | 36 in wide along z, 21 in deep along x | Centered between the two passages; central drawer bank below |
-| Hood | Base 48 x 24 in; ceiling end 36 x 18 in | Warm-white tapered surround with walnut band at y = 6.3-6.5; plaster continues to 9 ft ceiling |
-| Hood insert | Concealed provisional 46 in allowance | No selected insert/liner; hood task light stays; no bridge storage or hood-side upper cabinets |
+| Hood | 48 in wide throughout; depth tapers from 24 to 13 in | Warm-white plaster, plain lower edge at y = 6.3-6.5, cornice aligned with cabinets at 9 ft; no walnut band |
+| Hood-side uppers | Two approximately 27.6 in-wide x 12 in-deep stacks; bottoms at 54.6 in | Directly adjoin hood; two tiers of paired white-oak frameless Shaker doors, gold pulls, task lights, ceiling cornices; 1.5 in inset from base-run ends clears casing |
+| Hood insert | Concealed provisional 46 in allowance | No selected insert/liner; hood task light stays; no bridge storage; manufacturer must verify adjacent cabinet and insert clearances |
 | Quartz walls | North sink wall, east cooking/passages wall, south refrigeration wall | Floor-to-ceiling ivory quartz on kitchen-facing surfaces only; cutouts retained; modeled as face materials without added slab thickness |
 | Sink-wall storage | No upper stacks | Three windows replace the upper cabinets; no former under-cabinet task lights there |
 
@@ -206,12 +212,13 @@ Rear edges are at backsplash face z = 7.26, bottoms y = 3.04. This is **stored p
 
 Mudroom details, coordinated with [family-entry requirements](mud-room.html):
 
-- Five-cubby bench at (44.325, 22.35), facing decreasing x: 90 in long x 18 in deep, seat top 18 in, z = 18.6-26.1. Each bay has approximately 17.1 in clear width, two gold hooks, two open shoe levels below the seat, and three upper shelves. Case top is 105 in beneath the 108-inch ceiling.
-- Stacked-laundry bay at (39.825, 16.925), facing increasing x: 36 x 36 in W/D reservation, z = 15.425-18.425. White-oak surround and overhead Shaker compartment rise to 105 in; the provisional stack is 27 in wide x 32 in deep x approximately 80 in high. No product or service enclosure is approved.
-- Coat/shoe closet at (39.325, 19.9), facing increasing x: 30 in along z x 24 in deep x 105 in high; z = 18.65-21.15, clear of kitchen-entry casing. The lower front remains open to show the hanging rail and coats, two full-width shoe shelves, four extra side shelves, and a small quartz key/charging tray. Closed Shaker storage is above.
-- Closed-case aisle, including the closet pull: approximately 36.8 in between x = 40.5075 and 43.575. Laundry-front space to the east wall is approximately 44.9 in beyond x = 41.4875. These are static geometry checks, not open-door or occupied operating clearances.
+- Five-cubby bench at (44.325, 22.85), facing decreasing x: 90 x 18 in, seat top 18 in, z = 19.1-26.6. Each floor-level shoe opening is approximately 17.1 in wide x 17.25 in deep x 15.7 in high above tile/grout, without bottom shelf, lip or intermediate shelf. Target large-shoe pair envelope: 14 x 16 x 14 in; measure the family's largest actual footwear, especially tall boots. Continuous white-oak backing extends to the floor. Each cubby has one inward-facing gold hook on each side divider, not on its back or the wall, and three upper shelves.
+- Enclosed coat closet at (39.325, 16.9), facing increasing x: 36 x 24 x 105 in, z = 15.4-18.4. Normal side-to-side rod; four illustrative coats, two low shoe shelves, upper storage. Standard nominal 32 in bifold door shown closed, with jambs/headwall and gold knobs; final builder door/frame and operating clearance unselected.
+- Personal bin/seasonal shelves at (38.908333, 19.9), facing increasing x: 30 x 14 x 105 in. Five personal shelf positions, children lowest, each showing three removable purchased-container allowances of 8.5 x 11 x 5.5 in for socks/gloves/hats. No built-in drawer faces/runners. Matching key/charging and seasonal shelves remain.
+- Extra shoes move to the east wall at (44.491667, 17.15), facing decreasing x: 42 x 14 x 105 in, z = 15.4-18.9. Three columns x seven open levels target 21 pairs, with upper seasonal shelves. Clear cells approximately 13 x 13 x 9 in; target pair envelope 12 x 12.5 x 9 in. Oversized footwear reduces this extra capacity; larger daily shoes go under the bench.
+- Bin-to-bench aisle is approximately 49 in; enclosed coat face to opposite shoes is approximately 41 in, with a 36 x 36 in closed-door approach. Keep x = 38.4-43.4, z = 21.5-26.5 storage-free for arrival. Kitchen opening stays fixed; garage entry/steps shift 6 in away from the truck to x = 39.5-42.5, opening height 96 in. Static checks exclude occupied use, bifold operation and garage-door swing; no accessibility/code approval.
 - Direct prep-to-mudroom opening at z = 15, x = 42-45 is closed with wall/baseboard. Access is via the main kitchen or garage route.
-- Tile stays in the mudroom; prep remains hardwood. Future laundry services, vacuum charging, washable bench-wall finish and motion-sensor lighting are requirements, not fully coordinated installations.
+- All mudroom built-ins are muted matcha green, screen #8A9B74, with gold hardware; kitchen white oak stays unchanged. Full-height fillers close west/east run gaps, and north upper shelves/backing join the runs into a continuous U-shaped assembly with 81.6 in minimum overhead clearance. Tile remains; grid is raised above tile/grout. Confirm builder scope, actual shoes/coats/containers, door operation, supports, anchorage, charging and high-shelf access.
 
 ## Upstairs addition
 
@@ -291,9 +298,9 @@ Basement retaining walls follow the opening, stop beneath the ground-floor slab 
 | Office | Loveseat 60 x 33.6 in at (10.45, 50.4); SOLE E20 reference 65 x 22 x 64 in L/W/H at (1.65, 50.3) | Verify chair pull-back, window reach, pedal/user movement and headroom; no operating envelope certified |
 | Bedroom | Article Lenia queen reference 63.5 x 82.75 in W/D; center approximately (27.427083, 49.395), rotated -90 degrees | Headboard/rear edge x = 30.875 on east wall opposite west entry; faces decreasing x, not the porch |
 | Bedroom | Two nightstands, approximately 18 x 15.6 in, at (30.2, 45.695) / (30.2, 53.095) | Shifted toward porch with bed; porch-end stand limits further movement; keep trim/window clear |
-| Closet | Continuous long-hang rail and shorter lower hanging rail, upper shelf, north closed cabinet and three open shelves | Reserve 24 in hanging depth; at least 36 in remains beside the modeled fully open door/knob; fittings and occupied use need verification |
+| Closet | Widen to x = 17-25; left long-hang and right double short-hang runs, approximately 61 in rods each; upper shelf per run; five rear 12 in-deep x 32.4 in-wide shelves | Opposing 24 in-deep side zones leave 43.8 in middle aisle; centered 36 in doorless entry; hall remains 53.4 in clear to west |
 | Powder | Toilet retained at (1.6, 36.65); 27.6 in vanity moved to (3.25, 39.95), rotated 180 degrees | South-wall vanity clears the inward-opening door; tiled room extends to z = 41; verify sanitary and occupied clearances |
-| Guest shower bathroom | Toilet at (29.7, 35.9), 30 in vanity at (30.2, 39.9), rotated -90 degrees; shower pan x = 25.175-28.375, z = 34.775-38.975 | Shower curb interiors 36 x 48 in, nominal 30 in inward glass door, drain/head/mixer; tall linen cabinet and vestibule partition removed; not an approved installation |
+| Guest shower bathroom | Toilet (29.7, 35.9); southwest 24 in vanity (26.05, 40.5), facing east; shower unchanged x = 25.175-28.375, z = 34.775-38.975 | Moving vanity out of east corridor restores the full 31.8 in toilet approach; room door shifts east and opens outward, glass door inward; actual sanitary/occupied-use approval unresolved |
 | Guest coats | Reach-in closet centered (9.65, 36.3), upper shelf, continuous hanging rail, four illustrative coats | Replaces powder linen cabinet; separate closed oak door pair faces the open hall alcove, not the bathroom |
 | Porch | Two 60 x 20.4 in benches at (5, 55.4) / (26.2, 55.4) | No entry runner indoors; no sidelights/transom around the front doors |
 
@@ -351,14 +358,14 @@ Kitchen window piers and corner returns are 12 in; outer trim-cap returns are 7.
 | Hall to kids | 54 x 96 in, x = 19, z = 27-31.5 | Doorless west entry into relocated room; no direct living-side opening or sofa supervision |
 | Hall to office | Nominal 60 x 96 in envelope, x = 12.2, z = 42.75-47.75 | Two nominal 30 in white French leaves, each 2 columns x 5 rows of clear lites, white muntins, gold round knobs and dark hinges; white casing. Both stay fully open inward at 90 degrees into the office, perpendicular to the opening, on reload and view changes. Unit/jamb/rough opening, true/simulated divisions, safety glazing, handing and hardware unselected; see [office doors](office.html#doors) |
 | Hall to bedroom | 36 x 84 in, x = 19, z = 42-45 | Opening only; final door leaf/swing not detailed |
-| Bedroom to walk-in closet | Nominal 30 x 84 in, z = 42, x = 21.95-24.45 | White paneled leaf, east-jamb hinge, 90 degrees inward; west hanging zone stays clear |
-| Bedroom to shower bathroom | Nominal 30 x 84 in, z = 42, x = 25.65-28.15 | White paneled leaf, west-jamb hinge, 90 degrees inward; replaces former bath-to-vestibule opening |
+| Bedroom to walk-in closet | 36 x 84 in cased opening, z = 42, x = 19.5-22.5 | Doorless; centered on left/right hanging aisle; no pocket installation assumed |
+| Bedroom to shower bathroom | Nominal 30 x 84 in, z = 42, x = 28.15-30.65 | White paneled leaf, west-jamb hinge on bedroom frame face, 90 degrees outward; clears fixed bedroom furniture |
 | Guest shower | Nominal 30 in glass door on east side, x = 28.325, z = 36.225-38.725 | South-end hinge, displayed 90 degrees inward; product/finished clear opening and water containment unverified |
 | Front entry | 60 x 84 in, z = 54.2, x = 13.1-18.1 | Two oak/glass leaves shown closed, no sidelights/transom; final door unit unselected |
 | Front entry lock | Wyze brand selected; exact model/finish unconfirmed | One schematic interior smart-lock body above the existing pull, positive-x leaf provisionally active; exterior keypad/reader and product dimensions not assumed. Verify stile/glazing, bore/backset, latch/strike, inactive leaf, and egress with supplier; see [lock notes](front-entry.html#smart-lock) |
 | Dining patio | 72 x 96 in combined assembly, x = 26.5, z = 0-6 | Higher-z nominal 36 in inward-hinged door shown closed; other half stacked casements |
-| Mudroom to garage | 36 x 84 in, z = 26.9, x = 40-43 | Two straight steps outside; rated door, landing and swing not resolved |
-| Garage side pedestrian opening | 36 x 84 in, x = 55.5, z = 44-47 | Opening rises from garage datum, not house datum |
+| Mudroom to garage | 36 x 96 in, z = 26.9, x = 39.5-42.5 | Shift 6 in away from truck; two straight steps follow; rated door, landing and swing not resolved |
+| Garage side pedestrian opening | 36 x 96 in, x = 55.5, z = 44-47 | Opening rises from garage datum, not house datum |
 | Garage vehicle doors, 2 | Each 108 x 96 in, z = 49, x = 32.5-41.5 / 44-53 | Heights rise from garage datum; proposed, not zoning approval |
 | Powder entry | Nominal 30 x 84 in, x = 7.1, z = 38-40.5 | Opening centered between finished alcove walls with casing room at both jambs; painted-white leaf, south-jamb hinge, displayed 90 degrees open inward, clear of hall alcove and vanity |
 | Guest coat closet | Nominal 48 x 84 in, z = 37.5, x = 7.65-11.65 | Two closed white-oak Shaker leaves with satin-gold pulls; independent access from alcove |
@@ -377,10 +384,11 @@ See [garage working layout](garage.html#working-layout). Vehicles are closed-obj
 | EV charger | (42.75, 48.65), on the interior pier between garage doors; cable coiled off floor; supply/reach unverified |
 | Five-bike floor rack | Center (50.4, 18.5), 22.2 in nominal stand centers; both wheels on floor, no lifting/hooks |
 | Over-bike storage lift concept | 8 x 4 ft deck (32 sq ft), center (50.4, 18.5); deck top 7.5 ft / underside 7.25 ft above garage slab; eight illustrative bins; independent Visibility checkbox. Raised position only; goods-only, not walkable or load-rated. Bikes/people must clear the full lowering zone before real operation; structure, mechanism, safety controls and manufacturer requirements unverified |
-| Equipment station | Center (32.95, 27.115), against house-side wall in front of BMW; approximate x = 29.45-36.35, z = 27.075-29.105 |
-| Equipment contents | Upright-storage mower, rolling shop vac, blower, wall rail/hand-tool board, battery shelf and upper bins; no fixed workbench |
+| Mobile storage-access steps | Access mode only: six 7 in rises / five 10 in treads; 30 x 30 in standing platform at 3.5 ft, about 81 in nominal headroom, 42 in guard and continuous handrails; approximately 30 x 80 in footprint. Move truck/bikes out first. Never climb onto storage deck or access moving lift; product, load, locks, structural approval and stowed location unresolved |
+| Equipment station | Center (32.95, 27.115), in front of BMW; current bounds about x = 29.55-36.35, z = 27.075-31.905 after unfolding mower |
+| Equipment contents | Conventional mower on wheels with full handle, vacuum at right end, conspicuous dedicated leaf-blower cradle at tool-board left, wall tools, battery shelf and bins |
 | Equipment approach | Previously checked conservative BMW-front gap about 42.5 in; aim to keep 36 in retrieval route. Removing east-wall storage restored about 40 in beside truck mirror |
-| House-entry steps | x = 41-44, z = 26.725-28.558333; two 36 in-wide x 11 in-deep tread surfaces, two 7.5 in rises |
+| House-entry steps | x = 39.5-42.5, z = 26.725-28.558333; two 36 in-wide x 11 in-deep tread surfaces, two 7.5 in rises |
 | Step levels | Upper top y = 0, lower y = -0.625, garage y = -1.25; contrasting nosings, no separate landing/rails in concept |
 
 Closed-object gaps do not prove vehicle-door access, bike roll-out/turning, tool retrieval, charger cable reach or code compliance. Existing tour routing from garage center to the bike alcove has a recorded limitation; the storage relocation did not establish that route. Verify actual equipment, battery charging guidance, anchorage and shelf loading.
@@ -395,6 +403,7 @@ Exterior garage approaches are only provisional lowered pads, not driveway gradi
 | Hardwood | Continuous 7 in natural honey-oak plank spacing/grain across living, dining, kitchen, prep, hall, kids, office, bedroom and closet; varied 4-8 ft board lengths |
 | Other floors | Mudroom/bathrooms tile, porch paving, garage epoxy; not the earlier prep-tile note |
 | Closed cabinetry | Light natural-stained white oak, Shaker recessed fronts, frameless/full-overlay; satin-gold hardware; open stair-bookcase carcasses stay cream |
+| Mudroom exception | Connected builder-installed shelves, backed cubbies and enclosed coat closet in muted matcha #8A9B74; gold hardware; open personal shelves for removable containers, not drawers |
 | Quartz | Warm ivory/soft warm-gray veining on counters, island and kitchen walls; three main-kitchen window sills are smoky blue-gray |
 | Drawer cups | Top Knobs Dakota Charlotte M2223, Honey Bronze, kitchen/island/prep-extension drawers; one cup below 30 in width, pairs at quarter points at 30 in or wider |
 | Cup-pull dimensions | 3.75 in overall width, 1.125 in height, 15/16 in projection, 2 9/16 in mounting centers; geometry/drilling not installation CAD |
@@ -411,7 +420,7 @@ Physical samples must confirm stain, sheen, upholstery durability, quartz color,
 ## Preview behavior and future edits
 
 - Main toolbar: Whole floor, Living + dining, Kitchen, Prep + mud, Garage, Top view. Room menu retains additional room views; specialized inspection presets also exist in code, but not all have toolbar shortcuts.
-- The toolbar's **1 ft grid** checkbox toggles a floor grid of 1 ft squares, off by default. It follows ground-floor/garage elevations, upstairs and edited floor shapes; furniture hides the lines beneath it. The choice lasts for the page visit, including Reset/Home. Exterior and basement-stair views temporarily hide the grid.
+- The toolbar's **1 ft grid** checkbox toggles one-foot squares, off by default. Furnished ground/garage lines sit 0.05 ft above their floor datum, clearing mudroom tile and grout; upstairs/edited floors retain a 0.025 ft offset. Furniture occludes the lines. Choice lasts for the page visit, including Reset/Home; exterior/basement-stair views temporarily hide it.
 - Room dimensions live in the on-demand room menu, not labels floating in the model. Full-height walls stay; no general wall-height/cutaway toggle. A special basement preset hides the surrounding shell/upstairs stair geometry for inspection.
 - Rotate/Move control overview navigation. Tour is third person; clicking clear ground-floor space can enter it. Routes use a 6 in grid, collision-checked smoothing and 4 ft/sec travel. No stair/basement/upstairs travel.
 - Tour toggle/Escape restores the prior view/mode; room changes, Reset and Home exit. Dragging, focus loss or moving freezer pauses travel. Floor plan opens the small destination map; inaccessible destinations show a notice.
