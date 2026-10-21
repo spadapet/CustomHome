@@ -1227,15 +1227,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   ];
 
-  const tableX = 19.35;
-  const tableZ = 3.95;
-  const tableLength = 71 / 12;
-  const tableDepth = 37.5 / 12;
+  const tableX = (13.2 + 26.5) / 2;
+  const tableZ = (-2.1 + 8) / 2;
+  const tableLength = 84 / 12;
+  const tableDepth = 38 / 12;
   const diningSet = new THREE.Group();
-  diningSet.name = 'Dining table and six chairs';
+  diningSet.name = 'Dining table and eight chairs';
   diningSet.position.set(tableX, 0, tableZ);
-  diningSet.rotation.y = Math.PI / 2;
-  diningSet.userData = { rotationDegrees: 90, longAxis: 'z' };
+  diningSet.rotation.y = 0;
+  diningSet.userData = { rotationDegrees: 0, longAxis: 'x', seats: 8, centeredInDiningRoom: true, patioEndChairMustBeTuckedForDoor: true, provisional: true };
   scene.add(diningSet);
   const diningWalnut = mat('#60412e', 0.6);
   diningWalnut.name = 'Dining walnut finish - screen approximation';
@@ -1243,12 +1243,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   diningLeather.name = 'Black dining leather - screen approximation';
   const diningTable = box(diningSet, 0, 29 / 12 - 0.09, 0, tableLength, 0.18, tableDepth, diningWalnut, true);
   diningTable.name = 'Dining table';
-  diningTable.userData = { reference: 'Article Seno walnut', lengthInches: 71, depthInches: 37.5, heightInches: 29, seats: 6 };
-  for (const x of [-2.5, 2.5]) for (const z of [-1.1, 1.1]) box(diningSet, x, 1.15, z, 0.16, 2.3, 0.16, diningWalnut, true).name = 'Dining table leg';
+  diningTable.userData = { reference: 'Provisional eight-person walnut table; not the 71-inch Seno product', lengthInches: 84, depthInches: 38, heightInches: 29, seats: 8, productSelected: false, provisional: true };
+  for (const x of [-tableLength / 2 + 0.55, tableLength / 2 - 0.55]) for (const z of [-1.1, 1.1]) box(diningSet, x, 1.15, z, 0.16, 2.3, 0.16, diningWalnut, true).name = 'Dining table leg';
   function diningChair(x, z, rotation) {
     const chair = new THREE.Group();
     chair.name = 'Dining chair';
-    chair.userData = { reference: 'Article Nosh walnut and black leather', widthInches: 20, depthInches: 21, heightInches: 31, seatHeightInches: 19, outwardMoveInches: 2, provisional: true };
+    chair.userData = { reference: 'Article Nosh walnut and black leather', widthInches: 20, depthInches: 21, heightInches: 31, seatHeightInches: 19, provisional: true };
     chair.position.set(x - tableX, 0, z - tableZ);
     chair.rotation.y = rotation;
     diningSet.add(chair);
@@ -1260,13 +1260,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   }
   const diningChairInset = (7.2 - 2) / 12;
-  const diningChairPairOffset = 10.5 / 12;
-  for (const x of [-diningChairPairOffset, diningChairPairOffset]) {
+  const diningChairSpacing = 24 / 12;
+  for (const x of [-diningChairSpacing, 0, diningChairSpacing]) {
     diningChair(tableX + x, tableZ - tableDepth / 2 + diningChairInset, 0);
     diningChair(tableX + x, tableZ + tableDepth / 2 - diningChairInset, Math.PI);
   }
-  diningChair(tableX - tableLength / 2 + diningChairInset, tableZ, Math.PI / 2);
-  diningChair(tableX + tableLength / 2 - diningChairInset, tableZ, -Math.PI / 2);
+  const diningEndChairOffset = tableLength / 2 + 3 / 12;
+  diningChair(tableX - diningEndChairOffset, tableZ, Math.PI / 2);
+  diningChair(tableX + diningEndChairOffset, tableZ, -Math.PI / 2);
 
   const kitchen = new THREE.Group();
   kitchen.name = 'Kitchen furnishings';
@@ -3748,6 +3749,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (activeFloor !== 'ground' && floor !== activeFloor) selectFloor('ground');
     selectFloor(floor);
     currentView = name;
+    document.getElementById('dining-clearance-note').hidden = name !== 'dining';
     document.getElementById('firepit-storage-note').hidden = !['exterior-patio', 'exterior-firepit', 'exterior-wood'].includes(name);
     const accessingStorage = name === 'storage-access';
     document.getElementById('storage-access-note').hidden = !accessingStorage;
