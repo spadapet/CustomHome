@@ -12,6 +12,8 @@ before changing a layout. Room pages describe the owner's requirements.
 - Keep cabinetry, fixtures, trim, floor elevations, visibility and inspection
   views consistent. A feature hidden by a camera or floor finish is not
   necessarily missing geometry.
+- Preserve the owner's default door poses after temporary swing checks.
+  Keep the dining patio door closed by default; verify its sweep separately.
 - Keep the kitchen-to-mudroom opening fixed unless the owner changes that
   requirement. Use the latest room notes for other constraints and finishes;
   do not revive an earlier design from conversation history.

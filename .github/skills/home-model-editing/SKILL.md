@@ -67,6 +67,13 @@ Preview the HTTP-served model in the shared local browser:
   a toilet or storage area, not merely that objects do not overlap.
 - Test floor/view changes and restoration of hidden objects. Inspection
   presets can make shelves and closets readable without changing the layout.
+- Separate display pose from operating clearance. Temporarily sample a door's
+  full sweep with both tucked and pulled-out furniture, then restore the
+  requested default pose. The dining patio door stays closed at 0 degrees;
+  do not persist an open pose just because a swing inspection was requested.
+  For centered furniture, assert its midpoint against the actual room bounds,
+  not a camera impression or an offset chosen for clearance. Keep any
+  chair/door operating conflicts visible in the model notes.
 - Temporary browser route instrumentation may expose scene state for checks.
   Remove the route and reload the production script afterward; confirm one
   render canvas and no runtime errors. Do not commit debug globals.
