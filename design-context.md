@@ -1,5 +1,57 @@
 # Ground-floor design context
 
+## Design review directions - October 21, 2026 (not implemented)
+
+The room corrections are published as baseline `f25d3ba`. The ideas below
+are proposals, not changes to the current model. Keep the hall walkway,
+right-hand truck bay, five mudroom cubbies, fixed kitchen/mudroom opening,
+inward bathroom door and closed dining patio-door default. Do not restore the
+removed interactive designers.
+
+- **Mudroom:** keep the successful 90-inch bench/cubbies and centered coat
+  closet. Replace the full-height west shoe/bin towers and overhead bridges
+  with a lower, visually continuous console: a trial 70 W x 14 D x 42 H in
+  unit fits before the kitchen casing and retains about 49 in opposite the
+  bench. Five personal shelf bays hold one removable basket per person;
+  three low shoe levels target 15 extra pairs, rather than the present rack's
+  21. Closet/bench shoes remain additional. Confirm shoe count, basket sizes
+  and children's reach before accepting the capacity trade-off. Keep seasonal
+  storage high only where it is useful; common backing, base and trim can
+  join a builder-built composition without overhead storage bridges.
+- **Guest closet:** use a single 24 in-deep hanging wall along the west side,
+  nominally 6 ft long, with part double-hung and five 12 in-deep rear shelves.
+  A storage-footprint trial retains about 42 in clear beside the hanging and
+  roughly 69.6 + 45.6 in of usable upper/lower rail. Shift the doorless opening
+  right to align with that aisle, within the existing bedroom wall
+  (trial x = 21.825-24.325). No hall extension. Storage and internal approach
+  were checked; the relocated opening/threshold still needs a coordinated
+  model rebuild and actual-product review.
+- **Guest bathroom:** retain the fixtures and inward operation, but test an
+  east-jamb hinge on the same opening. A temporary mirrored leaf cleared
+  the fixtures and walls through 361 quarter-degree swing samples and parks
+  against the empty east wall rather than projecting along the middle.
+  This is a candidate handing change, not a selected door/stop specification.
+- **Garage:** the current positions improve a static mirror aisle, not real
+  door/tailgate use. The approximately 233 in-long truck needs about
+  23 ft 5 in clear length to allow 2 ft at each end; that is a comfort target,
+  not a code minimum. Its current front/rear allowances remain about 14/13 in.
+  Study extra usable bay depth or a limited mudroom-corner reallocation with
+  the architect, protecting cubbies and arrival circulation, rather than
+  indiscriminately shrinking the mudroom. Keep both 9 ft vehicle openings:
+  a 95.7 in mirror envelope leaves only about 6.15 in per side when perfectly
+  centered in a nominal opening. Prefer reachable daily storage and one
+  manufacturer-approved seasonal-storage method; do not combine a goods lift
+  with permanent walk-up access where standing headroom is absent.
+- **Elsewhere:** preserve an actual arrival landing/door-operating area before
+  finalizing garage-entry built-ins; professional level/fire/landing review
+  remains open. The centered eight-seat dining set still conflicts with the
+  patio door when its end chair is pulled out. A closed display does not
+  resolve occupied access; revisit the table/door choice before ordering.
+
+Recommended next prototype: simplify the mudroom and rebuild the guest
+closet within their existing room boundaries, then settle the garage's
+architectural depth and entry requirements before further detail.
+
 ## Double-chaise living-room study
 
 Default F keeps the warm-tan U-shaped sectional and adds two IKEA STRANDMON wing chairs, one in each window corner beside the fireplace media built-ins, angled into the room. The sectional remains chaise-seat-seat-chaise, exactly two regular center seats. Provisional size 132 x 68 x 36 in W/D/H, 42 in center-body depth, four 31 in seating modules and 4 in outer arms; both chaises extend 26 in beyond the center seats. Back/body center (11.25, 17.475), rotation -90 degrees, facing the fireplace. Modeled bounds x = 7.333-13, z = 11.975-22.975 remain inside the living area and outside the stair opening.
