@@ -89,3 +89,21 @@ test('guarded access steps stop below the goods deck and require truck/bikes cle
   assert.ok(source.includes('sierra.visible = !accessingStorage'));
   assert.ok(source.includes("currentView === 'storage-access'"));
 });
+
+test('truck remains in the right bay while parking alignment and BMW rear clearance improve', () => {
+  const vehicles = [];
+  const start = source.indexOf("  const sierra = vehicle(");
+  const end = source.indexOf('  for (const x of [32.5,', start);
+  assert.ok(start >= 0 && end > start);
+  vm.runInNewContext(source.slice(start, end), { vehicle(name, x, z, length, width, mirrors) { vehicles.push({ name, x, z, length, width, mirrors }); } });
+  const truck = vehicles.find((car) => car.name === 'GMC Sierra EV'), bmw = vehicles.find((car) => car.name === 'BMW i4');
+  assert.equal(truck.x, (44 + 53) / 2, 'Align truck with its right-hand nine-foot garage opening');
+  assert.equal(truck.length, 233.42, 'No shrinking truck dimensions to manufacture a clearance');
+  assert.equal(bmw.length, 188.5);
+  assert.equal(bmw.z, 40, 'BMW moves six inches farther into the garage');
+  assert.ok((48.825 - bmw.z - bmw.length / 24) * 12 >= 11.6, 'BMW gains six inches behind, rather than remaining under six inches from the rear wall');
+  assert.ok((bmw.z - bmw.length / 24 - 29.105) * 12 >= 36, 'Retain at least three feet ahead to the vacuum/bin projections in the parking lane');
+  assert.ok((truck.x - truck.mirrors / 24 - bmw.x - bmw.mirrors / 24) * 12 >= 49, 'Center mirror aisle gains six inches');
+  assert.ok((55.325 - truck.x - truck.mirrors / 24) * 12 >= 34, 'Truck retains side-wall mirror clearance');
+  assert.ok((truck.x - truck.width / 24 - 42.5) * 12 >= 30, 'Truck body gains separation from the mudroom steps');
+});

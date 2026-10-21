@@ -161,7 +161,7 @@ test('each family member has a divided removable bin on builder-installed shelve
   assert.equal(model.find('Family seasonal storage shelf').length, 4);
 });
 
-test('east shoe wall holds 21 extra pair envelopes without blocking the coat bay', () => {
+test('west shoe wall holds 21 extra pair envelopes beside the bin shelves', () => {
   const model = buildMudroom();
   const wall = model.find('Mudroom extra family shoe wall')[0];
   const cells = model.find('Mudroom extra shoe pair cell');
@@ -182,7 +182,9 @@ test('east shoe wall holds 21 extra pair envelopes without blocking the coat bay
   }
   assert.equal(model.find('Extra shoe wall seasonal shelf').length, 3);
   const shoeBounds = bounds(wall);
-  assert.ok(Math.abs((shoeBounds.max[2] - shoeBounds.min[2]) * 12 - 42) < 0.000001);
+  assert.ok(Math.abs((shoeBounds.max[2] - shoeBounds.min[2]) * 12 - 39) < 0.000001);
+  const binBounds = bounds(model.find('Mudroom family drawer and seasonal storage tower')[0]);
+  assert.ok(Math.abs(shoeBounds.max[2] - binBounds.min[2]) < 1e-6, 'Shoe and accessory run connect without projecting into the center aisle');
 });
 
 test('shallow bin shelves leave a 48-inch central aisle without projecting drawer runners', () => {
@@ -196,8 +198,9 @@ test('shallow bin shelves leave a 48-inch central aisle without projecting drawe
   assert.equal(tower.userData.bins, 5);
   assert.equal(tower.userData.drawerTravelInches, undefined);
   assert.equal(tower.userData.depthInches, 14);
-  const coat = bounds(model.find('Mudroom hanging coat closet')[0]);
-  assert.ok((bench.min[0] - coat.max[0]) * 12 >= 36, 'Northern closet corner also retains at least 36 inches between case projections');
+  const coat = model.find('Mudroom hanging coat closet')[0];
+  assert.ok(Math.abs(coat.position.x - (38 + 45.4) / 2) < 1e-9, 'Coat closet is centered on the back wall');
+  assert.equal(coat.rotation.y, 0, 'Closed coat doors face into the room, not sideways from the corner');
 });
 
 test('storage fits below the ceiling with no case overlap and keeps the entry route clear', () => {
@@ -235,7 +238,7 @@ test('the entire enclosed coat front has a 36-inch deep storage-free approach', 
   const model = buildMudroom();
   const coat = model.find('Mudroom hanging coat closet')[0];
   const c = bounds(coat);
-  const approach = { min: [c.max[0], 0, c.min[2]], max: [c.max[0] + 3, 6.4, c.max[2]] };
+  const approach = { min: [c.min[0], 0, c.max[2]], max: [c.max[0], 6.4, c.max[2] + 3] };
   for (const part of model.all.filter((part) => part.w !== undefined)) {
     let inCoat = false;
     for (let node = part; node; node = node.parent) if (node === coat) inCoat = true;
@@ -257,10 +260,11 @@ test('kitchen stays fixed while the eight-foot garage entry shifts six inches aw
 
 test('matcha-green connections join both storage runs and bridge overhead without reducing headroom', () => {
   const model = buildMudroom();
-  assert.equal(model.find('Mudroom west full-height joint filler').length, 1);
-  assert.equal(model.find('Mudroom east full-height joint filler').length, 1);
+  assert.equal(model.find('Mudroom west full-height joint filler').length, 0, 'Old corner closet filler is removed');
+  assert.equal(model.find('Mudroom east full-height joint filler').length, 0);
   const shelves = model.find('Mudroom connecting upper shelf');
-  assert.equal(shelves.length, 3);
+  assert.equal(shelves.length, 6, 'Upper connections flank the center coat closet instead of crossing through it');
+  assert.equal(model.find('Mudroom east return upper shelf').length, 3);
   assert.ok(shelves.every((shelf) => bounds(shelf).min[1] >= 6.8 - 1e-9));
   assert.ok(model.all.filter((part) => /shelf|backing|divider|headwall|joint filler|bifold.*panel/i.test(part.name || '')).every((part) => part.material?.name === 'Muted matcha-green mudroom built-ins'));
 });

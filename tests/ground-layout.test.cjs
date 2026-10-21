@@ -17,16 +17,16 @@ test('guest suite has independent bedroom entries, a walk-in closet and a shower
   assert.deepEqual(baseline.rooms.find((room) => room.name === 'Closet'), { name: 'Closet', ...suite.closet });
   assert.ok(!baseline.rooms.some((room) => room.name === 'Laundry'));
   assert.ok(!baseline.walls.some(([name]) => name === 'Laundry north'));
-  close(baseline.floors.filter((floor) => ['Closet', 'Bathroom'].includes(floor.room)).reduce((area, floor) => area + floor.w * floor.d, 0), 14.2 * 7.4);
+  close(baseline.floors.filter((floor) => ['Closet', 'Bathroom'].includes(floor.room)).reduce((area, floor) => area + floor.w * floor.d, 0), 12.2 * 7.4);
   for (const [name, door, west, east] of [
-    ['Closet south', suite.closetDoor, 17, 25],
+    ['Closet south', suite.closetDoor, 19, 25],
     ['Bathroom south', suite.bathroomDoor, 25, 31.2]
   ]) {
     const wall = baseline.walls.find(([wallName]) => wallName === name);
     close(wall[1] + wall[5][0][0], door.x);
     close(wall[1] + wall[5][0][1], door.x + door.width);
     close(wall[2], 42);
-    close(door.width * 12, name === 'Closet south' ? 36 : 30);
+    close(door.width * 12, 30);
     const casing = (3.5 + 0.125) / 12;
     assert.ok(door.x - west - 0.175 >= casing);
     assert.ok(east - 0.175 - door.x - door.width >= casing);
@@ -40,11 +40,14 @@ test('guest suite has independent bedroom entries, a walk-in closet and a shower
   assert.ok(suite.vanity.x + 1 <= suite.shower.x + suite.shower.w, 'Vanity is west of the entire toilet approach, not in its narrow corridor');
   assert.ok(suite.bathroomDoor.z - (suite.toilet.z + 0.85) >= 21 / 12, 'Toilet front has at least 21 inches free toward the entrance');
   assert.ok(suite.vanity.z + (suite.vanity.width + 0.06) / 2 <= 42 - 0.175 - 1.5 / 12, 'Vanity clears south baseboard');
-  const [left, right] = suite.closetStorage.hanging;
-  close((right.x - left.x - left.w) * 12, 43.8);
+  const [north, south] = suite.closetStorage.hanging;
+  close((south.z - north.z - north.d) * 12, 36.6);
   assert.equal(suite.closetDoor.doorless, true);
-  assert.ok(left.x + left.w < suite.closetDoor.x && right.x > suite.closetDoor.x + suite.closetDoor.width, 'Doorless entry aligns with the middle aisle');
-  assert.ok((17 - 12.2 - 0.35) * 12 >= 48, 'Borrowing hall space retains over four feet clear in the north hall');
+  assert.ok(suite.closetDoor.x + suite.closetDoor.width < south.x, 'Doorless entry stays beside, not inside, front hanging');
+  assert.deepEqual(baseline.rooms.find((room) => room.name === 'Entry hall'), { name: 'Entry hall', x: 12.2, z: 34.6, w: 6.8, d: 19.6 });
+  assert.ok(!baseline.rooms.some((room) => room.name === 'Closet hall'), 'No narrowed north hall remains');
+  for (const zone of [...suite.closetStorage.hanging, suite.closetStorage.shelves]) assert.ok(zone.x >= 19.175 && zone.x + zone.w <= 24.825, 'All closet storage stays inside original walls, out of the hall');
+  assert.equal(baseline.walls.find(([name]) => name === 'Guest west')[1], 19);
   assert.deepEqual(baseline.walls.find(([name]) => name === 'Garage west').slice(1), [31.2, 34.6, 31.2, 49]);
 });
 
@@ -95,9 +98,9 @@ test('furnished guest suite uses the shared fixtures, shower enclosure and inwar
   assert.equal(wardrobe.children.filter((part) => part.name === 'Walk-in folded-clothes shelf').length, 5);
   const hangingShelves = wardrobe.children.filter((part) => part.name === 'Guest closet hanging-zone upper shelf');
   assert.equal(hangingShelves.length, 2);
-  assert.ok(Math.abs((hangingShelves[1].x - hangingShelves[1].w / 2 - hangingShelves[0].x - hangingShelves[0].w / 2) * 12 - 43.8) < 1e-9, 'Actual opposing shelf edges preserve the 43.8-inch middle aisle');
+  assert.ok(Math.abs((hangingShelves[1].z - hangingShelves[1].d / 2 - hangingShelves[0].z - hangingShelves[0].d / 2) * 12 - 36.6) < 1e-9, 'Actual shelf edges preserve the internal 36.6-inch cross aisle without widening into the hall');
   const folded = wardrobe.children.filter((part) => part.name === 'Walk-in folded-clothes shelf');
-  assert.ok(folded.every((shelf) => shelf.d * 12 === 12 && shelf.z + shelf.d / 2 < 36), 'Shallow rear shelves leave the middle aisle accessible');
+  assert.ok(folded.every((shelf) => shelf.w * 12 === 12 && shelf.x - shelf.w / 2 >= 19.175 && shelf.x + shelf.w / 2 < 21.175), 'Shallow side shelves stay behind the restored hall wall');
   assert.deepEqual(find('Guest bathroom tile'), { name: 'Guest bathroom tile', ...suite.bathroom });
   assert.equal(find('Guest bathroom vanity').x, suite.vanity.x);
   assert.equal(find('Guest bathroom vanity').z, suite.vanity.z);
@@ -118,10 +121,14 @@ test('furnished guest suite uses the shared fixtures, shower enclosure and inwar
   assert.equal(glassDoor.rotation.y, Math.PI / 2);
   assert.equal(glassDoor.userData.nominalWidthInches, 30);
   assert.equal(find('Guest walk-in closet inward-opening door'), undefined);
-  for (const [name, opening, sign] of [['Guest bathroom', suite.bathroomDoor, -1]]) {
-    const door = find(`${name} outward-opening door`);
+  for (const [name, opening, sign] of [['Guest bathroom', suite.bathroomDoor, 1]]) {
+    const door = find(`${name} inward-opening door`);
     assert.equal(door.rotation.y, sign * Math.PI / 2);
-    assert.equal(door.z, 42.325);
+    assert.equal(door.z, 41.675);
+    assert.equal(door.userData.inwardSwing, true);
+    const nearestShowerZ = door.z - opening.width;
+    assert.ok(nearestShowerZ - (suite.shower.z + suite.shower.d) >= 0.19, 'Entire inward leaf sweep stays south of the shower');
+    assert.ok(opening.x - 0.22 > suite.vanity.x + 1, 'Hinge/knob stays east of the relocated vanity');
     assert.equal(door.userData.nominalWidthInches, opening.width * 12);
     assert.equal(door.children.filter((part) => part.name === `${name} painted-white door leaf`).length, 1);
   }

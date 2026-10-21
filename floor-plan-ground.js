@@ -25,15 +25,15 @@
 
   function getGuestSuiteLayout() {
     return {
-      closet: { x: 17, z: 34.6, w: 8, d: 7.4 },
+      closet: { x: 19, z: 34.6, w: 6, d: 7.4 },
       bathroom: { x: 25, z: 34.6, w: 6.2, d: 7.4 },
-      closetDoor: { x: 19.5, z: 42, width: 3, height: 7, doorless: true },
+      closetDoor: { x: 19.55, z: 42, width: 2.5, height: 7, doorless: true },
       closetStorage: {
         hanging: [
-          { x: 17.175, z: 35.6, w: 2, d: 5.3, double: false },
-          { x: 22.825, z: 35.6, w: 2, d: 5.3, double: true }
+          { x: 19.325, z: 34.775, w: 5.35, d: 2, double: false },
+          { x: 22.5, z: 39.825, w: 2.175, d: 2, double: true }
         ],
-        shelves: { x: 19.65, z: 34.925, w: 2.7, d: 1 }
+        shelves: { x: 19.325, z: 36.95, w: 1, d: 2.4 }
       },
       bathroomDoor: { x: 28.15, z: 42, width: 2.5, height: 7 },
       shower: { x: 25.175, z: 34.775, w: 3.2, d: 4.2, clearWidth: 3, clearDepth: 4, doorWidth: 2.5 },
@@ -56,8 +56,8 @@
       ['Prep kitchen', 38, 7, 17.5, 8], ['Mudroom', 38, 15, 7.4, 11.9],
       ['Kids room', 19, kidsNorthZ, 10, 34.6 - kidsNorthZ], ['Powder room', 0, powderZ, 7.1, guestEntry.powder.d],
       ['Guest coat closet', 7.1, powderZ, 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 7.1, entryZ, 5.1, guestEntry.alcove.d],
-      ['Office', 0, officeZ, 12.2, 54.2 - officeZ], ['Closet hall', 12.2, 34.6, 4.8, 7.4], ['Entry hall', 12.2, 42, 6.8, 12.2],
-      ['Closet', 17, 34.6, 8, 7.4], ['Bathroom', 25, 34.6, 6.2, guestSuite.bathroom.d],
+      ['Office', 0, officeZ, 12.2, 54.2 - officeZ], ['Entry hall', 12.2, 34.6, 6.8, 19.6],
+      ['Closet', 19, 34.6, 6, 7.4], ['Bathroom', 25, 34.6, 6.2, guestSuite.bathroom.d],
       ['Guest room', 19, 42, 12.2, 12.2],
       ['Garage', 29, 15, 26.5, 34], ['Front porch', 0, 54.2, 31.2, 7]
     ].map(([name, x, z, w, d]) => ({ name, x, z, w, d }));
@@ -70,9 +70,9 @@
       [stairs.x + stairs.width, stairs.z, 12.2 - stairs.x - stairs.width, stairs.depth],
       [0, stairs.z + stairs.depth, 12.2, powderZ - stairs.z - stairs.depth],
       [12.2, 25.7, 6.8, 8.9], [19, kidsNorthZ, 10, 34.6 - kidsNorthZ, 'Kids room'],
-      [12.2, 34.6, 4.8, 7.4, 'Closet hall'], [12.2, 42, 6.8, 12.2, 'Entry hall'], [0, powderZ, 7.1, guestEntry.powder.d, 'Powder room'],
+      [12.2, 34.6, 6.8, 19.6, 'Entry hall'], [0, powderZ, 7.1, guestEntry.powder.d, 'Powder room'],
       [7.1, entryZ, 5.1, guestEntry.alcove.d, 'Guest entry alcove'], [0, officeZ, 12.2, 54.2 - officeZ, 'Office'],
-      [17, 34.6, 8, 7.4, 'Closet'], [25, 34.6, 6.2, guestSuite.bathroom.d, 'Bathroom'],
+      [19, 34.6, 6, 7.4, 'Closet'], [25, 34.6, 6.2, guestSuite.bathroom.d, 'Bathroom'],
       [19, 42, 12.2, 12.2, 'Guest room'],
       [7.1, powderZ, 5.1, guestEntry.coatCloset.d, 'Guest coat closet'],
       [45.4, 15, 10.1, 11.9, 'Garage', -1.25], [29, 26.9, 26.5, 7.7, 'Garage', -1.25],
@@ -102,9 +102,9 @@
       ['Office east', 12.2, officeZ, 12.2, 54.2, [[45.25 - 2.5 - officeZ, 45.25 + 2.5 - officeZ, 0, 8]]],
       ['Office north', 0, officeZ, 12.2, officeZ],
       ['House south', 0, 54.2, 31.2, 54.2, [[3, 9, 3, 8], [13.1, 18.1, 0, 7], [21.2, 28.8, 3, 8]]],
-      ['Guest west', 19, 42, 19, 54.2, [[0, 3, 0, 7]]], ['Closet west', 17, 34.6, 17, 42],
-      ['Closet north', 17, 34.6, 25, 34.6], ['Closet east', 25, 34.6, 25, 42],
-      ['Closet south', 17, 42, 25, 42, [[guestSuite.closetDoor.x - 17, guestSuite.closetDoor.x - 17 + guestSuite.closetDoor.width, 0, 7]]],
+      ['Guest west', 19, 34.6, 19, 54.2, [[7.4, 10.4, 0, 7]]],
+      ['Closet north', 19, 34.6, 25, 34.6], ['Closet east', 25, 34.6, 25, 42],
+      ['Closet south', 19, 42, 25, 42, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x - 19 + guestSuite.closetDoor.width, 0, 7]]],
       ['Bathroom south', 25, 42, 31.2, 42, [[guestSuite.bathroomDoor.x - 25, guestSuite.bathroomDoor.x - 25 + guestSuite.bathroomDoor.width, 0, 7]]],
       ['Bathroom north', 25, 34.6, 29, 34.6], ['Garage southwest return', 29, 34.6, 31.2, 34.6],
       ['Garage west', 31.2, 34.6, 31.2, 49], ['Garage west return', 29, 26.9, 29, 34.6],
