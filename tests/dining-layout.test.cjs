@@ -99,15 +99,15 @@ test('centered table and stowed chairs stay inside the room with equal opposite 
   const { root, table, chairs } = buildDining();
   assert.equal(root.userData.centeredInDiningRoom, true);
   assert.ok(Math.abs(root.position.x - (13.2 + 26.5) / 2) < 1e-9);
-  assert.ok(Math.abs(root.position.z - (-2.1 + 8) / 2) < 1e-9);
+  assert.ok(Math.abs(root.position.z - (-0.1 + 8) / 2) < 1e-9);
   const west = root.position.x - table.w / 2 - 13.375;
   const east = 26.325 - root.position.x - table.w / 2;
   assert.ok(Math.abs(west - east) < 1e-9, 'Centered on finished side walls as well as nominal room boundaries');
-  assert.ok(Math.abs((root.position.z - table.d / 2 + 2.1) - (8 - root.position.z - table.d / 2)) < 1e-9);
+  assert.ok(Math.abs((root.position.z - table.d / 2 + 0.1) - (8 - root.position.z - table.d / 2)) < 1e-9);
   for (const chair of chairs) {
     const r = rectangle(root, chair);
     assert.ok(r.x - r.halfX > 13.5 && r.x + r.halfX < 26.2);
-    assert.ok(r.z - r.halfZ > -1.8 && r.z + r.halfZ < 8);
+    assert.ok(r.z - r.halfZ > 0.2 && r.z + r.halfZ < 8);
   }
 });
 
@@ -117,7 +117,7 @@ test('full chair envelopes clear each other and walls through 18-inch end-chair 
     const boxes = chairs.map((chair) => rectangle(root, chair, travel));
     for (const box of boxes) {
       assert.ok(box.x - box.halfX > 13.5 && box.x + box.halfX < 26.2, 'Clear side-wall trim');
-      assert.ok(box.z - box.halfZ > -1.8, 'Clear rear baseboard with full-depth chair allowance');
+      assert.ok(box.z - box.halfZ > 0.2, 'Clear moved rear baseboard with full-depth chair allowance');
     }
     for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
       const a = boxes[i], b = boxes[j];
@@ -131,22 +131,30 @@ test('full chair envelopes clear each other and walls through 18-inch end-chair 
   }), 'Do not claim the former 24-inch end pull-outs still fit after centering');
 });
 
-test('patio sweep clears side-chair pull-outs while end chairs are tucked, and warns about the end-chair conflict', () => {
+test('side chairs clear the patio sweep but the end chair must be moved clear even when tucked', () => {
   const { root, chairs, patio, door } = buildDining();
   for (const travel of [0, 1.5, 2]) {
-    const boxes = chairs.map((chair) => rectangle(root, chair, Math.abs(chair.rotation.y) === Math.PI / 2 ? 0 : travel));
+    const boxes = chairs.filter((chair) => chair.rotation.y !== -Math.PI / 2).map((chair) => rectangle(root, chair, Math.abs(chair.rotation.y) === Math.PI / 2 ? 0 : travel));
     for (let degree = 0; degree <= 90; degree++) {
       door.rotation.y = degree * Math.PI / 180;
       for (const box of boxes) for (const part of door.children) assert.equal(intersectsDoor(box, patio, door, part), false, 'Actual door leaf and hardware clear the full chair envelope when end chairs are tucked');
     }
   }
   const pulledEnd = rectangle(root, chairs.find((chair) => chair.rotation.y === -Math.PI / 2), 1.5);
-  door.rotation.y = Math.PI / 6;
-  assert.ok(door.children.some((part) => intersectsDoor(pulledEnd, patio, door, part)), 'Reproduce the pulled end-chair/door conflict instead of silently claiming full clearance');
-  assert.equal(root.userData.patioEndChairMustBeTuckedForDoor, true);
+  const tuckedEnd = rectangle(root, chairs.find((chair) => chair.rotation.y === -Math.PI / 2));
+  let hits = 0, tuckedHits = 0;
+  for (let degree = 0; degree <= 90; degree++) {
+    door.rotation.y = degree * Math.PI / 180;
+    if (door.children.some((part) => intersectsDoor(pulledEnd, patio, door, part))) hits++;
+    if (door.children.some((part) => intersectsDoor(tuckedEnd, patio, door, part))) tuckedHits++;
+  }
+  assert.ok(hits > 0, 'Keep the actual pulled-end-chair conflict documented');
+  assert.ok(tuckedHits > 0, 'Do not claim tucking the end chair is sufficient in the shorter room');
+  assert.equal(root.userData.patioEndChairMustBeTuckedForDoor, false);
+  assert.equal(root.userData.patioEndChairMustBeMovedForDoor, true);
   const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
   assert.match(html, /id="dining-clearance-note"[^>]*hidden/);
-  assert.match(html, /keep the patio-end chair tucked before opening the patio door/i);
+  assert.match(html, /24-inch end-chair pull-out reaches side-wall trim/i);
 });
 
 test('patio door starts closed and leaves the centered table and tucked chairs untouched', () => {
@@ -154,6 +162,26 @@ test('patio door starts closed and leaves the centered table and tucked chairs u
   assert.equal(door.rotation.y, 0);
   assert.equal(door.userData.openAngleDegrees, 0);
   assert.equal(door.userData.outswing, false);
-  assert.ok(Math.abs(root.position.x - 19.85) < 1e-9 && Math.abs(root.position.z - 2.95) < 1e-9);
+  assert.ok(Math.abs(root.position.x - 19.85) < 1e-9 && Math.abs(root.position.z - 3.95) < 1e-9);
   for (const chair of chairs) for (const part of door.children) assert.equal(intersectsDoor(rectangle(root, chair), patio, door, part), false);
+});
+
+test('rear wall moves two feet forward from the original position with matching floor and roof', () => {
+  const plan = require('../floor-plan-ground.js').getGroundFloorDefaultPlan();
+  const room = plan.rooms.find((item) => item.name === 'Dining room');
+  assert.deepEqual(room, { name: 'Dining room', x: 13.2, z: -0.1, w: 13.3, d: 8.1 });
+  const rear = plan.walls.find(([name]) => name === 'Dining north');
+  assert.deepEqual(rear.slice(1), [13.2, -0.1, 26.5, -0.1, [[3.65, 9.65, 3, 8]]]);
+  const east = plan.walls.find(([name]) => name === 'Dining east');
+  assert.ok(Math.abs(east[2] + east[5][0][0] - 0.5) < 1e-9, 'Patio opening moves six inches to clear the new rear corner');
+  const floor = plan.floors.find((item) => item.room === 'Dining room');
+  assert.ok(Math.abs(floor.w * floor.d - 107.73) < 1e-8, 'Removes 26.6 square feet from the original dining footprint');
+  assert.equal(plan.walls.find(([name]) => name === 'Kitchen north')[2], 7);
+  assert.equal(plan.walls.find(([name]) => name === 'Mudroom north')[2], 14.5);
+  const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  assert.match(exterior, /gable\('Dining rear projection roof', 13\.2, 26\.5, -0\.1, 2\.1/);
+  const lot = exterior.match(/const lot = (\{[^\n]+\});/);
+  const data = vm.runInNewContext(`(${lot[1]})`, { wallThickness: 0.45 });
+  assert.ok(Math.abs(data.rearWallZ - data.rearSetbackFeet - (-32.325)) < 1e-9, 'Property boundary is not moved to fake the old setback');
+  assert.equal(data.rearSetbackFeet, 32);
 });

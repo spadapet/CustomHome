@@ -31,9 +31,9 @@ Current model audit: October 21, 2026. This is the consolidated reference for th
 
 | Included floor | Source-plan figures | Default 3D model envelopes |
 |---|---:|---:|
-| Ground floor, excluding garage and outdoor spaces | 1,828.90 sq ft | 1,926.91 sq ft |
+| Ground floor, excluding garage and outdoor spaces | 1,828.90 sq ft | 1,900.31 sq ft |
 | Upstairs | 1,808.50 sq ft label | 2,047.13 sq ft, no above-garage room |
-| **Both floors** | **3,637.40 sq ft, provisional** | **3,974.04 sq ft** |
+| **Both floors** | **3,637.40 sq ft, provisional** | **3,947.44 sq ft** |
 
 The [ground-floor source drawing](assets/ground-floor-3d-source.png) prints total surface area 2,716.5 sq ft, garage 671.1 sq ft, and porch 216.5 sq ft: `2,716.5 - 671.1 - 216.5 = 1,828.9 sq ft` indoors. Its room schedule contains no separate covered-patio entry; do not subtract the later outdoor patio from this indoor subtotal. The individual printed room figures sum to 2,716.2 rather than 2,716.5 sq ft, a 0.3 sq ft schedule discrepancy.
 
@@ -45,13 +45,13 @@ The first-floor model takeoff consists of these non-overlapping rectangles. Coor
 
 | Indoor region | x limits | z limits | Width x depth | Area (sq ft) |
 |---|---|---|---|---:|
-| Rear dining projection | 13.2-26.5 | -2.1-8 | 13.3 x 10.1 | 134.33 |
+| Rear dining projection | 13.2-26.5 | -0.1-8 | 13.3 x 8.1 | 107.73 |
 | Kitchen/prep outward extension | 26.5-55.5 | 7-8 | 29 x 1 | 29.00 |
 | Rear indoor band across living/hall/kitchen/prep | 0-55.5 | 8-15 | 55.5 x 7 | 388.50 |
 | Living/hall/kitchen/mudroom band, west of garage | 0-45.4 | 15-26.9 | 45.4 x 11.9 | 540.26 |
 | Kids/hall/stair band, west of garage | 0-29 | 26.9-34.6 | 29 x 7.7 | 223.30 |
 | Front rooms/hall, ending before porch | 0-31.2 | 34.6-54.2 | 31.2 x 19.6 | 611.52 |
-| **Ground-floor model total** | | | | **1,926.91** |
+| **Ground-floor model total** | | | | **1,900.31** |
 
 Upstairs model: `(15.5 x 5.5) + (25.7 x 2.4) + (54 x 5.4) + (52 x 20.8) + (31 x 17) = 2,047.13 sq ft`.
 
@@ -95,16 +95,42 @@ Walk paving top is y = -1.35, level with the lowered driveway surface. The 25 ft
 
 ## Room and adjacency schedule
 
+October 23 correction: move the dining rear wall two feet FORWARD from its
+original -2.1 datum to -0.1, undoing the rejected -4.1 extension. Side walls,
+floor and roof shorten; table/eight chairs and west window center at z = 3.95.
+Tree moves to (14.9, 1.6). Patio assembly shifts 6 in forward to clear rear
+corner trim, opening z = 0.5-6.5; unit size/handing and closed default remain.
+Even the tucked patio-end chair now conflicts with full sweep and must be
+moved clear; 24 in end pull-outs still meet side-wall trim. Other rooms stay
+fixed. Lot/fence/path coordinates stay fixed; dining rear-wall setback is
+32 ft, distinct from patio/roof setbacks. Older dining dimensions, coordinates
+and setback statements below are superseded. Survey, zoning, foundation,
+occupied access and roof design require professional review.
+
+October 23 local divider edit: only the prep/mudroom wall at x = 38-45.4 moves
+from z = 15 to 14.5. Kitchen symmetry, island, sink/exterior wall, both kitchen
+passages, garage entry/steps and vehicles remain fixed. Mudroom gains 3.7 sq ft,
+prep loses 3.7 sq ft; total indoor/garage/patio takeoffs are unchanged.
+Prep floors are split: x = 38-45.4 has depth 7.5 ft, x = 45.4-55.5 depth 8 ft.
+Full pantry/cleaning/robot assemblies shift north 0.5 ft: shelving z =
+13.15-14.15, robot center (53.585, 13.55), leaving a 6 in rear setback at the
+east end. Counter aisle becomes 46.5 in, pull clearance about 44.4 in and
+closed oven-handle clearance about 43.3 in; verify occupied/open-door use.
+Coat closet center becomes (41.7, 15.9), still 36 x 24 in; blind corners
+extend to z = 14.9, retain front z = 17.54 and are not counted as storage.
+Side towers/bench/common top trim remain fixed. These values supersede the
+older north-wall/coat/pantry coordinates later in this reference.
+
 Dimensions include nominal room envelopes, not guaranteed usable clear rectangles.
 
 | Space | Model extents x / z (ft) | Approximate width x depth | Layout context |
 |---|---|---|---|
 | Living | 0-13.2 / 8-25.7 | 13 ft 2 in x 17 ft 8 in | Fireplace on west wall; open to dining/kitchen and stair side; former partition removed, with guard at the north stairwell edge |
-| Dining | 13.2-26.5 / -2.1-8 | 13 ft 4 in x 10 ft 1 in | Rear and west windows; east patio assembly; seasonal tree in northwest corner |
+| Dining | 13.2-26.5 / -0.1-8 | 13 ft 4 in x 8 ft 1 in | Rear wall two feet forward from original; centered table/west window; patio assembly adjusted 6 in |
 | Main kitchen | 26.5-38 / 7-26.9 | 11 ft 6 in x 19 ft 11 in | North sink wall, east cooktop/passages, south refrigeration; island shifts into open living-side space |
 | Hall / circulation zone | Nominal 13.3 x 17.7 ft schedule | 13 ft 4 in x 17 ft 8 in | Irregular connected route around stairs/private rooms, not a separate unobstructed rectangle |
 | Prep kitchen | 38-55.5 / 7-15 | 17 ft 6 in x 8 ft | North counter/tower, south pantry shelves; entry from main kitchen, not directly from mudroom |
-| Mudroom | 38-45.4 / 15-26.9 | 7 ft 5 in x 11 ft 11 in | Connected matcha built-ins; five cubbies, enclosed coat closet, five personal shelf positions with removable containers, 21-pair shoe shelves; fixed kitchen opening, shifted 8 ft garage entry |
+| Mudroom | 38-45.4 / 14.5-26.9 | 7 ft 5 in x 12 ft 5 in | Divider moved 6 in toward prep; ivory/putty/oak enclosure retained; coat closet follows wall, side storage/bench/entrances stay fixed |
 | Garage | 45.4-55.5 / 15-26.9 plus 29-55.5 / 26.9-34.6 plus 31.2-55.5 / 34.6-49 | 26 ft 6 in x 34 ft maximum | Stepped footprint; narrow forward bike alcove, two parking bays, lower slab |
 | Kids' room | 19-29 / 24.7367-34.6 | Approximately 10 ft x 9 ft 10 in | Former central stair area; three MICKE desks; 54 x 96 in doorless west hall entry; no exterior window or direct living-room opening |
 | Powder room | 0-7.1 / 35.1-41 | 7 ft 1 in x 5 ft 11 in | Hall-facing east-wall door via guest alcove; toilet retained, vanity on south wall; tile extends 1 ft south |
@@ -212,13 +238,13 @@ Rear edges are at backsplash face z = 7.26, bottoms y = 3.04. This is **stored p
 
 Mudroom details, coordinated with [family-entry requirements](mud-room.html):
 
-- Five-cubby bench at (44.325, 22.85), facing decreasing x: 90 x 18 in, seat top 18 in, z = 19.1-26.6. Each floor-level shoe opening is approximately 17.1 in wide x 17.25 in deep x 15.7 in high above tile/grout, without bottom shelf, lip or intermediate shelf. Target large-shoe pair envelope: 14 x 16 x 14 in; measure the family's largest actual footwear, especially tall boots. Continuous white-oak backing extends to the floor. Each cubby has one inward-facing gold hook on each side divider, not on its back or the wall, and three upper shelves.
+- Five-cubby bench stays (44.325, 22.85), 90 x 18 in, seat 18 in, z = 19.1-26.6. Upper dividers/shelves now use the full 18 in depth and align with the bench/return front, without enlarging the footprint. Keep solid painted backs, ten side-panel gold hooks, three upper shelves per cubby and floor-level shoe openings approximately 17.1 W x 17.25 D x 15.7 H in, with no lip/intermediate shelf. Daily shoe allowance 14 x 16 x 14 in; verify actual footwear.
 - Enclosed coat closet centered on back wall at (41.7, 16.4), facing increasing z: 36 x 24 x 105 in, x = 40.2-43.2. Normal transverse rod, four illustrated coats, low shoes and upper storage; nominal 32 in bifold shown closed. Its full front has a 36 in-deep clear approach; final builder hardware/operation unselected.
-- Personal bin/seasonal shelves at (38.908333, 19.9), facing increasing x: 30 x 14 x 105 in. Five personal shelf positions, children lowest, each showing three removable purchased-container allowances of 8.5 x 11 x 5.5 in for socks/gloves/hats. No built-in drawer faces/runners. Matching key/charging and seasonal shelves remain.
-- Extra shoes move to west wall at (38.908333, 17.025), facing increasing x: 39 x 14 x 105 in, z = 15.4-18.65, adjoining bin run. Three columns x seven levels still target 21 pairs; clear cells approximately 12 x 13 x 9 in. Pair allowance 12 x 12.5 x 9 in; oversized footwear reduces capacity.
+- Personal-container tower at (38.908333, 19.941667), facing increasing x: 29 x 14 x 105 in, z = 18.733333-21.15. Five family positions, children lowest; 15 removable purchased-container allowances of 8.5 x 11 x 5.5 in, no drawer fronts/runners. Key/charging nook retained. Four two-column upper shoe levels target eight extra pairs.
+- West shoe return (38.908333, 18.136667), 14.32 x 14 x 105 in, z = 17.54-18.733333, directly meets the container tower; seven extra pair cells. Right return (44.325, 18.32), facing decreasing x, 18.72 x 18 x 105 in, z = 17.54-19.1, directly meets the cubbies; seven larger pair cells. All 22 extra cells exclude bench/coat shoes. West/upper pair allowance 12 x 12.5 x 9 in; right allowance 14 x 16 x 12 in. Measured shelf and front-trim openings fit these envelopes; actual footwear/product fit remains provisional.
 - Bin-to-bench aisle stays approximately 49 in. Coat front z = 17.54 has a clear approach to z = 20.54, x = 40.2-43.2. Keep x = 38.4-43.4, z = 21.5-26.5 storage-free for arrival. Kitchen opening and 96 in-high garage entry/steps at x = 39.5-42.5 stay fixed. No walls/exterior footprint move for parking. Static checks exclude people, bifold operation and garage-door swing; no code/accessibility approval.
 - Direct prep-to-mudroom opening at z = 15, x = 42-45 is closed with wall/baseboard. Access is via the main kitchen or garage route.
-- Mudroom stays matcha #8A9B74 with gold hardware; kitchen white oak unchanged. West shoe/bin run meets directly; upper connections flank the centered coat closet and return east to unchanged cubbies, minimum underside 81.6 in. Remove former corner fillers/bridge through the center. Tile/grid remain. Confirm supports, door operation, products, charging, anchorage and high-shelf access.
+- The latest October 22 neutral palette replaces both all-green joinery and the green coat-front accent: ivory cases/trim, putty backs, stained white-oak coat front/bench/drop surface, oatmeal containers and gold hardware. See the shared finish schedule below; kitchen white oak is unchanged. Every case/top rail ends at 105 in. Two full-height enclosed corner returns fill x = 38.325-40.2 / 43.2-45.075, z = 15.4-17.54. These are blind builder-fitted corners, not counted storage. Remove open corner bridges. Continuous north/west/east top rails physically join all cases, with 103.5 in underside and no low arch across the aisle. Tile/grid unchanged. Confirm blind-corner construction, supports, bifold operation, actual products, charging, anchorage and safe high-shelf access.
 
 ## Upstairs addition
 
@@ -384,8 +410,7 @@ See [garage working layout](garage.html#working-layout). Vehicles are closed-obj
 | Parking gaps | Center mirror aisle improves to about 49.4 in; truck side-wall mirror gap about 34 in; body-to-house-step gap about 30 in. BMW rear gap improves to about 11.7 in and front parking-lane equipment gap stays 36.5 in. Truck nose/rear still about 14.4 / 13.2 in. No steering/door-sweep or rear access claim |
 | EV charger | (42.75, 48.65), on the interior pier between garage doors; cable coiled off floor; supply/reach unverified |
 | Five-bike floor rack | Center (50.4, 18.5), 22.2 in nominal stand centers; both wheels on floor, no lifting/hooks |
-| Over-bike storage lift concept | 8 x 4 ft deck (32 sq ft), center (50.4, 18.5); deck top 7.5 ft / underside 7.25 ft above garage slab; eight illustrative bins; independent Visibility checkbox. Raised position only; goods-only, not walkable or load-rated. Bikes/people must clear the full lowering zone before real operation; structure, mechanism, safety controls and manufacturer requirements unverified |
-| Mobile storage-access steps | Access mode only: six 7 in rises / five 10 in treads; 30 x 30 in standing platform at 3.5 ft, about 81 in nominal headroom, 42 in guard and continuous handrails; approximately 30 x 80 in footprint. Move truck/bikes out first. Never climb onto storage deck or access moving lift; product, load, locks, structural approval and stowed location unresolved |
+| Over-bike storage and retrieval steps | Removed October 23 at owner's request, including seasonal bins, ceiling hardware, visibility checkbox and access views. Five floor-parked bikes remain; no replacement overhead platform or loft |
 | Equipment station | Center (32.95, 27.115), in front of BMW; current bounds about x = 29.55-36.35, z = 27.075-31.905 after unfolding mower |
 | Equipment contents | Conventional mower on wheels with full handle, vacuum at right end, conspicuous dedicated leaf-blower cradle at tool-board left, wall tools, battery shelf and bins |
 | Equipment approach | Previously checked conservative BMW-front gap about 42.5 in; aim to keep 36 in retrieval route. Removing east-wall storage restored about 40 in beside truck mirror |
@@ -404,7 +429,7 @@ Exterior garage approaches are only provisional lowered pads, not driveway gradi
 | Hardwood | Continuous 7 in natural honey-oak plank spacing/grain across living, dining, kitchen, prep, hall, kids, office, bedroom and closet; varied 4-8 ft board lengths |
 | Other floors | Mudroom/bathrooms tile, porch paving, garage epoxy; not the earlier prep-tile note |
 | Closed cabinetry | Light natural-stained white oak, Shaker recessed fronts, frameless/full-overlay; satin-gold hardware; open stair-bookcase carcasses stay cream |
-| Mudroom exception | Connected builder-installed shelves, backed cubbies and enclosed coat closet in muted matcha #8A9B74; gold hardware; open personal shelves for removable containers, not drawers |
+| Mudroom exception | Connected cases/shelves/corner returns/top trim warm ivory #EEE8DC; solid backs soft putty #DED6C8; coat front/bench/drop surface light stained white oak; removable fabric containers oatmeal #C9B89D; satin-gold hooks/knobs. No green paint. Screen finish study: confirm a matching stainable white-oak/veneer standard bifold and surround, stain and paint samples; no accessory drawers |
 | Quartz | Warm ivory/soft warm-gray veining on counters, island and kitchen walls; three main-kitchen window sills are smoky blue-gray |
 | Drawer cups | Top Knobs Dakota Charlotte M2223, Honey Bronze, kitchen/island/prep-extension drawers; one cup below 30 in width, pairs at quarter points at 30 in or wider |
 | Cup-pull dimensions | 3.75 in overall width, 1.125 in height, 15/16 in projection, 2 9/16 in mounting centers; geometry/drilling not installation CAD |

@@ -2,7 +2,6 @@ const viewport = document.getElementById('model-viewport');
 const message = viewport.querySelector('.model-message');
 const viewButtons = document.querySelectorAll('[data-view]');
 const islandLightsInput = document.getElementById('show-island-lights');
-const bikeStorageInput = document.getElementById('show-bike-storage');
 const floorGridInput = document.getElementById('show-floor-grid');
 const resetButton = document.getElementById('reset-view');
 const navigationButtons = document.querySelectorAll('[data-navigation]');
@@ -77,7 +76,6 @@ function showModelError(text) {
   message.hidden = false;
   viewButtons.forEach((button) => { button.disabled = true; });
   islandLightsInput.disabled = true;
-  bikeStorageInput.disabled = true;
   floorGridInput.disabled = true;
   resetButton.disabled = true;
   navigationButtons.forEach((button) => { button.disabled = true; });
@@ -102,6 +100,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#eeeee6');
   const perspectiveCamera = new THREE.PerspectiveCamera(38, 1, 0.1, 500);
+  const mudroomInteriorCamera = new THREE.PerspectiveCamera(85, 1, 0.1, 500);
   const cooktopElevationCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 500);
   let camera = perspectiveCamera;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -124,7 +123,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   controls.target.set(14, 0, 12);
   controls.addEventListener('change', render);
   function setNavigationMode(mode, start) {
-    if (mode === 'walk' && (activeFloor === 'exterior' || currentView === 'storage-access')) return;
+    if (mode === 'walk' && activeFloor === 'exterior') return;
     if (mode === 'walk' && activeFloor === 'ground' && groundLayoutPreview) {
       setTourStatus('Tours are unavailable in the edited structure-only preview.');
       return;
@@ -681,7 +680,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const prepWindowHeight = 3.5;
   const prepWindowSill = 4.25;
   const prepWindowCenters = [prepSinkX - 1.75, prepSinkX + 1.75];
-  const diningSideWindowCenters = [2.95];
+  const diningSideWindowCenters = [3.95];
   const diningSideWindowWidth = 6;
   const diningSideWindowHeight = 5;
   const diningSideWindowSill = 3;
@@ -730,15 +729,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   // Stepped footprint and room adjacencies follow the user's attached plan.
   floor(0, 8, 13.2, 17.7, true, scene);
-  floor(13.2, -2.1, 13.3, 10.1, true, scene);
+  floor(13.2, -0.1, 13.3, 8.1, true, scene);
   floor(13.2, 8, 5.8, 17.7, true, scene);
   floor(19, 8, 7.5, kidsRoom.z - 8, true, scene);
   floor(26.5, kitchenWindowWallZ, 11.5, kidsRoom.z - kitchenWindowWallZ, true, scene);
   floor(29, kidsRoom.z, 9, 26.9 - kidsRoom.z, true, scene);
-  floor(38, kitchenWindowWallZ, 17.5, 15 - kitchenWindowWallZ, true, scene);
+  floor(38, kitchenWindowWallZ, 7.4, 14.5 - kitchenWindowWallZ, true, scene);
+  floor(45.4, kitchenWindowWallZ, 10.1, 15 - kitchenWindowWallZ, true, scene);
   for (const { x, z, w, d } of garageFloorAreas) floor(x, z, w, d, false, shell, false, garageFloorY);
   [
-    [38, 15, 7.4, 11.9],
+    [38, 14.5, 7.4, 12.4],
     [0, 25.7, 12.2, stairOpening.z - 25.7, true],
     [0, stairOpening.z, stairOpening.x, stairOpening.depth, true],
     [stairOpening.x + stairOpening.width, stairOpening.z, 12.2 - stairOpening.x - stairOpening.width, stairOpening.depth, true],
@@ -753,9 +753,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   [
     [0, 8, 13.2, 8, true, livingSideWindows.map(({ center, width }) => [center - width / 2, center + width / 2, livingSideWindowSill, livingWindowHead])],
-    [13.2, -2.1, 13.2, 8, true, diningSideWindowCenters.map((z) => [z - diningSideWindowWidth / 2 + 2.1, z + diningSideWindowWidth / 2 + 2.1, diningSideWindowSill, diningSideWindowSill + diningSideWindowHeight])],
-    [13.2, -2.1, 26.5, -2.1, true, [[3.65, 9.65, 3, 8]]],
-    [26.5, -2.1, 26.5, kitchenWindowWallZ, true, [[2.1, 8.1, 0, 8]], ceilingHeight, [1]],
+    [13.2, -0.1, 13.2, 8, true, diningSideWindowCenters.map((z) => [z - diningSideWindowWidth / 2 + 0.1, z + diningSideWindowWidth / 2 + 0.1, diningSideWindowSill, diningSideWindowSill + diningSideWindowHeight])],
+    [13.2, -0.1, 26.5, -0.1, true, [[3.65, 9.65, 3, 8]]],
+    [26.5, -0.1, 26.5, kitchenWindowWallZ, true, [[0.6, 6.6, 0, 8]], ceilingHeight, [1]],
     [kitchenWallLeft, kitchenWindowWallZ, kitchenWallRight, kitchenWindowWallZ, true, kitchenSinkWindows.map(({ x, width }) => [x - width / 2 - kitchenWallLeft, x + width / 2 - kitchenWallLeft, kitchenSinkWindowSill, kitchenSinkWindowSill + kitchenSinkWindowHeight]), ceilingHeight, [-1, 1], 1],
     [38, kitchenWindowWallZ, 55.5, kitchenWindowWallZ, false, prepWindowCenters.map((x) => [x - prepWindowWidth / 2 - 38, x + prepWindowWidth / 2 - 38, prepWindowSill, prepWindowSill + prepWindowHeight])],
     [55.5, kitchenWindowWallZ, 55.5, 15, false, [[prepEndWindowZ - prepEndWindowWidth / 2 - kitchenWindowWallZ, prepEndWindowZ + prepEndWindowWidth / 2 - kitchenWindowWallZ, prepWindowSill, prepWindowSill + prepWindowHeight]], ceilingHeight, [1]],
@@ -782,9 +782,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [29.6875, 26.9, 37.8, 26.9, true, [], ceilingHeight, [1], -1, garageFloorY],
     [37.8, 26.9, 38, 26.9, true, [], ceilingHeight, [-1, 1], -1, garageFloorY],
     [38, kitchenWindowWallZ, 38, 25.3, true, kitchenSideOpenings, ceilingHeight, [-1, 1], 1],
-    [38, 25.3, 38, 26.9, true, [], ceilingHeight, [-1], 1], [38, 15, 45.4, 15],
+    [38, 25.3, 38, 26.9, true, [], ceilingHeight, [-1], 1], [38, 14.5, 45.4, 14.5],
     [45.4, 15, 55.5, 15, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
-    [45.4, 15, 45.4, 26.9, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
+    [45.4, 14.5, 45.4, 26.9, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
     [38, 26.9, 45.4, 26.9, false, [[garageEntry.x - 38, garageEntry.x - 38 + garageEntry.width, 0, garageEntry.height]], ceilingHeight, [-1, 1], 0, garageFloorY]
   ].forEach((segment) => wall(...segment));
 
@@ -792,8 +792,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   buildBaseTrim();
 
   [
-    ['Living room', 13.2, 17.7], ['Dining room', 13.3, 10.1], ['Kitchen', 11.5, 26.9 - kitchenWindowWallZ],
-    ['Hall', 13.3, kidsRoom.z - 8], ['Prep kitchen', 17.5, 15 - kitchenWindowWallZ], ['Mudroom', 7.4, 11.9],
+    ['Living room', 13.2, 17.7], ['Dining room', 13.3, 8.1], ['Kitchen', 11.5, 26.9 - kitchenWindowWallZ],
+    ['Hall', 13.3, kidsRoom.z - 8], ['Prep kitchen', 17.5, 15 - kitchenWindowWallZ, true], ['Mudroom', 7.4, 12.4],
     ['Garage', 26.5, 34, true], ['Kids room', kidsRoom.width, kidsRoom.depth],
     ['Powder room', 7.1, guestEntry.powder.d], ['Guest coat closet', 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 5.1, guestEntry.alcove.d], ['Office', 12.2, 54.2 - officeNorthZ],
     ['Guest walk-in closet', 6, 7.4], ['Guest shower bathroom', 6.2, guestSuite.bathroom.d],
@@ -933,7 +933,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   diningSconces.name = 'Dining-room wall sconces';
   diningSconces.userData = { fixtures: 2, placement: 'Flanking the rear dining window', finish: 'Satin gold with warm opal diffusers', chandelier: false, provisional: true };
   scene.add(diningSconces);
-  for (const x of [15.3, 24.4]) wallSconce(diningSconces, x, -1.895, -Math.PI / 2);
+  for (const x of [15.3, 24.4]) wallSconce(diningSconces, x, 0.105, -Math.PI / 2);
   const kitchenSconces = new THREE.Group();
   kitchenSconces.name = 'Kitchen sink-wall end sconces';
   kitchenSconces.userData = { fixtures: 2, placement: 'Outside the kitchen window-bank ends', finish: 'Satin gold with warm opal diffusers', provisional: true };
@@ -995,13 +995,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   for (const { name, center, width, picture } of livingSideWindows) {
     windowFrame(name, center, 8.1, width, livingWindowHead - livingSideWindowSill, livingSideWindowSill, 0, scene, 1, { picture });
   }
-  windowFrame('Dining rear window', 19.85, -2, 6, 5, 3);
+  windowFrame('Dining rear window', 19.85, 0, 6, 5, 3);
   for (const [index, z] of diningSideWindowCenters.entries()) {
     windowFrame(`Dining left window ${index + 1}`, 13.2, z, diningSideWindowWidth, diningSideWindowHeight, diningSideWindowSill, -Math.PI / 2, scene, -1);
   }
   const patioDoor = new THREE.Group();
   patioDoor.name = 'Dining casement windows and inswing patio door';
-  patioDoor.position.set(26.5, 0, 3);
+  patioDoor.position.set(26.5, 0, 3.5);
   patioDoor.rotation.y = -Math.PI / 2;
   patioDoor.userData = { widthFeet: 6, heightFeet: 8, sliding: false, provisional: true, exteriorDirection: 'increasing x' };
   scene.add(patioDoor);
@@ -1157,7 +1157,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const christmasTree = new THREE.Group();
   christmasTree.name = 'Dining-corner Christmas tree';
-  christmasTree.position.set(15.25, 0, -0.05);
+  christmasTree.position.set(14.9, 0, 1.6);
   christmasTree.userData = { heightInches: 84, diameterInches: 36, location: 'Northwest dining corner between the exterior windows', seasonal: true, provisional: true };
   scene.add(christmasTree);
   const evergreen = mat('#344f3a');
@@ -1228,14 +1228,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   ];
 
   const tableX = (13.2 + 26.5) / 2;
-  const tableZ = (-2.1 + 8) / 2;
+  const tableZ = (-0.1 + 8) / 2;
   const tableLength = 84 / 12;
   const tableDepth = 38 / 12;
   const diningSet = new THREE.Group();
   diningSet.name = 'Dining table and eight chairs';
   diningSet.position.set(tableX, 0, tableZ);
   diningSet.rotation.y = 0;
-  diningSet.userData = { rotationDegrees: 0, longAxis: 'x', seats: 8, centeredInDiningRoom: true, patioEndChairMustBeTuckedForDoor: true, provisional: true };
+  diningSet.userData = { rotationDegrees: 0, longAxis: 'x', seats: 8, centeredInDiningRoom: true, patioEndChairMustBeTuckedForDoor: false, patioEndChairMustBeMovedForDoor: true, provisional: true };
   scene.add(diningSet);
   const diningWalnut = mat('#60412e', 0.6);
   diningWalnut.name = 'Dining walnut finish - screen approximation';
@@ -2288,13 +2288,25 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   }
 
-  tiledFloor('Mudroom tile', 38, 15, 7.4, 11.9);
+  for (const storage of [prepShelves, cleaningStation, robotDock]) storage.position.z -= 0.5;
+
+  tiledFloor('Mudroom tile', 38, 14.5, 7.4, 12.4);
+  const mudCaseFinish = mat('#eee8dc', 0.75);
+  mudCaseFinish.name = 'Warm ivory mudroom casework';
+  const mudBackingFinish = mat('#ded6c8', 0.85);
+  mudBackingFinish.name = 'Soft putty mudroom backing';
+  const mudBinFinish = mat('#c9b89d', 0.95);
+  mudBinFinish.name = 'Oatmeal fabric mudroom containers';
   const mudBench = furnishing('Five-cubby mudroom bench', 44.325, 22.85, -Math.PI / 2);
   const mudStorageTop = ceilingHeight - 0.25;
   const mudBenchWidth = 7.5;
   const mudPanel = 0.75 / 12;
   const mudCubbyPitch = (mudBenchWidth - mudPanel) / 5;
   const mudFamily = ['Child 1', 'Child 2', 'Child 3', 'Mom', 'Dad'];
+  const mudNorthFront = 17.54;
+  const mudWestRunEnd = 21.15;
+  const mudTopRailHeight = 1.5 / 12;
+  const mudTopRailBottom = mudStorageTop - mudTopRailHeight;
   function mudroomLabel(parent, text, x, y, z, width = 0.65) {
     const canvas = document.createElement('canvas');
     canvas.width = 256;
@@ -2317,11 +2329,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   mudBench.userData = { cubbies: 5, hooks: 10, hooksPerCubby: 2, shoeOpenings: 5, shoePairEnvelopeInches: [14, 16, 14], construction: 'Builder-installed panel-and-shelf built-in', widthInches: 90, depthInches: 18, seatHeightInches: 18, heightInches: mudStorageTop * 12, provisional: true };
   box(mudBench, 0, 1.425, 0, mudBenchWidth, 0.15, 1.5, cabinetRailFinish).name = 'Mudroom oak bench seat';
-  box(mudBench, 0, mudStorageTop / 2, -0.71875, mudBenchWidth, mudStorageTop, mudPanel, cabinetPanelFinish).name = 'Continuous white-oak cubby backing';
+  box(mudBench, 0, mudStorageTop / 2, -0.71875, mudBenchWidth, mudStorageTop, mudPanel, mudBackingFinish).name = 'Continuous mudroom cubby backing';
   for (let i = 0; i <= 5; i++) {
     const x = -mudBenchWidth / 2 + mudPanel / 2 + i * mudCubbyPitch;
-    box(mudBench, x, 0.675, 0, mudPanel, 1.35, 1.5, cabinetFinish).name = 'Open shoe bay divider';
-    box(mudBench, x, (1.5 + mudStorageTop) / 2, -0.175, mudPanel, mudStorageTop - 1.5, 1.15, cabinetFinish).name = 'Mudroom cubby partition';
+    box(mudBench, x, 0.675, 0, mudPanel, 1.35, 1.5, mudCaseFinish).name = 'Open shoe bay divider';
+    box(mudBench, x, (1.5 + mudStorageTop) / 2, 0, mudPanel, mudStorageTop - 1.5, 1.5, mudCaseFinish).name = 'Mudroom cubby partition';
   }
   for (let i = 0; i < 5; i++) {
     const cubby = new THREE.Group();
@@ -2340,16 +2352,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       box(hook, 0, -0.05, 0.12, 0.055, 0.055, 0.24, brass).name = 'Coat hook arm';
       box(hook, 0, 0.025, 0.225, 0.055, 0.15, 0.055, brass).name = 'Coat hook upturn';
     }
-    for (const y of [6.35, 7.5, mudStorageTop - 0.04]) box(cubby, 0, y, -0.175, mudCubbyPitch - mudPanel, 0.08, 1.15, cabinetRailFinish).name = 'Mudroom upper cubby shelf';
+    for (const y of [6.35, 7.5, mudStorageTop - 0.04]) box(cubby, 0, y, 0, mudCubbyPitch - mudPanel, 0.08, 1.5, mudCaseFinish).name = 'Mudroom upper cubby shelf';
     mudroomLabel(cubby, mudFamily[i], 0, 5.9, -0.64);
   }
 
-  const mudCoats = furnishing('Mudroom hanging coat closet', (38 + 45.4) / 2, 16.4);
+  const mudCoats = furnishing('Mudroom hanging coat closet', (38 + 45.4) / 2, 15.9);
   const mudCoatWidth = 3;
   mudCoats.userData = { widthInches: 36, depthInches: 24, heightInches: mudStorageTop * 12, doorStyle: 'Standard 32-inch bifold closet door, shown closed', railOrientation: 'Side to side', construction: 'Builder-installed enclosed closet, fixed rod and shelves; standard door, not drawer cabinetry', hangingRail: true, shoeShelves: 2, seasonalShelves: 2, provisional: true };
-  for (const x of [-1, 1]) box(mudCoats, x * (mudCoatWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 2, cabinetFinish).name = 'Coat closet side panel';
-  box(mudCoats, 0, mudStorageTop / 2, -0.97, mudCoatWidth - 2 * mudPanel, mudStorageTop, 0.06, cabinetFinish).name = 'Coat closet backing';
-  for (const y of [0.15, 1.15, 6.4, 7.55, mudStorageTop - 0.04]) box(mudCoats, 0, y, 0, mudCoatWidth - 2 * mudPanel, 0.08, 1.8, cabinetRailFinish).name = y < 2 ? 'Closet open shoe shelf' : 'Coat closet upper shelf';
+  for (const x of [-1, 1]) box(mudCoats, x * (mudCoatWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 2, mudCaseFinish).name = 'Coat closet side panel';
+  box(mudCoats, 0, mudStorageTop / 2, -0.97, mudCoatWidth - 2 * mudPanel, mudStorageTop, 0.06, mudBackingFinish).name = 'Coat closet backing';
+  for (const y of [0.15, 1.15, 6.4, 7.55, mudStorageTop - 0.04]) box(mudCoats, 0, y, 0, mudCoatWidth - 2 * mudPanel, 0.08, 1.8, mudCaseFinish).name = y < 2 ? 'Closet open shoe shelf' : 'Coat closet upper shelf';
   const mudCoatRail = cylinder(mudCoats, 0, 5.9, -0.05, 0.035, mudCoatWidth - 2 * mudPanel, brass);
   mudCoatRail.name = 'Mudroom coat hanging rail';
   mudCoatRail.rotation.z = Math.PI / 2;
@@ -2367,79 +2379,101 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   for (const x of [-mudDoorWidth / 4, mudDoorWidth / 4]) box(mudCoats, x, 3.2, 1.1, 0.1, 0.1, 0.08, brass).name = 'Mudroom closet gold knob';
 
-  const mudDrawers = furnishing('Mudroom family drawer and seasonal storage tower', 38.325 + 7 / 12, 19.9, Math.PI / 2);
-  const mudDrawerWidth = 2.5;
+  function mudroomShoeCell(parent, x, y, width, depth, nextShelf, envelope, zone) {
+    const cell = new THREE.Group();
+    cell.name = 'Mudroom extra shoe pair cell';
+    cell.position.set(x, y, 0);
+    cell.userData = { pairs: 1, zone, clearWidthInches: width * 12, depthInches: depth * 12, clearHeightInches: (Math.min(nextShelf - 0.04, mudTopRailBottom) - y - 0.04) * 12, pairEnvelopeInches: envelope, provisional: true };
+    parent.add(cell);
+    box(cell, 0, 0, 0, width, 0.08, depth, mudCaseFinish).name = 'Extra shoe pair shelf';
+    for (const side of [-1, 1]) {
+      box(cell, side * 0.225, 0.065, 0.02, 0.35, 0.05, 0.95, cream, true).name = 'Stored shoe sole';
+      box(cell, side * 0.225, 0.19, -0.03, 0.32, 0.22, 0.85, linen, true).name = 'Stored extra shoe';
+    }
+  }
+
+  const mudDrawerWidth = 29 / 12;
+  const mudBins = furnishing('Mudroom family container and shoe tower', 38.325 + 7 / 12, mudWestRunEnd - mudDrawerWidth / 2, Math.PI / 2);
   const mudDrawerDepth = 14 / 12;
   const mudDrawerBottom = 0.3;
   const mudDrawerTop = 3.1;
-  mudDrawers.userData = { widthInches: 30, depthInches: 14, bins: 5, owners: mudFamily, construction: 'Builder-installed open shelves with removable fabric bins; no custom drawer cabinetry', binEnvelopeInches: [27, 11, 5.5], heightInches: mudStorageTop * 12, provisional: true };
-  for (const side of [-1, 1]) box(mudDrawers, side * (mudDrawerWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, mudDrawerDepth, cabinetFinish).name = 'Family drawer tower side';
-  box(mudDrawers, 0, mudStorageTop / 2, -mudDrawerDepth / 2 + 0.03, mudDrawerWidth - 2 * mudPanel, mudStorageTop, 0.06, cabinetFinish).name = 'Family drawer tower backing';
-  box(mudDrawers, 0, 0.15, 0, mudDrawerWidth - 0.2, 0.3, mudDrawerDepth - 0.2, cabinetFinish).name = 'Family drawer tower recessed plinth';
+  mudBins.userData = { widthInches: 29, depthInches: 14, bins: 5, owners: mudFamily, construction: 'Builder-installed open shelves with removable fabric bins; no custom drawer cabinetry', binEnvelopeInches: [27, 11, 5.5], extraPairTarget: 8, heightInches: mudStorageTop * 12, provisional: true };
+  for (const side of [-1, 1]) box(mudBins, side * (mudDrawerWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, mudDrawerDepth, mudCaseFinish).name = 'Family container tower side';
+  box(mudBins, 0, mudStorageTop / 2, -mudDrawerDepth / 2 + 0.03, mudDrawerWidth - 2 * mudPanel, mudStorageTop, 0.06, mudBackingFinish).name = 'Family container tower backing';
+  box(mudBins, 0, 0.15, 0, mudDrawerWidth - 0.2, 0.3, mudDrawerDepth - 0.2, mudCaseFinish).name = 'Family container tower recessed plinth';
   for (const [index, owner] of mudFamily.entries()) {
     const pitch = (mudDrawerTop - mudDrawerBottom) / mudFamily.length;
     const centerY = mudDrawerBottom + (index + 0.5) * pitch;
     const drawer = new THREE.Group();
     drawer.name = 'Mudroom personal accessory bin';
     drawer.userData = { owner, contents: ['Socks', 'Gloves', 'Hats'], removableContainers: 3, provisional: true };
-    mudDrawers.add(drawer);
-    box(mudDrawers, 0, mudDrawerBottom + index * pitch, 0, mudDrawerWidth - 2 * mudPanel, 0.04, mudDrawerDepth - 0.12, cabinetRailFinish).name = 'Personal bin support shelf';
+    mudBins.add(drawer);
+    box(mudBins, 0, mudDrawerBottom + index * pitch, 0, mudDrawerWidth - 2 * mudPanel, 0.04, mudDrawerDepth - 0.12, mudCaseFinish).name = 'Personal bin support shelf';
     for (const [containerIndex, contents] of drawer.userData.contents.entries()) {
       const container = new THREE.Group();
       container.name = 'Removable accessory container';
       container.userData = { owner, contents, envelopeInches: [8.5, 11, 5.5], purchasedSeparately: true };
       container.position.x = (containerIndex - 1) * 0.75;
       drawer.add(container);
-      box(container, 0, centerY - 0.22, 0, 8.5 / 12, 0.04, 11 / 12, linen).name = 'Personal bin bottom';
-      for (const x of [-0.334, 0.334]) box(container, x, centerY, 0, 0.04, 0.4, 11 / 12, linen).name = 'Personal bin side';
-      box(container, 0, centerY, -0.438, 8.5 / 12, 0.4, 0.04, linen).name = 'Personal bin back';
-      box(container, 0, centerY - 0.085, 0.438, 8.5 / 12, 0.23, 0.04, linen).name = 'Personal bin low front';
+      box(container, 0, centerY - 0.22, 0, 8.5 / 12, 0.04, 11 / 12, mudBinFinish).name = 'Personal bin bottom';
+      for (const x of [-0.334, 0.334]) box(container, x, centerY, 0, 0.04, 0.4, 11 / 12, mudBinFinish).name = 'Personal bin side';
+      box(container, 0, centerY, -0.438, 8.5 / 12, 0.4, 0.04, mudBinFinish).name = 'Personal bin back';
+      box(container, 0, centerY - 0.085, 0.438, 8.5 / 12, 0.23, 0.04, mudBinFinish).name = 'Personal bin low front';
       mudroomLabel(container, contents, 0, centerY - 0.08, 0.46, 0.6);
     }
     mudroomLabel(drawer, owner, 0, mudDrawerBottom + index * pitch - 0.06, mudDrawerDepth / 2 + 0.01);
   }
-  box(mudDrawers, 0, 3.15, 0, mudDrawerWidth, 0.1, mudDrawerDepth, cabinetRailFinish).name = 'Mudroom keys and charging drop zone';
-  box(mudDrawers, 0, 3.8, -mudDrawerDepth / 2 + 0.07, 0.25, 0.35, 0.03, cream).name = 'Mudroom charging outlet allowance';
-  for (const y of [4.5, 5.8, 7.2, mudStorageTop - 0.04]) box(mudDrawers, 0, y, 0, mudDrawerWidth - 2 * mudPanel, 0.08, mudDrawerDepth - 0.12, cabinetRailFinish).name = 'Family seasonal storage shelf';
-  const mudShoes = furnishing('Mudroom extra family shoe wall', 38.325 + 7 / 12, 17.025, Math.PI / 2);
-  const mudShoeWidth = 39 / 12;
-  const mudShoeDepth = 14 / 12;
-  const mudShoePitch = (mudShoeWidth - mudPanel) / 3;
-  mudShoes.userData = { widthInches: 39, depthInches: 14, columns: 3, shoeLevels: 7, extraPairTarget: 21, pairEnvelopeInches: [12, 12.5, 9], construction: 'Builder-installed open adjustable shelves', heightInches: mudStorageTop * 12, provisional: true };
-  box(mudShoes, 0, mudStorageTop / 2, -mudShoeDepth / 2 + 0.03, mudShoeWidth, mudStorageTop, 0.06, cabinetFinish).name = 'Extra shoe wall backing';
-  for (let column = 0; column <= 3; column++) {
-    box(mudShoes, -mudShoeWidth / 2 + mudPanel / 2 + column * mudShoePitch, mudStorageTop / 2, 0, mudPanel, mudStorageTop, mudShoeDepth, cabinetFinish).name = 'Extra shoe wall divider';
+  box(mudBins, 0, 3.15, 0, mudDrawerWidth, 0.1, mudDrawerDepth, cabinetRailFinish).name = 'Mudroom keys and charging drop zone';
+  box(mudBins, 0, 3.8, -mudDrawerDepth / 2 + 0.07, 0.25, 0.35, 0.03, cream).name = 'Mudroom charging outlet allowance';
+  const mudUpperShoePitch = (mudDrawerWidth - mudPanel) / 2;
+  box(mudBins, 0, (4.46 + mudStorageTop - 0.08) / 2, 0, mudPanel, mudStorageTop - 0.08 - 4.46, mudDrawerDepth, mudCaseFinish).name = 'Family upper shoe divider';
+  for (let level = 0; level < 4; level++) {
+    const y = 4.5 + level * 1.1;
+    for (const side of [-1, 1]) mudroomShoeCell(mudBins, side * mudUpperShoePitch / 2, y, mudUpperShoePitch - mudPanel, mudDrawerDepth - 0.08, level < 3 ? y + 1.1 : mudStorageTop - 0.04, [12, 12.5, 9], 'Above personal containers');
   }
+  box(mudBins, 0, mudStorageTop - 0.04, 0, mudDrawerWidth - 2 * mudPanel, 0.08, mudDrawerDepth, mudCaseFinish).name = 'Family tower top cap';
+  const mudShoeWidth = mudWestRunEnd - mudNorthFront - mudDrawerWidth;
+  const mudShoes = furnishing('Mudroom extra family shoe wall', 38.325 + 7 / 12, mudNorthFront + mudShoeWidth / 2, Math.PI / 2);
+  const mudShoeDepth = 14 / 12;
+  mudShoes.userData = { widthInches: mudShoeWidth * 12, depthInches: 14, columns: 1, shoeLevels: 7, extraPairTarget: 7, pairEnvelopeInches: [12, 12.5, 9], construction: 'Builder-installed open shelves joined to the north enclosure', heightInches: mudStorageTop * 12, provisional: true };
+  box(mudShoes, 0, mudStorageTop / 2, -mudShoeDepth / 2 + 0.03, mudShoeWidth, mudStorageTop, 0.06, mudBackingFinish).name = 'Extra shoe wall backing';
+  for (const side of [-1, 1]) box(mudShoes, side * (mudShoeWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, mudShoeDepth, mudCaseFinish).name = 'Extra shoe wall divider';
   for (let level = 0; level < 7; level++) {
     const shelfY = 0.12 + level * 10 / 12;
-    for (let column = 0; column < 3; column++) {
-      const cell = new THREE.Group();
-      cell.name = 'Mudroom extra shoe pair cell';
-      cell.position.set(-mudShoeWidth / 2 + mudPanel / 2 + (column + 0.5) * mudShoePitch, shelfY, 0);
-      cell.userData = { pairs: 1, clearWidthInches: (mudShoePitch - mudPanel) * 12, depthInches: (mudShoeDepth - 0.08) * 12 };
-      mudShoes.add(cell);
-      box(cell, 0, 0, 0, mudShoePitch - mudPanel, 0.08, mudShoeDepth - 0.08, cabinetRailFinish).name = 'Extra shoe pair shelf';
-      for (const side of [-1, 1]) {
-        box(cell, side * 0.225, 0.065, 0.02, 0.35, 0.05, 0.95, cream, true).name = 'Stored shoe sole';
-        box(cell, side * 0.225, 0.19, -0.03, 0.32, 0.22, 0.85, (column + level) % 2 ? linen : black, true).name = 'Stored extra shoe';
-      }
-    }
+    mudroomShoeCell(mudShoes, 0, shelfY, mudShoeWidth - 2 * mudPanel, mudShoeDepth - 0.08, level < 6 ? shelfY + 10 / 12 : 6.2, [12, 12.5, 9], 'West return');
   }
-  for (const y of [6.2, 7.5, mudStorageTop - 0.04]) box(mudShoes, 0, y, 0, mudShoeWidth - 2 * mudPanel, 0.08, mudShoeDepth - 0.08, cabinetRailFinish).name = 'Extra shoe wall seasonal shelf';
+  for (const y of [6.2, 7.5, mudStorageTop - 0.04]) box(mudShoes, 0, y, 0, mudShoeWidth - 2 * mudPanel, 0.08, mudShoeDepth - 0.08, mudCaseFinish).name = 'Extra shoe wall seasonal shelf';
 
-  const mudJoinery = furnishing('Continuous mudroom built-in connections', 0, 0);
-  mudJoinery.userData = { joinedBuiltIns: true, clearHeadroomInches: 81.6, provisional: true };
-  const mudWestFront = 38.325 + 14 / 12, mudEastFront = 45.075 - 14 / 12;
-  for (const [left, right] of [[mudWestFront, 40.2], [43.2, mudEastFront]]) {
-    for (const y of [6.84, 7.8, mudStorageTop - 0.04]) box(mudJoinery, (left + right) / 2, y, 15.4 + 7 / 12, right - left, 0.08, 14 / 12, cabinetRailFinish).name = 'Mudroom connecting upper shelf';
-    box(mudJoinery, (left + right) / 2, (6.8 + mudStorageTop) / 2, 15.43, right - left, mudStorageTop - 6.8, 0.06, cabinetFinish).name = 'Mudroom connecting upper backing';
+  const mudCornerShoeWidth = 19.1 - mudNorthFront;
+  const mudCornerShoes = furnishing('Mudroom corner shoe tower', 44.325, (mudNorthFront + 19.1) / 2, -Math.PI / 2);
+  mudCornerShoes.userData = { widthInches: mudCornerShoeWidth * 12, depthInches: 18, heightInches: mudStorageTop * 12, shoeLevels: 7, extraPairTarget: 7, pairEnvelopeInches: [14, 16, 12], provisional: true };
+  for (const side of [-1, 1]) box(mudCornerShoes, side * (mudCornerShoeWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 1.5, mudCaseFinish).name = 'Corner shoe tower side';
+  box(mudCornerShoes, 0, mudStorageTop / 2, -0.72, mudCornerShoeWidth - 2 * mudPanel, mudStorageTop, 0.06, mudBackingFinish).name = 'Corner shoe tower backing';
+  for (let level = 0; level < 7; level++) {
+    const y = 0.12 + level * 1.2;
+    mudroomShoeCell(mudCornerShoes, 0, y, mudCornerShoeWidth - 2 * mudPanel, 1.5 - 0.08, level < 6 ? y + 1.2 : mudStorageTop - 0.04, [14, 16, 12], 'Beside cubbies');
   }
-  for (const y of [6.84, 7.8, mudStorageTop - 0.04]) box(mudJoinery, 45.075 - 7 / 12, y, (15.4 + 19.1) / 2, 14 / 12, 0.08, 19.1 - 15.4, cabinetRailFinish).name = 'Mudroom east return upper shelf';
-  const mudFinish = mat('#8a9b74', 0.85);
-  mudFinish.name = 'Muted matcha-green mudroom built-ins';
-  for (const builtIn of [mudBench, mudCoats, mudDrawers, mudShoes, mudJoinery]) builtIn.traverse((part) => {
-    if ([cabinetFinish, cabinetRailFinish, cabinetPanelFinish].includes(part.material)) part.material = mudFinish;
-  });
+  box(mudCornerShoes, 0, mudStorageTop - 0.04, 0, mudCornerShoeWidth - 2 * mudPanel, 0.08, 1.5, mudCaseFinish).name = 'Corner shoe tower top cap';
+
+  const mudJoinery = furnishing('Continuous mudroom built-in enclosure', 0, 0);
+  mudJoinery.userData = { joinedBuiltIns: true, enclosureStyle: 'Full-height wrapped U-shaped builder built-in', uniformTopInches: mudStorageTop * 12, topRailUndersideInches: mudTopRailBottom * 12, extraPairTarget: 22, enclosedBlindCorners: 2, blindCornersCountedAsStorage: false, provisional: true };
+  for (const [left, right] of [[38.325, 40.2], [43.2, 45.075]]) {
+    const corner = new THREE.Group();
+    corner.name = 'Mudroom enclosed corner return';
+    corner.userData = { accessibleStorage: false, construction: 'Builder-fitted blind corner, not an open gap or counted storage' };
+    corner.position.set((left + right) / 2, 0, (14.9 + mudNorthFront) / 2);
+    mudJoinery.add(corner);
+    const width = right - left, depth = mudNorthFront - 14.9;
+    for (const y of [0.04, mudStorageTop - 0.04]) box(corner, 0, y, 0, width, 0.08, depth, mudCaseFinish).name = 'Enclosed corner horizontal panel';
+    box(corner, 0, mudStorageTop / 2, -depth / 2 + 0.03, width, mudStorageTop - 0.16, 0.06, mudCaseFinish).name = 'Enclosed corner back';
+    box(corner, 0, mudStorageTop / 2, depth / 2 - mudPanel / 2, width, mudStorageTop - 0.16, mudPanel, mudCaseFinish).name = 'Enclosed corner front';
+    for (const side of [-1, 1]) box(corner, side * (width - mudPanel) / 2, mudStorageTop / 2, (0.06 - mudPanel) / 2, mudPanel, mudStorageTop - 0.16, depth - 0.06 - mudPanel, mudCaseFinish).name = 'Enclosed corner cheek';
+  }
+  box(mudJoinery, 41.7, mudStorageTop - 0.04, (16.95 + mudNorthFront) / 2, mudCoatWidth, 0.08, mudNorthFront - 16.95, mudCaseFinish).name = 'Coat header top return';
+  const mudWestFront = 38.325 + 14 / 12, mudEastFront = 43.575;
+  box(mudJoinery, (mudWestFront + mudEastFront) / 2, mudStorageTop - mudTopRailHeight / 2, mudNorthFront + 0.025, mudEastFront - mudWestFront - 0.1, mudTopRailHeight, 0.05, mudCaseFinish).name = 'Mudroom continuous north top rail';
+  box(mudJoinery, mudWestFront + 0.025, mudStorageTop - mudTopRailHeight / 2, (mudNorthFront + mudWestRunEnd) / 2, 0.05, mudTopRailHeight, mudWestRunEnd - mudNorthFront, mudCaseFinish).name = 'Mudroom continuous west top rail';
+  box(mudJoinery, mudEastFront - 0.025, mudStorageTop - mudTopRailHeight / 2, (mudNorthFront + 26.6) / 2, 0.05, mudTopRailHeight, 26.6 - mudNorthFront, mudCaseFinish).name = 'Mudroom continuous east top rail';
 
   const epoxy = mat('#a7aaa6', 0.55);
   for (const { x, z, w, d } of garageFloorAreas) {
@@ -2559,63 +2593,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(bicycle, 0, axleHeight - 0.25, 0.35, 0.65, 0.08, 0.25, black).name = 'Bicycle pedals';
   }
   bikeRack.traverse((object) => { if (object.isMesh) object.userData.tourObstacle = true; });
-
-  const bikeStorage = furnishing('Over-bike storage lift concept', 50.4, 18.5, 0, garageFloorY);
-  const bikeStorageHeight = 7.5;
-  bikeStorage.userData = { widthFeet: 8, depthFeet: 4, deckTopAboveGarageFeet: bikeStorageHeight, undersideAboveGarageFeet: 7.25, access: 'Goods-only lowering platform; clear all bikes and people from the lowering zone before operation', walkOnPlatform: false, engineered: false, ratedLoadPounds: null, provisional: true };
-  bikeStorage.visible = bikeStorageInput.checked;
-  box(bikeStorage, 0, bikeStorageHeight - 0.125, 0, 8, 0.25, 4, steel).name = 'Storage lift raised goods platform';
-  for (const side of [-1, 1]) {
-    box(bikeStorage, side * 3.96, bikeStorageHeight + 0.16, 0, 0.08, 0.32, 4, black).name = 'Storage tray side lip';
-    box(bikeStorage, 0, bikeStorageHeight + 0.16, side * 1.96, 8, 0.32, 0.08, black).name = 'Storage tray end lip';
-  }
-  const bikeStorageAnchorY = ceilingHeight - garageFloorY - 0.2;
-  for (const x of [-3.75, 3.75]) {
-    for (const z of [-1.75, 1.75]) {
-      box(bikeStorage, x, bikeStorageAnchorY, z, 0.5, 0.12, 0.5, black).name = 'Storage lift schematic ceiling attachment';
-      stairBeam('Storage lift schematic suspension', [x, bikeStorageHeight, z], [x, bikeStorageAnchorY - 0.06, z], 0.035, 0.035, steel, bikeStorage);
-    }
-  }
-  box(bikeStorage, 0, bikeStorageAnchorY - 0.1, -1.75, 1.2, 0.25, 0.5, black).name = 'Storage lift schematic drive housing';
-  for (const x of [-3, -1, 1, 3]) {
-    for (const z of [-0.95, 0.95]) {
-      box(bikeStorage, x, bikeStorageHeight + 0.7, z, 1.6, 1.4, 1.5, linen, true).name = 'Over-bike seasonal storage bin';
-      box(bikeStorage, x, bikeStorageHeight + 1.43, z, 1.66, 0.06, 1.56, black).name = 'Over-bike storage bin lid';
-    }
-  }
-
-  const storageAccessSteps = furnishing('Mobile guarded garage storage-access steps concept', 48.5, 20.9, 0, garageFloorY + 0.005);
-  storageAccessSteps.visible = false;
-  storageAccessSteps.userData = { standingHeightFeet: 3.5, nominalHeadroomInches: (ceilingHeight - garageFloorY - 0.005 - 3.5) * 12, widthInches: 30, risers: 6, riseInches: 7, treadInches: 10, platformInches: [30, 30], guardHeightInches: 42, mobile: true, parkedLocationSelected: false, requiresTruckAndBikesRemoved: true, walkOnStorageDeck: false, productSelected: false, engineered: false, ratedLoadPounds: null, provisional: true };
-  const accessHeight = 3.5, accessPlatformDepth = 2.5, accessRun = 50 / 12;
-  box(storageAccessSteps, 0, accessHeight - 0.075, accessPlatformDepth / 2, 2.5, 0.15, accessPlatformDepth, steel).name = 'Garage access standing platform, not storage deck';
-  for (let step = 0; step < 5; step++) {
-    const top = accessHeight - (step + 1) * 7 / 12;
-    box(storageAccessSteps, 0, top - 0.06, accessPlatformDepth + (step + 0.5) * 10 / 12, 2.5, 0.12, 10 / 12, steel).name = 'Garage access non-slip tread';
-  }
-  for (let riser = 0; riser < 6; riser++) box(storageAccessSteps, 0, accessHeight - (riser + 0.5) * 7 / 12, accessPlatformDepth + riser * 10 / 12, 2.5, 7 / 12, 0.08, steel).name = 'Garage access closed riser';
-  for (const side of [-1, 1]) {
-    stairBeam('Garage access stair stringer', [side * 1.2, 0.1, accessPlatformDepth + accessRun], [side * 1.2, accessHeight - 0.12, accessPlatformDepth], 0.12, 0.2, steel, storageAccessSteps);
-    stairBeam('Garage access continuous handrail', [side * 1.2, 3, accessPlatformDepth + accessRun], [side * 1.2, accessHeight + 3, accessPlatformDepth], 0.09, 0.09, steel, storageAccessSteps);
-    for (const z of [accessPlatformDepth, accessPlatformDepth + accessRun / 2, accessPlatformDepth + accessRun]) {
-      const base = accessHeight * (1 - (z - accessPlatformDepth) / accessRun);
-      box(storageAccessSteps, side * 1.2, base + 1.5, z, 0.08, 3, 0.08, steel).name = 'Garage access handrail upright';
-    }
-    for (let baluster = 0; baluster <= 14; baluster++) {
-      const z = accessPlatformDepth + accessRun * baluster / 14;
-      const base = accessHeight * (1 - baluster / 14);
-      box(storageAccessSteps, side * 1.2, base + 1.5, z, 0.06, 3, 0.06, steel).name = 'Garage access stair guard baluster';
-    }
-    for (const z of [0.06, 0.35, 0.65, 0.95, 1.25, 1.55, 1.85, 2.15, 2.44]) box(storageAccessSteps, side * 1.2, accessHeight + 1.75, z, 0.06, 3.5, 0.06, steel).name = 'Garage access platform guard';
-    for (const y of [accessHeight + 0.15, accessHeight + 1.75, accessHeight + 3.5]) box(storageAccessSteps, side * 1.2, y, 1.25, 0.08, 0.08, 2.5, steel).name = 'Garage access side guard rail';
-    for (const z of [0.3, accessPlatformDepth + accessRun - 0.2]) {
-      const wheel = cylinder(storageAccessSteps, side * 1.1, 0.12, z, 0.12, 0.15, black);
-      wheel.rotation.z = Math.PI / 2;
-      wheel.name = 'Garage access locking caster allowance';
-    }
-  }
-  for (const x of [-1.2, -0.9, -0.6, -0.3, 0, 0.3, 0.6, 0.9, 1.2]) box(storageAccessSteps, x, accessHeight + 1.75, 0.04, 0.06, 3.5, 0.06, steel).name = 'Garage access retrieval-side guard';
-  for (const y of [accessHeight + 0.15, accessHeight + 3.5]) box(storageAccessSteps, 0, y, 0.04, 2.5, 0.08, 0.08, steel).name = 'Garage access retrieval guard rail';
 
   const yardTools = furnishing('Garage yard-tool storage', 32.95, 27.115, 0, garageFloorY);
   yardTools.userData = { location: 'House-side wall in front of the BMW, clear of the house-entry steps', storage: 'Conventional floor-parked mower with unfolded handle and rolling shop vac; wall rail, hand-tool board, and battery shelf', provisional: true };
@@ -3132,19 +3109,17 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     social: { target: [19, 2, 12], offset: [27, 55, 32], span: 43 },
     living: { target: [12.5, 1.5, livingCenterZ], offset: [28, 27, 7], span: 32 },
     kids: { target: [24, 1, 30.15], offset: [-12, 30, 18], span: 17 },
-    dining: { target: [19.8, 1, 2.6], offset: [16, 19, 23], span: 20 },
+    dining: { target: [19.85, 1, 3.95], offset: [16, 19, 23], span: 20 },
     kitchen: { target: [32.2, 2, kitchenCenterZ], offset: [-22, 35, 27], span: 26 },
     cooktop: { target: [37, 5.3, cooktopCenterZ], offset: [-18, 0, 0], span: 11 },
     fridge: { target: [bottomRunCenterX, 5, 26.9], offset: [0, 0, -18], span: 12 },
     island: { target: [30.65 + island.position.x, 1.5, kitchenCenterZ], offset: [-12, 9, 10], span: 15 },
     whole: { target: [27, 0, 29], offset: [35, 75, 50], span: 78 },
     garage: { target: [43, 0, 33], offset: [15, 58, 10], span: 42 },
-    'bike-storage': { target: [50.4, 3.5, 18.5], offset: [0, 9, 12], span: 18 },
-    'storage-access': { target: [49.5, 2.5, 22.5], offset: [-13, 18, 19], span: 23 },
     prep: { target: [44, 1, 16], offset: [-28, 44, 30], span: 28 },
     mudroom: { target: [41.8, 2, 20.9], offset: [0, 22, 20], span: 17 },
     'mudroom-cubbies': { target: [44, 4.4, 22.85], offset: [-3, 2, 2], span: 9.5 },
-    'mudroom-storage': { target: [41.7, 4.4, 17.3], offset: [2, 1.5, 5], span: 9.5 },
+    'mudroom-storage': { target: [41.7, 4.8, 17.9], offset: [0, 0.7, 8.35], span: 12 },
     pantry: { target: [46.75, 4.5, 14.15], offset: [0, 0.2, -2.5], span: 14 },
     'prep-counter': { target: [46.75, 4.5, prepCounterZ], offset: [0, 0.4, 2.6], span: 12.5 },
     powder: { target: [6.1, 0, powderNorthZ + 2.95], offset: [0, 30, 4], span: 17 },
@@ -3520,9 +3495,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const starts = {
       upstairs: [...upstairs.start, 16.5, 23], 'upstairs-top': [...upstairs.start, 16.5, 23],
       whole: [15.6, 50, 15.6, 42], top: [15.6, 50, 15.6, 42], social: [20, 18, 20, 3],
-      living: [14.8, 23.9, 5, 16], kids: [20.1, 30, 24, 26], dining: [23, 7, 19.8, 2.6], kitchen: [33, 19.5, 32.25, 8],
+      living: [14.8, 23.9, 5, 16], kids: [20.1, 30, 24, 26], dining: [23, 7, 19.85, 3.95], kitchen: [33, 19.5, 32.25, 8],
       cooktop: [33, cooktopCenterZ, 37, cooktopCenterZ], fridge: [33, 23, 33, 26.9], island: [33, kitchenCenterZ, 28.65, kitchenCenterZ],
       prep: [43, 12, 48, prepCounterZ], pantry: [47, 12, 47, 14.15], 'prep-counter': [47, 12, 47, prepCounterZ],
+      mudroom: [41.7, 23, 41.7, 17.5], 'mudroom-cubbies': [41.7, 23, 44.3, 23], 'mudroom-storage': [41.7, 23, 41.7, 17.5],
       private: [15.6, 46, 15.6, 41], basement: [11.5, 33, 5, 30], garage: [43, 29, 43, 38]
     };
     const [x, z, lookX, lookZ] = starts[currentView];
@@ -3752,25 +3728,18 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     currentView = name;
     document.getElementById('dining-clearance-note').hidden = name !== 'dining';
     document.getElementById('firepit-storage-note').hidden = !['exterior-patio', 'exterior-firepit', 'exterior-wood'].includes(name);
-    const accessingStorage = name === 'storage-access';
-    document.getElementById('storage-access-note').hidden = !accessingStorage;
-    storageAccessSteps.visible = accessingStorage;
-    bikeStorageInput.disabled = accessingStorage;
-    bikeRack.visible = !accessingStorage;
-    sierra.visible = !accessingStorage;
-    if (accessingStorage) bikeStorage.visible = true;
-    else bikeStorage.visible = bikeStorageInput.checked;
     const prepElevationView = name === 'pantry' || name === 'prep-counter';
-    const mudroomElevationView = name === 'mudroom-cubbies' || name === 'mudroom-storage';
+    const mudroomInspectionView = name === 'mudroom-cubbies' || name === 'mudroom-storage';
+    const mudroomInteriorView = name === 'mudroom-storage';
     const exteriorElevation = outside && !['exterior', 'exterior-patio', 'exterior-firepit', 'exterior-wood'].includes(name);
-    const elevationView = name === 'fridge' || name === 'cooktop' || prepElevationView || mudroomElevationView || exteriorElevation;
-    controls.minDistance = prepElevationView || mudroomElevationView ? 1 : 12;
+    const elevationView = name === 'fridge' || name === 'cooktop' || prepElevationView || mudroomInspectionView || exteriorElevation;
+    controls.minDistance = prepElevationView || mudroomInspectionView ? 1 : 12;
     controls.maxPolarAngle = elevationView ? Math.PI / 2 : Math.PI / 2.12;
     const preset = presets[name];
     const aspect = viewport.clientWidth / viewport.clientHeight;
     const offset = new THREE.Vector3(...preset.offset);
     const portraitPadding = aspect < 1 ? 1.25 : 1;
-    camera = name === 'cooktop' || prepElevationView || mudroomElevationView || exteriorElevation ? cooktopElevationCamera : perspectiveCamera;
+    camera = mudroomInteriorView ? mudroomInteriorCamera : name === 'cooktop' || prepElevationView || mudroomInspectionView || exteriorElevation ? cooktopElevationCamera : perspectiveCamera;
     controls.object = camera;
     camera.zoom = 1;
     if (camera.isOrthographicCamera) {
@@ -3782,9 +3751,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       camera.bottom = -halfHeight;
     } else {
       camera.aspect = aspect;
-      const verticalFov = THREE.MathUtils.degToRad(camera.fov);
-      const minimumDistance = preset.span * portraitPadding / (2 * Math.tan(verticalFov / 2) * Math.min(aspect, 1));
-      offset.setLength(Math.max(offset.length(), minimumDistance));
+      if (mudroomInteriorView) {
+        // Widen portrait framing without moving the camera through the garage wall.
+        camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(85 / 2)) / Math.min(aspect, 1)));
+      } else {
+        const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+        const minimumDistance = preset.span * portraitPadding / (2 * Math.tan(verticalFov / 2) * Math.min(aspect, 1));
+        offset.setLength(Math.max(offset.length(), minimumDistance));
+      }
     }
     camera.updateProjectionMatrix();
     controls.target.set(...preset.target);
@@ -3818,7 +3792,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     document.querySelectorAll('.furniture-card').forEach((card) => {
       card.classList.toggle('selected', card.dataset.room === name);
     });
-    const exteriorLabel = name === 'exterior-security' ? 'camera directions and warm outdoor lighting plan, coverage unverified' : name === 'exterior-site' ? '75 by 130 ft lot plan with 30 ft rear-wall setback' : name === 'exterior-patio' ? 'covered kitchen-dining patio' : name === 'exterior-firepit' ? 'rear-yard firepit, cold storage only, not a burn location' : name === 'exterior-wood' ? 'side-yard firewood beside waste bins, clearance review required' : exteriorElevation ? name.slice(9) + ' elevation' : 'perspective view';
+    const exteriorLabel = name === 'exterior-security' ? 'camera directions and warm outdoor lighting plan, coverage unverified' : name === 'exterior-site' ? '75 by 130 ft lot plan, provisional setbacks' : name === 'exterior-patio' ? 'covered kitchen-dining patio' : name === 'exterior-firepit' ? 'rear-yard firepit, cold storage only, not a burn location' : name === 'exterior-wood' ? 'side-yard firewood beside waste bins, clearance review required' : exteriorElevation ? name.slice(9) + ' elevation' : 'perspective view';
     if (groundLayoutPreview && activeFloor === 'ground') {
       for (const object of originalGroundRoots) object.visible = object === stairs;
       groundLayoutPreview.group.visible = true;
@@ -3831,7 +3805,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     document.querySelector('.model-footer span').lastChild.textContent = groundLayoutPreview && activeFloor === 'ground' ? ' Structure-only concept' : ' Furnished concept';
     renderer.domElement.setAttribute('aria-label', outside ? `3D English-country exterior concept: ${exteriorLabel}, provisional stone facade and roof` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
     updateFloorGrid();
-    document.querySelector('[data-navigation="walk"]').disabled = accessingStorage || activeFloor === 'exterior' || Boolean(groundLayoutPreview);
+    document.querySelector('[data-navigation="walk"]').disabled = activeFloor === 'exterior' || Boolean(groundLayoutPreview);
     render();
   }
 
@@ -3843,10 +3817,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   });
   islandLightsInput.addEventListener('change', () => {
     updatePendantVisibility();
-    render();
-  });
-  bikeStorageInput.addEventListener('change', () => {
-    bikeStorage.visible = currentView === 'storage-access' || bikeStorageInput.checked;
     render();
   });
   floorGridInput.addEventListener('change', () => {
@@ -4063,6 +4033,5 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (initialView && Object.hasOwn(presets, initialView)) setView(initialView);
   }
   islandLightsInput.disabled = false;
-  bikeStorageInput.disabled = currentView === 'storage-access';
-  navigationButtons.forEach((button) => { button.disabled = button.dataset.navigation === 'walk' && (currentView === 'storage-access' || activeFloor === 'exterior' || (activeFloor === 'ground' && Boolean(groundLayoutPreview))); });
+  navigationButtons.forEach((button) => { button.disabled = button.dataset.navigation === 'walk' && (activeFloor === 'exterior' || (activeFloor === 'ground' && Boolean(groundLayoutPreview))); });
 }

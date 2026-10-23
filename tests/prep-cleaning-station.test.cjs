@@ -122,16 +122,16 @@ test('shallow vacuum and broom storage is separate from the threshold-free robot
   assert.equal(model.find('Robot dock power outlet allowance').length, 1);
 });
 
-test('vacuum bay stays flush with pantry shelves and restores the oven aisle', () => {
+test('vacuum bay follows the moved divider and keeps about 43.3 inches to closed oven handles', () => {
   const model = buildPrepShelves();
   const station = bounds(model.find('Prep cleaning station')[0]);
   assert.ok(station.minX >= 38.3, 'Full-height end panel clears west wall trim');
   assert.ok(station.minZ > 12.225 + 0.365, 'Bay clears the prep-entry casing');
   assert.ok(station.maxY <= 9 + 1e-9);
-  const originalFront = 13.65;
+  const originalFront = 13.15;
   const projection = originalFront - station.minZ;
   assert.ok(Math.abs(projection) < 1e-9, 'Neither cabinet nor equipment projects into the oven aisle');
-  assert.ok(49.3 - projection * 12 >= 49.29, 'Restore the approximately 49.3-inch closed-oven-handle aisle');
+  assert.ok(Math.abs((station.minZ - (13.65 - 49.3 / 12)) * 12 - 43.3) < 1e-8, 'Measure the reduced aisle against the unchanged oven handles');
   for (const name of ['Prep stored stick vacuum', 'Prep stored broom']) {
     const equipment = bounds(model.find(name)[0]);
     assert.ok(equipment.minX > station.minX && equipment.maxX < station.maxX, name);
@@ -166,9 +166,9 @@ test('robot and charging base turn sideways together while the power outlet stay
   assert.equal(dock.rotation.y, Math.PI / 2);
   assert.equal(model.find('Compact robot charging base allowance')[0].parent, dock);
   assert.ok(base.minX > robot.maxX, 'Dock sits east of the robot, not behind it across the aisle');
-  assert.ok(Math.abs((13.65 - robot.minZ) * 12 - 2.2) < 1e-9, 'Sideways parking reduces floor projection to 2.2 inches');
-  assert.ok(robot.maxZ < 14.65 && base.maxZ < 14.65, 'Robot and base clear the rear trim');
+  assert.ok(Math.abs((13.15 - robot.minZ) * 12 - 2.2) < 1e-9, 'Robot still projects only 2.2 inches beyond the moved shelf front');
+  assert.ok(robot.maxZ < 14.15 && base.maxZ < 14.15, 'Robot and base clear the moved rear line');
   const outlet = model.find('Robot dock power outlet allowance')[0];
   assert.equal(outlet.parent, model.find('Prep open pantry shelves')[0]);
-  assert.ok(bounds(outlet).minZ > 14.5, 'Outlet stays at the rear wall instead of rotating with equipment');
+  assert.ok(bounds(outlet).minZ > 14, 'Outlet follows the shelf backing instead of rotating with equipment');
 });

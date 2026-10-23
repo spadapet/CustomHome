@@ -6,7 +6,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const wallThickness = 0.45;
   const fenceBoundaryInset = 0.5, fenceRailOffset = 0.1, fenceRailDepth = 0.14;
   const eastWallFaceX = 55.5 + wallThickness / 2;
-  const lot = { widthFeet: 75, depthFeet: 130, rearSetbackFeet: 30, eastFenceClearanceFeet: 5, rearWallZ: -2.1 - wallThickness / 2 };
+  const lot = { widthFeet: 75, depthFeet: 130, rearSetbackFeet: 32, eastFenceClearanceFeet: 5, rearWallZ: -0.1 - wallThickness / 2 };
   // Coordinates stay house-local; offset the parcel to reposition the house within it.
   lot.right = eastWallFaceX + lot.eastFenceClearanceFeet + fenceRailOffset + fenceRailDepth / 2 + fenceBoundaryInset;
   lot.left = lot.right - lot.widthFeet;
@@ -157,9 +157,9 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const livingFeatureWall = getLivingRoomFeatureLayout();
   wall('west ground floor', 0, 8, 0, 54.2, -0.4, 9, [...livingFeatureWall.windowCenters.map((z) => win(z - 8)), win(westFrontWindowCenterZ - 8, westFrontWindowWidth)]);
   wall('living rear return', 13.2, 8, 0, 8, -0.4, 9, [win(1.8, 1.5), win(6.6, 5), win(11.4, 1.5)]);
-  wall('dining west', 13.2, -2.1, 13.2, 8, -0.4, 9, [win(5.05, 6)]);
-  wall('dining rear', 26.5, -2.1, 13.2, -2.1, -0.4, 9, [win(6.65, 6)]);
-  wall('dining patio', 26.5, 7, 26.5, -2.1, -0.4, 9, [win(4.05, 6, 0, 8)]);
+  wall('dining west', 13.2, -0.1, 13.2, 8, -0.4, 9, [win(4.05, 6)]);
+  wall('dining rear', 26.5, -0.1, 13.2, -0.1, -0.4, 9, [win(6.65, 6)]);
+  wall('dining patio', 26.5, 7, 26.5, -0.1, -0.4, 9, [win(3.55, 6, 0, 8)]);
   wall('kitchen and prep rear', 55.5, 7, 26.5, 7, -0.4, 9, [win(6.35, 2.5, 4.25, 3.5), win(9.85, 2.5, 4.25, 3.5), win(18.75, 1.5, 53 / 12, 3.5), win(23.25, 5.5, 53 / 12, 3.5), win(27.75, 1.5, 53 / 12, 3.5)]);
   const garageSideWall = wall('east ground floor', 55.5, 49, 55.5, 7, garageFloorY - 0.3, 9, [
     { center: 49 - garageSideDoorCenterZ, width: garageSideDoorWidth, sill: garageFloorY, height: 8, door: true }, win(37, 2, 4.25, 3.5)
@@ -229,7 +229,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   gable('Central bedroom gable', 14.2, 31, 2.1, 53.2, eaves, 10);
   gable('Rear east-wing roof', 25.7, 54, 10, 36.2, eaves, 8);
   gable('Single-story garage roof', 31, 55.5, 36.2, 49.2, 9, 6);
-  gable('Dining rear projection roof', 13.2, 26.5, -2.1, 2.1, 9, 5.5);
+  gable('Dining rear projection roof', 13.2, 26.5, -0.1, 2.1, 9, 5.5);
   const patio = new THREE.Group();
   patio.name = 'Covered kitchen-dining patio';
   const patioBounds = { left: 26.5, right: 55.5, rear: -2.1, front: 7 };
@@ -589,12 +589,12 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     new THREE.Vector3(-7, -1, lot.rearWallZ), new THREE.Vector3(-3, -1, lot.rearWallZ),
     new THREE.Vector3(-5, -1, lot.rearWallZ), new THREE.Vector3(13.2, -1, lot.rearWallZ)
   ]), boundaryMaterial);
-  dimension.name = '30 ft rear-wall setback dimension';
+  dimension.name = '32 ft dining rear-wall setback dimension';
   annotations.add(dimension);
   label('REAR / BACK', lot.centerX, lot.rear - 5, 22);
   label('75 ft lot width', lot.centerX, lot.front + 5);
   label('130 ft lot depth', lot.right + 9, 66, 30);
-  label('30 ft rear wall setback', lot.centerX, lot.rear + 15, 36);
+  label('32 ft dining rear wall setback', lot.centerX, lot.rear + 16, 36);
   label('FRONT / STREET', lot.centerX, lot.front - 5);
   const lighting = new THREE.Group();
   lighting.name = 'Outdoor lighting additions';

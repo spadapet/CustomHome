@@ -1,23 +1,134 @@
 # Ground-floor design context
 
-## Design review directions - October 21, 2026 (not implemented)
+## Dining rear-wall forward correction - October 23
 
-The room corrections are published as baseline `f25d3ba`. The ideas below
-are proposals, not changes to the current model. Keep the hall walkway,
+The owner corrected "back" to "forward": move the rear/window wall two feet
+toward the front from its original -2.1 datum, to z = -0.1. The rejected
+-4.1 rearward extension is removed, not the origin for another two-foot move.
+Side returns, hardwood and roof shorten accordingly: dining is 13.3 x 8.1 ft,
+26.6 sq ft smaller than the original. Rear glazing and sconces follow the wall.
+Center the unchanged 84 x 38 in table/eight-chair set and west window at
+z = 3.95. Tree moves to (14.9, 1.6), full size, clear of tucked furniture.
+Kitchen, living, mudroom, stairs and patio limits remain fixed.
+
+The 6 ft patio assembly must shift 6 in forward, opening z = 0.5-6.5, to
+clear the new rear corner/casing without changing the kitchen wall. Same
+unit dimensions, inward handing and closed default. Tucked patio-end chair
+now conflicts with the door sweep: it must be moved clear for full opening.
+Other chairs clear the sampled sweep; 24 in end pull-outs reach side trim.
+Do not call this verified occupied circulation or unobstructed patio access.
+
+Keep property/fence/path coordinates fixed. Dining rear wall separation is
+now 32 ft; patio/roof setbacks differ and remain unapproved. Foundation,
+roof/support, zoning and surveyed site review remain unresolved.
+Nominal model area: 1,900.31 sq ft downstairs / 3,947.44 total. Earlier dining
+coordinates/setback notes below are superseded. Change notes stay in Markdown.
+
+## Garage overhead removal and viewer text - October 23
+
+Remove the entire over-bike storage lift, its seasonal bins, ceiling
+attachments/suspension and dedicated mobile retrieval steps. Remove their
+visibility checkbox, inspection views and access-mode hiding of truck/bikes.
+Keep all five floor-parked bikes, vehicles, tools and house-entry steps.
+Do not restore an overhead platform or walk-on loft.
+
+Keep change-log narration in Markdown context, not banners, room-page
+paragraphs or other viewer text. The owner explicitly rejected the
+prep/mudroom divider-change banner. The actual divider geometry remains
+as described below; this request does not undo it.
+
+## Prep/mudroom divider - October 23 local change
+
+Move only the shared divider x = 38-45.4 from z = 15 to 14.5, six inches
+toward prep. This is not the rejected whole-wing shift. Kitchen, island,
+paired passages, sink wall, garage entry/steps, vehicles and exterior stay fixed.
+Mudroom gains 3.7 sq ft and six inches depth, now 7.4 x 12.4 ft; prep loses
+the same strip on its west portion, with 7.5 ft depth there and 8 ft east.
+Split the hardwood floor at x = 45.4 and extend mudroom tile to the new wall.
+
+Move the full prep pantry/cleaning/robot assemblies six inches north to keep
+their continuous alignment; the east end now stands six inches off its
+unchanged wall. Prep counter/tower stay fixed: counter aisle is now 46.5 in,
+pull clearance about 44.4 in and closed oven-handle gap about 43.3 in.
+These static dimensions do not approve open-oven or occupied operation.
+Move the centered coat closet to (41.7, 15.9), retaining its 36 x 24 in size.
+Extend the blind corner enclosures north, keeping their fronts, side towers,
+bench and common trim fixed and connected. No added usable corner capacity.
+The coat door is now recessed six inches relative to the corner-return front.
+The older coordinate examples below describe the prior north-wall position;
+use this section and the updated plan-reference note for this local change.
+
+## Uniform mudroom enclosure - October 22 local color prototype
+
+The low-console proposal was rejected: the owner wants a uniform enclosure,
+not separated units and visible corner gaps. Keep the full-height U-shaped
+joinery, with every case and shared top rail at 105 in. The owner has now
+rejected green, including the matcha coat-front accent. This neutral palette
+supersedes both the October 21 all-green finish and the first October 22
+green-accent proposal. No storage geometry, camera, room boundary or opening
+changes in the finish revision.
+
+| Element | Current finish |
+|---|---|
+| Cases, dividers, shelves, enclosed corner returns and continuous top rails | Warm ivory, screen #EEE8DC |
+| Solid cubby and storage backs | Soft putty, screen #DED6C8 |
+| Center coat-closet front: bifold leaves, recessed panels, jambs and headwall | Light stained white oak, reusing the kitchen's vertical-grain and recessed-panel finishes |
+| Bench seat and key/charging drop surface | Same light stained white-oak grain as the kitchen |
+| Removable fabric containers | Oatmeal, screen #C9B89D |
+| Hooks and closet knobs | Existing satin gold |
+
+Do not restore green paint, even as an accent, or blanket-recolor the joinery
+or shared kitchen/linen materials. The oak coat front, bench and drop surface
+provide warmth against the ivory/putty enclosure. This is a local prototype,
+not published or a selected door/finish product. Confirm that the builder can
+provide the existing nominal 32 in standard bifold and surround in matching
+stainable white oak/veneer; no bespoke cabinet mechanism is introduced.
+Review physical paint, oak and fabric samples together in daylight and warm
+evening light, and confirm durable, washable finishes.
+
+Keep the centered 36 x 24 in coat closet and five cubbies along the
+90 x 18 in bench. Upper cubby partitions/shelves now reach its full 18 in
+front line without changing the floor footprint, seat height, solid backs,
+side-panel hooks or kick-under shoes. Enclose both back corners with
+builder-fitted returns, explicitly not counted as accessible storage.
+Replace the former overhead shelf bridges with a continuous 1.5 in-high top
+rail, underside 103.5 in, physically joined to every case.
+
+The west run starts at z = 17.54 and ends before the kitchen casing at
+z = 21.15: a 14.32 x 14 in shoe tower and 29 x 14 in family-container tower
+meet directly. Keep five labeled personal positions and 15 removable
+container allowances, not drawers, with a key/charging nook above. Eight
+extra pair cells sit over the containers; seven in the west tower and seven
+larger cells in the new 18.72 x 18 in right-return tower target 22 extra
+pairs, excluding coat-closet/bench shoes. High shelves are for seasonal/adult
+use, not daily child retrieval. Actual shoes/containers and builder details
+remain to verify.
+
+The right return meets the cubbies at z = 19.1. The working aisle stays about
+49 in beneath the shallow trim, the full coat front keeps a 36 in-deep clear
+approach, and the garage arrival floor remains storage-free. Kitchen/garage
+openings, steps, room walls, garage parking and other rooms do not change.
+Confirm blind-corner construction, supports/anchorage, door operation,
+occupied use, high-shelf access and garage landing/fire requirements.
+
+The Coats + bins inspection uses an inside-room 85-degree perspective to
+show both inward-facing returns. Portrait framing widens the field of view
+instead of pushing the camera through the garage wall. Other camera fields
+of view are unchanged. All three mudroom views have Tour starts in the clear
+arrival aisle.
+
+## Earlier design review - October 21 (other ideas not implemented)
+
+The room corrections are published as baseline `f25d3ba`. Except for the
+superseding mudroom prototype above, the ideas below remain proposals.
+Keep the hall walkway,
 right-hand truck bay, five mudroom cubbies, fixed kitchen/mudroom opening,
 inward bathroom door and closed dining patio-door default. Do not restore the
 removed interactive designers.
 
-- **Mudroom:** keep the successful 90-inch bench/cubbies and centered coat
-  closet. Replace the full-height west shoe/bin towers and overhead bridges
-  with a lower, visually continuous console: a trial 70 W x 14 D x 42 H in
-  unit fits before the kitchen casing and retains about 49 in opposite the
-  bench. Five personal shelf bays hold one removable basket per person;
-  three low shoe levels target 15 extra pairs, rather than the present rack's
-  21. Closet/bench shoes remain additional. Confirm shoe count, basket sizes
-  and children's reach before accepting the capacity trade-off. Keep seasonal
-  storage high only where it is useful; common backing, base and trim can
-  join a builder-built composition without overhead storage bridges.
+- **Mudroom low console: rejected.** Do not apply the earlier 70 x 14 x 42 in
+  console/15-pair scheme or treat the old comparison drawing as the current
+  direction. Use the full-height uniform enclosure above.
 - **Guest closet:** use a single 24 in-deep hanging wall along the west side,
   nominally 6 ft long, with part double-hung and five 12 in-deep rear shelves.
   A storage-footprint trial retains about 42 in clear beside the hanging and
@@ -48,9 +159,8 @@ removed interactive designers.
   patio door when its end chair is pulled out. A closed display does not
   resolve occupied access; revisit the table/door choice before ordering.
 
-Recommended next prototype: simplify the mudroom and rebuild the guest
-closet within their existing room boundaries, then settle the garage's
-architectural depth and entry requirements before further detail.
+Guest-closet and garage architectural proposals remain separate future
+decisions. They are not included in the uniform mudroom prototype.
 
 ## Double-chaise living-room study
 
@@ -195,7 +305,7 @@ Important audit findings: the patio leaf is shown closed with the higher-z hinge
 - Both columns face into the kitchen. The cooktop stays on the shared kitchen/mud-room wall, above the passage shown in the reference.
 - Keep both kitchen-side openings 2.5 ft wide and 8 ft high. The expanded cooking run restores mirrored placement about its new center z = 16.95; both openings stay fixed.
 - Latest kitchen expansion: retain the prep entry at x = 38, z = 9.725-12.225, 2.5 ft wide and 8 ft high, 6 in beyond the sink counter. Fill the extra 12 in with matching cooking cabinetry/counter, restoring symmetry about z = 16.95. Move cooktop/hood 6 in toward prep; grow the island from 7 to 8 ft at that same center, with four stools at 24 in centers. Keep lower mudroom entry and refrigeration fixed.
-- Mudroom latest: matcha #8A9B74/gold unchanged, five cubbies and kick-under shoes preserved. Center the enclosed 36 x 24 in coat closet on back wall at (41.7, 16.4), facing into room, normal transverse rod and standard 32 in bifold shown closed. Keep full front approach x = 40.2-43.2, z = 17.54-20.54 clear. Move shoe run west at (38.908333, 17.025), 39 x 14 in, directly adjoining personal bins at z = 18.65; still 21 pair targets, clear cells about 12 x 13 x 9 in. Five personal shelves/three purchased containers each remain, no drawers. Upper shelves flank central closet and return east to cubbies; no old corner fillers. Overhead clearance 81.6 in, bin-to-bench aisle about 49 in, arrival zone clear. Kitchen opening and 96 in garage entry/steps at x = 39.5-42.5 stay fixed. No footprint/wall move for parking. Confirm actual products, supports, bifold operation, occupied use and fire/landing details.
+- Mudroom latest: use the uniform full-height enclosure prototype above, not the rejected low console or old open-corner bridges. Matcha/gold, five cubbies, centered closet, personal containers and fixed entrances remain. Closed corner returns, aligned 18 in cubby/return fronts and shared 105 in top rail join the cases; 22 extra shoe-pair targets, about 49 in working aisle, no drawers or expanded room footprint.
 - Close the separate prep-to-mudroom opening at z = 15, x = 42-45 with a continuous matching wall and baseboard, without doorway casing. Retain both kitchen-side passages.
 - Keep the full-width light-oak prep storage wall x = 38.175-55.325. Restore the oven-side vacuum/broom bay to 12 in deep, x = 38.35-41.5925, z = 13.65-14.65; keep its 37.4-inch clear width, 74-inch-high opening, two upper accessory shelves and cap. Case, mount and slim vacuum/broom remain behind the shelf-front line, restoring 49.28 inches to closed oven handles. Park the 14-inch robot and compact charging base sideways under opposite east-end bay 5: assembly center (53.585, 14.05), rotated 90 degrees, facing west along the shelves. Turn the base with the robot but keep the outlet at the rear wall. No threshold, door or deeper cabinet. Remove only that bay's bottom shelf and its food contents, leaving 27.225 inches clear beneath the next shelf; higher shelves remain. Sideways parking reduces floor projection from 6.8 to 2.2 inches. No self-emptying tower is modeled. Actual wet-vac dimensions, sideways robot approach/side clearances, charging/cord containment, oven heat and open-door access remain unverified; keep chemicals separate from food.
 - The other four prep bays stay 12 in deep at z = 13.65-14.65. Three retain six food shelf levels y = 1 / 2.3 / 3.6 / 4.9 / 6.2 / 7.5 ft; the robot bay omits the bottom level. Empty ceiling caps remain. Keep retained shelves' dry-goods jars, packages, baskets, oil and cans; original uprights begin y = 0.75 ft. Shelf loading, anchorage and high-shelf access remain unverified. The provisional 24 x 42 in exterior end-wall window at x = 55.5, z = 12 retains its 51-inch sill and white Craftsman casing; confirm framing and final size.
@@ -241,7 +351,7 @@ Important audit findings: the patio leaf is shown closed with the higher-z hinge
 | Mud-room opening with exposed casing | x = 38; z = 21.675-24.175; y = 0-8, unchanged. Cap ends at z = 24.539583, 1.225 in before the tower panel; mirrors prep about new center z = 16.95 |
 | Prep opening with exposed casing | x = 38; z = 9.725-12.225; y = 0-8; remains 6 in beyond the sink counter. Expanded cooking run now fills the former 12 in gap beside its casing |
 | Mudroom coat closet | Back-wall center (41.7, 16.4), 36 x 24 in, faces increasing z; normal transverse rod, shoe/seasonal shelves, standard bifold; clear full-front approach |
-| Mudroom personal storage | Bins (38.908333, 19.9), 30 x 14 in; shoe run (38.908333, 17.025), 39 x 14 in, 21 pair targets. Runs meet directly and connect overhead to centered closet/cubbies; matcha green |
+| Mudroom personal storage | Containers (38.908333, 19.941667), 29 x 14 in; west shoe return (38.908333, 18.136667), 14.32 x 14 in; right return (44.325, 18.32), 18.72 x 18 in. Seven west + eight upper + seven right extra pair cells; closed corners and continuous 105 in top rail |
 | Drop-zone center | x = 43.3; z = 16.1; faces increasing z |
 
 Both passages remain 2.5 ft wide and 8 ft high, centered at z = 10.975 / 22.925 and mirrored about the recentered cooking run z = 16.95. Verify finished widths, appliance swings/bin withdrawal, tower operation, and occupied circulation. Four stools remain, now at 24 in centers; none occupies the appliance end. Construction clearances remain unverified.

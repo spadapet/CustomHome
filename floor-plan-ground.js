@@ -51,9 +51,9 @@
     const entryZ = guestEntry.alcove.z, officeZ = guestEntry.officeNorthZ;
     const kidsNorthZ = 26.725 - 25 / 12 - 0.08 + 0.175;
     const rooms = [
-      ['Living room', 0, 8, 13.2, 17.7], ['Dining room', 13.2, -2.1, 13.3, 10.1],
+      ['Living room', 0, 8, 13.2, 17.7], ['Dining room', 13.2, -0.1, 13.3, 8.1],
       ['Hall', 13.2, 8, 13.3, kidsNorthZ - 8], ['Kitchen', 26.5, 7, 11.5, 19.9],
-      ['Prep kitchen', 38, 7, 17.5, 8], ['Mudroom', 38, 15, 7.4, 11.9],
+      ['Prep kitchen', 38, 7, 17.5, 8], ['Mudroom', 38, 14.5, 7.4, 12.4],
       ['Kids room', 19, kidsNorthZ, 10, 34.6 - kidsNorthZ], ['Powder room', 0, powderZ, 7.1, guestEntry.powder.d],
       ['Guest coat closet', 7.1, powderZ, 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 7.1, entryZ, 5.1, guestEntry.alcove.d],
       ['Office', 0, officeZ, 12.2, 54.2 - officeZ], ['Entry hall', 12.2, 34.6, 6.8, 19.6],
@@ -62,10 +62,10 @@
       ['Garage', 29, 15, 26.5, 34], ['Front porch', 0, 54.2, 31.2, 7]
     ].map(([name, x, z, w, d]) => ({ name, x, z, w, d }));
     const floors = [
-      [0, 8, 13.2, 17.7, 'Living room'], [13.2, -2.1, 13.3, 10.1, 'Dining room'],
+      [0, 8, 13.2, 17.7, 'Living room'], [13.2, -0.1, 13.3, 8.1, 'Dining room'],
       [13.2, 8, 5.8, 17.7, 'Hall'], [19, 8, 7.5, kidsNorthZ - 8, 'Hall'],
       [26.5, 7, 11.5, kidsNorthZ - 7, 'Kitchen'], [29, kidsNorthZ, 9, 26.9 - kidsNorthZ, 'Kitchen'],
-      [38, 7, 17.5, 8, 'Prep kitchen'], [38, 15, 7.4, 11.9, 'Mudroom'],
+      [38, 7, 7.4, 7.5, 'Prep kitchen'], [45.4, 7, 10.1, 8, 'Prep kitchen'], [38, 14.5, 7.4, 12.4, 'Mudroom'],
       [0, 25.7, 12.2, stairs.z - 25.7], [0, stairs.z, stairs.x, stairs.depth],
       [stairs.x + stairs.width, stairs.z, 12.2 - stairs.x - stairs.width, stairs.depth],
       [0, stairs.z + stairs.depth, 12.2, powderZ - stairs.z - stairs.depth],
@@ -81,9 +81,9 @@
     const sideWindows = [6.6 - 10 / 3, 6.6, 6.6 + 10 / 3].map((x) => [x - 1.25, x + 1.25, 3, 8]);
     const segments = [
       ['Living north', 0, 8, 13.2, 8, sideWindows],
-      ['Dining west', 13.2, -2.1, 13.2, 8, [[2.05, 8.05, 3, 8]]],
-      ['Dining north', 13.2, -2.1, 26.5, -2.1, [[3.65, 9.65, 3, 8]]],
-      ['Dining east', 26.5, -2.1, 26.5, 7, [[2.1, 8.1, 0, 8]]],
+      ['Dining west', 13.2, -0.1, 13.2, 8, [[1.05, 7.05, 3, 8]]],
+      ['Dining north', 13.2, -0.1, 26.5, -0.1, [[3.65, 9.65, 3, 8]]],
+      ['Dining east', 26.5, -0.1, 26.5, 7, [[0.6, 6.6, 0, 8]]],
       ['Kitchen north', 26.5, 7, 38, 7, [[1, 2.5, 53 / 12, 95 / 12], [3.5, 8, 53 / 12, 95 / 12], [9, 10.5, 53 / 12, 95 / 12]]],
       ['Prep north', 38, 7, 55.5, 7, [[6.4, 8.9, 4.25, 7.75], [9.9, 12.4, 4.25, 7.75]]],
       ['Prep east', 55.5, 7, 55.5, 15, [[4, 6, 4.25, 7.75]]],
@@ -111,8 +111,8 @@
       ['Kitchen south left', 29, 26.9, 29.6875, 26.9], ['Kitchen south', 29.6875, 26.9, 37.8, 26.9],
       ['Kitchen south right', 37.8, 26.9, 38, 26.9],
       ['Kitchen east', 38, 7, 38, 25.3, [[2.725, 5.225, 0, 8], [14.675, 17.175, 0, 8]]],
-      ['Kitchen east return', 38, 25.3, 38, 26.9], ['Mudroom north', 38, 15, 45.4, 15],
-      ['Garage north', 45.4, 15, 55.5, 15], ['Mudroom east', 45.4, 15, 45.4, 26.9],
+      ['Kitchen east return', 38, 25.3, 38, 26.9], ['Mudroom north', 38, 14.5, 45.4, 14.5],
+      ['Garage north', 45.4, 15, 55.5, 15], ['Mudroom east', 45.4, 14.5, 45.4, 26.9],
       ['Mudroom south', 38, 26.9, 45.4, 26.9, [[1.5, 4.5, 0, 8]]]
     ];
     return { rooms, floors, walls: segments, windows: [], stairs, floorName: 'first-floor' };

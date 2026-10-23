@@ -45,7 +45,7 @@ function buildEquipment() {
     }
   };
   context.cylinder = (parent, x, y, z, radius, h) => context.box(parent, x, y, z, radius * 2, h, radius * 2);
-  const start = source.indexOf('  const storageAccessSteps =');
+  const start = source.indexOf('  const yardTools =');
   const end = source.indexOf('  yardTools.traverse(', start);
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext(source.slice(start, end), context);
@@ -67,27 +67,16 @@ test('mower remains on four wheels with its full-length handle unfolded and no u
   assert.equal(model.find('Wall-hung battery leaf blower')[0].userData.wallMounted, true);
 });
 
-test('guarded access steps stop below the goods deck and require truck/bikes cleared', () => {
+test('over-bike lift and its retrieval steps are removed without removing the floor bike rack', () => {
   const model = buildEquipment();
-  const steps = model.roots[0];
-  assert.equal(steps.visible, false, 'No fixed stair obstruction in the parking layout');
-  assert.equal(steps.userData.standingHeightFeet, 3.5);
-  assert.ok(steps.userData.nominalHeadroomInches >= 80);
-  assert.equal(steps.userData.requiresTruckAndBikesRemoved, true);
-  assert.equal(steps.userData.walkOnStorageDeck, false);
-  assert.equal(steps.userData.engineered, false);
-  assert.equal(steps.userData.parkedLocationSelected, false);
-  assert.equal(model.find('Garage access non-slip tread').length, 5);
-  assert.equal(model.find('Garage access standing platform, not storage deck').length, 1);
-  assert.equal(model.find('Garage access continuous handrail').length, 2);
-  assert.equal(model.find('Garage access locking caster allowance').length, 4);
-  assert.equal(model.find('Garage access closed riser').length, 6);
-  assert.equal(model.find('Garage access stair guard baluster').length, 30);
-  const platformGuards = model.find('Garage access platform guard').filter((part) => part.position.x > 0).sort((a, b) => a.position.z - b.position.z);
-  for (let i = 1; i < platformGuards.length; i++) assert.ok((platformGuards[i].position.z - platformGuards[i - 1].position.z - 0.06) * 12 < 4);
-  assert.ok(source.includes('bikeRack.visible = !accessingStorage'));
-  assert.ok(source.includes('sierra.visible = !accessingStorage'));
-  assert.ok(source.includes("currentView === 'storage-access'"));
+  assert.equal(model.find('Garage access standing platform, not storage deck').length, 0);
+  assert.doesNotMatch(source, /bikeStorage|storageAccessSteps|storage-access|Over-bike seasonal storage bin/);
+  assert.match(source, /furnishing\('Five-bike roll-in floor rack'/);
+  const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
+  assert.doesNotMatch(html, /show-bike-storage|data-view="storage-access"|data-view="bike-storage"|Prep\/mudroom divider moved 6 inches/);
+  for (const file of ['kitchen.html', 'mud-room.html']) {
+    assert.doesNotMatch(fs.readFileSync(require.resolve(`../${file}`), 'utf8'), /October 23 divider|closed oven-handle clearance 43\.3/);
+  }
 });
 
 test('truck remains in the right bay while parking alignment and BMW rear clearance improve', () => {
