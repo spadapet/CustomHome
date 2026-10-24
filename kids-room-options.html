@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Kids room - layout choices</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f4f2eb; color: #263b35; font: 16px/1.5 system-ui, sans-serif; }
+    header, main { max-width: 1600px; margin: auto; padding: 24px; }
+    h1 { margin: 0; } p { max-width: 1000px; }
+    .legend, .controls { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0; }
+    .legend span { border-left: 18px solid; padding-left: 8px; }
+    #options { display: grid; grid-template-columns: repeat(auto-fit,minmax(320px,1fr)); gap: 20px; }
+    article { background: white; border: 1px solid #ccc9bc; border-radius: 10px; padding: 18px; }
+    article h2 { margin: 0; font-size: 21px; } article p { margin: 8px 0; }
+    article svg { width: 100%; max-height: 340px; }
+    .badge { display: inline-block; border-radius: 4px; padding: 3px 8px; background: #e8e6d8; font-size: 14px; }
+    .clear { background: #dcebdc; } .warn { background: #ffedce; }
+    details { font-size: 14px; } ul { padding-left: 20px; }
+    button, select { font: inherit; padding: 6px 10px; }
+    a { color: #265c65; }
+    @media print { .controls { display: none; } article { break-inside: avoid; } #options { grid-template-columns: repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="floor-plan-3d.html?view=kids">View selected east-aligned 3D layout</a>
+    <p><strong>Selected:</strong> PC south / Make south / Bins north + north, with both rows shifted east. The 3D model now uses that arrangement; these cards retain their original sampled offsets for comparison.</p>
+    <h1>Kids room: choose the arrangement, not a cropped camera angle</h1>
+    <p><strong>54 wall-assignment permutations</strong> for one PC desk, one homework/craft desk and two interchangeable TROFAST frames across the north, east and south walls. West is the entrance: its remaining wall segments are too short for either product. Every diagram has north at the top and the entrance on the left.</p>
+    <p>Each card shows one sampled arrangement at actual product scale, not every inch-by-inch position or furniture order. Positions are searched at 6-inch intervals plus centered/end positions, with a bounded search. Cards with no sample are <strong>not proven impossible</strong>. Pick a number to refine its exact placement or swap desk roles. Browsing this page does not apply changes to the model.</p>
+    <div class="legend"><span style="border-color:#bc8b55">PC desk: 47.25 x 31.5 in</span><span style="border-color:#72989c">Make desk: same size</span><span style="border-color:#7f8a75">TROFAST: 39 x 17.375 in each</span><span style="border-color:#d5b26e">Dashed: 30 in chair / 17.375 in bin-pull zones</span></div>
+    <p><strong>Screening, not approval:</strong> furniture rectangles do not overlap in shown samples. Dashed use zones are conservative envelopes, not chairs or people. Green only means these rectangular checks pass; it does not establish connected circulation, occupied comfort, code compliance, safe lift clearances or product anchoring. Rug omitted so it can follow your choice. Blackboard remains outside this room.</p>
+    <div class="controls">
+      <label>Show <select id="filter"><option value="all">All 54 assignments</option><option value="sample">Furniture-fit samples</option><option value="clear">No sampled use-zone conflicts</option><option value="paired">Both desks on one wall</option><option value="split">Desks on different walls</option></select></label>
+      <label>Order <select id="sort"><option value="screen">Fewest screening conflicts first</option><option value="number">Option number</option></select></label>
+      <button id="print" type="button">Print comparison</button>
+    </div>
+    <p id="status" role="status">Generating comparison...</p>
+  </header>
+  <main><div id="options"></div></main>
+  <script src="kids-room-options.js"></script>
+  <script>
+    'use strict';
+    const { room, generate } = KidsRoomOptions;
+    const options = generate();
+    const names = { N: 'north', E: 'east', S: 'south' };
+    function diagram(layout) {
+      const rect = (r, color, dashed = false) => `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.d}" fill="${dashed ? 'none' : color}" stroke="${color}" stroke-width="${dashed ? 0.7 : 0.4}" ${dashed ? 'stroke-dasharray="2 2"' : ''}/>`;
+      return `<svg viewBox="-24 -16 ${room.width + 40} ${room.depth + 32}" role="img" aria-label="Scaled top-down room plan, north up, entrance left">
+        <rect width="${room.width}" height="${room.depth}" fill="#faf7ee"/>
+        <path d="M0 ${room.entryStart} V0 H${room.width} V${room.depth} H0 V${room.entryEnd}" fill="none" stroke="#263b35" stroke-width="2"/>
+        <text x="${room.width / 2}" y="-6" text-anchor="middle" font-size="5">NORTH / KITCHEN WALL</text>
+        <text x="-4" y="${room.entryStart + 12}" text-anchor="end" font-size="4">ENTRY</text>
+        <text x="${room.width / 2}" y="${room.depth + 9}" text-anchor="middle" font-size="5">SOUTH</text>
+        <path d="M-16 ${(room.entryStart + room.entryEnd) / 2} H8" stroke="#263b35" stroke-width="1"/>
+        ${layout.parts.map((p, i) => rect(p.use, '#c39445', true)).join('')}
+        ${layout.parts.map((p, i) => `${rect(p, ['#bc8b55','#72989c','#7f8a75','#7f8a75'][i])}<text x="${p.x + p.w / 2}" y="${p.y + p.d / 2}" text-anchor="middle" dominant-baseline="middle" font-size="5" fill="white">${p.label}</text>`).join('')}
+      </svg>`;
+    }
+    function render() {
+      const filter = document.getElementById('filter').value;
+      const shown = options.filter(o => filter === 'all' || (filter === 'sample' && o.layout) || (filter === 'clear' && o.layout?.score === 0) || (filter === 'paired' && o.assignment[0] === o.assignment[1]) || (filter === 'split' && o.assignment[0] !== o.assignment[1]));
+      shown.sort((a, b) => document.getElementById('sort').value === 'number' ? a.id - b.id : (a.layout?.score ?? 10000) - (b.layout?.score ?? 10000) || a.id - b.id);
+      document.getElementById('status').textContent = `${shown.length} shown / 54 total. ${options.filter(o => o.layout).length} have a furniture-fit sample; ${options.filter(o => o.layout?.score === 0).length} have no sampled use-zone conflicts. Choose by option number.`;
+      document.getElementById('options').innerHTML = shown.map(o => `<article id="option-${o.id}">
+        <h2>Option ${o.id}</h2>
+        <p>PC: <strong>${names[o.assignment[0]]}</strong> / Make: <strong>${names[o.assignment[1]]}</strong><br>Bins: ${names[o.assignment[2]]} + ${names[o.assignment[3]]}</p>
+        <span class="badge ${o.layout ? o.layout.score === 0 ? 'clear' : 'warn' : ''}">${o.layout ? o.layout.score === 0 ? 'No sampled use-zone conflicts' : 'Use requires compromise' : 'No static fit found in sampled search'}</span>
+        ${o.layout ? diagram(o.layout) : '<p>Requested wall allocation has no non-overlapping furniture sample in this search. Try another allocation; do not treat this as a proof of impossibility.</p>'}
+        ${o.layout?.warnings.length ? `<details><summary>${o.layout.warnings.length} screening conflicts</summary><ul>${o.layout.warnings.map(w => `<li>${w}</li>`).join('')}</ul></details>` : ''}
+      </article>`).join('');
+    }
+    document.getElementById('filter').addEventListener('change', render);
+    document.getElementById('sort').addEventListener('change', render);
+    document.getElementById('print').addEventListener('click', () => window.print());
+    render();
+  </script>
+</body>
+</html>

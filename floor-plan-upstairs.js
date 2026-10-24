@@ -39,7 +39,7 @@ function getUpstairsDefaultPlan(stairOpening) {
   slab('North arrival approach', arrivalLeft, stairOpening.z, arrival.w, stairOpening.depth - arrivalDepth);
   slab('South hall', 9.5, 36.2, 12, 5);
   slab('South landing connection', 0, stairOpening.z + stairOpening.depth, 19, 36.2 - stairOpening.z - stairOpening.depth);
-  const door = (start, width = 3) => [start, start + width, 0, 7];
+  const door = (start, width = 3) => [start, start + width, 0, 8];
   const win = (start, width = 4) => [start, start + width, 3, 8];
   const walls = [
     ['Primary west', 0, 7.6, 0, 26.6, [win(3), win(12)], [-1]],

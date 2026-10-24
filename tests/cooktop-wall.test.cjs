@@ -37,7 +37,7 @@ function buildCookingWall() {
     }
   }
   const context = {
-    THREE: { Group, Mesh, CylinderGeometry }, kitchen: new Group(), ceilingHeight: 9,
+    THREE: { Group, Mesh, CylinderGeometry }, kitchen: new Group(), ceilingHeight: 9, cookingWallShiftX: -0.5,
     cooktopRunWidth: 21.675 - 12.225 - 2 * (3.625 / 12), cooktopEndFillerWidth: 1.5 / 12, cooktopCenterZ: 16.95,
     ...Object.fromEntries(['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish', 'brass', 'black', 'light'].map((name) => [name, { name }])),
     mat: (color) => ({ color }),
@@ -94,7 +94,7 @@ test('hood stays 48 inches wide, tapers only in depth and keeps a flush rear pla
     const vertices = surround.geometry.points.filter((point) => Math.sign(point.y) === localY);
     close(Math.max(...vertices.map((p) => p.z)) - Math.min(...vertices.map((p) => p.z)), 4);
     close(Math.max(...vertices.map((p) => p.x)) - Math.min(...vertices.map((p) => p.x)), depth);
-    close(Math.max(...vertices.map((p) => p.x)) + surround.position.x, 37.8);
+    close(bounds(surround).maxX, 37.3);
   }
   close(bounds(surround).minY, 6.5);
   close(bounds(surround).maxY, 8.85);

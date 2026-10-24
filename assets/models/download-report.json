@@ -1,0 +1,425 @@
+{
+  "retrievedOn": "2026-10-24",
+  "maximumMegabytes": 312,
+  "skipped": [
+    {
+      "id": "poly-haven/decorative_book_set_01",
+      "source": "https://polyhaven.com/a/decorative_book_set_01",
+      "reason": "No browser-ready 1K glTF variant"
+    },
+    {
+      "id": "poly-haven/plastic_broom",
+      "source": "https://polyhaven.com/a/plastic_broom",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1460495.0
+    },
+    {
+      "id": "poly-haven/plastic_monobloc_chair_01",
+      "source": "https://polyhaven.com/a/plastic_monobloc_chair_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1952867.0
+    },
+    {
+      "id": "poly-haven/pliers",
+      "source": "https://polyhaven.com/a/pliers",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2016360.0
+    },
+    {
+      "id": "poly-haven/plunger",
+      "source": "https://polyhaven.com/a/plunger",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1797973.0
+    },
+    {
+      "id": "poly-haven/portable_generator",
+      "source": "https://polyhaven.com/a/portable_generator",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 3434440.0
+    },
+    {
+      "id": "poly-haven/pot_enamel_01",
+      "source": "https://polyhaven.com/a/pot_enamel_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1744727.0
+    },
+    {
+      "id": "poly-haven/power_box_01",
+      "source": "https://polyhaven.com/a/power_box_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2725643.0
+    },
+    {
+      "id": "poly-haven/propane_torch",
+      "source": "https://polyhaven.com/a/propane_torch",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1735305.0
+    },
+    {
+      "id": "poly-haven/propane_torch_02",
+      "source": "https://polyhaven.com/a/propane_torch_02",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1662580.0
+    },
+    {
+      "id": "poly-haven/pull_chain_light_socket",
+      "source": "https://polyhaven.com/a/pull_chain_light_socket",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2048497.0
+    },
+    {
+      "id": "poly-haven/ratchet_wrench",
+      "source": "https://polyhaven.com/a/ratchet_wrench",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1519783.0
+    },
+    {
+      "id": "poly-haven/retro_multimeter",
+      "source": "https://polyhaven.com/a/retro_multimeter",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1393330.0
+    },
+    {
+      "id": "poly-haven/round_wooden_table_02",
+      "source": "https://polyhaven.com/a/round_wooden_table_02",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1921292.0
+    },
+    {
+      "id": "poly-haven/rusted_hacksaw",
+      "source": "https://polyhaven.com/a/rusted_hacksaw",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2156988.0
+    },
+    {
+      "id": "poly-haven/rusted_spade_01",
+      "source": "https://polyhaven.com/a/rusted_spade_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2423156.0
+    },
+    {
+      "id": "poly-haven/scandinavian_masonry_heater",
+      "source": "https://polyhaven.com/a/scandinavian_masonry_heater",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2460446.0
+    },
+    {
+      "id": "poly-haven/screwdriver",
+      "source": "https://polyhaven.com/a/screwdriver",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1536547.0
+    },
+    {
+      "id": "poly-haven/screwdrivers_02",
+      "source": "https://polyhaven.com/a/screwdrivers_02",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2080923.0
+    },
+    {
+      "id": "poly-haven/seadogs_compass",
+      "source": "https://polyhaven.com/a/seadogs_compass",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2695701.0
+    },
+    {
+      "id": "poly-haven/security_camera_01",
+      "source": "https://polyhaven.com/a/security_camera_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1759323.0
+    },
+    {
+      "id": "poly-haven/security_camera_02",
+      "source": "https://polyhaven.com/a/security_camera_02",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1694585.0
+    },
+    {
+      "id": "poly-haven/security_light",
+      "source": "https://polyhaven.com/a/security_light",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2390412.0
+    },
+    {
+      "id": "poly-haven/sledgehammer_01",
+      "source": "https://polyhaven.com/a/sledgehammer_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1784129.0
+    },
+    {
+      "id": "poly-haven/small_oil_can_01",
+      "source": "https://polyhaven.com/a/small_oil_can_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 934926.0
+    },
+    {
+      "id": "poly-haven/small_plastic_torch",
+      "source": "https://polyhaven.com/a/small_plastic_torch",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2327175.0
+    },
+    {
+      "id": "poly-haven/small_wooden_table_01",
+      "source": "https://polyhaven.com/a/small_wooden_table_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 414763.0
+    },
+    {
+      "id": "poly-haven/spinning_wheel_01",
+      "source": "https://polyhaven.com/a/spinning_wheel_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2125427.0
+    },
+    {
+      "id": "poly-haven/spray_paint_bottles_02",
+      "source": "https://polyhaven.com/a/spray_paint_bottles_02",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2231013.0
+    },
+    {
+      "id": "poly-haven/steel_frame_shelves_03",
+      "source": "https://polyhaven.com/a/steel_frame_shelves_03",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 3563231.0
+    },
+    {
+      "id": "poly-haven/stone_fire_pit",
+      "source": "https://polyhaven.com/a/stone_fire_pit",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2535945.0
+    },
+    {
+      "id": "poly-haven/street_lamp_01",
+      "source": "https://polyhaven.com/a/street_lamp_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2166163.0
+    },
+    {
+      "id": "poly-haven/street_lamp_02",
+      "source": "https://polyhaven.com/a/street_lamp_02",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1870246.0
+    },
+    {
+      "id": "poly-haven/tea_set_01",
+      "source": "https://polyhaven.com/a/tea_set_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2282591.0
+    },
+    {
+      "id": "poly-haven/tire_pump",
+      "source": "https://polyhaven.com/a/tire_pump",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1666060.0
+    },
+    {
+      "id": "poly-haven/tongue_groove_pliers",
+      "source": "https://polyhaven.com/a/tongue_groove_pliers",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2016940.0
+    },
+    {
+      "id": "poly-haven/tool_cart",
+      "source": "https://polyhaven.com/a/tool_cart",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 3172460.0
+    },
+    {
+      "id": "poly-haven/trowel_01",
+      "source": "https://polyhaven.com/a/trowel_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1973386.0
+    },
+    {
+      "id": "poly-haven/vintage_cabinet_01",
+      "source": "https://polyhaven.com/a/vintage_cabinet_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2870976.0
+    },
+    {
+      "id": "poly-haven/vintage_day_bed",
+      "source": "https://polyhaven.com/a/vintage_day_bed",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2425779.0
+    },
+    {
+      "id": "poly-haven/vintage_electric_kettle",
+      "source": "https://polyhaven.com/a/vintage_electric_kettle",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2387109.0
+    },
+    {
+      "id": "poly-haven/vintage_flashlight",
+      "source": "https://polyhaven.com/a/vintage_flashlight",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1835236.0
+    },
+    {
+      "id": "poly-haven/vintage_grandfather_clock_01",
+      "source": "https://polyhaven.com/a/vintage_grandfather_clock_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2362182.0
+    },
+    {
+      "id": "poly-haven/vintage_hand_drill",
+      "source": "https://polyhaven.com/a/vintage_hand_drill",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 3097287.0
+    },
+    {
+      "id": "poly-haven/vintage_lighter",
+      "source": "https://polyhaven.com/a/vintage_lighter",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1752604.0
+    },
+    {
+      "id": "poly-haven/vintage_microwave",
+      "source": "https://polyhaven.com/a/vintage_microwave",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1632959.0
+    },
+    {
+      "id": "poly-haven/vintage_oil_lamp",
+      "source": "https://polyhaven.com/a/vintage_oil_lamp",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2070002.0
+    },
+    {
+      "id": "poly-haven/vintage_radio_transceiver",
+      "source": "https://polyhaven.com/a/vintage_radio_transceiver",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 6301480.0
+    },
+    {
+      "id": "poly-haven/vintage_stapler",
+      "source": "https://polyhaven.com/a/vintage_stapler",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2321764.0
+    },
+    {
+      "id": "poly-haven/vintage_video_camera",
+      "source": "https://polyhaven.com/a/vintage_video_camera",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2710066.0
+    },
+    {
+      "id": "poly-haven/vintage_wooden_drawer_01",
+      "source": "https://polyhaven.com/a/vintage_wooden_drawer_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2087259.0
+    },
+    {
+      "id": "poly-haven/wall_clock",
+      "source": "https://polyhaven.com/a/wall_clock",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1564880.0
+    },
+    {
+      "id": "poly-haven/watering_can_metal_01",
+      "source": "https://polyhaven.com/a/watering_can_metal_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2611187.0
+    },
+    {
+      "id": "poly-haven/wine_bottles_01",
+      "source": "https://polyhaven.com/a/wine_bottles_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 3909317.0
+    },
+    {
+      "id": "poly-haven/wooden_axe_03",
+      "source": "https://polyhaven.com/a/wooden_axe_03",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2267798.0
+    },
+    {
+      "id": "poly-haven/wooden_bowl_01",
+      "source": "https://polyhaven.com/a/wooden_bowl_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1823237.0
+    },
+    {
+      "id": "poly-haven/wooden_bowl_02",
+      "source": "https://polyhaven.com/a/wooden_bowl_02",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2511366.0
+    },
+    {
+      "id": "poly-haven/wooden_broom",
+      "source": "https://polyhaven.com/a/wooden_broom",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 3424320.0
+    },
+    {
+      "id": "poly-haven/wooden_candlestick",
+      "source": "https://polyhaven.com/a/wooden_candlestick",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 8429072.0
+    },
+    {
+      "id": "poly-haven/wooden_display_shelves_01",
+      "source": "https://polyhaven.com/a/wooden_display_shelves_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 471129.0
+    },
+    {
+      "id": "poly-haven/wooden_hammer_01",
+      "source": "https://polyhaven.com/a/wooden_hammer_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1886297.0
+    },
+    {
+      "id": "poly-haven/wooden_ladder",
+      "source": "https://polyhaven.com/a/wooden_ladder",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2593249.0
+    },
+    {
+      "id": "poly-haven/wooden_ladder_02",
+      "source": "https://polyhaven.com/a/wooden_ladder_02",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2336660.0
+    },
+    {
+      "id": "poly-haven/wooden_lantern_01",
+      "source": "https://polyhaven.com/a/wooden_lantern_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 3768780.0
+    },
+    {
+      "id": "poly-haven/wooden_picnic_table",
+      "source": "https://polyhaven.com/a/wooden_picnic_table",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 4308296.0
+    },
+    {
+      "id": "poly-haven/wooden_spoon",
+      "source": "https://polyhaven.com/a/wooden_spoon",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 1974577.0
+    },
+    {
+      "id": "poly-haven/wooden_stool_01",
+      "source": "https://polyhaven.com/a/wooden_stool_01",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 961720.0
+    },
+    {
+      "id": "poly-haven/wooden_stool_02",
+      "source": "https://polyhaven.com/a/wooden_stool_02",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2656017.0
+    },
+    {
+      "id": "poly-haven/wooden_table_02",
+      "source": "https://polyhaven.com/a/wooden_table_02",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 485316.0
+    },
+    {
+      "id": "poly-haven/worn_metal_rack",
+      "source": "https://polyhaven.com/a/worn_metal_rack",
+      "reason": "Repository size budget or 50 MiB individual-file limit",
+      "estimatedBytes": 2009106.0
+    }
+  ]
+}

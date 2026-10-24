@@ -1,21 +1,34 @@
 const viewport = document.getElementById('model-viewport');
 const message = viewport.querySelector('.model-message');
-const viewButtons = document.querySelectorAll('[data-view]');
+let viewButtons = document.querySelectorAll('[data-view]');
 const islandLightsInput = document.getElementById('show-island-lights');
 const floorGridInput = document.getElementById('show-floor-grid');
 const resetButton = document.getElementById('reset-view');
+const refreshButton = document.getElementById('refresh-model');
+refreshButton?.addEventListener('click', () => {
+  refreshButton.disabled = true;
+  location.replace(location.pathname);
+});
 const navigationButtons = document.querySelectorAll('[data-navigation]');
 const walkControls = document.getElementById('walk-controls');
 const tourMap = document.getElementById('tour-map');
 const tourStatus = document.getElementById('tour-status');
 const notesButton = document.getElementById('toggle-design-notes');
 const notes = document.getElementById('design-notes');
+const viewerNavigation = document.getElementById('viewer-navigation');
+const narrowViewer = window.matchMedia('(max-width: 760px)');
+viewerNavigation.open = !narrowViewer.matches;
+function collapseMobileNavigation() {
+  if (!narrowViewer.matches) return;
+  viewerNavigation.querySelector('summary').focus({ preventScroll: true });
+  viewerNavigation.open = false;
+}
 
 function setRoomMenuVisible(visible) {
   notes.hidden = !visible;
   document.querySelector('.design-workspace').classList.toggle('notes-hidden', !visible);
   notesButton.setAttribute('aria-expanded', String(visible));
-  notesButton.textContent = visible ? 'Hide room menu' : 'Show room menu';
+  notesButton.textContent = visible ? 'Hide design notes' : 'Show design notes';
 }
 
 notesButton.addEventListener('click', () => setRoomMenuVisible(notes.hidden));
@@ -24,27 +37,15 @@ document.getElementById('close-design-notes').addEventListener('click', () => {
   notesButton.focus();
 });
 
-document.querySelectorAll('.furniture-photo img').forEach((image) => {
-  function showPhotoError() {
-    image.removeEventListener('error', showPhotoError);
-    console.error(`Furniture photo could not load: ${image.src}`);
-    image.hidden = true;
-    const notice = document.createElement('span');
-    notice.className = 'photo-error';
-    notice.textContent = 'Photo unavailable. Use the retailer link below to view this piece.';
-    image.parentElement.append(notice);
-  }
-  image.addEventListener('error', showPhotoError, { once: true });
-  if (image.complete && !image.naturalWidth) showPhotoError();
-});
 
 // A classic entry script also runs from file URLs; remote dependencies remain modules.
 async function initializePreview() {
   try {
-    const [THREE, { OrbitControls }, { RoundedBoxGeometry }] = await Promise.all([
+    const [THREE, { OrbitControls }, { RoundedBoxGeometry }, { GLTFLoader }] = await Promise.all([
       import('three'),
       import('three/addons/controls/OrbitControls.js'),
-      import('three/addons/geometries/RoundedBoxGeometry.js')
+      import('three/addons/geometries/RoundedBoxGeometry.js'),
+      import('three/addons/loaders/GLTFLoader.js')
     ]);
     let savedUpstairsLayout = UpstairsLayout.empty();
     let savedGroundLayout = UpstairsLayout.empty();
@@ -58,7 +59,150 @@ async function initializePreview() {
       if (!groundResponse.ok) throw new Error(`Could not load ground-layout.json (${groundResponse.status}). Restore that file before loading the viewer.`);
       savedGroundLayout = await groundResponse.json();
     }
-    buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLayout, savedGroundLayout);
+    const loader = new GLTFLoader();
+    const garageAssetDefinitions = [
+      { id: 'adjustable_wrench', axis: 'y', inches: 12, rotation: [0, 0, 0] },
+      { id: 'combination_wrench', axis: 'y', inches: 12, rotation: [Math.PI / 2, 0, 0] },
+      { id: 'cross_pein_hammer', axis: 'y', inches: 14, rotation: [0, 0, 0] },
+      { id: 'handsaw_wood', axis: 'y', inches: 16, rotation: [Math.PI / 2, 0, Math.PI / 2] },
+      { id: 'Drill_01', axis: 'y', inches: 10, rotation: [0, 0, 0] },
+      { id: 'metal_toolbox', axis: 'x', inches: 16, rotation: [0, 0, 0] },
+      { id: 'plastic_crate_01', axis: 'x', inches: 12, rotation: [0, 0, 0] }
+    ];
+    const [bicycleAsset, armchairAsset, sofaAsset, sideTableAsset, garageSourceAssets, shoeAsset, bootAsset] = await Promise.all([
+      loader.loadAsync('assets/models/poly-pizza/bicycle-google.glb'),
+      loader.loadAsync('assets/models/poly-haven/modern_arm_chair_01/modern_arm_chair_01_1k.gltf'),
+      loader.loadAsync('assets/models/khronos/GlamVelvetSofa.glb'),
+      loader.loadAsync('assets/models/poly-haven/side_table_01/side_table_01_1k.gltf'),
+      Promise.all(garageAssetDefinitions.map(({ id }) => loader.loadAsync(`assets/models/poly-haven/${id}/${id}_1k.gltf`))),
+      loader.loadAsync('assets/models/khronos/MaterialsVariantsShoe.glb'),
+      loader.loadAsync('assets/models/poly-haven/rubber_boots/rubber_boots_1k.gltf')
+    ]);
+    const mudroomAssets = {};
+    for (const definition of [
+      { id: 'shoe', source: shoeAsset.scene, rotation: Math.PI / 2, axis: 'z', inches: 11.5, asset: 'assets/models/khronos/MaterialsVariantsShoe.glb' },
+      { id: 'bootLeft', source: bootAsset.scene.getObjectByName('rubber_boots_l'), rotation: 0, axis: 'y', inches: 14, asset: 'assets/models/poly-haven/rubber_boots/rubber_boots_1k.gltf' },
+      { id: 'bootRight', source: bootAsset.scene.getObjectByName('rubber_boots_r'), rotation: 0, axis: 'y', inches: 14, asset: 'assets/models/poly-haven/rubber_boots/rubber_boots_1k.gltf' }
+    ]) {
+      if (!definition.source) throw new Error(`Missing mudroom asset component: ${definition.id}`);
+      const template = new THREE.Group();
+      template.add(definition.source.clone(true));
+      template.rotation.y = definition.rotation;
+      template.updateMatrixWorld(true);
+      const bounds = new THREE.Box3().setFromObject(template);
+      const size = bounds.getSize(new THREE.Vector3());
+      if (![size.x, size.y, size.z].every((value) => Number.isFinite(value) && value > 0)) throw new Error(`Invalid mudroom asset dimensions: ${definition.id}`);
+      template.scale.setScalar(definition.inches / 12 / size[definition.axis]);
+      template.updateMatrixWorld(true);
+      bounds.setFromObject(template);
+      bounds.getSize(size);
+      const center = bounds.getCenter(new THREE.Vector3());
+      template.position.set(-center.x, -bounds.min.y, -center.z);
+      const geometry = new THREE.Group();
+      geometry.add(template);
+      geometry.userData = { asset: definition.asset, widthInches: size.x * 12, heightInches: size.y * 12, depthInches: size.z * 12, uniformScale: true, manufacturerCAD: false };
+      mudroomAssets[definition.id] = geometry;
+    }
+    const garageAssets = {};
+    for (const [index, definition] of garageAssetDefinitions.entries()) {
+      const template = new THREE.Group();
+      template.add(garageSourceAssets[index].scene);
+      template.rotation.set(...definition.rotation);
+      template.updateMatrixWorld(true);
+      const bounds = new THREE.Box3().setFromObject(template);
+      const size = bounds.getSize(new THREE.Vector3());
+      if (![size.x, size.y, size.z].every((value) => Number.isFinite(value) && value > 0)) throw new Error(`Invalid garage asset dimensions: ${definition.id}`);
+      template.scale.setScalar((definition.inches / 12) / size[definition.axis]);
+      template.updateMatrixWorld(true);
+      bounds.setFromObject(template);
+      bounds.getSize(size);
+      const center = bounds.getCenter(new THREE.Vector3());
+      template.position.set(-center.x, -bounds.min.y, -center.z);
+      const geometry = new THREE.Group();
+      geometry.add(template);
+      geometry.userData = { asset: `assets/models/poly-haven/${definition.id}/${definition.id}_1k.gltf`, widthInches: size.x * 12, heightInches: size.y * 12, depthInches: size.z * 12, uniformScale: true, source: `https://polyhaven.com/a/${definition.id}`, license: 'CC0-1.0' };
+      garageAssets[definition.id] = geometry;
+    }
+    const bicycleTemplate = new THREE.Group();
+    bicycleTemplate.add(bicycleAsset.scene);
+    bicycleTemplate.rotation.y = Math.PI / 2;
+    bicycleTemplate.updateMatrixWorld(true);
+    const bicycleBounds = new THREE.Box3().setFromObject(bicycleTemplate);
+    const bicycleLength = bicycleBounds.max.z - bicycleBounds.min.z;
+    if (!Number.isFinite(bicycleLength) || bicycleLength <= 0) throw new Error('The downloaded bicycle has invalid dimensions.');
+    bicycleTemplate.scale.setScalar((65 / 12) / bicycleLength);
+    bicycleTemplate.updateMatrixWorld(true);
+    bicycleBounds.setFromObject(bicycleTemplate);
+    const bicycleCenter = bicycleBounds.getCenter(new THREE.Vector3());
+    bicycleTemplate.position.set(-bicycleCenter.x, -bicycleBounds.min.y, -bicycleCenter.z);
+    bicycleTemplate.userData = { asset: 'assets/models/poly-pizza/bicycle-google.glb', lengthInches: 65, widthInches: (bicycleBounds.max.x - bicycleBounds.min.x) * 12, heightInches: (bicycleBounds.max.y - bicycleBounds.min.y) * 12, uniformScale: true };
+    const bicycleGeometry = new THREE.Group();
+    bicycleGeometry.add(bicycleTemplate);
+    bicycleGeometry.userData = bicycleTemplate.userData;
+    const armchairTemplate = armchairAsset.scene;
+    armchairTemplate.updateMatrixWorld(true);
+    const armchairBounds = new THREE.Box3().setFromObject(armchairTemplate);
+    const armchairSize = armchairBounds.getSize(new THREE.Vector3());
+    if (![armchairSize.x, armchairSize.y, armchairSize.z].every((size) => Number.isFinite(size) && size > 0)) throw new Error('The downloaded armchair has invalid dimensions.');
+    armchairTemplate.scale.setScalar((32.25 / 12) / armchairSize.x);
+    armchairTemplate.updateMatrixWorld(true);
+    armchairBounds.setFromObject(armchairTemplate);
+    const armchairCenter = armchairBounds.getCenter(new THREE.Vector3());
+    armchairTemplate.position.set(-armchairCenter.x, -armchairBounds.min.y, -armchairCenter.z);
+    armchairBounds.getSize(armchairSize);
+    const armchairGeometry = new THREE.Group();
+    armchairGeometry.add(armchairTemplate);
+    armchairGeometry.userData = {
+      asset: 'assets/models/poly-haven/modern_arm_chair_01/modern_arm_chair_01_1k.gltf',
+      widthInches: armchairSize.x * 12, depthInches: armchairSize.z * 12, heightInches: armchairSize.y * 12,
+      uniformScale: true, manufacturerCAD: false, source: 'https://polyhaven.com/a/modern_arm_chair_01', license: 'CC0-1.0'
+    };
+    const sofaTemplate = sofaAsset.scene;
+    const champagneIndex = sofaAsset.parser.json.materials.findIndex((material) => material.name === 'GlamVelvetSofa_fabric_champagne');
+    if (champagneIndex < 0) throw new Error('The downloaded sofa is missing its Champagne upholstery material.');
+    const champagneMaterial = await sofaAsset.parser.getDependency('material', champagneIndex);
+    sofaTemplate.traverse((part) => {
+      if (part.isLight) part.visible = false;
+      if (part.isMesh && part.material.name.startsWith('GlamVelvetSofa_fabric_')) part.material = champagneMaterial;
+    });
+    sofaTemplate.updateMatrixWorld(true);
+    const sofaBounds = new THREE.Box3().setFromObject(sofaTemplate);
+    const sofaSize = sofaBounds.getSize(new THREE.Vector3());
+    if (![sofaSize.x, sofaSize.y, sofaSize.z].every((size) => Number.isFinite(size) && size > 0)) throw new Error('The downloaded sofa has invalid dimensions.');
+    sofaTemplate.scale.setScalar((86 / 12) / sofaSize.x);
+    sofaTemplate.updateMatrixWorld(true);
+    sofaBounds.setFromObject(sofaTemplate);
+    const sofaCenter = sofaBounds.getCenter(new THREE.Vector3());
+    sofaTemplate.position.set(-sofaCenter.x, -sofaBounds.min.y, -sofaCenter.z);
+    sofaBounds.getSize(sofaSize);
+    const sofaGeometry = new THREE.Group();
+    sofaGeometry.add(sofaTemplate);
+    sofaGeometry.userData = {
+      asset: 'assets/models/khronos/GlamVelvetSofa.glb', widthInches: sofaSize.x * 12, depthInches: sofaSize.z * 12, heightInches: sofaSize.y * 12,
+      uniformScale: true, manufacturerCAD: false, productSelected: false, comfortVerified: false,
+      source: 'https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/GlamVelvetSofa',
+      productURL: 'https://www.wayfair.com/furniture/pdp/mercer41-frankie-velvet-86-recessed-arm-sofa-bed-mcrf6337.html',
+      license: 'CC-BY-4.0', attribution: 'GlamVelvetSofa, copyright 2021 Wayfair, LLC; Eric Chadwick. CC BY 4.0. Uniformly scaled and positioned; authored Champagne fabric selected; embedded light disabled.'
+    };
+    const sideTableTemplate = sideTableAsset.scene;
+    sideTableTemplate.updateMatrixWorld(true);
+    const sideTableBounds = new THREE.Box3().setFromObject(sideTableTemplate);
+    const sideTableSize = sideTableBounds.getSize(new THREE.Vector3());
+    if (![sideTableSize.x, sideTableSize.y, sideTableSize.z].every((size) => Number.isFinite(size) && size > 0)) throw new Error('The downloaded side table has invalid dimensions.');
+    sideTableTemplate.scale.setScalar((20 / 12) / sideTableSize.y);
+    sideTableTemplate.updateMatrixWorld(true);
+    sideTableBounds.setFromObject(sideTableTemplate);
+    const sideTableCenter = sideTableBounds.getCenter(new THREE.Vector3());
+    sideTableTemplate.position.set(-sideTableCenter.x, -sideTableBounds.min.y, -sideTableCenter.z);
+    sideTableBounds.getSize(sideTableSize);
+    const sideTableGeometry = new THREE.Group();
+    sideTableGeometry.add(sideTableTemplate);
+    sideTableGeometry.userData = {
+      asset: 'assets/models/poly-haven/side_table_01/side_table_01_1k.gltf',
+      widthInches: sideTableSize.x * 12, depthInches: sideTableSize.z * 12, heightInches: sideTableSize.y * 12,
+      uniformScale: true, manufacturerCAD: false, source: 'https://polyhaven.com/a/side_table_01', license: 'CC0-1.0'
+    };
+    buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLayout, savedGroundLayout, bicycleGeometry, armchairGeometry, garageAssets, sofaGeometry, sideTableGeometry, mudroomAssets);
   } catch (error) {
     console.error('The 3D floor plan could not start.', error);
     showModelError(`The 3D preview could not load: ${error.message}. WebGL, a valid upstairs layout, and access to jsDelivr are required.`);
@@ -85,14 +229,14 @@ function showModelError(text) {
   viewport.classList.remove('walking');
 }
 
-function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLayout, savedGroundLayout) {
+function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLayout, savedGroundLayout, bicycleGeometry, armchairGeometry, garageAssets, sofaGeometry, sideTableGeometry, mudroomAssets) {
   // Model coordinates are feet; the supplied raster is a concept trace, not CAD.
   const ceilingHeight = 9;
   const garageRisers = 2;
   const garageRise = 7.5 / 12;
   const garageFloorY = -garageRisers * garageRise;
   const garageFloorAreas = [
-    { x: 45.4, z: 15, w: 10.1, d: 11.9 },
+    { x: 44.9 - 2 / 12, z: 15, w: 10.6 + 2 / 12, d: 11.9 },
     { x: 29, z: 26.9, w: 26.5, d: 7.7 },
     { x: 31.2, z: 34.6, w: 24.3, d: 14.4 }
   ];
@@ -134,7 +278,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (wasWalking && mode !== 'walk') stopWalking();
     const walking = mode === 'walk';
     upstairs.labels.visible = !walking;
-    const moving = mode === 'move';
+    const moving = mode === 'move' || currentView === 'top' || currentView === 'upstairs-top';
+    controls.enableRotate = currentView !== 'top' && currentView !== 'upstairs-top';
     controls.enabled = !walking;
     controls.mouseButtons.LEFT = moving ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
     controls.mouseButtons.RIGHT = moving ? THREE.MOUSE.ROTATE : THREE.MOUSE.PAN;
@@ -554,6 +699,17 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
         if (to - from > tolerance) covered.push([from, to]);
       }
       for (const run of edges) cover(run.a, run.b, run.normal);
+      // Keep timber trim out of the guest shower and behind fitted bathroom fixtures.
+      cover(new THREE.Vector2(24.675, 34.775), new THREE.Vector2(24.675, 38.475), new THREE.Vector2(1, 0));
+      cover(new THREE.Vector2(24.675, 34.775), new THREE.Vector2(31.025, 34.775), new THREE.Vector2(0, 1));
+      cover(new THREE.Vector2(31.025, 34.775), new THREE.Vector2(31.025, 38.475), new THREE.Vector2(-1, 0));
+      cover(new THREE.Vector2(24.675, 39.15), new THREE.Vector2(24.675, 41.15), new THREE.Vector2(1, 0));
+      cover(new THREE.Vector2(31.025, 38.55), new THREE.Vector2(31.025, 43.75), new THREE.Vector2(-1, 0));
+      // Fitted mudroom joinery meets these wall faces without baseboards behind it.
+      cover(new THREE.Vector2(37.675, 15.175), new THREE.Vector2(44.9 - 2 / 12 - 0.175, 15.175), new THREE.Vector2(0, 1));
+      cover(new THREE.Vector2(37.675, 15.175), new THREE.Vector2(37.675, 20.9), new THREE.Vector2(1, 0));
+      cover(new THREE.Vector2(44.9 - 2 / 12 - 0.175, 15.175), new THREE.Vector2(44.9 - 2 / 12 - 0.175, 26.725), new THREE.Vector2(-1, 0));
+      cover(new THREE.Vector2(43.075 - 2 / 12, 26.725), new THREE.Vector2(44.9 - 2 / 12 - 0.175, 26.725), new THREE.Vector2(0, -1));
       for (const wall of baseTrimSections) {
         for (const side of [-1, 1]) {
           if (wall.sides.includes(side)) continue;
@@ -598,44 +754,33 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       return adjacent ? run.normal.clone().add(adjacent.normal).divideScalar(1 + run.normal.dot(adjacent.normal)) : run.normal;
     }
     const depth = 0.75 / 12;
-    const radius = 0.75 / 12;
     const boardProfile = new THREE.Shape();
     boardProfile.moveTo(0, 0);
     boardProfile.lineTo(depth, 0);
     boardProfile.lineTo(depth, 8 / 12);
     boardProfile.lineTo(0, 8 / 12);
     boardProfile.closePath();
-    const shoeProfile = new THREE.Shape();
-    shoeProfile.moveTo(depth, 0);
-    shoeProfile.lineTo(depth + radius, 0);
-    shoeProfile.absarc(depth, 0, radius, 0, Math.PI / 2);
-    shoeProfile.closePath();
     scene.updateMatrixWorld(true);
     for (const run of edges) {
       const length = run.a.distanceTo(run.b);
       const startMiter = miter(run, run.a);
       const endMiter = miter(run, run.b);
       const inverse = run.group.matrixWorld.clone().invert();
-      for (const [profile, name, dimensions] of [
-        [boardProfile, '8 inch interior baseboard', { heightInches: 8, thicknessInches: 0.75 }],
-        [shoeProfile, 'Quarter-round baseboard shoe', { radiusInches: 0.75 }]
-      ]) {
-        const geometry = new THREE.ExtrudeGeometry(profile, { depth: length, bevelEnabled: false, curveSegments: 8 });
-        const positions = geometry.getAttribute('position');
-        for (let i = 0; i < positions.count; i++) {
-          const progress = THREE.MathUtils.clamp(positions.getZ(i) / length, 0, 1);
-          const offset = positions.getX(i);
-          const point = run.a.clone().lerp(run.b, progress).addScaledVector(startMiter, offset * (1 - progress)).addScaledVector(endMiter, offset * progress);
-          const local = new THREE.Vector3(point.x, 0.005 + positions.getY(i), point.y).applyMatrix4(inverse);
-          positions.setXYZ(i, local.x, local.y, local.z);
-        }
-        geometry.computeVertexNormals();
-        const mesh = new THREE.Mesh(geometry, windowTrim);
-        mesh.name = name;
-        mesh.userData = { ...dimensions, side: run.side, startFeet: run.a.toArray(), endFeet: run.b.toArray(), startMiter: startMiter.toArray(), endMiter: endMiter.toArray() };
-        mesh.castShadow = mesh.receiveShadow = true;
-        run.group.add(mesh);
+      const geometry = new THREE.ExtrudeGeometry(boardProfile, { depth: length, bevelEnabled: false, curveSegments: 8 });
+      const positions = geometry.getAttribute('position');
+      for (let i = 0; i < positions.count; i++) {
+        const progress = THREE.MathUtils.clamp(positions.getZ(i) / length, 0, 1);
+        const offset = positions.getX(i);
+        const point = run.a.clone().lerp(run.b, progress).addScaledVector(startMiter, offset * (1 - progress)).addScaledVector(endMiter, offset * progress);
+        const local = new THREE.Vector3(point.x, 0.005 + positions.getY(i), point.y).applyMatrix4(inverse);
+        positions.setXYZ(i, local.x, local.y, local.z);
       }
+      geometry.computeVertexNormals();
+      const mesh = new THREE.Mesh(geometry, windowTrim);
+      mesh.name = '8 inch interior baseboard';
+      mesh.userData = { heightInches: 8, thicknessInches: 0.75, side: run.side, startFeet: run.a.toArray(), endFeet: run.b.toArray(), startMiter: startMiter.toArray(), endMiter: endMiter.toArray() };
+      mesh.castShadow = mesh.receiveShadow = true;
+      run.group.add(mesh);
     }
   }
 
@@ -652,7 +797,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   const kitchenWallLeft = 26.5;
-  const kitchenWallRight = 38;
+  const kitchenWallRight = 37.5;
+  const cookingWallShiftX = kitchenWallRight - 38;
   const kitchenWindowWallZ = 7;
   const kitchenSinkRunZ = kitchenWindowWallZ + 1.2;
   const prepCounterZ = kitchenWindowWallZ + 1.25;
@@ -666,25 +812,25 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const kitchenSinkWindowHeight = 3.5;
   const kitchenSinkWindowSill = 53 / 12;
   const kitchenSinkWindows = [
-    { name: 'Kitchen left counter window', x: kitchenSinkX - 4, width: 1.5, picture: false },
+    { name: 'Kitchen left counter window', x: kitchenSinkX - 3.75, width: 1.5, picture: false },
     { name: 'Kitchen sink window', x: kitchenSinkX, width: kitchenSinkWindowWidth, picture: true },
-    { name: 'Kitchen right counter window', x: kitchenSinkX + 4, width: 1.5, picture: false }
+    { name: 'Kitchen right counter window', x: kitchenSinkX + 3.75, width: 1.5, picture: false }
   ];
   const kitchenWindowCapExtension = casingSideWidth + casingReveal + 0.125 / 2;
   const kitchenEndSconceCenters = [
-    (kitchenWallLeft + kitchenSinkWindows[0].x - kitchenSinkWindows[0].width / 2 - kitchenWindowCapExtension) / 2,
-    (kitchenWallRight + kitchenSinkWindows[2].x + kitchenSinkWindows[2].width / 2 + kitchenWindowCapExtension) / 2
+    (kitchenWallLeft + 0.175 + kitchenSinkWindows[0].x - kitchenSinkWindows[0].width / 2 - kitchenWindowCapExtension) / 2,
+    (kitchenWallRight - 0.175 + kitchenSinkWindows[2].x + kitchenSinkWindows[2].width / 2 + kitchenWindowCapExtension) / 2
   ];
   const prepSinkX = 47.4;
-  const prepWindowWidth = 2.5;
+  const prepWindowWidth = 5;
   const prepWindowHeight = 3.5;
   const prepWindowSill = 4.25;
-  const prepWindowCenters = [prepSinkX - 1.75, prepSinkX + 1.75];
+  const prepWindowCenters = [prepSinkX];
   const diningSideWindowCenters = [3.95];
   const diningSideWindowWidth = 6;
   const diningSideWindowHeight = 5;
   const diningSideWindowSill = 3;
-  const prepEndWindowZ = 12;
+  const prepEndWindowZ = (prepCounterZ + 2.05 / 2 + 13.825) / 2;
   const prepEndWindowWidth = 2;
   const kidsRoomNorthZ = 26.725 - 25 / 12 - 0.08 + 0.175;
   const kidsRoom = { x: 19, z: kidsRoomNorthZ, width: 10, depth: 34.6 - kidsRoomNorthZ };
@@ -723,6 +869,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const wallSideStairWidth = stairOpening.depth - stairWidth - stairGap;
   const guestEntry = getGuestEntryLayout(stairOpening);
   const guestSuite = getGuestSuiteLayout();
+  const garageClerestories = getGarageClerestoryLayout(garageFloorY);
   const powderNorthZ = guestEntry.powder.z;
   const powderEntryWallZ = guestEntry.alcove.z;
   const officeNorthZ = guestEntry.officeNorthZ;
@@ -732,22 +879,23 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   floor(13.2, -0.1, 13.3, 8.1, true, scene);
   floor(13.2, 8, 5.8, 17.7, true, scene);
   floor(19, 8, 7.5, kidsRoom.z - 8, true, scene);
-  floor(26.5, kitchenWindowWallZ, 11.5, kidsRoom.z - kitchenWindowWallZ, true, scene);
-  floor(29, kidsRoom.z, 9, 26.9 - kidsRoom.z, true, scene);
-  floor(38, kitchenWindowWallZ, 7.4, 14.5 - kitchenWindowWallZ, true, scene);
+  floor(26.5, kitchenWindowWallZ, 11, kidsRoom.z - kitchenWindowWallZ, true, scene);
+  floor(29, kidsRoom.z, 8.5, 26.9 - kidsRoom.z, true, scene);
+  floor(37.5, kitchenWindowWallZ, 7.9, 15 - kitchenWindowWallZ, true, scene);
   floor(45.4, kitchenWindowWallZ, 10.1, 15 - kitchenWindowWallZ, true, scene);
   for (const { x, z, w, d } of garageFloorAreas) floor(x, z, w, d, false, shell, false, garageFloorY);
   [
-    [38, 14.5, 7.4, 12.4],
+    [37.5, 15, 7.4 - 2 / 12, 11.9],
     [0, 25.7, 12.2, stairOpening.z - 25.7, true],
     [0, stairOpening.z, stairOpening.x, stairOpening.depth, true],
     [stairOpening.x + stairOpening.width, stairOpening.z, 12.2 - stairOpening.x - stairOpening.width, stairOpening.depth, true],
     [0, stairOpening.z + stairOpening.depth, 12.2, powderNorthZ - stairOpening.z - stairOpening.depth, true],
     [12.2, 25.7, kidsRoom.x - 12.2, 8.9, true],
-    [kidsRoom.x, kidsRoom.z, kidsRoom.width, kidsRoom.depth, true],
+    [kidsRoom.x, kidsRoom.z, 10, kidsRoom.depth, true],
     [12.2, 34.6, 6.8, 19.6, true], [0, powderNorthZ, 7.1, guestEntry.powder.d], [7.1, powderEntryWallZ, 5.1, guestEntry.alcove.d, true],
-    [0, officeNorthZ, 12.2, 54.2 - officeNorthZ, true], [19, 34.6, 6, 7.4, true], [25, 34.6, 6.2, guestSuite.bathroom.d],
-    [19, 42, 12.2, 12.2, true], [0, 54.2, 31.2, 7, false, false],
+    [0, officeNorthZ, 12.2, 54.2 - officeNorthZ, true], [19, 34.6, 5.5, 7.4, true], [24.5, 34.6, 6.7, guestSuite.bathroom.d],
+    [19, guestSuite.bathroom.z + guestSuite.bathroom.d, 12.2, 54.2 - guestSuite.bathroom.z - guestSuite.bathroom.d, true],
+    [19, 42, 5.5, guestSuite.bathroom.z + guestSuite.bathroom.d - 42, true], [0, 54.2, 31.2, 7, false, false],
     [7.1, powderNorthZ, 5.1, guestEntry.coatCloset.d, true]
   ].forEach(([x, z, w, d, hardwood = false, interior = true]) => floor(x, z, w, d, hardwood, shell, interior));
 
@@ -757,47 +905,50 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [13.2, -0.1, 26.5, -0.1, true, [[3.65, 9.65, 3, 8]]],
     [26.5, -0.1, 26.5, kitchenWindowWallZ, true, [[0.6, 6.6, 0, 8]], ceilingHeight, [1]],
     [kitchenWallLeft, kitchenWindowWallZ, kitchenWallRight, kitchenWindowWallZ, true, kitchenSinkWindows.map(({ x, width }) => [x - width / 2 - kitchenWallLeft, x + width / 2 - kitchenWallLeft, kitchenSinkWindowSill, kitchenSinkWindowSill + kitchenSinkWindowHeight]), ceilingHeight, [-1, 1], 1],
-    [38, kitchenWindowWallZ, 55.5, kitchenWindowWallZ, false, prepWindowCenters.map((x) => [x - prepWindowWidth / 2 - 38, x + prepWindowWidth / 2 - 38, prepWindowSill, prepWindowSill + prepWindowHeight])],
+    [37.5, kitchenWindowWallZ, 55.5, kitchenWindowWallZ, false, prepWindowCenters.map((x) => [x - prepWindowWidth / 2 - 37.5, x + prepWindowWidth / 2 - 37.5, prepWindowSill, prepWindowSill + prepWindowHeight])],
     [55.5, kitchenWindowWallZ, 55.5, 15, false, [[prepEndWindowZ - prepEndWindowWidth / 2 - kitchenWindowWallZ, prepEndWindowZ + prepEndWindowWidth / 2 - kitchenWindowWallZ, prepWindowSill, prepWindowSill + prepWindowHeight]], ceilingHeight, [1]],
-    [55.5, 15, 55.5, 49, false, [[29, 32, garageFloorY, garageFloorY + 8]], ceilingHeight, [1], 0, garageFloorY],
+    [55.5, 15, 55.5, 49, false, [...garageClerestories.map(({ z, width, sill, height }) => [z - width / 2 - 15, z + width / 2 - 15, sill, sill + height]), [29, 32, garageFloorY, garageFloorY + 8]], ceilingHeight, [1], 0, garageFloorY],
     [55.5, 49, 31.2, 49, false, [[2.5, 11.5, garageFloorY, garageFloorY + 8], [14, 23, garageFloorY, garageFloorY + 8]], ceilingHeight, [1], 0, garageFloorY],
     [31.2, 49, 31.2, 54.2], [31.2, 54.2, 31.2, 61.2, false, [], 2.6], [31.2, 61.2, 0, 61.2, false, [], 2.6],
-    [0, 61.2, 0, 54.2, false, [], 2.6],     [0, 54.2, 0, livingFeatureWall.wallEndZ, false, [[3.2, 7.2, 3, 8]]],
+    [0, 61.2, 0, 54.2, false, [], 2.6],     [0, 54.2, 0, livingFeatureWall.wallEndZ, false, [
+      [3.2, 7.2, 3, 8],
+      ...[...guestEntry.windows].reverse().map(({ z, openingWidth, openingSill, openingHeight }) => [54.2 - z - openingWidth / 2, 54.2 - z + openingWidth / 2, openingSill, openingSill + openingHeight])
+    ]],
     [0, livingFeatureWall.wallEndZ, 0, 8, true, [...livingWindowCenters].reverse().map((z) => [livingFeatureWall.wallEndZ - z - livingWindowWidth / 2, livingFeatureWall.wallEndZ - z + livingWindowWidth / 2, livingWindowSill, livingWindowHead])],
     [kidsRoom.x, kidsRoom.z, kidsRoom.x + kidsRoom.width, kidsRoom.z, true],
     [kidsDoorway.x, kidsRoom.z, kidsDoorway.x, 34.6, true, [[kidsDoorway.z - kidsRoom.z, kidsDoorway.z - kidsRoom.z + kidsDoorway.width, 0, kidsDoorway.height]]],
-    [29, kidsRoom.z, 29, 26.9, true], [0, powderNorthZ, 12.2, powderNorthZ],
+    [29, kidsRoom.z, 29, 26.9, true, [], ceilingHeight, [1]], [0, powderNorthZ, 12.2, powderNorthZ],
     [7.1, powderNorthZ, 7.1, officeNorthZ, false, [[guestEntry.powderDoor.z - powderNorthZ, guestEntry.powderDoor.z - powderNorthZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
     [7.1, powderEntryWallZ, 12.2, powderEntryWallZ, false, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
     [12.2, powderNorthZ, 12.2, powderEntryWallZ],
     [officeEntry.x, officeNorthZ, officeEntry.x, 54.2, false, [[officeEntry.z - officeEntry.width / 2 - officeNorthZ, officeEntry.z + officeEntry.width / 2 - officeNorthZ, 0, officeEntry.height]]],
-    [0, officeNorthZ, 12.2, officeNorthZ], [0, 54.2, 31.2, 54.2, false, [[3, 9, 3, 8], [13.1, 18.1, 0, 7], [21.2, 28.8, 3, 8]], ceilingHeight, [-1]],
-    [19, 34.6, 19, 54.2, false, [[7.4, 10.4, 0, 7]]], [19, 34.6, 25, 34.6],
-    [25, 34.6, 25, 42],
-    [19, 42, 25, 42, false, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x - 19 + guestSuite.closetDoor.width, 0, 7]]],
-    [25, 42, 31.2, 42, false, [[guestSuite.bathroomDoor.x - 25, guestSuite.bathroomDoor.x - 25 + guestSuite.bathroomDoor.width, 0, 7]]],
-    [25, 34.6, 29, 34.6], [29, 34.6, 31.2, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
+    [0, officeNorthZ, 12.2, officeNorthZ], [0, 54.2, 31.2, 54.2, false, [[3, 9, 3, 8], [13.1, 18.1, 0, 8], [21.2, 28.8, 3, 8]], ceilingHeight, [-1]],
+    [19, 34.6, 19, 54.2, false, [[7.4, 10.4, 0, 8]]],
+    [19, 34.6, 24.5, 34.6], [24.5, 34.6, 24.5, guestSuite.bathroom.z + guestSuite.bathroom.d],
+    [19, 42, 24.5, 42, false, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x - 19 + guestSuite.closetDoor.width, 0, guestSuite.closetDoor.height]]],
+    [24.05, guestSuite.bathroom.z + guestSuite.bathroom.d, 31.2, guestSuite.bathroom.z + guestSuite.bathroom.d, false, [[guestSuite.bathroomDoor.x - 24.05, guestSuite.bathroomDoor.x - 24.05 + guestSuite.bathroomDoor.width, 0, guestSuite.bathroomDoor.height]]],
+    [24.5, 34.6, 29, 34.6], [29, 34.6, 31.2, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
     [31.2, 34.6, 31.2, 49, false, [], ceilingHeight, [-1, 1], 0, garageFloorY], [29, 26.9, 29, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
-    [29, 26.9, 29.6875, 26.9, true, [], ceilingHeight, [-1, 1], -1, garageFloorY],
-    [29.6875, 26.9, 37.8, 26.9, true, [], ceilingHeight, [1], -1, garageFloorY],
-    [37.8, 26.9, 38, 26.9, true, [], ceilingHeight, [-1, 1], -1, garageFloorY],
-    [38, kitchenWindowWallZ, 38, 25.3, true, kitchenSideOpenings, ceilingHeight, [-1, 1], 1],
-    [38, 25.3, 38, 26.9, true, [], ceilingHeight, [-1], 1], [38, 14.5, 45.4, 14.5],
-    [45.4, 15, 55.5, 15, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
-    [45.4, 14.5, 45.4, 26.9, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
-    [38, 26.9, 45.4, 26.9, false, [[garageEntry.x - 38, garageEntry.x - 38 + garageEntry.width, 0, garageEntry.height]], ceilingHeight, [-1, 1], 0, garageFloorY]
+    [29, 26.9, 29.1875, 26.9, true, [], ceilingHeight, [-1, 1], -1, garageFloorY],
+    [29.1875, 26.9, 37.3, 26.9, true, [], ceilingHeight, [1], -1, garageFloorY],
+    [37.3, 26.9, 37.5, 26.9, true, [], ceilingHeight, [-1, 1], -1, garageFloorY],
+    [37.5, kitchenWindowWallZ, 37.5, 25.3, true, kitchenSideOpenings, ceilingHeight, [-1, 1], 1],
+    [37.5, 25.3, 37.5, 26.9, true, [], ceilingHeight, [-1], 1], [37.5, 15, 44.9 - 2 / 12, 15],
+    [44.9 - 2 / 12, 15, 55.5, 15, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
+    [44.9 - 2 / 12, 15, 44.9 - 2 / 12, 26.9, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
+    [37.5, 26.9, 44.9 - 2 / 12, 26.9, false, [[garageEntry.x - 37.5, garageEntry.x - 37.5 + garageEntry.width, 0, garageEntry.height]], ceilingHeight, [-1, 1], 0, garageFloorY]
   ].forEach((segment) => wall(...segment));
 
   joinWallCorners();
   buildBaseTrim();
 
   [
-    ['Living room', 13.2, 17.7], ['Dining room', 13.3, 8.1], ['Kitchen', 11.5, 26.9 - kitchenWindowWallZ],
-    ['Hall', 13.3, kidsRoom.z - 8], ['Prep kitchen', 17.5, 15 - kitchenWindowWallZ, true], ['Mudroom', 7.4, 12.4],
+    ['Living room', 13.2, 17.7], ['Dining room', 13.3, 8.1], ['Kitchen', 11, 26.9 - kitchenWindowWallZ],
+    ['Hall', 13.3, kidsRoom.z - 8], ['Prep kitchen', 18, 15 - kitchenWindowWallZ, true], ['Mudroom', 7.4 - 2 / 12, 11.9],
     ['Garage', 26.5, 34, true], ['Kids room', kidsRoom.width, kidsRoom.depth],
     ['Powder room', 7.1, guestEntry.powder.d], ['Guest coat closet', 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 5.1, guestEntry.alcove.d], ['Office', 12.2, 54.2 - officeNorthZ],
-    ['Guest walk-in closet', 6, 7.4], ['Guest shower bathroom', 6.2, guestSuite.bathroom.d],
-    ['Bedroom', 12.2, 12.2], ['Porch', 31.2, 7]
+    ['Guest walk-in closet', 5.5, 7.4], ['Guest shower bathroom', 6.7, guestSuite.bathroom.d],
+    ['Bedroom', 12.2, 54.2 - guestSuite.bathroom.z - guestSuite.bathroom.d], ['Bedroom entry', 5.5, guestSuite.bathroom.z + guestSuite.bathroom.d - 42], ['Porch', 31.2, 7]
   ].forEach((room) => roomDimensions(...room));
 
   // Proposed feature wall, following the existing living-room requirements.
@@ -874,7 +1025,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   mantel.userData = { widthInches: 74.4, thicknessInches: 3.6, bottomInches: 48, clearanceVerified: false, provisional: true };
   box(scene, fireplaceFaceX + 0.06, 5.8, livingCenterZ, 0.15, 2.7, 4.6, black, true).name = 'Fireplace television';
   const mediaBuiltIns = [];
-  const mediaWidth = 24 / 12;
+  const mediaWidth = (livingFeatureWall.wallEndZ - livingFeatureWall.wallStartZ) / 2 - 3.06;
   const mediaRearX = 0.4;
   const mediaDepth = fireplaceFaceX - mediaRearX;
   const mediaHeight = 26 / 12;
@@ -883,8 +1034,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     mediaBuiltIn.name = `${side === -1 ? 'Dining' : 'Stair'}-side fireplace media and charging built-in`;
     mediaBuiltIn.userData = {
       widthInches: mediaWidth * 12, depthInches: mediaDepth * 12, heightInches: 26, rearServiceGapInches: 3,
-      location: `${side === -1 ? 'Dining' : 'Stair'} side, directly adjoining fireplace stone`, openBack: true, openFront: false,
-      doors: 'Two closed Shaker doors with concealed push latches', frontX: fireplaceFaceX,
+      location: `${side === -1 ? 'Dining' : 'Stair'} side, from fireplace stone to wall end`, openBack: true, openFront: false,
+      doors: 'Four closed Shaker doors with concealed push latches', frontX: fireplaceFaceX,
       storage: 'Consoles, controllers and device charging concealed inside; verify shallow equipment fit and closed-door ventilation',
       power: 'Concealed receptacles and replaceable USB-C PD charging hub',
       data: 'Ethernet and accessible conduit to TV for at least three HDMI runs',
@@ -901,8 +1052,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(mediaBuiltIn, 0, mediaHeight - 1 / 24, 0, mediaWidth, 1 / 12, mediaDepth, cabinetRailFinish).name = 'Clear oak cabinet top flush with fireplace';
     box(mediaBuiltIn, 0, 0.4, -0.04, mediaWidth - 0.125, 0.0625, mediaDepth - 0.08, cabinetRailFinish).name = 'Concealed cabinet bottom';
     box(mediaBuiltIn, 0, 10 / 12, -0.04, mediaWidth - 0.125, 0.0625, mediaDepth - 0.08, cabinetRailFinish).name = 'Concealed equipment and charging shelf';
-    for (const edge of [-1, 1]) {
-      const door = shakerFront(mediaBuiltIn, edge * mediaWidth / 4, (0.4 + mediaHeight - 1 / 12) / 2, mediaDepth / 2 - 0.04, mediaWidth / 2 - 0.04, mediaHeight - 1 / 12 - 0.4 - 0.04);
+    box(mediaBuiltIn, 0, mediaHeight / 2, -0.04, 0.0625, mediaHeight - 2 / 12, mediaDepth - 0.08, cabinetFinish).name = 'Media cabinet center support';
+    for (let index = 0; index < 4; index++) {
+      const door = shakerFront(mediaBuiltIn, -mediaWidth / 2 + (index + 0.5) * mediaWidth / 4, (0.4 + mediaHeight - 1 / 12) / 2, mediaDepth / 2 - 0.04, mediaWidth / 4 - 0.04, mediaHeight - 1 / 12 - 0.4 - 0.04);
       door.name = 'Closed media cabinet Shaker door';
       door.userData.hardware = 'Concealed push latch; no projecting pull';
     }
@@ -940,6 +1092,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   scene.add(kitchenSconces);
   for (const x of kitchenEndSconceCenters) wallSconce(kitchenSconces, x, kitchenWindowWallZ + 0.205, -Math.PI / 2);
   const glass = new THREE.MeshStandardMaterial({ color: '#b3cad0', roughness: 0.15, metalness: 0.15, transparent: true, opacity: 0.52 });
+  const privacyGlass = new THREE.MeshStandardMaterial({ color: '#e0e8e4', roughness: 1, metalness: 0 });
+  privacyGlass.name = 'Obscured lower-half bathroom glazing - privacy concept';
   const windowExterior = mat('#181818');
   windowExterior.name = 'Andersen Black exterior - screen approximation';
   function windowFrame(name, x, z, width, height, sill, rotation = 0, parent = scene, interiorSide = 1, options = {}) {
@@ -956,6 +1110,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const rows = fixed ? 1 : Math.ceil(height / 6);
     frame.userData = { manufacturer: !fixed || picture ? 'Andersen' : null, series: !fixed || picture ? '100 Series' : null, operation: picture ? 'fixed picture window' : fixed ? 'fixed door sidelight' : 'casement', geometry: 'simplified concept, not manufacturer CAD', standardSizeVerified: false, exteriorFinish, interiorFinish: 'White', interiorTrim: 'white', interiorSide, columns, rows, widthFeet: width, heightFeet: height, sillDepthInches: (options.depth ?? 0.25) * 12, sillMaterial: options.material ? 'quartz' : 'white trim', faucetNotchWidthInches: (options.notchWidth ?? 0) * 12 };
     frame.userData.casingMaterial = (options.casingMaterial ?? windowTrim).name;
+    if (options.standardSizeCode) Object.assign(frame.userData, { standardSizeCode: options.standardSizeCode, standardSizeVerified: true, productSelected: false });
+    if (options.privacyLowerHalf) Object.assign(frame.userData, { privacyLowerHalf: true, privacyGlassTopFeet: sill + height / 2, privacyVerified: false });
     parent.add(frame);
     function ring(parent, w, h, border, depth, offset, material, name) {
       for (const side of [-1, 1]) {
@@ -982,7 +1138,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
         const sashHeight = unitHeight - 0.27;
         ring(sash, sashWidth, sashHeight, 0.1, 0.08, -interiorSide * 0.04, exteriorMaterial, `${exteriorFinish} exterior sash`);
         ring(sash, sashWidth, sashHeight, 0.1, 0.08, interiorSide * 0.04, windowTrim, 'White interior sash');
-        box(sash, 0, sashHeight / 2, 0, sashWidth - 0.2, sashHeight - 0.2, 0.04, glass).name = fixed ? 'Fixed glazing pane' : 'Single casement glazing pane';
+        if (options.privacyLowerHalf) {
+          const halfPaneHeight = (sashHeight - 0.2) / 2;
+          box(sash, 0, 0.1 + halfPaneHeight / 2, 0, sashWidth - 0.2, halfPaneHeight, 0.04, privacyGlass).name = 'Frosted lower-half privacy pane';
+          box(sash, 0, 0.1 + halfPaneHeight * 1.5, 0, sashWidth - 0.2, halfPaneHeight, 0.04, glass).name = 'Clear upper-half daylight pane';
+        } else {
+          box(sash, 0, sashHeight / 2, 0, sashWidth - 0.2, sashHeight - 0.2, 0.04, glass).name = fixed ? 'Fixed glazing pane' : 'Single casement glazing pane';
+        }
         if (!fixed) {
           box(unit, 0, 0.2, interiorSide * 0.16, 0.28, 0.07, 0.08, windowTrim).name = 'White casement crank housing';
           box(unit, 0.08, 0.2, interiorSide * 0.23, 0.16, 0.045, 0.06, windowTrim).name = 'Casement crank handle';
@@ -991,6 +1153,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       }
     }
     if (options.casing !== false) openingCasing(frame, 0, 0, width, height, 0.2, interiorSide, sill > 0, options);
+    return frame;
   }
   for (const { name, center, width, picture } of livingSideWindows) {
     windowFrame(name, center, 8.1, width, livingWindowHead - livingSideWindowSill, livingSideWindowSill, 0, scene, 1, { picture });
@@ -1016,7 +1179,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   doorLeaf.name = 'Inward-opening hinged patio door';
   doorLeaf.position.x = 2.88;
   doorLeaf.rotation.y = 0;
-  doorLeaf.userData = { outswing: false, openAngleDegrees: 0, nominalWidthFeet: 3, finish: 'White' };
+  doorLeaf.userData = { outswing: false, openAngleDegrees: 0, maxAngleDegrees: 180, nominalWidthFeet: 3, finish: 'White' };
   patioDoor.add(doorLeaf);
   for (const edge of [-0.04, -2.78]) {
     box(doorLeaf, edge, 3.98, 0, 0.08, 7.76, 0.14, windowTrim).name = 'Hinged patio door stile';
@@ -1084,33 +1247,18 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(sectional, x, 2.3, -sectionalBaseDepth / 2 + 0.5, sectionalSeatWidth - 0.05, 1.4, 0.65, tanLeatherCushion, true).name = 'Sectional loose back cushion';
   });
 
-  const strandmonWidth = 32.25 / 12;
-  const strandmonDepth = 37.75 / 12;
-  const strandmonHeight = 39.75 / 12;
-  const strandmonFabric = mat('#c2b09a', 0.98);
-  const strandmonChairs = [0, 1].map((index) => {
+  const livingChairWidth = armchairGeometry.userData.widthInches / 12;
+  const livingChairDepth = armchairGeometry.userData.depthInches / 12;
+  const livingArmchairs = [0, 1].map((index) => {
     const chair = new THREE.Group();
-    chair.name = `IKEA STRANDMON wing chair ${index + 1}`;
-    chair.userData = { seats: 1, manufacturer: 'IKEA', model: 'STRANDMON', widthInches: 32.25, depthInches: 37.75, heightInches: 39.75, seatHeightInches: 17.75, productURL: 'https://www.ikea.com/us/en/p/strandmon-wing-chair-talliden-beige-brown-30628943/', finish: 'Warm beige screen approximation; fabric not selected', manufacturerCAD: false };
+    chair.name = `Poly Haven textured armchair ${index + 1}`;
+    chair.userData = { ...armchairGeometry.userData, seats: 1, provisional: true };
+    const model = armchairGeometry.clone(true);
+    model.traverse((part) => {
+      if (part.isMesh) part.userData.tourObstacle = true;
+    });
+    chair.add(model);
     scene.add(chair);
-    for (const x of [-strandmonWidth / 2 + 0.25, strandmonWidth / 2 - 0.25]) {
-      for (const z of [-strandmonDepth / 2 + 0.3, strandmonDepth / 2 - 0.3]) cylinder(chair, x, 0.25, z, 0.065, 0.5, walnut, 0.045).name = 'STRANDMON dark tapered leg';
-    }
-    box(chair, 0, 0.84, 0, strandmonWidth, 0.8, strandmonDepth, strandmonFabric, true).name = 'STRANDMON upholstered base';
-    box(chair, 0, 17.75 / 12 - 0.125, 0.35, 19.25 / 12, 0.25, 21.25 / 12, strandmonFabric, true).name = 'STRANDMON seat cushion';
-    box(chair, 0, (1.25 + strandmonHeight) / 2, -strandmonDepth / 2 + 0.22, strandmonWidth - 0.4, strandmonHeight - 1.25, 0.44, strandmonFabric, true).name = 'STRANDMON high upholstered back';
-    for (const side of [-1, 1]) {
-      box(chair, side * (strandmonWidth / 2 - 0.12), (1.85 + strandmonHeight) / 2, -strandmonDepth / 2 + 0.36, 0.24, strandmonHeight - 1.85, 0.72, strandmonFabric, true).name = 'STRANDMON high back wing';
-      box(chair, side * (strandmonWidth / 2 - 0.18), 1.55, 0.06, 0.36, 0.8, strandmonDepth - 0.12, strandmonFabric, true).name = 'STRANDMON padded arm';
-    }
-    for (const x of [-0.42, 0.42]) {
-      for (const y of [2.05, 2.65]) {
-        const button = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), strandmonFabric);
-        button.position.set(x, y, -strandmonDepth / 2 + 0.455);
-        button.name = 'STRANDMON back upholstery button';
-        chair.add(button);
-      }
-    }
     return chair;
   });
 
@@ -1156,9 +1304,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   readingBook.traverse((part) => { part.userData.tourDecoration = true; });
 
   const christmasTree = new THREE.Group();
-  christmasTree.name = 'Dining-corner Christmas tree';
-  christmasTree.position.set(14.9, 0, 1.6);
-  christmasTree.userData = { heightInches: 84, diameterInches: 36, location: 'Northwest dining corner between the exterior windows', seasonal: true, provisional: true };
+  const treeHall = getGroundFloorDefaultPlan().rooms.find((room) => room.name === 'Hall');
+  christmasTree.name = 'Hall-center Christmas tree';
+  christmasTree.position.set(treeHall.x + treeHall.w / 2, 0, treeHall.z + treeHall.d / 2);
+  christmasTree.userData = { heightInches: 84, diameterInches: 36, location: 'Middle of the open hallway between the living room and kitchen island', seasonal: true, provisional: true };
   scene.add(christmasTree);
   const evergreen = mat('#344f3a');
   const treeGold = mat('#ba914b', 0.45);
@@ -1193,16 +1342,296 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(treeCross, 0, 0, 0, 0.055, 0.36, 0.04, topperGold).name = 'Cross upright';
   box(treeCross, 0, 0.055, 0, 0.24, 0.055, 0.04, topperGold).name = 'Cross arms';
 
+  const downloadedSofa = new THREE.Group();
+  downloadedSofa.name = 'Wayfair Glam velvet sofa - licensed product visualization';
+  downloadedSofa.userData = { ...sofaGeometry.userData, provisional: true };
+  downloadedSofa.add(sofaGeometry.clone(true));
+  downloadedSofa.traverse((part) => { if (part.isMesh) part.userData.tourObstacle = true; });
+  scene.add(downloadedSofa);
+
+  const familyLiving = new THREE.Group();
+  familyLiving.name = 'Family-of-five living-room furnishings';
+  familyLiving.userData = {
+    planningSeats: 5, sofaPlanningSeats: 3, chairPlanningSeats: 2, comfortVerified: false,
+    rug: { x: 7.8, z: livingCenterZ, w: 9, d: 12 },
+    ottoman: { x: 10.8 - sofaGeometry.userData.depthInches / 24 - 16 / 12 - 32 / 24, z: livingCenterZ, w: 32 / 12, d: 4, h: 17 / 12 },
+    sideTables: [{ x: 10.8, z: livingCenterZ - 5 }, { x: 10.8, z: livingCenterZ + 5 }],
+    sideTableDimensions: sideTableGeometry.userData
+  };
+  scene.add(familyLiving);
+  function livingWeaveTexture(color, border = false) {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 512;
+    const context = canvas.getContext('2d');
+    context.fillStyle = color;
+    context.fillRect(0, 0, 512, 512);
+    for (let line = 0; line < 512; line += 3) {
+      context.fillStyle = line % 2 ? '#ffffff18' : '#493c2b12';
+      context.fillRect(line, 0, 1, 512);
+      context.fillRect(0, line, 512, 1);
+    }
+    if (border) {
+      context.strokeStyle = '#8a88775c';
+      context.lineWidth = 5;
+      context.strokeRect(18, 18, 476, 476);
+      context.lineWidth = 1;
+      context.strokeRect(26, 26, 460, 460);
+    }
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    return texture;
+  }
+  const familyRug = familyLiving.userData.rug;
+  const rug = new THREE.Mesh(new THREE.PlaneGeometry(familyRug.w, familyRug.d), new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#d8cebc', true), roughness: 1 }));
+  rug.name = 'Family living 9 x 12 ft low-pile rug - finish study';
+  rug.rotation.x = -Math.PI / 2;
+  rug.position.set(familyRug.x, 0.008, familyRug.z);
+  rug.userData = { tourDecoration: true, walkSurface: true, nonSlipPadRequired: true, productSelected: false };
+  familyLiving.add(rug);
+  const familyOttoman = new THREE.Group();
+  familyOttoman.name = 'Family living soft 48 x 32 inch ottoman';
+  const ottomanDetails = familyLiving.userData.ottoman;
+  familyOttoman.position.set(ottomanDetails.x, 0, ottomanDetails.z);
+  familyOttoman.userData = { ...ottomanDetails, productSelected: false, seatingApproved: false, use: 'Footrest and removable-tray surface, not a sixth seat' };
+  const camelFabric = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#b18c66'), roughness: 0.96 });
+  for (const x of [-0.95, 0.95]) for (const z of [-1.65, 1.65]) cylinder(familyOttoman, x, 1 / 12, z, 0.08, 2 / 12, walnut).name = 'Ottoman low wood foot';
+  box(familyOttoman, 0, 8 / 12, 0, ottomanDetails.w - 0.04, 1, ottomanDetails.d - 0.04, camelFabric, true).name = 'Soft ottoman upholstered base';
+  box(familyOttoman, 0, 15.5 / 12, 0, ottomanDetails.w, 3 / 12, ottomanDetails.d, camelFabric, true).name = 'Soft ottoman rounded top';
+  familyOttoman.traverse((part) => { if (part.isMesh) part.userData.tourObstacle = true; });
+  familyLiving.add(familyOttoman);
+  for (const [index, position] of familyLiving.userData.sideTables.entries()) {
+    const table = new THREE.Group();
+    table.name = `Family living textured side table ${index + 1}`;
+    table.position.set(position.x, 0, position.z);
+    table.userData = { ...sideTableGeometry.userData, productSelected: false };
+    table.add(sideTableGeometry.clone(true));
+    table.traverse((part) => { if (part.isMesh) part.userData.tourObstacle = true; });
+    familyLiving.add(table);
+  }
+  const readingLamp = new THREE.Group();
+  readingLamp.name = 'Family living warm reading lamp - wiring review required';
+  readingLamp.position.set(10.8, 20 / 12, livingCenterZ + 5);
+  readingLamp.userData = { productSelected: false, electricianReviewRequired: true, cordRoute: 'Behind sofa to proposed floor outlet, never across a walking route' };
+  cylinder(readingLamp, 0, 0.035, 0, 0.23, 0.07, walnut).name = 'Reading lamp weighted base concept';
+  cylinder(readingLamp, 0, 0.5, 0, 0.025, 0.95, brass).name = 'Reading lamp stem';
+  const shadeMaterial = new THREE.MeshStandardMaterial({ color: '#eee4ce', roughness: 0.9, emissive: '#f6c982', emissiveIntensity: 0.25 });
+  cylinder(readingLamp, 0, 1.02, 0, 0.4, 0.55, shadeMaterial, 0.28).name = 'Warm linen reading shade';
+  const readingLight = new THREE.PointLight('#ffd5a0', 0.65, 6, 2);
+  readingLight.position.y = 1;
+  readingLamp.add(readingLight);
+  readingLamp.traverse((part) => { if (part.isMesh) part.userData.tourDecoration = true; });
+  familyLiving.add(readingLamp);
+
+  const referenceLounge = new THREE.Group();
+  referenceLounge.name = 'Photo-inspired oatmeal L lounge - fit study';
+  referenceLounge.userData = {
+    planningSeats: 5, guestChairs: 1, comfortVerified: false, productSelected: false,
+    main: { x: 10.8166667, z: 18.15, w: 44 / 12, d: 11 },
+    return: { x: 6.65, z: 21.8166667, w: 56 / 12, d: 44 / 12 },
+    rug: { x: 7.8, z: livingCenterZ, w: 9, d: 12 },
+    table: { x: 5.9, z: 16.9, w: 38 / 12, d: 38 / 12, h: 16.5 / 12 },
+    chair: { x: 5.65, z: 11.8, rotation: 0, widthInches: 30 },
+    sideTable: { x: 10.8, z: 11.35 }
+  };
+  scene.add(referenceLounge);
+  const referenceSectional = new THREE.Group();
+  referenceSectional.name = 'Oatmeal L sectional - five cushions plus uncounted corner';
+  referenceSectional.userData = {
+    widthInches: 132, returnInches: 100, depthInches: 44, seatDepthInches: 30,
+    planningSeats: 5, cornerCounted: false, comfortVerified: false, productSelected: false,
+    seats: [[10.2333333, 14.15], [10.2333333, 16.4833333], [10.2333333, 18.8166667],
+      [5.7333333, 21.2333333], [7.9, 21.2333333]]
+  };
+  referenceLounge.add(referenceSectional);
+  const oatmealFabric = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#b9af9d'), roughness: 0.97 });
+  const oatmealCushion = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#d0c7b6'), roughness: 0.98 });
+  for (const { x, z, w, d } of [referenceLounge.userData.main, referenceLounge.userData.return]) {
+    box(referenceSectional, x, 0.0875, z, w - 0.3, 0.175, d - 0.3, walnut, true).name = 'Reference sectional recessed floor plinth';
+    box(referenceSectional, x, 0.65, z, w, 0.95, d, oatmealFabric, true).name = 'Reference sectional upholstered base';
+  }
+  box(referenceSectional, 12.4, 1.8, 18.15, 0.5, 2.4, 11, oatmealFabric, true).name = 'Reference sectional long back';
+  box(referenceSectional, 6.65, 1.8, 23.4, 56 / 12, 2.4, 0.5, oatmealFabric, true).name = 'Reference sectional return back';
+  box(referenceSectional, 10.8166667, 1.8, 23.4, 44 / 12, 2.4, 0.5, oatmealFabric, true).name = 'Reference sectional corner back';
+  box(referenceSectional, 10.8166667, 1.3, 12.8166667, 44 / 12, 1.8, 4 / 12, oatmealFabric, true).name = 'Reference sectional north end arm';
+  box(referenceSectional, 4.4833333, 1.3, 21.8166667, 4 / 12, 1.8, 44 / 12, oatmealFabric, true).name = 'Reference sectional west end arm';
+  for (const [index, [x, z]] of referenceSectional.userData.seats.entries()) {
+    const main = index < 3;
+    const seat = box(referenceSectional, x, 1.35, z, main ? 2.5 : 26 / 12 - 0.04, 0.45, main ? 28 / 12 - 0.04 : 2.5, oatmealCushion, true);
+    seat.name = 'Reference sectional full seat cushion';
+    seat.userData = { planningSeat: index + 1, seatDepthInches: 30, nominalSeatWidthInches: main ? 28 : 26 };
+    box(referenceSectional, main ? 11.8 : x, 2.2, main ? z : 22.8, main ? 0.65 : 26 / 12 - 0.04, 1.3, main ? 28 / 12 - 0.04 : 0.65, oatmealCushion, true).name = 'Reference sectional loose back cushion';
+  }
+  box(referenceSectional, 10.2333333, 1.35, 21.2333333, 2.5, 0.45, 2.5, oatmealCushion, true).name = 'Reference sectional uncounted corner cushion';
+  const accentFabrics = ['#8b8d80', '#b2a58d', '#e0d6c3'].map((color) => new THREE.MeshStandardMaterial({ map: livingWeaveTexture(color), roughness: 0.98 }));
+  for (const [index, [x, z, turn]] of [[11.4, 14.25, 0.15], [11.4, 18.75, -0.18], [5.75, 22.35, 0.12]].entries()) {
+    const pillow = box(referenceSectional, x, 2.05, z, index === 2 ? 1.1 : 0.4, 1.1, index === 2 ? 0.4 : 1.1, accentFabrics[index], true);
+    pillow.name = 'Reference sectional loose accent pillow';
+    pillow.rotation.y = turn;
+  }
+
+  const referenceRugCanvas = document.createElement('canvas');
+  referenceRugCanvas.width = 768;
+  referenceRugCanvas.height = 1024;
+  const rugContext = referenceRugCanvas.getContext('2d');
+  rugContext.fillStyle = '#55595a';
+  rugContext.fillRect(0, 0, 768, 1024);
+  rugContext.strokeStyle = '#c7c1b2';
+  rugContext.lineWidth = 3;
+  rugContext.strokeRect(21, 21, 726, 982);
+  rugContext.lineWidth = 1.5;
+  rugContext.strokeRect(34, 34, 700, 956);
+  for (let row = 0; row < 6; row++) for (let column = 0; column < 5; column++) {
+    const x = 89 + column * 147;
+    const y = 105 + row * 160;
+    rugContext.save();
+    rugContext.translate(x, y);
+    rugContext.globalAlpha = 0.58;
+    rugContext.strokeStyle = '#ded7c7';
+    rugContext.fillStyle = '#c9c0ad';
+    for (let petal = 0; petal < 8; petal++) {
+      rugContext.rotate(Math.PI / 4);
+      rugContext.beginPath();
+      rugContext.ellipse(0, 20, 6, 17, 0, 0, Math.PI * 2);
+      rugContext.fill();
+    }
+    rugContext.beginPath();
+    rugContext.moveTo(0, -55);
+    rugContext.lineTo(48, 0);
+    rugContext.lineTo(0, 55);
+    rugContext.lineTo(-48, 0);
+    rugContext.closePath();
+    rugContext.stroke();
+    rugContext.beginPath();
+    rugContext.arc(0, 0, 8, 0, Math.PI * 2);
+    rugContext.fill();
+    rugContext.restore();
+  }
+  for (let index = 0; index < 14000; index++) {
+    const x = (index * 137 + index % 13 * 19) % 768;
+    const y = (index * 229 + index % 17 * 23) % 1024;
+    rugContext.fillStyle = index % 2 ? '#ded7c714' : '#242b2d18';
+    rugContext.fillRect(x, y, 2, 1);
+  }
+  const referenceRugMap = new THREE.CanvasTexture(referenceRugCanvas);
+  referenceRugMap.colorSpace = THREE.SRGBColorSpace;
+  referenceRugMap.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  const referenceRugDetails = referenceLounge.userData.rug;
+  const referenceRug = new THREE.Mesh(new THREE.PlaneGeometry(referenceRugDetails.w, referenceRugDetails.d), new THREE.MeshStandardMaterial({ map: referenceRugMap, roughness: 1 }));
+  referenceRug.name = 'Reference lounge charcoal and oatmeal patterned rug';
+  referenceRug.rotation.x = -Math.PI / 2;
+  referenceRug.position.set(referenceRugDetails.x, 0.008, referenceRugDetails.z);
+  referenceRug.userData = { tourDecoration: true, walkSurface: true, productSelected: false, nonSlipPadRequired: true };
+  referenceLounge.add(referenceRug);
+  const referenceCoffeeTable = new THREE.Group();
+  referenceCoffeeTable.name = 'Reference lounge 38 inch square oak coffee table';
+  const coffeeDetails = referenceLounge.userData.table;
+  referenceCoffeeTable.position.set(coffeeDetails.x, 0, coffeeDetails.z);
+  referenceCoffeeTable.userData = { ...coffeeDetails, productSelected: false, easedEdgesRequired: true };
+  const referenceOak = cabinetRailFinish.clone();
+  referenceOak.color.set('#b5aa96');
+  referenceOak.roughness = 0.85;
+  box(referenceCoffeeTable, 0, coffeeDetails.h - 0.0625, 0, coffeeDetails.w, 0.125, coffeeDetails.d, referenceOak, true).name = 'Reference square oak tabletop';
+  for (const x of [-1.25, 1.25]) for (const z of [-1.25, 1.25]) box(referenceCoffeeTable, x, 0.625, z, 0.25, 1.25, 0.25, referenceOak, true).name = 'Reference coffee table leg';
+  box(referenceCoffeeTable, 0, 0.35, 0, 2.75, 0.1, 2.75, referenceOak, true).name = 'Reference coffee table low shelf';
+  referenceLounge.add(referenceCoffeeTable);
+  const referenceChair = new THREE.Group();
+  referenceChair.name = 'Reference lounge oatmeal accent chair';
+  referenceChair.add(armchairGeometry.clone(true));
+  const chairDetails = referenceLounge.userData.chair;
+  referenceChair.scale.setScalar(chairDetails.widthInches / armchairGeometry.userData.widthInches);
+  referenceChair.position.set(chairDetails.x, 0, chairDetails.z);
+  referenceChair.rotation.y = chairDetails.rotation;
+  referenceChair.userData = {
+    ...armchairGeometry.userData, widthInches: chairDetails.widthInches,
+    depthInches: armchairGeometry.userData.depthInches * chairDetails.widthInches / armchairGeometry.userData.widthInches,
+    heightInches: armchairGeometry.userData.heightInches * chairDetails.widthInches / armchairGeometry.userData.widthInches,
+    finish: 'Oatmeal reupholstery concept; original normal and roughness maps retained', productSelected: false
+  };
+  const referenceChairFabric = livingWeaveTexture('#d6cdbd');
+  referenceChair.traverse((part) => {
+    if (!part.isMesh || !part.material.name.includes('pillow')) return;
+    part.material = part.material.clone();
+    part.material.map = referenceChairFabric;
+    part.material.color.set('#ffffff');
+    part.material.roughness = 0.98;
+    part.material.needsUpdate = true;
+  });
+  referenceLounge.add(referenceChair);
+  const referenceSideTable = new THREE.Group();
+  referenceSideTable.name = 'Reference lounge textured oak end table';
+  referenceSideTable.position.set(referenceLounge.userData.sideTable.x, 0, referenceLounge.userData.sideTable.z);
+  referenceSideTable.add(sideTableGeometry.clone(true));
+  referenceLounge.add(referenceSideTable);
+  const referenceLamp = readingLamp.clone(true);
+  referenceLamp.name = 'Reference lounge reading lamp - wiring review required';
+  referenceLamp.position.set(referenceLounge.userData.sideTable.x, 20 / 12, referenceLounge.userData.sideTable.z);
+  referenceLounge.add(referenceLamp);
+  referenceLounge.traverse((part) => { if (part.isMesh && !part.userData.tourDecoration) part.userData.tourObstacle = true; });
+
+  const familySectional = new THREE.Group();
+  familySectional.name = 'Deep L-shaped family sectional - five seats plus uncounted corner';
+  familySectional.userData = {
+    widthInches: 144, returnInches: 104, depthInches: 44, seatDepthInches: 30,
+    planningSeats: 5, cornerCounted: false, comfortVerified: false, productSelected: false,
+    seats: [[10.2, livingCenterZ - 1], [10.2, livingCenterZ + 1.6], [10.2, livingCenterZ + 4.3],
+      [5.3, livingCenterZ - 4.2], [7.6, livingCenterZ - 4.2]]
+  };
+  scene.add(familySectional);
+  const familyFabric = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#947453'), roughness: 0.96 });
+  const familyCushion = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#aa8864'), roughness: 0.98 });
+  const familySectionalParts = [
+    [10.5666667, livingCenterZ, 44 / 12, 12],
+    [6.2333333, livingCenterZ - 25 / 6, 5, 44 / 12]
+  ];
+  for (const [x, z, w, d] of familySectionalParts) {
+    box(familySectional, x, 0.65, z, w, 0.95, d, familyFabric, true).name = 'L sectional upholstered base';
+  }
+  box(familySectional, 12.15, 1.8, livingCenterZ, 0.5, 2.4, 12, familyFabric, true).name = 'L sectional main back';
+  box(familySectional, 6.2333333, 1.8, livingCenterZ - 5.75, 5, 2.4, 0.5, familyFabric, true).name = 'L sectional return back';
+  box(familySectional, 10.5666667, 1.8, livingCenterZ - 5.75, 44 / 12, 2.4, 0.5, familyFabric, true).name = 'L sectional corner back';
+  box(familySectional, 10.5666667, 1.3, livingCenterZ + 5.8, 44 / 12, 1.8, 0.4, familyFabric, true).name = 'L sectional end arm';
+  box(familySectional, 3.9333333, 1.3, livingCenterZ - 25 / 6, 0.4, 1.8, 44 / 12, familyFabric, true).name = 'L sectional return arm';
+  for (const [index, [x, z]] of familySectional.userData.seats.entries()) {
+    const main = index < 3;
+    box(familySectional, x, 1.35, z, main ? 2.5 : 2.25, 0.45, 2.5, familyCushion, true).name = 'L sectional full seating cushion';
+    box(familySectional, main ? 11.6 : x, 2.2, main ? z : livingCenterZ - 5.2, main ? 0.65 : 2.25, 1.3, main ? 2.5 : 0.65, familyCushion, true).name = 'L sectional loose back cushion';
+  }
+  box(familySectional, 10.2, 1.35, livingCenterZ - 4.2, 2.5, 0.45, 2.5, familyCushion, true).name = 'L sectional uncounted corner cushion';
+  familySectional.traverse((part) => { if (part.isMesh) part.userData.tourObstacle = true; });
+
   const livingLayouts = [
     {
-      id: 'double-chaise', title: 'F / Double-chaise sectional', recommended: true,
-      note: 'Double-chaise sectional plus two IKEA STRANDMON wing chairs in the window corners beside the media built-ins, angled inward. No ottomans or tables. Chair sizes follow IKEA; upholstery and occupied access remain to be confirmed.',
+      id: 'reference-lounge', title: 'J / Oatmeal L lounge', recommended: true, referenceLounge: true,
+      note: 'Photo-inspired 132 x 100 in oatmeal L with five cushions plus an uncounted corner, one cream accent chair, charcoal patterned rug and 38 in square oak table. One chair replaces the photographed pair to preserve room access. Table gaps target 18 in to both seating runs; physical comfort, cabinet operation and fireplace clearances remain unverified.',
+      sofa: null, chairs: [null, null]
+    },
+    {
+      id: 'family-sectional', title: 'I / Earlier deep family sectional', familyZone: true, familySectional: true,
+      note: 'Deep 144 x 104 in L-shaped sectional concept: five full seating positions plus an uncounted corner, 44 in overall depth and a 30 in seat-depth target. Warm brown upholstery, movable soft ottoman and no separate chairs. Main sofa-to-ottoman gap 16 in; 39.6 in around both ends and about 28.2 in at the return-to-cabinet pinch. These are static model gaps, not occupied access or fireplace approval. No product selected; family sit-test, cushion support and upholstery care remain essential.',
+      sofa: null, chairs: [null, null]
+    },
+    {
+      id: 'family-five', title: 'H / Earlier sofa and two chairs', familyZone: true,
+      note: 'Five planning positions: three on the 86 in textured sofa plus two inward-facing armchairs. A 9 x 12 ft rug, soft 48 x 32 in ottoman, two wood side tables and warm reading lamp form one family zone. Sofa-to-ottoman gap targets 16 in; circulation stays behind the sofa. Comfort, upholstery, fireplace clearances and lamp wiring need review.',
+      downloadedSofa: [10.8, livingCenterZ, -Math.PI / 2], sofa: null, chairs: [null, null],
+      armchairs: [[6.45, livingCenterZ - 5.475, Math.PI / 4], [6.45, livingCenterZ + 5.475, 3 * Math.PI / 4]]
+    },
+    {
+      id: 'real-sofa', title: 'G / Earlier textured product sofa',
+      note: 'Downloaded Wayfair Glam velvet sofa, 86 in display width, with two textured armchairs. Earlier corner-chair poses conflict with the new wall-length cabinets; comparison only, not a usable layout. Licensed product visualization, not a comfort-tested selection or manufacturer CAD. No sofa-bed opening is modeled.',
+      downloadedSofa: [11.25, livingCenterZ, -Math.PI / 2], sofa: null, chairs: [null, null],
+      armchairs: [[2.7, 10.45, Math.PI / 3], [2.7, 2 * livingCenterZ - 10.45, 2 * Math.PI / 3]]
+    },
+    {
+      id: 'double-chaise', title: 'F / Earlier double-chaise sectional',
+      note: 'Double-chaise sectional plus two textured Poly Haven armchairs in the window corners, angled inward. Earlier corner-chair poses conflict with the new wall-length cabinets; comparison only, not a usable layout. Uniformly scaled to 32.25 in wide; generic visual assets, not verified product sizes. Occupied access and heat clearances remain unverified.',
       sectional: [11.25, livingCenterZ, -Math.PI / 2], sofa: null, chairs: [null, null],
-      strandmon: [[2.7, 10.45, Math.PI / 3], [2.7, 2 * livingCenterZ - 10.45, 2 * Math.PI / 3]]
+      armchairs: [[2.7, 10.45, Math.PI / 3], [2.7, 2 * livingCenterZ - 10.45, 2 * Math.PI / 3]]
     },
     {
       id: 'centered', title: 'E / Earlier corner-chair layout',
-      note: 'Move the dining-side chair toward the window corner with a matching ottoman. Keep the stair-side reading chair, its ottoman and book, centered sofa and flush closed media cabinets fixed.',
+      note: 'Earlier corner-chair comparison: the stair-side reading chair conflicts with the new wall-length cabinet. Original furniture poses are preserved for comparison only, not a usable layout.',
       sofa: [11.6, livingCenterZ, -Math.PI / 2], chairs: [[3.6, 10.9, Math.PI / 3], [2.9, livingFeatureWall.wallEndZ - 2.175, 2 * Math.PI / 3]],
     },
     {
@@ -1342,10 +1771,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   }
 
-  for (const [x, width] of [[kitchenSinkX - 3.525, 4.05], [kitchenSinkX + 4.525, 2.05]]) box(kitchen, x, 1.44, kitchenSinkRunZ, width, 2.85, 2, cabinetFinish);
-  for (const x of [kitchenSinkX - 3.525, kitchenSinkX + 3.525]) box(kitchen, x, 2.96, kitchenSinkRunZ, 4.05, 0.18, 2.05, countertop, true).name = 'Top kitchen quartz counter';
+  for (const [x, width] of [[kitchenSinkX - 3.4, 3.8], [kitchenSinkX + 4.4, 1.8]]) box(kitchen, x, 1.44, kitchenSinkRunZ, width, 2.85, 2, cabinetFinish);
+  for (const x of [kitchenSinkX - 3.4, kitchenSinkX + 3.4]) box(kitchen, x, 2.96, kitchenSinkRunZ, 3.8, 0.18, 2.05, countertop, true).name = 'Top kitchen quartz counter';
   box(kitchen, kitchenSinkX, 1.1, kitchenSinkRunZ, 3, 2, 2, cabinetFinish);
-  for (const [x, width] of [[kitchenSinkX - 4.25, 2.45], [kitchenSinkX + 4.525, 1.9]]) drawerFront(x, kitchenSinkRunZ + 1.03, width);
+  for (const [x, width] of [[kitchenSinkX - 4.125, 2.2], [kitchenSinkX + 4.4, 1.65]]) drawerFront(x, kitchenSinkRunZ + 1.03, width);
   const trash = new THREE.Group();
   trash.name = 'Pull-out trash left of sink';
   trash.position.set(kitchenSinkX - 2.25, 0, kitchenSinkRunZ);
@@ -1502,6 +1931,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const cooktopSideDrawerOffset = 1.5 + (cooktopSideBayWidth - cooktopEndFillerWidth) / 2;
   const cooktopCabinetry = new THREE.Group();
   cooktopCabinetry.name = 'Extended cooktop base cabinetry';
+  cooktopCabinetry.position.x = cookingWallShiftX;
   cooktopCabinetry.userData = { widthInches: cooktopRunWidth * 12, sideDrawerWidthInches: cooktopSideDrawerWidth * 12, endFillerWidthInches: cooktopEndFillerWidth * 12, provisional: true };
   kitchen.add(cooktopCabinetry);
   box(cooktopCabinetry, 37, 1.44, cooktopCenterZ, 2, 2.85, cooktopRunWidth, cabinetFinish).name = 'Cooktop base cabinet run';
@@ -1510,17 +1940,18 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     drawerFront(36, cooktopCenterZ + side * cooktopSideDrawerOffset, cooktopSideDrawerWidth, -Math.PI / 2, cooktopCabinetry);
     box(cooktopCabinetry, 35.98, 1.44, cooktopCenterZ + side * (cooktopRunWidth - cooktopEndFillerWidth) / 2, 0.08, 2.85, cooktopEndFillerWidth, cabinetFinish).name = 'Cooktop casing-side scribe filler';
   }
-  const cooktop = box(kitchen, 37, 3.075, cooktopCenterZ, 1.75, 0.05, 3, black, true);
+  const cooktop = box(kitchen, 37 + cookingWallShiftX, 3.075, cooktopCenterZ, 1.75, 0.05, 3, black, true);
   cooktop.name = '36 inch induction cooktop';
   for (const [x, z] of [[36.58, cooktopCenterZ - 0.75], [37.42, cooktopCenterZ - 0.75], [36.58, cooktopCenterZ + 0.75], [37.42, cooktopCenterZ + 0.75], [37, cooktopCenterZ]]) {
     const ring = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.018, 8, 32), steel);
     ring.rotation.x = Math.PI / 2;
-    ring.position.set(x, 3.12, z);
+    ring.position.set(x + cookingWallShiftX, 3.12, z);
     kitchen.add(ring);
   }
   drawerFront(36, cooktopCenterZ, 2.7, -Math.PI / 2, cooktopCabinetry);
   const cooktopHood = new THREE.Group();
   cooktopHood.name = 'Kitchen cooktop hood';
+  cooktopHood.position.x = cookingWallShiftX;
   cooktopHood.userData = { style: 'Warm-white plaster hood joined to flanking Shaker cabinets, tapered in depth', widthInches: 48, topWidthInches: 48, concealedInsertAllowanceInches: 46, provisional: true };
   kitchen.add(cooktopHood);
   const hoodWidth = 48 / 12;
@@ -1554,6 +1985,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(cooktopHood, 36.65, hoodBottom - 0.045, cooktopCenterZ, 0.12, 0.025, 2.6, light).name = 'Cooktop hood task-light strip';
   const cooktopUppers = new THREE.Group();
   cooktopUppers.name = 'Hood-flanking white-oak upper cabinets';
+  cooktopUppers.position.x = cookingWallShiftX;
   kitchen.add(cooktopUppers);
   const cooktopUpperWidth = (cooktopRunWidth - hoodWidth) / 2 - cooktopEndFillerWidth;
   const cooktopUpperDepth = 1;
@@ -1579,6 +2011,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   const cookingDetails = new THREE.Group();
   cookingDetails.name = 'Cooktop finishing details';
+  cookingDetails.position.x = cookingWallShiftX;
   kitchen.add(cookingDetails);
 
   const cuttingBoard = new THREE.Group();
@@ -1626,10 +2059,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const columnWidth = 30 / 12;
   const columnHeight = 84 / 12;
   const columnPanel = 0.75 / 12;
-  const bottomRunLeft = 29.6875;
-  const bottomRunRight = 37.8;
-  const endStorageWidth = 6 / 12;
-  const bottomRunCabinetLeft = bottomRunLeft - endStorageWidth;
+  const bottomRunLeft = 29.1875;
+  const bottomRunRight = 37.3;
+  const bottomRunCabinetLeft = bottomRunLeft;
   const bottomRunCenterX = (bottomRunCabinetLeft + bottomRunRight) / 2;
   const bottomRunWidth = bottomRunRight - bottomRunCabinetLeft;
   const wallFillerWidth = 2.85 / 12;
@@ -1641,7 +2073,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const pantryCenterX = (pantryLeft + pantryRight) / 2;
   const upperStorageBottom = columnHeight + 0.15;
   const upperStorageTop = ceilingHeight - 0.15;
-  bottomRun.userData = { layout: 'Wall-side freezer separated from stair-side fridge by steam-oven storage tower', pantryWidthInches: pantryWidth * 12, endStorageWidthInches: endStorageWidth * 12, wallFillerWidthInches: wallFillerWidth * 12, ceilingHeight, provisional: true };
+  bottomRun.userData = { layout: 'Wall-side freezer separated from stair-side fridge by steam-oven storage tower', pantryWidthInches: pantryWidth * 12, wallFillerWidthInches: wallFillerWidth * 12, ceilingHeight, provisional: true };
   const refrigerationPantry = new THREE.Group();
   refrigerationPantry.name = 'Steam oven and pantry tower';
   refrigerationPantry.position.x = pantryCenterX;
@@ -1649,20 +2081,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const pantryDepth = 25 / 12;
   const pantryDoorHeight = upperStorageBottom - 0.3;
   const pantryDoorCenterY = (upperStorageBottom + 0.3) / 2;
-  const endStorage = new THREE.Group();
-  endStorage.name = 'Stair-side narrow pull-out cabinet';
-  endStorage.position.x = bottomRunCabinetLeft + endStorageWidth / 2;
-  endStorage.userData = { widthInches: endStorageWidth * 12, depthInches: 25, pullOut: true, provisional: true };
-  bottomRun.add(endStorage);
-  box(endStorage, 0, pantryDoorCenterY, 26.725 - pantryDepth / 2, endStorageWidth, pantryDoorHeight, pantryDepth, cabinetFinish).name = 'Narrow pull-out carcass';
-  box(endStorage, 0, 0.15, 25.8, endStorageWidth - 0.1, 0.3, 1.7, black).name = 'Narrow pull-out recessed toe-kick';
-  const endStorageFront = shakerFront(endStorage, 0, pantryDoorCenterY, 26.725 - pantryDepth - 0.04, endStorageWidth - 0.04, pantryDoorHeight - 0.06, Math.PI);
-  cabinetPull(endStorageFront, 0, 3.9 - pantryDoorCenterY, 0.09, 2.6, true);
-  const endUpperHeight = upperStorageTop - upperStorageBottom;
-  const endUpperCenterY = (upperStorageTop + upperStorageBottom) / 2;
-  box(endStorage, 0, endUpperCenterY, 26.725 - pantryDepth / 2, endStorageWidth, endUpperHeight, pantryDepth, cabinetFinish).name = 'Narrow end overhead cabinet';
-  const endUpperFront = shakerFront(endStorage, 0, endUpperCenterY, 26.725 - pantryDepth - 0.04, endStorageWidth - 0.04, endUpperHeight - 0.06, Math.PI);
-  cabinetPull(endUpperFront, 0, upperStorageBottom + 0.45 - endUpperCenterY, 0.09, 0.55, true);
   const steamOvenBottom = 3;
   const steamOvenTop = 5;
   const towerSideThickness = 0.75 / 12;
@@ -1718,9 +2136,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   }
   box(bottomRun, bottomRunCenterX, upperStorageTop + 0.075, 25.65, bottomRunWidth, 0.15, 2.15, cabinetRailFinish).name = 'Continuous refrigeration cabinet cornice';
-  const freezerDoor = new THREE.Group();
-  freezerDoor.name = 'Freezer conceptual hinged door';
-  freezerDoor.userData = { openAngleDegrees: 0, conceptualHinge: true };
   for (const [name, model, x, handleX] of [
     ['Column freezer', 'RS3084FLJK1', freezerRight - columnWidth / 2, 1.05],
     ['Column fridge', 'RS3084SRHK1', fridgeLeft + columnWidth / 2, -1.05]
@@ -1732,19 +2147,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     appliance.rotation.y = Math.PI;
     kitchen.add(appliance);
     box(appliance, 0, columnHeight / 2, 0, 29.75 / 12, columnHeight, 2, steel).name = 'Fisher & Paykel column body';
-    let doorParent = appliance;
-    let hingeX = 0;
-    let hingeZ = 0;
-    if (name === 'Column freezer') {
-      // Approximate an articulating hinge ahead of the panel; this is not manufacturer hinge CAD.
-      hingeX = -29.75 / 24;
-      hingeZ = 1.13;
-      freezerDoor.position.set(hingeX, 0, hingeZ);
-      appliance.add(freezerDoor);
-      doorParent = freezerDoor;
-    }
-    box(doorParent, -hingeX, (columnHeight + 4 / 12) / 2, 1 + 0.75 / 24 - hingeZ, 29.75 / 12, columnHeight - 4 / 12, 0.75 / 12, steel).name = 'Column stainless door panel';
-    box(doorParent, handleX - hingeX, 3.9, 1.13 - hingeZ, 0.065, 2.6, 0.1, black).name = 'Column tower-facing handle';
+    // Approximate an articulating hinge ahead of each panel; these are not manufacturer hinge CAD.
+    const hingeX = (name === 'Column freezer' ? -1 : 1) * 29.75 / 24;
+    const hingeZ = 1.13;
+    const door = new THREE.Group();
+    door.name = `${name} conceptual hinged door`;
+    door.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 115, openRotationSign: name === 'Column freezer' ? -1 : 1 }, conceptualHinge: true };
+    door.position.set(hingeX, 0, hingeZ);
+    appliance.add(door);
+    box(door, -hingeX, (columnHeight + 4 / 12) / 2, 1 + 0.75 / 24 - hingeZ, 29.75 / 12, columnHeight - 4 / 12, 0.75 / 12, steel).name = 'Column stainless door panel';
+    box(door, handleX - hingeX, 3.9, 1.13 - hingeZ, 0.065, 2.6, 0.1, black).name = 'Column tower-facing handle';
     box(appliance, 0, 2 / 12, 1.01, 29.5 / 12, 4 / 12, 0.04, black).name = 'Column ventilation toe-kick';
     for (const y of [0.08, 0.16, 0.24]) box(appliance, 0, y, 1.035, 29 / 12, 0.025, 0.015, steel).name = 'Column ventilation grille';
   }
@@ -1765,6 +2177,21 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   for (const offset of [-1, 0, 1]) drawerFront(32.2, 18.5 + offset * islandCabinetLength / 3, islandCabinetLength / 3 - 0.08, Math.PI / 2, island);
   const stoolFabric = mat('#a17c57', 0.98);
+  const fruitBowl = new THREE.Group();
+  fruitBowl.name = 'Everyday island fruit bowl';
+  fruitBowl.position.set(30.65, 3.05, 16);
+  fruitBowl.userData = { removable: true, diameterInches: 13.2, location: 'Main kitchen island, prep-side end' };
+  island.add(fruitBowl);
+  cylinder(fruitBowl, 0, 0.025, 0, 0.3, 0.05, cream);
+  for (let ring = 0; ring < 5; ring++) {
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.32 + ring * 0.05, 0.025, 8, 40), cream);
+    rim.rotation.x = Math.PI / 2;
+    rim.position.y = 0.05 + ring * 0.045;
+    fruitBowl.add(rim);
+  }
+  for (const [x, z, color] of [[-0.19, -0.15, '#b64732'], [0.19, -0.14, '#85a34c'], [0, 0.2, '#e49a37']]) {
+    addStorageFruit(fruitBowl, x, 0.23, z, color);
+  }
   stoolFabric.name = 'Brown stool upholstery';
   const stoolWood = mat('#98704e', 0.6);
   for (const offset of [-1.5, -0.5, 0.5, 1.5]) {
@@ -1797,6 +2224,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   rest.name = 'Remaining ground-floor furnishings';
   shell.add(rest);
   const tile = mat('#c5c2b6');
+  const mudTileFinish = mat('#ffffff', 0.82);
+  mudTileFinish.name = 'Honed warm limestone-look porcelain';
+  mudTileFinish.map = quartzTexture('#ded8cd', 'rgba(151, 143, 129, 0.16)');
+  const mudGroutFinish = mat('#d8d1c5', 0.95);
+  mudGroutFinish.name = 'Matching warm stone grout';
   const linen = mat('#b2b5a4');
 
   function furnishing(name, x, z, rotation = 0, elevation = 0) {
@@ -1808,11 +2240,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     return group;
   }
 
-  function tiledFloor(name, x, z, width, depth, material = tile) {
+  function tiledFloor(name, x, z, width, depth, material = tile, { tileWidth = 2, tileDepth = 2, groutWidth = 0.015, groutMaterial = cream } = {}) {
     const surface = box(rest, x + width / 2, 0.02, z + depth / 2, width, 0.03, depth, material);
     surface.name = name;
-    for (let col = 2; col < width; col += 2) box(rest, x + col, 0.038, z + depth / 2, 0.015, 0.005, depth, cream);
-    for (let row = 2; row < depth; row += 2) box(rest, x + width / 2, 0.038, z + row, width, 0.005, 0.015, cream);
+    surface.userData = { tileWidthInches: tileWidth * 12, tileDepthInches: tileDepth * 12, groutWidthInches: groutWidth * 12 };
+    for (let col = tileWidth; col < width; col += tileWidth) box(rest, x + col, 0.038, z + depth / 2, groutWidth, 0.005, depth, groutMaterial).name = `${name} grout`;
+    for (let row = tileDepth; row < depth; row += tileDepth) box(rest, x + width / 2, 0.038, z + row, width, 0.005, groutWidth, groutMaterial).name = `${name} grout`;
   }
 
   const stairs = furnishing('U-shaped hall staircase', stairOpening.x + stairOpening.width, stairOpening.z, stairOpening.rotation);
@@ -1845,6 +2278,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     return start >= stairRun ? landingHeight - 0.85 : start * (landingHeight - stairRise) / stairRun - 0.13;
   }
 
+  const stairStepGlow = new THREE.MeshStandardMaterial({ color: '#fff0d7', emissive: '#ffd5a0', emissiveIntensity: 0, roughness: 0.6 });
   for (const upper of [false, true]) {
     const flight = new THREE.Group();
     flight.name = upper ? 'Upper stair flight' : 'Lower stair flight';
@@ -1879,6 +2313,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       box(flight, x, height - 0.05, centerZ, stairGoing, 0.1, flightWidth, oak).name = 'Upstairs oak tread';
       box(flight, x - direction * (stairGoing / 2 - 0.02), height + 0.003, centerZ, 0.04, 0.006, flightWidth, walnut).name = 'Stair tread nosing';
       box(flight, x - direction * (stairGoing / 2 - 0.04), height - (stairRise + 0.1) / 2, centerZ, 0.08, stairRise - 0.1, flightWidth, cream).name = 'Stair riser';
+      const led = box(flight, x - direction * (stairGoing / 2 + 0.0125), height - 0.14, centerZ, 0.025, 0.04, flightWidth - 0.25, stairStepGlow);
+      led.name = 'Interior stair LED strip';
+      led.userData = { colorTemperatureKelvin: 2700, recessedDiffuser: true, provisional: true };
+      const treadLight = new THREE.PointLight('#ffd5a0', 0, 2, 2);
+      treadLight.name = 'Interior stair LED tread wash';
+      treadLight.position.set(x - direction * (stairGoing / 2 + 0.15), height - 0.18, centerZ);
+      flight.add(treadLight);
     }
     const endX = startX + direction * stairRun;
     const endHeight = baseHeight + landingHeight;
@@ -1944,33 +2385,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   const stairBaseTrim = new THREE.Group();
   stairBaseTrim.name = 'Under-stair base trim';
-  stairBaseTrim.userData = { heightInches: 8, thicknessInches: 0.75, shoeRadiusInches: 0.75 };
+  stairBaseTrim.userData = { heightInches: 8, thicknessInches: 0.75 };
   stairs.add(stairBaseTrim);
   const stairBaseTrimEndX = stairOpening.width;
   box(stairBaseTrim, (stairGoing + stairBaseTrimEndX) / 2, 0.005 + 4 / 12, -0.75 / 24, stairBaseTrimEndX - stairGoing, 8 / 12, 0.75 / 12, windowTrim).name = 'Under-stair white baseboard';
-  const stairShoeProfile = new THREE.Shape();
-  stairShoeProfile.moveTo(0, 0);
-  stairShoeProfile.lineTo(0.75 / 12, 0);
-  stairShoeProfile.absarc(0, 0, 0.75 / 12, 0, Math.PI / 2);
-  stairShoeProfile.closePath();
-  const stairShoe = new THREE.Mesh(new THREE.ExtrudeGeometry(stairShoeProfile, { depth: stairBaseTrimEndX - stairGoing, bevelEnabled: false, curveSegments: 8 }), windowTrim);
-  stairShoe.name = 'Under-stair quarter-round shoe';
-  stairShoe.rotation.y = Math.PI / 2;
-  stairShoe.position.set(stairGoing, 0.005, -0.75 / 12);
-  stairBaseTrim.add(stairShoe);
   const firstStepTrimHeight = Math.min(8 / 12, stairRise - 0.1);
   box(stairBaseTrim, stairGoing / 2, 0.005 + firstStepTrimHeight / 2, -0.75 / 24, stairGoing, firstStepTrimHeight, 0.75 / 12, windowTrim).name = 'Bottom-step baseboard extension';
-  const firstStepShoe = new THREE.Mesh(new THREE.ExtrudeGeometry(stairShoeProfile, { depth: stairGoing, bevelEnabled: false, curveSegments: 8 }), windowTrim);
-  firstStepShoe.name = 'Bottom-step quarter-round extension';
-  firstStepShoe.rotation.y = Math.PI / 2;
-  firstStepShoe.position.set(0, 0.005, -0.75 / 12);
-  stairBaseTrim.add(firstStepShoe);
   box(stairBaseTrim, -0.75 / 24, 0.005 + firstStepTrimHeight / 2, (stairWidth - 0.75 / 12) / 2, 0.75 / 12, firstStepTrimHeight, stairWidth + 0.75 / 12, windowTrim).name = 'Bottom-step front trim return';
   box(stairBaseTrim, landingEndX + 0.75 / 24, 0.005 + 4 / 12, (stairBookcaseDepth - 0.75 / 12) / 2, 0.75 / 12, 8 / 12, stairBookcaseDepth + 0.75 / 12, windowTrim).name = 'Bookcase end baseboard return';
-  const endShoe = new THREE.Mesh(new THREE.ExtrudeGeometry(stairShoeProfile, { depth: stairBookcaseDepth + 0.75 / 12, bevelEnabled: false, curveSegments: 8 }), windowTrim);
-  endShoe.name = 'Bookcase end quarter-round return';
-  endShoe.position.set(landingEndX + 0.75 / 12, 0.005, -0.75 / 12);
-  stairBaseTrim.add(endShoe);
   const landingGuardZ = -0.08;
   stairBeam('Turning landing side handrail', [stairRun, landingHeight + 3, landingGuardZ], [landingEndX, landingHeight + 3, landingGuardZ], 0.12, 0.12, oak);
   for (let rail = 1; rail <= 8; rail++) {
@@ -2034,7 +2456,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   const prep = furnishing('Prep kitchen cabinetry', 0, 0);
-  for (const [x, width] of [[prepSinkX - 3.775, 4.55], [prepSinkX + 3.225, 3.45]]) cabinet(prep, x, prepCounterZ, width);
+  cabinet(prep, prepSinkX - 4.025, prepCounterZ, 5.05);
+  cabinet(prep, prepSinkX + 3.975, prepCounterZ, 1.95);
+  const prepDishwasher = furnishing('Prep 18 inch integrated dishwasher', prepSinkX + 2.25, prepCounterZ);
+  prepDishwasher.userData = { nominalWidthInches: 18, bayDepthInches: 24, panelReady: true, modelSelected: false, installationVerified: false, provisional: true };
+  box(prepDishwasher, 0, 1.55, 0, 1.46, 2.65, 1.92, steel).name = 'Prep dishwasher appliance body';
+  const prepDishwasherFront = shakerFront(prepDishwasher, 0, 1.525, 1.04, 1.46, 2.65);
+  prepDishwasherFront.name = 'Prep dishwasher integrated Shaker door';
+  cabinetPull(prepDishwasherFront, 0, 0.95, 0.09, 1);
+  box(prepDishwasher, 0, 0.15, 0.97, 1.4, 0.16, 0.08, black).name = 'Prep dishwasher recessed toe-kick';
+  box(prep, prepSinkX + 2.22, 2.97, prepCounterZ, 1.5, 0.14, 2.05, countertop).name = 'Prep quartz counter over dishwasher';
   const prepExtension = furnishing('Prep counter extension with six drawers', 53.775, prepCounterZ);
   prepExtension.userData = { widthInches: 34.2, depthInches: 24, drawerBanks: 2, drawers: 6, provisional: true };
   box(prepExtension, 0, 1.475, 0, 2.85, 2.85, 2, cabinetFinish).name = 'Prep extension cabinet carcass';
@@ -2060,12 +2491,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   cylinder(prepSink, 0, 3.55, -0.88, 0.045, 1.16, steel).name = 'Prep sink faucet stem';
   box(prepSink, 0, 4.08, -0.57, 0.09, 0.09, 0.64, steel, true).name = 'Prep sink faucet spout';
   cylinder(prepSink, 0, 3.98, -0.28, 0.045, 0.2, steel).name = 'Prep sink faucet outlet';
-  box(prep, 48.275, 3.45, kitchenWindowWallZ + 0.22, 13.85, 0.82, 0.08, countertop).name = 'Prep quartz backsplash';
-  for (const [index, x] of prepWindowCenters.entries()) {
-    windowFrame(`Prep counter window ${index + 1}`, x, kitchenWindowWallZ, prepWindowWidth, prepWindowHeight, prepWindowSill, 0, rest);
+  box(prep, 48.025, 3.45, kitchenWindowWallZ + 0.22, 14.35, 0.82, 0.08, countertop).name = 'Prep quartz backsplash';
+  for (const x of prepWindowCenters) {
+    windowFrame('Prep sink picture window', x, kitchenWindowWallZ, prepWindowWidth, prepWindowHeight, prepWindowSill, 0, rest, 1, { picture: true });
   }
   windowFrame('Prep end-wall window', 55.5, prepEndWindowZ, prepEndWindowWidth, prepWindowHeight, prepWindowSill, -Math.PI / 2, rest);
-  const prepTower = furnishing('Prep microwave and wall oven tower', 39.875, kitchenWindowWallZ + 0.25 + 25 / 24);
+  for (const { name, x, z, width, height, sill, sillAboveFloor } of garageClerestories) {
+    const frame = windowFrame(name, x, z, width, height, sill, -Math.PI / 2, rest, 1, { picture: true });
+    Object.assign(frame.userData, { room: 'Garage', sillAboveFloorInches: sillAboveFloor * 12, structureVerified: false });
+  }
+  const prepTower = furnishing('Prep microwave and wall oven tower', 39.375, kitchenWindowWallZ + 0.25 + 25 / 24);
   const prepTowerWidth = 33 / 12;
   const prepTowerDepth = 25 / 12;
   const prepTowerSide = 0.75 / 12;
@@ -2104,8 +2539,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const blenderGlass = new THREE.MeshStandardMaterial({ color: '#d8e5df', transparent: true, opacity: 0.45, roughness: 0.15, depthWrite: false });
   const mixerPaint = mat('#ded8c9', 0.35);
   const prepApplianceSpecs = [
-    ['Prep stand mixer', 41.65 + 12.6 / 24, 12.6, 16.8, 16.8],
-    ['Breville Super Q blender', 41.65 + (12.6 + 2 + 8.1 / 2) / 12, 8.1, 10.5, 18.1],
+    ['Prep stand mixer', 50.3 + 12.6 / 24, 12.6, 16.8, 16.8],
+    ['Breville Super Q blender', 50.3 + (12.6 + 2 + 8.1 / 2) / 12, 8.1, 10.5, 18.1],
     ['Prep rice cooker', 52.858333333333334, 12, 14.4, 12.6],
     ['Prep Ninja air fryer', 54.225, 16.8, 15.6, 13.2]
   ];
@@ -2151,9 +2586,17 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   }
 
-  const prepShelfStart = 38 + 0.175;
+  function addStorageFruit(parent, x, y, z, color) {
+    const fruit = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 12), mat(color));
+    fruit.name = 'Room-temperature whole fruit';
+    fruit.position.set(x, y, z);
+    parent.add(fruit);
+    cylinder(parent, x, y + 0.15, z, 0.012, 0.06, oak).name = 'Fruit stem';
+  }
+
+  const prepShelfStart = 37.5 + 0.175;
   const prepShelfEnd = 55.5 - 0.175;
-  const prepShelves = furnishing('Prep open pantry shelves', (prepShelfStart + prepShelfEnd) / 2, 14.15);
+  const prepShelves = furnishing('Prep open pantry shelves', (prepShelfStart + prepShelfEnd) / 2, 14.325);
   const prepShelfWidth = prepShelfEnd - prepShelfStart;
   const prepShelfDepth = 1;
   const prepShelfThickness = 0.75 / 12;
@@ -2180,7 +2623,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const prepCleaningRight = prepShelfStart + (prepShelfWidth - prepShelfThickness) / prepShelfBays;
   const prepCleaningWidth = prepCleaningRight - prepCleaningLeft;
   const prepCleaningDepth = prepShelfDepth;
-  const prepCleaningRearZ = 14.65;
+  const prepCleaningRearZ = 14.825;
   const cleaningStation = furnishing('Prep cleaning station', (prepCleaningLeft + prepCleaningRight) / 2, prepCleaningRearZ - prepCleaningDepth / 2);
   cleaningStation.userData = { convertedPantryBay: 1, widthInches: prepCleaningWidth * 12, clearWidthInches: (prepCleaningWidth - 2 * prepShelfThickness) * 12, depthInches: 12, tallOpeningHeightInches: (6.2 - prepShelfThickness / 2) * 12, upperShelfLevels: 2, doors: false, equipmentSelected: false, provisional: true };
   for (const side of [-1, 1]) {
@@ -2245,6 +2688,38 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       supplies.name = `Pantry supplies bay ${bay + 1} level ${level + 1}`;
       supplies.position.set(-prepShelfWidth / 2 + prepShelfThickness / 2 + (bay + 0.5) * bayWidth, prepShelfLevels[level] + prepShelfThickness / 2, 0);
       pantryContents.add(supplies);
+      if (bay === 1 && level === 2) {
+        const breadBox = new THREE.Group();
+        breadBox.name = 'Removable prep pantry bread box';
+        breadBox.userData = { purchasedSeparately: true, envelopeInches: [18, 10, 9], pantryBay: 2, ventilation: 'Rear slots; select a food-safe bread container' };
+        supplies.add(breadBox);
+        box(breadBox, 0, 0.025, 0, 1.5, 0.05, 10 / 12, oak).name = 'Bread box base';
+        for (const side of [-1, 1]) box(breadBox, side * 0.725, 0.375, 0, 0.05, 0.75, 10 / 12, oak).name = 'Bread box side';
+        box(breadBox, 0, 0.725, 0, 1.5, 0.05, 10 / 12, oak).name = 'Bread box lid';
+        box(breadBox, 0, 0.375, -0.395, 1.4, 0.65, 0.04, cream).name = 'Bread box lift-up front';
+        box(breadBox, 0, 0.18, -0.44, 0.35, 0.045, 0.06, brass).name = 'Bread box handle';
+        for (let slat = 0; slat < 5; slat++) box(breadBox, 0, 0.09 + slat * 0.14, 0.395, 1.4, 0.09, 0.04, oak).name = 'Bread box ventilated back';
+        continue;
+      }
+      if (bay === 1 && level === 1) {
+        for (const [index, x] of [-0.77, 0.77].entries()) {
+          const basket = new THREE.Group();
+          basket.name = 'Removable prep produce basket';
+          basket.position.x = x;
+          basket.userData = { purchasedSeparately: true, envelopeInches: [16, 10, 5], pantryBay: 2, contents: index === 0 ? 'Apples' : 'Oranges', ventilation: 'Open slatted sides; no cabinet door' };
+          supplies.add(basket);
+          box(basket, 0, 0.025, 0, 16 / 12, 0.05, 10 / 12, pantryWicker).name = 'Produce basket base';
+          for (const side of [-1, 1]) {
+            for (let row = 0; row < 3; row++) {
+              box(basket, 0, 0.1 + row * 0.13, side * 0.395, 16 / 12, 0.045, 0.04, pantryWicker).name = 'Produce basket open front slat';
+              box(basket, side * 0.645, 0.1 + row * 0.13, 0, 0.04, 0.045, 10 / 12, pantryWicker).name = 'Produce basket open side slat';
+            }
+            for (const end of [-1, 1]) box(basket, side * 0.645, 0.23, end * 0.395, 0.04, 0.37, 0.04, oak).name = 'Produce basket corner';
+          }
+          for (const dx of [-0.38, 0, 0.38]) for (const dz of [-0.18, 0.18]) addStorageFruit(basket, dx, 0.19, dz, index === 0 ? '#b64732' : '#e49a37');
+        }
+        continue;
+      }
       const style = (bay + level) % 4;
       if (style === 0) {
         for (const x of [-0.74, 0.74]) {
@@ -2288,47 +2763,90 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   }
 
-  for (const storage of [prepShelves, cleaningStation, robotDock]) storage.position.z -= 0.5;
-
-  tiledFloor('Mudroom tile', 38, 14.5, 7.4, 12.4);
-  const mudCaseFinish = mat('#eee8dc', 0.75);
-  mudCaseFinish.name = 'Warm ivory mudroom casework';
-  const mudBackingFinish = mat('#ded6c8', 0.85);
-  mudBackingFinish.name = 'Soft putty mudroom backing';
-  const mudBinFinish = mat('#c9b89d', 0.95);
-  mudBinFinish.name = 'Oatmeal fabric mudroom containers';
-  const mudBench = furnishing('Five-cubby mudroom bench', 44.325, 22.85, -Math.PI / 2);
+  tiledFloor('Mudroom tile', 37.5, 15, 7.4 - 2 / 12, 11.9, mudTileFinish, { tileWidth: 2, tileDepth: 4, groutWidth: 1 / 16 / 12, groutMaterial: mudGroutFinish });
+  const mudCaseFinish = mat('#aaa99a', 0.75);
+  mudCaseFinish.name = 'Muted sage-greige mudroom casework';
+  const mudBackingFinish = mat('#aaa99a', 0.85);
+  mudBackingFinish.name = 'Muted sage-greige mudroom backing';
+  const mudBench = furnishing('Five-cubby mudroom bench', 43.825 - 2 / 12, 22.85, -Math.PI / 2);
   const mudStorageTop = ceilingHeight - 0.25;
   const mudBenchWidth = 7.5;
   const mudPanel = 0.75 / 12;
   const mudCubbyPitch = (mudBenchWidth - mudPanel) / 5;
-  const mudFamily = ['Child 1', 'Child 2', 'Child 3', 'Mom', 'Dad'];
+  const mudFamily = ['Peter', 'Lila', 'Jacob', 'Ada', 'Lucas'];
   const mudNorthFront = 17.54;
-  const mudWestRunEnd = 21.15;
   const mudTopRailHeight = 1.5 / 12;
   const mudTopRailBottom = mudStorageTop - mudTopRailHeight;
-  function mudroomLabel(parent, text, x, y, z, width = 0.65) {
+  function mudroomLabel(parent, text, x, y, z, width = 0.65, decorative = false) {
     const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 64;
+    canvas.width = decorative ? 512 : 256;
+    canvas.height = decorative ? 160 : 64;
     const context = canvas.getContext('2d');
     if (!context) throw new Error('A 2D canvas is required to create the mudroom family labels.');
-    context.fillStyle = '#eee7d6';
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    context.fillStyle = '#30372f';
-    context.font = 'bold 36px sans-serif';
+    if (!decorative) {
+      context.fillStyle = '#eee7d6';
+      context.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    context.fillStyle = decorative ? '#806239' : '#30372f';
+    context.font = decorative ? 'italic 96px "Segoe Script", "Brush Script MT", cursive' : 'bold 36px sans-serif';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.fillText(text, 128, 32);
+    context.fillText(text, canvas.width / 2, canvas.height / 2);
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
-    const label = new THREE.Mesh(new THREE.PlaneGeometry(width, width / 4), new THREE.MeshBasicMaterial({ map: texture }));
-    label.name = `Mudroom label: ${text}`;
+    const label = new THREE.Mesh(new THREE.PlaneGeometry(width, width * canvas.height / canvas.width), new THREE.MeshBasicMaterial({ map: texture, transparent: decorative, alphaTest: decorative ? 0.05 : 0, depthWrite: !decorative }));
+    label.name = decorative ? `Mudroom decorative name: ${text}` : `Mudroom label: ${text}`;
     label.position.set(x, y, z);
     parent.add(label);
   }
+  function mudroomFootwear(parent, x, y, z, kind, side, scale = 1, name = 'Stored extra shoe') {
+    const footwear = mudroomAssets[kind === 'boot' ? side < 0 ? 'bootLeft' : 'bootRight' : 'shoe'].clone(true);
+    footwear.name = name;
+    footwear.position.set(x, y, z);
+    footwear.scale.setScalar(scale);
+    footwear.userData = { ...footwear.userData, kind, displayScale: scale };
+    parent.add(footwear);
+    return footwear;
+  }
+  function mudroomHookAttachment(hook) {
+    const tip = hook.children.find((part) => part.name === 'Coat hook upturn');
+    const cosine = Math.cos(hook.rotation.y), sine = Math.sin(hook.rotation.y);
+    return { x: hook.position.x + cosine * tip.position.x + sine * tip.position.z, y: hook.position.y, z: hook.position.z - sine * tip.position.x + cosine * tip.position.z };
+  }
+  function mudroomGarment(cubby, owner, length, hook, color) {
+    const attachment = mudroomHookAttachment(hook);
+    const garment = new THREE.Group();
+    garment.name = `${owner} cubby ${owner === 'Lila' ? 'long coat' : 'jacket'}`;
+    garment.position.set(attachment.x, attachment.y, attachment.z + 0.2);
+    garment.rotation.y = -Math.PI / 2;
+    garment.userData = { owner, lengthInches: length * 12, mount: 'Right cubby side hook', provisional: true };
+    cubby.add(garment);
+    const cloth = mat(color, 0.95);
+    cloth.name = `${owner} outerwear fabric`;
+    const outline = new THREE.Shape();
+    const sleeve = owner === 'Lila' ? 1.8 : length / 2;
+    const points = [[-0.1, -0.025], [-0.33, -0.15], [-0.58, -sleeve * 0.8], [-0.43, -sleeve], [-0.28, -sleeve * 0.7], [-0.4, -length + 0.025], [0.4, -length + 0.025], [0.28, -sleeve * 0.7], [0.43, -sleeve], [0.58, -sleeve * 0.8], [0.33, -0.15], [0.1, -0.025], [0, -0.16]];
+    outline.moveTo(...points[0]);
+    for (const point of points.slice(1)) outline.lineTo(...point);
+    outline.closePath();
+    const geometry = new THREE.ExtrudeGeometry(outline, { depth: 0.18, bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.025, bevelSegments: 2, steps: 1 });
+    geometry.computeBoundingBox();
+    const { min, max } = geometry.boundingBox;
+    const garmentScale = length / (max.y - min.y);
+    // Beveled corners can extend beyond the profile's nominal height.
+    geometry.translate(0, -max.y, 0);
+    geometry.scale(garmentScale, garmentScale, garmentScale);
+    const body = new THREE.Mesh(geometry, cloth);
+    body.name = 'Contoured hanging outerwear';
+    body.castShadow = body.receiveShadow = true;
+    garment.add(body);
+    box(garment, -0.1, -0.08, 0.08, 0.22, 0.025, 0.18, brass).name = 'Outerwear hanger shoulder';
+    box(garment, -0.2, -0.04, 0, 0.025, 0.08, 0.03, brass).name = 'Outerwear hanging loop';
+    box(garment, 0, -length / 2 - 0.05, 0.212, 0.015, length - 0.35, 0.015, black).name = 'Outerwear front fastening';
+    for (const side of [-1, 1]) box(garment, side * 0.22, -length * 0.66, 0.217, 0.18, 0.2, 0.035, cloth, true).name = 'Outerwear pocket';
+  }
   mudBench.userData = { cubbies: 5, hooks: 10, hooksPerCubby: 2, shoeOpenings: 5, shoePairEnvelopeInches: [14, 16, 14], construction: 'Builder-installed panel-and-shelf built-in', widthInches: 90, depthInches: 18, seatHeightInches: 18, heightInches: mudStorageTop * 12, provisional: true };
-  box(mudBench, 0, 1.425, 0, mudBenchWidth, 0.15, 1.5, cabinetRailFinish).name = 'Mudroom oak bench seat';
+  box(mudBench, 0, 1.425, 0, mudBenchWidth, 0.15, 1.5, countertop).name = 'Mudroom light stone bench seat';
   box(mudBench, 0, mudStorageTop / 2, -0.71875, mudBenchWidth, mudStorageTop, mudPanel, mudBackingFinish).name = 'Continuous mudroom cubby backing';
   for (let i = 0; i <= 5; i++) {
     const x = -mudBenchWidth / 2 + mudPanel / 2 + i * mudCubbyPitch;
@@ -2344,7 +2862,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const side of [-1, 1]) {
       const hook = new THREE.Group();
       hook.name = 'Mudroom gold coat hook';
-      hook.position.set(side * ((mudCubbyPitch - mudPanel) / 2 - 0.03), 4.2, -0.15);
+      hook.position.set(side * ((mudCubbyPitch - mudPanel) / 2 - 0.03), mudFamily[i] === 'Lila' ? 5.55 : 4.2, -0.15);
       hook.rotation.y = -side * Math.PI / 2;
       hook.userData.mount = 'Cubby side panel';
       cubby.add(hook);
@@ -2352,13 +2870,45 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       box(hook, 0, -0.05, 0.12, 0.055, 0.055, 0.24, brass).name = 'Coat hook arm';
       box(hook, 0, 0.025, 0.225, 0.055, 0.15, 0.055, brass).name = 'Coat hook upturn';
     }
-    for (const y of [6.35, 7.5, mudStorageTop - 0.04]) box(cubby, 0, y, 0, mudCubbyPitch - mudPanel, 0.08, 1.5, mudCaseFinish).name = 'Mudroom upper cubby shelf';
-    mudroomLabel(cubby, mudFamily[i], 0, 5.9, -0.64);
+    const owner = mudFamily[i];
+    const firstShelf = 6.35;
+    for (const y of [firstShelf, 7.5, mudStorageTop - 0.04]) box(cubby, 0, y, 0, mudCubbyPitch - mudPanel, 0.08, 1.5, mudCaseFinish).name = 'Mudroom upper cubby shelf';
+    mudroomLabel(cubby, owner, owner === 'Lila' ? -0.1 : 0, 5.1, -0.6825, 1.1, true);
+    const hooks = cubby.children.filter((part) => part.name === 'Mudroom gold coat hook');
+    mudroomGarment(cubby, owner, owner === 'Lila' ? 4 : i < 2 ? 2.6 : 2, hooks[1], ['#4e5964', '#b39a80', '#46717b', '#ae6a60', '#67784b'][i]);
+    if (i >= 2) {
+      const backpack = new THREE.Group();
+      backpack.name = `${owner} backpack`;
+      const attachment = mudroomHookAttachment(hooks[0]);
+      backpack.position.set(attachment.x + 0.0575, attachment.y - 0.855, attachment.z + 0.2);
+      backpack.rotation.y = Math.PI / 2;
+      backpack.userData = { owner, widthInches: 10, heightInches: 15, depthInches: 5, mount: 'Left cubby side hook', provisional: true };
+      cubby.add(backpack);
+      const fabric = mat(['#306d8b', '#ae6785', '#bc853d'][i - 2], 0.95);
+      fabric.name = `${owner} backpack fabric`;
+      box(backpack, 0, 0, 0, 10 / 12, 15 / 12, 5 / 12, fabric, true).name = 'Backpack body';
+      box(backpack, 0, -0.22, 0.25, 0.58, 0.45, 0.08, fabric, true).name = 'Backpack front pocket';
+      for (const side of [-1, 1]) box(backpack, side * 0.23, 0.12, -0.24, 0.07, 0.95, 0.06, black, true).name = 'Backpack shoulder strap';
+      box(backpack, 0.2, 0.73, -0.0575, 0.23, 0.25, 0.045, black, true).name = 'Backpack hanging handle';
+      box(backpack, 0.2, 0.61, -0.14, 0.23, 0.035, 0.22, black, true).name = 'Backpack handle attachment';
+    } else if (owner === 'Peter') {
+      const hat = new THREE.Group();
+      hat.name = 'Peter hat';
+      hat.position.set(0, firstShelf + 0.065, 0);
+      cubby.add(hat);
+      const hatFabric = mat('#3c464b', 0.95);
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(0.25, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2), hatFabric);
+      crown.name = 'Hat crown';
+      hat.add(crown);
+      cylinder(hat, 0, 0, 0, 0.25, 0.03, hatFabric).name = 'Hat band';
+      box(hat, 0, -0.005, 0.25, 0.45, 0.035, 0.32, hatFabric, true).name = 'Hat visor';
+    }
+    for (const side of [-1, 1]) mudroomFootwear(cubby, side * 0.225, 0.0405, 0, i < 2 ? 'boot' : 'shoe', side, i < 2 ? 1 : 0.75, 'Mudroom daily footwear');
   }
 
-  const mudCoats = furnishing('Mudroom hanging coat closet', (38 + 45.4) / 2, 15.9);
+  const mudCoats = furnishing('Mudroom hanging coat closet', (37.5 + 44.9 - 2 / 12) / 2, 16.4);
   const mudCoatWidth = 3;
-  mudCoats.userData = { widthInches: 36, depthInches: 24, heightInches: mudStorageTop * 12, doorStyle: 'Standard 32-inch bifold closet door, shown closed', railOrientation: 'Side to side', construction: 'Builder-installed enclosed closet, fixed rod and shelves; standard door, not drawer cabinetry', hangingRail: true, shoeShelves: 2, seasonalShelves: 2, provisional: true };
+  mudCoats.userData = { widthInches: 36, depthInches: 24, heightInches: mudStorageTop * 12, doorHeightInches: 96, doorStyle: 'Nominal 32-inch bifold closet door, 96 inches tall, shown closed; product unselected', railOrientation: 'Side to side', construction: 'Builder-installed enclosed closet, fixed rod and shelves; standard door, not drawer cabinetry', hangingRail: true, shoeShelves: 2, seasonalShelves: 2, provisional: true };
   for (const x of [-1, 1]) box(mudCoats, x * (mudCoatWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 2, mudCaseFinish).name = 'Coat closet side panel';
   box(mudCoats, 0, mudStorageTop / 2, -0.97, mudCoatWidth - 2 * mudPanel, mudStorageTop, 0.06, mudBackingFinish).name = 'Coat closet backing';
   for (const y of [0.15, 1.15, 6.4, 7.55, mudStorageTop - 0.04]) box(mudCoats, 0, y, 0, mudCoatWidth - 2 * mudPanel, 0.08, 1.8, mudCaseFinish).name = y < 2 ? 'Closet open shoe shelf' : 'Coat closet upper shelf';
@@ -2370,14 +2920,27 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(mudCoats, x, 5.72, -0.05, 0.03, 0.34, 0.03, brass).name = 'Mudroom coat hanger';
   }
   const mudDoorWidth = 32 / 12;
-  for (const side of [-1, 1]) box(mudCoats, side * (mudCoatWidth + mudDoorWidth) / 4, 3.4, 1.01, (mudCoatWidth - mudDoorWidth) / 2, 6.8, 0.08, cabinetFinish).name = 'Mudroom closet door jamb';
-  box(mudCoats, 0, (6.8 + mudStorageTop) / 2, 1.01, mudCoatWidth, mudStorageTop - 6.8, 0.08, cabinetFinish).name = 'Mudroom closet headwall';
-  for (let leaf = 0; leaf < 4; leaf++) {
-    const x = (leaf - 1.5) * mudDoorWidth / 4;
-    box(mudCoats, x, 3.4, 1.015, mudDoorWidth / 4 - 0.015, 6.65, 0.06, cabinetFinish).name = 'Mudroom standard bifold door panel';
-    for (const y of [1.85, 5]) box(mudCoats, x, y, 1.05, mudDoorWidth / 4 - 0.15, 2.6, 0.015, cabinetPanelFinish).name = 'Mudroom bifold recessed panel';
+  for (const side of [-1, 1]) box(mudCoats, side * (mudCoatWidth + mudDoorWidth) / 4, 4, 1.01, (mudCoatWidth - mudDoorWidth) / 2, 8, 0.08, mudCaseFinish).name = 'Mudroom closet door jamb';
+  box(mudCoats, 0, (8 + mudStorageTop) / 2, 1.01, mudCoatWidth, mudStorageTop - 8, 0.08, mudCaseFinish).name = 'Mudroom closet headwall';
+  for (const side of [-1, 1]) {
+    const bifold = new THREE.Group();
+    bifold.name = `Mudroom ${side < 0 ? 'left' : 'right'} bifold door`;
+    bifold.position.set(side * mudDoorWidth / 2, 4, 1.015);
+    const rotationSign = -side;
+    bifold.userData = { interactiveHouseDoor: { operation: 'bifold', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: rotationSign } };
+    mudCoats.add(bifold);
+    const panelWidth = mudDoorWidth / 4 - 0.015;
+    const innerPanel = new THREE.Group();
+    innerPanel.position.x = -side * (panelWidth + 0.015);
+    bifold.add(innerPanel);
+    box(bifold, -side * (panelWidth + 0.015) / 2, 0, 0, panelWidth, 7.96, 0.06, mudCaseFinish).name = 'Mudroom standard bifold door panel';
+    box(innerPanel, -side * panelWidth / 2, 0, 0, panelWidth, 7.96, 0.06, mudCaseFinish).name = 'Mudroom standard bifold door panel';
+    bifold.userData.interactiveHouseDoor.foldPanel = innerPanel;
+    for (const panel of [{ parent: bifold, x: -side * (panelWidth + 0.015) / 2 }, { parent: innerPanel, x: -side * panelWidth / 2 }]) {
+      for (const y of [-1.95, 1.95]) box(panel.parent, panel.x, y, 0.035, panelWidth - 0.15, 3.2, 0.015, mudCaseFinish).name = 'Mudroom bifold recessed panel';
+    }
+    cylinder(innerPanel, 0, -0.8, 0.09, 0.05, 0.08, brass).name = 'Mudroom closet gold knob';
   }
-  for (const x of [-mudDoorWidth / 4, mudDoorWidth / 4]) box(mudCoats, x, 3.2, 1.1, 0.1, 0.1, 0.08, brass).name = 'Mudroom closet gold knob';
 
   function mudroomShoeCell(parent, x, y, width, depth, nextShelf, envelope, zone) {
     const cell = new THREE.Group();
@@ -2386,66 +2949,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     cell.userData = { pairs: 1, zone, clearWidthInches: width * 12, depthInches: depth * 12, clearHeightInches: (Math.min(nextShelf - 0.04, mudTopRailBottom) - y - 0.04) * 12, pairEnvelopeInches: envelope, provisional: true };
     parent.add(cell);
     box(cell, 0, 0, 0, width, 0.08, depth, mudCaseFinish).name = 'Extra shoe pair shelf';
-    for (const side of [-1, 1]) {
-      box(cell, side * 0.225, 0.065, 0.02, 0.35, 0.05, 0.95, cream, true).name = 'Stored shoe sole';
-      box(cell, side * 0.225, 0.19, -0.03, 0.32, 0.22, 0.85, linen, true).name = 'Stored extra shoe';
-    }
+    const kind = y < 1.4 ? 'boot' : 'shoe';
+    for (const side of [-1, 1]) mudroomFootwear(cell, side * 0.225, 0.04, 0, kind, side, kind === 'boot' ? 11 / 14 : 1);
   }
-
-  const mudDrawerWidth = 29 / 12;
-  const mudBins = furnishing('Mudroom family container and shoe tower', 38.325 + 7 / 12, mudWestRunEnd - mudDrawerWidth / 2, Math.PI / 2);
-  const mudDrawerDepth = 14 / 12;
-  const mudDrawerBottom = 0.3;
-  const mudDrawerTop = 3.1;
-  mudBins.userData = { widthInches: 29, depthInches: 14, bins: 5, owners: mudFamily, construction: 'Builder-installed open shelves with removable fabric bins; no custom drawer cabinetry', binEnvelopeInches: [27, 11, 5.5], extraPairTarget: 8, heightInches: mudStorageTop * 12, provisional: true };
-  for (const side of [-1, 1]) box(mudBins, side * (mudDrawerWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, mudDrawerDepth, mudCaseFinish).name = 'Family container tower side';
-  box(mudBins, 0, mudStorageTop / 2, -mudDrawerDepth / 2 + 0.03, mudDrawerWidth - 2 * mudPanel, mudStorageTop, 0.06, mudBackingFinish).name = 'Family container tower backing';
-  box(mudBins, 0, 0.15, 0, mudDrawerWidth - 0.2, 0.3, mudDrawerDepth - 0.2, mudCaseFinish).name = 'Family container tower recessed plinth';
-  for (const [index, owner] of mudFamily.entries()) {
-    const pitch = (mudDrawerTop - mudDrawerBottom) / mudFamily.length;
-    const centerY = mudDrawerBottom + (index + 0.5) * pitch;
-    const drawer = new THREE.Group();
-    drawer.name = 'Mudroom personal accessory bin';
-    drawer.userData = { owner, contents: ['Socks', 'Gloves', 'Hats'], removableContainers: 3, provisional: true };
-    mudBins.add(drawer);
-    box(mudBins, 0, mudDrawerBottom + index * pitch, 0, mudDrawerWidth - 2 * mudPanel, 0.04, mudDrawerDepth - 0.12, mudCaseFinish).name = 'Personal bin support shelf';
-    for (const [containerIndex, contents] of drawer.userData.contents.entries()) {
-      const container = new THREE.Group();
-      container.name = 'Removable accessory container';
-      container.userData = { owner, contents, envelopeInches: [8.5, 11, 5.5], purchasedSeparately: true };
-      container.position.x = (containerIndex - 1) * 0.75;
-      drawer.add(container);
-      box(container, 0, centerY - 0.22, 0, 8.5 / 12, 0.04, 11 / 12, mudBinFinish).name = 'Personal bin bottom';
-      for (const x of [-0.334, 0.334]) box(container, x, centerY, 0, 0.04, 0.4, 11 / 12, mudBinFinish).name = 'Personal bin side';
-      box(container, 0, centerY, -0.438, 8.5 / 12, 0.4, 0.04, mudBinFinish).name = 'Personal bin back';
-      box(container, 0, centerY - 0.085, 0.438, 8.5 / 12, 0.23, 0.04, mudBinFinish).name = 'Personal bin low front';
-      mudroomLabel(container, contents, 0, centerY - 0.08, 0.46, 0.6);
-    }
-    mudroomLabel(drawer, owner, 0, mudDrawerBottom + index * pitch - 0.06, mudDrawerDepth / 2 + 0.01);
-  }
-  box(mudBins, 0, 3.15, 0, mudDrawerWidth, 0.1, mudDrawerDepth, cabinetRailFinish).name = 'Mudroom keys and charging drop zone';
-  box(mudBins, 0, 3.8, -mudDrawerDepth / 2 + 0.07, 0.25, 0.35, 0.03, cream).name = 'Mudroom charging outlet allowance';
-  const mudUpperShoePitch = (mudDrawerWidth - mudPanel) / 2;
-  box(mudBins, 0, (4.46 + mudStorageTop - 0.08) / 2, 0, mudPanel, mudStorageTop - 0.08 - 4.46, mudDrawerDepth, mudCaseFinish).name = 'Family upper shoe divider';
-  for (let level = 0; level < 4; level++) {
-    const y = 4.5 + level * 1.1;
-    for (const side of [-1, 1]) mudroomShoeCell(mudBins, side * mudUpperShoePitch / 2, y, mudUpperShoePitch - mudPanel, mudDrawerDepth - 0.08, level < 3 ? y + 1.1 : mudStorageTop - 0.04, [12, 12.5, 9], 'Above personal containers');
-  }
-  box(mudBins, 0, mudStorageTop - 0.04, 0, mudDrawerWidth - 2 * mudPanel, 0.08, mudDrawerDepth, mudCaseFinish).name = 'Family tower top cap';
-  const mudShoeWidth = mudWestRunEnd - mudNorthFront - mudDrawerWidth;
-  const mudShoes = furnishing('Mudroom extra family shoe wall', 38.325 + 7 / 12, mudNorthFront + mudShoeWidth / 2, Math.PI / 2);
-  const mudShoeDepth = 14 / 12;
-  mudShoes.userData = { widthInches: mudShoeWidth * 12, depthInches: 14, columns: 1, shoeLevels: 7, extraPairTarget: 7, pairEnvelopeInches: [12, 12.5, 9], construction: 'Builder-installed open shelves joined to the north enclosure', heightInches: mudStorageTop * 12, provisional: true };
-  box(mudShoes, 0, mudStorageTop / 2, -mudShoeDepth / 2 + 0.03, mudShoeWidth, mudStorageTop, 0.06, mudBackingFinish).name = 'Extra shoe wall backing';
-  for (const side of [-1, 1]) box(mudShoes, side * (mudShoeWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, mudShoeDepth, mudCaseFinish).name = 'Extra shoe wall divider';
-  for (let level = 0; level < 7; level++) {
-    const shelfY = 0.12 + level * 10 / 12;
-    mudroomShoeCell(mudShoes, 0, shelfY, mudShoeWidth - 2 * mudPanel, mudShoeDepth - 0.08, level < 6 ? shelfY + 10 / 12 : 6.2, [12, 12.5, 9], 'West return');
-  }
-  for (const y of [6.2, 7.5, mudStorageTop - 0.04]) box(mudShoes, 0, y, 0, mudShoeWidth - 2 * mudPanel, 0.08, mudShoeDepth - 0.08, mudCaseFinish).name = 'Extra shoe wall seasonal shelf';
 
   const mudCornerShoeWidth = 19.1 - mudNorthFront;
-  const mudCornerShoes = furnishing('Mudroom corner shoe tower', 44.325, (mudNorthFront + 19.1) / 2, -Math.PI / 2);
+  const mudCornerShoes = furnishing('Mudroom corner shoe tower', 43.825 - 2 / 12, (mudNorthFront + 19.1) / 2, -Math.PI / 2);
   mudCornerShoes.userData = { widthInches: mudCornerShoeWidth * 12, depthInches: 18, heightInches: mudStorageTop * 12, shoeLevels: 7, extraPairTarget: 7, pairEnvelopeInches: [14, 16, 12], provisional: true };
   for (const side of [-1, 1]) box(mudCornerShoes, side * (mudCornerShoeWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 1.5, mudCaseFinish).name = 'Corner shoe tower side';
   box(mudCornerShoes, 0, mudStorageTop / 2, -0.72, mudCornerShoeWidth - 2 * mudPanel, mudStorageTop, 0.06, mudBackingFinish).name = 'Corner shoe tower backing';
@@ -2456,24 +2965,101 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(mudCornerShoes, 0, mudStorageTop - 0.04, 0, mudCornerShoeWidth - 2 * mudPanel, 0.08, 1.5, mudCaseFinish).name = 'Corner shoe tower top cap';
 
   const mudJoinery = furnishing('Continuous mudroom built-in enclosure', 0, 0);
-  mudJoinery.userData = { joinedBuiltIns: true, enclosureStyle: 'Full-height wrapped U-shaped builder built-in', uniformTopInches: mudStorageTop * 12, topRailUndersideInches: mudTopRailBottom * 12, extraPairTarget: 22, enclosedBlindCorners: 2, blindCornersCountedAsStorage: false, provisional: true };
-  for (const [left, right] of [[38.325, 40.2], [43.2, 45.075]]) {
+  mudJoinery.userData = { joinedBuiltIns: true, enclosureStyle: 'Wall-fitted north, east and basket built-ins with ceiling infill', uniformTopInches: mudStorageTop * 12, fittedTopInches: ceilingHeight * 12, topRailUndersideInches: mudTopRailBottom * 12, extraPairTarget: 7, enclosedBlindCorners: 2, blindCornersCountedAsStorage: false, basketReturnConnected: true, wallFitted: true, provisional: true };
+  for (const [left, right] of [[37.825, 39.7 - 1 / 12], [42.7 - 1 / 12, 44.575 - 2 / 12]]) {
     const corner = new THREE.Group();
     corner.name = 'Mudroom enclosed corner return';
     corner.userData = { accessibleStorage: false, construction: 'Builder-fitted blind corner, not an open gap or counted storage' };
-    corner.position.set((left + right) / 2, 0, (14.9 + mudNorthFront) / 2);
+    corner.position.set((left + right) / 2, 0, (15.4 + mudNorthFront) / 2);
     mudJoinery.add(corner);
-    const width = right - left, depth = mudNorthFront - 14.9;
+    const width = right - left, depth = mudNorthFront - 15.4;
     for (const y of [0.04, mudStorageTop - 0.04]) box(corner, 0, y, 0, width, 0.08, depth, mudCaseFinish).name = 'Enclosed corner horizontal panel';
     box(corner, 0, mudStorageTop / 2, -depth / 2 + 0.03, width, mudStorageTop - 0.16, 0.06, mudCaseFinish).name = 'Enclosed corner back';
     box(corner, 0, mudStorageTop / 2, depth / 2 - mudPanel / 2, width, mudStorageTop - 0.16, mudPanel, mudCaseFinish).name = 'Enclosed corner front';
     for (const side of [-1, 1]) box(corner, side * (width - mudPanel) / 2, mudStorageTop / 2, (0.06 - mudPanel) / 2, mudPanel, mudStorageTop - 0.16, depth - 0.06 - mudPanel, mudCaseFinish).name = 'Enclosed corner cheek';
   }
-  box(mudJoinery, 41.7, mudStorageTop - 0.04, (16.95 + mudNorthFront) / 2, mudCoatWidth, 0.08, mudNorthFront - 16.95, mudCaseFinish).name = 'Coat header top return';
-  const mudWestFront = 38.325 + 14 / 12, mudEastFront = 43.575;
+  box(mudJoinery, 41.2 - 1 / 12, mudStorageTop - 0.04, (17.45 + mudNorthFront) / 2, mudCoatWidth, 0.08, mudNorthFront - 17.45, mudCaseFinish).name = 'Coat header top return';
+  const mudWestFront = 37.825 + 14 / 12, mudEastFront = 43.075 - 2 / 12;
   box(mudJoinery, (mudWestFront + mudEastFront) / 2, mudStorageTop - mudTopRailHeight / 2, mudNorthFront + 0.025, mudEastFront - mudWestFront - 0.1, mudTopRailHeight, 0.05, mudCaseFinish).name = 'Mudroom continuous north top rail';
-  box(mudJoinery, mudWestFront + 0.025, mudStorageTop - mudTopRailHeight / 2, (mudNorthFront + mudWestRunEnd) / 2, 0.05, mudTopRailHeight, mudWestRunEnd - mudNorthFront, mudCaseFinish).name = 'Mudroom continuous west top rail';
   box(mudJoinery, mudEastFront - 0.025, mudStorageTop - mudTopRailHeight / 2, (mudNorthFront + 26.6) / 2, 0.05, mudTopRailHeight, 26.6 - mudNorthFront, mudCaseFinish).name = 'Mudroom continuous east top rail';
+
+  function mudroomFittedClosure(name, left, right, north, south, bottom = 0.0405, top = mudStorageTop) {
+    const closure = box(mudJoinery, (left + right) / 2, (bottom + top) / 2, (north + south) / 2, right - left, top - bottom, south - north, mudCaseFinish);
+    closure.name = name;
+    closure.userData = { construction: 'Site-fitted scribe/pack-out, not added storage', countedAsStorage: false, provisional: true };
+  }
+  const mudFinishedWest = 37.5 + 0.175, mudFinishedEast = 44.9 - 2 / 12 - 0.175;
+  const mudFinishedNorth = 15 + 0.175, mudFinishedSouth = 26.9 - 0.175;
+  const mudNorthBack = mudCoats.position.z - 1, mudEastBack = mudBench.position.x + 0.75;
+  const mudBenchSouth = mudBench.position.z + mudBenchWidth / 2;
+  mudroomFittedClosure('Mudroom north wall scribe', mudFinishedWest, mudFinishedEast, mudFinishedNorth, mudNorthBack);
+  mudroomFittedClosure('Mudroom west wall scribe', mudFinishedWest, 37.825, mudNorthBack, mudNorthFront);
+  mudroomFittedClosure('Mudroom east wall scribe', mudEastBack, mudFinishedEast, mudNorthBack, mudBenchSouth);
+  mudroomFittedClosure('Mudroom cubby end scribe', mudEastFront, mudFinishedEast, mudBenchSouth, mudFinishedSouth);
+  mudroomFittedClosure('Mudroom north ceiling infill', mudFinishedWest, mudFinishedEast, mudFinishedNorth, mudNorthFront + 0.05, mudStorageTop, ceilingHeight);
+  mudroomFittedClosure('Mudroom west ceiling infill', mudFinishedWest, 38.675, mudNorthFront + 0.05, 20.9, mudStorageTop, ceilingHeight);
+  mudroomFittedClosure('Mudroom east ceiling infill', mudEastFront - 0.05, mudFinishedEast, mudNorthFront + 0.05, mudFinishedSouth, mudStorageTop, ceilingHeight);
+
+  const mudBasketReturn = new THREE.Group();
+  mudBasketReturn.name = 'Mudroom basket built-in return';
+  mudBasketReturn.position.set(38.175, 0, (mudNorthFront + 18.9) / 2);
+  mudBasketReturn.rotation.y = Math.PI / 2;
+  mudBasketReturn.userData = { construction: 'Fixed open shelves and matching backing joining basket tower to north enclosure', widthInches: (18.9 - mudNorthFront) * 12, depthInches: 12, heightInches: 105, addedBasketCount: 0, capacityVerified: false };
+  mudJoinery.add(mudBasketReturn);
+  box(mudBasketReturn, 0, mudStorageTop / 2, -0.5 + mudPanel / 2, 18.9 - mudNorthFront, mudStorageTop, mudPanel, mudBackingFinish).name = 'Basket return continuous backing';
+  for (const y of [0.25, 1.9, 3.55, 5.2, 6.85, mudStorageTop - mudPanel / 2]) {
+    box(mudBasketReturn, 0, y, mudPanel / 2, 18.9 - mudNorthFront, mudPanel, 1 - mudPanel, mudCaseFinish).name = 'Basket return connecting shelf';
+  }
+  const mudPlinthTop = 0.25 - mudPanel / 2;
+  for (const [start, end] of [[mudNorthFront, 18.9], [18.9 + mudPanel, 20.9 - mudPanel]]) {
+    box(mudJoinery, 38.175, (0.0405 + mudPlinthTop) / 2, (start + end) / 2, 0.75, mudPlinthTop - 0.0405, end - start, mudCaseFinish).name = 'Mudroom continuous recessed plinth';
+  }
+
+  const mudBasketTower = furnishing('Mudroom arrival-wall basket shelves', 37.675 + 6 / 12, 19.9, Math.PI / 2);
+  mudBasketTower.userData = { widthInches: 24, depthInches: 12, heightInches: 105, baskets: 10, basketEnvelopeInches: [9, 10, 12], construction: 'Builder-installed fixed shelves with separately purchased removable baskets', highStorage: 'Upper baskets require safe access; anchorage and shelf loads unverified', provisional: true };
+  const mudBasketFinish = mat('#b89a70', 0.95);
+  mudBasketFinish.name = 'Natural woven mudroom baskets';
+  const mudBasketRim = mat('#987c55', 0.95);
+  mudBasketRim.name = 'Natural woven basket edging';
+  mudroomLabel(mudBasketTower, 'Safe high access required', 0, 8.3, 6 / 12 - 0.001, 1.75);
+  for (const side of [-1, 1]) box(mudBasketTower, side * (2 - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 12 / 12, mudCaseFinish).name = 'Arrival basket tower side';
+  box(mudBasketTower, 0, mudStorageTop / 2, -6 / 12 + mudPanel / 2, 2 - 2 * mudPanel, mudStorageTop, mudPanel, mudBackingFinish).name = 'Arrival basket tower backing';
+  for (const y of [0.25, 1.9, 3.55, 5.2, 6.85, mudStorageTop - mudPanel / 2]) {
+    box(mudBasketTower, 0, y, mudPanel / 2, 2 - 2 * mudPanel, mudPanel, 12 / 12 - mudPanel, mudCaseFinish).name = 'Arrival basket fixed shelf';
+    if (y > 8) continue;
+    const nextShelf = y < 6.85 ? y + 1.65 : mudStorageTop - mudPanel / 2;
+    box(mudBasketTower, 0, (y + nextShelf) / 2, mudPanel / 2, mudPanel, nextShelf - y - mudPanel, 12 / 12 - mudPanel, mudCaseFinish).name = 'Arrival basket center divider';
+    for (const side of [-1, 1]) {
+      const basket = new THREE.Group();
+      basket.name = 'Removable arrival-wall basket';
+      basket.position.set(side * 0.48, y + mudPanel / 2, 0.02);
+      basket.userData = { purchasedSeparately: true, envelopeInches: [9, 10, 12], access: y > 5 ? 'Safe high-storage access required' : 'Removable basket' };
+      mudBasketTower.add(basket);
+      box(basket, 0, 0.025, 0, 0.75, 0.05, 10 / 12, mudBasketFinish).name = 'Arrival basket bottom';
+      for (const edge of [-1, 1]) {
+        box(basket, edge * 0.355, 0.525, 0, 0.04, 0.95, 10 / 12, mudBasketFinish).name = 'Arrival basket side';
+        box(basket, 0, 0.525, edge * (5 / 12 - 0.02), 0.67, 0.95, 0.04, mudBasketFinish).name = 'Arrival basket face';
+        box(basket, 0, 0.98, edge * (5 / 12 - 0.02), 0.75, 0.04, 0.04, mudBasketRim).name = 'Arrival basket rim';
+      }
+      for (let rib = 0; rib < 8; rib++) box(basket, -0.315 + rib * 0.09, 0.525, 5 / 12 - 0.004, 0.018, 0.9, 0.008, mudBasketRim).name = 'Arrival basket woven rib';
+    }
+  }
+
+  const mudGarageDoor = furnishing('Mudroom garage entry door', garageEntry.x + 0.125 / 12, garageEntry.z - 1.75 / 24);
+  mudGarageDoor.userData = { nominalWidthInches: 36, nominalHeightInches: 96, thicknessInches: 1.75, swing: 'Inward into mudroom, west hinge', defaultOpenAngleDegrees: 90, approval: 'Rated/self-closing assembly, landing and fire separation unverified; open display is not hold-open approval', provisional: true };
+  const mudGarageLeaf = new THREE.Group();
+  mudGarageLeaf.name = 'Mudroom inward garage door leaf';
+  mudGarageLeaf.rotation.y = Math.PI / 2;
+  mudGarageLeaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 90, openRotationSign: 1 } };
+  mudGarageDoor.add(mudGarageLeaf);
+  const mudGarageLeafWidth = (36 - 0.25) / 12, mudGarageLeafThickness = 1.75 / 12;
+  const mudGarageLeafBottom = 0.0405 + 0.5 / 12, mudGarageLeafTop = 8 - 0.125 / 12;
+  box(mudGarageLeaf, mudGarageLeafWidth / 2, (mudGarageLeafBottom + mudGarageLeafTop) / 2, mudGarageLeafThickness / 2, mudGarageLeafWidth, mudGarageLeafTop - mudGarageLeafBottom, mudGarageLeafThickness, cream).name = 'Solid mudroom garage door panel';
+  for (const side of [-1, 1]) {
+    box(mudGarageLeaf, mudGarageLeafWidth - 0.25, 3.15, mudGarageLeafThickness / 2 + side * (mudGarageLeafThickness / 2 + 0.035), 0.13, 0.35, 0.07, brass).name = 'Mudroom garage door lock plate';
+    box(mudGarageLeaf, mudGarageLeafWidth - 0.38, 3.15, mudGarageLeafThickness / 2 + side * (mudGarageLeafThickness / 2 + 0.15), 0.3, 0.06, 0.08, brass).name = 'Mudroom garage door lever';
+  }
+  for (const y of [1, 4, 7]) cylinder(mudGarageLeaf, 0, y, 0, 0.035, 0.25, brass).name = 'Mudroom garage door hinge';
 
   const epoxy = mat('#a7aaa6', 0.55);
   for (const { x, z, w, d } of garageFloorAreas) {
@@ -2482,10 +3068,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     surface.userData.walkSurface = true;
   }
   const garageSideDoor = furnishing('Solid garage exterior pedestrian door', 55.5, 45.5, 0, garageFloorY);
-  box(garageSideDoor, 0, 4, 0, 0.18, 8, 3, cream).name = 'Opaque insulated exterior door slab';
+  const garageSideLeaf = new THREE.Group();
+  garageSideLeaf.name = 'Garage side pedestrian door leaf';
+  garageSideLeaf.position.z = -1.5;
+  garageSideLeaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 180, openRotationSign: 1 } };
+  garageSideDoor.add(garageSideLeaf);
+  box(garageSideLeaf, 0, 4, 1.5, 0.18, 8, 3, cream).name = 'Opaque insulated exterior door slab';
   for (const side of [-1, 1]) {
-    box(garageSideDoor, side * 0.14, 3.1, -1.15, 0.08, 0.5, 0.12, black).name = 'Exterior door lockset';
-    box(garageSideDoor, side * 0.2, 3.1, -1.02, 0.1, 0.08, 0.35, black).name = 'Exterior door lever';
+    box(garageSideLeaf, side * 0.14, 3.1, 0.35, 0.08, 0.5, 0.12, black).name = 'Exterior door lockset';
+    box(garageSideLeaf, side * 0.2, 3.1, 0.48, 0.1, 0.08, 0.35, black).name = 'Exterior door lever';
   }
   const garageStair = furnishing('Two-step garage-to-house entry', garageEntry.x + garageEntry.width / 2, garageEntry.z);
   garageStair.userData = { risers: garageRisers, riseInches: garageRise * 12, totalRiseInches: -garageFloorY * 12, treadDepthInches: 11, widthInches: garageEntry.width * 12, landing: false, rails: false, provisional: true };
@@ -2534,10 +3125,21 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       box(car, side * (width / 2 - 0.65), pickup ? 2.7 : 1.9, -length / 2 + 0.025, 0.9, 0.22, 0.04, light);
       box(car, side * (width / 2 - 0.5), pickup ? 2.7 : 1.9, length / 2 - 0.025, 0.55, 0.28, 0.04, mat('#ad4335'));
     }
+    for (const side of [-1, 1]) for (const row of ['front', 'rear']) {
+      const door = new THREE.Group();
+      door.name = `${name} ${side === -1 ? 'driver' : 'passenger'} ${row} estimated door`;
+      const doorLengthInches = row === 'front' ? 44 : 36;
+      const hingeZ = cabZ - cabDepth / 2 + 0.3 + (row === 'rear' ? 44 / 12 : 0);
+      door.position.set(side * (width / 2 + 0.04), 0, hingeZ);
+      door.userData = { vehicleDoor: true, side, row, doorLengthInches, angleDegrees: 0, estimated: true, manufacturerVerified: false };
+      car.add(door);
+      const doorMaterial = new THREE.MeshStandardMaterial({ color: '#d39836', transparent: true, opacity: 0.65, side: THREE.DoubleSide, roughness: 0.6 });
+      box(door, 0, (height + 0.6) / 2, doorLengthInches / 24, 0.08, height - 0.6, doorLengthInches / 12, doorMaterial).name = 'Estimated door swing panel, not manufacturer geometry';
+    }
     return car;
   }
   const sierra = vehicle('GMC Sierra EV', 48.5, 38, 233.42, 83.8, 95.7, 80, 145.7, true);
-  vehicle('BMW i4', 37, 40, 188.5, 72.9, 81.6, 57, 112.4, false);
+  const bmw = vehicle('BMW i4', 37, 40, 188.5, 72.9, 81.6, 57, 112.4, false);
   for (const x of [32.5, 41.5, 44, 53]) {
     const stripe = box(rest, x, garageFloorY + 0.012, 40.5, 0.05, 0.01, 16.6, cream);
     stripe.name = 'Garage bay stripe';
@@ -2548,6 +3150,151 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     threshold.name = 'Nine-foot garage door threshold';
     threshold.userData.walkSurface = true;
   }
+  const patioDoorButton = document.getElementById('patio-door-toggle');
+  const patioDoorState = document.getElementById('patio-door-state');
+  function setPatioDoorOpen(open) {
+    const angle = open ? doorLeaf.userData.maxAngleDegrees : 0;
+    if (doorLeaf.userData.openAngleDegrees === angle) return;
+    doorLeaf.userData.openAngleDegrees = angle;
+    doorLeaf.rotation.y = THREE.MathUtils.degToRad(angle);
+    patioDoorButton.setAttribute('aria-pressed', String(open));
+    patioDoorButton.textContent = `${open ? 'Close' : 'Open'} patio door`;
+    patioDoorState.textContent = `Patio door ${open ? `open ${angle} degrees inward` : 'closed'}.`;
+    stopTourTravel();
+    buildWalkObstacles();
+  }
+  function togglePatioDoor() {
+    if (activeFloor !== 'ground' || groundLayoutPreview) return;
+    setPatioDoorOpen(doorLeaf.userData.openAngleDegrees === 0);
+    render();
+  }
+  patioDoorButton.addEventListener('click', togglePatioDoor);
+  function pickPatioDoor(event) {
+    if (activeFloor !== 'ground' || groundLayoutPreview) return false;
+    const bounds = renderer.domElement.getBoundingClientRect();
+    const pointer = new THREE.Vector2((event.clientX - bounds.left) / bounds.width * 2 - 1, 1 - (event.clientY - bounds.top) / bounds.height * 2);
+    const raycaster = new THREE.Raycaster();
+    scene.updateMatrixWorld(true);
+    camera.updateMatrixWorld(true);
+    raycaster.setFromCamera(pointer, camera);
+    const hit = raycaster.intersectObjects(scene.children, true).find(({ object }) => {
+      for (let part = object; part; part = part.parent) if (!part.visible) return false;
+      return true;
+    });
+    for (let part = hit?.object; part; part = part.parent) {
+      if (part !== doorLeaf) continue;
+      togglePatioDoor();
+      return true;
+    }
+    return false;
+  }
+  const vehicleDoorControls = [];
+  const vehicleDoorStatus = document.getElementById('vehicle-door-status');
+  for (const car of [bmw, sierra]) {
+    for (const door of car.children.filter((part) => part.userData.vehicleDoor)) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'vehicle-door-button';
+      button.textContent = 'Door';
+      button.hidden = true;
+      button.setAttribute('aria-label', `Open ${door.name} to 60 degrees`);
+      button.setAttribute('aria-pressed', 'false');
+      button.title = `Open ${door.name} - estimated swing only`;
+      viewport.append(button);
+      button.addEventListener('pointerdown', (event) => event.stopPropagation());
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const open = door.userData.angleDegrees === 0;
+        door.userData.angleDegrees = open ? 60 : 0;
+        door.rotation.y = door.userData.side * THREE.MathUtils.degToRad(door.userData.angleDegrees);
+        button.setAttribute('aria-pressed', String(open));
+        button.setAttribute('aria-label', `${open ? 'Close' : 'Open'} ${door.name}${open ? '' : ' to 60 degrees'}`);
+        button.title = button.getAttribute('aria-label');
+        vehicleDoorStatus.textContent = `${door.name}: ${open ? '60 degrees open' : 'closed'}. Amber panels are estimated swing overlays; the closed vehicle stand-ins remain visible. Front doors use 44 in, rear doors 36 in, for both vehicles. Hinges, mirrors and swept volumes are not manufacturer verified. Check the full sweep and occupied access on the actual vehicle; this is not a fit approval.`;
+        render();
+      });
+      vehicleDoorControls.push({ door, button, height: car.userData.heightInches / 12 });
+    }
+  }
+  function updateVehicleDoorControls() {
+    const show = activeFloor === 'ground' && !groundLayoutPreview && navigationMode !== 'walk' && ['garage', 'bikes', 'top'].includes(currentView);
+    vehicleDoorStatus.hidden = !show;
+    if (!show) {
+      for (const { button } of vehicleDoorControls) button.hidden = true;
+      return;
+    }
+    scene.updateMatrixWorld(true);
+    camera.updateMatrixWorld(true);
+    const raycaster = new THREE.Raycaster();
+    for (const { door, button, height } of vehicleDoorControls) {
+      const anchor = door.localToWorld(new THREE.Vector3(door.userData.side * 0.1, height - 0.25, door.userData.doorLengthInches / 24));
+      const point = anchor.clone().project(camera);
+      raycaster.setFromCamera(new THREE.Vector2(point.x, point.y), camera);
+      const distance = anchor.distanceTo(raycaster.ray.origin);
+      const obstruction = show && raycaster.intersectObjects(scene.children, true).find((hit) => {
+        for (let part = hit.object; part; part = part.parent) if (!part.visible) return false;
+        return hit.distance < distance - 0.25;
+      });
+      button.hidden = !show || Boolean(obstruction) || Math.abs(point.x) > 0.95 || Math.abs(point.y) > 0.95 || Math.abs(point.z) > 1;
+      button.style.left = `${(point.x + 1) * viewport.clientWidth / 2}px`;
+      button.style.top = `${(1 - point.y) * viewport.clientHeight / 2}px`;
+    }
+  }
+  function pickVehicleDoor(event) {
+    if (vehicleDoorStatus.hidden) return false;
+    const bounds = renderer.domElement.getBoundingClientRect();
+    const pointer = new THREE.Vector2((event.clientX - bounds.left) / bounds.width * 2 - 1, 1 - (event.clientY - bounds.top) / bounds.height * 2);
+    const raycaster = new THREE.Raycaster();
+    scene.updateMatrixWorld(true);
+    camera.updateMatrixWorld(true);
+    raycaster.setFromCamera(pointer, camera);
+    const hit = raycaster.intersectObjects(scene.children, true).find(({ object }) => {
+      for (let part = object; part; part = part.parent) if (!part.visible) return false;
+      return true;
+    });
+    for (let part = hit?.object; part; part = part.parent) {
+      const control = vehicleDoorControls.find(({ door }) => door === part);
+      if (control) {
+        control.button.click();
+        return true;
+      }
+    }
+    return false;
+  }
+  function pickHouseDoor(event) {
+    if (!['ground', 'exterior'].includes(activeFloor) || groundLayoutPreview) return false;
+    const bounds = renderer.domElement.getBoundingClientRect();
+    const pointer = new THREE.Vector2((event.clientX - bounds.left) / bounds.width * 2 - 1, 1 - (event.clientY - bounds.top) / bounds.height * 2);
+    const raycaster = new THREE.Raycaster();
+    scene.updateMatrixWorld(true);
+    camera.updateMatrixWorld(true);
+    raycaster.setFromCamera(pointer, camera);
+    const hit = raycaster.intersectObjects(scene.children, true).find(({ object }) => {
+      for (let part = object; part; part = part.parent) if (!part.visible) return false;
+      return true;
+    });
+    if (!hit) return false;
+    let door = hit.object;
+    while (door && !door.userData?.interactiveHouseDoor) door = door.parent;
+    if (!door) return false;
+    const operation = door.userData.interactiveHouseDoor;
+    if (operation.operation === 'sliding') {
+      operation.open = !operation.open;
+      door.position.x = operation.open ? operation.openCenterX : operation.closedCenterX;
+      if (door.userData.shownOpen !== undefined) door.userData.shownOpen = operation.open;
+    } else if (operation.operation === 'overhead') {
+      operation.open = !operation.open;
+      door.rotation.x = operation.open ? THREE.MathUtils.degToRad(operation.maxAngleDegrees) : 0;
+    } else {
+      const open = operation.openAngleDegrees === 0;
+      const angle = open ? operation.maxAngleDegrees : 0;
+      operation.openAngleDegrees = angle;
+      door.rotation.y = (operation.closedRotationY ?? 0) + operation.openRotationSign * THREE.MathUtils.degToRad(angle);
+      if (operation.foldPanel) operation.foldPanel.rotation.y = open ? operation.openRotationSign * THREE.MathUtils.degToRad(angle) : 0;
+    }
+    render();
+    return true;
+  }
   const charger = furnishing('EV charger', 42.75, 48.65, Math.PI, garageFloorY);
   charger.userData = { location: 'Interior face of pier between the two garage doors', provisional: true, cableReachVerified: false };
   box(charger, 0, 4.4, 0, 0.7, 1.3, 0.35, black, true);
@@ -2555,12 +3302,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const chargingCable = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.035, 8, 32), black);
   chargingCable.position.set(0, 3.5, 0.22);
   charger.add(chargingCable);
-  const bikeRack = furnishing('Five-bike roll-in floor rack', 50.4, 18.5, 0, garageFloorY);
-  bikeRack.userData = { bikes: 5, storage: 'Floor-level wheel stands; no lifting', spacingInches: 22.2, provisional: true };
-  for (const z of [-2.05, -1.25]) box(bikeRack, 0, 0.1, z, 9.4, 0.1, 0.1, steel).name = 'Floor rack base rail';
-  const bicycleColors = [mat('#516f77'), mat('#b78355'), mat('#859b6b'), mat('#a75f59'), mat('#697b92')];
+  const bikeRack = furnishing('Five-bike roll-in floor rack', 52.5, 21, -Math.PI / 2, garageFloorY);
+  bikeRack.userData = { bikes: 5, storage: 'Right-wall floor stands; alternate front-wheel-in and rear-wheel-in; west access aisle; no lifting', alternatingDirections: true, spacingInches: 24, bicycleDimensions: bicycleGeometry.userData, retrievalVerified: false, provisional: true };
   for (let i = 0; i < 5; i++) {
-    const x = -3.7 + i * 1.85;
+    const x = (i - 2) * bikeRack.userData.spacingInches / 12;
+    for (const z of [-2.05, -1.25]) box(bikeRack, x, 0.1, z, 0.65, 0.1, 0.1, steel).name = 'Individual floor stand base';
     for (const side of [-1, 1]) {
       box(bikeRack, x + side * 0.13, 0.4, -2.05, 0.05, 0.7, 0.05, steel).name = 'Roll-in wheel stand upright';
       box(bikeRack, x + side * 0.13, 0.75, -1.78, 0.05, 0.05, 0.59, steel).name = 'Roll-in wheel stand top';
@@ -2569,44 +3315,49 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const bicycle = new THREE.Group();
     bicycle.name = `Floor-parked bicycle ${i + 1}`;
     bicycle.position.x = x;
-    bicycle.userData = { wheelsOnFloor: true, liftingRequired: false };
+    bicycle.rotation.y = i % 2 === 0 ? 0 : Math.PI;
+    bicycle.userData = { wheelsOnFloor: true, liftingRequired: false, wheelInStand: i % 2 === 0 ? 'Front' : 'Rear' };
     bikeRack.add(bicycle);
-    const radius = [1, 0.85, 0.8, 0.85, 1][i];
-    const axleHeight = radius + 0.06;
-    for (const z of [-1.65, 1.65]) {
-      const wheel = new THREE.Mesh(new THREE.TorusGeometry(radius, 0.055, 8, 32), black);
-      wheel.rotation.y = Math.PI / 2;
-      wheel.position.set(0, axleHeight, z);
-      wheel.name = 'Bicycle wheel on floor';
-      bicycle.add(wheel);
-      for (const slope of [-1, 1]) stairBeam('Bicycle wheel spoke', [0, axleHeight - radius * 0.85, z - slope * radius * 0.5], [0, axleHeight + radius * 0.85, z + slope * radius * 0.5], 0.018, 0.018, steel, bicycle);
-    }
-    const pedal = [0, axleHeight - 0.2, 0.35];
-    const saddle = [0, axleHeight + 1.05, 0.65];
-    const steering = [0, axleHeight + 1.15, -1.3];
-    for (const [from, to] of [[pedal, saddle], [saddle, steering], [steering, pedal], [saddle, [0, axleHeight, 1.65]], [pedal, [0, axleHeight, 1.65]], [steering, [0, axleHeight, -1.65]]]) {
-      stairBeam('Bicycle frame tube', from, to, 0.08, 0.08, bicycleColors[i], bicycle);
-    }
-    box(bicycle, 0, axleHeight + 1.15, 0.65, 0.5, 0.12, 0.65, black, true).name = 'Bicycle saddle';
-    stairBeam('Bicycle handlebar stem', steering, [0, axleHeight + 1.55, -1.3], 0.07, 0.07, steel, bicycle);
-    box(bicycle, 0, axleHeight + 1.55, -1.3, 1.5, 0.08, 0.1, black).name = 'Bicycle handlebar';
-    box(bicycle, 0, axleHeight - 0.25, 0.35, 0.65, 0.08, 0.25, black).name = 'Bicycle pedals';
+    const downloadedBike = bicycleGeometry.clone(true);
+    downloadedBike.name = 'Downloaded bicycle model';
+    downloadedBike.traverse((object) => {
+      if (object.isMesh) {
+        object.castShadow = true;
+        object.receiveShadow = true;
+      }
+    });
+    bicycle.add(downloadedBike);
   }
   bikeRack.traverse((object) => { if (object.isMesh) object.userData.tourObstacle = true; });
 
   const yardTools = furnishing('Garage yard-tool storage', 32.95, 27.115, 0, garageFloorY);
-  yardTools.userData = { location: 'House-side wall in front of the BMW, clear of the house-entry steps', storage: 'Conventional floor-parked mower with unfolded handle and rolling shop vac; wall rail, hand-tool board, and battery shelf', provisional: true };
+  yardTools.userData = { location: 'House-side wall in front of the BMW, clear of the house-entry steps', storage: 'Conventional floor-parked mower with unfolded handle and rolling shop vac; textured imported hand tools, drill, toolbox and four plastic crates; original wall rail and battery shelf', provisional: true };
+  function garageProp(id, name, parent, x, y, z) {
+    const prop = garageAssets[id].clone(true);
+    prop.name = name;
+    prop.position.set(x, y, z);
+    prop.userData.provisional = true;
+    prop.traverse((object) => {
+      if (object.isMesh) {
+        object.castShadow = true;
+        object.receiveShadow = true;
+      }
+    });
+    parent.add(prop);
+    return prop;
+  }
   const toolGreen = mat('#67826a');
   for (const y of [4.4, 6.5]) box(yardTools, 0, y, 0.8, 6.8, 0.12, 1.6, steel).name = 'Garage tool shelf';
   box(yardTools, 0, 5.4, 0.03, 6.8, 1.8, 0.08, black).name = 'Garage hand-tool board';
-  for (let i = 1; i < 6; i++) box(yardTools, -2.5 + i, 5.35, 0.15, 0.08, 0.9, 0.12, steel).name = 'Hanging hand tool';
-  for (const x of [-1.5, 0, 1.5]) box(yardTools, x, 4.62, 0.8, 0.6, 0.25, 0.5, black, true).name = 'Removable tool battery and charging dock';
-  for (const x of [-3.2, 3.2]) box(yardTools, x, 5.45, 0.02, 0.1, 2.3, 0.12, black).name = 'Wall-mounted shelf standard';
-  box(yardTools, 0, 3.8, 0.02, 6.8, 0.15, 0.12, black).name = 'Garden-tool hanging rail';
-  for (const x of [-0.5, 0.35, 1.2]) {
-    stairBeam('Long-handle garden tool', [x, 0.7, 0.18], [x, 3.8, 0.18], 0.05, 0.05, oak, yardTools);
-    box(yardTools, x, 3.85, 0.2, 0.4, 0.2, 0.12, steel).name = 'Garden-tool head and hook';
+  for (const [index, id] of ['adjustable_wrench', 'Drill_01', 'cross_pein_hammer', 'handsaw_wood', 'combination_wrench'].entries()) {
+    const dimensions = garageAssets[id].userData;
+    const prop = garageProp(id, 'Downloaded garage wall tool', yardTools, -1.5 + index, 5.35 - dimensions.heightInches / 24, 0.1 + dimensions.depthInches / 24);
+    prop.userData.wallMounted = true;
+    box(yardTools, -1.5 + index, 5.75, 0.1, 0.06, 0.08, 0.12, steel).name = 'Garage tool-board mounting allowance';
   }
+  for (const x of [-1.5, 0, 1.5]) box(yardTools, x, 4.62, 0.8, 0.6, 0.25, 0.5, black, true).name = 'Removable tool battery and charging dock';
+  garageProp('metal_toolbox', 'Downloaded garage metal toolbox', yardTools, 2.55, 4.46, 0.8);
+  for (const x of [-3.2, 3.2]) box(yardTools, x, 5.45, 0.02, 0.1, 2.3, 0.12, black).name = 'Wall-mounted shelf standard';
   const mower = new THREE.Group();
   mower.name = 'Conventional floor-parked lawn mower';
   mower.position.set(-2.3, 0, 1.5);
@@ -2638,69 +3389,209 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   blower.name = 'Wall-hung battery leaf blower';
   blower.userData = { wallMounted: true, dedicatedCradle: true, provisional: true };
   stairBeam('Leaf blower nozzle', [-2.25, 5.3, 0.85], [-2.25, 4.8, 1.45], 0.22, 0.22, black, yardTools);
-  for (const x of [-2.1, -0.7, 0.7, 2.1]) box(yardTools, x, 6.85, 0.8, 1.05, 0.55, 1.25, linen, true).name = 'Garage tool storage bin';
+  for (const x of [-2.1, -0.7, 0.7, 2.1]) garageProp('plastic_crate_01', 'Garage tool storage bin', yardTools, x, 6.56, 0.8);
+  const hangingTools = furnishing('Accessible garage garden-tool rail', 37.75, 27.115, 0, garageFloorY);
+  hangingTools.userData = { widthInches: 30, location: 'House-side wall between the equipment station and garage entry', contents: 'Rake, broom and dustpan, with four spare hooks', floorStorage: false, anchorageVerified: false, provisional: true };
+  for (const y of [3.2, 5.05]) box(hangingTools, 0, y, 0.03, 2.5, 0.15, 0.12, black).name = 'Garage garden-tool mounting rail';
+  for (const [x, y] of [[-0.8, 4.95], [-0.2, 5.05], [0.8, 5.05]]) {
+    box(hangingTools, x, y, 0.12, 0.12, 0.18, 0.12, steel).name = 'Garage garden-tool wall clip';
+    box(hangingTools, x, y, 0.24, 0.16, 0.06, 0.2, black).name = 'Garage garden-tool retaining clip';
+  }
+  const rake = new THREE.Group();
+  rake.name = 'Wall-hung garage rake';
+  rake.userData = { wallMounted: true, headWidthInches: 22, provisional: true };
+  hangingTools.add(rake);
+  cylinder(rake, -0.2, (0.85 + 5.5) / 2, 0.3, 0.035, 5.5 - 0.85, oak).name = 'Rake full-length round handle';
+  const rakeHead = cylinder(rake, -0.2, 5.5, 0.3, 0.035, 22 / 12, steel);
+  rakeHead.rotation.z = Math.PI / 2;
+  rakeHead.name = 'Rake crosshead';
+  for (let tine = 0; tine < 16; tine++) {
+    const x = -0.2 - 11 / 12 + tine * 22 / (12 * 15);
+    stairBeam('Rake steel tine', [x, 5.5, 0.3], [x, 5.25, 0.58], 0.018, 0.018, steel, rake);
+  }
+  const broom = new THREE.Group();
+  broom.name = 'Wall-hung garage broom';
+  broom.userData = { wallMounted: true, headWidthInches: 10.8, provisional: true };
+  hangingTools.add(broom);
+  cylinder(broom, 0.8, (1.04 + 5.2) / 2, 0.3, 0.035, 5.2 - 1.04, oak).name = 'Broom full-length round handle';
+  box(broom, 0.8, 0.95, 0.3, 0.8, 0.18, 0.25, toolGreen, true).name = 'Broom bristle block';
+  const broomBristles = mat('#b69b5c');
+  for (let bristle = 0; bristle < 24; bristle++) {
+    const x = 0.8 - 0.45 + bristle * 0.9 / 23;
+    stairBeam('Broom bristle bundle', [0.8 + (x - 0.8) * 0.82, 0.87, 0.3], [x, 0.3, 0.34], 0.025, 0.16, broomBristles, broom);
+  }
+  const dustpan = new THREE.Group();
+  dustpan.name = 'Wall-hung garage dustpan';
+  dustpan.userData = { wallMounted: true, widthInches: 9.6, provisional: true };
+  hangingTools.add(dustpan);
+  box(dustpan, -0.8, 4.2, 0.14, 0.8, 0.4, 0.04, toolGreen, true).name = 'Dustpan molded back';
+  box(dustpan, -0.8, 4.0, 0.32, 0.8, 0.04, 0.4, toolGreen).name = 'Dustpan collecting lip';
+  for (const x of [-1.18, -0.42]) box(dustpan, x, 4.2, 0.32, 0.04, 0.4, 0.4, toolGreen).name = 'Dustpan raised side';
+  cylinder(dustpan, -0.8, 4.7, 0.16, 0.04, 0.6, black).name = 'Dustpan hanging handle';
+  for (const x of [-1, -0.5, 0.2, 0.6]) {
+    box(hangingTools, x, 3.2, 0.12, 0.1, 0.18, 0.06, steel).name = 'Spare garage hook mounting plate';
+    const hook = new THREE.Group();
+    hook.name = 'Spare garage wall hook';
+    hook.position.set(x, 3.2, 0.15);
+    hangingTools.add(hook);
+    box(hook, 0, 0, 0.12, 0.05, 0.05, 0.24, steel);
+    box(hook, 0, 0.06, 0.225, 0.05, 0.15, 0.05, steel);
+  }
+  hangingTools.traverse((object) => { if (object.isMesh) object.userData.tourObstacle = true; });
   yardTools.traverse((object) => { if (object.isMesh) object.userData.tourObstacle = true; });
 
   const kidsClay = mat('#b98369');
   const kidsBlue = mat('#78949a');
-  const kidsRug = furnishing('Kids play rug', 23.4, 30.5);
-  kidsRug.userData = { widthInches: 78, depthInches: 42, finish: 'Muted sage, washable low-pile direction', provisional: true };
-  box(kidsRug, 0, 0.07, 0, 6.5, 0.06, 3.5, linen, true);
-  const toyStorage = furnishing('Kids low toy storage', 24, 33.65, Math.PI);
-  toyStorage.userData = { widthInches: 96, depthInches: 15, heightInches: 24, closedStorage: true, wallAnchorageRequired: true, provisional: true };
-  box(toyStorage, 0, 0.15, -0.1, 7.9, 0.3, 1.05, cabinetFinish).name = 'Toy storage recessed plinth';
-  box(toyStorage, 0, 1.1, 0, 8, 1.7, 1.25, cabinetFinish).name = 'Low toy storage cabinet';
-  box(toyStorage, 0, 1.95, 0, 8, 0.1, 1.25, cabinetRailFinish).name = 'Toy storage oak top';
-  for (let door = 0; door < 4; door++) {
-    const front = shakerFront(toyStorage, (door - 1.5) * 2, 1.1, 0.665, 1.96, 1.66);
-    cabinetPull(front, 0, 0.55, 0.09, 0.35);
+  const familyPanelDepth = 0.5 / 12;
+  const familyPanels = furnishing('Family message wall panelling', kidsRoom.x + kidsRoom.width / 2, kidsRoom.z - 0.175, Math.PI);
+  familyPanels.userData = { finish: 'Warm-white painted vertical grooved panelling', thicknessInches: 0.5, bottomInches: 8, topInches: 108, face: 'Kitchen / hall side only', provisional: true };
+  const familyPanelWidth = kidsRoom.width - 0.35;
+  const familyPanelFinish = mat('#f2efe7');
+  box(familyPanels, 0, (9 + 8 / 12) / 2, familyPanelDepth / 4, familyPanelWidth, 9 - 8 / 12, familyPanelDepth / 2, mat('#d1ccc1')).name = 'Family panelling recessed groove backing';
+  for (let index = 0; index < 20; index++) {
+    box(familyPanels, -familyPanelWidth / 2 + (index + 0.5) * familyPanelWidth / 20, (9 + 8 / 12) / 2, 3 * familyPanelDepth / 4, familyPanelWidth / 20 - 0.015, 9 - 8 / 12, familyPanelDepth / 2, familyPanelFinish).name = 'Family vertical wall panel';
   }
-  const readingBench = furnishing('Kids reading bench', 27.9, 30.1, -Math.PI / 2);
-  readingBench.userData = { widthInches: 60, depthInches: 18, seatHeightInches: 18, upholstery: 'Washable sage direction', wallAnchorageRequired: true, provisional: true };
-  box(readingBench, 0, 0.7, 0, 5, 1.25, 1.5, cabinetFinish).name = 'Reading bench storage base';
-  box(readingBench, 0, 1.4, 0, 5, 0.2, 1.5, linen, true).name = 'Sage reading bench cushion';
+  const familyEdgeTrim = furnishing('Family message wall white edge trim', kidsRoom.x + kidsRoom.width / 2, kidsRoom.z - 0.175, Math.PI);
+  familyEdgeTrim.userData = { finish: 'Warm-white paint matching wall panelling', thicknessInches: 0.5, frontStripWidthInches: 4.2, bottomInches: 8, topInches: 108, cornerReturns: true, provisional: true };
   for (const side of [-1, 1]) {
-    const front = shakerFront(readingBench, side * 1.25, 0.7, 0.79, 2.46, 1.21);
-    cabinetPull(front, 0, 0.4, 0.09, 0.35);
-    box(readingBench, side * 1.25, 1.85, -0.55, 1.5, 0.7, 0.3, side < 0 ? kidsClay : linen, true).name = 'Reading nook back cushion';
+    box(familyEdgeTrim, side * kidsRoom.width / 2, (9 + 8 / 12) / 2, familyPanelDepth / 2, 0.35, 9 - 8 / 12, familyPanelDepth, familyPanelFinish).name = 'Family white edge front strip';
+    box(familyEdgeTrim, side * (kidsRoom.width / 2 + 0.175 + familyPanelDepth / 2), (9 + 8 / 12) / 2, (familyPanelDepth - 0.35) / 2, familyPanelDepth, 9 - 8 / 12, 0.35 + familyPanelDepth, familyPanelFinish).name = 'Family white edge corner return';
   }
-  const kidsBooks = furnishing('Kids face-out book display', 19.65, 32.7, Math.PI / 2);
-  kidsBooks.userData = { widthInches: 18, depthInches: 6, heightInches: 36, wallAnchorageRequired: true, provisional: true };
-  box(kidsBooks, 0, 1.5, -0.2, 1.5, 3, 0.08, cabinetFinish).name = 'Low book display backing';
-  for (const y of [0.5, 1.7]) {
-    box(kidsBooks, 0, y, 0, 1.5, 0.08, 0.5, cabinetRailFinish).name = 'Face-out book ledge';
-    box(kidsBooks, 0, y + 0.12, 0.22, 1.5, 0.2, 0.06, cabinetRailFinish).name = 'Book ledge retaining lip';
-    for (const [index, material] of [kidsClay, kidsBlue, linen].entries()) {
-      box(kidsBooks, (index - 1) * 0.45, y + 0.42, 0.08, 0.4, 0.72, 0.07, material).name = 'Displayed picture book';
+  const hallPanelStartZ = kidsRoom.z + 0.175;
+  const hallPanelLength = 54.2 - 0.175 - hallPanelStartZ;
+  const hallPanels = furnishing('Hall-facing white wall panelling', kidsRoom.x - 0.175, hallPanelStartZ, -Math.PI / 2);
+  hallPanels.userData = { finish: 'Warm-white painted vertical grooved panelling', thicknessInches: 0.5, bottomInches: 8, topInches: 108, face: 'Hall side of kids and guest west walls, continuing to foyer', provisional: true };
+  const hallPanelCutouts = [];
+  for (const opening of [{ start: kidsDoorway.z, end: kidsDoorway.z + kidsDoorway.width, height: kidsDoorway.height }, { start: 42, end: 45, height: 8 }]) {
+    const sideExtent = casingSideWidth + casingReveal;
+    const headerTop = opening.height + casingReveal + 5.5 / 12;
+    for (const [extent, bottom, top] of [
+      [sideExtent, 0, headerTop],
+      [sideExtent + 0.03125, opening.height + casingReveal, opening.height + casingReveal + 0.0625],
+      [sideExtent + 0.0625, headerTop, headerTop + 0.0416667 + 1 / 24]
+    ]) hallPanelCutouts.push({ left: opening.start - extent - hallPanelStartZ, right: opening.end + extent - hallPanelStartZ, bottom, top });
+  }
+  function hallPanelPart(name, left, right, depth, thickness, material) {
+    let pieces = [{ left, right, bottom: 0.005 + 8 / 12, top: 9 }];
+    for (const cut of hallPanelCutouts) {
+      pieces = pieces.flatMap((piece) => {
+        const x1 = Math.max(piece.left, cut.left);
+        const x2 = Math.min(piece.right, cut.right);
+        const y1 = Math.max(piece.bottom, cut.bottom);
+        const y2 = Math.min(piece.top, cut.top);
+        if (x2 <= x1 || y2 <= y1) return [piece];
+        return [
+          { ...piece, top: y1 }, { ...piece, bottom: y2 },
+          { left: piece.left, right: x1, bottom: y1, top: y2 },
+          { left: x2, right: piece.right, bottom: y1, top: y2 }
+        ].filter((part) => part.right - part.left > 1e-6 && part.top - part.bottom > 1e-6);
+      });
+    }
+    for (const part of pieces) box(hallPanels, (part.left + part.right) / 2, (part.bottom + part.top) / 2, depth, part.right - part.left, part.top - part.bottom, thickness, material).name = name;
+  }
+  hallPanelPart('Hall panelling recessed groove backing', 0, hallPanelLength, familyPanelDepth / 4, familyPanelDepth / 2, mat('#d1ccc1'));
+  const hallPanelPitch = familyPanelWidth / 20;
+  for (let start = 0; start < hallPanelLength; start += hallPanelPitch) {
+    hallPanelPart('Hall vertical wall panel', start + 0.0075, Math.min(start + hallPanelPitch - 0.0075, hallPanelLength), 3 * familyPanelDepth / 4, familyPanelDepth / 2, familyPanelFinish);
+  }
+  const familyBoard = furnishing('Family glass dry-erase and cork board', kidsRoom.x + kidsRoom.width / 2, kidsRoom.z - 0.21 - familyPanelDepth, Math.PI);
+  familyBoard.userData = { widthInches: 84, heightInches: 48, bottomInches: 30, maxProjectionInches: 3.5, face: 'Kitchen / hall side of kids north wall', finish: 'White oak frame, charcoal tempered dry-erase glass, natural cork', writingMedium: 'Opaque light-coloured dry-erase markers approved for black glass; no chalk or chalk markers', wallAnchorageRequired: true, safetyGlazingRequired: true, provisional: true };
+  const glassBoardFinish = mat('#263531');
+  glassBoardFinish.roughness = 0.18;
+  const corkFinish = mat('#b79367');
+  box(familyBoard, 0, 4.5, 0, 7, 4, 0.06, cabinetFinish).name = 'Family board backing';
+  box(familyBoard, -1, 4.5, 0.04, 4.75, 3.75, 0.025, glassBoardFinish).name = 'Family charcoal dry-erase glass';
+  box(familyBoard, 2.4375, 4.5, 0.04, 1.875, 3.75, 0.025, corkFinish).name = 'Family cork pinboard';
+  for (const x of [-3.4375, 1.4375, 3.4375]) box(familyBoard, x, 4.5, 0.055, 0.125, 4, 0.08, cabinetRailFinish).name = 'Family board oak stile';
+  for (const y of [2.5625, 6.4375]) box(familyBoard, 0, y, 0.055, 6.75, 0.125, 0.08, cabinetRailFinish).name = 'Family board oak rail';
+  box(familyBoard, -1, 2.56, 0.09, 4.75, 0.08, 0.18, cabinetRailFinish).name = 'Shallow marker and eraser tray';
+  box(familyBoard, 0.75, 2.63, 0.09, 0.35, 0.06, 0.16, black).name = 'Family board eraser';
+  for (const x of [-2.9, -2.65]) {
+    box(familyBoard, x, 2.62, 0.12, 0.24, 0.05, 0.05, cream).name = 'Family board dry-erase marker';
+    box(familyBoard, x + 0.1, 2.62, 0.12, 0.06, 0.055, 0.055, black).name = 'Family marker captive cap';
+  }
+  for (const y of [4.6, 5.25, 5.9]) box(familyBoard, -1, y, 0.058, 4.3, 0.012, 0.008, cream).name = 'Dry-erase weekly planner line';
+  for (let day = 1; day < 7; day++) box(familyBoard, -3.15 + day * 4.3 / 7, 5.25, 0.058, 0.012, 1.3, 0.008, cream).name = 'Dry-erase weekly planner divider';
+  for (const [index, material] of [cream, kidsBlue, kidsClay].entries()) {
+    box(familyBoard, 2.4375, 5.55 - index * 1.05, 0.065, 1.25, 0.8, 0.018, material).name = 'Pinned family paper';
+    box(familyBoard, 2.4375, 5.87 - index * 1.05, 0.082, 0.2, 0.06, 0.015, cabinetFinish).name = 'Captive paper clip';
+  }
+  for (const [x, y, width] of [[-2.25, 3.9, 1.3], [-2.1, 3.65, 1.6], [0.1, 3.4, 0.9]]) {
+    box(familyBoard, x, y, 0.058, width, 0.025, 0.008, cream).name = 'Dry-erase drawing stroke';
+  }
+  const trofastWidth = 39 / 12;
+  const trofastDepth = 17.375 / 12;
+  const trofastHeight = 37 / 12;
+  const trofastPanel = 0.06;
+  const trofastBay = (trofastWidth - 4 * trofastPanel) / 3;
+  const trofastMesh = mat('#555e5c');
+  const trofastWire = mat('#7c8582');
+  for (let index = 0; index < 2; index++) {
+    const x = kidsRoom.x + kidsRoom.width - 0.35 - trofastWidth / 2 - (1 - index) * (trofastWidth + 2 / 12);
+    const storage = furnishing(`IKEA TROFAST toy storage ${index + 1}`, x, kidsRoom.z + 0.35 + trofastDepth / 2);
+    storage.userData = { manufacturer: 'IKEA', model: 'TROFAST', articleNumber: '796.131.29', productURL: 'https://www.ikea.com/us/en/p/trofast-storage-combination-with-boxes-room-divider-white-dark-gray-s79613129/', widthInches: 39, depthInches: 17.375, heightInches: 37, finish: 'White frame / dark gray mesh boxes', removableBoxes: 9, wallAnchorageRequired: true, looseLegoRequiresLiddedInserts: true, binPullAllowanceInches: 17.375, manufacturerCAD: false, provisional: true };
+    for (const y of [trofastPanel / 2, trofastHeight - trofastPanel / 2]) box(storage, 0, y, 0, trofastWidth, trofastPanel, trofastDepth, porcelain).name = 'TROFAST white horizontal frame';
+    for (let panel = 0; panel < 4; panel++) {
+      box(storage, -trofastWidth / 2 + trofastPanel / 2 + panel * (trofastBay + trofastPanel), trofastHeight / 2, 0, trofastPanel, trofastHeight - 2 * trofastPanel, trofastDepth, porcelain).name = 'TROFAST white upright';
+    }
+    for (let column = 0; column < 3; column++) for (let row = 0; row < 3; row++) {
+      const binX = -trofastWidth / 2 + trofastPanel + trofastBay / 2 + column * (trofastBay + trofastPanel);
+      const binBottom = 0.2 + row * 0.95;
+      const binWidth = 11.75 / 12;
+      const binDepth = 16.5 / 12;
+      const binHeight = 9 / 12;
+      for (const side of [-1, 1]) box(storage, binX + side * (trofastBay / 2 - 0.02), binBottom - 0.035, 0, 0.04, 0.04, binDepth, porcelain).name = 'TROFAST box guide rail';
+      const bin = new THREE.Group();
+      bin.name = 'TROFAST removable mesh box';
+      bin.position.set(binX, binBottom, 0);
+      bin.userData = { removable: true, builtInDrawer: false, widthInches: 11.75, depthInches: 16.5, heightInches: 9, purpose: index === 0 ? 'LEGO in separate lidded inserts' : 'Toys and play supplies' };
+      storage.add(bin);
+      box(bin, 0, 0.015, 0, binWidth, 0.03, binDepth, trofastMesh).name = 'TROFAST box bottom';
+      for (const side of [-1, 1]) {
+        box(bin, side * (binWidth / 2 - 0.015), binHeight / 2, 0, 0.03, binHeight, binDepth, trofastMesh).name = 'TROFAST mesh box side';
+        box(bin, 0, binHeight / 2, side * (binDepth / 2 - 0.015), binWidth - 0.06, binHeight, 0.03, trofastMesh).name = 'TROFAST mesh box end';
+      }
+      for (let wire = 1; wire < 8; wire++) box(bin, -binWidth / 2 + wire * binWidth / 8, binHeight / 2, binDepth / 2 + 0.002, 0.008, binHeight - 0.06, 0.004, trofastWire).name = 'TROFAST mesh front wire';
+      for (const y of [0.04, 0.25, 0.5, binHeight - 0.02]) box(bin, 0, y, binDepth / 2 + 0.002, binWidth - 0.04, 0.008, 0.004, trofastWire).name = 'TROFAST mesh front crosswire';
+      box(bin, 0, binHeight - 0.12, binDepth / 2 + 0.006, 0.28, 0.08, 0.008, black).name = 'TROFAST box grip';
+      if (index === 0) {
+        box(bin, 0, 0.3, 0, 0.7, 0.5, 1, linen).name = 'Separate LEGO organizer insert';
+        box(bin, 0, 0.565, 0, 0.74, 0.03, 1.04, porcelain).name = 'LEGO organizer removable lid';
+      }
     }
   }
-  const artDisplay = furnishing('Kids art display board', 24, 34.34, Math.PI);
-  box(artDisplay, 0, 4.5, 0, 7, 2.25, 0.08, linen).name = 'Sage art display backing';
-  for (const x of [-3.5, 3.5]) box(artDisplay, x, 4.5, 0.03, 0.08, 2.33, 0.08, cabinetFinish);
-  for (const y of [3.375, 5.625]) box(artDisplay, 0, y, 0.03, 7, 0.08, 0.08, cabinetRailFinish);
-  for (const [index, material] of [kidsClay, kidsBlue, oak].entries()) {
-    const x = (index - 1) * 2.1;
-    box(artDisplay, x, 4.5, 0.06, 1.65, 1.7, 0.025, cream).name = 'Rotating child artwork';
-    box(artDisplay, x - 0.2, 4.65, 0.08, 0.6, 0.5, 0.015, material);
-    box(artDisplay, x + 0.2, 4.2, 0.08, 0.5, 0.3, 0.015, material);
-  }
-  const kidsDeskWidth = 28.75 / 12;
-  const kidsDeskDepth = 19.625 / 12;
+  const kidsDeskWidth = 47.25 / 12;
+  const kidsDeskDepth = 31.5 / 12;
   const kidsDeskHeight = 29.5 / 12;
-  const kidsDeskZ = kidsRoom.z + 0.35 + kidsDeskDepth / 2;
-  for (let index = 0; index < 3; index++) {
-    const x = kidsRoom.x + 0.65 + kidsDeskWidth / 2 + index * 2.5;
-    const desk = furnishing(`IKEA MICKE kids desk ${index + 1}`, x, kidsDeskZ);
-    desk.userData = { manufacturer: 'IKEA', model: 'MICKE', articleNumber: '302.130.76', widthInches: 28.75, depthInches: 19.625, heightInches: 29.5, productURL: 'https://www.ikea.com/us/en/p/micke-desk-white-30213076/', finish: 'White', manufacturerCAD: false, chairAllowanceInches: 30 };
-    box(desk, 0, kidsDeskHeight - 0.05, 0, kidsDeskWidth, 0.1, kidsDeskDepth, porcelain).name = 'MICKE white desktop';
-    box(desk, -kidsDeskWidth / 2 + 0.04, (kidsDeskHeight - 0.1) / 2, 0, 0.08, kidsDeskHeight - 0.1, kidsDeskDepth, porcelain).name = 'MICKE solid side support';
-    for (const z of [-kidsDeskDepth / 2 + 0.04, kidsDeskDepth / 2 - 0.04]) box(desk, kidsDeskWidth / 2 - 0.04, (kidsDeskHeight - 0.1) / 2, z, 0.06, kidsDeskHeight - 0.1, 0.06, porcelain).name = 'MICKE metal frame upright';
-    box(desk, kidsDeskWidth / 2 - 0.04, 0.03, 0, 0.06, 0.06, kidsDeskDepth, porcelain).name = 'MICKE metal frame foot';
-    box(desk, 0, 2.15, kidsDeskDepth / 2 - 0.03, kidsDeskWidth - 0.16, 0.35, 0.06, porcelain).name = 'MICKE drawer front';
-    box(desk, 0, 2.27, kidsDeskDepth / 2 - 0.003, 0.4, 0.06, 0.006, black).name = 'MICKE drawer finger recess';
-    box(desk, 0, 2, -kidsDeskDepth / 2 + 0.12, kidsDeskWidth - 0.16, 0.08, 0.24, porcelain).name = 'MICKE rear cable tray';
-    cylinder(desk, 0.75, kidsDeskHeight - 0.003, -0.5, 0.045, 0.006, black).name = 'MICKE cable outlet';
-    const chair = furnishing(`Kids desk chair ${index + 1}`, x, kidsDeskZ + kidsDeskDepth / 2 + 0.95, Math.PI);
+  const kidsDeskZ = 34.25 - kidsDeskDepth / 2;
+  for (let index = 0; index < 2; index++) {
+    const rotation = Math.PI;
+    const x = kidsRoom.x + kidsRoom.width - 0.175 - 1 / 12 - kidsDeskWidth / 2 - (1 - index) * 4.1;
+    const z = kidsDeskZ;
+    const desk = furnishing(`IKEA MITTZON kids desk ${index + 1}`, x, z, rotation);
+    desk.userData = { manufacturer: 'IKEA', model: 'MITTZON', widthInches: 47.25, depthInches: 31.5, heightInches: 29.5, minHeightInches: 24.375, maxHeightInches: 49.625, productURL: 'https://www.ikea.com/us/en/p/mittzon-desk-sit-stand-electric-birch-veneer-white-s09527743/', finish: 'Birch veneer / white', manufacturerCAD: false, chairAllowanceInches: 30, purpose: index === 0 ? 'All-in-one PC' : 'Homework and crafts', childUseRequiresReview: true };
+    box(desk, 0, kidsDeskHeight - 0.05, 0, kidsDeskWidth, 0.1, kidsDeskDepth, oak).name = 'MITTZON desktop';
+    for (const side of [-1, 1]) {
+      box(desk, side * 1.45, 0.08, 0, 0.25, 0.16, 2.3, porcelain).name = 'MITTZON T foot';
+      box(desk, side * 1.45, 0.85, 0, 0.2, 1.5, 0.2, porcelain).name = 'MITTZON lower lift column';
+      box(desk, side * 1.45, 1.95, 0, 0.15, 0.8, 0.15, porcelain).name = 'MITTZON upper lift column';
+    }
+    box(desk, 0, 2.2, 0, 3.1, 0.18, 0.15, porcelain).name = 'MITTZON frame crossbar';
+    box(desk, 0, 2.15, -0.95, 2.5, 0.2, 0.35, porcelain).name = 'MITTZON cable tray';
+    box(desk, 1.6, 2.35, 1.22, 0.35, 0.08, 0.12, black).name = 'MITTZON height control';
+    if (index === 0) {
+      box(desk, 0, 3.45, -0.6, 2.05, 1.2, 0.14, black, true).name = 'Kids all-in-one PC';
+      box(desk, 0, 2.7, -0.6, 0.12, 0.5, 0.12, porcelain).name = 'All-in-one PC stand';
+      box(desk, 0, 2.49, -0.6, 0.75, 0.06, 0.45, porcelain).name = 'All-in-one PC base';
+      box(desk, -0.2, 2.49, 0.6, 1.35, 0.06, 0.45, porcelain).name = 'Kids PC keyboard';
+      box(desk, 0.8, 2.49, 0.6, 0.22, 0.06, 0.35, black).name = 'Kids PC mouse';
+    } else {
+      box(desk, -0.3, 2.48, 0.35, 1.5, 0.04, 1, kidsBlue).name = 'Homework writing mat';
+      box(desk, -0.3, 2.51, 0.25, 0.7, 0.02, 0.85, cream).name = 'Homework notebook';
+      box(desk, 1.3, 2.65, -0.75, 0.55, 0.4, 0.45, kidsClay).name = 'Removable art supply caddy';
+    }
+    const chairOffset = kidsDeskDepth / 2 + 0.025;
+    const chair = furnishing(`Kids desk chair ${index + 1}`, x + Math.sin(rotation) * chairOffset, z + Math.cos(rotation) * chairOffset, rotation + Math.PI);
     chair.userData = { widthInches: 18, depthInches: 18, seatHeightInches: 18, productSelected: false, provisional: true };
     box(chair, 0, 1.425, 0, 1.5, 0.15, 1.5, index === 1 ? kidsBlue : linen, true).name = 'Kids desk chair seat';
     box(chair, 0, 2.05, -0.67, 1.5, 1.2, 0.1, index === 1 ? kidsBlue : linen, true).name = 'Kids desk chair back';
@@ -2752,7 +3643,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const leaf = new THREE.Group();
     leaf.name = side < 0 ? 'Office first French door leaf' : 'Office second French door leaf';
     leaf.position.x = side * (officeEntry.width / 2 - 0.125 / 12);
-    leaf.userData = { nominalWidthInches: 30, nominalHeightInches: 96, thicknessInches: 1.75, columns: 2, rows: 5, lites: 10, inwardOpenRotation: -side * Math.PI / 2, provisional: true };
+    leaf.userData = {
+      nominalWidthInches: 30, nominalHeightInches: 96, thicknessInches: 1.75, columns: 2, rows: 5, lites: 10,
+      inwardOpenRotation: -side * Math.PI / 2,
+      interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 180, openRotationSign: -side },
+      provisional: true
+    };
     leaf.rotation.y = leaf.userData.inwardOpenRotation * officeDoors.userData.openAngleDegrees / 90;
     officeDoors.add(leaf);
     const centerX = -side * officeLeafWidth / 2;
@@ -2830,8 +3726,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     cylinder(nightstand, 0, 2.4, 0, 0.05, 1.2, brass);
     cylinder(nightstand, 0, 3, 0, 0.4, 0.45, cream, 0.25);
   }
-  const wardrobe = furnishing('Walk-in closet fittings', 0, 0);
-  wardrobe.userData = { nominalWidthInches: 72, nominalDepthInches: 88.8, hangingDepthInches: 24, openAisleInches: 36.6, opposingHanging: 'North and south walls; no hall encroachment', doorless: true, provisional: true };
+  const wardrobe = furnishing('Guest walk-in closet fittings', guestSuite.closet.x + 0.175, guestSuite.closet.z + guestSuite.closet.d - 0.325, Math.PI / 2);
+  wardrobe.userData = { hangingRunInches: 81.96, clothingDepthAllowanceInches: 24, minimumAisleAtTrimInches: 36, doorless: true, provisional: true };
   for (const run of guestSuite.closetStorage.hanging) {
     const centerX = run.x + run.w / 2, centerZ = run.z + run.d / 2;
     const shelf = box(wardrobe, centerX, 7.4, centerZ, run.w, 0.08, run.d, oak);
@@ -2850,19 +3746,21 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   }
   const closetShelves = guestSuite.closetStorage.shelves;
-  for (const y of [1, 2.5, 4, 5.5, 7]) box(wardrobe, closetShelves.x + closetShelves.w / 2, y, closetShelves.z + closetShelves.d / 2, closetShelves.w, 0.08, closetShelves.d, oak).name = 'Walk-in folded-clothes shelf';
-  for (const [name, opening, eastHinge] of [
-    ['Guest bathroom', guestSuite.bathroomDoor, false]
-  ]) {
-    const door = furnishing(`${name} inward-opening door`, opening.x, opening.z - 0.325, Math.PI / 2);
-    door.userData = { nominalWidthInches: opening.width * 12, heightInches: opening.height * 12, openAngleDegrees: 90, inwardSwing: true, hinge: 'West jamb on bathroom face', provisional: true };
-    const side = eastHinge ? -1 : 1;
-    box(door, side * opening.width / 2, 3.5, 0, opening.width - 0.04, 6.96, 0.13, windowTrim).name = `${name} painted-white door leaf`;
-    for (const y of [1.8, 5.15]) for (const face of [-1, 1]) box(door, side * opening.width / 2, y, face * 0.075, opening.width - 0.4, 2.7, 0.025, cream).name = `${name} recessed panel`;
-    for (const face of [-1, 1]) box(door, side * (opening.width - 0.3), 3, face * 0.14, 0.15, 0.15, 0.16, brass, true).name = `${name} satin-gold knob`;
-  }
+  for (const y of [1, 2.5, 4, 5.5, 7]) box(wardrobe, closetShelves.x + closetShelves.w / 2, y, closetShelves.z + closetShelves.d / 2, closetShelves.w, 0.08, closetShelves.d, oak).name = 'Guest wardrobe folded-clothes shelf';
+  const bathroomOpening = guestSuite.bathroomDoor;
+  const bathroomPocketDoor = furnishing('Guest bathroom pocket door proposal - framing approval required', bathroomOpening.x + bathroomOpening.width / 2, bathroomOpening.z);
+  bathroomPocketDoor.userData = {
+    nominalWidthInches: bathroomOpening.width * 12, heightInches: bathroomOpening.height * 12,
+    operation: 'Slides west into wall; shown closed', targetClearWidthInches: bathroomOpening.pocket.targetClearWidth * 12,
+    closedCenterX: bathroomOpening.x + bathroomOpening.width / 2, openCenterX: bathroomOpening.pocket.x + 1.31,
+    approvalRequired: true, review: 'Pocket framing, wall thickness, short west wall return, nonpenetrating fixings, services and privacy hardware; cavity is schematic', provisional: true
+  };
+  bathroomPocketDoor.userData.interactiveHouseDoor = { operation: 'sliding', open: false, closedCenterX: bathroomPocketDoor.userData.closedCenterX, openCenterX: bathroomPocketDoor.userData.openCenterX };
+  box(bathroomPocketDoor, 0, bathroomOpening.height / 2, 0, bathroomOpening.width + 0.08, bathroomOpening.height - 0.04, 0.13, windowTrim).name = 'Guest bathroom painted-white pocket leaf';
+  for (const y of [2.05, 5.95]) for (const face of [-1, 1]) box(bathroomPocketDoor, 0, y, face * 0.05, bathroomOpening.width - 0.4, 3.2, 0.025, cream).name = 'Guest bathroom recessed pocket panel';
+  for (const face of [-1, 1]) box(bathroomPocketDoor, bathroomOpening.width / 2 - 0.2, 3, face * 0.066, 0.12, 0.5, 0.012, brass).name = 'Guest bathroom flush privacy pull concept';
   const guestCoats = furnishing('Guest coat closet', 9.65, powderNorthZ + 1.2);
-  guestCoats.userData = { purpose: 'Guest coats, separate from powder room', nominalWidthInches: 61.2, nominalDepthInches: 28.8, clearDepthInches: 24.6, doorWidthInches: 48, provisional: true };
+  guestCoats.userData = { purpose: 'Guest coats, separate from powder room', nominalWidthInches: 61.2, nominalDepthInches: 28.8, clearDepthInches: 24.6, doorWidthInches: 48, doorHeightInches: guestEntry.closetDoor.height * 12, provisional: true };
   box(guestCoats, 0, 6.5, 0, 4.65, 0.1, 1.95, cabinetFinish).name = 'Guest coat closet upper shelf';
   const guestCoatRail = cylinder(guestCoats, 0, 5.65, 0, 0.045, 4.4, brass);
   guestCoatRail.rotation.z = Math.PI / 2;
@@ -2871,16 +3769,27 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(guestCoats, x, 3.8, 0, 0.65, 3.2, 1.45, x < 0 ? linen : cream, true).name = 'Guest hanging coat';
   }
   for (const side of [-1, 1]) {
-    const door = shakerFront(guestCoats, side, 3.5, 1.2, guestEntry.closetDoor.width / 2 - 0.04, 6.96);
+    const width = guestEntry.closetDoor.width / 2 - 0.04;
+    const hinge = new THREE.Group();
+    hinge.name = 'Guest coat closet hinged Shaker door';
+    hinge.position.set(side * (width + 0.04) / 2, guestEntry.closetDoor.height / 2, 1.2);
+    hinge.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 180, openRotationSign: side } };
+    guestCoats.add(hinge);
+    const door = shakerFront(hinge, -side * width / 2, 0, 0, width, guestEntry.closetDoor.height - 0.04);
     door.name = 'Guest coat closet closed Shaker door';
-    cabinetPull(door, -side * 0.8, 0, 0.09, 0.65);
+    cabinetPull(door, -side * 0.8, 3.5 - guestEntry.closetDoor.height / 2, 0.09, 0.65);
   }
 
   const powderDoor = furnishing('Powder room inward-opening door', guestEntry.powderDoor.x, guestEntry.powderDoor.z + guestEntry.powderDoor.width, Math.PI / 2);
-  powderDoor.userData = { nominalWidthInches: 30, heightInches: 84, openAngleDegrees: 90, inwardSwing: true, hinge: 'South jamb', provisional: true };
-  box(powderDoor, 0, 3.5, -1.25, 0.13, 6.96, 2.46, windowTrim).name = 'Powder painted-white door leaf';
-  for (const y of [1.8, 5.15]) for (const side of [-1, 1]) box(powderDoor, side * 0.075, y, -1.25, 0.025, 2.7, 2.05, cream).name = 'Powder door recessed panel';
-  for (const side of [-1, 1]) box(powderDoor, side * 0.14, 3, -2.2, 0.16, 0.15, 0.15, brass, true).name = 'Powder door satin-gold knob';
+  powderDoor.userData = { nominalWidthInches: 30, heightInches: guestEntry.powderDoor.height * 12, openAngleDegrees: 90, inwardSwing: true, hinge: 'South jamb', provisional: true };
+  const powderLeaf = new THREE.Group();
+  powderLeaf.position.set(0, 4, -1.25);
+  powderLeaf.rotation.y = Math.PI / 2;
+  powderLeaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 180, openRotationSign: 1 } };
+  powderDoor.add(powderLeaf);
+  box(powderLeaf, 0, 0, 0, 0.13, guestEntry.powderDoor.height - 0.04, 2.46, windowTrim).name = 'Powder painted-white door leaf';
+  for (const y of [-1.95, 1.95]) for (const side of [-1, 1]) box(powderLeaf, side * 0.075, y, 0, 0.025, 3.2, 2.05, cream).name = 'Powder door recessed panel';
+  for (const side of [-1, 1]) box(powderLeaf, side * 0.14, -1, 0.95, 0.16, 0.15, 0.15, brass, true).name = 'Powder door satin-gold knob';
 
   function toilet(name, x, z, rotation = 0) {
     const wc = furnishing(name, x, z, rotation);
@@ -2894,41 +3803,148 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(wc, 0, 2.7, -0.75, 1.75, 0.1, 0.7, porcelain, true);
   }
 
-  function vanity(name, x, z, width, rotation = 0) {
+  function vanity(name, x, z, width, rotation = 0, basinCount = 1, mirrorWidth = width * 0.82) {
     const unit = furnishing(name, x, z, rotation);
     cabinet(unit, 0, 0, width, 1.5, 2.65);
-    box(unit, 0, 2.86, 0, width * 0.6, 0.16, 1, porcelain, true);
-    cylinder(unit, 0, 3.1, -0.55, 0.04, 0.65, brass);
-    box(unit, 0, 3.4, -0.4, 0.08, 0.08, 0.35, brass);
-    box(unit, 0, 5.1, -0.72, width * 0.82, 2.3, 0.06, steel, true);
+    unit.userData = { widthInches: width * 12, depthInches: 18, basinCount, basinCenterSpacingInches: basinCount === 2 ? width * 6 : 0, provisional: true, productFitVerified: false };
+    const centers = basinCount === 2 ? [-width / 4, width / 4] : [0];
+    for (const [index, center] of centers.entries()) {
+      box(unit, center, 2.86, 0, basinCount === 2 ? 1.4 : Math.min(width * 0.6, 1.75), 0.16, 1, porcelain, true).name = `${name} basin ${index + 1}`;
+      cylinder(unit, center, 3.1, -0.55, 0.04, 0.65, brass).name = `${name} faucet riser ${index + 1}`;
+      box(unit, center, 3.4, -0.4, 0.08, 0.08, 0.35, brass).name = `${name} faucet spout ${index + 1}`;
+      box(unit, center, 5.1, -0.72, basinCount === 2 ? 1.8 : mirrorWidth, 2.3, 0.06, steel, true).name = `${name} mirror ${index + 1}`;
+    }
+    return unit;
   }
-  tiledFloor('Powder room tile', guestEntry.powder.x, powderNorthZ, guestEntry.powder.w, guestEntry.powder.d);
-  toilet('Powder toilet', guestEntry.toilet.x, guestEntry.toilet.z);
-  vanity('Powder vanity', guestEntry.vanity.x, guestEntry.vanity.z, guestEntry.vanity.width, guestEntry.vanity.rotation);
+  const powderStone = mat('#d8cdbb', 0.9);
+  const powderBasin = mat('#d9ded8', 0.35);
+  const powderGlow = new THREE.MeshStandardMaterial({ color: '#fff1d7', emissive: '#ffe0a3', emissiveIntensity: 0.45, roughness: 0.6 });
+  tiledFloor('Powder room tile', guestEntry.powder.x, powderNorthZ, guestEntry.powder.w, guestEntry.powder.d, powderStone);
+  toilet('Powder toilet', guestEntry.toilet.x, guestEntry.toilet.z, guestEntry.toilet.rotation);
+  const powderVanity = furnishing('Powder vanity', guestEntry.vanity.x, guestEntry.vanity.z, guestEntry.vanity.rotation);
+  powderVanity.userData = { widthInches: guestEntry.vanity.width * 12, depthInches: guestEntry.vanity.depth * 12, counterHeightInches: 34, sinkBayWidthInches: 22, drawerBankWidthInches: 10, drawerBankSide: 'Both', drawers: 6, drawerTravelInches: 15, plumbingZone: { minX: -0.8, maxX: 0.8, minZ: -0.8, maxZ: 0.4 }, finish: 'Natural white oak Shaker with satin-gold knobs', provisional: true, occupiedClearancesVerified: false, plumbingVerified: false, closeDrawersBeforeEntryDoorSwing: true };
+  const powderSinkX = 0;
+  const powderSinkBayWidth = 22 / 12;
+  const powderDrawerWidth = (guestEntry.vanity.width - powderSinkBayWidth) / 2;
+  const powderDrawerBoxWidth = powderDrawerWidth - 0.25;
+  const powderPanel = 0.75 / 12;
+  for (const x of [-guestEntry.vanity.width / 2 + powderPanel / 2, -powderSinkBayWidth / 2, powderSinkBayWidth / 2, guestEntry.vanity.width / 2 - powderPanel / 2]) {
+    box(powderVanity, x, 1.425, 0, powderPanel, 2.55, guestEntry.vanity.depth, cabinetFinish).name = 'Powder vanity side or divider';
+  }
+  box(powderVanity, 0, 1.425, -guestEntry.vanity.depth / 2 + powderPanel / 2, guestEntry.vanity.width - 2 * powderPanel, 2.55, powderPanel, cabinetFinish).name = 'Powder vanity back';
+  box(powderVanity, 0, 0.35, 0, guestEntry.vanity.width - 2 * powderPanel, powderPanel, guestEntry.vanity.depth - 2 * powderPanel, cabinetFinish).name = 'Powder vanity cabinet floor';
+  box(powderVanity, 0, 0.15, -0.08, guestEntry.vanity.width - 0.2, 0.3, 1.5, cabinetFinish).name = 'Powder vanity recessed plinth';
+  for (const side of [-1, 1]) {
+    const doorWidth = powderSinkBayWidth / 2;
+    const powderSinkDoor = shakerFront(powderVanity, side * doorWidth / 2, 1.425, 0.915, doorWidth - 0.04, 2.46);
+    powderSinkDoor.name = 'Powder plumbing-access Shaker door';
+    const knob = cylinder(powderSinkDoor, -side * (doorWidth / 2 - 0.15), 0.925, 0.1, 0.055, 0.1, brass);
+    knob.name = 'Powder sink-door gold knob';
+    knob.rotation.x = Math.PI / 2;
+  }
+  for (const side of [-1, 1]) for (let row = 0; row < 3; row++) {
+    const drawer = new THREE.Group();
+    drawer.name = `Powder vanity drawer ${side < 0 ? row + 1 : row + 4}`;
+    drawer.position.set(side * (powderSinkBayWidth + powderDrawerWidth) / 2, 0.75 + row * 0.75, 0);
+    drawer.userData = { side: side < 0 ? 'Left' : 'Right', travelFeet: 1.25, shownClosed: true, hardwareSelected: false };
+    powderVanity.add(drawer);
+    const front = shakerFront(drawer, 0, 0, 0.915, powderDrawerWidth - 0.04, 0.69);
+    front.name = 'Powder drawer Shaker front';
+    const knob = cylinder(front, 0, 0.12, 0.1, 0.055, 0.1, brass);
+    knob.name = 'Powder drawer gold knob';
+    knob.rotation.x = Math.PI / 2;
+    box(drawer, 0, -0.255, 0.135, powderDrawerBoxWidth, 0.04, 1.25, oak).name = 'Powder drawer bottom';
+    for (const edge of [-1, 1]) {
+      box(drawer, edge * (powderDrawerBoxWidth - 0.04) / 2, 0, 0.135, 0.04, 0.55, 1.25, oak).name = 'Powder drawer side';
+      box(drawer, 0, 0, 0.135 + edge * 0.605, powderDrawerBoxWidth - 0.08, 0.55, 0.04, oak).name = 'Powder drawer end';
+    }
+  }
+  const powderCounterWidth = guestEntry.vanity.width + 0.06;
+  const powderCounterDepth = guestEntry.vanity.depth + 0.05;
+  for (const [start, end] of [[-powderCounterWidth / 2, powderSinkX - 0.725], [powderSinkX + 0.725, powderCounterWidth / 2]]) {
+    box(powderVanity, (start + end) / 2, 2.77, 0, end - start, 0.14, powderCounterDepth, countertop).name = 'Powder counter beside basin opening';
+  }
+  for (const [start, end] of [[-powderCounterDepth / 2, 0.03 - 0.425], [0.03 + 0.425, powderCounterDepth / 2]]) {
+    box(powderVanity, powderSinkX, 2.77, (start + end) / 2, 1.45, 0.14, end - start, countertop).name = 'Powder counter ahead or behind basin opening';
+  }
+  box(powderVanity, powderSinkX, 2.36, 0.03, 1.45, 0.04, 0.85, powderBasin, true).name = 'Powder inset basin interior';
+  for (const side of [-1, 1]) {
+    box(powderVanity, powderSinkX + side * 0.76, 2.86, 0.03, 0.09, 0.08, 1, porcelain).name = 'Powder basin side rim';
+    box(powderVanity, powderSinkX, 2.86, 0.03 + side * 0.455, 1.45, 0.08, 0.09, porcelain).name = 'Powder basin end rim';
+    box(powderVanity, powderSinkX + side * 0.705, 2.6, 0.03, 0.04, 0.48, 0.85, porcelain).name = 'Powder basin side wall';
+    box(powderVanity, powderSinkX, 2.6, 0.03 + side * 0.405, 1.37, 0.48, 0.04, porcelain).name = 'Powder basin end wall';
+  }
+  cylinder(powderVanity, powderSinkX, 3.08, -0.58, 0.04, 0.52, brass).name = 'Powder brass faucet stem';
+  box(powderVanity, powderSinkX, 3.32, -0.43, 0.08, 0.08, 0.35, brass).name = 'Powder brass faucet spout';
+  box(powderVanity, 0, 3.03, -0.89, guestEntry.vanity.width + 0.06, 0.4, 0.07, countertop).name = 'Powder low stone backsplash';
+  const powderMirrorFrame = cylinder(powderVanity, powderSinkX, 5.2, -0.925, 1.04, 0.045, brass);
+  powderMirrorFrame.rotation.x = Math.PI / 2;
+  powderMirrorFrame.name = 'Powder round brass mirror frame';
+  const powderMirror = cylinder(powderVanity, powderSinkX, 5.2, -0.89, 0.98, 0.035, steel);
+  powderMirror.rotation.x = Math.PI / 2;
+  powderMirror.name = 'Powder round mirror glass';
+  for (const side of [-1, 1]) {
+    box(powderVanity, powderSinkX + side * 1.4, 5.2, -0.91, 0.18, 0.6, 0.06, brass).name = 'Powder sconce backplate';
+    box(powderVanity, powderSinkX + side * 1.4, 5.2, -0.75, 0.08, 0.08, 0.3, brass).name = 'Powder sconce arm';
+    cylinder(powderVanity, powderSinkX + side * 1.4, 5.25, -0.59, 0.13, 0.8, powderGlow).name = 'Powder warm opal sconce';
+  }
+  box(powderVanity, 0, 0.11, 0.98, 3.2, 0.045, 0.04, powderGlow).name = 'Powder low-level night-light concept';
+  const powderTowel = furnishing('Powder wall-mounted hand towel', guestEntry.powder.w - 0.175, powderNorthZ + 2.15);
+  powderTowel.userData = { wall: 'East, beside vanity and north of entry casing', hookHeightInches: 48, towelSizeInches: [16, 28], foldedWidthInches: 8, provisional: true };
+  box(powderTowel, -0.035, 4, 0, 0.06, 0.2, 0.14, brass).name = 'Powder towel hook backplate';
+  box(powderTowel, -0.15, 4, 0, 0.22, 0.045, 0.045, brass).name = 'Powder towel hook arm';
+  cylinder(powderTowel, -0.25, 4.04, 0, 0.035, 0.14, brass).name = 'Powder towel hook upturned tip';
+  box(powderTowel, -0.27, 3.3, 0, 0.035, 1.3, 8 / 12, linen, true).name = 'Powder hanging hand towel';
+  box(powderTowel, -0.29, 2.68, 0, 0.045, 0.08, 8 / 12, linen).name = 'Powder hand towel hem';
+  cylinder(powderVanity, -1.25, 3.02, -0.3, 0.1, 0.35, porcelain).name = 'Powder soap dispenser';
+  box(powderVanity, -1.25, 3.23, -0.25, 0.06, 0.07, 0.2, brass).name = 'Powder soap pump';
+  const powderPaper = furnishing('Powder toilet paper holder', 0.4, guestEntry.toilet.z + 0.6);
+  box(powderPaper, 0, 2, 0, 0.4, 0.08, 0.08, brass).name = 'Powder paper holder arm';
+  const powderRoll = cylinder(powderPaper, 0.15, 2, 0, 0.16, 0.36, porcelain);
+  powderRoll.rotation.x = Math.PI / 2;
+  powderRoll.name = 'Powder toilet paper roll';
+  for (const [index, window] of guestEntry.windows.entries()) {
+    windowFrame(`Powder privacy window ${index + 1}`, window.x + 0.1, window.z, window.width, window.height, window.sill, -Math.PI / 2, rest, -1, { privacyLowerHalf: window.privacyLowerHalf, standardSizeCode: window.standardSizeCode });
+  }
   tiledFloor('Guest bathroom tile', guestSuite.bathroom.x, guestSuite.bathroom.z, guestSuite.bathroom.w, guestSuite.bathroom.d);
-  vanity('Guest bathroom vanity', guestSuite.vanity.x, guestSuite.vanity.z, guestSuite.vanity.width, guestSuite.vanity.rotation);
-  toilet('Guest bathroom toilet', guestSuite.toilet.x, guestSuite.toilet.z);
+  const guestVanity = vanity('Guest bathroom vanity', guestSuite.vanity.x, guestSuite.vanity.z, guestSuite.vanity.width, guestSuite.vanity.rotation, guestSuite.vanity.basinCount, guestSuite.vanity.mirrorWidth);
+  guestVanity.userData.mirrorWidthInches = guestSuite.vanity.mirrorWidth * 12;
+  for (const side of [-1, 1]) {
+    box(guestVanity, side * 1.55, 5.1, -0.72, 0.18, 0.6, 0.06, brass).name = 'Guest bathroom warm sconce backplate';
+    box(guestVanity, side * 1.55, 5.1, -0.56, 0.08, 0.08, 0.28, brass).name = 'Guest bathroom warm sconce arm';
+    const diffuser = cylinder(guestVanity, side * 1.55, 5.1, -0.39, 0.12, 0.65, powderGlow);
+    diffuser.name = 'Guest bathroom warm opal vanity sconce';
+    diffuser.userData = { colorTemperatureKelvin: 2700, provisional: true };
+    const light = new THREE.PointLight('#ffd3a0', 8, 5, 2);
+    light.name = 'Guest bathroom warm vanity light';
+    light.position.set(side * 1.55, 5.1, -0.35);
+    guestVanity.add(light);
+  }
+  const guestNightLight = furnishing('Guest bathroom independent night-light concept', guestSuite.vanity.x, guestSuite.vanity.z, guestSuite.vanity.rotation);
+  box(guestNightLight, 0, 0.15, 0.9, 2.5, 0.05, 0.04, powderGlow).name = 'Guest bathroom warm low-level night light';
+  const guestTowel = furnishing('Guest bathroom wall-mounted towel hook', 31.1, 37.3);
+  guestTowel.userData = { wall: 'East, beside the shower and south of the vanity', hookHeightInches: 48, towelSizeInches: [16, 28], provisional: true };
+  box(guestTowel, 0.035, 4, 0, 0.06, 0.2, 0.14, brass).name = 'Guest bathroom towel hook backplate';
+  box(guestTowel, -0.08, 4, 0, 0.22, 0.045, 0.045, brass).name = 'Guest bathroom towel hook arm';
+  cylinder(guestTowel, -0.18, 4.04, 0, 0.035, 0.14, brass).name = 'Guest bathroom towel hook upturned tip';
+  box(guestTowel, -0.2, 3.3, 0, 0.035, 1.3, 16 / 12, linen, true).name = 'Guest bathroom hanging towel';
+  box(guestTowel, -0.22, 2.68, 0, 0.045, 0.08, 16 / 12, linen).name = 'Guest bathroom towel hem';
+  toilet('Guest bathroom toilet', guestSuite.toilet.x, guestSuite.toilet.z, guestSuite.toilet.rotation);
   const showerLayout = guestSuite.shower;
   const guestShower = furnishing('Guest bathroom shower', showerLayout.x, showerLayout.z);
   guestShower.userData = { clearWidthInches: showerLayout.clearWidth * 12, clearDepthInches: showerLayout.clearDepth * 12, doorOpeningInches: showerLayout.doorWidth * 12, provisional: true };
   box(guestShower, showerLayout.w / 2, 0.1, showerLayout.d / 2, showerLayout.w, 0.2, showerLayout.d, porcelain).name = 'Guest shower pan';
   for (const x of [0.05, showerLayout.w - 0.05]) box(guestShower, x, 0.22, showerLayout.d / 2, 0.1, 0.24, showerLayout.d, countertop).name = 'Guest shower side curb';
   for (const z of [0.05, showerLayout.d - 0.05]) box(guestShower, showerLayout.w / 2, 0.22, z, showerLayout.w, 0.24, 0.1, countertop).name = 'Guest shower end curb';
-  box(guestShower, 0.05, 3.5, showerLayout.d / 2, 0.08, 6.6, showerLayout.d, cream).name = 'Guest shower west tile';
-  box(guestShower, showerLayout.w / 2, 3.5, 0.05, showerLayout.w, 6.6, 0.08, cream).name = 'Guest shower north tile';
-  box(guestShower, showerLayout.w / 2, 3.4, showerLayout.d - 0.05, showerLayout.w, 6.4, 0.06, glass).name = 'Guest shower fixed south glass';
-  const showerHingeZ = showerLayout.d - 0.25;
-  const showerOpeningStart = showerHingeZ - showerLayout.doorWidth;
-  box(guestShower, showerLayout.w - 0.05, 3.4, showerOpeningStart / 2, 0.06, 6.4, showerOpeningStart, glass).name = 'Guest shower fixed east glass';
-  box(guestShower, showerLayout.w - 0.05, 3.4, (showerHingeZ + showerLayout.d) / 2, 0.06, 6.4, showerLayout.d - showerHingeZ, glass).name = 'Guest shower hinge-side glass';
-  const showerDoor = new THREE.Group();
-  showerDoor.name = 'Guest shower inward-opening glass door';
-  showerDoor.position.set(showerLayout.w - 0.05, 0, showerHingeZ);
-  showerDoor.rotation.y = Math.PI / 2;
-  showerDoor.userData = { nominalWidthInches: 30, openAngleDegrees: 90, inwardSwing: true, provisional: true };
-  guestShower.add(showerDoor);
-  box(showerDoor, 0, 3.4, -showerLayout.doorWidth / 2, 0.06, 6.36, showerLayout.doorWidth - 0.04, glass).name = 'Guest shower glass door leaf';
-  cylinder(showerDoor, 0.09, 3.4, -showerLayout.doorWidth + 0.25, 0.035, 0.65, brass).name = 'Guest shower gold door pull';
+  const showerGlassCenterY = 0.2 + showerLayout.height / 2;
+  box(guestShower, 0.05, showerGlassCenterY, showerLayout.d / 2, 0.08, showerLayout.height, showerLayout.d, cream).name = 'Guest shower west tile';
+  box(guestShower, showerLayout.w / 2, showerGlassCenterY, 0.05, showerLayout.w, showerLayout.height, 0.08, cream).name = 'Guest shower north tile';
+  box(guestShower, showerLayout.entryOffset / 2, showerGlassCenterY, showerLayout.d - 0.05, showerLayout.entryOffset, showerLayout.height, 0.06, glass).name = 'Guest shower fixed southwest glass';
+  const showerRightStart = showerLayout.entryOffset + showerLayout.doorWidth;
+  const showerRightWidth = showerLayout.w - showerRightStart;
+  box(guestShower, showerRightStart + showerRightWidth / 2, showerGlassCenterY, showerLayout.d - 0.05, showerRightWidth, showerLayout.height, 0.06, glass).name = 'Guest shower fixed southeast glass';
+  box(guestShower, showerLayout.w - 0.05, showerGlassCenterY, showerLayout.d / 2, 0.06, showerLayout.height, showerLayout.d, glass).name = 'Guest shower fixed east glass';
+  guestShower.userData = { ...guestShower.userData, entryType: 'Open walk-in, fixed splash glass only', slidingDoor: false };
   box(guestShower, showerLayout.w / 2, 0.21, 0.65, 0.55, 0.02, 0.18, steel).name = 'Guest shower drain';
   cylinder(guestShower, 1.6, 5.8, 0.16, 0.035, 2.2, brass).name = 'Guest shower riser';
   box(guestShower, 1.6, 6.85, 0.42, 0.07, 0.07, 0.6, brass).name = 'Guest shower head arm';
@@ -2936,17 +3952,24 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(guestShower, 2.85, 3.5, 0.16, 0.18, 0.35, 0.12, brass).name = 'Guest shower mixer control';
 
   const frontDoor = furnishing('Double front entry', 15.6, 54.2);
-  frontDoor.userData = { lockBrand: 'Wyze', lockModel: null, activeLeafHandingVerified: false, hardwareCompatibilityVerified: false };
+  frontDoor.userData = { heightInches: 96, lockBrand: 'Wyze', lockModel: null, activeLeafHandingVerified: false, hardwareCompatibilityVerified: false };
+  let activeFrontEntryLeaf;
   for (const side of [-1, 1]) {
-    box(frontDoor, side * 1.25, 3.45, 0, 2.45, 6.9, 0.12, oak);
-    box(frontDoor, side * 1.25, 4.15, -0.08, 1.65, 3.6, 0.04, glass);
-    box(frontDoor, side * 0.22, 3.15, -0.14, 0.06, 1, 0.08, brass);
+    const leaf = new THREE.Group();
+    leaf.name = `Front entry ${side < 0 ? 'left' : 'right'} oak door leaf`;
+    leaf.position.x = side * 2.475;
+    leaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 180, openRotationSign: -side } };
+    frontDoor.add(leaf);
+    box(leaf, -side * 1.225, 4, 0, 2.45, 7.96, 0.12, oak).name = 'Front entry oak door leaf';
+    box(leaf, -side * 1.225, 4.65, -0.08, 1.65, 4.6, 0.04, glass).name = 'Front entry door glazing';
+    box(leaf, -side * 2.255, 3.15, -0.14, 0.06, 1, 0.08, brass);
+    if (side === 1) activeFrontEntryLeaf = leaf;
   }
   const entrySmartLock = new THREE.Group();
   entrySmartLock.name = 'Wyze smart-lock selection placeholder';
-  entrySmartLock.position.set(0.22, 4.15, -0.08);
+  entrySmartLock.position.set(-2.255, 4.15, -0.08);
   entrySmartLock.userData = { brand: 'Wyze', model: null, representation: 'Schematic interior lock body, not manufacturer geometry', leafSide: 'Positive x, provisional active leaf', finishVerified: false, dimensionsVerified: false };
-  frontDoor.add(entrySmartLock);
+  activeFrontEntryLeaf.add(entrySmartLock);
   box(entrySmartLock, 0, 0, -0.06, 0.28, 0.55, 0.12, black, true).name = 'Schematic smart-lock interior housing';
   box(entrySmartLock, 0, -0.12, -0.14, 0.16, 0.045, 0.05, steel, true).name = 'Schematic smart-lock thumbturn';
   tiledFloor('Porch paving', 0, 54.2, 31.2, 7, mat('#c9c7bc'));
@@ -3010,6 +4033,60 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const originalGroundDimensions = [...document.querySelectorAll('#room-dimension-summary li')].map((item) => item.cloneNode(true));
   const groundBaseline = getGroundFloorDefaultPlan();
   let groundLayoutPreview = null;
+  const roomDimensionsInput = document.getElementById('show-room-dimensions');
+  const planDimensionLabels = document.getElementById('plan-dimension-labels');
+  const planDimensionsPanel = document.getElementById('plan-dimensions');
+  let dimensionRooms = [];
+  function updatePlanDimensions() {
+    const planView = currentView === 'top' || currentView === 'upstairs-top';
+    const visible = planView && roomDimensionsInput.checked;
+    roomDimensionsInput.disabled = !planView;
+    planDimensionLabels.hidden = planDimensionsPanel.hidden = !visible;
+    if (!visible) return;
+    const rooms = activeFloor === 'upstairs' ? upstairs.rooms : (groundLayoutPreview?.plan ?? groundBaseline).rooms;
+    if (rooms === dimensionRooms) return;
+    dimensionRooms = rooms;
+    planDimensionLabels.replaceChildren();
+    const list = document.getElementById('plan-dimension-list');
+    list.replaceChildren();
+    for (const room of rooms) {
+      const dimensions = `${feet(room.w)} x ${feet(room.d)}`;
+      const label = document.createElement('div');
+      label.className = 'plan-dimension-label';
+      const name = document.createElement('strong');
+      name.textContent = room.name;
+      const size = document.createElement('span');
+      size.textContent = dimensions;
+      label.append(name, size);
+      planDimensionLabels.append(label);
+      const item = document.createElement('li');
+      item.textContent = `${room.name}: ~ ${dimensions}`;
+      list.append(item);
+    }
+  }
+  function positionPlanDimensions() {
+    if (planDimensionLabels.hidden) return;
+    const width = viewport.clientWidth;
+    const height = viewport.clientHeight;
+    dimensionRooms.forEach((room, index) => {
+      const center = new THREE.Vector3(room.x + room.w / 2, activeFloor === 'upstairs' ? stairFloorToFloor : 0, room.z + room.d / 2).project(camera);
+      const roomWidth = room.w * width / (camera.right - camera.left) * camera.zoom;
+      const roomDepth = room.d * height / (camera.top - camera.bottom) * camera.zoom;
+      const label = planDimensionLabels.children[index];
+      label.style.left = `${(center.x + 1) * width / 2}px`;
+      label.style.top = `${(1 - center.y) * height / 2}px`;
+      label.style.fontSize = `${Math.min(13, roomWidth / (Math.max(room.name.length, 18) * 0.65), roomDepth / 3.5)}px`;
+    });
+  }
+  roomDimensionsInput.addEventListener('change', () => {
+    updatePlanDimensions();
+    const url = new URL(window.location.href);
+    if (roomDimensionsInput.checked) url.searchParams.set('dimensions', '1');
+    else url.searchParams.delete('dimensions');
+    url.searchParams.set('view', currentView);
+    window.history.replaceState(null, '', url);
+    render();
+  });
   const upstairsHelpers = { box, mat, wood, wallMaterial, windowTrim, oak, cream, black, steel, linen, windowFrame, openingCasing };
   let upstairs = buildUpstairsModel(THREE, upstairsHelpers, stairOpening, stairFloorToFloor, savedUpstairsLayout);
   scene.add(upstairs.group);
@@ -3062,6 +4139,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       basementStairs.visible = true;
     }
     activeFloor = floor;
+    document.getElementById('ground-room-views').hidden = floor !== 'ground';
+    document.getElementById('upstairs-room-views').hidden = floor !== 'upstairs';
+    document.getElementById('room-controls-title').hidden = floor === 'exterior';
     const groundStatus = document.getElementById('ground-preview-status');
     if (groundStatus) groundStatus.hidden = floor !== 'ground' || !groundLayoutPreview;
     upstairs.group.visible = floor === 'upstairs';
@@ -3074,7 +4154,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     tourMapBounds.right = Math.max(...areas.map((area) => area.x + area.w));
     tourMapBounds.bottom = Math.max(...areas.map((area) => area.z + area.d));
     tourMapScale = (tourMap.width - 24) / Math.max(tourMapBounds.right - tourMapBounds.x, tourMapBounds.bottom - tourMapBounds.z);
-    document.getElementById('floor-caption').textContent = floor === 'exterior' ? 'EXTERIOR - ENGLISH COUNTRY CONCEPT' : floor === 'upstairs' ? 'UPSTAIRS - ADAPTED STUDY' : 'GROUND FLOOR';
     viewport.setAttribute('aria-label', floor === 'exterior' ? '3D English-country exterior concept. Drag to orbit; select an elevation to view each facade.' : `3D ${floor === 'upstairs' ? 'upstairs' : 'ground floor'}. Click the floor to enter the tour. Drag to ${navigationMode === 'move' ? 'move' : 'rotate'}; scroll or pinch to zoom.`);
     tourMap.setAttribute('aria-label', `Clickable ${floor === 'upstairs' ? 'upstairs' : 'ground-floor'} plan. Arrow keys select a destination; Enter travels there.`);
     islandLightsInput.closest('details').hidden = floor !== 'ground';
@@ -3105,29 +4184,64 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     'exterior-wood': { target: [57, 0.5, 26.5], offset: [18, 24, -16], span: 24 },
     'exterior-security': { target: [exterior.userData.lot.centerX, 0, (exterior.userData.lot.rear + exterior.userData.lot.front) / 2], offset: [0, 160, 0.01], span: 150 },
     upstairs: { target: [27, stairFloorToFloor + 1, 28], offset: [34, 68, 43], span: 74 },
-    'upstairs-top': { target: [27, stairFloorToFloor, 28], offset: [0, 110, 0.1], span: 70 },
+    'upstairs-top': { target: [27, stairFloorToFloor, 28], offset: [0, 110, 0], span: 70 },
     social: { target: [19, 2, 12], offset: [27, 55, 32], span: 43 },
     living: { target: [12.5, 1.5, livingCenterZ], offset: [28, 27, 7], span: 32 },
     kids: { target: [24, 1, 30.15], offset: [-12, 30, 18], span: 17 },
     dining: { target: [19.85, 1, 3.95], offset: [16, 19, 23], span: 20 },
     kitchen: { target: [32.2, 2, kitchenCenterZ], offset: [-22, 35, 27], span: 26 },
-    cooktop: { target: [37, 5.3, cooktopCenterZ], offset: [-18, 0, 0], span: 11 },
+    cooktop: { target: [36.5, 5.3, cooktopCenterZ], offset: [-18, 0, 0], span: 11 },
     fridge: { target: [bottomRunCenterX, 5, 26.9], offset: [0, 0, -18], span: 12 },
     island: { target: [30.65 + island.position.x, 1.5, kitchenCenterZ], offset: [-12, 9, 10], span: 15 },
     whole: { target: [27, 0, 29], offset: [35, 75, 50], span: 78 },
-    garage: { target: [43, 0, 33], offset: [15, 58, 10], span: 42 },
+    garage: { target: [43, 0, 33], offset: [-15, 58, 10], span: 42 },
+    'garage-storage': { target: [35, 2.8, 28.1], offset: [4, 6, 11], span: 13 },
+    bikes: { target: [52, 0.5, 21], offset: [-9, 22, 7], span: 15 },
     prep: { target: [44, 1, 16], offset: [-28, 44, 30], span: 28 },
-    mudroom: { target: [41.8, 2, 20.9], offset: [0, 22, 20], span: 17 },
-    'mudroom-cubbies': { target: [44, 4.4, 22.85], offset: [-3, 2, 2], span: 9.5 },
-    'mudroom-storage': { target: [41.7, 4.8, 17.9], offset: [0, 0.7, 8.35], span: 12 },
-    pantry: { target: [46.75, 4.5, 14.15], offset: [0, 0.2, -2.5], span: 14 },
-    'prep-counter': { target: [46.75, 4.5, prepCounterZ], offset: [0, 0.4, 2.6], span: 12.5 },
-    powder: { target: [6.1, 0, powderNorthZ + 2.95], offset: [0, 30, 4], span: 17 },
-    'guest-suite': { target: [25.1, 0, 39.7], offset: [0, 36, 4], span: 18 },
+    mudroom: { target: [41.55, 2, 20.9], offset: [0, 22, 20], span: 17 },
+    'mudroom-cubbies': { target: [44, 4.4, 22.85], offset: [-4, 1, 0], span: 9.5 },
+    'mudroom-storage': { target: [41.11666666666667, 4.8, 17.9], offset: [0, 0.7, 8.35], span: 12 },
+    pantry: { target: [46.75, 4.5, 14.325], offset: [0, 0.2, -2.5], span: 14 },
+    'prep-counter': { target: [46.6, 4.5, prepCounterZ], offset: [0, 0.4, 2.6], span: 14 },
+    powder: { target: [3.7, 1, powderNorthZ + 2.95], offset: [4, 34, 4], span: 12 },
+    'guest-bathroom': { target: [27.85, 1.5, 38.8], offset: [0.2, 14, 1], span: 10 },
+    'guest-suite': { target: [25.1, 0, 44.4], offset: [0, 40, 0.01], span: 25 },
     private: { target: [15.6, 1, 43], offset: [32, 49, 37], span: 40 },
     basement: { target: [stairOpening.x + stairOpening.width / 2, -3, stairOpening.z + stairOpening.depth / 2], offset: [4, 30, 5], span: 21 },
-    top: { target: [27, 0, 29], offset: [0, 110, 0.1], span: 72 }
+    top: { target: [27, 0, 29], offset: [0, 110, 0], span: 72 }
   };
+  const roomViewAliases = {
+    'Living room': 'living', 'Dining room': 'dining', 'Kids room': 'kids', 'Powder room': 'powder',
+    'Guest coat closet': 'guest-coats', 'Guest entry alcove': 'guest-entry', 'Closet': 'guest-closet',
+    'Bathroom': 'guest-bathroom', 'Guest room': 'guest-bedroom'
+  };
+  const roomViewLabels = { Closet: 'Guest walk-in', Bathroom: 'Guest bathroom', 'Guest room': 'Guest bedroom' };
+  const groundRooms = [
+    ...getGroundFloorDefaultPlan().rooms,
+    { name: 'Stairs', x: stairOpening.x, z: stairOpening.z, w: stairOpening.width, d: stairOpening.depth }
+  ];
+  for (const [floor, rooms] of [['ground', groundRooms], ['upstairs', upstairs.rooms]]) {
+    const container = document.getElementById(`${floor}-room-views`);
+    for (const room of rooms) {
+      const roomName = room.name.replace(' (relocated)', '');
+      const slug = roomName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const name = floor === 'upstairs' ? `upstairs-${slug}` : roomViewAliases[room.name] ?? slug;
+      presets[name] ??= {
+        target: [room.x + room.w / 2, (floor === 'upstairs' ? stairFloorToFloor : 0) + 1, room.z + room.d / 2],
+        offset: [4, 34, 4], span: Math.max(room.w, room.d) + 5
+      };
+      Object.assign(presets[name], { floor, roomName });
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.view = name;
+      button.dataset.floor = floor;
+      button.setAttribute('aria-pressed', 'false');
+      button.textContent = floor === 'ground' ? roomViewLabels[room.name] ?? roomName : roomName;
+      container.append(button);
+    }
+  }
+  viewButtons = document.querySelectorAll('[data-view]');
+
   function fitEditedUpstairs(edits) {
     const status = document.getElementById('upstairs-preview-status');
     status.textContent = upstairs.coordinationWarnings.join(' ');
@@ -3496,12 +4610,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       upstairs: [...upstairs.start, 16.5, 23], 'upstairs-top': [...upstairs.start, 16.5, 23],
       whole: [15.6, 50, 15.6, 42], top: [15.6, 50, 15.6, 42], social: [20, 18, 20, 3],
       living: [14.8, 23.9, 5, 16], kids: [20.1, 30, 24, 26], dining: [23, 7, 19.85, 3.95], kitchen: [33, 19.5, 32.25, 8],
-      cooktop: [33, cooktopCenterZ, 37, cooktopCenterZ], fridge: [33, 23, 33, 26.9], island: [33, kitchenCenterZ, 28.65, kitchenCenterZ],
-      prep: [43, 12, 48, prepCounterZ], pantry: [47, 12, 47, 14.15], 'prep-counter': [47, 12, 47, prepCounterZ],
+      cooktop: [33, cooktopCenterZ, 36.5, cooktopCenterZ], fridge: [33, 23, 33, 26.9], island: [33, kitchenCenterZ, 28.65, kitchenCenterZ],
+      prep: [43, 12, 48, prepCounterZ], pantry: [47, 12, 47, 14.325], 'prep-counter': [47, 12, 47, prepCounterZ],
       mudroom: [41.7, 23, 41.7, 17.5], 'mudroom-cubbies': [41.7, 23, 44.3, 23], 'mudroom-storage': [41.7, 23, 41.7, 17.5],
       private: [15.6, 46, 15.6, 41], basement: [11.5, 33, 5, 30], garage: [43, 29, 43, 38]
     };
-    const [x, z, lookX, lookZ] = starts[currentView];
+    const [targetX, , targetZ] = presets[currentView].target;
+    const [x, z, lookX, lookZ] = starts[currentView] ?? [targetX, targetZ, targetX, targetZ - 1];
     buildWalkObstacles();
     const start = requestedStart ? (canWalkAt(...requestedStart) ? requestedStart : null) : findWalkStart(x, z);
     if (!start) {
@@ -3670,7 +4785,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (walkDrag?.id !== event.pointerId) return;
     const tap = !walkDrag.moved && Math.hypot(event.clientX - walkDrag.startX, event.clientY - walkDrag.startY) <= 6;
     walkDrag = null;
-    if (tap) pickTourFloor(event);
+    if (tap && !pickPatioDoor(event) && !pickHouseDoor(event) && !pickVehicleDoor(event)) pickTourFloor(event);
   });
   for (const eventName of ['pointerup', 'pointercancel', 'lostpointercapture']) {
     renderer.domElement.addEventListener(eventName, (event) => {
@@ -3721,11 +4836,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   function setView(name) {
     if (navigationMode === 'walk') setNavigationMode('rotate');
+    if (name !== currentView) setPatioDoorOpen(false);
     const outside = name === 'exterior' || name.startsWith('exterior-');
-    const floor = outside ? 'exterior' : name === 'upstairs' || name === 'upstairs-top' ? 'upstairs' : 'ground';
+    const floor = outside ? 'exterior' : presets[name].floor ?? (name === 'upstairs' || name === 'upstairs-top' ? 'upstairs' : 'ground');
     if (activeFloor !== 'ground' && floor !== activeFloor) selectFloor('ground');
     selectFloor(floor);
     currentView = name;
+    const planView = name === 'top' || name === 'upstairs-top';
     document.getElementById('dining-clearance-note').hidden = name !== 'dining';
     document.getElementById('firepit-storage-note').hidden = !['exterior-patio', 'exterior-firepit', 'exterior-wood'].includes(name);
     const prepElevationView = name === 'pantry' || name === 'prep-counter';
@@ -3739,7 +4856,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const aspect = viewport.clientWidth / viewport.clientHeight;
     const offset = new THREE.Vector3(...preset.offset);
     const portraitPadding = aspect < 1 ? 1.25 : 1;
-    camera = mudroomInteriorView ? mudroomInteriorCamera : name === 'cooktop' || prepElevationView || mudroomInspectionView || exteriorElevation ? cooktopElevationCamera : perspectiveCamera;
+    camera = mudroomInteriorView ? mudroomInteriorCamera : planView || name === 'cooktop' || prepElevationView || mudroomInspectionView || exteriorElevation ? cooktopElevationCamera : perspectiveCamera;
     controls.object = camera;
     camera.zoom = 1;
     if (camera.isOrthographicCamera) {
@@ -3765,6 +4882,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     camera.position.copy(controls.target).add(offset);
     controls.update();
     const basementCutaway = name === 'basement';
+    setNavigationMode(planView ? 'move' : navigationMode);
+    document.querySelector('[data-navigation="rotate"]').disabled = planView;
     if (outside) {
       for (const object of groundModelRoots) object.visible = false;
       upstairs.group.visible = false;
@@ -3787,24 +4906,23 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     exterior.getObjectByName('Security plan annotations').visible = name === 'exterior-security';
     document.getElementById('security-plan-key').hidden = name !== 'exterior-security';
     viewButtons.forEach((button) => {
-      button.setAttribute('aria-pressed', String(button.dataset.view === name || (button.closest('.model-toolbar') && button.dataset.view === 'exterior' && outside) || (['upstairs', 'top'].includes(button.dataset.view) && name === 'upstairs-top')));
-    });
-    document.querySelectorAll('.furniture-card').forEach((card) => {
-      card.classList.toggle('selected', card.dataset.room === name);
+      button.setAttribute('aria-pressed', String(button.dataset.view === name || (button.closest('.model-toolbar') && button.dataset.view === 'exterior' && outside) || (button.dataset.view === 'upstairs' && floor === 'upstairs') || (button.dataset.view === 'top' && name === 'upstairs-top')));
     });
     const exteriorLabel = name === 'exterior-security' ? 'camera directions and warm outdoor lighting plan, coverage unverified' : name === 'exterior-site' ? '75 by 130 ft lot plan, provisional setbacks' : name === 'exterior-patio' ? 'covered kitchen-dining patio' : name === 'exterior-firepit' ? 'rear-yard firepit, cold storage only, not a burn location' : name === 'exterior-wood' ? 'side-yard firewood beside waste bins, clearance review required' : exteriorElevation ? name.slice(9) + ' elevation' : 'perspective view';
     if (groundLayoutPreview && activeFloor === 'ground') {
       for (const object of originalGroundRoots) object.visible = object === stairs;
       groundLayoutPreview.group.visible = true;
-      document.getElementById('floor-caption').textContent = 'FIRST FLOOR - EDITED STRUCTURE ONLY';
       viewport.setAttribute('aria-label', 'Edited first-floor structure only. Drag to rotate or move; scroll or pinch to zoom. Tours are unavailable.');
     } else if (activeFloor === 'ground') {
-      document.getElementById('floor-caption').textContent = 'GROUND FLOOR';
       viewport.setAttribute('aria-label', `3D ground floor. Click the floor to enter the tour. Drag to ${navigationMode === 'move' ? 'move' : 'rotate'}; scroll or pinch to zoom.`);
     }
     document.querySelector('.model-footer span').lastChild.textContent = groundLayoutPreview && activeFloor === 'ground' ? ' Structure-only concept' : ' Furnished concept';
-    renderer.domElement.setAttribute('aria-label', outside ? `3D English-country exterior concept: ${exteriorLabel}, provisional stone facade and roof` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
+    if (planView) {
+      viewport.setAttribute('aria-label', '2D floor plan. Drag to pan; scroll or pinch to zoom. Select Whole floor or Upstairs to return to 3D.');
+    }
+    renderer.domElement.setAttribute('aria-label', planView ? `2D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground-floor'} orthographic furnished plan, north at top` : outside ? `3D English-country exterior concept: ${exteriorLabel}, provisional stone facade and roof` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
     updateFloorGrid();
+    updatePlanDimensions();
     document.querySelector('[data-navigation="walk"]').disabled = activeFloor === 'exterior' || Boolean(groundLayoutPreview);
     render();
   }
@@ -3812,7 +4930,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   viewButtons.forEach((button) => {
     button.addEventListener('click', () => {
       setView(button.dataset.view === 'top' && activeFloor === 'upstairs' ? 'upstairs-top' : button.dataset.view);
-      if (button.closest('.furniture-card')) viewport.scrollIntoView({ block: 'center', behavior: 'instant' });
+      if (button.closest('.viewer-navigation')) collapseMobileNavigation();
     });
   });
   islandLightsInput.addEventListener('change', () => {
@@ -3826,6 +4944,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   resetButton.disabled = false;
   resetButton.addEventListener('click', () => {
     setView('whole');
+    setNavigationMode('rotate');
   });
   viewport.addEventListener('keydown', (event) => {
     if (event.target !== viewport) return;
@@ -3841,6 +4960,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     const moves = { ArrowLeft: -0.15, ArrowRight: 0.15 };
     if (event.key in moves) {
+      if (currentView === 'top' || currentView === 'upstairs-top') return;
       const offset = camera.position.clone().sub(controls.target);
       offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), moves[event.key]);
       camera.position.copy(controls.target).add(offset);
@@ -3880,6 +5000,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     } else setView(currentView);
   }
   function render() {
+    updateVehicleDoorControls();
+    positionPlanDimensions();
     renderer.render(scene, camera);
   }
   function applyLivingLayout(layout, showLiving = true) {
@@ -3893,98 +5015,34 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       if (placement.length === 3) object.rotation.y = placement[2];
     }
     place(sofa, layout.sofa);
+    place(downloadedSofa, layout.downloadedSofa ?? null);
     place(sectional, layout.sectional ?? null);
+    place(familySectional, layout.familySectional ? [0, 0, 0] : null);
+    place(referenceLounge, layout.referenceLounge ? [0, 0, 0] : null);
+    place(familyLiving, layout.familyZone ? [0, 0, 0] : null);
+    if (layout.familyZone) {
+      familyOttoman.position.x = layout.familySectional ? 6.0666667 : familyLiving.userData.ottoman.x;
+      familyOttoman.position.z = familyLiving.userData.ottoman.z + (layout.familySectional ? 1.5 : 0);
+      for (const part of familyLiving.children.filter((child) => child.name.startsWith('Family living textured side table') || child === readingLamp)) {
+        part.visible = !layout.familySectional;
+        part.traverse((child) => { child.userData.livingLayoutHidden = layout.familySectional; });
+      }
+    }
     loungeChairs.forEach((chair, index) => place(chair, layout.chairs[index]));
-    strandmonChairs.forEach((chair, index) => place(chair, layout.strandmon?.[index] ?? null));
+    livingArmchairs.forEach((chair, index) => place(chair, layout.armchairs?.[index] ?? null));
     [cornerOttoman, readingOttoman].forEach((ottoman, index) => {
       ottoman.visible = layout.id === 'centered' && loungeChairs[index].visible;
       ottoman.traverse((part) => { part.userData.livingLayoutHidden = !ottoman.visible; });
     });
-    document.querySelectorAll('button[data-living-layout]').forEach((button) => {
-      button.setAttribute('aria-pressed', String(button.dataset.livingLayout === layout.id));
-    });
-    document.getElementById('living-layout-status').textContent = `${layout.title}${layout.recommended ? ' — current direction' : ''}. ${layout.note}`;
     viewport.dataset.livingLayout = layout.id;
     buildWalkObstacles();
     if (showLiving) setView('living');
   }
 
-  function livingPlan(layout) {
-    const namespace = 'http://www.w3.org/2000/svg';
-    function element(parent, tag, attributes) {
-      const node = document.createElementNS(namespace, tag);
-      for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, String(value));
-      parent.append(node);
-      return node;
-    }
-    const svg = document.createElementNS(namespace, 'svg');
-    svg.setAttribute('viewBox', `0 0 332 ${(livingFeatureWall.wallEndZ - 8) * 10 + 20}`);
-    svg.setAttribute('aria-hidden', 'true');
-    const plan = element(svg, 'g', { transform: 'translate(10 10) scale(10)', stroke: '#6d675b', 'stroke-width': 0.06 });
-    element(plan, 'rect', { x: 0, y: 0, width: 31.2, height: livingFeatureWall.wallEndZ - 8, fill: '#eee3cf' });
-    element(plan, 'rect', { x: 0.02, y: livingCenterZ - 3 - 8, width: 1.36, height: 6, fill: '#82715f' });
-    for (const cabinet of mediaBuiltIns) {
-      element(plan, 'rect', { x: cabinet.position.x - mediaDepth / 2, y: cabinet.position.z - mediaWidth / 2 - 8, width: mediaDepth, height: mediaWidth, fill: '#c6ad87', 'data-media-built-in': 'true' });
-    }
-    for (const center of livingWindowCenters) element(plan, 'line', { x1: 0, x2: 0, y1: center - 10, y2: center - 6, stroke: '#729ba6', 'stroke-width': 0.2 });
-    for (const { center, width } of livingSideWindows) element(plan, 'line', { x1: center - width / 2, x2: center + width / 2, y1: 0, y2: 0, stroke: '#729ba6', 'stroke-width': 0.2 });
-    const islandCenterX = 30.65 + island.position.x;
-    element(plan, 'rect', { x: islandCenterX - island.userData.width / 2, y: kitchenCenterZ - 8 - island.userData.length / 2, width: island.userData.width, height: island.userData.length, fill: '#e3ddcf' });
-    element(plan, 'text', { x: islandCenterX, y: kitchenCenterZ - 8, 'font-size': 0.65, 'text-anchor': 'middle', stroke: 'none', fill: '#6d675b' }).textContent = 'Island';
-    function seat(placement, width, depth, color = '#b88558') {
-      if (!placement) return;
-      const group = element(plan, 'g', { transform: `translate(${placement[0]} ${placement[1] - 8}) rotate(${-placement[2] * 180 / Math.PI})` });
-      element(group, 'rect', { x: -width / 2, y: -depth / 2, width, height: depth, rx: 0.12, fill: color });
-      element(group, 'line', { x1: -width / 2 + 0.12, x2: width / 2 - 0.12, y1: -depth / 2 + 0.14, y2: -depth / 2 + 0.14, stroke: '#68452e', 'stroke-width': 0.16 });
-      return group;
-    }
-    seat(layout.sofa, 105 / 12, 46 / 12);
-    if (layout.sectional) {
-      const [x, z, rotation] = layout.sectional;
-      const group = element(plan, 'g', { transform: `translate(${x} ${z - 8}) rotate(${-rotation * 180 / Math.PI})`, 'data-double-chaise': 'true' });
-      element(group, 'rect', { x: -sectionalWidth / 2, y: -sectionalBaseDepth / 2, width: sectionalWidth, height: sectionalBaseDepth, rx: 0.12, fill: '#b88558' });
-      for (const side of [-1, 1]) {
-        element(group, 'rect', { x: side === -1 ? -sectionalWidth / 2 : sectionalWidth / 2 - sectionalSeatWidth - sectionalArm, y: sectionalBaseDepth / 2, width: sectionalSeatWidth + sectionalArm, height: sectionalExtension, rx: 0.12, fill: '#b88558' });
-      }
-      sectional.userData.modules.forEach((type, index) => {
-        const depth = (type === 'chaise' ? sectionalDepth : sectionalBaseDepth) - 0.5;
-        element(group, 'rect', { x: (index - 1.5) * sectionalSeatWidth - (sectionalSeatWidth - 0.04) / 2, y: -sectionalBaseDepth / 2 + 0.4, width: sectionalSeatWidth - 0.04, height: depth, rx: 0.1, fill: '#c89969', 'data-sectional-module': type });
-      });
-      element(group, 'line', { x1: -sectionalWidth / 2 + 0.12, x2: sectionalWidth / 2 - 0.12, y1: -sectionalBaseDepth / 2 + 0.14, y2: -sectionalBaseDepth / 2 + 0.14, stroke: '#68452e', 'stroke-width': 0.16 });
-    }
-    layout.chairs.forEach((placement) => seat(placement, 34 / 12, 34.5 / 12));
-    for (const placement of layout.strandmon ?? []) seat(placement, strandmonWidth, strandmonDepth, '#c2b09a').setAttribute('data-strandmon-chair', 'true');
-    if (layout.id === 'centered') {
-      [cornerOttoman, readingOttoman].forEach((ottoman, index) => {
-        const [x, z, rotation] = layout.chairs[index];
-        const group = element(plan, 'g', { transform: `translate(${x} ${z - 8}) rotate(${-rotation * 180 / Math.PI})` });
-        element(group, 'rect', { x: -ottoman.userData.widthInches / 24, y: ottoman.position.z - ottoman.userData.depthInches / 24, width: ottoman.userData.widthInches / 12, height: ottoman.userData.depthInches / 12, rx: 0.12, fill: '#b88558', 'data-lounge-ottoman': 'true' });
-      });
-    }
-    return svg;
-  }
-
-  const layoutOptions = document.getElementById('living-layout-options');
-  for (const layout of livingLayouts) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'living-layout-option';
-    button.dataset.livingLayout = layout.id;
-    button.setAttribute('aria-pressed', 'false');
-    button.append(livingPlan(layout));
-    const title = document.createElement('strong');
-    title.textContent = `${layout.title}${layout.recommended ? ' · Current direction' : ''}`;
-    const note = document.createElement('span');
-    note.textContent = layout.note;
-    button.append(title, note);
-    button.addEventListener('click', () => {
-      applyLivingLayout(layout);
-      viewport.scrollIntoView({ block: 'center', behavior: 'instant' });
-    });
-    layoutOptions.append(button);
-  }
   applyLivingLayout(livingLayouts[0], false);
-  const initialView = new URLSearchParams(window.location.search).get('view');
+  const initialParameters = new URLSearchParams(window.location.search);
+  roomDimensionsInput.checked = initialParameters.get('dimensions') === '1';
+  const initialView = initialParameters.get('view');
   if (initialView && Object.hasOwn(presets, initialView)) currentView = initialView;
   new ResizeObserver(resize).observe(viewport);
   resize();

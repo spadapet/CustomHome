@@ -19,7 +19,7 @@ function buildPrepShelves() {
   const roots = [];
   const context = {
     ceilingHeight: 9,
-    THREE: { Group, MeshStandardMaterial: class {} },
+    THREE: { Group, MeshStandardMaterial: class {}, Mesh: Group, SphereGeometry: class {} },
     ...Object.fromEntries(['cabinetFinish', 'cabinetRailFinish', 'oak', 'black', 'steel', 'linen', 'brass', 'cream'].map((name) => [name, { name }])),
     mat: (color) => ({ color }),
     furnishing(name, x, z, rotation = 0) {
@@ -42,7 +42,7 @@ function buildPrepShelves() {
       return context.box(parent, x, y, z, radius * 2, height, radius * 2, material);
     }
   };
-  const start = source.indexOf('  const prepShelfStart =');
+  const start = source.indexOf('  function addStorageFruit(');
   const end = source.indexOf("  tiledFloor('Mudroom tile'", start);
   assert.ok(start >= 0 && end > start, 'Locate all prep pantry geometry and contents');
   vm.runInNewContext(source.slice(start, end), context);
@@ -89,12 +89,31 @@ test('only the robot bay loses its bottom food shelf and contents', () => {
   assert.ok(supplies.every((item) => !item.name.startsWith('Pantry supplies bay 1 ')));
   assert.equal(model.find('Pantry supplies bay 5 level 1').length, 0);
   for (const bay of [2, 3, 4]) assert.equal(model.find(`Pantry supplies bay ${bay} level 1`).length, 1);
-  const bayShelves = model.find('Open pantry shelf').filter((shelf) => bounds(shelf).minX > 51.9);
+  const robotX = model.find('Prep robot docking station')[0].position.x;
+  const bayShelves = model.find('Open pantry shelf').filter((shelf) => bounds(shelf).minX < robotX && bounds(shelf).maxX > robotX);
   assert.equal(bayShelves.length, 6, 'Keep five food shelves and the cap above the robot');
   assert.ok(bayShelves.every((shelf) => shelf.position.y >= 2.3), 'Remove the 12-inch shelf only in the robot bay');
   assert.equal(model.find('Open pantry shelf').filter((shelf) => shelf.position.y === 1).length, 3);
   assert.equal(model.find('Cleaning station upper shelf').length, 2);
   assert.equal(model.find('Cleaning station ceiling cap').length, 1);
+});
+
+test('bread and ventilated produce containers fit the nearest food bay without changing shelves', () => {
+  const model = buildPrepShelves();
+  const bread = model.find('Removable prep pantry bread box');
+  const baskets = model.find('Removable prep produce basket');
+  assert.equal(bread.length, 1);
+  assert.equal(baskets.length, 2);
+  for (const container of [...bread, ...baskets]) {
+    assert.equal(container.userData.purchasedSeparately, true);
+    assert.equal(container.userData.pantryBay, 2);
+    const b = bounds(container);
+    assert.ok(b.minZ >= 13.825 && b.maxZ <= 14.825, 'Containers stay inside the 12-inch shelf depth');
+    assert.ok(b.minX > 41.2 && b.maxX < 44.75, 'Containers stay in the first food bay, away from cleaning and robot bays');
+  }
+  assert.equal(model.find('Room-temperature whole fruit').length, 12);
+  assert.equal(model.find('Produce basket open front slat').length, 12);
+  assert.ok(bounds(bread[0]).minY > bounds(baskets[0]).maxY);
 });
 
 test('shallow vacuum and broom storage is separate from the threshold-free robot dock', () => {
@@ -122,16 +141,19 @@ test('shallow vacuum and broom storage is separate from the threshold-free robot
   assert.equal(model.find('Robot dock power outlet allowance').length, 1);
 });
 
-test('vacuum bay follows the moved divider and keeps about 43.3 inches to closed oven handles', () => {
+test('pantry and vacuum bay meet the continuous wall without reducing their depth', () => {
   const model = buildPrepShelves();
   const station = bounds(model.find('Prep cleaning station')[0]);
-  assert.ok(station.minX >= 38.3, 'Full-height end panel clears west wall trim');
+  assert.ok(station.minX >= 37.8, 'Full-height end panel clears the shifted west wall trim');
   assert.ok(station.minZ > 12.225 + 0.365, 'Bay clears the prep-entry casing');
   assert.ok(station.maxY <= 9 + 1e-9);
-  const originalFront = 13.15;
+  const originalFront = 13.825;
   const projection = originalFront - station.minZ;
   assert.ok(Math.abs(projection) < 1e-9, 'Neither cabinet nor equipment projects into the oven aisle');
-  assert.ok(Math.abs((station.minZ - (13.65 - 49.3 / 12)) * 12 - 43.3) < 1e-8, 'Measure the reduced aisle against the unchanged oven handles');
+  assert.ok(Math.abs(station.maxZ - (15 - 0.175)) < 1e-9, 'Cleaning bay rear meets the finished wall face');
+  const shelfRear = bounds(model.find('Prep open pantry shelves')[0]).maxZ;
+  assert.ok(Math.abs(shelfRear - station.maxZ) < 1e-9, 'Entire pantry run meets the same rear wall');
+  assert.ok(Math.abs((station.minZ - (13.65 - 49.3 / 12)) * 12 - 51.4) < 1e-8, 'Measure clearance to unchanged closed oven handles');
   for (const name of ['Prep stored stick vacuum', 'Prep stored broom']) {
     const equipment = bounds(model.find(name)[0]);
     assert.ok(equipment.minX > station.minX && equipment.maxX < station.maxX, name);
@@ -148,7 +170,7 @@ test('robot parks below the opposite end shelf without deepening the cabinet or 
   assert.ok(robot.minX > 51.9 && robot.maxX < 55.2, 'Robot remains in the far-east bay');
   assert.ok(base.minX > 51.9 && base.maxX < 55.2);
   assert.ok(robot.minX > 41.25, 'Robot is not opposite the oven tower');
-  assert.ok(robot.minZ < 13.65, 'Only the low robot footprint projects beyond the original shelf line');
+  assert.ok(robot.minZ < 13.825, 'Only the low robot footprint projects beyond the shelf line');
   assert.ok(robot.maxY < 2.3 - 0.75 / 24 && base.maxY < 2.3 - 0.75 / 24, 'Robot and compact base clear the next shelf');
   assert.ok(dock.children.every((part) => !part.name?.includes('side panel')), 'No deeper full-height robot cabinet');
   const pantry = model.find('Prep open pantry shelves')[0];
@@ -166,8 +188,8 @@ test('robot and charging base turn sideways together while the power outlet stay
   assert.equal(dock.rotation.y, Math.PI / 2);
   assert.equal(model.find('Compact robot charging base allowance')[0].parent, dock);
   assert.ok(base.minX > robot.maxX, 'Dock sits east of the robot, not behind it across the aisle');
-  assert.ok(Math.abs((13.15 - robot.minZ) * 12 - 2.2) < 1e-9, 'Robot still projects only 2.2 inches beyond the moved shelf front');
-  assert.ok(robot.maxZ < 14.15 && base.maxZ < 14.15, 'Robot and base clear the moved rear line');
+  assert.ok(Math.abs((13.825 - robot.minZ) * 12 - 2.2) < 1e-9, 'Robot still projects only 2.2 inches beyond the shelf front');
+  assert.ok(robot.maxZ < 14.825 && base.maxZ < 14.825, 'Robot and base clear the rear wall');
   const outlet = model.find('Robot dock power outlet allowance')[0];
   assert.equal(outlet.parent, model.find('Prep open pantry shelves')[0]);
   assert.ok(bounds(outlet).minZ > 14, 'Outlet follows the shelf backing instead of rotating with equipment');

@@ -28,6 +28,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const roofCap = mat('#8e7255');
   const wood = mat('#956c3e');
   const glass = new THREE.MeshStandardMaterial({ color: '#819ba2', metalness: 0.25, roughness: 0.22 });
+  const privacyGlass = new THREE.MeshStandardMaterial({ color: '#e0e8e4', roughness: 1 });
   const glow = new THREE.MeshStandardMaterial({ color: '#ffe3ad', emissive: '#ffbf68', emissiveIntensity: 0.8 });
   const baseStone = new THREE.MeshStandardMaterial({ color: '#897b6a', roughness: 0.98 });
   const stepStone = mat('#796c5b', 0.98);
@@ -103,16 +104,23 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     material.map.repeat.set((roof ? d : Math.max(w, d)) / 8, (roof ? w : h) / 8);
     return box(parent, x, y, z, w, h, d, material);
   }
-  function windowUnit(parent, center, sill, width, height) {
+  function windowUnit(parent, center, sill, width, height, privacyLowerHalf = false, picture = false) {
     const frame = new THREE.Group();
     frame.name = 'Exterior black-trimmed concept window';
     frame.userData = { exteriorTrim: 'Black', interiorTrimUnchanged: true };
+    if (picture) frame.userData.operation = 'fixed picture window';
+    if (privacyLowerHalf) Object.assign(frame.userData, { room: 'Powder room', privacyLowerHalf: true, privacyVerified: false });
     frame.position.set(center, sill, 0.25);
     parent.add(frame);
-    box(frame, 0, height / 2, 0, width, height, 0.12, glass);
+    if (privacyLowerHalf) {
+      box(frame, 0, height / 4, 0, width, height / 2, 0.12, privacyGlass).name = 'Exterior powder frosted lower-half pane';
+      box(frame, 0, height * 3 / 4, 0, width, height / 2, 0.12, glass).name = 'Exterior powder clear upper-half pane';
+    } else {
+      box(frame, 0, height / 2, 0, width, height, 0.12, glass);
+    }
     for (const x of [-width / 2, width / 2]) box(frame, x, height / 2, 0.08, 0.16, height + 0.3, 0.16, windowBlack);
     for (const y of [0, height]) box(frame, 0, y, 0.08, width + 0.3, 0.16, 0.16, windowBlack);
-    box(frame, 0, height / 2, 0.1, 0.1, height, 0.08, windowBlack);
+    if (!privacyLowerHalf && !picture) box(frame, 0, height / 2, 0.1, 0.1, height, 0.08, windowBlack);
     box(frame, 0, -0.13, 0.05, width + 0.65, 0.22, 0.45, windowBlack);
     box(frame, 0, height + 0.2, 0.03, width + 0.65, 0.3, 0.3, windowBlack);
   }
@@ -142,7 +150,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
       fill(cursor, center - width / 2, bottom, top);
       fill(center - width / 2, center + width / 2, bottom, sill);
       fill(center - width / 2, center + width / 2, sill + height, top);
-      if (!door) windowUnit(wallGroup, center, sill, width, height);
+      if (!door) windowUnit(wallGroup, center, opening.frameSill ?? sill, opening.frameWidth ?? width, opening.frameHeight ?? height, opening.privacyLowerHalf, opening.picture);
       cursor = center + width / 2;
     }
     fill(cursor, length, bottom, top);
@@ -151,30 +159,43 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const win = (center, width = 4, sill = 3, height = 5) => ({ center, width, sill, height });
   const garageSideDoorCenterZ = 45.5;
   const garageSideDoorWidth = 3;
+  const garageClerestories = getGarageClerestoryLayout(garageFloorY);
   const westFrontWindowCenterZ = 49;
   const westFrontWindowWidth = 4;
-  wall('front ground floor', 0, 54.2, 31.2, 54.2, -0.4, 9, [win(6, 6), { center: 15.6, width: 5, sill: 0, height: 7, door: true }, win(25, 7.6)]);
+  wall('front ground floor', 0, 54.2, 31.2, 54.2, -0.4, 9, [win(6, 6), { center: 15.6, width: 5, sill: 0, height: 8, door: true }, win(25, 7.6)]);
   const livingFeatureWall = getLivingRoomFeatureLayout();
-  wall('west ground floor', 0, 8, 0, 54.2, -0.4, 9, [...livingFeatureWall.windowCenters.map((z) => win(z - 8)), win(westFrontWindowCenterZ - 8, westFrontWindowWidth)]);
+  const guestEntry = getGuestEntryLayout();
+  wall('west ground floor', 0, 8, 0, 54.2, -0.4, 9, [
+    ...livingFeatureWall.windowCenters.map((z) => win(z - 8)),
+    ...guestEntry.windows.map(({ z, width, height, sill, openingWidth, openingHeight, openingSill, privacyLowerHalf }) => ({ center: z - 8, width: openingWidth, height: openingHeight, sill: openingSill, frameWidth: width, frameHeight: height, frameSill: sill, privacyLowerHalf })),
+    win(westFrontWindowCenterZ - 8, westFrontWindowWidth)
+  ]);
   wall('living rear return', 13.2, 8, 0, 8, -0.4, 9, [win(1.8, 1.5), win(6.6, 5), win(11.4, 1.5)]);
   wall('dining west', 13.2, -0.1, 13.2, 8, -0.4, 9, [win(4.05, 6)]);
   wall('dining rear', 26.5, -0.1, 13.2, -0.1, -0.4, 9, [win(6.65, 6)]);
   wall('dining patio', 26.5, 7, 26.5, -0.1, -0.4, 9, [win(3.55, 6, 0, 8)]);
-  wall('kitchen and prep rear', 55.5, 7, 26.5, 7, -0.4, 9, [win(6.35, 2.5, 4.25, 3.5), win(9.85, 2.5, 4.25, 3.5), win(18.75, 1.5, 53 / 12, 3.5), win(23.25, 5.5, 53 / 12, 3.5), win(27.75, 1.5, 53 / 12, 3.5)]);
+  wall('kitchen and prep rear', 55.5, 7, 26.5, 7, -0.4, 9, [{ ...win(8.1, 5, 4.25, 3.5), picture: true }, win(19.75, 1.5, 53 / 12, 3.5), win(23.5, 4.5, 53 / 12, 3.5), win(27.25, 1.5, 53 / 12, 3.5)]);
   const garageSideWall = wall('east ground floor', 55.5, 49, 55.5, 7, garageFloorY - 0.3, 9, [
-    { center: 49 - garageSideDoorCenterZ, width: garageSideDoorWidth, sill: garageFloorY, height: 8, door: true }, win(37, 2, 4.25, 3.5)
-  ]);
+    { center: 49 - garageSideDoorCenterZ, width: garageSideDoorWidth, sill: garageFloorY, height: 8, door: true },
+    ...garageClerestories.map(({ z, width, sill, height }) => ({ center: 49 - z, width, sill, height, picture: true })),
+    win(37.45, 2, 4.25, 3.5)
+  ].sort((a, b) => a.center - b.center));
   const garageSideDoor = new THREE.Group();
   garageSideDoor.name = 'Solid garage exterior pedestrian door';
   garageSideDoor.position.set(49 - garageSideDoorCenterZ, garageFloorY, 0.25);
   garageSideWall.add(garageSideDoor);
-  box(garageSideDoor, 0, 4, 0, 3, 8, 0.18, white).name = 'Opaque insulated exterior door slab';
+  const garageSideLeaf = new THREE.Group();
+  garageSideLeaf.name = 'Garage side pedestrian door leaf';
+  garageSideLeaf.position.x = 1.5;
+  garageSideLeaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 180, openRotationSign: -1 } };
+  garageSideDoor.add(garageSideLeaf);
+  box(garageSideLeaf, -1.5, 4, 0, 3, 8, 0.18, white).name = 'Opaque insulated exterior door slab';
   for (const x of [-1.58, 1.58]) box(garageSideDoor, x, 4, 0.08, 0.16, 8.16, 0.16, windowBlack);
   box(garageSideDoor, 0, 8.08, 0.08, 3.32, 0.16, 0.16, windowBlack);
   box(garageSideDoor, 0, 0.02, 0.08, 3, 0.04, 0.3, dark).name = 'Exterior door threshold';
   for (const side of [-1, 1]) {
-    box(garageSideDoor, 1.15, 3.1, side * 0.14, 0.12, 0.5, 0.08, dark).name = 'Exterior door lockset';
-    box(garageSideDoor, 1.02, 3.1, side * 0.2, 0.35, 0.08, 0.1, dark).name = 'Exterior door lever';
+    box(garageSideLeaf, -0.35, 3.1, side * 0.14, 0.12, 0.5, 0.08, dark).name = 'Exterior door lockset';
+    box(garageSideLeaf, -0.48, 3.1, side * 0.2, 0.35, 0.08, 0.1, dark).name = 'Exterior door lever';
   }
   wall('garage front', 31.2, 49, 55.5, 49, garageFloorY - 0.3, 9, [
     { center: 5.8, width: 9, sill: garageFloorY, height: 8, door: true },
@@ -368,9 +389,14 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   porchRoof.rotation.x = 0.22;
   gable('Entry porch gable', 11.5, 19.7, 54.4, 61.7, 8.5, 4);
   for (const side of [-1, 1]) {
-    box(group, 15.6 + side * 1.24, 3.45, 54.48, 2.43, 6.9, 0.2, wood).name = 'Warm oak double entry door';
-    for (const y of [1.7, 4.8]) box(group, 15.6 + side * 1.24, y, 54.61, 1.85, 2.65, 0.07, wood).name = 'Raised oak door panel';
-    box(group, 15.6 + side * 0.2, 3.1, 54.74, 0.07, 0.7, 0.1, dark).name = 'Entry pull';
+    const leaf = new THREE.Group();
+    leaf.name = `Exterior front entry ${side < 0 ? 'left' : 'right'} door leaf`;
+    leaf.position.set(15.6 + side * 2.455, 0, 54.48);
+    leaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 180, openRotationSign: -side } };
+    group.add(leaf);
+    box(leaf, -side * 1.215, 4, 0, 2.43, 7.96, 0.2, wood).name = 'Warm oak double entry door';
+    for (const y of [2, 5.8]) box(leaf, -side * 1.215, y, 0.13, 1.85, 3.1, 0.07, wood).name = 'Raised oak door panel';
+    box(leaf, -side * 2.255, 3.1, 0.26, 0.07, 0.7, 0.1, dark).name = 'Entry pull';
   }
   for (const center of [37, 48.5]) {
     const assembly = new THREE.Group();
@@ -378,11 +404,16 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     assembly.position.set(center, garageFloorY, 49);
     assembly.userData = { openingWidthFeet: 9, openingHeightFeet: 8, doorColor: '#e6d7b9', surroundColor: '#a18d70', sideTrimInches: 6, headerTrimInches: 8, trimDepthInches: 3, provisional: true };
     group.add(assembly);
-    box(assembly, 0, 4, 0.28, 9, 8, 0.16, garageDoorFinish).name = 'Cream carriage-style garage door';
-    for (let panel = 0; panel < 6; panel++) box(assembly, -3.75 + panel * 1.5, 3, 0.39, 0.06, 5.6, 0.05, garageDoorDetail).name = 'Cream garage door panel detail';
-    for (const offset of [-3, -1, 1, 3]) box(assembly, offset, 6.8, 0.41, 1.6, 1, 0.05, glass).name = 'Garage door glazing';
+    const garageLeaf = new THREE.Group();
+    garageLeaf.name = 'Conceptual overhead garage door leaf';
+    garageLeaf.position.set(0, 8, 0.28);
+    garageLeaf.userData = { interactiveHouseDoor: { operation: 'overhead', open: false, maxAngleDegrees: 90 } };
+    assembly.add(garageLeaf);
+    box(garageLeaf, 0, -4, 0, 9, 8, 0.16, garageDoorFinish).name = 'Cream carriage-style garage door';
+    for (let panel = 0; panel < 6; panel++) box(garageLeaf, -3.75 + panel * 1.5, -5, 0.11, 0.06, 5.6, 0.05, garageDoorDetail).name = 'Cream garage door panel detail';
+    for (const offset of [-3, -1, 1, 3]) box(garageLeaf, offset, -1.2, 0.13, 1.6, 1, 0.05, glass).name = 'Garage door glazing';
     for (const side of [-1, 1]) {
-      box(assembly, side * 0.25, 3.6, 0.45, 0.06, 0.6, 0.08, dark).name = 'Garage door dark handle';
+      box(garageLeaf, side * 0.25, -4.4, 0.17, 0.06, 0.6, 0.08, dark).name = 'Garage door dark handle';
       box(assembly, side * 4.75, 4, 0.35, 0.5, 8, 0.25, garageSurround).name = 'Garage door six-inch side surround';
     }
     box(assembly, 0, 8 + 1 / 3, 0.35, 10, 2 / 3, 0.25, garageSurround).name = 'Garage door eight-inch header surround';

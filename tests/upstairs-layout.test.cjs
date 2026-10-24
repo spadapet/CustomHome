@@ -12,6 +12,19 @@ const room = (plan, name) => plan.rooms.find((item) => item.name === name);
 const wall = (plan, name) => plan.walls.find((item) => item.name === name);
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 0.001, `${actual} differs from ${expected}`);
 
+test('every upstairs doorway is eight feet tall and remains so with saved-layout resolution', () => {
+  const plan = layout.resolve(baseline, layout.empty());
+  let count = 0;
+  for (const wall of plan.walls) {
+    for (const [, , bottom, top] of wall.openings) {
+      if (bottom !== 0) continue;
+      assert.equal(top, 8, `${wall.name} opening is 96 inches tall`);
+      count++;
+    }
+  }
+  assert.ok(count >= 15, 'Covers bedroom, bathroom, closet and service-room doorways');
+});
+
 test('upper arrival follows the powder-room-side flight after the stair swap', () => {
   const arrival = baseline.arrival;
   close(arrival.z + arrival.d, stairs.z + stairs.depth);

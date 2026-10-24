@@ -177,7 +177,7 @@ test('rear wall moves two feet forward from the original position with matching 
   const floor = plan.floors.find((item) => item.room === 'Dining room');
   assert.ok(Math.abs(floor.w * floor.d - 107.73) < 1e-8, 'Removes 26.6 square feet from the original dining footprint');
   assert.equal(plan.walls.find(([name]) => name === 'Kitchen north')[2], 7);
-  assert.equal(plan.walls.find(([name]) => name === 'Mudroom north')[2], 14.5);
+  assert.equal(plan.walls.find(([name]) => name === 'Mudroom north')[2], 15);
   const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
   assert.match(exterior, /gable\('Dining rear projection roof', 13\.2, 26\.5, -0\.1, 2\.1/);
   const lot = exterior.match(/const lot = (\{[^\n]+\});/);
