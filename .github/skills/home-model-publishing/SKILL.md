@@ -23,6 +23,11 @@ description: 'Publish verified CustomHome model and documentation changes. Use w
 
    Verify the production browser still loads, with temporary instrumentation
    removed. Check current room notes for stale dimensions and safety labels.
+   Keep the viewer minimal and model-first: publish only UI needed for the
+   owner's request. Do not restore unrequested banners, slogans, badges,
+   explanatory panels, duplicate menus or links. Verify the removed top
+   slogan, concept badge and visible garage-door explanation banner stay
+   absent; retain necessary errors, safety warnings and accessible feedback.
 5. Stage intended paths explicitly. Inspect `git diff --cached --stat` and the
    staged file list before committing. Keep a separate customization commit
    when model work and reusable workflows are both being published.

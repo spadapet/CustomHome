@@ -23,6 +23,15 @@ Identify the relevant surfaces:
 
 ## Make the change
 
+Keep the viewer minimal and model-first. Add only UI needed for the owner's
+request. Do not add unrequested banners, slogans, badges, explanatory panels,
+duplicate menus or links. Do not restore the removed top slogan, concept
+badge or visible garage-door explanation banner. Reuse existing navigation
+and optional design notes for help and assumptions; do not open them
+automatically. Preserve essential errors and actionable safety warnings.
+Use screen-reader-only announcements when interaction feedback does not
+need a visible status area.
+
 1. Trace the existing helper and shared layout before adding geometry. Units
    are feet; garage and upstairs floor datums differ from the house floor.
 2. Preserve unrelated owner decisions and saved layout data. For changed
@@ -60,6 +69,9 @@ Preview the HTTP-served model in the shared local browser:
 
 - Check the relevant camera and the actual controls. Enable the grid when
   checking it; its default is off.
+- Check that the requested feature adds no unnecessary visible UI or space
+  above the model. Removed promotional chrome and explanatory banners must
+  stay removed, including after floor/view changes and interactions.
 - Measure real Three.js geometry after updating world matrices. Compare
   constituent meshes, not the empty interior of a whole cabinet's bounding box.
   Treat intended contact/joinery separately from positive overlap.

@@ -31,6 +31,20 @@ test('project instructions and README link to existing guidance and the bundled 
   assert.ok(fs.existsSync(path.join(root, '.github', 'skills', 'home-model-editing', 'scripts', 'check-model.cjs')));
 });
 
+test('project instructions and both skills preserve the minimal viewer requirement', () => {
+  for (const relative of [
+    path.join('.github', 'copilot-instructions.md'),
+    path.join('.github', 'skills', 'home-model-editing', 'SKILL.md'),
+    path.join('.github', 'skills', 'home-model-publishing', 'SKILL.md')
+  ]) {
+    const text = fs.readFileSync(path.join(root, relative), 'utf8');
+    assert.match(text, /minimal and model-first/);
+    assert.match(text, /unrequested banners, slogans, badges/);
+    assert.match(text, /duplicate menus or links/);
+    assert.match(text, /visible garage-door explanation banner/);
+  }
+});
+
 test('model validator rejects an unknown suite instead of reporting an empty success', () => {
   const runner = path.join(root, '.github', 'skills', 'home-model-editing', 'scripts', 'check-model.cjs');
   const result = spawnSync(process.execPath, [runner, 'not-an-existing-suite'], { cwd: root, encoding: 'utf8' });

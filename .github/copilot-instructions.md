@@ -4,6 +4,14 @@ This is a home-design study, not construction drawings. Read the current
 [plan reference](../floor-plan-reference.md) and [design context](../design-context.md)
 before changing a layout. Room pages describe the owner's requirements.
 
+- Keep the viewer minimal and model-first. Add only UI needed for the owner's
+  request; do not add unrequested banners, slogans, badges, explanatory panels,
+  duplicate menus or links. Do not restore the removed top slogan, concept
+  badge or visible garage-door explanation banner.
+- Reuse existing navigation and optional design notes for help and assumptions,
+  without opening them automatically. Keep essential errors and genuinely
+  actionable safety warnings explicit; use screen-reader-only announcements
+  for interaction feedback that does not need a visible status area.
 - The model uses feet. Shared ground-floor geometry lives in
   `floor-plan-ground.js`; the furnished model is `floor-plan-3d.js`.
   Coordinate both when changing room boundaries or openings.
@@ -14,6 +22,10 @@ before changing a layout. Room pages describe the owner's requirements.
   necessarily missing geometry.
 - Preserve the owner's default door poses after temporary swing checks.
   Keep the dining patio door closed by default; verify its sweep separately.
+- All doors are 8 feet tall (96 inches) throughout the home. This owner
+  requirement supersedes older 7-foot/84-inch door notes or model defaults.
+  Keep wall openings, door leaves, frames, casing, schedules and room notes
+  coordinated to the 8-foot door height when creating or updating doors.
 - Keep the kitchen-to-mudroom opening fixed unless the owner changes that
   requirement. Use the latest room notes for other constraints and finishes;
   do not revive an earlier design from conversation history.
