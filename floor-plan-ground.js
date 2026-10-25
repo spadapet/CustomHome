@@ -35,7 +35,9 @@
     return {
       closet: { x: 19, z: 34.6, w: 5.5, d: 7.4 },
       closetDoor: { x: 21.35, z: 42, width: 2.5, height: 8, doorless: true },
-      bathroom: { x: 24.5, z: 34.6, w: 6.7, d: 8.4 },
+      bathroom: { x: 24.5, z: 34.6, w: 6.7, d: 5 },
+      sinkAlcove: { x: 24.5, z: 39.6, w: 6.7, d: 3.4 },
+      vanityPrivacyWall: { x: 29.3225, z: 43.2, w: 1.8775 },
       closetStorage: {
         hanging: [
           { x: 0.08, z: 0.08, w: 3.63, d: 1.84, double: false },
@@ -43,10 +45,10 @@
         ],
         shelves: { x: 5.77, z: 0.08, w: 0.98, d: 1.84 }
       },
-      bathroomDoor: { x: 26.7, z: 43, width: 2.5, height: 8, pocket: { x: 24.05, w: 2.65, targetClearWidth: 28 / 12, approvalRequired: true } },
-      shower: { x: 24.675, z: 34.775, w: 6.35, d: 3.2, clearWidth: 6.15, clearDepth: 3, entryOffset: 2.025, doorWidth: 2.5, height: 8 },
-      toilet: { x: 25.8, z: 40.15, rotation: Math.PI / 2 },
-      vanity: { x: 30.2, z: 40.75, width: 4.5, mirrorWidth: 2.5, rotation: -Math.PI / 2, basinCount: 1 }
+      bathroomDoor: { x: 25, z: 39.6, width: 2.5, height: 8, pocket: { x: 27.5, w: 2.65, targetClearWidth: 28 / 12, approvalRequired: true } },
+      shower: { x: 31.025, z: 34.775, w: 4.65, d: 3.2, rotation: -Math.PI / 2, clearWidth: 4.45, clearDepth: 3, entryOffset: 2, doorWidth: 2.5, height: 8 },
+      toilet: { x: 26, z: 35.95, rotation: 0 },
+      vanity: { x: 30.2, z: 41.4, width: 3, mirrorWidth: 2.5, rotation: -Math.PI / 2, basinCount: 1 }
     };
   }
 
@@ -66,8 +68,9 @@
       ['Guest coat closet', 7.1, powderZ, 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 7.1, entryZ, 5.1, guestEntry.alcove.d],
       ['Office', 0, officeZ, 12.2, 54.2 - officeZ], ['Entry hall', 12.2, 34.6, 6.8, 19.6],
       ['Closet', 19, 34.6, 5.5, 7.4], ['Bathroom', 24.5, 34.6, 6.7, guestSuite.bathroom.d],
-      ['Guest room', 19, guestSuite.bathroom.z + guestSuite.bathroom.d, 12.2, 54.2 - guestSuite.bathroom.z - guestSuite.bathroom.d],
-      ['Guest room entry', 19, 42, 5.5, guestSuite.bathroom.z + guestSuite.bathroom.d - 42],
+      ['Guest sink alcove', guestSuite.sinkAlcove.x, guestSuite.sinkAlcove.z, guestSuite.sinkAlcove.w, guestSuite.sinkAlcove.d],
+      ['Guest room', 19, 43, 12.2, 11.2],
+      ['Guest room entry', 19, 42, 5.5, 1],
       ['Garage', 29, 15, 26.5, 34], ['Front porch', 0, 54.2, 31.2, 7]
     ].map(([name, x, z, w, d]) => ({ name, x, z, w, d }));
     const floors = [
@@ -82,8 +85,9 @@
       [12.2, 34.6, 6.8, 19.6, 'Entry hall'], [0, powderZ, 7.1, guestEntry.powder.d, 'Powder room'],
       [7.1, entryZ, 5.1, guestEntry.alcove.d, 'Guest entry alcove'], [0, officeZ, 12.2, 54.2 - officeZ, 'Office'],
       [19, 34.6, 5.5, 7.4, 'Closet'], [24.5, 34.6, 6.7, guestSuite.bathroom.d, 'Bathroom'],
-      [19, guestSuite.bathroom.z + guestSuite.bathroom.d, 12.2, 54.2 - guestSuite.bathroom.z - guestSuite.bathroom.d, 'Guest room'],
-      [19, 42, 5.5, guestSuite.bathroom.z + guestSuite.bathroom.d - 42, 'Guest room entry'],
+      [guestSuite.sinkAlcove.x, guestSuite.sinkAlcove.z, guestSuite.sinkAlcove.w, guestSuite.sinkAlcove.d, 'Guest sink alcove'],
+      [19, 43, 12.2, 11.2, 'Guest room'],
+      [19, 42, 5.5, 1, 'Guest room entry'],
       [7.1, powderZ, 5.1, guestEntry.coatCloset.d, 'Guest coat closet'],
       [44.9 - 2 / 12, 15, 10.6 + 2 / 12, 11.9, 'Garage', -1.25], [29, 26.9, 26.5, 7.7, 'Garage', -1.25],
       [31.2, 34.6, 24.3, 14.4, 'Garage', -1.25], [0, 54.2, 31.2, 7, 'Front porch']
@@ -116,9 +120,10 @@
       ['Office north', 0, officeZ, 12.2, officeZ],
       ['House south', 0, 54.2, 31.2, 54.2, [[3, 9, 3, 8], [13.1, 18.1, 0, 8], [21.2, 28.8, 3, 8]]],
       ['Guest west', 19, 34.6, 19, 54.2, [[7.4, 10.4, 0, 8]]],
-      ['Closet north', 19, 34.6, 24.5, 34.6], ['Closet east', 24.5, 34.6, 24.5, guestSuite.bathroom.z + guestSuite.bathroom.d],
+      ['Closet north', 19, 34.6, 24.5, 34.6], ['Closet east', 24.5, 34.6, 24.5, 42],
       ['Closet south', 19, 42, 24.5, 42, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x - 19 + guestSuite.closetDoor.width, 0, guestSuite.closetDoor.height]]],
-      ['Bathroom south', 24.05, guestSuite.bathroom.z + guestSuite.bathroom.d, 31.2, guestSuite.bathroom.z + guestSuite.bathroom.d, [[guestSuite.bathroomDoor.x - 24.05, guestSuite.bathroomDoor.x - 24.05 + guestSuite.bathroomDoor.width, 0, guestSuite.bathroomDoor.height]]],
+      ['Bathroom south', 24.5, guestSuite.bathroomDoor.z, 31.2, guestSuite.bathroomDoor.z, [[guestSuite.bathroomDoor.x - 24.5, guestSuite.bathroomDoor.x - 24.5 + guestSuite.bathroomDoor.width, 0, guestSuite.bathroomDoor.height]]],
+      ['Guest vanity privacy return', guestSuite.vanityPrivacyWall.x, guestSuite.vanityPrivacyWall.z, guestSuite.vanityPrivacyWall.x + guestSuite.vanityPrivacyWall.w, guestSuite.vanityPrivacyWall.z],
       ['Bathroom north', 24.5, 34.6, 29, 34.6], ['Garage southwest return', 29, 34.6, 31.2, 34.6],
       ['Garage west', 31.2, 34.6, 31.2, 49], ['Garage west return', 29, 26.9, 29, 34.6],
       ['Kitchen south left', 29, 26.9, 29.1875, 26.9], ['Kitchen south', 29.1875, 26.9, 37.3, 26.9],

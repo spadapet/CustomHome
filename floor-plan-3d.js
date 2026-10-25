@@ -700,11 +700,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       }
       for (const run of edges) cover(run.a, run.b, run.normal);
       // Keep timber trim out of the guest shower and behind fitted bathroom fixtures.
-      cover(new THREE.Vector2(24.675, 34.775), new THREE.Vector2(24.675, 38.475), new THREE.Vector2(1, 0));
-      cover(new THREE.Vector2(24.675, 34.775), new THREE.Vector2(31.025, 34.775), new THREE.Vector2(0, 1));
-      cover(new THREE.Vector2(31.025, 34.775), new THREE.Vector2(31.025, 38.475), new THREE.Vector2(-1, 0));
-      cover(new THREE.Vector2(24.675, 39.15), new THREE.Vector2(24.675, 41.15), new THREE.Vector2(1, 0));
-      cover(new THREE.Vector2(31.025, 38.55), new THREE.Vector2(31.025, 43.75), new THREE.Vector2(-1, 0));
+      cover(new THREE.Vector2(guestSuite.shower.x - guestSuite.shower.d, guestSuite.shower.z), new THREE.Vector2(guestSuite.shower.x, guestSuite.shower.z), new THREE.Vector2(0, 1));
+      cover(new THREE.Vector2(guestSuite.shower.x, guestSuite.shower.z), new THREE.Vector2(guestSuite.shower.x, guestSuite.shower.z + guestSuite.shower.w), new THREE.Vector2(-1, 0));
+      cover(new THREE.Vector2(guestSuite.shower.x - guestSuite.shower.d, guestSuite.bathroomDoor.z - 0.175), new THREE.Vector2(guestSuite.shower.x, guestSuite.bathroomDoor.z - 0.175), new THREE.Vector2(0, -1));
+      cover(new THREE.Vector2(guestSuite.toilet.x - 0.9, 34.775), new THREE.Vector2(guestSuite.toilet.x + 0.9, 34.775), new THREE.Vector2(0, 1));
+      cover(new THREE.Vector2(31.025, guestSuite.vanity.z - 1.6), new THREE.Vector2(31.025, guestSuite.vanity.z + 1.6), new THREE.Vector2(-1, 0));
       // Fitted mudroom joinery meets these wall faces without baseboards behind it.
       cover(new THREE.Vector2(37.675, 15.175), new THREE.Vector2(44.9 - 2 / 12 - 0.175, 15.175), new THREE.Vector2(0, 1));
       cover(new THREE.Vector2(37.675, 15.175), new THREE.Vector2(37.675, 20.9), new THREE.Vector2(1, 0));
@@ -894,8 +894,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [kidsRoom.x, kidsRoom.z, 10, kidsRoom.depth, true],
     [12.2, 34.6, 6.8, 19.6, true], [0, powderNorthZ, 7.1, guestEntry.powder.d], [7.1, powderEntryWallZ, 5.1, guestEntry.alcove.d, true],
     [0, officeNorthZ, 12.2, 54.2 - officeNorthZ, true], [19, 34.6, 5.5, 7.4, true], [24.5, 34.6, 6.7, guestSuite.bathroom.d],
-    [19, guestSuite.bathroom.z + guestSuite.bathroom.d, 12.2, 54.2 - guestSuite.bathroom.z - guestSuite.bathroom.d, true],
-    [19, 42, 5.5, guestSuite.bathroom.z + guestSuite.bathroom.d - 42, true], [0, 54.2, 31.2, 7, false, false],
+    [guestSuite.sinkAlcove.x, guestSuite.sinkAlcove.z, guestSuite.sinkAlcove.w, guestSuite.sinkAlcove.d, true],
+    [19, 43, 12.2, 11.2, true],
+    [19, 42, 5.5, 1, true], [0, 54.2, 31.2, 7, false, false],
     [7.1, powderNorthZ, 5.1, guestEntry.coatCloset.d, true]
   ].forEach(([x, z, w, d, hardwood = false, interior = true]) => floor(x, z, w, d, hardwood, shell, interior));
 
@@ -924,9 +925,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [officeEntry.x, officeNorthZ, officeEntry.x, 54.2, false, [[officeEntry.z - officeEntry.width / 2 - officeNorthZ, officeEntry.z + officeEntry.width / 2 - officeNorthZ, 0, officeEntry.height]]],
     [0, officeNorthZ, 12.2, officeNorthZ], [0, 54.2, 31.2, 54.2, false, [[3, 9, 3, 8], [13.1, 18.1, 0, 8], [21.2, 28.8, 3, 8]], ceilingHeight, [-1]],
     [19, 34.6, 19, 54.2, false, [[7.4, 10.4, 0, 8]]],
-    [19, 34.6, 24.5, 34.6], [24.5, 34.6, 24.5, guestSuite.bathroom.z + guestSuite.bathroom.d],
+    [19, 34.6, 24.5, 34.6], [24.5, 34.6, 24.5, 42],
     [19, 42, 24.5, 42, false, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x - 19 + guestSuite.closetDoor.width, 0, guestSuite.closetDoor.height]]],
-    [24.05, guestSuite.bathroom.z + guestSuite.bathroom.d, 31.2, guestSuite.bathroom.z + guestSuite.bathroom.d, false, [[guestSuite.bathroomDoor.x - 24.05, guestSuite.bathroomDoor.x - 24.05 + guestSuite.bathroomDoor.width, 0, guestSuite.bathroomDoor.height]]],
+    [24.5, guestSuite.bathroomDoor.z, 31.2, guestSuite.bathroomDoor.z, false, [[guestSuite.bathroomDoor.x - 24.5, guestSuite.bathroomDoor.x - 24.5 + guestSuite.bathroomDoor.width, 0, guestSuite.bathroomDoor.height]]],
+    [guestSuite.vanityPrivacyWall.x, guestSuite.vanityPrivacyWall.z, guestSuite.vanityPrivacyWall.x + guestSuite.vanityPrivacyWall.w, guestSuite.vanityPrivacyWall.z],
     [24.5, 34.6, 29, 34.6], [29, 34.6, 31.2, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
     [31.2, 34.6, 31.2, 49, false, [], ceilingHeight, [-1, 1], 0, garageFloorY], [29, 26.9, 29, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
     [29, 26.9, 29.1875, 26.9, true, [], ceilingHeight, [-1, 1], -1, garageFloorY],
@@ -948,7 +950,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     ['Garage', 26.5, 34, true], ['Kids room', kidsRoom.width, kidsRoom.depth],
     ['Powder room', 7.1, guestEntry.powder.d], ['Guest coat closet', 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 5.1, guestEntry.alcove.d], ['Office', 12.2, 54.2 - officeNorthZ],
     ['Guest walk-in closet', 5.5, 7.4], ['Guest shower bathroom', 6.7, guestSuite.bathroom.d],
-    ['Bedroom', 12.2, 54.2 - guestSuite.bathroom.z - guestSuite.bathroom.d], ['Bedroom entry', 5.5, guestSuite.bathroom.z + guestSuite.bathroom.d - 42], ['Porch', 31.2, 7]
+    ['Guest sink alcove', guestSuite.sinkAlcove.w, guestSuite.sinkAlcove.d],
+    ['Bedroom', 12.2, 11.2], ['Bedroom entry', 5.5, 1], ['Porch', 31.2, 7]
   ].forEach((room) => roomDimensions(...room));
 
   // Proposed feature wall, following the existing living-room requirements.
@@ -3751,9 +3754,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const bathroomPocketDoor = furnishing('Guest bathroom pocket door proposal - framing approval required', bathroomOpening.x + bathroomOpening.width / 2, bathroomOpening.z);
   bathroomPocketDoor.userData = {
     nominalWidthInches: bathroomOpening.width * 12, heightInches: bathroomOpening.height * 12,
-    operation: 'Slides west into wall; shown closed', targetClearWidthInches: bathroomOpening.pocket.targetClearWidth * 12,
+    operation: 'Slides east into partition; shown closed', targetClearWidthInches: bathroomOpening.pocket.targetClearWidth * 12,
     closedCenterX: bathroomOpening.x + bathroomOpening.width / 2, openCenterX: bathroomOpening.pocket.x + 1.31,
-    approvalRequired: true, review: 'Pocket framing, wall thickness, short west wall return, nonpenetrating fixings, services and privacy hardware; cavity is schematic', provisional: true
+    approvalRequired: true, review: 'Pocket framing, wall thickness, nonpenetrating fixings, services and privacy hardware; cavity is schematic', provisional: true
   };
   bathroomPocketDoor.userData.interactiveHouseDoor = { operation: 'sliding', open: false, closedCenterX: bathroomPocketDoor.userData.closedCenterX, openCenterX: bathroomPocketDoor.userData.openCenterX };
   box(bathroomPocketDoor, 0, bathroomOpening.height / 2, 0, bathroomOpening.width + 0.08, bathroomOpening.height - 0.04, 0.13, windowTrim).name = 'Guest bathroom painted-white pocket leaf';
@@ -3805,8 +3808,41 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   function vanity(name, x, z, width, rotation = 0, basinCount = 1, mirrorWidth = width * 0.82) {
     const unit = furnishing(name, x, z, rotation);
-    cabinet(unit, 0, 0, width, 1.5, 2.65);
-    unit.userData = { widthInches: width * 12, depthInches: 18, basinCount, basinCenterSpacingInches: basinCount === 2 ? width * 6 : 0, provisional: true, productFitVerified: false };
+    const drawerWidth = 1;
+    const doorWidth = width - drawerWidth;
+    const dividerX = width / 2 - drawerWidth;
+    const panel = 0.75 / 12;
+    unit.userData = { widthInches: width * 12, depthInches: 18, basinCount, basinCenterSpacingInches: basinCount === 2 ? width * 6 : 0, cabinetDoors: 1, cabinetDoorSide: 'Left facing sink', doorBayWidthInches: doorWidth * 12, drawers: 3, drawerBankSide: 'Right facing sink', drawerBankWidthInches: drawerWidth * 12, drawerTravelInches: 15, provisional: true, productFitVerified: false, plumbingVerified: false };
+    for (const center of [-width / 2 + panel / 2, dividerX, width / 2 - panel / 2]) {
+      box(unit, center, 1.5, 0, panel, 2.4, 1.5, cabinetFinish).name = 'Guest vanity side or divider';
+    }
+    box(unit, 0, 1.5, -0.75 + panel / 2, width - 2 * panel, 2.4, panel, cabinetFinish).name = 'Guest vanity back';
+    box(unit, 0, 0.32, 0, width - 2 * panel, panel, 1.5 - 2 * panel, cabinetFinish).name = 'Guest vanity cabinet floor';
+    box(unit, 0, 0.15, -0.08, width - 0.2, 0.3, 1.3, cabinetFinish).name = 'Guest vanity recessed plinth';
+    box(unit, 0, 2.77, 0, width + 0.06, 0.14, 1.55, countertop).name = 'Guest vanity countertop';
+    const door = shakerFront(unit, -drawerWidth / 2, 1.5, 0.79, doorWidth - 0.04, 2.25);
+    door.name = 'Guest vanity left cabinet door';
+    const doorKnob = cylinder(door, doorWidth / 2 - 0.15, 0.85, 0.1, 0.055, 0.1, brass);
+    doorKnob.name = 'Guest vanity cabinet-door gold knob';
+    doorKnob.rotation.x = Math.PI / 2;
+    const drawerBoxWidth = drawerWidth - 0.25;
+    for (let row = 0; row < 3; row++) {
+      const drawer = new THREE.Group();
+      drawer.name = `Guest vanity right pull-out drawer ${row + 1}`;
+      drawer.position.set((width - drawerWidth) / 2, 0.75 + row * 0.75, 0);
+      drawer.userData = { side: 'Right facing sink', travelFeet: 1.25, shownClosed: true, hardwareSelected: false };
+      unit.add(drawer);
+      const front = shakerFront(drawer, 0, 0, 0.79, drawerWidth - 0.04, 0.69);
+      front.name = 'Guest vanity drawer Shaker front';
+      const knob = cylinder(front, 0, 0.12, 0.1, 0.055, 0.1, brass);
+      knob.name = 'Guest vanity drawer gold knob';
+      knob.rotation.x = Math.PI / 2;
+      box(drawer, 0, -0.255, 0.075, drawerBoxWidth, 0.04, 1.25, oak).name = 'Guest vanity drawer bottom';
+      for (const edge of [-1, 1]) {
+        box(drawer, edge * (drawerBoxWidth - 0.04) / 2, 0, 0.075, 0.04, 0.55, 1.25, oak).name = 'Guest vanity drawer side';
+        box(drawer, 0, 0, 0.075 + edge * 0.605, drawerBoxWidth - 0.08, 0.55, 0.04, oak).name = 'Guest vanity drawer end';
+      }
+    }
     const centers = basinCount === 2 ? [-width / 4, width / 4] : [0];
     for (const [index, center] of centers.entries()) {
       box(unit, center, 2.86, 0, basinCount === 2 ? 1.4 : Math.min(width * 0.6, 1.75), 0.16, 1, porcelain, true).name = `${name} basin ${index + 1}`;
@@ -3910,20 +3946,20 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const guestVanity = vanity('Guest bathroom vanity', guestSuite.vanity.x, guestSuite.vanity.z, guestSuite.vanity.width, guestSuite.vanity.rotation, guestSuite.vanity.basinCount, guestSuite.vanity.mirrorWidth);
   guestVanity.userData.mirrorWidthInches = guestSuite.vanity.mirrorWidth * 12;
   for (const side of [-1, 1]) {
-    box(guestVanity, side * 1.55, 5.1, -0.72, 0.18, 0.6, 0.06, brass).name = 'Guest bathroom warm sconce backplate';
-    box(guestVanity, side * 1.55, 5.1, -0.56, 0.08, 0.08, 0.28, brass).name = 'Guest bathroom warm sconce arm';
-    const diffuser = cylinder(guestVanity, side * 1.55, 5.1, -0.39, 0.12, 0.65, powderGlow);
+    box(guestVanity, side * 1.45, 5.1, -0.72, 0.18, 0.6, 0.06, brass).name = 'Guest bathroom warm sconce backplate';
+    box(guestVanity, side * 1.45, 5.1, -0.56, 0.08, 0.08, 0.28, brass).name = 'Guest bathroom warm sconce arm';
+    const diffuser = cylinder(guestVanity, side * 1.45, 5.1, -0.39, 0.12, 0.65, powderGlow);
     diffuser.name = 'Guest bathroom warm opal vanity sconce';
     diffuser.userData = { colorTemperatureKelvin: 2700, provisional: true };
     const light = new THREE.PointLight('#ffd3a0', 8, 5, 2);
     light.name = 'Guest bathroom warm vanity light';
-    light.position.set(side * 1.55, 5.1, -0.35);
+    light.position.set(side * 1.45, 5.1, -0.35);
     guestVanity.add(light);
   }
   const guestNightLight = furnishing('Guest bathroom independent night-light concept', guestSuite.vanity.x, guestSuite.vanity.z, guestSuite.vanity.rotation);
   box(guestNightLight, 0, 0.15, 0.9, 2.5, 0.05, 0.04, powderGlow).name = 'Guest bathroom warm low-level night light';
-  const guestTowel = furnishing('Guest bathroom wall-mounted towel hook', 31.1, 37.3);
-  guestTowel.userData = { wall: 'East, beside the shower and south of the vanity', hookHeightInches: 48, towelSizeInches: [16, 28], provisional: true };
+  const guestTowel = furnishing('Guest bathroom wall-mounted towel hook', 24.6, 38.4, Math.PI);
+  guestTowel.userData = { wall: 'West, beside the shower approach', hookHeightInches: 48, towelSizeInches: [16, 28], provisional: true };
   box(guestTowel, 0.035, 4, 0, 0.06, 0.2, 0.14, brass).name = 'Guest bathroom towel hook backplate';
   box(guestTowel, -0.08, 4, 0, 0.22, 0.045, 0.045, brass).name = 'Guest bathroom towel hook arm';
   cylinder(guestTowel, -0.18, 4.04, 0, 0.035, 0.14, brass).name = 'Guest bathroom towel hook upturned tip';
@@ -3931,7 +3967,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(guestTowel, -0.22, 2.68, 0, 0.045, 0.08, 16 / 12, linen).name = 'Guest bathroom towel hem';
   toilet('Guest bathroom toilet', guestSuite.toilet.x, guestSuite.toilet.z, guestSuite.toilet.rotation);
   const showerLayout = guestSuite.shower;
-  const guestShower = furnishing('Guest bathroom shower', showerLayout.x, showerLayout.z);
+  const guestShower = furnishing('Guest bathroom shower', showerLayout.x, showerLayout.z, showerLayout.rotation);
   guestShower.userData = { clearWidthInches: showerLayout.clearWidth * 12, clearDepthInches: showerLayout.clearDepth * 12, doorOpeningInches: showerLayout.doorWidth * 12, provisional: true };
   box(guestShower, showerLayout.w / 2, 0.1, showerLayout.d / 2, showerLayout.w, 0.2, showerLayout.d, porcelain).name = 'Guest shower pan';
   for (const x of [0.05, showerLayout.w - 0.05]) box(guestShower, x, 0.22, showerLayout.d / 2, 0.1, 0.24, showerLayout.d, countertop).name = 'Guest shower side curb';

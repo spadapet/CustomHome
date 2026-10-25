@@ -37,11 +37,21 @@ test('guest suite retains a walk-in closet alongside the comfortable shower', ()
   assert.deepEqual(baseline.rooms.find((room) => room.name === 'Closet'), { name: 'Closet', ...suite.closet });
   assert.ok(!baseline.rooms.some((room) => room.name === 'Laundry'));
   assert.ok(!baseline.walls.some(([name]) => name === 'Laundry north'));
-  close(baseline.floors.filter((floor) => ['Closet', 'Bathroom', 'Guest room', 'Guest room entry'].includes(floor.room)).reduce((area, floor) => area + floor.w * floor.d, 0), 12.2 * 19.6);
-  close((9.4 - suite.bathroom.d) * suite.bathroom.w, 6.7);
+  close(baseline.floors.filter((floor) => ['Closet', 'Bathroom', 'Guest sink alcove', 'Guest room', 'Guest room entry'].includes(floor.room)).reduce((area, floor) => area + floor.w * floor.d, 0), 12.2 * 19.6);
+  assert.deepEqual(baseline.rooms.find((room) => room.name === 'Guest sink alcove'), { name: 'Guest sink alcove', ...suite.sinkAlcove });
+  close(suite.bathroom.z + suite.bathroom.d, suite.sinkAlcove.z);
+  close(suite.sinkAlcove.z + suite.sinkAlcove.d, guestRoom.z);
+  const privacyWall = baseline.walls.find(([name]) => name === 'Guest vanity privacy return');
+  assert.equal(privacyWall.length, 5, 'Privacy return has no opening or spanning header');
+  privacyWall.slice(1).forEach((coordinate, index) => close(coordinate, [29.3225, 43.2, 31.2, 43.2][index]));
+  close(suite.vanityPrivacyWall.x - 0.75 / 12, suite.vanity.x - (0.79 + 0.1 + 0.1 / 2));
+  close(suite.vanityPrivacyWall.w * 12, 22.53);
+  close((suite.vanityPrivacyWall.x - 0.75 / 12 - suite.sinkAlcove.x - 0.175) * 12, 55.02);
+  assert.ok(suite.vanity.z + (suite.vanity.width + 0.06) / 2 < suite.vanityPrivacyWall.z - 0.175 - 0.75 / 12, 'Counter clears privacy-wall baseboard');
+  assert.ok(!baseline.walls.some(([, x1, z1, x2, z2]) => z1 === z2 && z1 >= 43 && z1 <= 43.4 && Math.min(x1, x2) < suite.vanityPrivacyWall.x), 'No wall, door or header extends past vanity front or spans the open west passage');
   for (const [name, door, west, east] of [
     ['Closet south', suite.closetDoor, 19, 24.5],
-    ['Bathroom south', suite.bathroomDoor, 24.05, 31.2]
+    ['Bathroom south', suite.bathroomDoor, 24.5, 31.2]
   ]) {
     const wall = baseline.walls.find(([wallName]) => wallName === name);
     close(wall[1] + wall[5][0][0], door.x);
@@ -52,24 +62,21 @@ test('guest suite retains a walk-in closet alongside the comfortable shower', ()
     assert.ok(door.x - west - 0.175 >= casing);
     assert.ok(east - 0.175 - door.x - door.width >= casing);
   }
-  close(suite.shower.clearWidth * 12, 73.8);
+  close(suite.shower.clearWidth * 12, 53.4);
   close(suite.shower.clearDepth * 12, 36);
-  close((suite.shower.w - 0.2) * 12, 73.8);
-  close((suite.shower.w) * 12, 76.2);
+  close((suite.shower.w - 0.2) * 12, 53.4);
   close((suite.shower.d - 0.2) * 12, 36);
-  close(suite.shower.x, suite.bathroom.x + 0.175);
-  close(suite.shower.x + suite.shower.w, suite.bathroom.x + suite.bathroom.w - 0.175);
+  assert.equal(suite.shower.rotation, -Math.PI / 2);
+  close(suite.shower.x, suite.bathroom.x + suite.bathroom.w - 0.175);
+  close(suite.shower.z + suite.shower.w, suite.bathroomDoor.z - 0.175);
   assert.equal(suite.vanity.basinCount, 1);
-  close(suite.vanity.width * 12, 54);
-  assert.ok(26.675 >= suite.toilet.x + 0.848 && 29.175 <= suite.vanity.x - 0.9525, 'A 30-inch-deep standing zone fits between actual fixture projections');
-  for (const centerZ of [suite.vanity.z]) {
-    assert.ok(centerZ - 1.25 >= suite.shower.z + suite.shower.d, 'Each 30-inch-wide basin station stays south of the shower');
-    assert.ok(centerZ + 1.25 <= suite.bathroom.z + suite.bathroom.d - 0.175 - 0.125, 'Each station stays north of the south wall trim');
-  }
-  close((suite.shower.d - 0.2) * 12, 36);
-  assert.ok((suite.toilet.z - suite.shower.z - suite.shower.d) * 12 >= 18, 'Toilet center is at least 18 inches from shower curb');
-  assert.ok((suite.bathroom.z + suite.bathroom.d - 0.175 - suite.toilet.z) * 12 >= 18, 'Toilet center is at least 18 inches from south wall');
-  assert.ok((suite.vanity.x - 0.9525 - suite.toilet.x - 0.848) * 12 >= 30, 'Actual toilet-front/vanity projections leave 30 inches');
+  close(suite.vanity.width * 12, 36);
+  assert.ok(suite.vanity.z - (suite.vanity.width + 0.06) / 2 > suite.bathroomDoor.z + 0.175, 'Vanity counter clears the partition');
+  assert.ok(suite.vanity.z + (suite.vanity.width + 0.06) / 2 < 43, 'Vanity stays within sink alcove');
+  assert.ok(suite.toilet.x + 0.875 < suite.shower.x - suite.shower.d, 'Toilet sits west of the shower');
+  assert.ok(suite.toilet.z - 1.1 >= suite.bathroom.z + 0.175, 'Toilet tank clears north wall');
+  assert.ok(suite.toilet.z + 0.848 < suite.bathroomDoor.z - 0.175, 'Toilet stays entirely in enclosed bathroom');
+  assert.equal(suite.toilet.rotation, 0);
   close(suite.closet.d, 7.4);
   close(suite.closet.w, 5.5);
   close((suite.closet.w - 0.35 - 2 - 0.15) * 12, 36);
@@ -99,8 +106,14 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
   const items = [];
   const context = {
     THREE: { Group, PointLight: class { constructor() { this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } }; } } }, guestSuite: getGuestSuiteLayout(),
-    windowTrim: {}, cream: {}, brass: {}, porcelain: {}, countertop: {}, glass: {}, steel: {}, oak: {}, linen: {}, powderGlow: {},
-    shakerFront(parent) { const front = new Group(); parent.add(front); return front; },
+    windowTrim: {}, cream: {}, brass: {}, porcelain: {}, countertop: {}, glass: {}, steel: {}, oak: {}, linen: {}, powderGlow: {}, cabinetFinish: {},
+    shakerFront(parent, x, y, z, width, height) {
+      const front = new Group();
+      front.position.set(x, y, z);
+      front.userData = { width, height };
+      parent.add(front);
+      return front;
+    },
     furnishing(name, x, z, rotation = 0) {
       const group = new Group();
       Object.assign(group, { name, x, z });
@@ -140,7 +153,7 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
   assert.deepEqual(find('Guest bathroom tile'), { name: 'Guest bathroom tile', ...suite.bathroom });
   assert.equal(find('Guest bathroom vanity').x, suite.vanity.x);
   assert.equal(find('Guest bathroom vanity').z, suite.vanity.z);
-  assert.equal(find('Guest bathroom vanity').userData.widthInches, 54);
+  assert.equal(find('Guest bathroom vanity').userData.widthInches, 36);
   assert.equal(find('Guest bathroom vanity').rotation.y, suite.vanity.rotation);
   assert.equal(find('Guest bathroom vanity').children.filter((part) => /^Guest bathroom vanity basin \d$/.test(part.name)).length, 1);
   assert.equal(find('Guest bathroom vanity').children.filter((part) => /^Guest bathroom vanity faucet spout \d$/.test(part.name)).length, 1);
@@ -153,10 +166,35 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
   assert.equal(mirror.x, 0);
   assert.equal(mirror.w * 12, 30);
   assert.equal(find('Guest bathroom vanity').userData.mirrorWidthInches, 30);
-  assert.equal((suite.vanity.width - basin.w) * 6, 16.5, 'Broad counter remains on each side of the centered sink');
+  const vanity = find('Guest bathroom vanity');
+  const cabinetDoor = vanity.children.filter((part) => part.name === 'Guest vanity left cabinet door');
+  const drawers = vanity.children.filter((part) => /^Guest vanity right pull-out drawer \d$/.test(part.name));
+  assert.equal(cabinetDoor.length, 1);
+  assert.equal(drawers.length, 3);
+  assert.equal(vanity.userData.doorBayWidthInches, 24);
+  assert.equal(vanity.userData.drawerBankWidthInches, 12);
+  assert.ok(cabinetDoor[0].position.x < 0, 'Door is left when facing sink, not left on the floor plan');
+  assert.equal(cabinetDoor[0].userData.width, 1.96);
+  assert.deepEqual(drawers.map((drawer) => drawer.position.y), [0.75, 1.5, 2.25]);
+  for (const drawer of drawers) {
+    assert.ok(drawer.position.x > 0, 'Every drawer is on the right when facing sink');
+    assert.equal(drawer.userData.shownClosed, true);
+    assert.equal(drawer.userData.travelFeet, 1.25);
+    assert.equal(drawer.children.filter((part) => part.name === 'Guest vanity drawer bottom').length, 1);
+    assert.equal(drawer.children.filter((part) => part.name === 'Guest vanity drawer side').length, 2);
+    assert.equal(drawer.children.filter((part) => part.name === 'Guest vanity drawer end').length, 2);
+    const front = drawer.children.find((part) => part.name === 'Guest vanity drawer Shaker front');
+    assert.equal(front.userData.width, 0.96);
+    const bottom = drawer.children.find((part) => part.name === 'Guest vanity drawer bottom');
+    assert.ok(drawer.position.x - bottom.w / 2 > 0.5 + 0.75 / 24, 'Drawer box clears cupboard divider');
+    assert.ok(drawer.position.x + bottom.w / 2 < suite.vanity.width / 2 - 0.75 / 12, 'Drawer box clears cabinet side');
+    assert.ok(suite.vanity.z + drawer.position.x + front.userData.width / 2 < suite.vanityPrivacyWall.z - 0.175 - 0.75 / 12, 'Right drawers clear privacy-wall baseboard');
+  }
+  assert.equal((suite.vanity.width - basin.w) * 6, 7.5, 'Counter remains on each side of the centered sink');
   assert.equal(find('Guest bathroom toilet').x, suite.toilet.x);
   assert.equal(find('Guest bathroom toilet').z, suite.toilet.z);
-  assert.equal(find('Guest bathroom toilet').rotation, Math.PI / 2);
+  assert.equal(find('Guest bathroom toilet').rotation, 0);
+  assert.equal(find('Guest bathroom shower').rotation.y, -Math.PI / 2);
   assert.equal(find('Guest bathroom vanity').children.filter((part) => part.name === 'Guest bathroom warm opal vanity sconce').length, 2);
   assert.equal(find('Guest bathroom vanity').children.filter((part) => part.name === 'Guest bathroom warm vanity light').length, 2);
   const towel = find('Guest bathroom wall-mounted towel hook');
@@ -177,32 +215,32 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
   assert.equal(shower.children.some((part) => part.name.includes('sliding glass door')), false);
   const westGlass = shower.children.find((part) => part.name === 'Guest shower fixed southwest glass');
   const eastGlass = shower.children.find((part) => part.name === 'Guest shower fixed southeast glass');
-  const entranceLeft = suite.shower.x + westGlass.x + westGlass.w / 2;
-  const entranceRight = suite.shower.x + eastGlass.x - eastGlass.w / 2;
-  assert.ok(Math.abs((entranceRight - entranceLeft) * 12 - 30) < 1e-9, 'Actual fixed-glass edges form a central 30-inch entry');
-  assert.ok(Math.abs(entranceLeft - suite.bathroomDoor.x) < 1e-9);
-  assert.ok(Math.abs(entranceRight - suite.bathroomDoor.x - suite.bathroomDoor.width) < 1e-9);
-  assert.ok(entranceLeft >= suite.toilet.x + 0.848, 'Entry aligns east of the toilet front, not behind the toilet');
-  assert.ok(entranceRight <= suite.vanity.x - 0.9525, 'Entry aligns west of the vanity front, not behind the vanity');
+  const entranceNorth = suite.shower.z + westGlass.x + westGlass.w / 2;
+  const entranceSouth = suite.shower.z + eastGlass.x - eastGlass.w / 2;
+  assert.ok(Math.abs((entranceSouth - entranceNorth) * 12 - 30) < 1e-9, 'Rotated fixed-glass edges form a 30-inch west-facing entry');
   assert.equal(westGlass.h, suite.shower.height);
   assert.equal(eastGlass.h, suite.shower.height);
-  const routeCenterX = (entranceLeft + entranceRight) / 2;
-  assert.ok(routeCenterX - 28 / 24 >= suite.bathroomDoor.x && routeCenterX + 28 / 24 <= suite.bathroomDoor.x + suite.bathroomDoor.width, 'A continuous 28-inch route aligns with both room and shower openings');
   const routeObstacles = [
-    { left: suite.toilet.x - 1.1, right: suite.toilet.x + 0.848, north: suite.toilet.z - 0.875, south: suite.toilet.z + 0.875 },
-    { left: suite.vanity.x - 0.9525, right: suite.vanity.x + 0.775, north: suite.vanity.z - (suite.vanity.width + 0.06) / 2, south: suite.vanity.z + (suite.vanity.width + 0.06) / 2 }
+    { left: suite.toilet.x - 0.875, right: suite.toilet.x + 0.875, north: suite.toilet.z - 1.1, south: suite.toilet.z + 0.848 },
+    { left: suite.vanity.x - 0.9525, right: suite.vanity.x + 0.775, north: suite.vanity.z - (suite.vanity.width + 0.06) / 2, south: suite.vanity.z + (suite.vanity.width + 0.06) / 2 },
+    { left: 24.325, right: suite.bathroomDoor.x, north: 39.425, south: 39.775 },
+    { left: suite.bathroomDoor.x + suite.bathroomDoor.width, right: 31.375, north: 39.425, south: 39.775 },
+    { left: suite.vanityPrivacyWall.x, right: 31.375, north: suite.vanityPrivacyWall.z - 0.175 - 0.75 / 12, south: suite.vanityPrivacyWall.z + 0.175 + 0.75 / 12 },
+    { left: suite.vanity.x - 0.94 - 1.25, right: suite.vanity.x, north: suite.vanity.z + 0.52, south: suite.vanity.z + 1.48 }
   ];
   for (const part of shower.children.filter((part) => part.name.includes('fixed south'))) {
-    routeObstacles.push({ left: shower.x + part.x - part.w / 2, right: shower.x + part.x + part.w / 2, north: shower.z + part.z - part.d / 2, south: shower.z + part.z + part.d / 2 });
+    routeObstacles.push({ left: shower.x - part.z - part.d / 2, right: shower.x - part.z + part.d / 2, north: shower.z + part.x - part.w / 2, south: shower.z + part.x + part.w / 2 });
   }
-  const routeIsClear = (centerX) => {
-    for (let z = suite.bathroomDoor.z + 0.5; z >= suite.shower.z + 1.65; z -= 0.05) {
-      if (routeObstacles.some((item) => Math.hypot(Math.max(item.left - centerX, 0, centerX - item.right), Math.max(item.north - z, 0, z - item.south)) < 28 / 24 - 1e-9)) return false;
+  const route = [[26.25, 44], [26.25, 38.05], [29.4, 38.05]];
+  for (let index = 1; index < route.length; index++) {
+    const [x0, z0] = route[index - 1], [x1, z1] = route[index];
+    const steps = Math.ceil(Math.hypot(x1 - x0, z1 - z0) / 0.05);
+    for (let step = 0; step <= steps; step++) {
+      const x = x0 + (x1 - x0) * step / steps, z = z0 + (z1 - z0) * step / steps;
+      assert.ok(routeObstacles.every((item) => Math.hypot(Math.max(item.left - x, 0, x - item.right), Math.max(item.north - z, 0, z - item.south)) >= 28 / 24 - 1e-9), `28-inch route blocked at ${x}, ${z}`);
     }
-    return true;
-  };
-  assert.equal(routeIsClear(routeCenterX), true, 'Sample a body-width route all the way into the shower, not just to the toilet or vanity');
-  assert.equal(routeIsClear(suite.shower.x + suite.shower.w - 0.1 - 28 / 24), false, 'The previous far-right entrance is blocked by the vanity');
+  }
+  assert.ok(38.05 - 28 / 24 >= entranceNorth && 38.05 + 28 / 24 <= entranceSouth, 'Route turns through the actual west-facing shower entry');
   assert.equal(find('Guest walk-in closet inward-opening door'), undefined);
   const opening = suite.bathroomDoor;
   const door = find('Guest bathroom pocket door proposal - framing approval required');
@@ -216,8 +254,9 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
   assert.equal(leaf.h, opening.height - 0.04);
   assert.equal(leaf.y, opening.height / 2);
   assert.ok(door.userData.openCenterX - leaf.w / 2 >= opening.pocket.x);
-  assert.ok(door.userData.openCenterX + leaf.w / 2 <= opening.x, 'Fully retracted leaf clears the passage');
-  assert.ok(opening.pocket.x > suite.closetDoor.x + suite.closetDoor.width, 'Proposed cavity does not cross the walk-in opening');
+  assert.ok(door.userData.openCenterX - leaf.w / 2 >= opening.x + opening.width, 'Fully retracted leaf clears the passage to the east');
+  assert.ok(door.userData.openCenterX + leaf.w / 2 <= opening.pocket.x + opening.pocket.w);
+  assert.ok(opening.pocket.x + opening.pocket.w < suite.bathroom.x + suite.bathroom.w - 0.175, 'Pocket stays within partition, outside closet and garage');
   assert.ok(!items.some((item) => item.name === 'Guest bathroom outward-opening door'));
 });
 
