@@ -1,5 +1,20 @@
 # Ground-floor design context
 
+## Dynamic livable-area estimate
+
+Remove the redundant "Furnished concept" footer label and its decorative dot.
+Keep the area totals and refresh/reset controls; saved-layout warnings remain.
+
+The viewer footer shows a combined two-floor livable-area estimate computed
+from current floor surfaces, including saved layout overrides, with separate
+first-floor and second-floor values visible alongside the total. Count overlapping
+surfaces once per floor, including closets, halls, bathrooms, laundry and the
+upstairs arrival landing. Exclude garage, porch, mechanical space and open stair
+voids. Recalculate on view/layout changes; source-plan changes update on reload.
+This is nominal modeled interior floor area, not certified appraisal or code
+living area. Wall thickness, headroom eligibility and stair-area conventions
+remain unverified. No room layout changes are implied.
+
 ## Upstairs furnishing and label cleanup - October 24
 
 Remove upstairs floating labels without removing room buttons, tour-map

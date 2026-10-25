@@ -6,6 +6,13 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const read = (file) => fs.readFileSync(require.resolve(`../${file}`), 'utf8');
 
+test('footer keeps area totals and controls without the furnished-concept legend', () => {
+  const footer = read('floor-plan-3d.html').split('<div class="model-footer">')[1].split('</div>')[0];
+  assert.doesNotMatch(footer, /Furnished concept|legend-dot/);
+  for (const id of ['livable-area', 'refresh-model', 'reset-view']) assert.ok(footer.includes(`id="${id}"`));
+  assert.doesNotMatch(read('floor-plan-3d.js'), /querySelector\('\.model-footer span'\)/);
+});
+
 test('room navigation gives every room its own floor-aware camera and keeps inspection shortcuts out of the toolbar', () => {
   const { getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
   const UpstairsLayout = require('../upstairs-layout.js');

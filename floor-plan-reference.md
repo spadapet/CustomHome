@@ -1,5 +1,23 @@
 # Ground-floor plan reference
 
+## Livable-area display
+
+The footer omits the redundant "Furnished concept" legend and decorative dot.
+Area totals and refresh/reset controls remain, as do saved-layout warnings.
+
+The existing viewer footer displays `Livable: ~N sq ft` for both floors combined.
+First-floor and second-floor estimates appear separately alongside the total,
+using the same live calculation and whole-square-foot rounding.
+Calculate from the union of current floor rectangles on each floor, not summed
+room envelopes, which can overlap or omit hall/return surfaces. Use resolved
+saved-layout floors and include the upstairs arrival landing. Include closets,
+halls, bathrooms and laundry; exclude garage, porch, mechanical space and open
+stair voids. The tooltip provides floor subtotals and the calculation scope.
+View/layout changes recalculate; source geometry changes update on reload.
+Round only the final displayed values to whole square feet. This is a nominal
+model estimate, not a certified living-area measurement: wall thickness,
+headroom eligibility and stair-area conventions need independent review.
+
 ## Dining side-wall / kitchen cabinet alignment - October 24
 
 The circled projection is the dining patio-side wall beside the left end

@@ -4016,6 +4016,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const originalGroundDimensions = [...document.querySelectorAll('#room-dimension-summary li')].map((item) => item.cloneNode(true));
   const groundBaseline = getGroundFloorDefaultPlan();
   let groundLayoutPreview = null;
+  function updateLivableArea() {
+    const groundArea = getLivableFloorArea(groundLayoutPreview?.plan ?? groundBaseline);
+    const upstairsArea = getLivableFloorArea({ floors: [...upstairs.plan.floors, upstairs.baseline.arrival] });
+    const format = (area) => Math.round(area).toLocaleString('en-US');
+    const output = document.getElementById('livable-area');
+    output.textContent = `Livable: ~${format(groundArea + upstairsArea)} sq ft | First floor: ~${format(groundArea)} sq ft | Second floor: ~${format(upstairsArea)} sq ft`;
+    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. Combined modeled interior floor surfaces; overlaps counted once. Includes closets, halls, bathrooms and laundry. Excludes garage, porch, mechanical space and open stair voids. Not certified living area; wall thickness and headroom eligibility are not verified.`;
+  }
   const roomDimensionsInput = document.getElementById('show-room-dimensions');
   const planDimensionLabels = document.getElementById('plan-dimension-labels');
   const planDimensionsPanel = document.getElementById('plan-dimensions');
@@ -4902,12 +4910,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     } else if (activeFloor === 'ground') {
       viewport.setAttribute('aria-label', `3D ground floor. Click the floor to enter the tour. Drag to ${navigationMode === 'move' ? 'move' : 'rotate'}; scroll or pinch to zoom.`);
     }
-    document.querySelector('.model-footer span').lastChild.textContent = groundLayoutPreview && activeFloor === 'ground' ? ' Structure-only concept' : ' Furnished concept';
     if (planView) {
       viewport.setAttribute('aria-label', '2D floor plan. Drag to pan; scroll or pinch to zoom. Select Whole floor or Upstairs to return to 3D.');
     }
     renderer.domElement.setAttribute('aria-label', planView ? `2D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground-floor'} orthographic furnished plan, north at top` : outside ? `3D English-country exterior concept: ${exteriorLabel}, provisional stone facade and roof` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
     updateFloorGrid();
+    updateLivableArea();
     updatePlanDimensions();
     document.querySelector('[data-navigation="walk"]').disabled = activeFloor === 'exterior' || Boolean(groundLayoutPreview);
     render();

@@ -52,6 +52,26 @@
     };
   }
 
+  function getLivableFloorArea(plan) {
+    const floors = plan.floors.filter((floor) => !/^(Garage|Front porch|Mechanical(?:\b|$))/.test(floor.room ?? floor.name ?? ''));
+    for (const floor of floors) {
+      if (![floor.x, floor.z, floor.w, floor.d].every(Number.isFinite) || floor.w < 0 || floor.d < 0) throw new Error('Cannot calculate livable area from invalid floor geometry.');
+    }
+    const edges = [...new Set(floors.flatMap(({ x, w }) => [x, x + w]))].sort((a, b) => a - b);
+    let area = 0;
+    for (let index = 1; index < edges.length; index++) {
+      const left = edges[index - 1], right = edges[index];
+      const spans = floors.filter(({ x, w }) => x < right && x + w > left).map(({ z, d }) => [z, z + d]).sort((a, b) => a[0] - b[0]);
+      let end = -Infinity, depth = 0;
+      for (const [start, stop] of spans) {
+        depth += Math.max(0, stop - Math.max(start, end));
+        end = Math.max(end, stop);
+      }
+      area += (right - left) * depth;
+    }
+    return area;
+  }
+
   function getGroundFloorDefaultPlan() {
     const stairs = UpstairsLayout.stairOpening();
     const livingFeatureWall = getLivingRoomFeatureLayout(stairs);
@@ -141,6 +161,7 @@
   root.getGuestEntryLayout = getGuestEntryLayout;
   root.getGuestSuiteLayout = getGuestSuiteLayout;
   root.getGroundFloorDefaultPlan = getGroundFloorDefaultPlan;
+  root.getLivableFloorArea = getLivableFloorArea;
   root.buildGroundLayoutPreview = function (THREE, baseline, edits) {
     const plan = UpstairsLayout.resolve(baseline, edits);
     const group = new THREE.Group();
@@ -184,5 +205,5 @@
       }
     };
   };
-  if (typeof module !== 'undefined' && module.exports) module.exports = { getGroundFloorDefaultPlan, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { getGroundFloorDefaultPlan, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
