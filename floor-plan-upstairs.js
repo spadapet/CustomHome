@@ -163,6 +163,56 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     if (name !== 'Stair opening guard') furnitureAnchors.push({ item, x, z });
     return item;
   }
+  function cabinet(parent, x, z, width, height, depth, drawers = 3) {
+    box(parent, x, height / 2, z, width, height, depth, oak);
+    for (let row = 0; row < drawers; row++) {
+      const y = (row + 0.5) * (height - 0.2) / drawers + 0.1;
+      box(parent, x, y, z + depth / 2 + 0.035, width - 0.12, (height - 0.2) / drawers - 0.06, 0.07, cream);
+      box(parent, x, y, z + depth / 2 + 0.11, Math.min(0.7, width / 3), 0.05, 0.08, black);
+    }
+  }
+  function lamp(parent, x, y, z) {
+    box(parent, x, y + 0.04, z, 0.55, 0.08, 0.55, black, true);
+    box(parent, x, y + 0.45, z, 0.06, 0.8, 0.06, steel);
+    box(parent, x, y + 0.95, z, 0.8, 0.65, 0.8, cream, true);
+  }
+  function chair(name, x, z, rotation = 0) {
+    const item = furniture(name, x, z, rotation);
+    box(item, 0, 1.5, 0, 1.65, 0.22, 1.65, linen, true);
+    box(item, 0, 2.15, 0.75, 1.65, 1.3, 0.15, oak);
+    for (const dx of [-0.65, 0.65]) for (const dz of [-0.65, 0.65]) box(item, dx, 0.7, dz, 0.1, 1.4, 0.1, oak);
+    return item;
+  }
+  function hangingBay(name, x, z, width, rotation = 0, double = false) {
+    const item = furniture(name, x, z, rotation);
+    item.userData = { storageDepthFeet: 2, continuousRods: true, doubleHang: double };
+    for (const dx of [-width / 2, width / 2]) box(item, dx, 3.7, 0, 0.09, 7.4, 2, oak);
+    box(item, 0, 7.35, 0, width, 0.1, 2, oak).userData.closetCanopy = true;
+    for (const y of double ? [3.4, 6.8] : [6.5]) {
+      const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, width - 0.15, 12), steel);
+      rod.rotation.z = Math.PI / 2;
+      rod.position.set(0, y, 0.15);
+      rod.name = 'Continuous hanging rod';
+      item.add(rod);
+      const length = double ? 2.6 : 4.8;
+      for (let dx = -width / 2 + 0.35, index = 0; dx < width / 2 - 0.2; dx += 0.32, index++) {
+        box(item, dx, y - 0.16, 0.15, 0.045, 0.12, 1.35, oak);
+        box(item, dx, y - length / 2 - 0.25, 0.15, 0.12, length, 1.55, index % 3 === 0 ? linen : index % 3 === 1 ? cream : windowTrim, true);
+      }
+    }
+    return item;
+  }
+  function shelving(name, x, z, width, rotation = 0) {
+    const item = furniture(name, x, z, rotation);
+    for (const dx of [-width / 2, width / 2]) box(item, dx, 3.6, 0, 0.09, 7.2, 1.3, oak);
+    for (const y of [0.3, 1.7, 3.1, 4.5, 5.9, 7.2]) {
+      box(item, 0, y, 0, width, 0.09, 1.3, oak);
+      if (y < 7) for (const dx of [-width / 4, width / 4]) {
+        for (let fold = 0; fold < 3; fold++) box(item, dx, y + 0.13 + fold * 0.12, 0, width * 0.35, 0.12, 0.85, fold % 2 ? linen : cream, true);
+      }
+    }
+    return item;
+  }
   for (const [name, x, z, width, rotation] of [
     ['Primary bed', 4.5, 16.8, 6.4, Math.PI / 2],
     ['Bedroom 2 bed', 37.5, 14.5, 5.3, Math.PI],
@@ -175,12 +225,35 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     box(bed, 0, 1.45, 1, width - 0.12, 0.15, 4.5, linen);
     box(bed, 0, 1.6, -2.5, width - 0.5, 0.3, 1.3, cream, true);
     box(bed, 0, 1.7, -3.5, width, 2, 0.18, oak);
+    for (const dx of [-width / 4, width / 4]) box(bed, dx, 1.8, -2.3, width / 2 - 0.35, 0.28, 1.2, windowTrim, true);
+    for (const dx of [-width / 2 - 1, width / 2 + 1]) {
+      cabinet(bed, dx, -2.4, 1.55, 1.9, 1.5, 2);
+      lamp(bed, dx, 1.9, -2.4);
+    }
+    box(bed, 0, 0.025, 0.6, width + 2, 0.04, 8.3, linen);
   }
+  for (const [name, x, z, width, rotation] of [
+    ['Primary dresser', 10.9, 25.45, 4.5, Math.PI],
+    ['Bedroom 2 dresser', 41, 20.85, 4, Math.PI],
+    ['Bedroom 3 dresser', 10.5, 51.95, 3.5, Math.PI],
+    ['Bedroom 4 dresser', 21, 51.95, 3.5, Math.PI]
+  ]) cabinet(furniture(name, x, z, rotation), 0, 0, width, 2.8, 1.6);
+  const bedroomDesk = furniture('Primary writing desk', 5, 9);
+  box(bedroomDesk, 0, 2.5, 0, 4, 0.14, 1.8, oak);
+  for (const x of [-1.8, 1.8]) box(bedroomDesk, x, 1.25, 0, 0.12, 2.5, 1.6, black);
+  lamp(bedroomDesk, -1.3, 2.57, 0);
+  chair('Primary desk chair', 5, 10.8);
   function vanity(name, x, z, width, rotation = 0) {
     const item = furniture(name, x, z, rotation);
     box(item, 0, 1.3, 0, width, 2.6, 1.8, oak);
     box(item, 0, 2.7, 0, width + 0.05, 0.15, 1.9, cream);
-    box(item, 0, 2.8, 0, width * 0.65, 0.08, 1.1, windowTrim, true);
+    for (const dx of width > 5 ? [-width / 4, width / 4] : [0]) {
+      box(item, dx, 2.8, 0, 1.45, 0.08, 1.1, windowTrim, true);
+      box(item, dx, 2.845, 0, 1.1, 0.015, 0.75, steel, true);
+      box(item, dx, 3.05, -0.65, 0.08, 0.55, 0.08, steel);
+      box(item, dx, 3.3, -0.45, 0.08, 0.08, 0.45, steel);
+    }
+    for (let dx = -width / 2 + 0.5; dx < width / 2; dx += 1) box(item, dx, 1.5, 0.96, 0.5, 0.06, 0.08, black);
     box(item, 0, 4.7, -0.85, width - 0.1, 2.5, 0.08, steel);
   }
   function toilet(name, x, z, rotation = 0) {
@@ -191,10 +264,10 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   }
   vanity('Primary double vanity', 18, 3.3, 5.5);
   vanity('Bedroom 2 vanity', 47, 14.1, 3, Math.PI);
-  vanity('West bath vanity', 1.8, 37.3, 2.5);
+  vanity('West bath vanity', 1.8, 37.45, 2.5);
   vanity('East bath vanity', 29.6, 38.7, 2.5, -Math.PI / 2);
   toilet('Primary toilet', 11.7, 3.6);
-  toilet('Bedroom 2 toilet', 50, 13);
+  toilet('Bedroom 2 toilet', 49.5, 11.5);
   toilet('West bath toilet', 5, 37.9);
   toilet('East bath toilet', 26.5, 38.2);
   for (const [name, x, z, w, d] of [
@@ -207,36 +280,65 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     box(item, 0, 0.12, 0, w, 0.24, d, cream);
     box(item, 0, 3, -d / 2 + 0.08, w, 6, 0.12, tile);
     box(item, 0, 5.5, -d / 2 + 0.2, 0.5, 0.06, 0.5, steel);
+    box(item, 0, 3.2, -d / 2 + 0.18, 0.25, 0.4, 0.08, steel);
+    box(item, 0, 0.25, 0, 0.3, 0.015, 0.3, steel);
   }
   const tub = furniture('Primary freestanding tub', 23.2, 11.2);
   box(tub, 0, 1, 0, 2.8, 2, 5.2, windowTrim, true);
   box(tub, 0, 1.9, 0, 2.25, 0.15, 4.4, cream, true);
+  box(tub, 0, 1.99, 0, 1.9, 0.025, 3.9, windowTrim, true);
+  box(tub, -1.7, 1.3, 0, 0.1, 2.6, 0.1, steel);
+  box(tub, -1.4, 2.6, 0, 0.7, 0.1, 0.1, steel);
   for (const x of [21.3, 24.6]) {
     const machine = furniture(x < 23 ? 'Washer' : 'Dryer', x, 28.5);
     box(machine, 0, 1.6, 0, 2.8, 3.2, 2.8, windowTrim);
     box(machine, 0, 1.5, 1.43, 1.8, 1.8, 0.08, black, true);
+    box(machine, 0, 1.5, 1.48, 1.4, 1.4, 0.04, steel, true);
+    box(machine, 0.8, 2.85, 1.45, 0.22, 0.22, 0.08, black, true);
   }
+  const laundryStorage = furniture('Laundry wall cupboards', 24.1, 27.5);
+  for (const x of [-3, -1, 1, 3]) cabinet(laundryStorage, x, 0, 1.9, 2, 1.2, 1);
+  laundryStorage.position.y = 5.2;
   const laundryCounter = furniture('Laundry folding counter', 24.1, 35);
   box(laundryCounter, 0, 1.4, 0, 7.5, 2.8, 1.7, oak);
   box(laundryCounter, 0, 2.9, 0, 7.6, 0.15, 1.8, cream);
   const furnace = furniture('Mechanical equipment reservation', 31, 34.6);
   box(furnace, 0, 3, 0, 2.5, 6, 2.7, steel);
-  for (const [name, x, z, width, rotation] of [
-    ['Primary closet rail', 22, 15.7, 12, 0],
-    ['Bedroom 2 closet rail', 50.9, 18.7, 5, -Math.PI / 2],
-    ['Bedroom 3 closet rail', 15.5, 46, 4, Math.PI],
-    ['Bedroom 4 closet rail', 15.5, 52.2, 4, Math.PI],
-    ['Linen shelves', 33, 29, 5.5, Math.PI]
-  ]) {
-    const item = furniture(name, x, z, rotation);
-    for (const y of [1, 3, 5.5, 7.3]) box(item, 0, y, 0, width, 0.08, 1.3, oak);
-  }
+  hangingBay('Primary closet long hanging', 18, 20.7, 5, Math.PI);
+  hangingBay('Primary closet double hanging', 23.1, 20.7, 5, Math.PI, true);
+  shelving('Primary closet folded clothes', 27.1, 21.1, 2.7, Math.PI);
+  hangingBay('Primary closet return hanging', 29.7, 13, 4.8, Math.PI / 2);
+  const closetDresser = furniture('Primary closet drawers', 20, 15.65);
+  cabinet(closetDresser, 0, 0, 6, 2.9, 1.4, 4);
+  closetDresser.userData.aisleToHangingFeet = 3.2;
+  hangingBay('Bedroom 2 closet hanging', 50.7, 18.7, 5, Math.PI / 2, true);
+  shelving('Bedroom 2 closet shelves', 46.7, 21.05, 3, Math.PI);
+  hangingBay('Bedroom 3 closet hanging', 15.5, 45.7, 4, Math.PI, true);
+  hangingBay('Bedroom 4 closet hanging', 15.5, 51.9, 4, Math.PI, true);
+  shelving('Linen shelves', 33, 28.9, 5.5, Math.PI);
   const loftSofa = furniture('Loft sofa', 47, 32, Math.PI);
   box(loftSofa, 0, 0.9, 0, 6, 1.2, 2.8, linen, true);
   box(loftSofa, 0, 1.8, -1.2, 6, 1.6, 0.3, linen, true);
+  for (const x of [-2.8, 2.8]) box(loftSofa, x, 1.4, 0, 0.4, 1.3, 2.8, linen, true);
+  for (const x of [-1.8, 0, 1.8]) box(loftSofa, x, 1.55, 0, 1.6, 0.2, 2.1, cream, true);
+  for (const x of [-2, 2]) box(loftSofa, x, 2, -0.8, 0.9, 0.8, 0.25, oak, true);
+  const loftTable = furniture('Loft coffee table and rug', 46.5, 28.6);
+  box(loftTable, 0, 0.03, 0, 8, 0.05, 7, linen);
+  box(loftTable, 0, 1.3, 0, 3.8, 0.15, 2, oak);
+  for (const x of [-1.5, 1.5]) for (const z of [-0.7, 0.7]) box(loftTable, x, 0.65, z, 0.12, 1.3, 0.12, black);
+  const media = furniture('Loft media console', 45, 23.05);
+  cabinet(media, 0, 0, 6, 1.6, 1.2, 1);
+  box(media, 0, 3.3, -0.35, 4.5, 2.6, 0.12, black);
+  chair('Loft reading chair', 41.2, 29, -Math.PI / 2);
+  const sideTable = furniture('Loft reading side table', 40.7, 32);
+  cabinet(sideTable, 0, 0, 1.5, 1.8, 1.5, 1);
+  lamp(sideTable, 0, 1.8, 0);
   const loftDesk = furniture('Loft desk', 50.8, 24.8, -Math.PI / 2);
   box(loftDesk, 0, 2.5, 0, 4.5, 0.15, 1.8, oak);
   for (const x of [-2, 2]) box(loftDesk, x, 1.25, 0, 0.12, 2.5, 1.6, black);
+  box(loftDesk, 0, 3.25, -0.5, 1.8, 1.1, 0.1, black);
+  box(loftDesk, 0, 2.6, 0.2, 1.3, 0.06, 0.45, steel);
+  chair('Loft desk chair', 48.9, 24.8, -Math.PI / 2);
   // Leave the east-side upper arrival open to the hall; guard the remaining void edges.
   const guardY = 1.5;
   const left = stairOpening.x;
@@ -250,32 +352,6 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     for (let position = -length / 2; position <= length / 2 + 0.01; position += length / Math.ceil(length / 3)) box(rail, position, guardY, 0, 0.08, 3, 0.08, black);
   }
   // The upper flight stays visible below this level without duplicating its arrival slab.
-  const labelMaterial = new THREE.SpriteMaterial({ color: '#ffffff', transparent: true, depthTest: false, depthWrite: false, toneMapped: false });
-  const labels = new THREE.Group();
-  labels.name = 'Upstairs room labels';
-  group.add(labels);
-  for (const room of rooms) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 96;
-    const context = canvas.getContext('2d');
-    if (!context) throw new Error('Upstairs room labels require a 2D canvas context.');
-    context.fillStyle = '#30483c';
-    context.font = 'bold 36px sans-serif';
-    context.textAlign = 'center';
-    context.fillText(room.name, 256, 35);
-    context.font = '28px sans-serif';
-    context.fillText(`${room.w.toFixed(1)} x ${room.d.toFixed(1)} ft`, 256, 66);
-    const material = labelMaterial.clone();
-    material.map = new THREE.CanvasTexture(canvas);
-    material.map.colorSpace = THREE.SRGBColorSpace;
-    const sprite = new THREE.Sprite(material);
-    sprite.name = `Room label: ${room.name}`;
-    sprite.raycast = () => {};
-    sprite.position.set(room.x + room.w / 2, wallHeight + 0.3, room.z + room.d / 2);
-    sprite.scale.set(10, 1.875, 1);
-    labels.add(sprite);
-  }
   const coordinationWarnings = [];
   group.updateMatrixWorld(true);
   for (const { item, x, z } of furnitureAnchors) {
@@ -294,9 +370,8 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
       }
     });
     tile.dispose();
-    labelMaterial.dispose();
   }
-  return { group, rooms, areas, labels, plan, baseline, dispose, coordinationWarnings, start: [16.5, 33], mapLabels: rooms.map((room) => [room.name, room.x + room.w / 2, room.z + room.d / 2]) };
+  return { group, rooms, areas, plan, baseline, dispose, coordinationWarnings, start: [16.5, 33], mapLabels: rooms.map((room) => [room.name, room.x + room.w / 2, room.z + room.d / 2]) };
 }
 
 if (typeof module !== 'undefined' && module.exports) module.exports = { getUpstairsDefaultPlan };

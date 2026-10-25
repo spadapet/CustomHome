@@ -787,6 +787,23 @@ Physical samples must confirm stain, sheen, upholstery durability, quartz color,
 
 ## Open decisions and known differences
 
+### Upstairs furnishing update - October 24, 2026
+
+Remove floating upstairs room labels, retaining room navigation and opt-in 2D
+dimensions. Furnish all four bedrooms with nightstands, lamps, rugs, pillows
+and dressers; add a primary writing desk and a complete loft seating/work area.
+Add laundry wall cupboards, folded linen and bathroom fixture details.
+Replace shelf-only closet placeholders with continuous hanging rods, visible
+clothes, long/double hanging, folded storage and primary closet drawers.
+Closet room inspection hides hanging-bay top shelves; other views restore them.
+The primary closet's modeled drawer-handle-to-hanging-bay aisle is 38.4 inches,
+including the two-foot clothing zone. Keep both existing connecting openings
+clear; no walls, openings, saved layout data or door display poses change.
+Bedroom 2's toilet is moved north away from its vanity; the west bath vanity
+is offset from the wall trim. Mechanical equipment remains a reservation.
+Product selection, occupied retrieval, door operation, sanitary clearances,
+supports and code approval remain unresolved. See [upstairs notes](upstairs.html#model-study).
+
 1. **Guest-entry verification:** hall access, powder door, relocated vanity and separate coat closet are now modeled; the former blocked entry is resolved geometrically. Confirm actual finished door/frame clear widths, occupied alcove circulation, sanitary clearances, plumbing/exhaust, structure, closet operation, and accessibility. The remaining 6-inch stair-edge-to-wall-centerline buffer is not a walking passage.
 2. **Patio circulation:** inward handing and closed display remain current. The rotated dining set moves 6 in west for swing clearance; actual occupied passage and manufacturer door/chair envelopes still need confirmation.
 3. **Stair enclosure:** relocated flight guards and the new living-side opening guard replace the earlier wall-backed omissions. Confirm required handrails, guards, clear widths, headroom, fire protection, anchorage and structural support after removing the living partition.

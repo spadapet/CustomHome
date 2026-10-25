@@ -278,7 +278,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     navigationMode = mode;
     if (wasWalking && mode !== 'walk') stopWalking();
     const walking = mode === 'walk';
-    upstairs.labels.visible = !walking;
     const moving = mode === 'move' || currentView === 'top' || currentView === 'upstairs-top';
     controls.enableRotate = currentView !== 'top' && currentView !== 'upstairs-top';
     controls.enabled = !walking;
@@ -4826,6 +4825,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (activeFloor !== 'ground' && floor !== activeFloor) selectFloor('ground');
     selectFloor(floor);
     currentView = name;
+    upstairs.group.traverse((object) => {
+      if (object.userData.closetCanopy) object.visible = !(name.startsWith('upstairs-') && name.includes('closet'));
+    });
     const planView = name === 'top' || name === 'upstairs-top';
     document.getElementById('dining-clearance-note').hidden = name !== 'dining';
     document.getElementById('firepit-storage-note').hidden = !['exterior-patio', 'exterior-firepit', 'exterior-wood'].includes(name);

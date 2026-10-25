@@ -1,5 +1,22 @@
 # Ground-floor design context
 
+## Upstairs furnishing and label cleanup - October 24
+
+Remove upstairs floating labels without removing room buttons, tour-map
+destinations or optional 2D dimensions. Preserve saved layouts and all walls,
+openings and default door poses. Add paired bedroom nightstands/lamps, rugs,
+pillows, dressers, a primary writing desk, loft seating/media/work furniture,
+laundry cupboards and bathroom details. Replace closet shelf placeholders
+with continuous rods, clothing, long/double hanging, drawers and folded storage.
+Closet inspection views hide the hanging-bay top shelves to expose their
+contents; changing views restores them.
+The primary walk-in retains its stepped north return and both connecting
+openings; its drawer handles leave a modeled 38.4-inch aisle to the opposing
+two-foot clothing zone. Move Bedroom 2's toilet clear of its vanity and the
+west bath vanity clear of trim. Mechanical equipment is still only a service
+reservation. Actual products, occupied use, door swings, sanitary clearances,
+supports and code compliance require review; see [upstairs notes](upstairs.html#model-study).
+
 ## Corrected dining side-wall alignment - October 24
 
 The owner's circled wall is the patio-side return next to the kitchen
