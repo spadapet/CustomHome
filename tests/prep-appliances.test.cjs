@@ -143,7 +143,7 @@ test('the appliance row aligns at the backsplash and the mixer clears the narrow
 test('prep picture window centers on the sink and the operable end window centers in the aisle', () => {
   const frames = [];
   const context = {
-    casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12, rest: {},
+    casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12, rest: {}, garageClerestories: [],
     windowFrame(...args) { frames.push(args); }
   };
   const start = source.indexOf('  const kitchenWallLeft =');
@@ -182,7 +182,7 @@ test('exterior prep openings match the furnished windows and the picture pane ha
   const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
   const walls = [];
   const context = {
-    garageSideDoorCenterZ: 45.5, garageSideDoorWidth: 3, garageFloorY: -1.25,
+    garageSideDoorCenterZ: 45.5, garageSideDoorWidth: 3, garageFloorY: -1.25, garageClerestories: [],
     win: (center, width, sill, height) => ({ center, width, sill, height }),
     wall(...args) { walls.push(args); }
   };

@@ -162,7 +162,7 @@ test('dimensioned 2D links show every current room and retain a plain plan optio
   assert.equal(input.disabled, true);
   assert.equal(elements['plan-dimension-labels'].hidden, true);
   assert.match(source, /roomDimensionsInput.checked = initialParameters.get\('dimensions'\) === '1'/);
-  assert.match(source, /function render\(\) \{\s+updateVehicleDoorControls\(\);\s+positionPlanDimensions\(\)/);
+  assert.match(source, /function render\(\) \{[^}]*updateVehicleDoorControls\(\);\s+positionPlanDimensions\(\)/);
 });
 
 test('viewer consolidates controls in a collapsible sidebar without duplicate plan links', () => {

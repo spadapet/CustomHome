@@ -95,7 +95,7 @@ test('shared-wall floor changes leave the gray wall, garage and all opening widt
   assert.deepEqual(shared[5], [[2.725, 5.225, 0, 8], [14.675, 17.175, 0, 8]]);
   assert.equal(plan.rooms.find((room) => room.name === 'Kitchen').w, 11);
   assert.equal(plan.rooms.find((room) => room.name === 'Prep kitchen').w, 18);
-  assert.equal(plan.rooms.find((room) => room.name === 'Mudroom').w, 7.9);
+  assert.equal(plan.rooms.find((room) => room.name === 'Mudroom').w, 7.4 - 2 / 12);
   assert.equal(plan.walls.find(([name]) => name === 'Garage west return')[1], 29);
   assert.equal(plan.walls.find(([name]) => name === 'Mudroom south')[2], 26.9);
   assert.equal(plan.walls.find(([name]) => name === 'Kitchen north')[2], 7);
