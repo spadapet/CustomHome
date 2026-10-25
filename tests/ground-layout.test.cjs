@@ -8,6 +8,25 @@ const layout = require('../upstairs-layout.js');
 const { getGroundFloorDefaultPlan, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout } = require('../floor-plan-ground.js');
 const baseline = getGroundFloorDefaultPlan();
 
+test('powder room uses the shared hardwood floor without a tile overlay', () => {
+  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const floors = [];
+  const guestEntry = getGuestEntryLayout();
+  const guestSuite = getGuestSuiteLayout();
+  const stairOpening = { x: 0.5, z: 28, width: 10, depth: 6 };
+  const start = source.lastIndexOf('  [', source.indexOf('    [37.5, 15,'));
+  const end = source.indexOf(';', source.indexOf('].forEach(([x, z, w, d, hardwood')) + 1;
+  vm.runInNewContext(source.slice(start, end), {
+    guestEntry, guestSuite, stairOpening, shell: {}, powderNorthZ: guestEntry.powder.z,
+    powderEntryWallZ: guestEntry.alcove.z, officeNorthZ: guestEntry.officeNorthZ,
+    kidsRoom: { x: 19, z: 25.7, depth: 8.9 },
+    floor(x, z, w, d, hardwood) { floors.push({ x, z, w, d, hardwood }); }
+  });
+  const powder = floors.find(({ x, z }) => x === guestEntry.powder.x && z === guestEntry.powder.z);
+  assert.deepEqual(powder, { ...guestEntry.powder, hardwood: true });
+  assert.ok(!source.includes("tiledFloor('Powder room tile'"), 'No tile covers the hardwood');
+});
+
 test('all ground-floor door and passage openings are eight feet above their floor datum', () => {
   let count = 0;
   for (const [name, , , , , openings = []] of baseline.walls) {
@@ -286,6 +305,54 @@ test('guest powder room and coat closet have separate doors off an open hall alc
   assert.ok(entry.vanity.z + entry.vanity.depth / 2 + 0.2 < entry.powderDoor.z, 'North-wall vanity stays north of the entire door opening');
 });
 
+test('guest coat French doors span the opening and swing outward from opposite jambs', () => {
+  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  class Group {
+    constructor() {
+      this.children = [];
+      this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } };
+      this.rotation = {};
+    }
+    add(child) { this.children.push(child); }
+  }
+  let closet;
+  const entry = getGuestEntryLayout();
+  const context = {
+    THREE: { Group }, guestEntry: entry, powderNorthZ: entry.powder.z, cabinetFinish: {}, brass: {}, linen: {}, cream: {},
+    furnishing() { closet = new Group(); return closet; },
+    box() { return {}; },
+    cylinder() { return { rotation: {} }; },
+    shakerFront(parent, x, y, z, width, height) {
+      const leaf = { x, y, z, width, height };
+      parent.add(leaf);
+      return leaf;
+    },
+    cabinetPull() {}
+  };
+  vm.runInNewContext(source.slice(source.indexOf('  const guestCoats ='), source.indexOf('  const powderDoor =')), context);
+  const hinges = closet.children;
+  assert.equal(hinges.length, 2);
+  const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-9, `${a} differs from ${b}`);
+  for (const [index, side] of [-1, 1].entries()) {
+    const hinge = hinges[index], leaf = hinge.children[0];
+    close(9.65 + hinge.position.x, entry.closetDoor.x + index * entry.closetDoor.width);
+    close(entry.powder.z + 1.2 + hinge.position.z, entry.closetDoor.z);
+    close(leaf.width, 1.96);
+    close(leaf.height, 7.96);
+    close(hinge.position.x + leaf.x - side * leaf.width / 2, side * 0.04);
+    const operation = hinge.userData.interactiveHouseDoor;
+    assert.equal(operation.operation, 'hinged');
+    assert.equal(operation.openAngleDegrees, 0);
+    assert.equal(operation.maxAngleDegrees, 90);
+    for (let angle = 0; angle <= operation.maxAngleDegrees; angle++) {
+      const radians = side * angle * Math.PI / 180;
+      const freeEdgeZ = hinge.position.z - Math.sin(radians) * -side * leaf.width;
+      assert.ok(freeEdgeZ >= hinge.position.z - 1e-9, 'Leaf swings toward alcove, not hanging coats');
+    }
+    assert.equal(operation.openRotationSign, side);
+  }
+});
+
 test('powder redesign aligns fixtures north and leaves their approaches clear of the entry sweep', () => {
   const entry = getGuestEntryLayout();
   assert.equal(entry.vanity.width * 12, 42);
@@ -457,11 +524,11 @@ test('powder-wall-backed upper flight and landing omit guards without removing s
   const stairDepth = baseline.stairs.depth;
   const stairRun = 70 / 12;
   const context = {
-    THREE: { Group }, stairs: new Group(),
+    THREE: { Group, PointLight: class { constructor() { this.position = { set() {} }; } } }, stairs: new Group(),
     stairWidth, stairGap, stairDepth, stairRun, wallSideStairWidth: stairDepth - stairWidth - stairGap,
     stairRisers: 8, stairRise: 7.5 / 12, stairGoing: 10 / 12, landingHeight: 5, landingEndX: stairRun + 4,
     stairBookcaseDepth: 11 / 12, stairBookcaseFlightSplitStep: 5,
-    oak: {}, walnut: {}, cream: {}, black: {}, wallMaterial: {},
+    oak: {}, walnut: {}, cream: {}, black: {}, wallMaterial: {}, stairStepGlow: {},
     stairBookcaseHeight() { return 0; },
     stairBeam(name, start, end) { parts.push({ name, start, end }); },
     box(parent, x, y, z) {
@@ -594,7 +661,7 @@ test('double-chaise sectional has exactly chaise-seat-seat-chaise modules and fi
       return mesh;
     }
   };
-  vm.runInNewContext(source.slice(source.indexOf('  const sectional ='), source.indexOf('  const strandmonWidth =')), context);
+  vm.runInNewContext(source.slice(source.indexOf('  const sectional ='), source.indexOf('  const livingChairWidth =')), context);
   const sectional = scene.children[0];
   const modules = sectional.children.filter((part) => part.userData);
   assert.deepEqual(modules.map((part) => part.userData.type), ['chaise', 'seat', 'seat', 'chaise']);
@@ -618,7 +685,7 @@ test('double-chaise sectional has exactly chaise-seat-seat-chaise modules and fi
   assert.ok(sectional.position.z - minX < baseline.stairs.z, 'Sectional stays outside stair opening');
 });
 
-test('sectional default replaces chairs and sofa, and comparison switching restores visibility and obstacle flags', () => {
+test('earlier sectional comparison restores visibility and obstacle flags when switching from the default', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
   function object(children = []) {
     return {
@@ -633,7 +700,8 @@ test('sectional default replaces chairs and sofa, and comparison switching resto
     livingCenterZ: getLivingRoomFeatureLayout().centerZ, livingFeatureWall: getLivingRoomFeatureLayout(),
     navigationMode: 'rotate', activeFloor: 'ground',
     sofa: object([object()]), sectional: object([object()]),
-    strandmonChairs: [object([object()]), object([object()])],
+    downloadedSofa: object(), familySectional: object(), referenceLounge: object(), familyLiving: object(),
+    livingArmchairs: [object([object()]), object([object()])],
     loungeChairs: [object([cornerOttoman]), object([readingOttoman, book])], cornerOttoman, readingOttoman,
     document: { querySelectorAll: () => [], getElementById: () => ({}) },
     viewport: { dataset: {} }, buildWalkObstacles() {}
@@ -641,34 +709,37 @@ test('sectional default replaces chairs and sofa, and comparison switching resto
   const layouts = source.slice(source.indexOf('  const livingLayouts ='), source.indexOf('  const tableX ='));
   const apply = source.slice(source.indexOf('  function applyLivingLayout('), source.indexOf('  applyLivingLayout(livingLayouts[0], false);'));
   vm.runInNewContext(`${layouts}\n${apply}\nglobalThis.layouts = livingLayouts;`, context);
-  const current = context.layouts[0];
+  assert.equal(context.layouts[0].id, 'reference-lounge');
+  assert.equal(context.layouts[0].recommended, true);
+  const current = context.layouts.find((layout) => layout.id === 'double-chaise');
   assert.equal(current.id, 'double-chaise');
-  assert.equal(current.recommended, true);
+  assert.ok(!current.recommended);
   assert.equal(current.sofa, null);
   assert.ok(current.chairs.every((chair) => chair === null));
   assert.equal(current.sectional[1], getLivingRoomFeatureLayout().centerZ);
   const previous = context.layouts.find((layout) => layout.id === 'centered');
   assert.ok(!previous.recommended);
-  assert.equal(context.layouts.length, 6);
-  for (const layout of [current, previous, current]) {
+  assert.equal(context.layouts.length, 10);
+  for (const layout of [context.layouts[0], current, previous, current]) {
     context.applyLivingLayout(layout, false);
     const showingSectional = layout === current;
     assert.equal(context.sectional.visible, showingSectional);
-    assert.equal(context.sofa.visible, !showingSectional);
-    for (const chair of context.strandmonChairs) {
+    assert.equal(context.sofa.visible, layout === previous);
+    assert.equal(context.referenceLounge.visible, layout === context.layouts[0]);
+    for (const chair of context.livingArmchairs) {
       assert.equal(chair.visible, showingSectional);
       chair.traverse((part) => {
         assert.equal(part.userData.livingLayoutHidden, !showingSectional, 'Wing chairs block tours only in their active layout');
       });
     }
     for (const chair of context.loungeChairs) {
-      assert.equal(chair.visible, !showingSectional);
+      assert.equal(chair.visible, layout === previous);
       chair.traverse((part) => {
-        assert.equal(part.userData.livingLayoutHidden, showingSectional, 'Hidden seating and descendants do not block tours');
+        assert.equal(part.userData.livingLayoutHidden, layout !== previous, 'Hidden seating and descendants do not block tours');
       });
     }
-    assert.equal(cornerOttoman.visible, !showingSectional);
-    assert.equal(readingOttoman.visible, !showingSectional);
+    assert.equal(cornerOttoman.visible, layout === previous);
+    assert.equal(readingOttoman.visible, layout === previous);
     assert.equal(context.sectional.children[0].userData.livingLayoutHidden, !showingSectional);
   }
 });
@@ -706,7 +777,7 @@ test('earlier corner-chair comparison preserves centered fireplace and sofa', ()
   assert.ok(context.layouts.every((option) => !('tables' in option)), 'No living layout restores the removed sofa-side table');
   assert.doesNotMatch(source, /livingTables|Square walnut sofa end table|Walnut end-table leg/, 'Removed table geometry and preview wiring stay absent');
   assert.equal(layout.sofa[0], 11.6);
-  assert.equal(context.layouts.length, 6);
+  assert.equal(context.layouts.length, 10);
   const readingChair = layout.chairs[1];
   const halfDepth = (Math.abs(Math.sin(readingChair[2])) * 34 / 12 + Math.abs(Math.cos(readingChair[2])) * 34.5 / 12) / 2;
   const cabinetEndZ = feature.wallEndZ;

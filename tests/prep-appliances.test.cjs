@@ -74,6 +74,27 @@ test('prep cooktop is removed while the continuous left quartz counter and main 
   assert.match(source, /cooktop\.name = '36 inch induction cooktop'/, 'Keep the separate main-kitchen cooktop');
 });
 
+test('prep sage tile contrasts with quartz without changing the backsplash envelope', () => {
+  const model = buildPrepCounter();
+  assert.equal(model.find('Prep quartz backsplash').length, 0);
+  const backing = bounds(model.find('Prep backsplash warm-gray grout backing')[0]);
+  const tiles = model.find('Prep sage running-bond backsplash tile');
+  assert.equal(tiles.length, 67);
+  for (const tile of tiles) {
+    const b = bounds(tile);
+    assert.equal(tile.material.name, 'Prep muted deep sage ceramic tile');
+    assert.ok(b.minX > backing.minX && b.maxX < backing.maxX);
+    assert.ok(b.minY > 3.04 && b.maxY < 3.86);
+    assert.ok(Math.abs(b.minZ - backing.maxZ) < 1e-9, 'Tile meets the grout backing');
+    assert.ok(Math.abs(b.maxZ - 7.26) < 1e-9, 'Original appliance alignment face is unchanged');
+  }
+  assert.equal(new Set(tiles.map(tile => tile.position.y)).size, 3);
+  for (let i = 0; i < tiles.length; i++) for (let j = i + 1; j < tiles.length; j++) {
+    const a = bounds(tiles[i]), b = bounds(tiles[j]);
+    assert.ok(a.maxX <= b.minX || b.maxX <= a.minX || a.maxY <= b.minY || b.maxY <= a.minY, 'Tiles have open grout joints, not overlaps');
+  }
+});
+
 test('18-inch dishwasher replaces cabinet volume beside the sink under a continuous counter', () => {
   const model = buildPrepCounter();
   const dishwasher = model.find('Prep 18 inch integrated dishwasher')[0];

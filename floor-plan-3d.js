@@ -250,6 +250,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = false;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
@@ -303,10 +304,23 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     });
   });
 
-  scene.add(new THREE.AmbientLight('#ffffff', 2.5));
+  const ambientLight = new THREE.AmbientLight('#ffffff', 2.5);
+  scene.add(ambientLight);
   const studioFill = new THREE.PointLight('#ffffff', 650, 0, 2);
   studioFill.position.set(25, 32, 29);
   scene.add(studioFill);
+  const mudroomKeyLight = new THREE.SpotLight('#fff1dc', 260, 24, Math.PI / 2.8, 0.7, 2);
+  mudroomKeyLight.name = 'Mudroom soft interior study light';
+  mudroomKeyLight.position.set(39.2, 8.4, 24.5);
+  mudroomKeyLight.target.position.set(43.4, 3.4, 20.9);
+  mudroomKeyLight.castShadow = true;
+  mudroomKeyLight.shadow.mapSize.set(2048, 2048);
+  mudroomKeyLight.shadow.camera.near = 0.5;
+  mudroomKeyLight.shadow.camera.far = 24;
+  mudroomKeyLight.shadow.bias = -0.00015;
+  mudroomKeyLight.shadow.normalBias = 0.025;
+  mudroomKeyLight.visible = false;
+  scene.add(mudroomKeyLight, mudroomKeyLight.target);
 
   const mat = (color, roughness = 0.85) => new THREE.MeshStandardMaterial({ color, roughness });
   const cream = mat('#e9e0cd');
@@ -876,10 +890,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   // Stepped footprint and room adjacencies follow the user's attached plan.
   floor(0, 8, 13.2, 17.7, true, scene);
-  floor(13.2, -0.1, 13.3, 8.1, true, scene);
+  floor(13.2, -0.1, 13.675, 8.1, true, scene);
   floor(13.2, 8, 5.8, 17.7, true, scene);
   floor(19, 8, 7.5, kidsRoom.z - 8, true, scene);
-  floor(26.5, kitchenWindowWallZ, 11, kidsRoom.z - kitchenWindowWallZ, true, scene);
+  floor(26.875, kitchenWindowWallZ, 10.625, 8 - kitchenWindowWallZ, true, scene);
+  floor(26.5, 8, 11, kidsRoom.z - 8, true, scene);
   floor(29, kidsRoom.z, 8.5, 26.9 - kidsRoom.z, true, scene);
   floor(37.5, kitchenWindowWallZ, 7.9, 15 - kitchenWindowWallZ, true, scene);
   floor(45.4, kitchenWindowWallZ, 10.1, 15 - kitchenWindowWallZ, true, scene);
@@ -892,7 +907,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [0, stairOpening.z + stairOpening.depth, 12.2, powderNorthZ - stairOpening.z - stairOpening.depth, true],
     [12.2, 25.7, kidsRoom.x - 12.2, 8.9, true],
     [kidsRoom.x, kidsRoom.z, 10, kidsRoom.depth, true],
-    [12.2, 34.6, 6.8, 19.6, true], [0, powderNorthZ, 7.1, guestEntry.powder.d], [7.1, powderEntryWallZ, 5.1, guestEntry.alcove.d, true],
+    [12.2, 34.6, 6.8, 19.6, true], [0, powderNorthZ, 7.1, guestEntry.powder.d, true], [7.1, powderEntryWallZ, 5.1, guestEntry.alcove.d, true],
     [0, officeNorthZ, 12.2, 54.2 - officeNorthZ, true], [19, 34.6, 5.5, 7.4, true], [24.5, 34.6, 6.7, guestSuite.bathroom.d],
     [guestSuite.sinkAlcove.x, guestSuite.sinkAlcove.z, guestSuite.sinkAlcove.w, guestSuite.sinkAlcove.d, true],
     [19, 43, 12.2, 11.2, true],
@@ -903,9 +918,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   [
     [0, 8, 13.2, 8, true, livingSideWindows.map(({ center, width }) => [center - width / 2, center + width / 2, livingSideWindowSill, livingWindowHead])],
     [13.2, -0.1, 13.2, 8, true, diningSideWindowCenters.map((z) => [z - diningSideWindowWidth / 2 + 0.1, z + diningSideWindowWidth / 2 + 0.1, diningSideWindowSill, diningSideWindowSill + diningSideWindowHeight])],
-    [13.2, -0.1, 26.5, -0.1, true, [[3.65, 9.65, 3, 8]]],
-    [26.5, -0.1, 26.5, kitchenWindowWallZ, true, [[0.6, 6.6, 0, 8]], ceilingHeight, [1]],
-    [kitchenWallLeft, kitchenWindowWallZ, kitchenWallRight, kitchenWindowWallZ, true, kitchenSinkWindows.map(({ x, width }) => [x - width / 2 - kitchenWallLeft, x + width / 2 - kitchenWallLeft, kitchenSinkWindowSill, kitchenSinkWindowSill + kitchenSinkWindowHeight]), ceilingHeight, [-1, 1], 1],
+    [13.2, -0.1, 26.875, -0.1, true, [[3.8375, 9.8375, 3, 8]]],
+    [26.875, -0.1, 26.875, kitchenWindowWallZ, true, [[0.6, 6.6, 0, 8]], ceilingHeight, [1]],
+    [26.875, kitchenWindowWallZ, kitchenWallRight, kitchenWindowWallZ, true, kitchenSinkWindows.map(({ x, width }) => [x - width / 2 - 26.875, x + width / 2 - 26.875, kitchenSinkWindowSill, kitchenSinkWindowSill + kitchenSinkWindowHeight]), ceilingHeight, [-1, 1], 1],
     [37.5, kitchenWindowWallZ, 55.5, kitchenWindowWallZ, false, prepWindowCenters.map((x) => [x - prepWindowWidth / 2 - 37.5, x + prepWindowWidth / 2 - 37.5, prepWindowSill, prepWindowSill + prepWindowHeight])],
     [55.5, kitchenWindowWallZ, 55.5, 15, false, [[prepEndWindowZ - prepEndWindowWidth / 2 - kitchenWindowWallZ, prepEndWindowZ + prepEndWindowWidth / 2 - kitchenWindowWallZ, prepWindowSill, prepWindowSill + prepWindowHeight]], ceilingHeight, [1]],
     [55.5, 15, 55.5, 49, false, [...garageClerestories.map(({ z, width, sill, height }) => [z - width / 2 - 15, z + width / 2 - 15, sill, sill + height]), [29, 32, garageFloorY, garageFloorY + 8]], ceilingHeight, [1], 0, garageFloorY],
@@ -945,7 +960,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   buildBaseTrim();
 
   [
-    ['Living room', 13.2, 17.7], ['Dining room', 13.3, 8.1], ['Kitchen', 11, 26.9 - kitchenWindowWallZ],
+    ['Living room', 13.2, 17.7], ['Dining room', 13.675, 8.1], ['Kitchen', 11, 26.9 - kitchenWindowWallZ],
     ['Hall', 13.3, kidsRoom.z - 8], ['Prep kitchen', 18, 15 - kitchenWindowWallZ, true], ['Mudroom', 7.4 - 2 / 12, 11.9],
     ['Garage', 26.5, 34, true], ['Kids room', kidsRoom.width, kidsRoom.depth],
     ['Powder room', 7.1, guestEntry.powder.d], ['Guest coat closet', 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 5.1, guestEntry.alcove.d], ['Office', 12.2, 54.2 - officeNorthZ],
@@ -1088,7 +1103,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   diningSconces.name = 'Dining-room wall sconces';
   diningSconces.userData = { fixtures: 2, placement: 'Flanking the rear dining window', finish: 'Satin gold with warm opal diffusers', chandelier: false, provisional: true };
   scene.add(diningSconces);
-  for (const x of [15.3, 24.4]) wallSconce(diningSconces, x, 0.105, -Math.PI / 2);
+  for (const x of [15.4875, 24.5875]) wallSconce(diningSconces, x, 0.105, -Math.PI / 2);
   const kitchenSconces = new THREE.Group();
   kitchenSconces.name = 'Kitchen sink-wall end sconces';
   kitchenSconces.userData = { fixtures: 2, placement: 'Outside the kitchen window-bank ends', finish: 'Satin gold with warm opal diffusers', provisional: true };
@@ -1161,13 +1176,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   for (const { name, center, width, picture } of livingSideWindows) {
     windowFrame(name, center, 8.1, width, livingWindowHead - livingSideWindowSill, livingSideWindowSill, 0, scene, 1, { picture });
   }
-  windowFrame('Dining rear window', 19.85, 0, 6, 5, 3);
+  windowFrame('Dining rear window', 20.0375, 0, 6, 5, 3);
   for (const [index, z] of diningSideWindowCenters.entries()) {
     windowFrame(`Dining left window ${index + 1}`, 13.2, z, diningSideWindowWidth, diningSideWindowHeight, diningSideWindowSill, -Math.PI / 2, scene, -1);
   }
   const patioDoor = new THREE.Group();
   patioDoor.name = 'Dining casement windows and inswing patio door';
-  patioDoor.position.set(26.5, 0, 3.5);
+  patioDoor.position.set(26.875, 0, 3.5);
   patioDoor.rotation.y = -Math.PI / 2;
   patioDoor.userData = { widthFeet: 6, heightFeet: 8, sliding: false, provisional: true, exteriorDirection: 'increasing x' };
   scene.add(patioDoor);
@@ -1427,149 +1442,64 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   familyLiving.add(readingLamp);
 
   const referenceLounge = new THREE.Group();
-  referenceLounge.name = 'Photo-inspired oatmeal L lounge - fit study';
+  const livingRoomBounds = getGroundFloorDefaultPlan().rooms.find((room) => room.name === 'Living room');
+  referenceLounge.name = 'Centered warm taupe sofa and paired camel chairs - fit study';
   referenceLounge.userData = {
-    planningSeats: 5, guestChairs: 1, comfortVerified: false, productSelected: false,
-    main: { x: 10.8166667, z: 18.15, w: 44 / 12, d: 11 },
-    return: { x: 6.65, z: 21.8166667, w: 56 / 12, d: 44 / 12 },
-    rug: { x: 7.8, z: livingCenterZ, w: 9, d: 12 },
-    table: { x: 5.9, z: 16.9, w: 38 / 12, d: 38 / 12, h: 16.5 / 12 },
-    chair: { x: 5.65, z: 11.8, rotation: 0, widthInches: 30 },
-    sideTable: { x: 10.8, z: 11.35 }
+    planningSeats: 5, sofaPlanningSeats: 3, guestChairs: 2, comfortVerified: false, productSelected: false,
+    sofas: [{ x: livingRoomBounds.x + livingRoomBounds.w / 2, z: livingRoomBounds.z + livingRoomBounds.d / 2, w: 7.5, d: 3.25, rotation: -Math.PI / 2 }],
+    chairs: [{ x: 7, z: 10.5, rotation: -Math.PI / 2 }, { x: 7, z: 23.2, rotation: -Math.PI / 2 }]
   };
   scene.add(referenceLounge);
-  const referenceSectional = new THREE.Group();
-  referenceSectional.name = 'Oatmeal L sectional - five cushions plus uncounted corner';
-  referenceSectional.userData = {
-    widthInches: 132, returnInches: 100, depthInches: 44, seatDepthInches: 30,
-    planningSeats: 5, cornerCounted: false, comfortVerified: false, productSelected: false,
-    seats: [[10.2333333, 14.15], [10.2333333, 16.4833333], [10.2333333, 18.8166667],
-      [5.7333333, 21.2333333], [7.9, 21.2333333]]
-  };
-  referenceLounge.add(referenceSectional);
-  const oatmealFabric = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#b9af9d'), roughness: 0.97 });
-  const oatmealCushion = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#d0c7b6'), roughness: 0.98 });
-  for (const { x, z, w, d } of [referenceLounge.userData.main, referenceLounge.userData.return]) {
-    box(referenceSectional, x, 0.0875, z, w - 0.3, 0.175, d - 0.3, walnut, true).name = 'Reference sectional recessed floor plinth';
-    box(referenceSectional, x, 0.65, z, w, 0.95, d, oatmealFabric, true).name = 'Reference sectional upholstered base';
-  }
-  box(referenceSectional, 12.4, 1.8, 18.15, 0.5, 2.4, 11, oatmealFabric, true).name = 'Reference sectional long back';
-  box(referenceSectional, 6.65, 1.8, 23.4, 56 / 12, 2.4, 0.5, oatmealFabric, true).name = 'Reference sectional return back';
-  box(referenceSectional, 10.8166667, 1.8, 23.4, 44 / 12, 2.4, 0.5, oatmealFabric, true).name = 'Reference sectional corner back';
-  box(referenceSectional, 10.8166667, 1.3, 12.8166667, 44 / 12, 1.8, 4 / 12, oatmealFabric, true).name = 'Reference sectional north end arm';
-  box(referenceSectional, 4.4833333, 1.3, 21.8166667, 4 / 12, 1.8, 44 / 12, oatmealFabric, true).name = 'Reference sectional west end arm';
-  for (const [index, [x, z]] of referenceSectional.userData.seats.entries()) {
-    const main = index < 3;
-    const seat = box(referenceSectional, x, 1.35, z, main ? 2.5 : 26 / 12 - 0.04, 0.45, main ? 28 / 12 - 0.04 : 2.5, oatmealCushion, true);
-    seat.name = 'Reference sectional full seat cushion';
-    seat.userData = { planningSeat: index + 1, seatDepthInches: 30, nominalSeatWidthInches: main ? 28 : 26 };
-    box(referenceSectional, main ? 11.8 : x, 2.2, main ? z : 22.8, main ? 0.65 : 26 / 12 - 0.04, 1.3, main ? 28 / 12 - 0.04 : 0.65, oatmealCushion, true).name = 'Reference sectional loose back cushion';
-  }
-  box(referenceSectional, 10.2333333, 1.35, 21.2333333, 2.5, 0.45, 2.5, oatmealCushion, true).name = 'Reference sectional uncounted corner cushion';
-  const accentFabrics = ['#8b8d80', '#b2a58d', '#e0d6c3'].map((color) => new THREE.MeshStandardMaterial({ map: livingWeaveTexture(color), roughness: 0.98 }));
-  for (const [index, [x, z, turn]] of [[11.4, 14.25, 0.15], [11.4, 18.75, -0.18], [5.75, 22.35, 0.12]].entries()) {
-    const pillow = box(referenceSectional, x, 2.05, z, index === 2 ? 1.1 : 0.4, 1.1, index === 2 ? 0.4 : 1.1, accentFabrics[index], true);
-    pillow.name = 'Reference sectional loose accent pillow';
-    pillow.rotation.y = turn;
+  const taupeFabric = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#8d7562'), roughness: 0.97 });
+  const taupeCushion = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#a58b73'), roughness: 0.98 });
+  const accentFabrics = ['#705443', '#b29b7f', '#92745b'].map((color) => new THREE.MeshStandardMaterial({ map: livingWeaveTexture(color), roughness: 0.98 }));
+  const referenceChairFabric = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#a17c58'), roughness: 0.98 });
+  for (const [index, details] of referenceLounge.userData.sofas.entries()) {
+    const sofa = new THREE.Group();
+    sofa.name = `Reference warm taupe sofa ${index + 1}`;
+    sofa.position.set(details.x, 0, details.z);
+    sofa.rotation.y = details.rotation;
+    sofa.userData = { ...details, planningSeats: 3, productSelected: false, comfortVerified: false };
+    referenceLounge.add(sofa);
+    box(sofa, 0, 0.12, 0, 7.1, 0.24, 2.85, walnut, true).name = 'Reference sofa recessed plinth';
+    box(sofa, 0, 0.8, 0, details.w, 1.2, details.d, taupeFabric, true).name = 'Reference sofa upholstered base';
+    box(sofa, 0, 1.95, -1.375, details.w, 2.1, 0.5, taupeFabric, true).name = 'Reference sofa back';
+    for (const x of [-3.5, 3.5]) box(sofa, x, 1.5, 0, 0.5, 1.8, details.d, taupeFabric, true).name = 'Reference sofa track arm';
+    for (let seat = 0; seat < 3; seat++) {
+      const x = (seat - 1) * 26 / 12;
+      box(sofa, x, 1.45, 0.2, 26 / 12 - 0.04, 0.4, 2.5, taupeCushion, true).name = 'Reference sofa seat cushion';
+      box(sofa, x, 2.25, -0.83, 26 / 12 - 0.04, 1.3, 0.55, taupeCushion, true).name = 'Reference sofa loose back cushion';
+    }
+    for (const [pillowIndex, x] of [-2.65, -1.6, 2.65].entries()) {
+      const pillow = box(sofa, x, 2.15, -0.4, 1, 1, 0.35, accentFabrics[pillowIndex], true);
+      pillow.name = 'Reference sofa accent pillow';
+      pillow.rotation.z = pillowIndex === 0 ? 0.15 : -0.12;
+    }
   }
 
-  const referenceRugCanvas = document.createElement('canvas');
-  referenceRugCanvas.width = 768;
-  referenceRugCanvas.height = 1024;
-  const rugContext = referenceRugCanvas.getContext('2d');
-  rugContext.fillStyle = '#55595a';
-  rugContext.fillRect(0, 0, 768, 1024);
-  rugContext.strokeStyle = '#c7c1b2';
-  rugContext.lineWidth = 3;
-  rugContext.strokeRect(21, 21, 726, 982);
-  rugContext.lineWidth = 1.5;
-  rugContext.strokeRect(34, 34, 700, 956);
-  for (let row = 0; row < 6; row++) for (let column = 0; column < 5; column++) {
-    const x = 89 + column * 147;
-    const y = 105 + row * 160;
-    rugContext.save();
-    rugContext.translate(x, y);
-    rugContext.globalAlpha = 0.58;
-    rugContext.strokeStyle = '#ded7c7';
-    rugContext.fillStyle = '#c9c0ad';
-    for (let petal = 0; petal < 8; petal++) {
-      rugContext.rotate(Math.PI / 4);
-      rugContext.beginPath();
-      rugContext.ellipse(0, 20, 6, 17, 0, 0, Math.PI * 2);
-      rugContext.fill();
-    }
-    rugContext.beginPath();
-    rugContext.moveTo(0, -55);
-    rugContext.lineTo(48, 0);
-    rugContext.lineTo(0, 55);
-    rugContext.lineTo(-48, 0);
-    rugContext.closePath();
-    rugContext.stroke();
-    rugContext.beginPath();
-    rugContext.arc(0, 0, 8, 0, Math.PI * 2);
-    rugContext.fill();
-    rugContext.restore();
+  for (const [index, details] of referenceLounge.userData.chairs.entries()) {
+    const chair = new THREE.Group();
+    chair.name = `Reference muted camel upholstered chair ${index + 1}`;
+    chair.position.set(details.x, 0, details.z);
+    chair.rotation.y = details.rotation;
+    chair.userData = { widthInches: 30, depthInches: 33, heightInches: 34.8, productSelected: false };
+    for (const x of [-0.95, 0.95]) for (const z of [-1.05, 1.05]) box(chair, x, 0.3, z, 0.15, 0.6, 0.15, walnut, true).name = 'Reference chair wood leg';
+    box(chair, 0, 0.95, 0, 2.5, 0.8, 2.75, referenceChairFabric, true).name = 'Reference chair upholstered base';
+    box(chair, 0, 1.45, 0.15, 1.9, 0.3, 2.15, referenceChairFabric, true).name = 'Reference chair seat cushion';
+    const backShape = new THREE.Shape();
+    backShape.absarc(0, 0, 1.25, Math.PI, 2 * Math.PI, false);
+    backShape.lineTo(1, 0);
+    backShape.absarc(0, 0, 1, 2 * Math.PI, Math.PI, true);
+    backShape.closePath();
+    const back = new THREE.Mesh(new THREE.ExtrudeGeometry(backShape, { depth: 1.4, bevelEnabled: false, curveSegments: 24 }), referenceChairFabric);
+    back.name = 'Reference chair curved upholstered back';
+    back.rotation.x = Math.PI / 2;
+    back.position.set(0, 2.9, -0.1);
+    back.castShadow = back.receiveShadow = true;
+    chair.add(back);
+    for (const x of [-1.1, 1.1]) box(chair, x, 1.85, 0.6375, 0.3, 0.9, 1.475, referenceChairFabric, true).name = 'Reference chair upholstered arm';
+    referenceLounge.add(chair);
   }
-  for (let index = 0; index < 14000; index++) {
-    const x = (index * 137 + index % 13 * 19) % 768;
-    const y = (index * 229 + index % 17 * 23) % 1024;
-    rugContext.fillStyle = index % 2 ? '#ded7c714' : '#242b2d18';
-    rugContext.fillRect(x, y, 2, 1);
-  }
-  const referenceRugMap = new THREE.CanvasTexture(referenceRugCanvas);
-  referenceRugMap.colorSpace = THREE.SRGBColorSpace;
-  referenceRugMap.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-  const referenceRugDetails = referenceLounge.userData.rug;
-  const referenceRug = new THREE.Mesh(new THREE.PlaneGeometry(referenceRugDetails.w, referenceRugDetails.d), new THREE.MeshStandardMaterial({ map: referenceRugMap, roughness: 1 }));
-  referenceRug.name = 'Reference lounge charcoal and oatmeal patterned rug';
-  referenceRug.rotation.x = -Math.PI / 2;
-  referenceRug.position.set(referenceRugDetails.x, 0.008, referenceRugDetails.z);
-  referenceRug.userData = { tourDecoration: true, walkSurface: true, productSelected: false, nonSlipPadRequired: true };
-  referenceLounge.add(referenceRug);
-  const referenceCoffeeTable = new THREE.Group();
-  referenceCoffeeTable.name = 'Reference lounge 38 inch square oak coffee table';
-  const coffeeDetails = referenceLounge.userData.table;
-  referenceCoffeeTable.position.set(coffeeDetails.x, 0, coffeeDetails.z);
-  referenceCoffeeTable.userData = { ...coffeeDetails, productSelected: false, easedEdgesRequired: true };
-  const referenceOak = cabinetRailFinish.clone();
-  referenceOak.color.set('#b5aa96');
-  referenceOak.roughness = 0.85;
-  box(referenceCoffeeTable, 0, coffeeDetails.h - 0.0625, 0, coffeeDetails.w, 0.125, coffeeDetails.d, referenceOak, true).name = 'Reference square oak tabletop';
-  for (const x of [-1.25, 1.25]) for (const z of [-1.25, 1.25]) box(referenceCoffeeTable, x, 0.625, z, 0.25, 1.25, 0.25, referenceOak, true).name = 'Reference coffee table leg';
-  box(referenceCoffeeTable, 0, 0.35, 0, 2.75, 0.1, 2.75, referenceOak, true).name = 'Reference coffee table low shelf';
-  referenceLounge.add(referenceCoffeeTable);
-  const referenceChair = new THREE.Group();
-  referenceChair.name = 'Reference lounge oatmeal accent chair';
-  referenceChair.add(armchairGeometry.clone(true));
-  const chairDetails = referenceLounge.userData.chair;
-  referenceChair.scale.setScalar(chairDetails.widthInches / armchairGeometry.userData.widthInches);
-  referenceChair.position.set(chairDetails.x, 0, chairDetails.z);
-  referenceChair.rotation.y = chairDetails.rotation;
-  referenceChair.userData = {
-    ...armchairGeometry.userData, widthInches: chairDetails.widthInches,
-    depthInches: armchairGeometry.userData.depthInches * chairDetails.widthInches / armchairGeometry.userData.widthInches,
-    heightInches: armchairGeometry.userData.heightInches * chairDetails.widthInches / armchairGeometry.userData.widthInches,
-    finish: 'Oatmeal reupholstery concept; original normal and roughness maps retained', productSelected: false
-  };
-  const referenceChairFabric = livingWeaveTexture('#d6cdbd');
-  referenceChair.traverse((part) => {
-    if (!part.isMesh || !part.material.name.includes('pillow')) return;
-    part.material = part.material.clone();
-    part.material.map = referenceChairFabric;
-    part.material.color.set('#ffffff');
-    part.material.roughness = 0.98;
-    part.material.needsUpdate = true;
-  });
-  referenceLounge.add(referenceChair);
-  const referenceSideTable = new THREE.Group();
-  referenceSideTable.name = 'Reference lounge textured oak end table';
-  referenceSideTable.position.set(referenceLounge.userData.sideTable.x, 0, referenceLounge.userData.sideTable.z);
-  referenceSideTable.add(sideTableGeometry.clone(true));
-  referenceLounge.add(referenceSideTable);
-  const referenceLamp = readingLamp.clone(true);
-  referenceLamp.name = 'Reference lounge reading lamp - wiring review required';
-  referenceLamp.position.set(referenceLounge.userData.sideTable.x, 20 / 12, referenceLounge.userData.sideTable.z);
-  referenceLounge.add(referenceLamp);
   referenceLounge.traverse((part) => { if (part.isMesh && !part.userData.tourDecoration) part.userData.tourObstacle = true; });
 
   const familySectional = new THREE.Group();
@@ -1605,8 +1535,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const livingLayouts = [
     {
-      id: 'reference-lounge', title: 'J / Oatmeal L lounge', recommended: true, referenceLounge: true,
-      note: 'Photo-inspired 132 x 100 in oatmeal L with five cushions plus an uncounted corner, one cream accent chair, charcoal patterned rug and 38 in square oak table. One chair replaces the photographed pair to preserve room access. Table gaps target 18 in to both seating runs; physical comfort, cabinet operation and fireplace clearances remain unverified.',
+      id: 'reference-lounge', title: 'J / Centered warm sofa', recommended: true, referenceLounge: true,
+      note: 'One 90 x 39 in warm taupe sofa centered on the shared living-room bounds, facing the fireplace, with two flanking muted camel chairs and earthy cushions. Five planning positions, not verified family comfort. No coffee table, end table, cart, lamp or rug; hardwood stays exposed. Chair-to-sofa end gaps are 16.2 in; the main hall strip stays clear. Product comfort, occupied access, cabinet operation and fireplace clearances remain unverified.',
       sofa: null, chairs: [null, null]
     },
     {
@@ -1659,7 +1589,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   ];
 
-  const tableX = (13.2 + 26.5) / 2;
+  const tableX = (13.2 + 26.875) / 2;
   const tableZ = (-0.1 + 8) / 2;
   const tableLength = 84 / 12;
   const tableDepth = 38 / 12;
@@ -2494,7 +2424,20 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   cylinder(prepSink, 0, 3.55, -0.88, 0.045, 1.16, steel).name = 'Prep sink faucet stem';
   box(prepSink, 0, 4.08, -0.57, 0.09, 0.09, 0.64, steel, true).name = 'Prep sink faucet spout';
   cylinder(prepSink, 0, 3.98, -0.28, 0.045, 0.2, steel).name = 'Prep sink faucet outlet';
-  box(prep, 48.025, 3.45, kitchenWindowWallZ + 0.22, 14.35, 0.82, 0.08, countertop).name = 'Prep quartz backsplash';
+  const prepBacksplashTile = new THREE.MeshStandardMaterial({ color: '#49645c', roughness: 0.32 });
+  prepBacksplashTile.name = 'Prep muted deep sage ceramic tile';
+  const prepBacksplashGrout = mat('#b5b3a6');
+  box(prep, 48.025, 3.45, kitchenWindowWallZ + 0.19, 14.35, 0.82, 0.02, prepBacksplashGrout).name = 'Prep backsplash warm-gray grout backing';
+  const prepBacksplashLeft = 48.025 - 14.35 / 2;
+  const prepBacksplashRight = 48.025 + 14.35 / 2;
+  const prepBacksplashJoint = 1 / 16 / 12;
+  for (let row = 0; row < 3; row++) {
+    for (let start = prepBacksplashLeft - (row % 2) / 3; start < prepBacksplashRight; start += 2 / 3) {
+      const left = Math.max(start, prepBacksplashLeft) + prepBacksplashJoint / 2;
+      const right = Math.min(start + 2 / 3, prepBacksplashRight) - prepBacksplashJoint / 2;
+      box(prep, (left + right) / 2, 3.04 + (row + 0.5) * 0.82 / 3, kitchenWindowWallZ + 0.23, right - left, 0.82 / 3 - prepBacksplashJoint, 0.06, prepBacksplashTile).name = 'Prep sage running-bond backsplash tile';
+    }
+  }
   for (const x of prepWindowCenters) {
     windowFrame('Prep sink picture window', x, kitchenWindowWallZ, prepWindowWidth, prepWindowHeight, prepWindowSill, 0, rest, 1, { picture: true });
   }
@@ -2767,10 +2710,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   tiledFloor('Mudroom tile', 37.5, 15, 7.4 - 2 / 12, 11.9, mudTileFinish, { tileWidth: 2, tileDepth: 4, groutWidth: 1 / 16 / 12, groutMaterial: mudGroutFinish });
-  const mudCaseFinish = mat('#aaa99a', 0.75);
-  mudCaseFinish.name = 'Muted sage-greige mudroom casework';
-  const mudBackingFinish = mat('#aaa99a', 0.85);
-  mudBackingFinish.name = 'Muted sage-greige mudroom backing';
+  const mudCaseFinish = mat('#c5cdb7', 0.65);
+  mudCaseFinish.name = 'Soft sage mudroom casework';
+  const mudBackingFinish = mat('#627257', 0.95);
+  mudBackingFinish.name = 'Deep olive-sage mudroom backing';
+  const mudClosetFinish = mat('#dfd5c2', 0.48);
+  mudClosetFinish.name = 'Warm ivory mudroom closet doors';
+  const mudClosetPanelFinish = mat('#b9ad95', 0.7);
+  mudClosetPanelFinish.name = 'Warm putty mudroom recessed door panels';
+  const mudEntryDoorFinish = mat('#f2eee4', 0.5);
+  mudEntryDoorFinish.name = 'Off-white mudroom entry door';
   const mudBench = furnishing('Five-cubby mudroom bench', 43.825 - 2 / 12, 22.85, -Math.PI / 2);
   const mudStorageTop = ceilingHeight - 0.25;
   const mudBenchWidth = 7.5;
@@ -2790,7 +2739,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       context.fillStyle = '#eee7d6';
       context.fillRect(0, 0, canvas.width, canvas.height);
     }
-    context.fillStyle = decorative ? '#806239' : '#30372f';
+    context.fillStyle = decorative ? '#fff0c8' : '#30372f';
     context.font = decorative ? 'italic 96px "Segoe Script", "Brush Script MT", cursive' : 'bold 36px sans-serif';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
@@ -2936,11 +2885,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const innerPanel = new THREE.Group();
     innerPanel.position.x = -side * (panelWidth + 0.015);
     bifold.add(innerPanel);
-    box(bifold, -side * (panelWidth + 0.015) / 2, 0, 0, panelWidth, 7.96, 0.06, mudCaseFinish).name = 'Mudroom standard bifold door panel';
-    box(innerPanel, -side * panelWidth / 2, 0, 0, panelWidth, 7.96, 0.06, mudCaseFinish).name = 'Mudroom standard bifold door panel';
+    box(bifold, -side * (panelWidth + 0.015) / 2, 0, 0, panelWidth, 7.96, 0.06, mudClosetFinish).name = 'Mudroom standard bifold door panel';
+    box(innerPanel, -side * panelWidth / 2, 0, 0, panelWidth, 7.96, 0.06, mudClosetFinish).name = 'Mudroom standard bifold door panel';
     bifold.userData.interactiveHouseDoor.foldPanel = innerPanel;
     for (const panel of [{ parent: bifold, x: -side * (panelWidth + 0.015) / 2 }, { parent: innerPanel, x: -side * panelWidth / 2 }]) {
-      for (const y of [-1.95, 1.95]) box(panel.parent, panel.x, y, 0.035, panelWidth - 0.15, 3.2, 0.015, mudCaseFinish).name = 'Mudroom bifold recessed panel';
+      for (const y of [-1.95, 1.95]) box(panel.parent, panel.x, y, 0.035, panelWidth - 0.15, 3.2, 0.015, mudClosetPanelFinish).name = 'Mudroom bifold recessed panel';
     }
     cylinder(innerPanel, 0, -0.8, 0.09, 0.05, 0.08, brass).name = 'Mudroom closet gold knob';
   }
@@ -3057,7 +3006,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   mudGarageDoor.add(mudGarageLeaf);
   const mudGarageLeafWidth = (36 - 0.25) / 12, mudGarageLeafThickness = 1.75 / 12;
   const mudGarageLeafBottom = 0.0405 + 0.5 / 12, mudGarageLeafTop = 8 - 0.125 / 12;
-  box(mudGarageLeaf, mudGarageLeafWidth / 2, (mudGarageLeafBottom + mudGarageLeafTop) / 2, mudGarageLeafThickness / 2, mudGarageLeafWidth, mudGarageLeafTop - mudGarageLeafBottom, mudGarageLeafThickness, cream).name = 'Solid mudroom garage door panel';
+  box(mudGarageLeaf, mudGarageLeafWidth / 2, (mudGarageLeafBottom + mudGarageLeafTop) / 2, mudGarageLeafThickness / 2, mudGarageLeafWidth, mudGarageLeafTop - mudGarageLeafBottom, mudGarageLeafThickness, mudEntryDoorFinish).name = 'Solid mudroom garage door panel';
   for (const side of [-1, 1]) {
     box(mudGarageLeaf, mudGarageLeafWidth - 0.25, 3.15, mudGarageLeafThickness / 2 + side * (mudGarageLeafThickness / 2 + 0.035), 0.13, 0.35, 0.07, brass).name = 'Mudroom garage door lock plate';
     box(mudGarageLeaf, mudGarageLeafWidth - 0.38, 3.15, mudGarageLeafThickness / 2 + side * (mudGarageLeafThickness / 2 + 0.15), 0.3, 0.06, 0.08, brass).name = 'Mudroom garage door lever';
@@ -3774,12 +3723,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   for (const side of [-1, 1]) {
     const width = guestEntry.closetDoor.width / 2 - 0.04;
     const hinge = new THREE.Group();
-    hinge.name = 'Guest coat closet hinged Shaker door';
-    hinge.position.set(side * (width + 0.04) / 2, guestEntry.closetDoor.height / 2, 1.2);
-    hinge.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 180, openRotationSign: side } };
+    hinge.name = 'Guest coat closet French door hinge';
+    hinge.position.set(guestEntry.closetDoor.x + (side < 0 ? 0 : guestEntry.closetDoor.width) - 9.65, guestEntry.closetDoor.height / 2, guestEntry.closetDoor.z - (powderNorthZ + 1.2));
+    hinge.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: side } };
     guestCoats.add(hinge);
     const door = shakerFront(hinge, -side * width / 2, 0, 0, width, guestEntry.closetDoor.height - 0.04);
-    door.name = 'Guest coat closet closed Shaker door';
+    door.name = 'Guest coat closet solid Shaker French door leaf';
     cabinetPull(door, -side * 0.8, 3.5 - guestEntry.closetDoor.height / 2, 0.09, 0.65);
   }
 
@@ -3855,7 +3804,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const powderStone = mat('#d8cdbb', 0.9);
   const powderBasin = mat('#d9ded8', 0.35);
   const powderGlow = new THREE.MeshStandardMaterial({ color: '#fff1d7', emissive: '#ffe0a3', emissiveIntensity: 0.45, roughness: 0.6 });
-  tiledFloor('Powder room tile', guestEntry.powder.x, powderNorthZ, guestEntry.powder.w, guestEntry.powder.d, powderStone);
   toilet('Powder toilet', guestEntry.toilet.x, guestEntry.toilet.z, guestEntry.toilet.rotation);
   const powderVanity = furnishing('Powder vanity', guestEntry.vanity.x, guestEntry.vanity.z, guestEntry.vanity.rotation);
   powderVanity.userData = { widthInches: guestEntry.vanity.width * 12, depthInches: guestEntry.vanity.depth * 12, counterHeightInches: 34, sinkBayWidthInches: 22, drawerBankWidthInches: 10, drawerBankSide: 'Both', drawers: 6, drawerTravelInches: 15, plumbingZone: { minX: -0.8, maxX: 0.8, minZ: -0.8, maxZ: 0.4 }, finish: 'Natural white oak Shaker with satin-gold knobs', provisional: true, occupiedClearancesVerified: false, plumbingVerified: false, closeDrawersBeforeEntryDoorSwing: true };
@@ -4224,7 +4172,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     social: { target: [19, 2, 12], offset: [27, 55, 32], span: 43 },
     living: { target: [12.5, 1.5, livingCenterZ], offset: [28, 27, 7], span: 32 },
     kids: { target: [24, 1, 30.15], offset: [-12, 30, 18], span: 17 },
-    dining: { target: [19.85, 1, 3.95], offset: [16, 19, 23], span: 20 },
+    dining: { target: [20.0375, 1, 3.95], offset: [16, 19, 23], span: 20 },
     kitchen: { target: [32.2, 2, kitchenCenterZ], offset: [-22, 35, 27], span: 26 },
     cooktop: { target: [36.5, 5.3, cooktopCenterZ], offset: [-18, 0, 0], span: 11 },
     fridge: { target: [bottomRunCenterX, 5, 26.9], offset: [0, 0, -18], span: 12 },
@@ -4645,7 +4593,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const starts = {
       upstairs: [...upstairs.start, 16.5, 23], 'upstairs-top': [...upstairs.start, 16.5, 23],
       whole: [15.6, 50, 15.6, 42], top: [15.6, 50, 15.6, 42], social: [20, 18, 20, 3],
-      living: [14.8, 23.9, 5, 16], kids: [20.1, 30, 24, 26], dining: [23, 7, 19.85, 3.95], kitchen: [33, 19.5, 32.25, 8],
+      living: [14.8, 23.9, 5, 16], kids: [20.1, 30, 24, 26], dining: [23, 7, 20.0375, 3.95], kitchen: [33, 19.5, 32.25, 8],
       cooktop: [33, cooktopCenterZ, 36.5, cooktopCenterZ], fridge: [33, 23, 33, 26.9], island: [33, kitchenCenterZ, 28.65, kitchenCenterZ],
       prep: [43, 12, 48, prepCounterZ], pantry: [47, 12, 47, 14.325], 'prep-counter': [47, 12, 47, prepCounterZ],
       mudroom: [41.7, 23, 41.7, 17.5], 'mudroom-cubbies': [41.7, 23, 44.3, 23], 'mudroom-storage': [41.7, 23, 41.7, 17.5],
@@ -5036,6 +4984,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     } else setView(currentView);
   }
   function render() {
+    const mudroomLighting = activeFloor === 'ground' && currentView.startsWith('mudroom');
+    ambientLight.intensity = mudroomLighting ? 0.85 : 2.5;
+    mudroomKeyLight.visible = mudroomLighting;
+    renderer.shadowMap.enabled = mudroomLighting;
     updateVehicleDoorControls();
     positionPlanDimensions();
     renderer.render(scene, camera);

@@ -172,9 +172,9 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   ]);
   wall('living rear return', 13.2, 8, 0, 8, -0.4, 9, [win(1.8, 1.5), win(6.6, 5), win(11.4, 1.5)]);
   wall('dining west', 13.2, -0.1, 13.2, 8, -0.4, 9, [win(4.05, 6)]);
-  wall('dining rear', 26.5, -0.1, 13.2, -0.1, -0.4, 9, [win(6.65, 6)]);
-  wall('dining patio', 26.5, 7, 26.5, -0.1, -0.4, 9, [win(3.55, 6, 0, 8)]);
-  wall('kitchen and prep rear', 55.5, 7, 26.5, 7, -0.4, 9, [{ ...win(8.1, 5, 4.25, 3.5), picture: true }, win(19.75, 1.5, 53 / 12, 3.5), win(23.5, 4.5, 53 / 12, 3.5), win(27.25, 1.5, 53 / 12, 3.5)]);
+  wall('dining rear', 26.875, -0.1, 13.2, -0.1, -0.4, 9, [win(6.8375, 6)]);
+  wall('dining patio', 26.875, 7, 26.875, -0.1, -0.4, 9, [win(3.55, 6, 0, 8)]);
+  wall('kitchen and prep rear', 55.5, 7, 26.875, 7, -0.4, 9, [{ ...win(8.1, 5, 4.25, 3.5), picture: true }, win(19.75, 1.5, 53 / 12, 3.5), win(23.5, 4.5, 53 / 12, 3.5), win(27.25, 1.5, 53 / 12, 3.5)]);
   const garageSideWall = wall('east ground floor', 55.5, 49, 55.5, 7, garageFloorY - 0.3, 9, [
     { center: 49 - garageSideDoorCenterZ, width: garageSideDoorWidth, sill: garageFloorY, height: 8, door: true },
     ...garageClerestories.map(({ z, width, sill, height }) => ({ center: 49 - z, width, sill, height, picture: true })),
@@ -250,7 +250,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   gable('Central bedroom gable', 14.2, 31, 2.1, 53.2, eaves, 10);
   gable('Rear east-wing roof', 25.7, 54, 10, 36.2, eaves, 8);
   gable('Single-story garage roof', 31, 55.5, 36.2, 49.2, 9, 6);
-  gable('Dining rear projection roof', 13.2, 26.5, -0.1, 2.1, 9, 5.5);
+  gable('Dining rear projection roof', 13.2, 26.875, -0.1, 2.1, 9, 5.5);
   const patio = new THREE.Group();
   patio.name = 'Covered kitchen-dining patio';
   const patioBounds = { left: 26.5, right: 55.5, rear: -2.1, front: 7 };
@@ -282,10 +282,10 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   function patioRoofUndersideAt(z) {
     return patioRoofY + (z - patioRoofCenterZ) * patioRoofPitch - patioRoofThickness / (2 * Math.cos(patioRoofAngle));
   }
-  wall('Patio roof raised headwall', 55.5, 7, 26.5, 7, 9, patioRoofUndersideAt(7 + wallThickness / 2) + 0.02);
+  wall('Patio roof raised headwall', 55.5, 7, 26.875, 7, 9, patioRoofUndersideAt(7 + wallThickness / 2) + 0.02);
   wall('Patio roof upper-wall return', 54, 10, 55.5, 10, 9, patioRoofUndersideAt(10) + 0.02);
   for (const { x, rear, name } of [
-    { x: 26.5, rear: 2.75, name: 'Patio roof west tapered closure' },
+    { x: 26.875, rear: 2.75, name: 'Patio roof west tapered closure' },
     { x: 55.5, rear: 7, name: 'Patio roof east tapered closure' }
   ]) {
     const geometry = new THREE.BoxGeometry(wallThickness, 1, patioRoofFront - rear);

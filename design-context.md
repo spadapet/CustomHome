@@ -1,5 +1,23 @@
 # Ground-floor design context
 
+## Corrected dining side-wall alignment - October 24
+
+The owner's circled wall is the patio-side return next to the kitchen
+sink-run base cabinets. Do not extend the backyard window wall. Move the
+side-wall centerline east 4.5 in to x = 26.875 ft so its dining face
+x = 26.7 matches the cabinet/counter end. Retain ordinary projecting
+baseboard trim. Backyard wall stays z = -0.1 and kitchen wall stays z = 7;
+kitchen cabinetry, glazing, sconces and kitchen-to-mudroom passage stay fixed.
+
+Dining becomes 13.675 x 8.1 ft, gaining 3.0375 sq ft. Center the unchanged
+table/eight chairs at (20.0375, 3.95), moving them and rear glazing/sconces
+2.25 in east. Patio assembly follows its wall without changing z opening,
+handing or closed default. Match rear-wall width, floor patches, trim,
+exterior and dining roof; preserve lot, patio cover/paving and saved JSON.
+Full door sweep still conflicts with the patio-end chair even tucked;
+24-inch end-chair pull-outs still reach trim. These model checks are not
+structural, product or occupied-clearance approval.
+
 ## Kitchen fruit and bread organization - October 24
 
 Owner approved showing everyday fruit in the main kitchen and bread/extra
@@ -14,40 +32,35 @@ not new built-ins. Products, food-safe finishes and shelf capacity remain
 unverified. Keep refrigerated fruit in the refrigerator. Inspect using
 Kitchen and Prep shelves; preserve all counters, cabinetry and passages.
 
-## Photo-inspired oatmeal L lounge - current J study
+## Centered warm sofa - current J study
 
-The owner supplied a reference photo of an oatmeal L sectional, paired
-chairs, charcoal/oatmeal patterned rug and square oak table, then authorized
-adapting whatever fits. This supersedes the earlier brown-only finish and
-ottoman-only direction. J is default; A-I remain comparisons.
+Latest request puts the couch in the middle. Interpret this as one sofa
+centered in the living room facing the fireplace, replacing the two facing
+sofas. Keep warm taupe upholstery, muted camel chairs and earthy cushions;
+no coffee table, end table/cart or rug. J is default; A-I remain earlier
+comparisons. The earlier photo grouping and L are superseded.
 
-Use a 132 x 100 in, 44 in-deep L, with its long back on the hall side and
-return on the stair side, opening toward the fireplace/windows.
-Footprint x = 4.3167-12.65, z = 12.65-23.65 ft.
-There are five separate 30 in-deep cushions, three about 27.5 in wide and
-two about 25.5 in wide after seams, plus an uncounted corner. Add relaxed
-back cushions and muted oatmeal/taupe accent pillows.
-This is modeled concept furniture, not an imported manufacturer sectional.
+Use one 90 x 39 in sofa centered at (6.6, 16.85), derived from the shared
+Living room bounds x = 0-13.2, z = 8-25.7 ft. Turn -90 degrees to face
+the fireplace/TV. Keep three cushions and brown/sand pillows.
+Three sofa positions plus two chairs are planning positions, not verified
+occupied comfort. All furniture is modeled concept geometry, not selected
+manufacturer products.
 
-Keep one accent chair rather than forcing the photographed pair into the
-cabinet/sectional approach. Center (5.65, 11.8), facing south; the existing
-CC0 Poly Haven chair is uniformly scaled to 30 in width, approximately
-36.1 in depth / 37.4 in height, with oatmeal reupholstery and original
-normal/roughness maps. Do not alter the darker comparison chairs.
+Two muted camel upholstered 30 x 33 x 34.8 in chairs flank the sofa at
+(7, 10.5) and (7, 23.2), facing west. Their backs stop at x = 8.375,
+outside the retained hall strip. Do not alter the darker comparison chairs.
 
-Use an original procedural charcoal/oatmeal patterned 9 x 12 ft rug,
-center (7.8, 17.475). The 38 in-square oak table centers at (5.9, 16.9),
-top 16.5 in high. Its 18 in gaps to both seating runs keep every seat
-approach reachable by the existing 12 in tour avatar. One textured
-20 in-high end table and warm lamp stand at (10.8, 11.35).
-Route any future lamp cord behind the sectional, not across circulation.
+Leave the existing hardwood exposed and the space in front open. No rug, coffee
+table/books, end table, cart or lamp remains in J. Earlier comparison
+furnishings stay hidden in J and retain their original finishes.
 
-Static gaps: about 35.2 in to the closed fireplace/cabinet front line,
-37.5 in at the stair-side end and 36 in in the retained main hall strip
+Static gaps: 16.2 in from each chair to the nearest sofa end,
+43.14 in sofa-front-to-closed-cabinet line and
+36 in in the retained main hall strip
 x = 13.25-16.25, z = 10.5-25.5. These are model checks, not occupied-use,
 accessibility, cabinet-door, window-sash or fireplace-clearance approval.
-All-five comfort, actual dimensions, upholstery care, nonslip rug pad,
-table edges/stability and electrical installation need product review.
+Family comfort, actual dimensions and upholstery care need product review.
 Keep architecture, full-length cabinets, stairs, dining and hall tree fixed.
 Switching must restore each layout's geometry, finishes, lights and obstacles.
 
@@ -100,6 +113,29 @@ cleared 63 sampled positions from the central garage aisle to the tool
 approach with both vehicles parked; this is not occupied-use approval.
 Garage overview now faces the east window wall rather than cutting it
 away in the foreground; storage inspection includes the new hanging rail.
+
+## Mudroom rendering depth - October 24
+
+The owner found the same-color shelves and backs unreadable under flat light.
+Retain all sage-greige materials, storage geometry, room boundaries and door
+poses. For mudroom views only, reduce ambient intensity from 2.5 to 0.85
+and enable a warm interior spotlight with a 2048 px soft-filtered shadow map.
+Place the study light below the nominal ceiling, aimed across the cubby wall,
+so actual shelves and dividers cast depth-revealing shadows on the backs.
+Restore original ambient lighting and disable the key/shadow pass outside
+mudroom views. No new controls, geometry or product selections are added.
+This is improved interactive shading, not photorealism, a fixture proposal
+or verified illuminance; clothing remains modeled design concepts.
+
+## Prep-kitchen contrasting backsplash - October 24
+
+Use muted deep sage ceramic tile in a running-bond pattern with warm-gray
+1/16 in grout joints, contrasting with the retained warm ivory quartz counters.
+Keep the existing 14.35 ft-wide, 9.84 in-high backsplash envelope and its
+front face at z = 7.26 ft; appliances, windows and cabinetry do not move.
+This supersedes the prep quartz backsplash only, not main-kitchen quartz walls.
+Tile color is a visualization concept; verify samples, cleanability, substrate
+and sealed wet-area joints before product selection or installation.
 
 ## Prep-kitchen window refinement - October 24
 
@@ -546,6 +582,16 @@ use this section and the updated plan-reference note for this local change.
 
 ## Uniform mudroom enclosure - October 24 photo-inspired finish
 
+Readability revision: the uniform #AAA99A paint blurred shelves and doors.
+Use pale sage cases against deeper matte olive backs, ivory closet leaves
+with putty recessed panels, and an off-white garage-entry leaf. The owner
+explicitly rejected green on this door; use #F2EEE4 instead. Retain the
+existing scoped mudroom study lighting; do not recolor shared kitchen
+materials or change global lighting. Decorative names change to pale gold
+for contrast on the deeper backs. See the current finish table below.
+Storage geometry, fitted wall/ceiling closures, door operation and clearances
+remain unchanged; these are screen studies, not selected paint products.
+
 The owner rejected the remaining freestanding-style perimeter gaps.
 Keep the storage fronts and useful dimensions fixed, but close all exposed
 rear/end voids with matching site-fitted scribes/pack-outs: north rear
@@ -565,7 +611,7 @@ each child has a jacket and backpack. The owner corrected Lila's coat to
 48 in long. Lower her side hooks to 66.6 in; the hem stays at 18.6 in,
 0.6 in above the bench. Align all first shelves at 76.2 in, superseding
 Lila's earlier raised shelf and 60 in coat. Verify real clothing and reach.
-Replace white shelf-edge nameplates with decorative warm-bronze script
+Replace white shelf-edge nameplates with decorative pale-gold script
 on transparent backgrounds, directly inside the cubbies on their backing.
 Names sit at 61.2 in, below the shelf sightline; no white rectangular plate.
 The Cubbies inspection is now front-on with a slight downward angle so
@@ -633,9 +679,11 @@ boundary or opening changes are needed for these storage/finish revisions.
 
 | Element | Current finish |
 |---|---|
-| Cases, dividers, shelves, enclosed corner returns and continuous top rails | Muted sage-greige, screen #AAA99A |
-| Solid cubby and storage backs | Matching muted sage-greige, screen #AAA99A |
-| Center coat-closet front: bifold leaves, recessed panels, jambs and headwall | Matching muted sage-greige paint |
+| Cases, dividers, shelves, fitted closures/returns and top rails | Pale soft sage #C5CDB7; roughness 0.65 |
+| Solid cubby and storage backs | Deeper matte olive-sage #627257; roughness 0.95 |
+| Center coat closet | Warm ivory #DFD5C2 leaf frames (roughness 0.48), putty #B9AD95 recessed panels (0.7); sage jambs/headwall |
+| Garage-entry leaf | Off-white #F2EEE4, not green; roughness 0.5; existing pose/hardware retained |
+| Decorative cubby names | Pale gold #FFF0C8, transparent background |
 | Bench seat | Warm ivory quartz with soft warm-gray veining, reusing the existing kitchen stone material |
 | Removable baskets | Natural woven tan, screen #B89A70 |
 | Mudroom floor | 24 x 48 in matte/honed warm limestone-look rectified porcelain, straight lay; long direction along z; matching 1/16 in grout visual target |
@@ -771,7 +819,9 @@ Keep the centered feature wall: finished dining-return face z = 8.175 and stair 
 
 ## Guest powder room and coat closet
 
-Powder-room layout redesign supersedes the earlier finish-only refresh and fixed toilet: use a 42 x 21-inch natural white oak Shaker vanity on the north wall at (4.75, 36.225), facing south; relocate the toilet to the northwest at (1.65, 36.45), also facing south. One fixture wall avoids an opposing-fixture diagonal pinch and leaves a connected approach across both fronts. Keep the round brass mirror, paired opal sconces, low backsplash, inset-basin study, warm tile and low-level night-light concept. The toilet has a separate 30 x 30-inch forward approach west of the vanity and approximately 42 inches to the south wall. Keep the inward door's south-jamb hinge and 90-degree default pose. The powder camera frames the whole layout rather than hiding the toilet.
+Guest coat closet doors are paired solid white-oak Shaker French doors with satin-gold pulls, retaining the 48 x 96 in opening and closed default pose. Two nominal 24 in leaves hinge at the outer jambs x = 7.65 / 11.65, z = 37.5 and meet at x = 9.65; each swings 90 degrees outward into the alcove independently, never slides or folds. Solid panels retain concealed coat storage. Actual stops, occupied circulation and hardware remain unverified.
+
+Powder-room layout redesign supersedes the earlier finish-only refresh and fixed toilet: use a 42 x 21-inch natural white oak Shaker vanity on the north wall at (4.75, 36.225), facing south; relocate the toilet to the northwest at (1.65, 36.45), also facing south. One fixture wall avoids an opposing-fixture diagonal pinch and leaves a connected approach across both fronts. Keep the round brass mirror, paired opal sconces, low backsplash, inset-basin study and low-level night-light concept. Use the same 7-inch engineered hardwood as the adjoining hall, replacing the earlier warm tile floor; confirm product bathroom-use warranty, moisture protection and installation details. The toilet has a separate 30 x 30-inch forward approach west of the vanity and approximately 42 inches to the south wall. Keep the inward door's south-jamb hinge and 90-degree default pose. The powder camera frames the whole layout rather than hiding the toilet.
 
 Implemented taller powder window: one centered west-wall Andersen 100 Series standard size 2640 at (0, 38.05), replacing the shorter 2630. The [2024-25 manufacturer size chart, dealer-hosted copy](https://www.arlcoal.com/m/AndersenWindowsLearnMore/pdfs/Sizing/sizing-windows--100series-casement.pdf) gives an approximately 2.4583 x 3.9583 ft frame and minimum 2.5 x 4 ft rough opening. Shared/furnished/exterior wall cuts use the rough opening; frame geometry uses catalog dimensions. Rough sill/head 4/8 ft, frame sill/head approximately 4.0208/7.9792 ft. Lower half remains frosted to 6 ft; upper half clear, white inside/black outside. The center and width stay unchanged; the nominal head aligns with the 8 ft doors. This is now modeled, not a pending recommendation. See the [window-size comparison in feet](floor-plan-reference.md#powder-room-window-options-in-feet). Standard dimensions are verified; half-frosted product availability, sightlines/night privacy, handing, safety glazing, installation allowances and weatherproofing remain unapproved.
 

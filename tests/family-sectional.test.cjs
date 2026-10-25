@@ -39,57 +39,79 @@ test('family L sectional has five full cushions without counting its corner and 
     assert.equal(seat.userData.tourObstacle, true);
   });
 
-  test('photo-inspired L fits five full cushions, square table and one accent chair without losing earlier studies', () => {
+  test('one warm sofa is centered on room bounds facing the fireplace with two flanking chairs', () => {
     class Group {
-      constructor() { this.children = []; this.userData = {}; this.rotation = {}; }
+      constructor() { this.children = []; this.userData = {}; this.rotation = {}; this.position = { set() {} }; }
       add(child) { this.children.push(child); }
+      traverse(callback) { callback(this); this.children.forEach((child) => child.traverse(callback)); }
     }
     const scene = new Group();
     const context = {
-      THREE: { Group, MeshStandardMaterial: class {} }, scene, walnut: {},
-      livingCenterZ: getLivingRoomFeatureLayout().centerZ, livingFeatureWall: getLivingRoomFeatureLayout(), livingWeaveTexture() {},
-      box(parent, x, y, z, w, h, d) {
+      THREE: {
+        Group,
+        MeshStandardMaterial: class { constructor(options) { Object.assign(this, options); } },
+        Shape: class { absarc() {} lineTo() {} closePath() {} },
+        ExtrudeGeometry: class {},
+        Mesh: class extends Group { constructor(geometry, material) { super(); Object.assign(this, { geometry, material, isMesh: true }); } }
+      }, scene, walnut: {},
+      getGroundFloorDefaultPlan: require('../floor-plan-ground.js').getGroundFloorDefaultPlan,
+      livingCenterZ: getLivingRoomFeatureLayout().centerZ, livingFeatureWall: getLivingRoomFeatureLayout(), livingWeaveTexture(color) { return color; },
+      box(parent, x, y, z, w, h, d, material) {
         const part = new Group();
-        Object.assign(part, { x, y, z, w, h, d });
+        Object.assign(part, { x, y, z, w, h, d, material, isMesh: true });
         parent.add(part);
         return part;
       }
     };
     const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
     vm.createContext(context);
-    vm.runInContext(source.slice(source.indexOf('  const referenceLounge ='), source.indexOf('  const referenceRugCanvas =')), context);
+    const loungeSource = source.slice(source.indexOf('  const referenceLounge ='), source.indexOf('  const familySectional ='));
+    vm.runInContext(loungeSource, context);
     const lounge = scene.children[0];
-    const sectional = lounge.children[0];
-    assert.equal(sectional.userData.planningSeats, 5);
-    assert.equal(sectional.userData.cornerCounted, false);
-    assert.equal(sectional.userData.comfortVerified, false);
-    assert.equal(lounge.userData.guestChairs, 1);
-    const seats = sectional.children.filter((part) => part.name === 'Reference sectional full seat cushion');
-    assert.equal(seats.length, 5);
-    assert.equal(sectional.children.filter((part) => part.name === 'Reference sectional uncounted corner cushion').length, 1);
-    seats.forEach((seat, index) => {
-      assert.ok((index < 3 ? seat.d : seat.w) * 12 >= 25.5, 'Counted seat widths are at least 25.5 inches after seams');
-      assert.ok((index < 3 ? seat.w : seat.d) * 12 >= 30, 'Counted seat depths are at least 30 inches');
-    });
-    for (let i = 0; i < seats.length; i++) for (let j = i + 1; j < seats.length; j++) {
-      assert.ok(Math.abs(seats[i].x - seats[j].x) >= (seats[i].w + seats[j].w) / 2 ||
-        Math.abs(seats[i].z - seats[j].z) >= (seats[i].d + seats[j].d) / 2, 'Counted cushions remain separate');
+    assert.equal(lounge.userData.planningSeats, 5);
+    assert.equal(lounge.userData.guestChairs, 2);
+    assert.equal(lounge.children.length, 3, 'Only one sofa and two chairs remain');
+    const sofaGroups = lounge.children.filter((part) => part.name.startsWith('Reference warm taupe sofa'));
+    const chairGroups = lounge.children.filter((part) => part.name.startsWith('Reference muted camel upholstered chair'));
+    assert.equal(sofaGroups.length, 1);
+    assert.equal(chairGroups.length, 2);
+    for (const sofa of sofaGroups) {
+      assert.equal(sofa.userData.planningSeats, 3);
+      assert.equal(sofa.userData.comfortVerified, false);
+      assert.equal(sofa.children.filter((part) => part.name === 'Reference sofa seat cushion').length, 3);
+      assert.equal(sofa.children.find((part) => part.name === 'Reference sofa upholstered base').material.map, '#8d7562');
+      assert.equal(sofa.children.find((part) => part.name === 'Reference sofa seat cushion').material.map, '#a58b73');
+      assert.deepEqual(sofa.children.filter((part) => part.name === 'Reference sofa accent pillow').map((part) => part.material.map), ['#705443', '#b29b7f', '#92745b']);
     }
-    const { main, return: side, table, rug, chair } = lounge.userData;
-    const maxX = main.x + main.w / 2;
-    const minX = side.x - side.w / 2;
-    assert.ok(Math.abs((maxX - minX) * 12 - 100) < 0.001);
-    assert.equal(main.d * 12, 132);
-    assert.ok(Math.abs((main.x - main.w / 2 - table.x - table.w / 2) * 12 - 18) < 0.001);
-    assert.ok(Math.abs((side.z - side.d / 2 - table.z - table.d / 2) * 12 - 18) < 0.001);
-    assert.ok((minX - 1.38) * 12 >= 35.2, 'Return stays over 35 inches from the closed cabinet front');
-    assert.ok((26.775 - main.z - main.d / 2) * 12 >= 37.4, 'Retain the stair-side end gap');
-    assert.ok(maxX < 13.25, 'Keep the main hall strip clear');
-    assert.equal(table.w * 12, 38);
-    assert.equal(table.d * 12, 38);
-    assert.equal(rug.w, 9);
-    assert.equal(rug.d, 12);
-    assert.equal(chair.widthInches, 30);
+    for (const chair of chairGroups) {
+      assert.equal(chair.children.find((part) => part.name === 'Reference chair upholstered base').material.map, '#a17c58');
+      assert.equal(chair.children.find((part) => part.name === 'Reference chair curved upholstered back').material.map, '#a17c58');
+    }
+    lounge.traverse((part) => { if (part.isMesh) assert.equal(part.userData.tourObstacle, true); });
+    assert.doesNotMatch(loungeSource, /referenceRug|referenceCoffeeTable|referenceCart|referenceSideTable|referenceLamp/);
+    for (const key of ['rug', 'table', 'cart', 'sideTable']) assert.equal(lounge.userData[key], undefined);
+    const { sofas, chairs } = lounge.userData;
+    const room = context.getGroundFloorDefaultPlan().rooms.find((item) => item.name === 'Living room');
+    assert.equal(sofas.length, 1);
+    assert.equal(sofas[0].rotation, -Math.PI / 2);
+    assert.equal(sofas[0].x, room.x + room.w / 2);
+    assert.equal(sofas[0].z, room.z + room.d / 2);
+    for (const sofa of sofas) {
+      assert.equal(sofa.w * 12, 90);
+      assert.equal(sofa.d * 12, 39);
+      assert.ok(sofa.x + sofa.d / 2 < 13.25);
+      assert.ok((sofa.x - sofa.d / 2 - 1.38) * 12 > 43);
+    }
+    assert.equal(chairs.length, 2);
+    for (const chair of chairs) {
+      assert.equal(chair.rotation, -Math.PI / 2);
+      assert.ok(chair.x + 2.75 / 2 < 13.25, 'Keep chair backs out of the main hall strip');
+      const endGap = Math.abs(chair.z - sofas[0].z) - 1.25 - sofas[0].w / 2;
+      assert.ok(Math.abs(endGap * 12 - 16.2) < 0.001);
+      assert.ok(chair.z - 1.25 > room.z);
+      assert.ok(chair.z + 1.25 < room.z + room.d);
+    }
+    assert.doesNotMatch(source.slice(source.indexOf('  const referenceLounge ='), source.indexOf('  const familySectional =')), /referenceSectional|referenceLamp/);
     vm.runInContext(source.slice(source.indexOf('  const livingLayouts ='), source.indexOf('  const tableX =')), context);
     assert.equal(vm.runInContext('livingLayouts[0].id', context), 'reference-lounge');
     assert.equal(vm.runInContext('livingLayouts.filter((layout) => layout.recommended).length', context), 1);

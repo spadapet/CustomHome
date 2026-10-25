@@ -61,7 +61,7 @@
     const entryZ = guestEntry.alcove.z, officeZ = guestEntry.officeNorthZ;
     const kidsNorthZ = 26.725 - 25 / 12 - 0.08 + 0.175;
     const rooms = [
-      ['Living room', 0, 8, 13.2, 17.7], ['Dining room', 13.2, -0.1, 13.3, 8.1],
+      ['Living room', 0, 8, 13.2, 17.7], ['Dining room', 13.2, -0.1, 13.675, 8.1],
       ['Hall', 13.2, 8, 13.3, kidsNorthZ - 8], ['Kitchen', 26.5, 7, 11, 19.9],
       ['Prep kitchen', 37.5, 7, 18, 8], ['Mudroom', 37.5, 15, 7.4 - 2 / 12, 11.9],
       ['Kids room', 19, kidsNorthZ, 10, 34.6 - kidsNorthZ], ['Powder room', 0, powderZ, 7.1, guestEntry.powder.d],
@@ -74,9 +74,9 @@
       ['Garage', 29, 15, 26.5, 34], ['Front porch', 0, 54.2, 31.2, 7]
     ].map(([name, x, z, w, d]) => ({ name, x, z, w, d }));
     const floors = [
-      [0, 8, 13.2, 17.7, 'Living room'], [13.2, -0.1, 13.3, 8.1, 'Dining room'],
+      [0, 8, 13.2, 17.7, 'Living room'], [13.2, -0.1, 13.675, 8.1, 'Dining room'],
       [13.2, 8, 5.8, 17.7, 'Hall'], [19, 8, 7.5, kidsNorthZ - 8, 'Hall'],
-      [26.5, 7, 11, kidsNorthZ - 7, 'Kitchen'], [29, kidsNorthZ, 8.5, 26.9 - kidsNorthZ, 'Kitchen'],
+      [26.875, 7, 10.625, 1, 'Kitchen'], [26.5, 8, 11, kidsNorthZ - 8, 'Kitchen'], [29, kidsNorthZ, 8.5, 26.9 - kidsNorthZ, 'Kitchen'],
       [37.5, 7, 7.9, 8, 'Prep kitchen'], [45.4, 7, 10.1, 8, 'Prep kitchen'], [37.5, 15, 7.4 - 2 / 12, 11.9, 'Mudroom'],
       [0, 25.7, 12.2, stairs.z - 25.7], [0, stairs.z, stairs.x, stairs.depth],
       [stairs.x + stairs.width, stairs.z, 12.2 - stairs.x - stairs.width, stairs.depth],
@@ -96,9 +96,9 @@
     const segments = [
       ['Living north', 0, 8, 13.2, 8, sideWindows],
       ['Dining west', 13.2, -0.1, 13.2, 8, [[1.05, 7.05, 3, 8]]],
-      ['Dining north', 13.2, -0.1, 26.5, -0.1, [[3.65, 9.65, 3, 8]]],
-      ['Dining east', 26.5, -0.1, 26.5, 7, [[0.6, 6.6, 0, 8]]],
-      ['Kitchen north', 26.5, 7, 37.5, 7, [[1, 2.5, 53 / 12, 95 / 12], [3.25, 7.75, 53 / 12, 95 / 12], [8.5, 10, 53 / 12, 95 / 12]]],
+      ['Dining north', 13.2, -0.1, 26.875, -0.1, [[3.8375, 9.8375, 3, 8]]],
+      ['Dining east', 26.875, -0.1, 26.875, 7, [[0.6, 6.6, 0, 8]]],
+      ['Kitchen north', 26.875, 7, 37.5, 7, [[0.625, 2.125, 53 / 12, 95 / 12], [2.875, 7.375, 53 / 12, 95 / 12], [8.125, 9.625, 53 / 12, 95 / 12]]],
       ['Prep north', 37.5, 7, 55.5, 7, [[7.4, 12.4, 4.25, 7.75]]],
       ['Prep east', 55.5, 7, 55.5, 15, [[3.55, 5.55, 4.25, 7.75]]],
       ['Garage east', 55.5, 15, 55.5, 49, [...getGarageClerestoryLayout().map(({ z, width, sill, height }) => [z - width / 2 - 15, z + width / 2 - 15, sill, sill + height]), [29, 32, -1.25, 6.75]]],

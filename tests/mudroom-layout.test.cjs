@@ -6,6 +6,45 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
 
+test('mudroom lighting uses a shadow-casting interior key and restores other views', () => {
+  class Light {
+    constructor(color, intensity, distance, angle, penumbra, decay) {
+      Object.assign(this, { color, intensity, distance, angle, penumbra, decay });
+      this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } };
+      this.target = { position: { set(x, y, z) { Object.assign(this, { x, y, z }); } } };
+      this.shadow = { camera: {}, mapSize: { set(width, height) { Object.assign(this, { width, height }); } } };
+    }
+  }
+  const context = {
+    THREE: { AmbientLight: Light, PointLight: Light, SpotLight: Light },
+    scene: { add() {} }, renderer: { shadowMap: { enabled: false } },
+    activeFloor: 'ground', currentView: 'mudroom'
+  };
+  const start = source.indexOf('  const ambientLight =');
+  const end = source.indexOf('  const mat =', start);
+  const renderStart = source.indexOf('  function render() {');
+  const renderEnd = source.indexOf('    updateVehicleDoorControls();', renderStart);
+  assert.ok(start >= 0 && end > start && renderStart >= 0 && renderEnd > renderStart);
+  vm.runInNewContext(source.slice(start, end) + source.slice(renderStart, renderEnd) + '}\nglobalThis.lights = { ambientLight, mudroomKeyLight };', context);
+  const { ambientLight, mudroomKeyLight } = context.lights;
+  assert.equal(mudroomKeyLight.castShadow, true);
+  assert.equal(mudroomKeyLight.shadow.mapSize.width, 2048);
+  assert.ok(mudroomKeyLight.penumbra >= 0.5);
+  assert.ok(mudroomKeyLight.position.y < 9, 'Key light is inside the room, below the nominal ceiling');
+  for (const [floor, view, enabled] of [
+    ['ground', 'mudroom', true], ['ground', 'mudroom-cubbies', true], ['ground', 'mudroom-storage', true],
+    ['ground', 'kitchen', false], ['upstairs', 'upstairs', false], ['ground', 'top', false],
+    ['ground', 'mudroom-cubbies', true], ['exterior', 'exterior', false]
+  ]) {
+    context.activeFloor = floor;
+    context.currentView = view;
+    context.render();
+    assert.equal(mudroomKeyLight.visible, enabled, view);
+    assert.equal(context.renderer.shadowMap.enabled, enabled, view);
+    assert.equal(ambientLight.intensity, enabled ? 0.85 : 2.5, view);
+  }
+});
+
 function buildMudroom() {
   class Group {
     constructor() {
@@ -171,7 +210,7 @@ test('five backed cubbies have side-panel hooks and unobstructed floor-level lar
   assert.ok(model.find('Mudroom cubby partition').every((part) => part.d === seat.d && part.position.z === 0), 'Upper dividers now align with the bench front without enlarging its footprint');
   assert.ok(model.find('Mudroom upper cubby shelf').every((part) => part.d === seat.d && part.position.z === 0));
   const backing = model.find('Continuous mudroom cubby backing')[0];
-  assert.equal(backing.material.name, 'Muted sage-greige mudroom backing');
+  assert.equal(backing.material.name, 'Deep olive-sage mudroom backing');
   assert.equal(backing.h, 8.75);
   assert.ok((seat.position.y - seat.h / 2 - 0.0405) * 12 >= 14, 'At least 14-inch actual clear height above finished tile/grout');
   assert.ok((0.75 - (backing.position.z + backing.d / 2)) * 12 >= 16, 'At least 16-inch clear shoe depth');
@@ -313,7 +352,7 @@ test('decorative names sit inside cubbies on transparent backgrounds instead of 
     assert.equal(drawing.fills.length, 0, 'No rectangular background is painted');
     assert.equal(drawing.texts[0].text, cubby.userData.owner);
     assert.match(drawing.texts[0].font, /italic.*Script.*cursive/);
-    assert.equal(drawing.texts[0].color, '#806239');
+    assert.equal(drawing.texts[0].color, '#fff0c8');
     assert.equal(model.find(`Mudroom label: ${cubby.userData.owner}`).length, 0);
     assert.ok(cubby.children.filter((part) => part.name === 'Mudroom upper cubby shelf')[0].position.y === 6.35, 'First shelf line now aligns across all five cubbies');
   }
@@ -493,7 +532,7 @@ test('prep/mudroom divider aligns with the garage wall while kitchen openings an
   assert.equal(model.find('Five-cubby mudroom bench')[0].position.z, 22.85);
 });
 
-test('reference-inspired mudroom uses consistent sage-greige paint, light stone and warm gold without changing shared finishes', () => {
+test('mudroom contrast palette separates shelf backs, casework and both door types without changing shared finishes', () => {
   const model = buildMudroom();
   const ivoryParts = [
     'Open shoe bay divider', 'Mudroom cubby partition', 'Mudroom upper cubby shelf', 'Coat closet side panel',
@@ -507,11 +546,14 @@ test('reference-inspired mudroom uses consistent sage-greige paint, light stone 
   const backingParts = [
     'Continuous mudroom cubby backing', 'Coat closet backing', 'Arrival basket tower backing', 'Corner shoe tower backing', 'Basket return continuous backing'
   ];
-  const oakFrontParts = ['Mudroom closet door jamb', 'Mudroom closet headwall', 'Mudroom standard bifold door panel', 'Mudroom bifold recessed panel'];
+  const surroundParts = ['Mudroom closet door jamb', 'Mudroom closet headwall'];
   const binParts = ['Arrival basket bottom', 'Arrival basket side', 'Arrival basket face'];
   for (const [names, finish, color] of [
-    [ivoryParts.concat(oakFrontParts), 'Muted sage-greige mudroom casework', '#aaa99a'],
-    [backingParts, 'Muted sage-greige mudroom backing', '#aaa99a'],
+    [ivoryParts.concat(surroundParts), 'Soft sage mudroom casework', '#c5cdb7'],
+    [backingParts, 'Deep olive-sage mudroom backing', '#627257'],
+    [['Mudroom standard bifold door panel'], 'Warm ivory mudroom closet doors', '#dfd5c2'],
+    [['Mudroom bifold recessed panel'], 'Warm putty mudroom recessed door panels', '#b9ad95'],
+    [['Solid mudroom garage door panel'], 'Off-white mudroom entry door', '#f2eee4'],
     [binParts, 'Natural woven mudroom baskets', '#b89a70']
   ]) {
     for (const name of names) {
@@ -526,11 +568,11 @@ test('reference-inspired mudroom uses consistent sage-greige paint, light stone 
   for (const [name, count] of [['Mudroom closet door jamb', 2], ['Mudroom closet headwall', 1], ['Mudroom standard bifold door panel', 4]]) {
     const parts = model.find(name);
     assert.equal(parts.length, count);
-    assert.ok(parts.every((part) => part.material.name === 'Muted sage-greige mudroom casework'), `${name} matches the painted enclosure`);
+    assert.ok(parts.every((part) => part.material.name === (name === 'Mudroom standard bifold door panel' ? 'Warm ivory mudroom closet doors' : 'Soft sage mudroom casework')), `${name} uses its intended contrasting finish`);
   }
   const recessed = model.find('Mudroom bifold recessed panel');
   assert.equal(recessed.length, 8);
-  assert.ok(recessed.every((part) => part.material.name === 'Muted sage-greige mudroom casework'), 'Recessed bifold panels match the painted leaves');
+  assert.ok(recessed.every((part) => part.material.name === 'Warm putty mudroom recessed door panels'), 'Recessed panels differ from the ivory leaf frames');
   const wood = model.all.filter((part) => ['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish'].includes(part.material?.name));
   assert.equal(wood.length, 0, 'Mudroom recoloring replaces local material assignments, not shared kitchen finishes');
   const seat = model.find('Mudroom light stone bench seat')[0];
@@ -538,6 +580,28 @@ test('reference-inspired mudroom uses consistent sage-greige paint, light stone 
   assert.ok(model.find('Mudroom gold coat hook').every((hook) => hook.children.every((part) => part.material.name === 'brass')));
   assert.ok(model.find('Mudroom closet gold knob').every((part) => part.material.name === 'brass'));
   assert.ok(model.find('Stored extra shoe').every((part) => part.userData.asset && part.userData.uniformScale), 'Shelf footwear is a uniformly scaled licensed asset, not flat blocks');
+});
+
+test('finish colors provide measurable shelf/background and name/background separation', () => {
+  const model = buildMudroom();
+  const luminance = (hex) => {
+    const channels = [1, 3, 5].map((index) => parseInt(hex.slice(index, index + 2), 16) / 255).map((value) => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
+    return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+  };
+  const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
+  const casework = model.find('Mudroom cubby partition')[0].material;
+  const backing = model.find('Continuous mudroom cubby backing')[0].material;
+  const closet = model.find('Mudroom standard bifold door panel')[0].material;
+  const entry = model.find('Solid mudroom garage door panel')[0].material;
+  assert.ok(contrast(casework.color, backing.color) >= 3, 'Base paint colors have at least 3:1 separation; this is not a rendered accessibility rating');
+  assert.ok(contrast(closet.color, backing.color) >= 3);
+  assert.equal(entry.color, '#f2eee4', 'Owner requires an off-white entry door, never green');
+  assert.ok(contrast(entry.color, backing.color) >= 4, 'Off-white entry door remains distinct from the olive storage backs');
+  for (const owner of ['Peter', 'Lila', 'Jacob', 'Ada', 'Lucas']) {
+    const nameColor = model.find(`Mudroom decorative name: ${owner}`)[0].material.map.image.context.texts[0].color;
+    assert.ok(contrast(nameColor, backing.color) >= 4.5, `${owner}'s name remains readable against the deeper backing`);
+  }
+  assert.ok(backing.roughness > casework.roughness && casework.roughness > closet.roughness, 'Recesses are matte while door faces have a satin response');
 });
 
 test('all five remaining case groups share a 105-inch top with connected north and east trim', () => {

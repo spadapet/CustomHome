@@ -48,6 +48,7 @@ test('single sloping patio roof retains its envelope and closes the gap above th
   assert.equal(roof.userData.limits.rear, -2.1);
   assert.equal(roof.userData.limits.front, 10);
   const headwall = walls.find((wall) => wall.name === 'Patio roof raised headwall');
+  assert.equal(headwall.x2, 26.875);
   assert.equal(headwall.bottom, 9);
   assert.ok(headwall.top >= underside(7 + 0.225), 'Wall reaches the underside across its full thickness');
   const upperReturn = walls.find((wall) => wall.name === 'Patio roof upper-wall return');
@@ -60,6 +61,7 @@ test('both tapered side closures meet the actual roof slope without extending in
   const { meshes, underside } = buildRoof();
   const closures = meshes.filter((mesh) => /tapered closure/.test(mesh.name));
   assert.equal(closures.length, 2);
+  assert.equal(closures.find((mesh) => mesh.name === 'Patio roof west tapered closure').position.x, 26.875);
   for (const mesh of closures) {
     const p = mesh.geometry.attributes.position;
     for (let i = 0; i < p.count; i++) {

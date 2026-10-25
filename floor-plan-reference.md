@@ -1,5 +1,47 @@
 # Ground-floor plan reference
 
+## Dining side-wall / kitchen cabinet alignment - October 24
+
+The circled projection is the dining patio-side wall beside the left end
+of the kitchen sink base cabinets, not the backyard window wall. Shift the
+side-wall centerline east 4.5 in, from x = 26.5 to 26.875 ft. Its dining
+face is now x = 26.7, matching the cabinet/counter end; the 1.5-inch
+baseboard projection remains ordinary trim, not a structural wall stub.
+Keep the backyard wall at z = -0.1, kitchen window wall at z = 7,
+and all kitchen cabinets, windows, sconces and passages fixed.
+
+Dining nominal bounds become 13.675 x 8.1 ft (110.7675 sq ft), a 3.0375 sq ft
+side-strip gain. Recenter the table/eight chairs and rear window/sconces
+2.25 in east, table midpoint (20.0375, 3.95). Tabletop margins to finished
+side-wall faces are 37.95 in each. The patio assembly moves with its wall
+but retains z = 0.5-6.5, inward handing and closed default. Coordinate the
+rear-wall end, kitchen-wall junction, trim, floor patches, exterior and
+dining roof width. Lot, rear setback, patio cover and paving stay fixed.
+
+Full 180-degree sweep checks retain the tucked/pulled patio-end chair
+conflict; move that chair clear. Eighteen-inch chair pull-outs clear trim,
+but 24-inch end pull-outs still reach it. This supersedes older dining
+widths/x coordinates, not the existing rear-wall depth. Structure,
+foundation/roof junctions, actual products and occupied use need review.
+
+## Mudroom rendering depth - October 24
+
+Mudroom overview, Cubbies and Coats + bins use a warm interior study spotlight,
+lower ambient fill and a 2048 px soft-filtered shadow map. Real shelf/divider
+geometry casts shadows onto recessed backs; no contrasting paint or geometry
+change is needed. Other floor/view presets restore the original lighting and
+disable the shadow pass. This is an interactive visualization, not photometric
+verification or a selected fixture layout.
+
+## Prep backsplash contrast - October 24
+
+Replace only the prep quartz backsplash with muted deep sage ceramic tile,
+running bond and warm-gray 1/16 in grout joints. Retain ivory quartz counters,
+all appliances and the main-kitchen quartz wall finish. The backsplash stays
+14.35 ft wide and 9.84 in high, bottom y = 3.04 ft, front z = 7.26 ft.
+No room geometry, window trim or appliance alignment changes. Finish samples,
+cleanability, substrate and sealed wet-area joints require verification.
+
 ## Kitchen fruit and bread organization - October 24
 
 - Main island: removable 13.2 in-diameter fruit bowl, center (28.65, 14.45), bottom at countertop y = 3.05 ft. Cabinetry and seating stay unchanged.
@@ -8,29 +50,30 @@
 - Inspect with Kitchen and Prep shelves views. Refrigeration-dependent fruit stays in the fridge.
 - Browser mesh bounds confirm both baskets stay within shelf depth with about 1 in combined front/back margin. Bread-box depth including its handle is about 10.64 in, leaving about 0.36 in at the shelf front and 1 in behind. These are model fit checks, not selected-product approval.
 
-## Photo-inspired living room - current J study
+## Centered warm sofa - current J study
 
-J adapts the owner's reference photo to the room. Keep the fireplace/TV,
+J now uses one centered sofa facing the fireplace, replacing the two facing
+sofas. Center on the actual shared Living room bounds x = 0-13.2,
+z = 8-25.7 ft, not the feature-wall midpoint. Retain warm taupe upholstery,
+muted camel chairs and earthy cushions, with no coffee table, end table/cart,
+lamp or rug. Expose existing hardwood. The earlier L and photo grouping
+are superseded. Performance
+upholstery is a selection target, not a verified product. Keep the fireplace/TV,
 full-length cabinets, windows, stairs, dining and hall tree unchanged.
-The lighter oatmeal finish supersedes the earlier brown-only direction.
+The warmer taupe/camel finish supersedes the bright ivory/blue direction.
 A-I remain available as comparisons.
 
 | Item | Current J geometry |
 |---|---|
-| Sectional | 132 x 100 in L, 44 in deep; x = 4.3167-12.65, z = 12.65-23.65 ft. Long back east, return south/stair-side |
-| Family seats | Five separate 30 in-deep cushions: three approximately 27.5 in wide and two 25.5 in wide; corner is not counted. Comfort/product fit unverified |
-| Accent chair | One CC0 Poly Haven chair, uniformly scaled to approximately 30 x 36.1 x 37.4 in W/D/H; center (5.65, 11.8), facing south. Oatmeal material concept with original normal/roughness maps |
-| Rug | 9 x 12 ft original charcoal/oatmeal pattern, center (7.8, 17.475), y = 0.008 ft. Not a photographed product texture |
-| Coffee table | 38 x 38 x 16.5 in square oak concept, center (5.9, 16.9); 18 in to each seating run |
-| End table/lamp | Textured table at (10.8, 11.35), 20 in high, with warm reading lamp; wiring/stability need review |
-| Static gaps | Approximately 35.2 in from return/table to closed cabinet/fireplace front line; 36.2 in from guest chair to closed cabinet line; 37.5 in at stair-side end |
-| Main route | Retained 36 in strip x = 13.25-16.25, z = 10.5-25.5. Tour avatar reaches five sectional approaches and the guest chair |
+| Sofa | One 90 x 39 in warm taupe sofa, center (6.6, 16.85), turn -90 degrees facing fireplace/TV. Three cushion positions |
+| Chairs | Two muted camel upholstered 30 x 33 x 34.8 in chairs, centers (7, 10.5) / (7, 23.2), facing west |
+| Open floor | No coffee table/books, end table, cart, lamp or rug; existing hardwood exposed |
+| Static gaps | 16.2 in chair-to-sofa-end; 43.14 in sofa-front-to-closed-cabinet line |
+| Main route | Retained 36 in strip x = 13.25-16.25, z = 10.5-25.5. Chairs end at x = 8.375 |
 
-One chair replaces the photo's pair to avoid overcrowding. The sectional,
-table, rug and lamp are modeled design concepts, not selected products.
-Tour checks use a 12 in avatar, not occupied-family or accessibility envelopes.
-Verify all-five comfort, upholstery, rug/pad slip resistance, table edges,
-lamp services, cabinet/window operation and fireplace heat clearances.
+These are modeled design concepts, not selected products. The 16.2 in
+chair-to-sofa gaps are not main walking routes. Verify family comfort, upholstery,
+cabinet/window operation and fireplace heat clearances.
 The old still render predates this arrangement.
 
 ## Earlier I family-of-five living room
@@ -110,6 +153,15 @@ vehicle dimensions and parking positions.
 
 ## Current mudroom / garage boundary - October 24
 
+Readability palette replaces the former uniform #AAA99A finish: pale
+sage #C5CDB7 cases/shelves/trim against matte olive-sage #627257 backs;
+warm ivory #DFD5C2 closet leaves with putty #B9AD95 recessed panels;
+off-white #F2EEE4 garage-entry leaf (owner explicitly rejects green here);
+pale-gold #FFF0C8 script names.
+Retain the scoped study lighting, light stone/tile, natural baskets and
+gold hardware. Finish-only revision: no layout, fitted-gap, door-pose or
+clearance changes. Confirm actual paint samples; rendered shading varies.
+
 **Wall-fitted finish:** close the former installation gaps with matching
 site-fitted scribes/pack-outs, without shifting storage fronts: north rear
 2.7 in (z = 15.175-15.4), side gaps 1.8 in, cubby south end 1.5 in
@@ -124,7 +176,7 @@ Cubby order: Peter, Lila, Jacob, Ada, Lucas. Peter has a hat/jacket;
 Jacob, Ada and Lucas each have a backpack/jacket; Lila's corrected coat is
 48 in long, with her hooks lowered to 66.6 in and 0.6 in hem clearance
 above the 18 in bench. All first shelves now align at 76.2 in.
-Decorative warm-bronze script names sit directly on the inside backing at
+Decorative pale-gold script names sit directly on the inside backing at
 61.2 in, on transparent backgrounds rather than white shelf-edge nameplates.
 Real clothing/reach remain unverified. Daily footwear uses
 licensed textured sneaker/boot assets: 14 in adult boots fit below the bench,
@@ -560,7 +612,7 @@ offsets differ from the selected east-aligned placement. Layout choice is not in
 | Bedroom | Article Lenia queen reference 63.5 x 82.75 in W/D; center approximately (27.427083, 49.395), rotated -90 degrees | Headboard/rear edge x = 30.875 on east wall opposite west entry; faces decreasing x, not the porch |
 | Bedroom | Two nightstands, approximately 18 x 15.6 in, at (30.2, 45.695) / (30.2, 53.095) | Shifted toward porch with bed; porch-end stand limits further movement; keep trim/window clear |
 | Guest walk-in | Approximately 82 in west-side fittings run inside x = 19-24.5, z = 34.6-42; long hanging extended 9.96 in, unchanged short hanging/shelves shifted north; end z = 34.925 | 0.3 in modeled end gap to north shoe, field tolerance unapproved; 36.3 in aisle with 24 in clothing allowance; no opposing storage or bedroom reach-in; hall unchanged |
-| Powder | Northwest toilet (1.65, 36.45); 42 x 21 in vanity (4.75, 36.225): basin, faucet and mirror centered at x = 4.75, equal counter margins, symmetrical sconces; 22 in double-door center cupboard and two 10 in banks of three drawers with gold knobs; east-wall towel hook at 48 in | 15 in drawer extension clears fixtures with entry parked 90 degrees inward; close right drawers before moving door because their extended position intersects its sweep. Drawers closed for sampled 28 in route. Keep 8 ft door; verify plumbing, usable interiors, slides and occupied use |
+| Powder | Northwest toilet (1.65, 36.45); 42 x 21 in vanity (4.75, 36.225): basin, faucet and mirror centered at x = 4.75, equal counter margins, symmetrical sconces; 22 in double-door center cupboard and two 10 in banks of three drawers with gold knobs; east-wall towel hook at 48 in; 7-inch engineered hardwood matching the hall, no tile overlay | 15 in drawer extension clears fixtures with entry parked 90 degrees inward; close right drawers before moving door because their extended position intersects its sweep. Drawers closed for sampled 28 in route. Keep 8 ft door; verify plumbing, usable interiors, slides, occupied use and flooring moisture/warranty requirements |
 | Guest shower bathroom and screened sink alcove | Toilet (26, 35.95), facing south; shower x = 27.825-31.025, z = 34.775-39.425, 36 x 53.4 in clear, west-facing 30 in open entry and fixed glass; west-wall towel hook at 48 in. Alcove has 36 x 18 in vanity (30.2, 41.4), facing west: 24 in left cupboard bay/one door, 12 in right bank/three pull-out drawers, gold knobs, centered 21 in basin/faucet, 30 in mirror and warm sconces | 7.5 in nominal counter each side; 15 in conceptual drawer travel, fronts closed by default. Full-height privacy return x = 29.26-31.2, z = 43.2 ends flush with closed vanity hardware, screening south without projecting past it; open west passage. Sampled 28 in route through retracted bathroom door into shower also clears extended drawers. Not occupied/accessibility approval; drawer interiors/slides, trap/services, compact products, sanitary clearances, step-over curb and splash control unverified |
 | Guest coats | Reach-in closet centered (9.65, 36.3), upper shelf, continuous hanging rail, four illustrative coats | Replaces powder linen cabinet; separate closed oak door pair faces the open hall alcove, not the bathroom |
 | Porch | Two 60 x 20.4 in benches at (5, 55.4) / (26.2, 55.4) | No entry runner indoors; no sidelights/transom around the front doors |
@@ -657,7 +709,7 @@ All house doors and doorless cased passages have nominal **8 ft / 96 in heads** 
 | Garage side pedestrian opening | 36 x 96 in, x = 55.5, z = 44-47 | Click/tap the modeled pedestrian leaf to toggle its conceptual 180-degree swing; opening rises from garage datum, not house datum |
 | Garage overhead doors, 2 | Each 108 x 96 in, z = 49, x = 32.5-41.5 / 44-53 | Exterior view click/tap rotates each simplified panel to a conceptual overhead pose; tracks, ceiling storage, spring balance, stops and actual travel are not modeled or approved |
 | Powder entry | Nominal 30 x 96 in, x = 7.1, z = 38-40.5 | Opening centered between finished alcove walls with casing room at both jambs; painted-white leaf, south-jamb hinge, displayed 90 degrees open inward; click/tap toggles closed or to the modeled 180-degree endpoint |
-| Guest coat closet | Nominal 48 x 96 in, z = 37.5, x = 7.65-11.65 | Two closed white-oak Shaker leaves with satin-gold pulls; click/tap either leaf to toggle its conceptual swing; independent access from alcove |
+| Guest coat closet | Nominal 48 x 96 in, z = 37.5, x = 7.65-11.65 | Paired solid white-oak Shaker French doors, nominal 24 in per leaf, outer-jamb hinges and center meeting; closed by default, satin-gold pulls; click/tap each leaf to swing 90 degrees outward independently into alcove, never slide; actual stops/occupied circulation unverified |
 | Mudroom coat closet | Nominal 32 x 96 in bifold, centered at x = 41.1167, z = 16.4 | Closed by default; click/tap either paired leaf to fold to its modeled 90-degree endpoint; supplier mechanism and clearances require verification |
 
 Doorless openings do not provide acoustic separation. Simplified trim does not establish finished clear width or egress/accessibility compliance. See [door requirements](doors.html).
@@ -709,7 +761,7 @@ Exterior garage approaches are only provisional lowered pads, not driveway gradi
 | Hardwood | Continuous 7 in natural honey-oak plank spacing/grain across living, dining, kitchen, prep, hall, kids, office, bedroom and closet; varied 4-8 ft board lengths |
 | Other floors | Mudroom/bathrooms tile, porch paving, garage epoxy; not the earlier prep-tile note |
 | Closed cabinetry | Light natural-stained white oak, Shaker recessed fronts, frameless/full-overlay; satin-gold hardware; open stair-bookcase carcasses stay cream |
-| Mudroom exception | Sage-greige #AAA99A cases/backs/bifold/trim; warm ivory quartz bench; natural woven tan baskets #B89A70; satin-gold hooks/knobs; 24 x 48 in matte/honed warm stone-look porcelain, matching 1/16 in grout target. West bin/shoe run and drop counter removed; separate arrival shelves now 12 in deep. Supersedes ivory/putty/oak here only. Confirm paint/basket samples, paint-grade bifold, tile installation and stone supports; no accessory drawers |
+| Mudroom exception | Pale sage cases/trim #C5CDB7; matte olive backs #627257; ivory bifold leaves #DFD5C2 with putty panels #B9AD95; off-white entry leaf #F2EEE4, never green; pale-gold names #FFF0C8. Warm ivory quartz bench, natural woven baskets #B89A70, gold hardware and large-format stone-look tile retained. Supersedes the single #AAA99A finish; kitchen materials unchanged. Confirm physical samples, products and supports; no accessory drawers |
 | Quartz | Warm ivory/soft warm-gray veining on counters, island and kitchen walls; three main-kitchen window sills are smoky blue-gray |
 | Drawer cups | Top Knobs Dakota Charlotte M2223, Honey Bronze, kitchen/island/prep-extension drawers; one cup below 30 in width, pairs at quarter points at 30 in or wider |
 | Cup-pull dimensions | 3.75 in overall width, 1.125 in height, 15/16 in projection, 2 9/16 in mounting centers; geometry/drilling not installation CAD |
