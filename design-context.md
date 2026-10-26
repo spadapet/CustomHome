@@ -1,5 +1,37 @@
 # Ground-floor design context
 
+## Unify decorative wall lights - October 25
+
+Owner requests all decorative wall sconces match corrected Aleena ivory
+half-oval wall-backed shade and brass plate. Apply to living, dining and
+kitchen pairs (six total) with unchanged mounts/control. Preserve exterior
+weather-rated, mirror/task/picture and stair lights for their specific uses.
+Verify product listing, heat, cleaning and window/curtain clearances.
+
+## Aleena wall-hugging ivory correction - October 25
+
+Follow latest supplied photo rather than linked red variant: ivory fabric
+half-oval shade, flat-backed to wall with open top/bottom and brass plate
+below. Replace full cylinder/stand-off with shallow 4 in projection concept.
+Dimensions provisional; preserve living mounts and Night/Day.
+
+## Aleena replaces loop sconces - October 25
+
+Latest selection is Monulo Aleena Red variant 46224862347422, per product
+data and variant photo: cylindrical rust fabric shade over rounded brass
+backplate, no U-loop. Seller size 7.9 x 10.2 in; projection and detailed
+geometry provisional. Retain living positions/control only. Supersedes
+ivory loop/tapered studies; electrical certification and installation unverified.
+
+## Homey living wall lights - October 25
+
+Owner accepts warm-brass/ivory fabric-shade living sconces in place of
+vertical opal bars. Latest photo supersedes tapered shades: model cylindrical
+ivory shades above visible curved brass U-loops at the existing two positions,
+preserving Night/Day. Geometry, listing and product remain unverified.
+Keep kitchen/dining bars unchanged. Review glare, dimming, bulb heat,
+electrical listing and curtain/window reach with actual selected product.
+
 ## Continuous L-sectional back - October 25
 
 Fix missing corner back between main run and return with a matching

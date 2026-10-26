@@ -1,5 +1,42 @@
 # Ground-floor plan reference
 
+## Matching decorative wall sconces throughout - October 25
+
+Use the corrected ivory wall-backed half-oval fabric/brass plate style
+for all six decorative wall sconces: living two, dining two, kitchen two.
+Keep mount positions and Night/Day. Exterior weather-rated downlights,
+mirror/task/picture lights and stair safety lighting are not fabric sconces.
+Projection is provisional 4 in; verify window/curtain reach, kitchen
+cleanability/grease exposure, listing, bulb heat and dimming before selecting.
+
+## Correct wall-backed ivory Aleena shape - October 25
+
+Owner photo supersedes red linked variant and round projecting shade.
+Use ivory half-oval fabric shell with rear edges at wall, open top/bottom,
+rounded brass backplate showing below. Width/height remain provisional
+7.9/10.2 in; projection reduced to approximate 4 in. No full cylinder
+or extended arm. Preserve positions/controls; product and electrical
+clearances remain unverified.
+
+## Aleena living sconces - October 25
+
+Replace prior loop fixtures with Monulo Aleena-inspired sconces, linked
+variant 46224862347422 (Red): rust-red straight fabric shade and rounded
+brass backplate. Seller variant lists 7.9 in diameter x 10.2 in height.
+Projection/shade proportions are approximations, not manufacturer CAD.
+Keep two positions and Night/Day; kitchen/dining unchanged. Verify listing,
+bulb heat, dimming, glare and window/curtain clearance before purchase.
+
+## Living fabric-shade sconces - October 25
+
+Replace only the two living vertical bars with warm-brass U-loop supports
+and straight-sided ivory fabric shades matching the latest owner photo.
+This supersedes the tapered Monulo-inspired shade study.
+Keep mounting centers and Night/Day control. Concept width 7.2 in,
+projection 10.8 in; not verified manufacturer dimensions. No dining/kitchen
+change. Confirm electrical listing, replaceable bulb, 2700K/CRI90+ dimming,
+curtain/window clearances and seated glare before purchase; no product approval.
+
 ## Sectional corner back correction - October 25
 
 Close the 33 in missing back segment between main sofa back and return.

@@ -1168,34 +1168,54 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   const livingSconces = new THREE.Group();
   livingSconces.name = 'Living-room wall sconces';
-  livingSconces.userData = { fixtures: 2, placement: 'Outer ends of the grouped living-room side windows', finish: 'Satin gold with warm opal diffusers', provisional: true };
+  livingSconces.userData = { fixtures: 2, placement: 'Outer ends of the grouped living-room side windows', finish: 'Ivory wall-backed half-oval fabric shades and rounded brass backplates', productVerified: false, provisional: true };
   scene.add(livingSconces);
   const sconceGlow = new THREE.MeshStandardMaterial({ color: '#fff0d7', emissive: '#ffd5a0', emissiveIntensity: 0.6, roughness: 0.65 });
-  function wallSconce(parent, x, z, rotation) {
+  function wallSconce(parent, x, z, rotation, fabricShade = true) {
     const sconce = new THREE.Group();
-    sconce.name = 'Warm vertical wall sconce';
+    sconce.name = fabricShade ? 'Living brass and ivory fabric-shade sconce' : 'Warm vertical wall sconce';
     sconce.position.set(x, 6.3, z);
     sconce.rotation.y = rotation;
     parent.add(sconce);
-    box(sconce, 0, 0, 0, 0.05, 1.55, 0.22, brass).name = 'Sconce gold backplate';
-    cylinder(sconce, 0.14, 0, 0, 0.1, 1.2, sconceGlow).name = 'Warm opal sconce diffuser';
-    for (const y of [-0.64, 0.64]) cylinder(sconce, 0.14, y, 0, 0.11, 0.08, brass).name = 'Sconce gold end cap';
+    if (fabricShade) {
+      sconce.userData = { styleReference: 'Owner Aleena ivory wall-backed half-oval shade photo', widthInches: 7.9, heightInches: 10.2, projectionInches: 4, projectionVerified: false, manufacturerDimensionsVerified: false, electricalListingVerified: false, colorTemperatureKelvin: 2700 };
+      box(sconce, 0.04, 0, 0, 0.08, 10.2 / 12, 4.8 / 12, brass, true).name = 'Aleena rounded brass backplate';
+      const fabric = new THREE.MeshStandardMaterial({ color: '#eee4ce', roughness: 0.95, emissive: '#ffd5a0', emissiveIntensity: 0.15, side: THREE.DoubleSide });
+      const shadePositions = [];
+      for (let segment = 0; segment < 32; segment++) {
+        const a = Math.PI * segment / 32, b = Math.PI * (segment + 1) / 32;
+        const x1 = 0.01 + (4 / 12 - 0.01) * Math.sin(a), z1 = 7.9 / 24 * Math.cos(a);
+        const x2 = 0.01 + (4 / 12 - 0.01) * Math.sin(b), z2 = 7.9 / 24 * Math.cos(b);
+        const bottom = -0.165, top = bottom + 7.08 / 12;
+        shadePositions.push(x1, bottom, z1, x2, bottom, z2, x2, top, z2, x1, bottom, z1, x2, top, z2, x1, top, z1);
+      }
+      const shadeGeometry = new THREE.BufferGeometry();
+      shadeGeometry.setAttribute('position', new THREE.Float32BufferAttribute(shadePositions, 3));
+      shadeGeometry.computeVertexNormals();
+      const shade = new THREE.Mesh(shadeGeometry, fabric);
+      shade.name = 'Aleena ivory wall-backed half-oval fabric shade';
+      sconce.add(shade);
+    } else {
+      box(sconce, 0, 0, 0, 0.05, 1.55, 0.22, brass).name = 'Sconce gold backplate';
+      cylinder(sconce, 0.14, 0, 0, 0.1, 1.2, sconceGlow).name = 'Warm opal sconce diffuser';
+      for (const y of [-0.64, 0.64]) cylinder(sconce, 0.14, y, 0, 0.11, 0.08, brass).name = 'Sconce gold end cap';
+    }
     const accentLight = new THREE.PointLight('#ffd3a0', 12, 5, 2);
     accentLight.name = 'Warm wall accent light';
-    accentLight.position.set(0.35, 0, 0);
+    accentLight.position.set(fabricShade ? 0.2 : 0.35, fabricShade ? 0.05 : 0, 0);
     sconce.add(accentLight);
   }
   for (const [x, z, rotation] of livingSideSconceCenters.map((x) => [x, 8.205, -Math.PI / 2])) {
-    wallSconce(livingSconces, x, z, rotation);
+    wallSconce(livingSconces, x, z, rotation, true);
   }
   const diningSconces = new THREE.Group();
   diningSconces.name = 'Dining-room wall sconces';
-  diningSconces.userData = { fixtures: 2, placement: 'Flanking the rear dining window', finish: 'Satin gold with warm opal diffusers', chandelier: false, provisional: true };
+  diningSconces.userData = { fixtures: 2, placement: 'Flanking the rear dining window', finish: 'Ivory wall-backed fabric shades and rounded brass backplates', chandelier: false, provisional: true };
   scene.add(diningSconces);
   for (const x of [15.4875, 24.5875]) wallSconce(diningSconces, x, 0.105, -Math.PI / 2);
   const kitchenSconces = new THREE.Group();
   kitchenSconces.name = 'Kitchen sink-wall end sconces';
-  kitchenSconces.userData = { fixtures: 2, placement: 'Outside the kitchen window-bank ends', finish: 'Satin gold with warm opal diffusers', provisional: true };
+  kitchenSconces.userData = { fixtures: 2, placement: 'Outside the kitchen window-bank ends', finish: 'Ivory wall-backed fabric shades and rounded brass backplates', provisional: true };
   scene.add(kitchenSconces);
   for (const x of kitchenEndSconceCenters) wallSconce(kitchenSconces, x, kitchenWindowWallZ + 0.205, -Math.PI / 2);
   const glass = new THREE.MeshStandardMaterial({ color: '#b3cad0', roughness: 0.15, metalness: 0.15, transparent: true, opacity: 0.52 });
