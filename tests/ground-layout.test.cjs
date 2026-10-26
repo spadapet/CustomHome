@@ -578,9 +578,10 @@ test('kitchen-facing kids-room wall is flush with the tall cabinet fronts withou
   }
 });
 
-test('both low fireplace media built-ins are removed without removing under-stair bookcases', () => {
+test('paired fireplace built-ins return with standard boxes while under-stair bookcases remain', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
-  assert.doesNotMatch(source, /mediaBuiltIns|mediaBuiltIn|Closed media cabinet Shaker door|Media cabinet recessed plinth/);
+  assert.match(source, /fireplaceBuiltIns\.name = 'Paired low white-oak fireplace built-ins'/);
+  assert.match(source, /cabinetWidthInches: 36, cabinetsPerSide: 2/);
   assert.match(source, /stairBookcases\.name = 'Recessed under-stair bookcases'/);
   assert.match(source, /stairBookcases\.userData = \{ bays: 4/);
 });

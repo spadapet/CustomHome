@@ -1,5 +1,96 @@
 # Ground-floor design context
 
+## Pull living seating back 18 inches - October 25
+
+Owner requests 1-2 ft more distance from fireplace built-ins. Shift the
+complete seating/rug group 1.5 ft east without rotating or changing
+internal spacing. Retain z midpoint 16.85; x midpoint becomes 8.1.
+Nearest chair-to-cabinet gap is now 24.84 in; furniture stops at x = 12.75,
+6 in before main hall strip. Do not claim approved cabinet-use circulation.
+Built-ins, windows, walls and office piano are unchanged. This overrides
+prior exact x-centering and tighter cabinet-gap notes.
+
+## POANG-style chairs accepted - October 25
+
+Use two lighter open oak-frame reading chairs with taupe seat/back cushions,
+no footstools, replacing bulky oatmeal tub chairs. Approximate envelopes
+27 x 32 x 39.5 in, inspired by IKEA POANG rather than manufacturer CAD.
+Keep sectional, rug, paired cabinets and office piano. Recompute seating
+centering from new footprints; cabinet gap remains only 6.84 in, not an
+access aisle. Confirm selected model dimensions and actual seated comfort.
+
+## Living centering display correction - October 25
+
+Center placement uses the viewer's [x,z,rotation] tuple, not XYZ. Keep
+the whole seating group unrotated while shifting x -1.1125, z +1.325 ft.
+This fixes unintended rotation from the previous centering change;
+no furniture, cabinet or room-design change.
+
+## Center seating and restore paired fireplace cabinets - October 25
+
+Owner requests centered furniture and both low built-ins back. Use actual
+living room center (6.6,16.85); center the combined seating envelope and
+9 x 12 rug there. Seating shift is x -1.1125, z +1.325 ft, preserving all
+relative chair/sectional/table gaps. Main hall remains unobstructed.
+Restore white-oak 74.88 x 11.76 x 26 in runs on both stone sides, each
+two standard 36 in cabinet boxes with separate 1.44 in end fillers.
+Use four closed Shaker doors and clear continuous tops, no projecting pulls.
+Nearest chair-to-cabinet gap is just 6.09 in: not approved retrieval access.
+Review cabinet use, product fit, ventilation, wall power and fireplace heat.
+Piano stays in office; no other walls, windows or rooms move.
+
+## Piano relocated to office - October 25
+
+Owner explicitly requests piano out of living. Move complete Yamaha group
+(bench and lamp included) to office north wall at (8.6,42.0742), facing south.
+Reparent to ground-floor office furnishing group so living-layout changes
+do not hide it. Keep desks, loveseat and elliptical unchanged. Piano rear
+edge z = 41.4; desk-side gap only about 1 in, not an access aisle.
+Default open French leaf clears bench by about 1.45 in; full swing,
+occupied playing/pullout, workstation use, noise and electrical access
+remain unverified. Supersedes living-room piano-retention notes below.
+
+## Latest L-sectional and rug reference - October 25
+
+Use 114 x 99 in overall L sectional with backed return at stair/piano end,
+two oatmeal chairs at the window wall, and a 9 x 12 ft charcoal/taupe
+textured rug. Preserve mushroom practical upholstery, fireplace and
+open center without coffee table. Five sectional planning places exclude
+shared corner; two chairs bring provisional capacity to seven.
+Retain piano for now rather than invent a hall location; tucked bench
+clears return by only 15.6 in, so playing/pullout and occupied access
+remain unresolved. Main hall stays outside furniture/rug. Confirm product
+fit, fireplace separation and non-slip low-pile rug. Supersedes chaise-only
+and no-rug direction; piano relocation is not yet approved or implemented.
+
+## Enlarge photo sofa - October 25
+
+Replace undersized 90 x 63 in chaise study with 114 in width, four cushions
+and 68 in overall chaise depth. Keep sofa center, single chair, piano and
+end table fixed. Five planning seats; no six-person comfort claim.
+Chair-end gap is 13.8 in, not a passage; main hall remains clear.
+Actual product, circulation and fireplace heat clearances require review.
+
+## Single-chaise sofa photo layout - October 25
+
+Implement photo layout as a single-chaise mushroom sofa plus one oatmeal
+chair, facing the current fireplace rather than blocking it as in the photo.
+Use the 90 in sofa with a 24 in chaise extension at its window/dining end,
+63 in total depth. Keep first chair (4.25,10.2), piano and end table/lamp;
+remove the second chair. Four lounge planning positions, not five/six.
+Do not revive cream upholstery, coffee table, rug or removed cabinets without
+owner direction. Product fit, occupied access and heat clearances unverified.
+
+## Consistent photo-reference Craftsman window trim - October 25
+
+Match white flat sides and layered header/cap in the owner's reference on
+all interior windows. Existing shared casing already supplies the profile
+on both floors; replace the kitchen bank's slim sides/header with matching
+3.5 in sides and 5.5 in header, bead and cap. Preserve inset ordinary sills
+and quartz kitchen ledge as earlier owner requirements, plus all window
+types, grids and joined outer surrounds. Kitchen trim top is 101.625 in;
+verify actual joinery, fixtures and product installation.
+
 ## Move one chair to dining-side gap - October 25
 
 Move the second existing oatmeal chair from (8.45,10.2) to (11,10.8),

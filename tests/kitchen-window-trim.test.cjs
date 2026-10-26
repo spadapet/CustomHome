@@ -45,7 +45,7 @@ function build() {
 
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `${a} should equal ${b}`);
 
-test('three joined kitchen units share one slim header and sill without bulky caps or apron', () => {
+test('three joined kitchen units share Craftsman header and cap while retaining quartz ledge', () => {
   const { context, frames, parts } = build();
   assert.equal(frames.length, 3);
   frames.forEach((frame, index) => {
@@ -58,16 +58,17 @@ test('three joined kitchen units share one slim header and sill without bulky ca
     assert.equal(frame[9].casing, false);
     assert.equal(frame[9].picture, spec.picture);
   });
-  for (const name of ['White casing header', 'White casing projecting cap', 'White window apron', 'Kitchen window flat intermediate casing']) {
+  for (const name of ['White window apron', 'Kitchen window flat intermediate casing']) {
     assert.equal(parts.filter((part) => part.name === name).length, 0, name);
   }
-  assert.equal(parts.filter((part) => part.name === 'Slim kitchen window head edging').length, 1);
-  close(parts.find((part) => part.name === 'Slim kitchen window head edging').w * 12, 92.25);
+  for (const name of ['White casing header', 'White casing header bead', 'White casing projecting cap']) assert.equal(parts.filter((part) => part.name === name).length, 1);
+  close(parts.find((part) => part.name === 'White casing header').w * 12, 97.25);
+  close(parts.find((part) => part.name === 'White casing projecting cap').userData.top * 12, 101.625);
   assert.equal(parts.filter((part) => part.name === 'Quartz plant window sill').length, 1);
   const sill = parts.find((part) => part.name === 'Quartz plant window sill');
   close(sill.h * 12, 0.75);
   close(sill.d * 12, 3.5);
-  close(sill.w * 12, 93.25);
+  close(sill.w * 12, 98.25);
   assert.equal(sill.material, context.kitchenSillQuartz);
 });
 
@@ -76,10 +77,10 @@ test('only two outer side boards surround the bank and joined unit frames have n
   const boards = parts.filter((part) => part.name === 'Slim kitchen window side edging');
   assert.equal(boards.length, 2);
   boards.forEach((board) => {
-    close(board.w * 12, 1);
-    close(board.d * 12, 0.5);
+    close(board.w * 12, 3.5);
+    close(board.d * 12, 0.75);
     close(board.userData.bottom, 53 / 12);
-    close(board.userData.top, 95 / 12);
+    close(board.userData.top, (95 + 0.125) / 12);
     assert.equal(board.material, context.windowTrim);
   });
   for (let index = 0; index < 2; index++) {
