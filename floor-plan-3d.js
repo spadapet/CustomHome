@@ -3193,24 +3193,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(mudCoats, x, 5.72, -0.05, 0.03, 0.34, 0.03, brass).name = 'Mudroom coat hanger';
   }
   const mudDoorWidth = 32 / 12;
-  for (const side of [-1, 1]) box(mudCoats, side * (mudCoatWidth + mudDoorWidth) / 4, 4, 1.01, (mudCoatWidth - mudDoorWidth) / 2, 8, 0.08, windowTrim).name = 'Mudroom closet door jamb';
-  box(mudCoats, 0, (8 + mudStorageTop) / 2, 1.01, mudCoatWidth, mudStorageTop - 8, 0.08, windowTrim).name = 'Mudroom closet headwall';
-  for (const side of [-1, 1]) {
-    const bifold = new THREE.Group();
-    bifold.name = `Mudroom ${side < 0 ? 'left' : 'right'} bifold door`;
-    bifold.position.set(side * mudDoorWidth / 2, 4, 1.015);
-    const rotationSign = -side;
-    bifold.userData = { interactiveHouseDoor: { operation: 'bifold', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: rotationSign } };
-    mudCoats.add(bifold);
-    const panelWidth = mudDoorWidth / 4 - 0.015;
-    const innerPanel = new THREE.Group();
-    innerPanel.position.x = -side * (panelWidth + 0.015);
-    bifold.add(innerPanel);
-    singlePanelDoor(bifold, -side * (panelWidth + 0.015) / 2, 0, 0, panelWidth, 7.96, 0.06, windowTrim).name = 'Mudroom standard bifold door panel';
-    singlePanelDoor(innerPanel, -side * panelWidth / 2, 0, 0, panelWidth, 7.96, 0.06, windowTrim).name = 'Mudroom standard bifold door panel';
-    bifold.userData.interactiveHouseDoor.foldPanel = innerPanel;
-    cylinder(innerPanel, 0, -0.8, 0.09, 0.05, 0.08, brass).name = 'Mudroom closet gold knob';
-  }
+  for (const side of [-1, 1]) box(mudCoats, side * (mudCoatWidth + mudDoorWidth) / 4, 4, 1.01, (mudCoatWidth - mudDoorWidth) / 2, 8, 0.08, mudCaseFinish).name = 'Mudroom closet door jamb';
+  box(mudCoats, 0, (8 + mudStorageTop) / 2, 1.01, mudCoatWidth, mudStorageTop - 8, 0.08, mudCaseFinish).name = 'Mudroom closet headwall';
+  mudCoats.userData.doorStyle = 'Nominal 32-inch hinged interior closet door, 96 inches tall, shown closed; product unselected';
+  const mudClosetHinge = new THREE.Group();
+  mudClosetHinge.name = 'Mudroom single hinged closet door';
+  mudClosetHinge.position.set(-mudDoorWidth / 2, 4, 1.015);
+  mudClosetHinge.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: -1 }, swingClearanceVerified: false };
+  mudCoats.add(mudClosetHinge);
+  singlePanelDoor(mudClosetHinge, mudDoorWidth / 2, 0, 0, mudDoorWidth - 0.04, 7.96, 1.375 / 12, mudCaseFinish).name = 'Mudroom standard hinged closet door panel';
+  cylinder(mudClosetHinge, mudDoorWidth - 0.2, -0.8, 0.12, 0.05, 0.08, brass).name = 'Mudroom closet gold knob';
 
   function mudroomShoeCell(parent, x, y, width, depth, nextShelf, envelope, zone) {
     const cell = new THREE.Group();

@@ -1,5 +1,20 @@
 # Ground-floor plan reference
 
+## Mudroom closet paint matches cabinets - October 25
+
+Use the exact mudroom casework material (#E6DECE) on the single hinged
+closet leaf, jambs and headwall, overriding white-trim finish for this closet
+only. Keep garage entry and other interior doors white. Night shading can
+darken appearance; this is shared paint/material, not a lighting change.
+
+## Mudroom single closet door - October 25
+
+Replace coat-closet bifold with one nominal 32 x 96 in white single-panel
+hinged interior leaf. Keep opening, closet, shelves and rail unchanged.
+Left jamb hinge opens outward into mudroom to 90 degrees, closed by default.
+Full 32 in sweep occupies the closet approach; verify adjacent storage,
+occupied circulation, retrieval and selected-product jamb/rough opening.
+
 ## Seating moved back from built-ins - October 25
 
 Shift the complete living seating group and rug 18 in east, away from

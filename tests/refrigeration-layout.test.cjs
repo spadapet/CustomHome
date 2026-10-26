@@ -177,7 +177,7 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
 
 test('modeled room doors and exterior overhead leaves carry click-operation metadata', () => {
   assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 115/);
-  assert.match(source, /interactiveHouseDoor: \{ operation: 'bifold', openAngleDegrees: 0, maxAngleDegrees: 90/);
+  assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90/);
   assert.match(source, /bathroomPocketDoor\.userData\.interactiveHouseDoor = \{ operation: 'sliding', open: false, closedCenterX:/);
   assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 180/);
   assert.match(exteriorSource, /interactiveHouseDoor: \{ operation: 'overhead', open: false, maxAngleDegrees: 90/);

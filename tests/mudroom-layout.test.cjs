@@ -351,9 +351,9 @@ test('conventional enclosed coat closet has a transverse rail and standard bifol
   assert.equal(closet.userData.depthInches, 24);
   assert.equal(closet.userData.doorHeightInches, 96);
   assert.equal(closet.userData.railOrientation, 'Side to side');
-  assert.match(closet.userData.doorStyle, /32-inch bifold/);
-  assert.equal(model.find('Mudroom standard bifold door panel').length, 4);
-  for (const leaf of model.find('Mudroom standard bifold door panel')) {
+  assert.match(closet.userData.doorStyle, /32-inch hinged/);
+  assert.equal(model.find('Mudroom standard hinged closet door panel').length, 1);
+  for (const leaf of model.find('Mudroom standard hinged closet door panel')) {
     assert.equal(leaf.userData.height, 7.96);
     assert.ok(Math.abs((bounds(leaf).min[1] + bounds(leaf).max[1]) / 2 - 4) < 1e-9, 'Interactive leaves remain centered four feet above the floor');
   }
@@ -666,9 +666,8 @@ test('mudroom contrast palette separates shelf backs, casework and both door typ
   const binParts = ['Arrival basket bottom', 'Arrival basket side', 'Arrival basket face'];
   for (const [names, finish, color] of [
     [ivoryParts, 'Off-white mudroom casework', '#e6dece'],
-    [surroundParts, 'White interior window trim', '#faf9f5'],
+    [surroundParts, 'Off-white mudroom casework', '#e6dece'],
     [backingParts, 'Warm painted mudroom backing', '#e6dece'],
-    [['Interior door single recessed field'], 'White interior window trim', '#faf9f5'],
     [binParts, 'Natural woven mudroom baskets', '#b89a70']
   ]) {
     for (const name of names) {
@@ -680,13 +679,14 @@ test('mudroom contrast palette separates shelf backs, casework and both door typ
       }
     }
   }
-  for (const [name, count] of [['Mudroom closet door jamb', 2], ['Mudroom closet headwall', 1], ['Mudroom standard bifold door panel', 4]]) {
+  for (const [name, count] of [['Mudroom closet door jamb', 2], ['Mudroom closet headwall', 1], ['Mudroom standard hinged closet door panel', 1]]) {
     const parts = model.find(name);
     assert.equal(parts.length, count);
-    assert.ok(parts.every((part) => name === 'Mudroom standard bifold door panel' ? part.children.every((mesh) => mesh.material.name === 'White interior window trim') : part.material.name === 'White interior window trim'));
+    const caseMaterial = model.find('Mudroom cubby partition')[0].material;
+    assert.ok(parts.every((part) => name === 'Mudroom standard hinged closet door panel' ? part.children.every((mesh) => mesh.material === caseMaterial) : part.material === caseMaterial));
   }
   const recessed = model.find('Interior door single recessed field');
-  assert.equal(recessed.length, 5);
+  assert.equal(recessed.length, 2);
   assert.equal(model.find('Mudroom bifold recessed panel').length, 0);
   const wood = model.all.filter((part) => ['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish'].includes(part.material?.name));
   assert.equal(wood.length, 0, 'Mudroom recoloring replaces local material assignments, not shared kitchen finishes');
@@ -706,13 +706,13 @@ test('finish colors provide measurable shelf/background and name/background sepa
   const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
   const casework = model.find('Mudroom cubby partition')[0].material;
   const backing = model.find('Continuous mudroom cubby backing')[0].material;
-  const closet = model.find('Mudroom standard bifold door panel')[0].children[0].material;
+  const closet = model.find('Mudroom standard hinged closet door panel')[0].children[0].material;
   const entry = model.find('Solid mudroom garage door panel')[0].children[0].material;
   assert.equal(casework.color, '#e6dece');
   assert.equal(backing.color, casework.color, 'Backs match all painted cabinetry');
-  assert.equal(closet.color, '#faf9f5');
+  assert.equal(closet.color, casework.color);
   assert.equal(backing.map, undefined, 'Painted backs no longer use exposed wood grain');
-  assert.equal(entry.color, closet.color, 'Doors match the surrounding trim');
+  assert.equal(entry.color, '#faf9f5', 'Garage entry retains white interior trim finish');
   for (const owner of ['Peter', 'Lila', 'Jacob', 'Ada', 'Lucas']) {
     const nameColor = model.find(`Mudroom decorative name: ${owner}`)[0].material.map.image.context.texts[0].color;
     assert.ok(contrast(nameColor, backing.color) >= 4.5, `${owner}'s name remains readable against the deeper backing`);
@@ -782,13 +782,13 @@ test('only opted-in painted boxes get tiny eased edges within their unchanged en
 
 test('solid interior leaves have one genuinely recessed field and match trim on both faces', () => {
   const model = buildMudroom();
-  const leaves = [...model.find('Mudroom standard bifold door panel'), ...model.find('Solid mudroom garage door panel')];
-  assert.equal(leaves.length, 5);
+  const leaves = [...model.find('Mudroom standard hinged closet door panel'), ...model.find('Solid mudroom garage door panel')];
+  assert.equal(leaves.length, 2);
   for (const leaf of leaves) {
     const field = leaf.children.filter((part) => part.name === 'Interior door single recessed field');
     assert.equal(field.length, 1);
     const material = leaf.children[0].material;
-    assert.equal(material.color, '#faf9f5');
+    assert.equal(material.color, leaf.name === 'Mudroom standard hinged closet door panel' ? '#e6dece' : '#faf9f5');
     assert.ok(leaf.children.every((part) => part.material === material));
     assert.ok(field[0].d < leaf.userData.depth, 'Panel is recessed on both faces, not applied over a solid slab');
     const bottom = leaf.children.find((part) => part.name === 'Interior door bottom rail');

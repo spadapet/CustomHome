@@ -1,5 +1,19 @@
 # Ground-floor design context
 
+## Closet cabinet-color exception - October 25
+
+Owner requests the mudroom hinged closet door match cabinets, not white
+interior trim. Reuse mudCaseFinish (#E6DECE) on all leaf components and its
+surround, preserving texture/roughness as well as color. Other doors and
+lighting stay unchanged. Keep 32 x 96 in nominal door and closed default.
+
+## Standard mudroom closet door - October 25
+
+Interpret pictured four-panel doors as mudroom coat closet. Replace bifold
+with a single 32 x 96 in hinged white interior door, one tall recessed panel.
+Keep opening and storage. Closed default, left-hinged outward 90-degree
+swing; operating space and adjacent storage use remain unverified.
+
 ## Pull living seating back 18 inches - October 25
 
 Owner requests 1-2 ft more distance from fireplace built-ins. Shift the
