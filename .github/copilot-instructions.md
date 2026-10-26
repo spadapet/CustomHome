@@ -20,6 +20,12 @@ before changing a layout. Room pages describe the owner's requirements.
 - Keep cabinetry, fixtures, trim, floor elevations, visibility and inspection
   views consistent. A feature hidden by a camera or floor finish is not
   necessarily missing geometry.
+- Always use standard cabinet sizes commonly available from most vendors.
+  Fit fixed runs with separate fillers/scribes, not odd-width cabinet boxes.
+  Appliance cutouts and mounting heights still require selected-product review.
+  Keep the combi/steam oven and microwave low enough for the owner to reach;
+  do not raise them without approval. Show the prep dishwasher with an exposed
+  appliance front, not a cabinet panel concealing it.
 - Preserve the owner's default door poses after temporary swing checks.
   Keep the dining patio door closed by default; verify its sweep separately.
 - All doors are 8 feet tall (96 inches) throughout the home. This owner
