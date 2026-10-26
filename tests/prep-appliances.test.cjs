@@ -277,7 +277,7 @@ test('exterior prep openings match the furnished windows and the picture pane ha
   const helperEnd = exterior.indexOf('  function wall(', helperStart);
   assert.ok(helperStart >= 0 && helperEnd > helperStart);
   vm.runInNewContext(exterior.slice(helperStart, helperEnd) + '\nwindowUnit(new THREE.Group(), 8.1, 4.25, 5, 3.5, false, true);', {
-    THREE: { Group }, glass: {}, privacyGlass: {}, windowBlack: {},
+    THREE: { Group }, glass: {}, privacyGlass: {}, windowBlack: {}, trim: {},
     box(parent, x, y, z, w, h, d) { const part = { x, y, z, w, h, d }; parts.push(part); return part; }
   });
   assert.equal(parts.filter(part => part.x === 0 && part.w === 0.1 && part.h === 3.5 && part.d === 0.08).length, 0, 'Exterior picture glazing is uninterrupted too');

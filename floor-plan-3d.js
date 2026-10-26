@@ -1175,8 +1175,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const glass = new THREE.MeshStandardMaterial({ color: '#b3cad0', roughness: 0.15, metalness: 0.15, transparent: true, opacity: 0.52 });
   const privacyGlass = new THREE.MeshStandardMaterial({ color: '#e0e8e4', roughness: 1, metalness: 0 });
   privacyGlass.name = 'Obscured lower-half bathroom glazing - privacy concept';
-  const windowExterior = mat('#181818');
-  windowExterior.name = 'Andersen Black exterior - screen approximation';
+  const windowExterior = windowTrim;
   function windowFrame(name, x, z, width, height, sill, rotation = 0, parent = scene, interiorSide = 1, options = {}) {
     const frame = new THREE.Group();
     frame.name = name;
@@ -1184,7 +1183,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     frame.rotation.y = rotation;
     const picture = options.picture === true;
     const fixed = options.fixed === true || picture;
-    const exteriorFinish = options.whiteExterior ? 'White' : 'Black';
+    const exteriorFinish = 'White';
     const exteriorMaterial = options.whiteExterior ? windowTrim : windowExterior;
     // Group large openings without claiming these concept dimensions are catalog sizes.
     const columns = fixed ? 1 : Math.ceil(width / 3);
@@ -1509,7 +1508,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   referenceLounge.userData = {
     planningSeats: 5, sofaPlanningSeats: 3, guestChairs: 2, comfortVerified: false, productSelected: false,
     sofas: [{ x: 10.8, z: livingCenterZ, w: 7.5, d: 3.25, seats: 3, rotation: -Math.PI / 2 }],
-    chairs: [{ x: 4.25, z: 10.2, rotation: 0 }, { x: 8.45, z: 10.2, rotation: 0 }],
+    chairs: [{ x: 4.25, z: 10.2, rotation: 0 }, { x: 11, z: 10.8, rotation: -Math.PI / 4 }],
     endTable: { w: 16 / 12, d: 16 / 12, h: 22 / 12 }
   };
   scene.add(referenceLounge);
@@ -1601,8 +1600,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const referenceEndTable = new THREE.Group();
   referenceEndTable.name = 'Reference small oak end table between chairs';
   const endTableDetails = referenceLounge.userData.endTable;
-  const [firstChair, secondChair] = referenceLounge.userData.chairs;
-  referenceEndTable.position.set((firstChair.x + secondChair.x) / 2, 0, (firstChair.z + secondChair.z) / 2);
+  referenceEndTable.position.set(6.35, 0, 10.2);
   referenceEndTable.userData = { ...endTableDetails, productSelected: false, stabilityVerified: false };
   box(referenceEndTable, 0, endTableDetails.h - 0.05, 0, endTableDetails.w, 0.1, endTableDetails.d, oak, true).name = 'Reference end table eased oak top';
   for (const x of [-0.48, 0.48]) for (const z of [-0.48, 0.48]) {

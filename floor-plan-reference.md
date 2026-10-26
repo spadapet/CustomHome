@@ -1,5 +1,32 @@
 # Ground-floor plan reference
 
+## Split living chair placement - October 25
+
+Move only the second oatmeal chair to (11,10.8) ft, rotation -45 degrees,
+in the dining-side gap before the sofa. Retain first chair (4.25,10.2),
+end table/lamp (6.35,10.2), sofa and piano. Five lounge positions remain.
+Rotated chair envelope ends at x = 12.856, outside the main hall strip
+starting x = 13.25; sofa-end separation is about 12.8 in, not a through-route.
+Occupied dining pullout, comfort and circulation remain unverified.
+This supersedes the paired-window-chair placement below.
+
+## White exterior windows throughout - October 25
+
+Use white exterior window frames, sash and perimeter trim on every elevation,
+including joined-bank headers/sills and garage clerestories. Supersedes
+Black exterior window specifications below. Keep white interiors, existing
+grilles, openings, operations and inset interior sills unchanged. Match
+selected manufacturer finishes to physical samples; no product approval.
+
+## Cream queen brick selected - October 25
+
+Use cream queen-size face brick across exterior walls, gables and brick
+closures, retaining warm gray-beige mortar. Viewer face modules are nominal
+8 x 3.125 in including joints, approximately 5.76 bricks/sq ft.
+Preliminary 4,640 sq ft veneer allowance implies about 29,400 bricks with
+10% waste; budgeting only, not an order. Manufacturer dimensions, samples,
+final exposed areas, coursing, lintels, ties and support require confirmation.
+
 ## Dining garden window interior face - October 25
 
 Correct the east/garden-facing dining casements so the white interior

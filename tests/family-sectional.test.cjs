@@ -115,8 +115,8 @@ test('family L sectional has five full cushions without counting its corner and 
     const { sofas, chairs, endTable } = lounge.userData;
     const tableGroup = lounge.children.find((part) => part.name === 'Reference small oak end table between chairs');
     assert.ok(tableGroup);
-    assert.equal(tableGroup.position.x, (chairs[0].x + chairs[1].x) / 2);
-    assert.equal(tableGroup.position.z, (chairs[0].z + chairs[1].z) / 2);
+    assert.equal(tableGroup.position.x, 6.35);
+    assert.equal(tableGroup.position.z, 10.2);
     assert.equal(endTable.w * 12, 16);
     assert.equal(endTable.d * 12, 16);
     assert.equal(endTable.h * 12, 22);
@@ -130,10 +130,11 @@ test('family L sectional has five full cushions without counting its corner and 
       assert.equal(sofa.d * 12, 39);
     }
     assert.equal(chairs.length, 2);
-    for (const chair of chairs) {
-      assert.equal(chair.rotation, 0, 'Chairs face into the room from the window wall');
-      assert.equal(chair.z, 10.2);
-    }
+    assert.equal(chairs[0].rotation, 0);
+    assert.equal(chairs[0].z, 10.2);
+    assert.equal(chairs[1].x, 11);
+    assert.equal(chairs[1].z, 10.8);
+    assert.equal(chairs[1].rotation, -Math.PI / 4);
     const envelopes = [...sofas, ...chairs.map((chair) => ({ ...chair, w: 2.5, d: 2.75 })), { ...endTable, x: tableGroup.position.x, z: tableGroup.position.z, rotation: 0 }].map((part) => {
       const w = Math.abs(Math.cos(part.rotation)) * part.w + Math.abs(Math.sin(part.rotation)) * part.d;
       const d = Math.abs(Math.sin(part.rotation)) * part.w + Math.abs(Math.cos(part.rotation)) * part.d;
@@ -150,7 +151,7 @@ test('family L sectional has five full cushions without counting its corner and 
     }
     assert.ok(Math.abs((envelopes[0].minZ - envelopes[1].maxZ) * 12 - 25.8) < 0.001);
     assert.ok(Math.abs((envelopes[3].minX - envelopes[1].maxX) * 12 - 2.2) < 0.001);
-    assert.ok(Math.abs((envelopes[2].minX - envelopes[3].maxX) * 12 - 2.2) < 0.001);
+    assert.ok((envelopes[0].minZ - envelopes[2].maxZ) * 12 > 12, 'Moved chair stays clear of the sofa end');
     assert.doesNotMatch(source.slice(source.indexOf('  const referenceLounge ='), source.indexOf('  const familySectional =')), /referenceSectional|referenceLamp/);
     vm.runInContext(source.slice(source.indexOf('  const livingLayouts ='), source.indexOf('  const tableX =')), context);
     assert.equal(vm.runInContext('livingLayouts[0].id', context), 'reference-lounge');

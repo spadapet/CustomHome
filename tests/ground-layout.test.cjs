@@ -414,7 +414,7 @@ test('one standard-size powder window cuts the west wall and retains half-froste
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
   vm.runInNewContext(source.slice(source.indexOf('  function windowFrame('), source.indexOf('  const livingWindowBank =')), context);
   const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-  const exteriorContext = { ...context, glass: {}, privacyGlass: {}, windowBlack: {} };
+  const exteriorContext = { ...context, glass: {}, privacyGlass: {}, windowBlack: {}, trim: {} };
   vm.runInNewContext(exterior.slice(exterior.indexOf('  function windowUnit('), exterior.indexOf('  function wall(')), exteriorContext);
   for (const window of entry.windows) {
     assert.deepEqual(westWall[5].find((opening) => Math.abs(westWall[2] + (opening[0] + opening[1]) / 2 - window.z) < 1e-9),

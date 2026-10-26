@@ -1,5 +1,31 @@
 # Ground-floor design context
 
+## Move one chair to dining-side gap - October 25
+
+Move the second existing oatmeal chair from (8.45,10.2) to (11,10.8),
+turned -45 degrees toward the seating group. Do not add a sixth seat.
+Keep first chair, end table/lamp, sofa, piano and windows unchanged.
+The rotated chair clears the main hall strip and does not overlap the sofa;
+the roughly 12.8 in sofa-end gap is not a walking route. Verify occupied
+circulation and dining-chair pullout; older paired-chair notes are superseded.
+
+## White window trim all around - October 25
+
+Owner replaces black side/rear exterior window finishes with white on all
+elevations, including sash, frames and continuous bank trim/sills. Coordinate
+exterior and furnished model; retain white interiors, grille locations and
+window geometry. Dark cameras, light fixtures and door hardware stay unchanged.
+Earlier Black exterior window notes are superseded; confirm physical samples.
+
+## Cream queen exterior brick - October 25
+
+Owner selects cream queen-size face brick, replacing the smaller-format
+appearance. Keep cream variation and warm gray-beige mortar. Model an
+8 x 3.125 in nominal face module including joints on walls and gables.
+No roof, opening, wall thickness or layout changes. About 29,400 bricks
+including 10% waste is preliminary budgeting only; verify selected-product
+dimensions, outdoor samples, final takeoff and veneer construction details.
+
 ## Dining window face correction - October 25
 
 The garden-facing dining window had reversed interior/exterior sides.

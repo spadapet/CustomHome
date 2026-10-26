@@ -49,7 +49,7 @@ test('brick texture uses cream variations and contrasting warm mortar with the o
   assert.ok(fills.slice(1).every((fill) => fill.bounds[2] === 60 && fill.bounds[3] === 28));
 });
 
-test('front windows receive white grids without changing side/rear windows', () => {
+test('all exterior windows use white trim while grilles remain front-only', () => {
   const meshes = [];
   class Group {
     constructor() { this.userData = {}; this.position = { set() {} }; }
@@ -64,12 +64,18 @@ test('front windows receive white grids without changing side/rear windows', () 
   meshes.length = 0;
   vm.runInContext('windowUnit(new THREE.Group(), 6, 3, 6, 5)', context);
   assert.equal(meshes.filter((mesh) => /grille/.test(mesh.name ?? '')).length, 0);
+  assert.ok(meshes.filter((mesh) => mesh.material && mesh.material !== context.glass).every((mesh) => mesh.material === context.trim));
+  assert.match(source, /exteriorTrim: 'White'/);
+  const viewer = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  assert.match(viewer, /const windowExterior = windowTrim;/);
+  assert.match(viewer, /const exteriorFinish = 'White';/);
 });
 
 test('reference elevation uses fixed brick without an optional finish control', () => {
   const repeats = [];
   const frontBrick = { clone() { return {}; }, map: { clone() { return { repeat: { set(...values) { repeats.push(values); } } }; } } };
   const context = { frontBrick, box(parent, x, y, z, w, h, d, material) { return { material }; } };
+  vm.runInNewContext(source.slice(source.indexOf('  const brickTextureWidthFeet ='), source.indexOf('  group.userData.brickFormat =')) + '\nglobalThis.brickTextureWidthFeet = brickTextureWidthFeet; globalThis.brickTextureHeightFeet = brickTextureHeightFeet;', context);
   vm.createContext(context);
   const start = source.indexOf('  function brickBox(');
   const end = source.indexOf('  function texturedBox(', start);
@@ -77,7 +83,7 @@ test('reference elevation uses fixed brick without an optional finish control', 
   const base = vm.runInContext('brickBox({}, 0, 0, 0, 6, 1, 0.45)', context);
   assert.equal(base.name, 'Cream exterior brick masonry');
   assert.ok(base.material.map);
-  assert.deepEqual(repeats, [[2.25, 1 / 1.75]]);
+  assert.deepEqual(repeats, [[2.25, 12 / 25]]);
   assert.doesNotMatch(source, /setFrontBrick|frontBrickEnabled|Optional front brick/);
   assert.doesNotMatch(fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8'), /front-brick-toggle/);
 });
@@ -102,11 +108,11 @@ test('brick cladding fills every wall orientation without siding or limestone ba
 });
 
 test('brick gables and tapered closures use the same physical course scale', () => {
-  const context = { THREE: { Float32BufferAttribute: class { constructor(array) { this.array = array; } } } };
+  const context = { brickTextureWidthFeet: 8 / 3, brickTextureHeightFeet: 25 / 12, THREE: { Float32BufferAttribute: class { constructor(array) { this.array = array; } } } };
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  function brickFaceUVs('), source.indexOf('  function texturedBox(')), context);
   const attributes = {};
-  const geometry = { attributes: { position: { count: 2, getX: (index) => index * 8 / 3, getY: (index) => index * 1.75, getZ: (index) => index * 16 / 3 } }, setAttribute(name, attribute) { attributes[name] = attribute; } };
+  const geometry = { attributes: { position: { count: 2, getX: (index) => index * 8 / 3, getY: (index) => index * 25 / 12, getZ: (index) => index * 16 / 3 } }, setAttribute(name, attribute) { attributes[name] = attribute; } };
   context.geometry = geometry;
   vm.runInContext('brickFaceUVs(geometry)', context);
   assert.deepEqual(Array.from(attributes.uv.array), [0, 0, 1, 1]);

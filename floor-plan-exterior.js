@@ -104,6 +104,9 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   baseStone.map = stoneTexture;
   const roofTexture = surfaceTexture(true);
   const porchColumnFinish = mat('#f4f1e9', 0.95);
+  const brickTextureWidthFeet = 8 / 3;
+  const brickTextureHeightFeet = 25 / 12;
+  group.userData.brickFormat = 'Cream queen face brick; nominal 8 x 3.125 inch face module including mortar';
   const frontBrick = (() => {
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 256;
@@ -123,7 +126,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   function brickBox(parent, x, y, z, w, h, d) {
     const brick = frontBrick.clone();
     brick.map = frontBrick.map.clone();
-    brick.map.repeat.set(Math.max(w, d) / (8 / 3), h / 1.75);
+    brick.map.repeat.set(Math.max(w, d) / brickTextureWidthFeet, h / brickTextureHeightFeet);
     const mesh = box(parent, x, y, z, w, h, d, brick);
     mesh.name = 'Cream exterior brick masonry';
     return mesh;
@@ -131,7 +134,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   function brickFaceUVs(geometry, axis = 'x') {
     const positions = geometry.attributes.position;
     const uv = [];
-    for (let index = 0; index < positions.count; index++) uv.push((axis === 'x' ? positions.getX(index) : positions.getZ(index)) / (8 / 3), positions.getY(index) / 1.75);
+    for (let index = 0; index < positions.count; index++) uv.push((axis === 'x' ? positions.getX(index) : positions.getZ(index)) / brickTextureWidthFeet, positions.getY(index) / brickTextureHeightFeet);
     geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   }
   function texturedBox(parent, x, y, z, w, h, d, roof = false) {
@@ -141,9 +144,9 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   }
   function windowUnit(parent, center, sill, width, height, privacyLowerHalf = false, picture = false, perimeterTrim = true, front = false) {
     const frame = new THREE.Group();
-    frame.name = front ? 'Front white-trimmed gridded window' : 'Exterior black-trimmed concept window';
-    frame.userData = { exteriorTrim: front ? 'White' : 'Black', interiorTrimUnchanged: true, frontGrid: front };
-    const windowFinish = front ? trim : windowBlack;
+    frame.name = front ? 'Front white-trimmed gridded window' : 'Exterior white-trimmed concept window';
+    frame.userData = { exteriorTrim: 'White', interiorTrimUnchanged: true, frontGrid: front };
+    const windowFinish = trim;
     if (picture) frame.userData.operation = 'fixed picture window';
     if (privacyLowerHalf) Object.assign(frame.userData, { room: 'Powder room', privacyLowerHalf: true, privacyVerified: false });
     frame.position.set(center, sill, 0.25);
@@ -187,8 +190,8 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
       fill(center - width / 2, center + width / 2, sill + height, top);
       if (opening.units) {
         for (const unit of opening.units) windowUnit(wallGroup, center + opening.bankX - unit.x, unit.sill, unit.width, unit.height, false, unit.picture, false);
-        box(wallGroup, center, opening.frameSill - 0.13, 0.3, opening.frameWidth + 0.65, 0.22, 0.45, windowBlack).name = `${opening.trimLabel ?? 'Prep'} bank continuous exterior sill`;
-        box(wallGroup, center, opening.frameSill + opening.frameHeight + 0.2, 0.28, opening.frameWidth + 0.65, 0.3, 0.3, windowBlack).name = `${opening.trimLabel ?? 'Prep'} bank continuous exterior header trim`;
+        box(wallGroup, center, opening.frameSill - 0.13, 0.3, opening.frameWidth + 0.65, 0.22, 0.45, trim).name = `${opening.trimLabel ?? 'Prep'} bank continuous exterior sill`;
+        box(wallGroup, center, opening.frameSill + opening.frameHeight + 0.2, 0.28, opening.frameWidth + 0.65, 0.3, 0.3, trim).name = `${opening.trimLabel ?? 'Prep'} bank continuous exterior header trim`;
       } else if (!door) windowUnit(wallGroup, center, opening.frameSill ?? sill, opening.frameWidth ?? width, opening.frameHeight ?? height, opening.privacyLowerHalf, opening.picture, true, front);
       cursor = center + width / 2;
     }
