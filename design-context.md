@@ -1,5 +1,11 @@
 # Ground-floor design context
 
+## Continuous L-sectional back - October 25
+
+Fix missing corner back between main run and return with a matching
+33 in upholstered segment. Existing overall size and position stay fixed;
+the return is backed seating, not an open chaise.
+
 ## Closet cabinet-color exception - October 25
 
 Owner requests the mudroom hinged closet door match cabinets, not white

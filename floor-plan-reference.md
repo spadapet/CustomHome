@@ -1,5 +1,11 @@
 # Ground-floor plan reference
 
+## Sectional corner back correction - October 25
+
+Close the 33 in missing back segment between main sofa back and return.
+Match mushroom upholstery and existing back height; join both ends without
+changing the furniture footprint, seating arrangement or circulation.
+
 ## Mudroom closet paint matches cabinets - October 25
 
 Use the exact mudroom casework material (#E6DECE) on the single hinged

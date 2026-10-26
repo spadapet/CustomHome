@@ -1570,6 +1570,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const seatWidth = (details.w - 1) / details.seats;
     box(sofa, 3.425, 0.8, 4.125, 2.65, 1.2, 5, fabric, true).name = 'L sectional return base';
     box(sofa, 4.5, 1.95, 4.125, 0.5, 2.1, 5, fabric, true).name = 'L sectional return back';
+    box(sofa, 4.5, 1.95, 0.25, 0.5, 2.1, 2.75, fabric, true).name = 'L sectional continuous corner back';
     box(sofa, 3.425, 1.5, 6.375, 2.65, 1.8, 0.5, fabric, true).name = 'L sectional return end arm';
     for (const z of [2.8, 5.05]) {
       box(sofa, 3.2, 1.45, z, 2.1, 0.4, 2.2, cushion, true).name = 'L sectional return seat cushion';

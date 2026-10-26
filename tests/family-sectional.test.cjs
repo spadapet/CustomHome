@@ -94,6 +94,13 @@ test('family L sectional has five full cushions without counting its corner and 
     assert.equal(chairGroups.length, 2);
     assert.equal(sofaGroups[0].children.filter((part) => part.name === 'L sectional return base').length, 1);
     assert.equal(sofaGroups[0].userData.returnDepthInches, 99);
+    const cornerBack = sofaGroups[0].children.find((part) => part.name === 'L sectional continuous corner back');
+    const mainBack = sofaGroups[0].children.find((part) => part.name === 'Reference sofa back');
+    const returnBack = sofaGroups[0].children.find((part) => part.name === 'L sectional return back');
+    assert.equal(cornerBack.z - cornerBack.d / 2, mainBack.z + mainBack.d / 2, 'Corner back meets main back');
+    assert.equal(cornerBack.z + cornerBack.d / 2, returnBack.z - returnBack.d / 2, 'Corner back meets return without a gap');
+    assert.equal(cornerBack.y, returnBack.y);
+    assert.equal(cornerBack.h, returnBack.h);
     for (const [index, sofa] of sofaGroups.entries()) {
       assert.equal(sofa.userData.planningSeats, index === 0 ? 5 : 2);
       assert.equal(sofa.userData.comfortVerified, false);
