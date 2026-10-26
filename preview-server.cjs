@@ -52,7 +52,7 @@ function createPreviewServer({ root = __dirname } = {}) {
     '/api/ground-layout': { baseline: getGroundFloorDefaultPlan(), file: 'ground-layout.json' }
   };
   let writes = Promise.resolve();
-  const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.md': 'text/plain; charset=utf-8' };
+  const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.md': 'text/plain; charset=utf-8', '.mp4': 'video/mp4', '.vtt': 'text/vtt; charset=utf-8' };
 
   async function persist(body, { baseline, file }) {
     const layoutFile = path.join(root, file);
@@ -109,7 +109,28 @@ function createPreviewServer({ root = __dirname } = {}) {
       if (['ENOENT', 'EISDIR', 'ENOTDIR'].includes(error.code)) throw new RequestError(404, 'Preview file not found.');
       throw error;
     }
-    response.writeHead(200, { 'Content-Type': types[path.extname(resolved).toLowerCase()] ?? 'application/octet-stream', 'Content-Length': contents.length, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+    const extension = path.extname(resolved).toLowerCase();
+    const headers = { 'Content-Type': types[extension] ?? 'application/octet-stream', 'Content-Length': contents.length, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
+    let status = 200;
+    if (extension === '.mp4') {
+      headers['Accept-Ranges'] = 'bytes';
+      if (request.method === 'GET' && request.headers.range && !request.headers['if-range']) {
+        const range = /^bytes=(\d*)-(\d*)$/.exec(request.headers.range);
+        const first = range?.[1] ? Number(range[1]) : null;
+        const last = range?.[2] ? Number(range[2]) : null;
+        const start = first ?? Math.max(0, contents.length - last);
+        const end = first === null ? contents.length - 1 : Math.min(last ?? contents.length - 1, contents.length - 1);
+        if (!range || (first === null && (last === null || last === 0)) || !Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || start > end || start >= contents.length || (first !== null && !Number.isSafeInteger(first)) || (last !== null && !Number.isSafeInteger(last))) {
+          response.setHeader('Content-Range', `bytes */${contents.length}`);
+          throw new RequestError(416, 'Request one valid byte range within the video.');
+        }
+        headers['Content-Range'] = `bytes ${start}-${end}/${contents.length}`;
+        contents = contents.subarray(start, end + 1);
+        headers['Content-Length'] = contents.length;
+        status = 206;
+      }
+    }
+    response.writeHead(status, headers);
     response.end(request.method === 'HEAD' ? undefined : contents);
   }
 

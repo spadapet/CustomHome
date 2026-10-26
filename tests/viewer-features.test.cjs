@@ -206,7 +206,7 @@ test('night lighting applies to all bathrooms without prematurely selecting a sw
   assert.match(read('electrical.html'), /switch-integrated night light is a candidate, not a selected product/);
 });
 
-test('firepit returns to rear cold storage and a narrow wood rack fits beside the waste bins', () => {
+test('firepit moves to uncovered patio cold storage and the wood rack stays beside the waste bins', () => {
   class Group {
     constructor() {
       this.children = [];
@@ -224,7 +224,7 @@ test('firepit returns to rear cold storage and a narrow wood rack fits beside th
   }
   const group = new Group();
   const context = {
-    THREE: { Group, Mesh, CylinderGeometry }, group, dark: {}, stepStone: {}, wood: {},
+    THREE: { Group, Mesh, CylinderGeometry }, group, dark: {}, stepStone: {}, wood: {}, patioGrade: -1.625, livingTerraceRear: -4.325,
     box(parent, x, y, z, w, h, d, material) {
       const mesh = new Mesh({ w, h, d }, material);
       mesh.position.set(x, y, z);
@@ -237,7 +237,11 @@ test('firepit returns to rear cold storage and a narrow wood rack fits beside th
   const end = source.indexOf('  function exteriorSteps(', start);
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext(source.slice(start, end), context);
-  const firepit = group.children.find((part) => part.name === 'Portable firepit - rear-yard cold storage only');
+  const firepit = group.children.find((part) => part.name === 'Portable firepit - uncovered patio cold storage only');
+  assert.equal(firepit.position.x, -3.75);
+  assert.equal(firepit.position.y, -1.625);
+  assert.ok(Math.abs(firepit.position.z + 2.325) < 1e-9);
+  assert.ok(!group.children.some((part) => part.name === 'Rear firepit cold-storage pad, not a burn area'));
   assert.equal(firepit.userData.coldStorageOnly, true);
   assert.equal(firepit.userData.operationApproved, false);
   assert.equal(firepit.userData.useClearanceSatisfied, false);
@@ -251,7 +255,7 @@ test('firepit returns to rear cold storage and a narrow wood rack fits beside th
     const maxX = firepit.position.x + part.position.x + part.w / 2;
     const minZ = firepit.position.z + part.position.z - part.d / 2;
     const maxZ = firepit.position.z + part.position.z + part.d / 2;
-    assert.ok(minX >= 38 && maxX <= 42 && minZ >= -17 && maxZ <= -13, 'Firepit is on its rear storage pad, not the front lawn or patio');
+    assert.ok(minX > -5.855 && maxX < 0 && minZ > -4.325 && maxZ < -0.325, 'Entire firepit fits the flat uncovered patio corner, clear of the roof, graded strip and terrace edge');
     assert.ok(part.position.y - part.h / 2 >= -1e-9, 'Feet rest on paving');
   }
   const rack = group.children.find((part) => part.name === 'Side-yard firewood rack beside waste bins - clearance review required');

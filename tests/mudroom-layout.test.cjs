@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
 
-test('mudroom lighting uses a shadow-casting interior key and restores other views', () => {
+test('mudroom and kitchen lighting stay scoped and restore other floor/view settings', () => {
   class Light {
     constructor(color, intensity, distance, angle, penumbra, decay) {
       Object.assign(this, { color, intensity, distance, angle, penumbra, decay });
@@ -16,33 +16,137 @@ test('mudroom lighting uses a shadow-casting interior key and restores other vie
     }
   }
   const context = {
-    THREE: { AmbientLight: Light, PointLight: Light, SpotLight: Light },
+    THREE: { AmbientLight: Light, PointLight: Light, SpotLight: Light, DirectionalLight: Light, VSMShadowMap: 'VSM', PCFSoftShadowMap: 'PCFSoft' },
     scene: { add() {} }, renderer: { shadowMap: { enabled: false } },
-    activeFloor: 'ground', currentView: 'mudroom'
+    activeFloor: 'ground', currentView: 'mudroom', nightLighting: true,
+    updateKitchenLighting() {}, updateHomeLighting() {}, updateStairLighting() {}, updateExteriorLighting() {}
   };
   const start = source.indexOf('  const ambientLight =');
   const end = source.indexOf('  const mat =', start);
   const renderStart = source.indexOf('  function render() {');
   const renderEnd = source.indexOf('    updateVehicleDoorControls();', renderStart);
   assert.ok(start >= 0 && end > start && renderStart >= 0 && renderEnd > renderStart);
-  vm.runInNewContext(source.slice(start, end) + source.slice(renderStart, renderEnd) + '}\nglobalThis.lights = { ambientLight, mudroomKeyLight };', context);
-  const { ambientLight, mudroomKeyLight } = context.lights;
+  vm.runInNewContext(source.slice(start, end) + source.slice(renderStart, renderEnd) + '}\nglobalThis.lights = { ambientLight, mudroomKeyLight, kitchenKeyLight, studioFill };', context);
+  const { ambientLight, mudroomKeyLight, kitchenKeyLight, studioFill } = context.lights;
+  assert.equal(mudroomKeyLight.color, '#fff3e3');
+  assert.equal(mudroomKeyLight.intensity, 120);
+  assert.equal(mudroomKeyLight.shadow.radius, 4);
+  assert.equal(mudroomKeyLight.shadow.blurSamples, 12);
   assert.equal(mudroomKeyLight.castShadow, true);
   assert.equal(mudroomKeyLight.shadow.mapSize.width, 2048);
   assert.ok(mudroomKeyLight.penumbra >= 0.5);
   assert.ok(mudroomKeyLight.position.y < 9, 'Key light is inside the room, below the nominal ceiling');
-  for (const [floor, view, enabled] of [
+  for (const night of [true, false]) for (const [floor, view, enabled] of [
     ['ground', 'mudroom', true], ['ground', 'mudroom-cubbies', true], ['ground', 'mudroom-storage', true],
-    ['ground', 'kitchen', false], ['upstairs', 'upstairs', false], ['ground', 'top', false],
+    ['ground', 'kitchen', false], ['ground', 'prep-counter', false], ['ground', 'prep-kitchen', false], ['ground', 'pantry', false],
+    ['ground', 'sink-storage', false], ['ground', 'cooktop', false], ['ground', 'island', false], ['ground', 'fridge', false],
+    ['ground', 'whole', false], ['ground', 'top', false],
+    ['ground', 'walk', false], ['upstairs', 'walk', false], ['ground', 'living', false],
+    ['upstairs', 'kitchen', false], ['upstairs', 'upstairs', false], ['upstairs', 'top', false],
     ['ground', 'mudroom-cubbies', true], ['exterior', 'exterior', false]
   ]) {
     context.activeFloor = floor;
     context.currentView = view;
+    context.nightLighting = night;
     context.render();
     assert.equal(mudroomKeyLight.visible, enabled, view);
+    const kitchenLighting = floor === 'ground' && ['kitchen', 'prep-counter', 'prep-kitchen', 'pantry', 'sink-storage', 'cooktop', 'island', 'fridge'].includes(view);
+    assert.equal(kitchenKeyLight.visible, kitchenLighting, view);
     assert.equal(context.renderer.shadowMap.enabled, enabled, view);
-    assert.equal(ambientLight.intensity, enabled ? 0.85 : 2.5, view);
+    assert.equal(ambientLight.intensity, night ? 0.5 : 2.5, view);
+    assert.equal(studioFill.intensity, night ? 250 : 650, view);
+    assert.equal(context.renderer.toneMappingExposure, night ? 0.75 : 1.25, view);
+    assert.equal(context.renderer.shadowMap.type, enabled ? 'VSM' : 'PCFSoft', view);
+    if (kitchenLighting) {
+      const prep = ['prep-counter', 'prep-kitchen', 'pantry'].includes(view);
+      assert.equal(kitchenKeyLight.position.x, prep ? 40.5 : 29);
+      assert.equal(kitchenKeyLight.target.position.x, prep ? 48.5 : 35);
+      assert.notEqual(kitchenKeyLight.castShadow, true, 'Use soft screen-space contact shading rather than harsh cast silhouettes');
+      assert.ok(kitchenKeyLight.position.y < 9);
+    }
   }
+});
+
+test('menu lighting toggle defaults to Night and changes only lighting state', () => {
+  const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
+  assert.match(html, /id="toggle-night-lighting" aria-pressed="true"[^>]*disabled>Night lighting<\/button>/);
+  assert.match(source, /let nightLighting = true;/);
+  let click;
+  let renders = 0;
+  const button = { disabled: true, addEventListener(event, callback) { assert.equal(event, 'click'); click = callback; }, setAttribute(name, value) { this[name] = value; } };
+  const input = { checked: true };
+  const context = { nightLightingButton: button, islandLightsInput: input, render() { renders++; } };
+  const start = source.indexOf('  nightLightingButton.disabled = false;');
+  const end = source.indexOf('\n  });', start) + '\n  });'.length;
+  assert.ok(start >= 0 && end > start);
+  vm.runInNewContext('let nightLighting = true;\nlet daytimeIslandLights = false;\n' + source.slice(start, end), context);
+  assert.equal(button.disabled, false);
+  click();
+  assert.equal(button['aria-pressed'], 'false');
+  assert.equal(button.textContent, 'Day lighting');
+  assert.equal(input.checked, false);
+  click();
+  assert.equal(button['aria-pressed'], 'true');
+  assert.equal(button.textContent, 'Night lighting');
+  assert.equal(input.checked, true);
+  assert.equal(renders, 2);
+});
+
+test('prep inspection shows more worktop without changing the quartz finish', () => {
+  const preset = source.match(/^    'prep-counter': (.+),$/m);
+  assert.ok(preset);
+  const view = vm.runInNewContext(`(${preset[1]})`, { prepCounterZ: 8.25 });
+  assert.deepEqual(Array.from(view.target), [46.6, 4.5, 8.25]);
+  assert.deepEqual(Array.from(view.offset), [0, 1.2, 2.6]);
+  assert.equal(view.span, 14);
+  const formerTopVisibility = 0.4 / Math.hypot(0.4, 2.6);
+  const currentTopVisibility = view.offset[1] / Math.hypot(view.offset[1], view.offset[2]);
+  assert.ok(currentTopVisibility > 2.5 * formerTopVisibility, 'The downward angle shows substantially more of the horizontal worktop');
+  assert.match(source, /const countertop = new THREE\.MeshPhysicalMaterial\(\{ map: quartzTexture\(\), roughness: 0\.48, metalness: 0, clearcoat: 0\.1, clearcoatRoughness: 0\.5 \}\)/);
+  assert.match(source, /function quartzTexture\(baseColor = '#c8b99d', veinColor = 'rgba\(133, 124, 109, 0\.3\)'\)/);
+});
+
+test('interior contact shading reuses its composer and follows camera projection and viewport changes', () => {
+  class Composer {
+    constructor() { this.passes = []; this.renders = 0; this.renderTarget1 = {}; this.renderTarget2 = {}; }
+    addPass(pass) { this.passes.push(pass); }
+    setSize(width, height) { this.size = [width, height]; }
+    render() { this.renders++; }
+  }
+  class Pass {
+    constructor(scene, camera) {
+      Object.assign(this, { scene, camera });
+      this.ssaoMaterial = { defines: {}, uniforms: { cameraNear: {}, cameraFar: {} } };
+    }
+  }
+  const context = {
+    EffectComposer: Composer, RenderPass: Pass, SSAOPass: Pass, OutputPass: Pass,
+    renderer: { capabilities: { maxSamples: 8 } }, scene: {}, camera: { isPerspectiveCamera: false, near: 0.1, far: 500 },
+    viewport: { clientWidth: 900, clientHeight: 700 }
+  };
+  const start = source.indexOf('  function renderInterior() {');
+  const end = source.indexOf('  function render() {', start);
+  vm.runInNewContext('let interiorPost = null;\n' + source.slice(start, end) + '\nglobalThis.post = () => interiorPost;', context);
+  context.renderInterior();
+  const first = context.post();
+  assert.equal(first.composer.passes.length, 3);
+  assert.equal(first.composer.renderTarget1.samples, 4);
+  assert.equal(first.composer.renderTarget2.samples, 4);
+  assert.equal(first.occlusion.kernelRadius, 0.35, 'Contact shading radius is in modeled feet');
+  assert.equal(first.occlusion.ssaoMaterial.defines.PERSPECTIVE_CAMERA, 0);
+  assert.equal(first.occlusion.ssaoMaterial.uniforms.cameraFar.value, 500);
+  assert.deepEqual(first.composer.size, [900, 700]);
+  context.camera = { isPerspectiveCamera: true, near: 0.2, far: 300 };
+  context.viewport.clientWidth = 600;
+  context.renderInterior();
+  assert.equal(context.post(), first, 'No new composer or targets are created for every frame');
+  assert.equal(first.beauty.camera, context.camera);
+  assert.equal(first.occlusion.camera, context.camera);
+  assert.equal(first.occlusion.ssaoMaterial.defines.PERSPECTIVE_CAMERA, 1);
+  assert.equal(first.occlusion.ssaoMaterial.uniforms.cameraNear.value, 0.2);
+  assert.deepEqual(first.composer.size, [600, 700]);
+  assert.equal(first.composer.renders, 2);
+  assert.match(source, /if \(mudroomLighting \|\| kitchenLighting\) renderInterior\(\);\s+else renderer\.render\(scene, camera\);/);
 });
 
 function buildMudroom() {
@@ -100,11 +204,20 @@ function buildMudroom() {
   const context = {
     THREE: {
       Group, Mesh, Shape, ExtrudeGeometry,
+      DataTexture: class {
+        constructor(data, width, height) { this.image = { data, width, height }; this.repeat = { set(x, y) { Object.assign(this, { x, y }); } }; }
+      },
+      PMREMGenerator: class {
+        fromScene() { return { texture: { name: 'Local room reflections' } }; }
+        dispose() {}
+      },
+      RepeatWrapping: 'repeat', LinearMipmapLinearFilter: 'mipmaps', LinearFilter: 'linear',
       SphereGeometry: class { constructor(radius) { this.bounds = { min: [-radius, 0, -radius], max: [radius, radius, radius] }; } },
       CanvasTexture: class { constructor(image) { this.image = image; } },
       PlaneGeometry: class { constructor(width, height) { this.parameters = { width, height }; } },
       MeshBasicMaterial: class { constructor(options) { Object.assign(this, options); } }
-    }, ceilingHeight: 9,
+    }, ceilingHeight: 9, renderer: {},
+    RoomEnvironment: class { dispose() {} },
     mudroomAssets: { shoe: footwearTemplate('shoe'), bootLeft: footwearTemplate('boot'), bootRight: footwearTemplate('boot') },
     document: {
       createElement() {
@@ -112,7 +225,7 @@ function buildMudroom() {
         return { context, getContext() { return context; } };
       }
     },
-    ...Object.fromEntries(['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish', 'cream', 'brass', 'porcelain', 'steel', 'black', 'linen', 'countertop', 'mudTileFinish', 'mudGroutFinish'].map((name) => [name, { name }])),
+    ...Object.fromEntries(['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish', 'cream', 'brass', 'porcelain', 'steel', 'black', 'linen', 'countertop', 'mudTileFinish', 'mudGroutFinish'].map((name) => [name, { name, clone() { return { ...this }; } }])),
     rest: new Group(), garageEntry: { x: 39.5, z: 26.725, width: 3, height: 8 },
     furnishing(name, x, z, rotation = 0) {
       const group = new Group();
@@ -136,7 +249,8 @@ function buildMudroom() {
     mat(color, roughness) { return { color, roughness }; }
   };
   // Reuse the real front/pull geometry, including its projection into the aisle.
-  vm.runInNewContext(source.slice(source.indexOf('  function shakerFront('), source.indexOf('  function cabinetCupPull(')), context);
+  context.windowTrim = { name: 'White interior window trim', color: '#faf9f5' };
+  vm.runInNewContext(source.slice(source.indexOf('  function singlePanelDoor('), source.indexOf('  function cabinetCupPull(')), context);
   vm.runInNewContext(source.slice(source.indexOf('  function tiledFloor('), source.indexOf("  const stairs = furnishing(")), context);
   const start = source.indexOf("  tiledFloor('Mudroom tile'");
   const end = source.indexOf('  const epoxy', start);
@@ -144,7 +258,7 @@ function buildMudroom() {
   vm.runInNewContext(source.slice(start, end), context);
   const descendants = (node) => [node, ...node.children.flatMap(descendants)];
   const all = roots.flatMap(descendants);
-  return { roots, all, floorParts: context.rest.children, find: (name) => all.filter((item) => item.name === name) };
+  return { roots, all, floorParts: context.rest.children, shared: { brass: context.brass, cabinetFinish: context.cabinetFinish }, find: (name) => all.filter((item) => item.name === name) };
 }
 
 function bounds(root) {
@@ -189,9 +303,12 @@ test('five backed cubbies have side-panel hooks and unobstructed floor-level lar
   const model = buildMudroom();
   const cubbies = model.find('Mudroom family cubby');
   assert.equal(cubbies.length, 5);
-  assert.equal(model.find('Mudroom gold coat hook').length, 10);
+  assert.equal(model.find('Mudroom gold coat hook').length, 16);
   for (const cubby of cubbies) {
-    assert.equal(cubby.children.filter((part) => part.name === 'Mudroom gold coat hook').length, 2);
+    const hooks = cubby.children.filter((part) => part.name === 'Mudroom gold coat hook');
+    assert.equal(hooks.length, ['Peter', 'Lila'].includes(cubby.userData.owner) ? 2 : 4);
+    assert.equal(hooks.filter((hook) => hook.position.y === 5.55).length, 2);
+    assert.equal(hooks.filter((hook) => hook.position.y === 4.2).length, ['Peter', 'Lila'].includes(cubby.userData.owner) ? 0 : 2);
     assert.equal(cubby.children.filter((part) => part.name === 'Open cubby shoe shelf').length, 0, 'No shelf lip or intermediate shelf obstructs kicking shoes in');
     for (const hook of cubby.children.filter((part) => part.name === 'Mudroom gold coat hook')) {
       assert.equal(hook.userData.mount, 'Cubby side panel');
@@ -210,7 +327,7 @@ test('five backed cubbies have side-panel hooks and unobstructed floor-level lar
   assert.ok(model.find('Mudroom cubby partition').every((part) => part.d === seat.d && part.position.z === 0), 'Upper dividers now align with the bench front without enlarging its footprint');
   assert.ok(model.find('Mudroom upper cubby shelf').every((part) => part.d === seat.d && part.position.z === 0));
   const backing = model.find('Continuous mudroom cubby backing')[0];
-  assert.equal(backing.material.name, 'Deep olive-sage mudroom backing');
+  assert.equal(backing.material.name, 'Warm painted mudroom backing');
   assert.equal(backing.h, 8.75);
   assert.ok((seat.position.y - seat.h / 2 - 0.0405) * 12 >= 14, 'At least 14-inch actual clear height above finished tile/grout');
   assert.ok((0.75 - (backing.position.z + backing.d / 2)) * 12 >= 16, 'At least 16-inch clear shoe depth');
@@ -237,7 +354,7 @@ test('conventional enclosed coat closet has a transverse rail and standard bifol
   assert.match(closet.userData.doorStyle, /32-inch bifold/);
   assert.equal(model.find('Mudroom standard bifold door panel').length, 4);
   for (const leaf of model.find('Mudroom standard bifold door panel')) {
-    assert.equal(leaf.h, 7.96);
+    assert.equal(leaf.userData.height, 7.96);
     assert.ok(Math.abs((bounds(leaf).min[1] + bounds(leaf).max[1]) / 2 - 4) < 1e-9, 'Interactive leaves remain centered four feet above the floor');
   }
   for (const jamb of model.find('Mudroom closet door jamb')) assert.equal(jamb.h, 8);
@@ -352,12 +469,11 @@ test('decorative names sit inside cubbies on transparent backgrounds instead of 
     assert.equal(drawing.fills.length, 0, 'No rectangular background is painted');
     assert.equal(drawing.texts[0].text, cubby.userData.owner);
     assert.match(drawing.texts[0].font, /italic.*Script.*cursive/);
-    assert.equal(drawing.texts[0].color, '#fff0c8');
+    assert.equal(drawing.texts[0].color, '#493827');
     assert.equal(model.find(`Mudroom label: ${cubby.userData.owner}`).length, 0);
     assert.ok(cubby.children.filter((part) => part.name === 'Mudroom upper cubby shelf')[0].position.y === 6.35, 'First shelf line now aligns across all five cubbies');
   }
-  const safety = model.find('Mudroom label: Safe high access required')[0];
-  assert.equal(safety.material.transparent, false, 'High-access warning retains its readable background');
+  assert.equal(model.find('Mudroom label: Safe high access required').length, 0, 'Owner removed the tower sign; high-access caution stays in design notes');
 });
 
 test('daily boots and sneakers fit under the bench and shelf boots clear the shelf above', () => {
@@ -457,9 +573,9 @@ test('storage fits below the ceiling with no case overlap and keeps the entry ro
       assert.ok(a.max.some((value, axis) => value <= b.min[axis] + 0.000001 || b.max[axis] <= a.min[axis] + 0.000001), `${aPart.name} and ${bPart.name} join without positive overlap`);
     }
   }
-  assert.ok(closet.max[2] < 21.675 - (3.5 + 0.125) / 12, 'Closet clears kitchen-entry casing');
+  assert.ok(closet.max[2] < 21.175 - (3.5 + 0.125) / 12, 'Closet clears kitchen-entry casing');
   assert.ok(bench.min[0] > 42.5 + (3.5 + 0.125) / 12, 'Bench clears garage-entry casing');
-  assert.ok(closet.max[2] < 21.675 && bench.min[0] > 42.9, 'Kitchen-to-garage route remains open');
+  assert.ok(closet.max[2] < 21.175 && bench.min[0] > 42.9, 'Kitchen-to-garage route remains open');
   const entryTurningArea = { min: [39.875, 0, 21.5], max: [42.9, 6, 26.5] };
   for (const part of model.all.filter((part) => part.w !== undefined)) {
     const b = bounds(part);
@@ -481,13 +597,13 @@ test('the entire enclosed coat front has a 36-inch deep storage-free approach', 
   }
 });
 
-test('kitchen wall shifts six inches while both passage widths and garage entry location stay fixed', () => {
+test('kitchen wall stays fixed while owner-requested clear passages widen and garage entry stays fixed', () => {
   assert.ok(source.includes('const garageEntry = { x: 39.5, z: 26.725, width: 3, going: 11 / 12, height: 8 }'));
-  assert.match(source, /const kitchenSideOpenings = \[9\.725, 21\.675\]/);
+  assert.match(source, /const kitchenSideOpenings = kitchenPassages\.openings/);
   const plan = require('../floor-plan-ground.js').getGroundFloorDefaultPlan();
   const kitchen = plan.walls.find((wall) => wall[0] === 'Kitchen east');
   const garage = plan.walls.find((wall) => wall[0] === 'Mudroom south');
-  assert.deepEqual(kitchen[5][1], [14.675, 17.175, 0, 8]);
+  assert.deepEqual(kitchen[5][1], [14.175, 17.175, 0, 8]);
   assert.equal(kitchen[1], 37.5);
   assert.equal(kitchen[3], 37.5);
   assert.deepEqual(garage[5], [[2, 5, 0, 8]]);
@@ -526,7 +642,7 @@ test('prep/mudroom divider aligns with the garage wall while kitchen openings an
   assert.ok(Math.abs(prepFloors.reduce((area, floor) => area + floor.w * floor.d, 0) - 18 * 8) < 1e-9);
   assert.equal(plan.walls.find(([name]) => name === 'Mudroom south')[2], 26.9);
   assert.equal(plan.walls.find(([name]) => name === 'Kitchen north')[2], 7);
-  assert.deepEqual(plan.walls.find(([name]) => name === 'Kitchen east')[5], [[2.725, 5.225, 0, 8], [14.675, 17.175, 0, 8]]);
+  assert.deepEqual(plan.walls.find(([name]) => name === 'Kitchen east')[5], [[2.725, 5.725, 0, 8], [14.175, 17.175, 0, 8]]);
   const model = buildMudroom();
   assert.equal(model.find('Mudroom hanging coat closet')[0].position.z, 16.4);
   assert.equal(model.find('Five-cubby mudroom bench')[0].position.z, 22.85);
@@ -549,11 +665,10 @@ test('mudroom contrast palette separates shelf backs, casework and both door typ
   const surroundParts = ['Mudroom closet door jamb', 'Mudroom closet headwall'];
   const binParts = ['Arrival basket bottom', 'Arrival basket side', 'Arrival basket face'];
   for (const [names, finish, color] of [
-    [ivoryParts.concat(surroundParts), 'Soft sage mudroom casework', '#c5cdb7'],
-    [backingParts, 'Deep olive-sage mudroom backing', '#627257'],
-    [['Mudroom standard bifold door panel'], 'Warm ivory mudroom closet doors', '#dfd5c2'],
-    [['Mudroom bifold recessed panel'], 'Warm putty mudroom recessed door panels', '#b9ad95'],
-    [['Solid mudroom garage door panel'], 'Off-white mudroom entry door', '#f2eee4'],
+    [ivoryParts, 'Off-white mudroom casework', '#e6dece'],
+    [surroundParts, 'White interior window trim', '#faf9f5'],
+    [backingParts, 'Warm painted mudroom backing', '#e6dece'],
+    [['Interior door single recessed field'], 'White interior window trim', '#faf9f5'],
     [binParts, 'Natural woven mudroom baskets', '#b89a70']
   ]) {
     for (const name of names) {
@@ -568,17 +683,17 @@ test('mudroom contrast palette separates shelf backs, casework and both door typ
   for (const [name, count] of [['Mudroom closet door jamb', 2], ['Mudroom closet headwall', 1], ['Mudroom standard bifold door panel', 4]]) {
     const parts = model.find(name);
     assert.equal(parts.length, count);
-    assert.ok(parts.every((part) => part.material.name === (name === 'Mudroom standard bifold door panel' ? 'Warm ivory mudroom closet doors' : 'Soft sage mudroom casework')), `${name} uses its intended contrasting finish`);
+    assert.ok(parts.every((part) => name === 'Mudroom standard bifold door panel' ? part.children.every((mesh) => mesh.material.name === 'White interior window trim') : part.material.name === 'White interior window trim'));
   }
-  const recessed = model.find('Mudroom bifold recessed panel');
-  assert.equal(recessed.length, 8);
-  assert.ok(recessed.every((part) => part.material.name === 'Warm putty mudroom recessed door panels'), 'Recessed panels differ from the ivory leaf frames');
+  const recessed = model.find('Interior door single recessed field');
+  assert.equal(recessed.length, 5);
+  assert.equal(model.find('Mudroom bifold recessed panel').length, 0);
   const wood = model.all.filter((part) => ['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish'].includes(part.material?.name));
   assert.equal(wood.length, 0, 'Mudroom recoloring replaces local material assignments, not shared kitchen finishes');
   const seat = model.find('Mudroom light stone bench seat')[0];
   assert.equal(seat.material.name, 'countertop');
-  assert.ok(model.find('Mudroom gold coat hook').every((hook) => hook.children.every((part) => part.material.name === 'brass')));
-  assert.ok(model.find('Mudroom closet gold knob').every((part) => part.material.name === 'brass'));
+  assert.ok(model.find('Mudroom gold coat hook').every((hook) => hook.children.every((part) => part.material.name === 'Satin brass mudroom hardware')));
+  assert.ok(model.find('Mudroom closet gold knob').every((part) => part.material.name === 'Satin brass mudroom hardware'));
   assert.ok(model.find('Stored extra shoe').every((part) => part.userData.asset && part.userData.uniformScale), 'Shelf footwear is a uniformly scaled licensed asset, not flat blocks');
 });
 
@@ -591,17 +706,125 @@ test('finish colors provide measurable shelf/background and name/background sepa
   const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
   const casework = model.find('Mudroom cubby partition')[0].material;
   const backing = model.find('Continuous mudroom cubby backing')[0].material;
-  const closet = model.find('Mudroom standard bifold door panel')[0].material;
-  const entry = model.find('Solid mudroom garage door panel')[0].material;
-  assert.ok(contrast(casework.color, backing.color) >= 3, 'Base paint colors have at least 3:1 separation; this is not a rendered accessibility rating');
-  assert.ok(contrast(closet.color, backing.color) >= 3);
-  assert.equal(entry.color, '#f2eee4', 'Owner requires an off-white entry door, never green');
-  assert.ok(contrast(entry.color, backing.color) >= 4, 'Off-white entry door remains distinct from the olive storage backs');
+  const closet = model.find('Mudroom standard bifold door panel')[0].children[0].material;
+  const entry = model.find('Solid mudroom garage door panel')[0].children[0].material;
+  assert.equal(casework.color, '#e6dece');
+  assert.equal(backing.color, casework.color, 'Backs match all painted cabinetry');
+  assert.equal(closet.color, '#faf9f5');
+  assert.equal(backing.map, undefined, 'Painted backs no longer use exposed wood grain');
+  assert.equal(entry.color, closet.color, 'Doors match the surrounding trim');
   for (const owner of ['Peter', 'Lila', 'Jacob', 'Ada', 'Lucas']) {
     const nameColor = model.find(`Mudroom decorative name: ${owner}`)[0].material.map.image.context.texts[0].color;
     assert.ok(contrast(nameColor, backing.color) >= 4.5, `${owner}'s name remains readable against the deeper backing`);
   }
-  assert.ok(backing.roughness > casework.roughness && casework.roughness > closet.roughness, 'Recesses are matte while door faces have a satin response');
+  assert.ok(backing.roughness > casework.roughness);
+});
+
+test('paint has fine relief, varied satin response and local reflections without recoloring shared finishes', () => {
+  const model = buildMudroom();
+  const paintedNames = ['Mudroom cubby partition', 'Continuous mudroom cubby backing', 'Mudroom painted vertical backing board'];
+  const texture = model.find(paintedNames[0])[0].material.bumpMap;
+  assert.equal(texture.image.width, 128);
+  assert.equal(texture.image.height, 128);
+  assert.equal(texture.repeat.x, 8);
+  assert.equal(texture.wrapS, 'repeat');
+  assert.equal(texture.minFilter, 'mipmaps');
+  const tones = new Set();
+  for (let i = 0; i < texture.image.data.length; i += 4) {
+    const value = texture.image.data[i];
+    tones.add(value);
+    assert.ok(value >= 200 && value <= 240);
+    assert.equal(texture.image.data[i + 1], value);
+    assert.equal(texture.image.data[i + 2], value);
+    assert.equal(texture.image.data[i + 3], 255);
+  }
+  assert.ok(tones.size >= 35, 'Paint texture varies rather than acting as another flat scalar');
+  for (const name of paintedNames) {
+    const finish = model.find(name)[0].material;
+    assert.equal(finish.bumpMap, texture);
+    assert.equal(finish.roughnessMap, texture);
+    assert.equal(finish.bumpScale, 0.0003, 'Relief is about 0.09 mm, not a visible plaster texture');
+    assert.equal(finish.userData.edgeRadiusFeet * 12, 1 / 32);
+    assert.equal(finish.envMap.name, 'Local room reflections');
+    assert.equal(finish.envMapIntensity, 0.18);
+    assert.equal(finish.map, undefined, 'Relief/roughness do not tint the selected paint color');
+  }
+  const hardware = model.find('Mudroom closet gold knob')[0].material;
+  assert.equal(hardware.envMapIntensity, 0.7);
+  assert.notEqual(hardware, model.shared.brass);
+  assert.equal(model.shared.brass.envMap, undefined);
+  assert.equal(model.shared.cabinetFinish.envMap, undefined);
+  const second = buildMudroom().find(paintedNames[0])[0].material.bumpMap;
+  assert.equal(Buffer.from(second.image.data).equals(Buffer.from(texture.image.data)), true, 'Texture is deterministic between reloads');
+});
+
+test('only opted-in painted boxes get tiny eased edges within their unchanged envelope', () => {
+  class Geometry {
+    constructor(width, height, depth, segments, radius) { this.parameters = { width, height, depth, segments, radius }; }
+  }
+  const context = {
+    THREE: { BoxGeometry: Geometry, Mesh: class { constructor(geometry) { this.geometry = geometry; this.position = { set() {} }; } } },
+    RoundedBoxGeometry: Geometry
+  };
+  const start = source.indexOf('  function box(');
+  vm.runInNewContext(source.slice(start, source.indexOf('  function cylinder(', start)), context);
+  const parent = { add() {} };
+  const eased = context.box(parent, 0, 0, 0, 1.5, 0.08, 1.5, { userData: { edgeRadiusFeet: 1 / 384 } });
+  assert.equal(eased.geometry.parameters.radius, 1 / 384);
+  assert.equal(eased.geometry.parameters.width, 1.5);
+  const thin = context.box(parent, 0, 0, 0, 0.3, 4, 0.004, { userData: { edgeRadiusFeet: 1 / 384 } });
+  assert.ok(thin.geometry.parameters.radius <= 0.004 / 3);
+  const unchanged = context.box(parent, 0, 0, 0, 1, 1, 1, {});
+  assert.equal(unchanged.geometry.parameters.radius, undefined);
+  const legacyRounded = context.box(parent, 0, 0, 0, 1, 0.15, 1, {}, true);
+  assert.equal(legacyRounded.geometry.parameters.radius, 0.15 / 3);
+});
+
+test('solid interior leaves have one genuinely recessed field and match trim on both faces', () => {
+  const model = buildMudroom();
+  const leaves = [...model.find('Mudroom standard bifold door panel'), ...model.find('Solid mudroom garage door panel')];
+  assert.equal(leaves.length, 5);
+  for (const leaf of leaves) {
+    const field = leaf.children.filter((part) => part.name === 'Interior door single recessed field');
+    assert.equal(field.length, 1);
+    const material = leaf.children[0].material;
+    assert.equal(material.color, '#faf9f5');
+    assert.ok(leaf.children.every((part) => part.material === material));
+    assert.ok(field[0].d < leaf.userData.depth, 'Panel is recessed on both faces, not applied over a solid slab');
+    const bottom = leaf.children.find((part) => part.name === 'Interior door bottom rail');
+    const top = leaf.children.find((part) => part.name === 'Interior door top rail');
+    assert.ok(bottom.h > top.h);
+    assert.equal(leaf.children.filter((part) => part.name === 'Interior door full-height stile').length, 2);
+  }
+});
+
+test('reference-style painted boards have narrow real joints and leave shelves, names and shoe openings clear', () => {
+  const model = buildMudroom();
+  const boards = model.find('Mudroom painted vertical backing board');
+  assert.equal(boards.length, 60);
+  for (const cubby of model.find('Mudroom family cubby')) {
+    const panels = cubby.children.filter((part) => part.name === 'Mudroom painted vertical backing board');
+    const label = cubby.children.find((part) => part.name.startsWith('Mudroom decorative name:'));
+    const shelves = cubby.children.filter((part) => part.name === 'Mudroom upper cubby shelf');
+    for (const panel of panels) {
+      assert.equal(panel.material.name, 'Cream painted tongue-and-groove boards');
+      assert.equal(panel.material.color, '#e6dece', 'Boards match the consistent off-white casework');
+      assert.ok(panel.position.y - panel.h / 2 >= 1.5 - 1e-9, 'Shoe openings below seat remain unchanged');
+      assert.ok(panel.position.z + panel.d / 2 < label.position.z, 'Name remains in front of the painted boards');
+      for (const shelf of shelves) {
+        const overlap = Math.min(panel.position.y + panel.h / 2, shelf.position.y + shelf.h / 2) - Math.max(panel.position.y - panel.h / 2, shelf.position.y - shelf.h / 2);
+        assert.ok(overlap <= 1e-9, 'Boards stop at actual shelf faces');
+      }
+    }
+    const row = panels.slice(0, 4);
+    for (let i = 1; i < row.length; i++) {
+      const gap = row[i].position.x - row[i].w / 2 - (row[i - 1].position.x + row[i - 1].w / 2);
+      assert.ok(Math.abs(gap * 12 - 1 / 8) < 1e-9);
+    }
+  }
+  assert.equal(model.find('Mudroom hook fixing screw').length, 32);
+  assert.equal(model.find('Mudroom east stepped cornice').length, 2);
+  assert.equal(model.find('Mudroom north stepped cornice').length, 2);
 });
 
 test('all five remaining case groups share a 105-inch top with connected north and east trim', () => {
@@ -632,8 +855,8 @@ test('arrival-wall shelves hold ten removable baskets clear of the fixed kitchen
   const b = bounds(tower);
   assert.ok(Math.abs((b.max[2] - b.min[2]) * 12 - 24) < 1e-9);
   assert.ok(Math.abs((b.max[0] - b.min[0]) * 12 - 12) < 1e-9);
-  assert.ok(b.max[2] < 21.675 - (3.5 + 0.125) / 12, 'Relocated shelves finish north of the kitchen casing');
-  assert.ok(Math.abs(b.min[2] - 18.9) < 1e-9 && Math.abs(b.max[2] - 20.9) < 1e-9, 'Baskets move to the other side of the kitchen opening');
+  assert.ok(b.max[2] < 21.175 - (3.5 + 0.125) / 12 - 0.125 / 2, 'Relocated shelves clear the projecting casing cap, not just the flat board');
+  assert.ok(Math.abs(b.min[2] - 18.775) < 1e-9 && Math.abs(b.max[2] - 20.775) < 1e-9, 'Baskets move 1.5 inches north without losing capacity');
   assert.ok(Math.abs(b.max[0] - 38.675) < 1e-9, 'Case depth remains twelve inches');
   assert.equal(model.find('Arrival basket fixed shelf').length, 6);
   assert.equal(model.find('Arrival basket center divider').length, 5);
@@ -648,7 +871,7 @@ test('arrival-wall shelves hold ten removable baskets clear of the fixed kitchen
     assert.ok((benchBounds.min[0] - basketBounds.max[0] - 10 / 12) * 12 >= 40, 'A conceptual ten-inch straight basket withdrawal retains at least forty inches to the bench, excluding the user');
   }
   assert.match(tower.userData.highStorage, /safe access.*unverified/);
-  assert.equal(model.find('Mudroom label: Safe high access required').length, 1);
+  assert.equal(model.find('Mudroom label: Safe high access required').length, 0);
   for (const divider of model.find('Arrival basket center divider')) {
     assert.equal(divider.w * 12, 0.75);
     assert.equal(divider.position.x, 0);
@@ -664,7 +887,7 @@ test('matching return physically connects the basket tower and north enclosure a
   const model = buildMudroom();
   const connector = model.find('Mudroom basket built-in return')[0];
   const b = bounds(connector);
-  assert.ok(Math.abs((b.max[2] - b.min[2]) * 12 - 16.32) < 1e-9);
+  assert.ok(Math.abs((b.max[2] - b.min[2]) * 12 - 14.82) < 1e-9);
   assert.ok(Math.abs((b.max[0] - b.min[0]) * 12 - 12) < 1e-9);
   assert.ok(Math.abs(b.max[1] * 12 - 105) < 1e-9);
   assert.equal(connector.userData.addedBasketCount, 0);
@@ -718,7 +941,7 @@ test('scribed backs and ends close every perimeter gap and fitted top infills me
     near(b.min[1], 8.75); near(b.max[1], 9);
     assert.ok(b.min[0] >= west - 1e-8 && b.max[0] <= east + 1e-8 && b.min[2] >= north - 1e-8 && b.max[2] <= south + 1e-8);
   }
-  near(bounds(model.find('Mudroom west ceiling infill')[0]).max[2], 20.9);
+  near(bounds(model.find('Mudroom west ceiling infill')[0]).max[2], 20.775);
   assert.equal(model.find('Removable arrival-wall basket').length, 10);
 });
 

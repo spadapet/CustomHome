@@ -13,7 +13,8 @@ function buildDining() {
       this.rotation = { y: 0 };
       this.userData = {};
     }
-    add(child) { this.children.push(child); }
+    add(child) { child.parent = this; this.children.push(child); }
+    remove(child) { this.children.splice(this.children.indexOf(child), 1); }
   }
   const roots = [];
   const context = {
@@ -21,6 +22,8 @@ function buildDining() {
     windowTrim: {}, cream: {}, black: {}, glass: {},
     mat() { return {}; },
     windowFrame() {},
+    openingCasing() {},
+    livingFeatureWall: require('../floor-plan-ground.js').getLivingRoomFeatureLayout(),
     box(parent, x, y, z, w, h, d, material) {
       const part = new Group();
       part.position.set(x, y, z);
@@ -36,12 +39,12 @@ function buildDining() {
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext(source.slice(start, end), context);
   const root = roots[0];
-  const patioStart = source.indexOf('  const patioDoor =');
-  const patioEnd = source.indexOf('  for (const [index, z] of livingWindowCenters', patioStart);
+  const patioStart = source.indexOf('  const livingPatioDoor =');
+  const patioEnd = source.indexOf("  windowFrame('Dining garden-facing casements'", patioStart);
   assert.ok(patioStart >= 0 && patioEnd > patioStart);
   vm.runInNewContext(source.slice(patioStart, patioEnd), context);
   const patio = roots[1];
-  const door = patio.children.find((part) => part.name === 'Inward-opening hinged patio door');
+  const door = patio.children.find((part) => part.name === 'Dining west patio inward door hinge');
   return { root, table: root.children.find((part) => part.name === 'Dining table'), chairs: root.children.filter((part) => part.name === 'Dining chair'), patio, door };
 }
 
@@ -134,17 +137,17 @@ test('full chair envelopes clear each other and walls through 18-inch end-chair 
 test('side chairs clear the patio sweep but the end chair must be moved clear even when tucked', () => {
   const { root, chairs, patio, door } = buildDining();
   for (const travel of [0, 1.5, 2]) {
-    const boxes = chairs.filter((chair) => chair.rotation.y !== -Math.PI / 2).map((chair) => rectangle(root, chair, Math.abs(chair.rotation.y) === Math.PI / 2 ? 0 : travel));
+    const boxes = chairs.filter((chair) => chair.rotation.y !== Math.PI / 2).map((chair) => rectangle(root, chair, Math.abs(chair.rotation.y) === Math.PI / 2 ? 0 : travel));
     for (let degree = 0; degree <= door.userData.maxAngleDegrees; degree++) {
-      door.rotation.y = degree * Math.PI / 180;
+      door.rotation.y = -degree * Math.PI / 180;
       for (const box of boxes) for (const part of door.children) assert.equal(intersectsDoor(box, patio, door, part), false, 'Actual door leaf and hardware clear the full chair envelope when end chairs are tucked');
     }
   }
-  const pulledEnd = rectangle(root, chairs.find((chair) => chair.rotation.y === -Math.PI / 2), 1.5);
-  const tuckedEnd = rectangle(root, chairs.find((chair) => chair.rotation.y === -Math.PI / 2));
+  const pulledEnd = rectangle(root, chairs.find((chair) => chair.rotation.y === Math.PI / 2), 1.5);
+  const tuckedEnd = rectangle(root, chairs.find((chair) => chair.rotation.y === Math.PI / 2));
   let hits = 0, tuckedHits = 0;
   for (let degree = 0; degree <= door.userData.maxAngleDegrees; degree++) {
-    door.rotation.y = degree * Math.PI / 180;
+    door.rotation.y = -degree * Math.PI / 180;
     if (door.children.some((part) => intersectsDoor(pulledEnd, patio, door, part))) hits++;
     if (door.children.some((part) => intersectsDoor(tuckedEnd, patio, door, part))) tuckedHits++;
   }

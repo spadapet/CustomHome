@@ -1,0 +1,123 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const exteriorSource = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+const viewerSource = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+
+class Group {
+  constructor() {
+    this.children = [];
+    this.userData = {};
+    this.rotation = { y: 0 };
+    this.position = { x: 0, y: 0, z: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } };
+  }
+  add(...children) { for (const child of children) { child.parent = this; this.children.push(child); } }
+  traverse(callback) { callback(this); for (const child of this.children) child.traverse(callback); }
+}
+
+function buildLighting() {
+  const group = new Group();
+  const context = {
+    THREE: {
+      Group,
+      SpotLight: class extends Group {
+        constructor(color, intensity, distance, angle, penumbra, decay) {
+          super();
+          Object.assign(this, { isLight: true, color, intensity, distance, angle, penumbra, decay, target: new Group() });
+        }
+      }
+    },
+    group, dark: {}, glow: { emissiveIntensity: 0.8, emissive: { getHex: () => 0xffbf68 } }, patioGrade: -1.625,
+    patioRoofCenterX: 6.6, patioRoofWidth: 13.2, livingPatioCenterZ: 3.725,
+    patioRoofUndersideAt: (z) => 8.26780663414694 + z * 3 / 16,
+    westGateCenterX: -10.605, westFenceReturnZ: 45, eastFenceReturnZ: 41, garageSideDoorCenterZ: 45.5,
+    box(parent, x, y, z, width, height, depth, material) {
+      const mesh = new Group();
+      Object.assign(mesh, { isMesh: true, material, width, height, depth });
+      mesh.position.set(x, y, z);
+      parent.add(mesh);
+      return mesh;
+    }
+  };
+  vm.createContext(context);
+  vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const porchCanopyHeight ='), exteriorSource.indexOf('  const porchRoof =')), context);
+  vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const lighting ='), exteriorSource.indexOf('  const cameras =')), context);
+  return { group, context, lighting: group.children[0] };
+}
+
+test('warm downward fixtures cover entrances, side paths, garden and patio without path posts', () => {
+  const { lighting } = buildLighting();
+  const fixtures = lighting.children.filter((part) => part.userData.mount);
+  const sources = lighting.children.filter((part) => part.isLight);
+  assert.equal(fixtures.length, 17);
+  assert.equal(sources.length, 17);
+  assert.equal(fixtures.filter((part) => part.userData.mount === 'wall').length, 12);
+  for (const fixture of fixtures) {
+    assert.equal(fixture.userData.colorTemperatureKelvin, 2700);
+    assert.equal(fixture.userData.downwardOnly, true);
+    assert.equal(fixture.userData.productSelected, false);
+  }
+  for (const source of sources) {
+    assert.ok(source.target.position.y < source.position.y, 'No upward beam');
+    assert.ok(source.target.position.x >= -13.605 && source.target.position.x <= 61.395, 'Aim stays within the modeled lot');
+    assert.ok(source.target.position.z >= -32.325 && source.target.position.z <= 97.675);
+    assert.equal(source.decay, 2);
+    assert.ok(!source.castShadow, 'Do not add costly exterior shadow maps');
+  }
+  for (const phrase of ['Front porch', 'Front door', 'West side-path', 'East side-path', 'Rear kitchen garden', 'Rear prep garden', 'Dining patio steps', 'Open-patio approach']) {
+    assert.ok(fixtures.some((part) => part.name.includes(phrase)), phrase);
+  }
+  assert.doesNotMatch(exteriorSource, /name = ['"][^'"]*(?:bollard|path-post light)/i);
+});
+
+test('wall lights have correctly oriented mounting plates and porch housings meet the sloping canopy', () => {
+  const { lighting, context } = buildLighting();
+  const fixtures = lighting.children.filter((part) => part.userData.mount);
+  const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-8, `${actual} should equal ${expected}`);
+  for (const fixture of fixtures.filter((part) => part.userData.mount === 'wall')) {
+    const plate = fixture.children.find((part) => part.name === 'Exterior downlight wall backplate');
+    assert.ok(plate);
+    const wallX = fixture.position.x - Math.sin(fixture.rotation.y) * 0.25;
+    const wallZ = fixture.position.z - Math.cos(fixture.rotation.y) * 0.25;
+    if (fixture.name.startsWith('West')) close(wallX, -0.225);
+    else if (fixture.name.startsWith('East')) close(wallX, 55.725);
+    else if (fixture.name.startsWith('Dining patio')) close(wallX, 12.975);
+    else if (fixture.name.startsWith('Front door')) close(wallZ, 54.425);
+    else if (fixture.name.startsWith('Driveway')) close(wallZ, 49.225);
+    else if (fixture.name.startsWith('Rear dining')) close(wallZ, -0.325);
+    else close(wallZ, 6.775);
+  }
+  for (const fixture of fixtures.filter((part) => part.name === 'Front porch approach ceiling light')) {
+    close(fixture.position.y + 0.075, context.porchCanopyUndersideAt(fixture.position.z));
+  }
+});
+
+test('Day/Night and floor changes gate every exterior light and shared glowing surface without losing intensities', () => {
+  const { group, lighting } = buildLighting();
+  const extraGlow = { emissiveIntensity: 0.35, emissive: { getHex: () => 0xffcf8c } };
+  const opaqueMaterial = { emissiveIntensity: 1, emissive: { getHex: () => 0 } };
+  const marker = new Group();
+  marker.material = [opaqueMaterial, extraGlow];
+  const stepWash = Object.assign(new Group(), { isLight: true, intensity: 1.4 });
+  group.add(marker, stepWash);
+  const context = { exterior: group, nightLighting: true, activeFloor: 'exterior' };
+  vm.createContext(context);
+  const start = viewerSource.indexOf('  const exteriorLighting =');
+  const end = viewerSource.indexOf('  const floorGrid =', start);
+  assert.ok(start >= 0 && end > start);
+  vm.runInContext(viewerSource.slice(start, end), context);
+  const sources = lighting.children.filter((part) => part.isLight);
+  const original = sources.map((lamp) => lamp.intensity);
+  for (const [night, floor] of [[true, 'exterior'], [false, 'exterior'], [true, 'ground'], [true, 'upstairs'], [true, 'exterior']]) {
+    Object.assign(context, { nightLighting: night, activeFloor: floor });
+    context.updateExteriorLighting();
+    sources.forEach((lamp, index) => assert.equal(lamp.intensity, night && floor === 'exterior' ? original[index] : 0));
+    assert.equal(extraGlow.emissiveIntensity, night && floor === 'exterior' ? 0.35 : 0);
+    assert.equal(stepWash.intensity, night && floor === 'exterior' ? 1.4 : 0);
+    assert.equal(opaqueMaterial.emissiveIntensity, 1, 'Leave non-glowing material defaults untouched');
+  }
+  assert.match(viewerSource, /updateStairLighting\(\);\s+updateExteriorLighting\(\);/);
+});

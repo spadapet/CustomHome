@@ -71,10 +71,10 @@ test('baseboards stop behind the fitted mudroom cases and remain outside the kit
   const east = 44.9 - 2 / 12 - 0.175;
   assert.deepEqual(covered.map(({ a, b, normal }) => [a.x, a.y, b.x, b.y, normal.x, normal.y]), [
     [37.675, 15.175, east, 15.175, 0, 1],
-    [37.675, 15.175, 37.675, 20.9, 1, 0],
+    [37.675, 15.175, 37.675, 20.775, 1, 0],
     [east, 15.175, east, 26.725, -1, 0],
     [43.075 - 2 / 12, 26.725, east, 26.725, 0, -1]
   ]);
-  assert.ok(covered[1].b.y < 21.675, 'West trim returns before the unchanged kitchen opening');
+  assert.ok(covered[1].b.y < 21.175, 'West trim returns before the widened kitchen opening');
   assert.ok(covered[3].a.x > 42.5, 'No fitted joinery or trim cuts across the garage opening');
 });

@@ -1,0 +1,4 @@
+# Preserve downloaded asset checksums and upstream license formatting.
+/assets/models/** -text -whitespace
+/assets/models/*.md text=auto !whitespace
+/assets/models/*.json text=auto !whitespace

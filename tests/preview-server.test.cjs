@@ -60,6 +60,54 @@ test('autosave validates, persists and confirms the exact layout without leaving
   assert.deepEqual((await fs.readdir(root)).sort(), ['index.html', 'upstairs-layout.json']);
 });
 
+test('walkthrough video and captions have native playback MIME types and HEAD lengths', async (t) => {
+  const { origin, root } = await fixture(t);
+  for (const [file, content, mime] of [['tour.mp4', 'test-video', 'video/mp4'], ['tour.vtt', 'WEBVTT\n\n', 'text/vtt; charset=utf-8']]) {
+    await fs.writeFile(path.join(root, file), content);
+    const response = await fetch(`${origin}/${file}`);
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('content-type'), mime);
+    assert.equal(await response.text(), content);
+    const head = await fetch(`${origin}/${file}`, { method: 'HEAD' });
+    assert.equal(head.headers.get('content-type'), mime);
+    assert.equal(Number(head.headers.get('content-length')), Buffer.byteLength(content));
+    assert.equal(await head.text(), '');
+  }
+});
+
+test('video byte ranges support seeking, suffixes and explicit invalid-range errors', async (t) => {
+  const { origin, root } = await fixture(t);
+  await fs.writeFile(path.join(root, 'tour.mp4'), '0123456789');
+  for (const [range, content, contentRange] of [
+    ['bytes=0-3', '0123', 'bytes 0-3/10'],
+    ['bytes=7-', '789', 'bytes 7-9/10'],
+    ['bytes=-4', '6789', 'bytes 6-9/10'],
+    ['bytes=-99', '0123456789', 'bytes 0-9/10'],
+    ['bytes=8-99', '89', 'bytes 8-9/10']
+  ]) {
+    const response = await fetch(`${origin}/tour.mp4`, { headers: { Range: range } });
+    assert.equal(response.status, 206, range);
+    assert.equal(response.headers.get('content-type'), 'video/mp4');
+    assert.equal(response.headers.get('accept-ranges'), 'bytes');
+    assert.equal(response.headers.get('content-range'), contentRange);
+    assert.equal(Number(response.headers.get('content-length')), content.length);
+    assert.equal(await response.text(), content);
+  }
+  for (const range of ['bytes=10-', 'bytes=5-2', 'bytes=-0', 'bytes=-', 'bytes=0-0,2-2', 'bytes=9007199254740992-', 'invalid']) {
+    const response = await fetch(`${origin}/tour.mp4`, { headers: { Range: range } });
+    assert.equal(response.status, 416, range);
+    assert.equal(response.headers.get('content-range'), 'bytes */10');
+    assert.ok((await response.json()).error);
+  }
+  const full = await fetch(`${origin}/tour.mp4`, { headers: { Range: 'bytes=0-3', 'If-Range': '"unknown"' } });
+  assert.equal(full.status, 200, 'No cache validator is available to confirm If-Range');
+  assert.equal(await full.text(), '0123456789');
+  const head = await fetch(`${origin}/tour.mp4`, { method: 'HEAD', headers: { Range: 'bytes=0-3' } });
+  assert.equal(head.status, 200);
+  assert.equal(head.headers.get('content-length'), '10');
+  assert.equal(await head.text(), '');
+});
+
 test('invalid geometry/schema and stair overlap never change project data', async (t) => {
   const { file, update } = await fixture(t);
   const linen = baseline.rooms.find((room) => room.name === 'Linen (relocated)');

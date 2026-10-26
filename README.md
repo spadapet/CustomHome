@@ -29,6 +29,31 @@ enable the **1 ft grid**. Choose **Whole floor** or **Upstairs** to return to 3D
 The viewer opens on **Whole floor** in **Rotate** mode unless a link selects a
 view. **Refresh model** below the canvas reloads the latest model there;
 **Reset view** returns to Whole floor and Rotate without reloading.
+The Menu's **Night lighting / Day lighting** button switches preview illumination.
+Night is the softer default (pressed); click for Day, then again for Night.
+Warm 2700 K-intent deep-regressed recessed fixtures now cover both modeled
+floors: 4 in apertures, dark baffles and lenses recessed 2 in above the
+ceiling plane, replacing the surface-mounted disks. They provide broad
+ambient illumination only, with separate local
+living-room reading and piano lamps. The rosewood Yamaha CLP-825 replaces
+the dark living-room loveseat; its bench is provisional. Recessed kitchen
+cans provide broad ambient light only. Product glare/output and occupied
+piano access still require verification.
+The choice stays in effect during tours, floor/view changes and Reset.
+Reload/Refresh starts in Night. In exterior views, Night enables the warm
+porch/door, driveway, side-path,
+rear garden-path and patio lights plus the lanterns and step washes.
+Day switches exterior sources and lens glow off; returning to Night
+restores them. Previously removed path-post/bollard lights stay removed.
+Lighting is illustrative, not verified illuminance or glare compliance.
+On the applicable interior views, Night also enables four kitchen downlights,
+the main interior stair LED strips and their soft tread washes,
+under-cabinet/hood task lighting and the family-board picture light, and
+checks **Island lights** so its pendants show and illuminate the island.
+Day turns these practical light sources off and restores the previous
+daytime pendant-visibility choice. Inspection presets still hide foreground
+pendants/ceiling hardware; other views restore them. This is illustrative
+lighting, not a verified illuminance or glare calculation.
 Furniture references, earlier living-room layouts and model assumptions are in
 [viewer reference notes](viewer-reference-notes.md), not below the viewer.
 Direct links: [ground-floor plan](http://127.0.0.1:4173/floor-plan-3d.html?view=top)
@@ -50,16 +75,45 @@ bifold, pocket sliding and exterior overhead door poses. Ordinary
 hinged leaves use a conceptual 180-degree endpoint; the selected refrigerator
 and freezer use the manufacturer-guide 115-degree full-access angle, bifolds
 90 degrees, and sliders their modeled track endpoints. Existing starting
-poses are preserved. Cabinet/appliance fronts and vehicle doors use separate
+poses are preserved. Click or tap cabinet doors, drawers or their handles on
+either floor to open/close them too. Cabinet doors swing outward 90 degrees;
+drawers slide with their boxes. Storage starts closed; view changes preserve
+its pose, and reloading closes it. Vehicle doors retain their separate
 controls. These are display limits, not verified hardware stops or approved
-clearance.
+clearance; close cabinet fronts before using the adjacent route.
 
 In **Dining room**, the patio leaf starts closed; click/tap it to show the
-180-degree inward endpoint, or use **Open patio door** / **Close patio door**
+90-degree inward endpoint on the west dining wall, or use **Open patio door** / **Close patio door**
 above the viewer (also keyboard accessible). Reloading or choosing a different
-camera view closes it. The adjacent casements stay closed. Move the patio-end
+camera view closes it. The old garden-side door and landing are removed,
+replaced by a paired-casement window. Move the west end
 chair clear in real use; even its tucked position conflicts. The toggle shows
 the concept swing, not approved operating clearance.
+
+## Watch without navigating
+
+The [house walkthrough](floor-plan-design.html#house-walkthrough) is a
+4:03, 1280 x 720 MP4 with original soft instrumental music, small room labels, gentle camera movement and
+edited cuts. It covers the exterior, furnished ground floor, garage,
+upstairs rooms and covered patio. Native controls support pause, seeking
+and full screen; the page includes captions, a text description and a
+[downloadable MP4](assets/videos/whole-house-walkthrough.mp4) for sharing.
+The viewer's Menu also links to the video.
+Restart an already-running preview server after updating so MP4 content types
+and byte-range seeking are enabled.
+
+This October 25, 2026 recording is a static model snapshot, not a live
+automatic tour or continuous stair walk. Later model changes require a
+new recording. Basement rooms are not modeled; mechanical equipment
+and construction/code clearances remain unverified. Asset credits are
+included in the collapsed video description and [source notes](assets/models/README.md).
+The picture has no concept disclaimer, date stamp, title card or credits panel.
+Native volume/mute controls also work in the downloaded MP4.
+The original soundtrack can be regenerated without dependencies:
+
+```powershell
+python .\scripts\generate-walkthrough-music.py C:\temp\walkthrough-music.wav
+```
 
 ## Check changes
 

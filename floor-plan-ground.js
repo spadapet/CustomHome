@@ -6,7 +6,16 @@
     const wallStartZ = 8 + 0.35 / 2;
     const wallEndZ = stairs.z;
     const centerZ = (wallStartZ + wallEndZ) / 2;
-    return { wallStartZ, wallEndZ, centerZ, windowCenters: [centerZ - 5.8, centerZ + 5.8] };
+    const sideWindowBank = {
+      name: 'Living joined return window bank', x: 6.6, z: 8, width: 7.5, height: 5, sill: 3,
+      openingWidth: 7.5, openingHeight: 5, openingSill: 3, trimLabel: 'Living',
+      units: [-1, 0, 1].map((side) => ({
+        name: side < 0 ? 'Living left side window' : side > 0 ? 'Living right side window' : 'Living side window',
+        x: 6.6 + side * 2.5, z: 8, width: 2.5, height: 5, sill: 3, picture: side === 0
+      }))
+    };
+    const patioDoor = { x: 13.2, z: 3.95, width: 3, height: 8 };
+    return { wallStartZ, wallEndZ, centerZ, windowCenters: [centerZ - 5.8, centerZ + 5.8], sideWindowBank, patioDoor };
   }
 
   function getGarageClerestoryLayout(floorY = -1.25) {
@@ -14,6 +23,38 @@
       name: `Garage high window ${index + 1}`, x: 55.5, z, width: 6, height: 1.5,
       sill: floorY + 7.5, sillAboveFloor: 7.5, fixed: true
     }));
+  }
+
+  function getKitchenPassageLayout() {
+    const wallZ = 7;
+    const openings = [2.725, 14.175].map((start) => [start, start + 3, 0, 8]);
+    const passages = ['Kitchen to prep', 'Kitchen to mudroom'].map((name, index) => ({ name, startZ: wallZ + openings[index][0], endZ: wallZ + openings[index][1] }));
+    return { wallX: 37.5, wallZ, clearWidth: 3, clearHeight: 8, doorless: true, passages, openings };
+  }
+
+  function getPrepWindowLayout() {
+    return [
+      { name: 'Prep left counter window', x: 47.4 - 83 / 24, z: 7, openingWidth: 2, openingHeight: 5, openingSill: 41 / 12, standardSizeCode: '2050', picture: false },
+      { name: 'Prep sink picture window', x: 47.4, z: 7, openingWidth: 5, openingHeight: 5, openingSill: 41 / 12, standardSizeCode: '5050', picture: true },
+      { name: 'Prep right counter window', x: 47.4 + 83 / 24, z: 7, openingWidth: 2, openingHeight: 5, openingSill: 41 / 12, standardSizeCode: '2050', picture: false },
+      { name: 'Prep end-wall window', x: 55.5, z: 11.55, openingWidth: 2, openingHeight: 6, openingSill: 29 / 12, standardSizeCode: '2060', picture: false }
+    ].map((window) => ({ ...window, width: window.openingWidth - 0.5 / 12, height: window.openingHeight - 0.5 / 12, sill: window.openingSill + 0.25 / 12 }));
+  }
+
+  function getPrepWindowBankLayout() {
+    const units = getPrepWindowLayout().filter((window) => window.z === 7);
+    const width = units.reduce((sum, window) => sum + window.width, 0);
+    return { name: 'Prep joined counter window bank', x: 47.4, z: 7, width, height: units[0].height, sill: units[0].sill, openingWidth: width + 0.5 / 12, openingHeight: 5, openingSill: 41 / 12, units };
+  }
+
+  function getKitchenWindowBankLayout() {
+    const x = 32, z = 7, height = 3.5, sill = 53 / 12;
+    const units = [
+      { name: 'Kitchen left counter window', x: x - 3, z, width: 1.5, height, sill, picture: false },
+      { name: 'Kitchen sink window', x, z, width: 4.5, height, sill, picture: true },
+      { name: 'Kitchen right counter window', x: x + 3, z, width: 1.5, height, sill, picture: false }
+    ];
+    return { name: 'Kitchen joined sink window bank', x, z, width: 7.5, height, sill, openingWidth: 7.5, openingHeight: height, openingSill: sill, units, trimLabel: 'Kitchen', assemblyApproved: false };
   }
 
   function getGuestEntryLayout(stairs = UpstairsLayout.stairOpening()) {
@@ -77,6 +118,7 @@
     const livingFeatureWall = getLivingRoomFeatureLayout(stairs);
     const guestEntry = getGuestEntryLayout(stairs);
     const guestSuite = getGuestSuiteLayout();
+    const kitchenPassages = getKitchenPassageLayout();
     const powderZ = guestEntry.powder.z;
     const entryZ = guestEntry.alcove.z, officeZ = guestEntry.officeNorthZ;
     const kidsNorthZ = 26.725 - 25 / 12 - 0.08 + 0.175;
@@ -112,15 +154,15 @@
       [44.9 - 2 / 12, 15, 10.6 + 2 / 12, 11.9, 'Garage', -1.25], [29, 26.9, 26.5, 7.7, 'Garage', -1.25],
       [31.2, 34.6, 24.3, 14.4, 'Garage', -1.25], [0, 54.2, 31.2, 7, 'Front porch']
     ].map(([x, z, w, d, room, elevation = 0]) => ({ x, z, w, d, room: room ?? null, elevation }));
-    const sideWindows = [6.6 - 10 / 3, 6.6, 6.6 + 10 / 3].map((x) => [x - 1.25, x + 1.25, 3, 8]);
+    const sideWindows = [livingFeatureWall.sideWindowBank].map(({ x, openingWidth, openingSill, openingHeight }) => [x - openingWidth / 2, x + openingWidth / 2, openingSill, openingSill + openingHeight]);
     const segments = [
       ['Living north', 0, 8, 13.2, 8, sideWindows],
-      ['Dining west', 13.2, -0.1, 13.2, 8, [[1.05, 7.05, 3, 8]]],
+      ['Dining west', 13.2, -0.1, 13.2, 8, [[livingFeatureWall.patioDoor.z - 1.5 + 0.1, livingFeatureWall.patioDoor.z + 1.5 + 0.1, 0, 8]]],
       ['Dining north', 13.2, -0.1, 26.875, -0.1, [[3.8375, 9.8375, 3, 8]]],
-      ['Dining east', 26.875, -0.1, 26.875, 7, [[0.6, 6.6, 0, 8]]],
-      ['Kitchen north', 26.875, 7, 37.5, 7, [[0.625, 2.125, 53 / 12, 95 / 12], [2.875, 7.375, 53 / 12, 95 / 12], [8.125, 9.625, 53 / 12, 95 / 12]]],
-      ['Prep north', 37.5, 7, 55.5, 7, [[7.4, 12.4, 4.25, 7.75]]],
-      ['Prep east', 55.5, 7, 55.5, 15, [[3.55, 5.55, 4.25, 7.75]]],
+      ['Dining east', 26.875, -0.1, 26.875, 7, [[0.6, 6.6, 3, 8]]],
+      ['Kitchen north', 26.875, 7, 37.5, 7, [getKitchenWindowBankLayout()].map(({ x, openingWidth, openingSill, openingHeight }) => [x - openingWidth / 2 - 26.875, x + openingWidth / 2 - 26.875, openingSill, openingSill + openingHeight])],
+      ['Prep north', 37.5, 7, 55.5, 7, [getPrepWindowBankLayout()].map(({ x, openingWidth, openingSill, openingHeight }) => [x - openingWidth / 2 - 37.5, x + openingWidth / 2 - 37.5, openingSill, openingSill + openingHeight])],
+      ['Prep east', 55.5, 7, 55.5, 15, getPrepWindowLayout().filter((window) => window.x === 55.5).map(({ z, openingWidth, openingSill, openingHeight }) => [z - openingWidth / 2 - 7, z + openingWidth / 2 - 7, openingSill, openingSill + openingHeight])],
       ['Garage east', 55.5, 15, 55.5, 49, [...getGarageClerestoryLayout().map(({ z, width, sill, height }) => [z - width / 2 - 15, z + width / 2 - 15, sill, sill + height]), [29, 32, -1.25, 6.75]]],
       ['Garage south', 31.2, 49, 55.5, 49, [[1.3, 10.3, -1.25, 6.75], [12.8, 21.8, -1.25, 6.75]]],
       ['Guest east', 31.2, 49, 31.2, 54.2],
@@ -148,7 +190,7 @@
       ['Garage west', 31.2, 34.6, 31.2, 49], ['Garage west return', 29, 26.9, 29, 34.6],
       ['Kitchen south left', 29, 26.9, 29.1875, 26.9], ['Kitchen south', 29.1875, 26.9, 37.3, 26.9],
       ['Kitchen south right', 37.3, 26.9, 37.5, 26.9],
-      ['Kitchen east', 37.5, 7, 37.5, 25.3, [[2.725, 5.225, 0, 8], [14.675, 17.175, 0, 8]]],
+      ['Kitchen east', kitchenPassages.wallX, kitchenPassages.wallZ, kitchenPassages.wallX, 25.3, kitchenPassages.openings],
       ['Kitchen east return', 37.5, 25.3, 37.5, 26.9], ['Mudroom north', 37.5, 15, 44.9 - 2 / 12, 15],
       ['Garage north', 44.9 - 2 / 12, 15, 55.5, 15], ['Mudroom east', 44.9 - 2 / 12, 15, 44.9 - 2 / 12, 26.9],
       ['Mudroom south', 37.5, 26.9, 44.9 - 2 / 12, 26.9, [[2, 5, 0, 8]]]
@@ -161,6 +203,10 @@
   root.getGuestEntryLayout = getGuestEntryLayout;
   root.getGuestSuiteLayout = getGuestSuiteLayout;
   root.getGroundFloorDefaultPlan = getGroundFloorDefaultPlan;
+  root.getKitchenPassageLayout = getKitchenPassageLayout;
+  root.getPrepWindowLayout = getPrepWindowLayout;
+  root.getPrepWindowBankLayout = getPrepWindowBankLayout;
+  root.getKitchenWindowBankLayout = getKitchenWindowBankLayout;
   root.getLivableFloorArea = getLivableFloorArea;
   root.buildGroundLayoutPreview = function (THREE, baseline, edits) {
     const plan = UpstairsLayout.resolve(baseline, edits);
@@ -205,5 +251,5 @@
       }
     };
   };
-  if (typeof module !== 'undefined' && module.exports) module.exports = { getGroundFloorDefaultPlan, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { getGroundFloorDefaultPlan, getKitchenPassageLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

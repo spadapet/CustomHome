@@ -2,7 +2,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const group = new THREE.Group();
   group.name = 'English-country exterior concept';
   group.visible = false;
-  group.userData = { provisional: true, style: 'English country: cream limestone, medium-brown shingles, black window trim, oak entry', floorToFloorFeet: floorToFloor, coordinatedConstructionDrawings: false };
+  group.userData = { provisional: true, style: 'All-brick farmhouse exterior: warm cream brick walls and gables on all sides, white trim, light-wood doors and square entry posts without a decorative arch', floorToFloorFeet: floorToFloor, coordinatedConstructionDrawings: false, frontElevationStudy: true, frontOpeningsCoordinatedWithInteriors: false, garageUpperVolume: 'Unassigned exterior roof-volume study only; no room, floor, storage or access approval', wallCladding: 'Brick veneer finish study; wall assembly and support not designed' };
   const wallThickness = 0.45;
   const fenceBoundaryInset = 0.5, fenceRailOffset = 0.1, fenceRailDepth = 0.14;
   const eastWallFaceX = 55.5 + wallThickness / 2;
@@ -14,19 +14,24 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   lot.rear = lot.rearWallZ - lot.rearSetbackFeet;
   lot.front = lot.rear + lot.depthFeet;
   group.userData.lot = lot;
+  const fenceLeft = lot.left + fenceBoundaryInset, fenceRight = lot.right - fenceBoundaryInset, fenceRear = lot.rear + fenceBoundaryInset;
+  const fencePaverGap = 0.75;
+  const pathWidth = 3.5;
+  const westPaverEdgeX = fenceLeft + fencePaverGap, eastPaverEdgeX = fenceRight - fencePaverGap;
   const eaves = floorToFloor + 9;
-  const trim = mat('#e4d5b8');
+  const trim = mat('#f5f2ea');
   const white = mat('#f3eddf');
-  const garageDoorFinish = mat('#e6d7b9');
-  garageDoorFinish.name = 'Warm cream garage door - screen approximation';
-  const garageDoorDetail = mat('#ddcba7');
-  garageDoorDetail.name = 'Cream garage door panel detail - screen approximation';
-  const garageSurround = mat('#a18d70');
-  garageSurround.name = 'Warm taupe garage opening surround - screen approximation';
+  const garageDoorFinish = mat('#c99f6b');
+  garageDoorFinish.name = 'Natural wood garage door - screen approximation';
+  const garageDoorDetail = mat('#af8554');
+  garageDoorDetail.name = 'Natural wood garage door panel detail - screen approximation';
+  const garageSurround = mat('#f5f2ea');
+  garageSurround.name = 'White garage opening surround - screen approximation';
   const dark = mat('#393b38', 0.65);
   const windowBlack = mat('#202321');
   const roofCap = mat('#8e7255');
   const wood = mat('#956c3e');
+  const entryWood = mat('#c99f6b');
   const glass = new THREE.MeshStandardMaterial({ color: '#819ba2', metalness: 0.25, roughness: 0.22 });
   const privacyGlass = new THREE.MeshStandardMaterial({ color: '#e0e8e4', roughness: 1 });
   const glow = new THREE.MeshStandardMaterial({ color: '#ffe3ad', emissive: '#ffbf68', emissiveIntensity: 0.8 });
@@ -68,7 +73,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     canvas.width = canvas.height = 512;
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Exterior masonry and roof textures require a 2D canvas context.');
-    context.fillStyle = roof ? '#70583f' : '#b9aa8e';
+    context.fillStyle = roof ? '#837b6c' : '#b9aa8e';
     context.fillRect(0, 0, 512, 512);
     let seed = roof ? 73 : 19;
     function random() {
@@ -82,7 +87,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
       while (x < 512) {
         const width = roof ? 32 : 43 + Math.floor(random() * 47);
         const shade = Math.floor(random() * (roof ? 22 : 16));
-        context.fillStyle = roof ? `rgb(${135 + shade},${105 + shade},${76 + shade})` : `rgb(${211 + shade},${198 + shade},${174 + shade})`;
+        context.fillStyle = roof ? `rgb(${151 + shade},${140 + shade},${120 + shade})` : `rgb(${211 + shade},${198 + shade},${174 + shade})`;
         context.fillRect(x + 1, row * height + 1, width - 2, height - 2);
         context.fillStyle = roof ? '#ffffff0b' : '#ffffff28';
         context.fillRect(x + 2, row * height + 2, width - 4, 2);
@@ -98,16 +103,47 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const stoneTexture = surfaceTexture(false);
   baseStone.map = stoneTexture;
   const roofTexture = surfaceTexture(true);
-  const limestone = new THREE.MeshStandardMaterial({ map: stoneTexture, roughness: 0.95 });
+  const porchColumnFinish = mat('#f4f1e9', 0.95);
+  const frontBrick = (() => {
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 256;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Exterior brick texture requires a 2D canvas context.');
+    context.fillStyle = '#bfb3a0';
+    context.fillRect(0, 0, 256, 256);
+    for (let row = 0; row < 8; row++) for (let column = -1; column < 4; column++) {
+      context.fillStyle = ['#e8ddc4', '#e0d2b7', '#efe5d0', '#dccdb0'][(row * 3 + column + 4) % 4];
+      context.fillRect(column * 64 + (row % 2) * 32 + 2, row * 32 + 2, 60, 28);
+    }
+    const map = new THREE.CanvasTexture(canvas);
+    map.colorSpace = THREE.SRGBColorSpace;
+    map.wrapS = map.wrapT = THREE.RepeatWrapping;
+    return new THREE.MeshStandardMaterial({ map, roughness: 0.98 });
+  })();
+  function brickBox(parent, x, y, z, w, h, d) {
+    const brick = frontBrick.clone();
+    brick.map = frontBrick.map.clone();
+    brick.map.repeat.set(Math.max(w, d) / (8 / 3), h / 1.75);
+    const mesh = box(parent, x, y, z, w, h, d, brick);
+    mesh.name = 'Cream exterior brick masonry';
+    return mesh;
+  }
+  function brickFaceUVs(geometry, axis = 'x') {
+    const positions = geometry.attributes.position;
+    const uv = [];
+    for (let index = 0; index < positions.count; index++) uv.push((axis === 'x' ? positions.getX(index) : positions.getZ(index)) / (8 / 3), positions.getY(index) / 1.75);
+    geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  }
   function texturedBox(parent, x, y, z, w, h, d, roof = false) {
     const material = new THREE.MeshStandardMaterial({ map: (roof ? roofTexture : stoneTexture).clone(), roughness: 0.95 });
     material.map.repeat.set((roof ? d : Math.max(w, d)) / 8, (roof ? w : h) / 8);
     return box(parent, x, y, z, w, h, d, material);
   }
-  function windowUnit(parent, center, sill, width, height, privacyLowerHalf = false, picture = false) {
+  function windowUnit(parent, center, sill, width, height, privacyLowerHalf = false, picture = false, perimeterTrim = true, front = false) {
     const frame = new THREE.Group();
-    frame.name = 'Exterior black-trimmed concept window';
-    frame.userData = { exteriorTrim: 'Black', interiorTrimUnchanged: true };
+    frame.name = front ? 'Front white-trimmed gridded window' : 'Exterior black-trimmed concept window';
+    frame.userData = { exteriorTrim: front ? 'White' : 'Black', interiorTrimUnchanged: true, frontGrid: front };
+    const windowFinish = front ? trim : windowBlack;
     if (picture) frame.userData.operation = 'fixed picture window';
     if (privacyLowerHalf) Object.assign(frame.userData, { room: 'Powder room', privacyLowerHalf: true, privacyVerified: false });
     frame.position.set(center, sill, 0.25);
@@ -118,31 +154,30 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     } else {
       box(frame, 0, height / 2, 0, width, height, 0.12, glass);
     }
-    for (const x of [-width / 2, width / 2]) box(frame, x, height / 2, 0.08, 0.16, height + 0.3, 0.16, windowBlack);
-    for (const y of [0, height]) box(frame, 0, y, 0.08, width + 0.3, 0.16, 0.16, windowBlack);
-    if (!privacyLowerHalf && !picture) box(frame, 0, height / 2, 0.1, 0.1, height, 0.08, windowBlack);
-    box(frame, 0, -0.13, 0.05, width + 0.65, 0.22, 0.45, windowBlack);
-    box(frame, 0, height + 0.2, 0.03, width + 0.65, 0.3, 0.3, windowBlack);
+    for (const x of [-width / 2, width / 2]) box(frame, x, height / 2, 0.08, front ? 0.28 : 0.16, height + 0.3, 0.16, windowFinish);
+    for (const y of [0, height]) box(frame, 0, y, 0.08, width + 0.3, 0.16, 0.16, windowFinish);
+    if (!privacyLowerHalf && !picture && !front) box(frame, 0, height / 2, 0.1, 0.1, height, 0.08, windowFinish);
+    if (front) {
+      for (const fraction of [0.25, 0.5, 0.75]) box(frame, 0, height * fraction, 0.13, width, 0.045, 0.06, trim).name = 'Front window horizontal grille';
+      box(frame, 0, height / 2, 0.13, 0.045, height, 0.06, trim).name = 'Front window vertical grille';
+    }
+    if (perimeterTrim) {
+      box(frame, 0, -0.13, 0.05, width + 0.65, 0.22, 0.45, windowFinish);
+      box(frame, 0, height + 0.2, 0.03, width + 0.65, 0.3, 0.3, windowFinish);
+    }
   }
   function wall(name, x1, z1, x2, z2, bottom, top, openings = []) {
+    const front = ['front ground floor', 'upper front bedrooms', 'upper loft south', 'garage front', 'garage porch return', 'Garage front upper elevation study', 'Garage upper east return study', 'Garage upper west return study'].includes(name);
     const wallGroup = new THREE.Group();
-    wallGroup.name = `Exterior stone wall: ${name}`;
+    wallGroup.name = `Exterior brick wall: ${name}`;
     wallGroup.position.set(x1, 0, z1);
     wallGroup.rotation.y = -Math.atan2(z2 - z1, x2 - x1);
     group.add(wallGroup);
     const length = Math.hypot(x2 - x1, z2 - z1);
     function fill(start, end, low, high) {
       if (end <= start || high <= low) return;
-      const creamLow = low < 1.25 && bottom < 0 ? Math.max(low, 1.31) : low;
-      if (high > creamLow) texturedBox(wallGroup, (start + end) / 2, (creamLow + high) / 2, 0, end - start, high - creamLow, wallThickness).name = 'Coursed cream limestone';
-      if (low < 1.25 && bottom < 0) {
-        const baseLow = low === bottom ? -1.65 : low;
-        const baseHigh = Math.min(high, 1.25);
-        if (baseHigh > baseLow) {
-          box(wallGroup, (start + end) / 2, (baseLow + baseHigh) / 2, 0, end - start, baseHigh - baseLow, wallThickness, baseStone).name = 'Contrasting taupe-brown stone base';
-          if (baseHigh === 1.25) box(wallGroup, (start + end) / 2, 1.27, 0, end - start, 0.08, wallThickness, stepStone).name = 'Stone base cap';
-        }
-      }
+      const baseLow = low === bottom && bottom < 0 ? Math.min(low, -1.65) : low;
+      brickBox(wallGroup, (start + end) / 2, (baseLow + high) / 2, 0, end - start, high - baseLow, wallThickness);
     }
     let cursor = 0;
     for (const opening of openings) {
@@ -150,7 +185,11 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
       fill(cursor, center - width / 2, bottom, top);
       fill(center - width / 2, center + width / 2, bottom, sill);
       fill(center - width / 2, center + width / 2, sill + height, top);
-      if (!door) windowUnit(wallGroup, center, opening.frameSill ?? sill, opening.frameWidth ?? width, opening.frameHeight ?? height, opening.privacyLowerHalf, opening.picture);
+      if (opening.units) {
+        for (const unit of opening.units) windowUnit(wallGroup, center + opening.bankX - unit.x, unit.sill, unit.width, unit.height, false, unit.picture, false);
+        box(wallGroup, center, opening.frameSill - 0.13, 0.3, opening.frameWidth + 0.65, 0.22, 0.45, windowBlack).name = `${opening.trimLabel ?? 'Prep'} bank continuous exterior sill`;
+        box(wallGroup, center, opening.frameSill + opening.frameHeight + 0.2, 0.28, opening.frameWidth + 0.65, 0.3, 0.3, windowBlack).name = `${opening.trimLabel ?? 'Prep'} bank continuous exterior header trim`;
+      } else if (!door) windowUnit(wallGroup, center, opening.frameSill ?? sill, opening.frameWidth ?? width, opening.frameHeight ?? height, opening.privacyLowerHalf, opening.picture, true, front);
       cursor = center + width / 2;
     }
     fill(cursor, length, bottom, top);
@@ -162,7 +201,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const garageClerestories = getGarageClerestoryLayout(garageFloorY);
   const westFrontWindowCenterZ = 49;
   const westFrontWindowWidth = 4;
-  wall('front ground floor', 0, 54.2, 31.2, 54.2, -0.4, 9, [win(6, 6), { center: 15.6, width: 5, sill: 0, height: 8, door: true }, win(25, 7.6)]);
+  wall('front ground floor', 0, 54.2, 31.2, 54.2, -0.4, 9, [win(4.2, 2.8), win(8.3, 2.8), { center: 15.6, width: 5, sill: 0, height: 8, door: true }, win(23, 2.8), win(27.1, 2.8)]);
   const livingFeatureWall = getLivingRoomFeatureLayout();
   const guestEntry = getGuestEntryLayout();
   wall('west ground floor', 0, 8, 0, 54.2, -0.4, 9, [
@@ -170,15 +209,18 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     ...guestEntry.windows.map(({ z, width, height, sill, openingWidth, openingHeight, openingSill, privacyLowerHalf }) => ({ center: z - 8, width: openingWidth, height: openingHeight, sill: openingSill, frameWidth: width, frameHeight: height, frameSill: sill, privacyLowerHalf })),
     win(westFrontWindowCenterZ - 8, westFrontWindowWidth)
   ]);
-  wall('living rear return', 13.2, 8, 0, 8, -0.4, 9, [win(1.8, 1.5), win(6.6, 5), win(11.4, 1.5)]);
-  wall('dining west', 13.2, -0.1, 13.2, 8, -0.4, 9, [win(4.05, 6)]);
+  wall('living rear return', 13.2, 8, 0, 8, -0.4, 9, [livingFeatureWall.sideWindowBank].map((bank) => ({
+    ...win(13.2 - bank.x, bank.openingWidth, bank.openingSill, bank.openingHeight),
+    bankX: bank.x, frameWidth: bank.width, frameHeight: bank.height, frameSill: bank.sill, units: bank.units, trimLabel: bank.trimLabel
+  })));
+  wall('dining west', 13.2, -0.1, 13.2, 8, -0.4, 9, [{ center: livingFeatureWall.patioDoor.z + 0.1, width: 3, sill: 0, height: 8, door: true }]);
   wall('dining rear', 26.875, -0.1, 13.2, -0.1, -0.4, 9, [win(6.8375, 6)]);
-  wall('dining patio', 26.875, 7, 26.875, -0.1, -0.4, 9, [win(3.55, 6, 0, 8)]);
-  wall('kitchen and prep rear', 55.5, 7, 26.875, 7, -0.4, 9, [{ ...win(8.1, 5, 4.25, 3.5), picture: true }, win(19.75, 1.5, 53 / 12, 3.5), win(23.5, 4.5, 53 / 12, 3.5), win(27.25, 1.5, 53 / 12, 3.5)]);
+  wall('dining patio', 26.875, 7, 26.875, -0.1, -0.4, 9, [win(3.5, 6, 3, 5)]);
+  wall('kitchen and prep rear', 55.5, 7, 26.875, 7, -0.4, 9, [getPrepWindowBankLayout(), getKitchenWindowBankLayout()].map((bank) => ({ ...win(55.5 - bank.x, bank.openingWidth, bank.openingSill, bank.openingHeight), bankX: bank.x, frameWidth: bank.width, frameHeight: bank.height, frameSill: bank.sill, units: bank.units, trimLabel: bank.trimLabel })));
   const garageSideWall = wall('east ground floor', 55.5, 49, 55.5, 7, garageFloorY - 0.3, 9, [
     { center: 49 - garageSideDoorCenterZ, width: garageSideDoorWidth, sill: garageFloorY, height: 8, door: true },
     ...garageClerestories.map(({ z, width, sill, height }) => ({ center: 49 - z, width, sill, height, picture: true })),
-    win(37.45, 2, 4.25, 3.5)
+    ...getPrepWindowLayout().filter((window) => window.x === 55.5).map((window) => ({ ...win(49 - window.z, window.openingWidth, window.openingSill, window.openingHeight), frameWidth: window.width, frameHeight: window.height, frameSill: window.sill }))
   ].sort((a, b) => a.center - b.center));
   const garageSideDoor = new THREE.Group();
   garageSideDoor.name = 'Solid garage exterior pedestrian door';
@@ -203,7 +245,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   ]);
   wall('garage porch return', 31.2, 54.2, 31.2, 49, -0.4, 9);
   const upper = floorToFloor;
-  wall('upper front bedrooms', 0, 53.2, 31, 53.2, 9, eaves, [win(6.5, 4, upper + 3), win(24.5, 4, upper + 3)]);
+  wall('upper front bedrooms', 0, 53.2, 31, 53.2, 9, eaves, [win(4.8, 2.4, upper + 3), win(8.6, 2.4, upper + 3), win(12.4, 1.8, upper + 3), win(20.2, 2.4, upper + 3), win(24, 2.4, upper + 3), win(28.1, 1.8, upper + 3)]);
   wall('upper west', 0, 7.6, 0, 53.2, 9, eaves, [win(5, 4, upper + 3), win(14, 4, upper + 3), win(22, 3, upper + 3), win(37.6, 4, upper + 3)]);
   wall('upper primary rear', 10.2, 7.6, 0, 7.6, 9, eaves);
   wall('upper bath west return', 10.2, 2.1, 10.2, 7.6, 9, eaves);
@@ -215,6 +257,10 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   wall('upper east loft', 52, 36.2, 52, 15.4, 9, eaves, [win(8.2, 4, upper + 3), win(14.2, 4, upper + 3)]);
   wall('upper loft south', 36.5, 36.2, 52, 36.2, 9, eaves);
   wall('upper bedroom east return', 31, 53.2, 31, 36.2, 9, eaves);
+  const garageUpperStudy = wall('Garage front upper elevation study', 31.2, 49, 55.5, 49, 9, eaves, [win(8.2, 2.8, upper + 3), win(12.8, 2.8, upper + 3)]);
+  garageUpperStudy.userData = { exteriorStudyOnly: true, habitableRoom: false, floorAdded: false, openingCoordinationRequired: true };
+  wall('Garage upper east return study', 55.5, 49, 55.5, 36.2, 9, eaves);
+  wall('Garage upper west return study', 31.2, 36.2, 31.2, 49, 9, eaves);
 
   function gable(name, left, right, back, front, base, rise) {
     const roof = new THREE.Group();
@@ -227,11 +273,19 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
       geometry.setAttribute('position', new THREE.Float32BufferAttribute([left, base, z, right, base, z, center, base + rise, z], 3));
       geometry.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, half / 4, 0, half / 8, rise / 8], 2));
       geometry.computeVertexNormals();
-      const faceMaterial = limestone.clone();
+      const referenceFront = z === front && ['West bedroom gable', 'Central bedroom gable', 'Rear east-wing roof', 'Reference garage-front gable study', 'Entry porch gable'].includes(name);
+      const faceMaterial = frontBrick.clone();
       faceMaterial.side = THREE.DoubleSide;
+      brickFaceUVs(geometry);
       const face = new THREE.Mesh(geometry, faceMaterial);
-      face.name = 'Limestone gable end';
+      face.name = 'Brick gable end';
       roof.add(face);
+      if (referenceFront) {
+        if (rise > 5) {
+          box(roof, center, base + rise * 0.65, z + 0.08, 0.9, 1.5, 0.12, trim).name = 'Front gable vent surround';
+          for (let slat = 0; slat < 7; slat++) box(roof, center, base + rise * 0.65 - 0.55 + slat * 0.18, z + 0.16, 0.65, 0.055, 0.08, garageDoorDetail).name = 'Front gable vent louver';
+        }
+      }
     }
     const pitch = Math.atan2(rise, half);
     const overhang = 0.65;
@@ -247,46 +301,122 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     box(roof, center, base + rise + 0.1, (back + front) / 2, 0.22, 0.16, front - back + 1.4, roofCap).name = 'Brown-shingle roof ridge cap';
   }
   gable('West bedroom gable', 0, 14.2, 7.6, 53.2, eaves, 8.8);
-  gable('Central bedroom gable', 14.2, 31, 2.1, 53.2, eaves, 10);
-  gable('Rear east-wing roof', 25.7, 54, 10, 36.2, eaves, 8);
-  gable('Single-story garage roof', 31, 55.5, 36.2, 49.2, 9, 6);
+  gable('Central bedroom gable', 14.2, 31, 2.1, 53.2, eaves, 8.8);
+  gable('Rear east-wing roof', 25.7, 54, 10, 36.2, eaves, 6);
+  gable('Reference garage-front gable study', 31, 55.5, 36.2, 49.2, eaves, 8.8);
   gable('Dining rear projection roof', 13.2, 26.875, -0.1, 2.1, 9, 5.5);
   const patio = new THREE.Group();
-  patio.name = 'Covered kitchen-dining patio';
-  const patioBounds = { left: 26.5, right: 55.5, rear: -2.1, front: 7 };
+  patio.name = 'Kitchen-prep vegetable garden';
+  const patioBounds = { left: 26.5, right: 55.5, rear: -0.1 - wallThickness / 2, front: 7 };
   const patioWidth = patioBounds.right - patioBounds.left;
   const patioDepth = patioBounds.front - patioBounds.rear;
-  const patioCenterX = (patioBounds.left + patioBounds.right) / 2;
-  const patioCenterZ = (patioBounds.rear + patioBounds.front) / 2;
   const terraceLeft = patioBounds.left + 0.25;
   const terraceFront = patioBounds.front - 0.25;
-  const patioStepX = patioBounds.right - 4.5;
-  const patioStepStartZ = patioBounds.rear + 3 * 1.1;
-  const patioStepHalfWidth = 3.4;
-  patio.userData = { x: patioBounds.left, z: patioBounds.rear, widthFeet: patioWidth, depthFeet: patioDepth, limits: patioBounds, stepsInset: true, stepCenterXFeet: patioStepX, openSides: true, doorAndWindowsUnchanged: true, roofSupportVerified: false };
+  const patioGrade = -1.625;
+  patio.userData = { x: patioBounds.left, z: patioBounds.rear, widthFeet: patioWidth, depthFeet: patioDepth, limits: patioBounds, topFeet: patioGrade, stepsAtDiningDoor: false, garden: true, oldDoorReplacedByWindow: true, openSides: true, plantingAndDrainageVerified: false };
   group.add(patio);
-  paving(patio, 'Raised patio paver terrace', terraceLeft, patioStepStartZ, patioBounds.right - terraceLeft, terraceFront - patioStepStartZ, 0, 1.65, baseStone);
-  paving(patio, 'Patio terrace west return', terraceLeft, patioBounds.rear, patioStepX - patioStepHalfWidth - terraceLeft, patioStepStartZ - patioBounds.rear, 0, 1.65, baseStone);
-  paving(patio, 'Patio terrace east return', patioStepX + patioStepHalfWidth, patioBounds.rear, patioBounds.right - patioStepX - patioStepHalfWidth, patioStepStartZ - patioBounds.rear, 0, 1.65, baseStone);
+  const kitchenGarden = box(patio, (terraceLeft + patioBounds.right) / 2, patioGrade - 0.12, (patioBounds.rear + terraceFront) / 2, patioBounds.right - terraceLeft, 0.2, terraceFront - patioBounds.rear, mat('#66513d'));
+  kitchenGarden.name = 'Kitchen-prep garden soil';
+  kitchenGarden.userData = { x: terraceLeft, z: patioBounds.rear, widthFeet: patioBounds.right - terraceLeft, depthFeet: terraceFront - patioBounds.rear, topFeet: patioGrade - 0.02 };
+  const vegetableGarden = new THREE.Group();
+  vegetableGarden.name = 'Cucumbers, green beans and pumpkins';
+  vegetableGarden.userData = { crops: ['Cucumbers', 'Green beans', 'Pumpkins'], illustrativeMatureGrowth: true, sunlightAndSpacingVerified: false, foundationDrainageVerified: false };
+  patio.add(vegetableGarden);
+  const vineGreen = mat('#446b2d'), leafGreen = mat('#4c803a'), cucumberGreen = mat('#31552a'), beanGreen = mat('#78a648'), pumpkinOrange = mat('#d48026');
+  function gardenOval(parent, name, x, y, z, sx, sy, sz, material) {
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, 12, 8), material);
+    mesh.name = name;
+    mesh.position.set(x, y, z);
+    mesh.scale.set(sx, sy, sz);
+    parent.add(mesh);
+    return mesh;
+  }
+  const soilTop = patioGrade - 0.02;
+  for (const [crop, left, fruitMaterial] of [['Cucumber', 30.5, cucumberGreen], ['Green bean', 39.5, beanGreen]]) {
+    const row = new THREE.Group();
+    row.name = `${crop} trellis row`;
+    row.userData = { crop, leftFeet: left, rightFeet: left + 6.5, zFeet: 4.4, heightFeet: 5, provisional: true };
+    vegetableGarden.add(row);
+    for (const x of [left, left + 6.5]) box(row, x, soilTop + 2.5, 4.4, 0.12, 5, 0.12, wood).name = `${crop} trellis upright`;
+    for (const height of [1, 2, 3, 4, 5]) box(row, left + 3.25, soilTop + height, 4.4, 6.5, 0.035, 0.035, wood).name = `${crop} trellis horizontal`;
+    for (const offset of [0.9, 3.25, 5.6]) {
+      const x = left + offset;
+      box(row, x, soilTop + 2.35, 4.3, 0.045, 4.7, 0.045, vineGreen).name = `${crop} climbing vine`;
+      for (let level = 0; level < 6; level++) {
+        const side = level % 2 ? 1 : -1, y = soilTop + 0.65 + level * 0.68;
+        const leaf = gardenOval(row, `${crop} leaf`, x + side * 0.32, y, 4.15, crop === 'Cucumber' ? 0.38 : 0.27, 0.19, 0.16, leafGreen);
+        leaf.rotation.z = side * 0.45;
+        gardenOval(row, crop === 'Cucumber' ? 'Growing cucumber' : 'Hanging green bean pod', x - side * 0.12, y - 0.25, 4.02, crop === 'Cucumber' ? 0.11 : 0.035, crop === 'Cucumber' ? 0.32 : 0.4, crop === 'Cucumber' ? 0.1 : 0.035, fruitMaterial);
+      }
+    }
+  }
+  for (const x of [49, 52.5]) {
+    const patch = new THREE.Group();
+    patch.name = 'Pumpkin vine and fruit';
+    patch.userData = { crop: 'Pumpkin', xFeet: x, zFeet: 3, provisional: true };
+    vegetableGarden.add(patch);
+    box(patch, x, soilTop + 0.035, 3, 2.6, 0.05, 0.06, vineGreen).name = 'Trailing pumpkin vine';
+    for (const [dx, dz] of [[-1, -0.5], [-0.45, 0.65], [0.65, -0.55], [1.1, 0.6]]) gardenOval(patch, 'Broad pumpkin leaf', x + dx, soilTop + 0.16, 3 + dz, 0.48, 0.1, 0.4, leafGreen);
+    for (let lobe = 0; lobe < 8; lobe++) {
+      const angle = lobe * Math.PI / 4;
+      gardenOval(patch, 'Orange pumpkin rib', x + Math.cos(angle) * 0.22, soilTop + 0.33, 3 + Math.sin(angle) * 0.22, 0.27, 0.33, 0.27, pumpkinOrange);
+    }
+    const stem = box(patch, x, soilTop + 0.76, 3, 0.1, 0.25, 0.1, vineGreen);
+    stem.name = 'Pumpkin stem';
+    stem.rotation.z = 0.2;
+  }
+  const livingPatio = new THREE.Group();
+  livingPatio.name = 'Living-room patio with covered seating and open yard extension';
+  const livingPatioBounds = { left: 0, right: 13.2, rear: patioBounds.rear, front: 8 };
+  const livingTerraceLeft = westPaverEdgeX + pathWidth;
+  const livingTerraceFlatLeft = livingTerraceLeft + 3;
+  const livingTerraceRight = livingPatioBounds.right - 0.25;
+  const livingTerraceRear = livingPatioBounds.rear - 4;
+  const livingTerraceFront = livingPatioBounds.front - wallThickness / 2;
+  const livingPatioCenterZ = (livingPatioBounds.rear + livingTerraceFront) / 2;
+  const diningPatioStairWidth = livingTerraceFront - livingPatioBounds.rear;
+  livingPatio.userData = { limits: { left: livingTerraceLeft, right: livingTerraceRight, rear: livingTerraceRear, front: livingTerraceFront }, coveredLimits: livingPatioBounds, uncoveredYardExtensionFeet: 4, connectsToWestFencePath: true, flatAreaLeftFeet: livingTerraceFlatLeft, topFeet: patioGrade, directHouseDoor: true, levelDiningWalkout: false, stepsAtDiningDoor: true, connectedByGardenPath: true, structureVerified: false, drainageVerified: false, daylightPerformanceVerified: false };
+  group.add(livingPatio);
+  const livingExit = new THREE.Group();
+  livingExit.name = 'Dining covered-patio glazed exterior door, 36 by 96 inches';
+  livingExit.position.set(livingFeatureWall.patioDoor.x, 0, livingFeatureWall.patioDoor.z);
+  livingExit.rotation.y = -Math.PI / 2;
+  livingPatio.add(livingExit);
+  for (const x of [-1.44, 1.44]) box(livingExit, x, 4, 0, 0.12, 8, 0.2, white).name = 'Living exterior door stile';
+  for (const y of [0.08, 7.92]) box(livingExit, 0, y, 0, 3, 0.16, 0.2, white).name = 'Living exterior door rail';
+  box(livingExit, 0, 4, 0, 2.76, 7.68, 0.05, glass).name = 'Living exterior door glazing';
+  box(livingExit, -1.15, 3, 0.16, 0.08, 0.4, 0.12, dark).name = 'Living exterior door handle';
+  paving(livingPatio, 'Ground-level living-room patio terrace', livingTerraceFlatLeft, livingTerraceRear, livingTerraceRight - livingTerraceFlatLeft, livingTerraceFront - livingTerraceRear, patioGrade, 0.3, baseStone);
+  const westPatioTransition = paving(livingPatio, 'Patio to west fence-path grade transition', livingTerraceLeft, livingTerraceRear, livingTerraceFlatLeft - livingTerraceLeft, livingTerraceFront - livingTerraceRear, patioGrade, 0.3, baseStone);
+  const westPatioPositions = westPatioTransition.geometry.attributes.position;
+  for (let index = 0; index < westPatioPositions.count; index++) westPatioPositions.setY(index, westPatioPositions.getY(index) + (1.5 - westPatioPositions.getX(index)) / 3 * (-1.35 - patioGrade));
+  westPatioPositions.needsUpdate = true;
+  westPatioTransition.geometry.computeVertexNormals();
+  westPatioTransition.userData = { ...westPatioTransition.userData, westTopFeet: -1.35, eastTopFeet: patioGrade, slopeVerified: false, accessibleRouteVerified: false };
+  paving(livingPatio, 'Covered dining patio door landing', 8.975, livingPatioBounds.rear, 4, diningPatioStairWidth, 0, -patioGrade + 0.3, baseStone);
+  paving(livingPatio, 'Dining patio threshold', livingTerraceRight, livingFeatureWall.patioDoor.z - 1.5, livingFeatureWall.patioDoor.x - livingTerraceRight, 3, 0, 0.3, baseStone);
   const patioRoofPitch = 3 / 16;
+  const patioRoofLeft = livingPatioBounds.left;
+  const patioRoofRight = livingPatioBounds.right;
+  const patioRoofWidth = patioRoofRight - patioRoofLeft;
+  const patioRoofCenterX = (patioRoofLeft + patioRoofRight) / 2;
   const patioRoofAngle = Math.atan(patioRoofPitch);
   const patioRoofThickness = 0.18;
-  const patioRoofFront = 10;
-  const patioRoofCenterZ = (patioBounds.rear + patioRoofFront) / 2;
-  const patioRoofY = 9.5;
-  const patioRoofLength = (patioRoofFront - patioBounds.rear - patioRoofThickness * Math.sin(patioRoofAngle)) / Math.cos(patioRoofAngle);
-  const patioRoof = texturedBox(patio, patioCenterX, patioRoofY, patioRoofCenterZ, patioWidth, patioRoofThickness, patioRoofLength, true);
+  const patioRoofFront = livingPatioBounds.front + wallThickness / 2;
+  const patioRoofCenterZ = (livingPatioBounds.rear + patioRoofFront) / 2;
+  const patioRoofY = 9.1;
+  const patioRoofLength = (patioRoofFront - livingPatioBounds.rear - patioRoofThickness * Math.sin(patioRoofAngle)) / Math.cos(patioRoofAngle);
+  const patioRoof = texturedBox(livingPatio, patioRoofCenterX, patioRoofY, patioRoofCenterZ, patioRoofWidth, patioRoofThickness, patioRoofLength, true);
   patioRoof.name = 'Brown-shingle covered patio roof';
-  patioRoof.userData = { continuousPrepAndPatioCover: true, limits: { ...patioBounds, front: patioRoofFront }, centerHeightFeet: patioRoofY, pitch: patioRoofPitch };
+  patioRoof.userData = { location: 'Behind living room', limits: { ...livingPatioBounds, front: patioRoofFront }, centerHeightFeet: patioRoofY, pitch: patioRoofPitch, kitchenAndPrepFrontageOpen: true, coversDiningLanding: false, livingRoomDaylightReduced: true, attachmentVerified: false, daylightPerformanceVerified: false };
   patioRoof.rotation.x = -patioRoofAngle;
   function patioRoofUndersideAt(z) {
     return patioRoofY + (z - patioRoofCenterZ) * patioRoofPitch - patioRoofThickness / (2 * Math.cos(patioRoofAngle));
   }
-  wall('Patio roof raised headwall', 55.5, 7, 26.875, 7, 9, patioRoofUndersideAt(7 + wallThickness / 2) + 0.02);
-  wall('Patio roof upper-wall return', 54, 10, 55.5, 10, 9, patioRoofUndersideAt(10) + 0.02);
+  wall('Patio roof raised headwall', patioRoofRight, 8, patioRoofLeft, 8, 9, patioRoofUndersideAt(patioRoofFront) + 0.02);
+  const patioSideClosureStart = patioRoofCenterZ + (9 - patioRoofY + patioRoofThickness / (2 * Math.cos(patioRoofAngle))) / patioRoofPitch;
   for (const { x, rear, name } of [
-    { x: 26.875, rear: 2.75, name: 'Patio roof west tapered closure' },
-    { x: 55.5, rear: 7, name: 'Patio roof east tapered closure' }
+    { x: patioRoofRight, rear: patioSideClosureStart, name: 'Patio roof east tapered closure' }
   ]) {
     const geometry = new THREE.BoxGeometry(wallThickness, 1, patioRoofFront - rear);
     const positions = geometry.attributes.position;
@@ -295,35 +425,43 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
       positions.setY(i, positions.getY(i) > 0 ? patioRoofUndersideAt(centerZ + positions.getZ(i)) + 0.02 - 9 : 0);
     }
     geometry.computeVertexNormals();
-    const closure = new THREE.Mesh(geometry, limestone);
+    brickFaceUVs(geometry, 'z');
+    const closure = new THREE.Mesh(geometry, frontBrick);
     closure.name = name;
     closure.position.set(x, 9, centerZ);
-    group.add(closure);
+    livingPatio.add(closure);
   }
-  for (const z of [patioBounds.rear + 0.6, patioBounds.front - 0.6]) {
+  for (const z of [livingPatioBounds.rear + 0.6, livingPatioBounds.front - 1]) {
     const beamTop = patioRoofUndersideAt(z);
-    const middlePostX = z < patioCenterZ ? patioCenterX + 3.5 : patioCenterX;
-    for (const x of [patioBounds.left + 0.6, middlePostX, patioBounds.right - 0.6]) {
-      box(patio, x, (beamTop - 0.32) / 2, z, 0.45, beamTop - 0.32, 0.45, wood).name = 'Patio timber support post';
-      box(patio, x, 0.6, z, 0.7, 1.2, 0.7, baseStone).name = 'Patio post stone foot';
+    for (const x of [patioRoofLeft + 0.75, patioRoofRight - 0.75]) {
+      if (z !== livingPatioBounds.rear + 0.6 || x !== patioRoofLeft + 0.75) continue;
+      const post = box(livingPatio, x, (beamTop - 0.32 + patioGrade) / 2, z, 0.75, beamTop - 0.32 - patioGrade, 0.75, wood);
+      post.name = 'Patio timber support post';
+      post.userData = { widthInches: 9, structuralApproval: false };
+      box(livingPatio, x, patioGrade + 0.6, z, 1, 1.2, 1, baseStone).name = 'Patio post stone foot';
     }
-    box(patio, patioCenterX, beamTop - 0.16, z, patioWidth - 0.75, 0.32, 0.3, wood).name = 'Patio perimeter beam';
+    box(livingPatio, patioRoofCenterX, beamTop - 0.16, z, patioRoofWidth - 0.75, 0.32, 0.3, wood).name = 'Patio perimeter beam';
   }
-  const patioTableX = patioCenterX - 3.5;
-  const patioTableZ = patioCenterZ + 1;
-  box(patio, patioTableX, 2.4, patioTableZ, 3, 0.2, 5, wood).name = 'Outdoor dining table';
-  for (const x of [patioTableX - 1, patioTableX + 1]) for (const z of [patioTableZ - 2, patioTableZ + 2]) box(patio, x, 1.15, z, 0.12, 2.3, 0.12, dark).name = 'Outdoor table leg';
-  for (const x of [patioTableX - 2.2, patioTableX + 2.2]) for (const z of [patioTableZ - 1.6, patioTableZ + 1.6]) {
-    box(patio, x, 1.4, z, 1.7, 0.18, 1.7, white).name = 'Outdoor dining chair';
-    box(patio, x + (x < patioTableX ? -0.75 : 0.75), 2.05, z, 0.12, 1.2, 1.7, wood).name = 'Outdoor dining chair back';
-    for (const side of [-0.65, 0.65]) box(patio, x, 0.65, z + side, 1.4, 1.3, 0.1, dark).name = 'Outdoor dining chair side frame';
+  const patioTableX = 3.5;
+  const patioTableZ = 6.65;
+  const patioFurniture = new THREE.Group();
+  patioFurniture.name = 'Two patio chairs and small side table';
+  patioFurniture.userData = { seats: 2, tableWidthInches: 18, tableDepthInches: 18, tableHeightInches: 20, productSelected: false, occupiedAccessVerified: false };
+  patioFurniture.position.y = patioGrade;
+  livingPatio.add(patioFurniture);
+  const patioTableHeight = 20 / 12;
+  box(patioFurniture, patioTableX, patioTableHeight - 0.05, patioTableZ, 1.5, 0.1, 1.5, wood).name = 'Outdoor small side table';
+  for (const x of [patioTableX - 0.55, patioTableX + 0.55]) for (const z of [patioTableZ - 0.55, patioTableZ + 0.55]) box(patioFurniture, x, (patioTableHeight - 0.1) / 2, z, 0.1, patioTableHeight - 0.1, 0.1, dark).name = 'Outdoor table leg';
+  for (const x of [patioTableX - 1.9, patioTableX + 1.9]) {
+    box(patioFurniture, x, 1.4, patioTableZ, 1.7, 0.18, 1.7, white).name = 'Outdoor patio chair';
+    box(patioFurniture, x, 2.05, patioTableZ + 0.75, 1.7, 1.2, 0.12, wood).name = 'Outdoor patio chair back';
+    for (const side of [-0.65, 0.65]) box(patioFurniture, x + side, 0.65, patioTableZ, 0.1, 1.3, 1.4, dark).name = 'Outdoor patio chair side frame';
   }
   const portableFirepit = new THREE.Group();
-  portableFirepit.name = 'Portable firepit - rear-yard cold storage only';
-  portableFirepit.position.set(40, -1.6, -15);
-  portableFirepit.userData = { diameterInches: 30.72, heightInches: 19.56, provisional: true, modelSelected: false, fuel: 'Wood assumed; model unconfirmed', coldStorageOnly: true, operationApproved: false, useClearanceSatisfied: false, localPortableClearanceFeet: 15, instruction: 'Requested rear-yard location is for fully extinguished, cold storage only. It does not meet the checked Birmingham operating clearances between the house/patio and cedar fence. Do not light here or under the patio roof. No approved burn location is established; confirm the actual unit and site with the Fire Department.' };
+  portableFirepit.name = 'Portable firepit - uncovered patio cold storage only';
+  portableFirepit.position.set(-3.75, patioGrade, livingTerraceRear + 2);
+  portableFirepit.userData = { diameterInches: 30.72, heightInches: 19.56, provisional: true, modelSelected: false, fuel: 'Wood assumed; model unconfirmed', coldStorageOnly: true, operationApproved: false, useClearanceSatisfied: false, localPortableClearanceFeet: 15, outsideRoofFootprint: true, manufacturerClearanceVerified: false, instruction: 'Uncovered outer patio corner is for fully extinguished, cold storage only. Being outside the roof does not meet the Birmingham 15-foot separation from structures and combustible materials, including the nearby roof and cedar fence. Do not light here or under the patio roof. Confirm the selected unit instructions and site with the Fire Department before any use.' };
   group.add(portableFirepit);
-  box(group, 40, -1.635, -15, 4, 0.06, 4, stepStone).name = 'Rear firepit cold-storage pad, not a burn area';
   const firepitBody = new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1, 1.1, 32, 1, true), dark);
   firepitBody.name = 'Unlit portable firepit open bowl';
   firepitBody.position.y = 0.9;
@@ -355,62 +493,84 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     firewoodRack.add(splitLog);
   }
 
-  function exteriorSteps(parent, name, x, startZ, direction, width) {
+  function exteriorSteps(parent, name, x, startZ, direction, width, { riseFeet = 0.45, baseFeet = -1.65, treadCount = 3, flareFeet = 0.4, flushNosing = false } = {}) {
     const steps = new THREE.Group();
     steps.name = name;
-    steps.userData = { risers: 3, riseFeet: 0.45, goingFeet: 1.1, contrastNosing: true, provisional: true };
+    steps.userData = { risers: 3, riseFeet, goingFeet: 1.1, contrastNosing: true, provisional: true };
     parent.add(steps);
-    for (let step = 0; step < 3; step++) {
-      const top = -(step + 1) * 0.45;
+    for (let step = 0; step < treadCount; step++) {
+      const top = -(step + 1) * riseFeet;
       const z = startZ + direction * (step * 1.1 + 0.55);
-      box(steps, x, (top - 1.65) / 2, z, width + step * 0.4, top + 1.65, 1.1, stepStone).name = 'Darker stone entry tread';
-      box(steps, x, top + 0.025, z + direction * 0.48, width + step * 0.4, 0.05, 0.14, stepEdge).name = 'Contrasting step nosing';
-      box(steps, x, -step * 0.45 - 0.16, startZ + direction * (step * 1.1 + 0.015), 0.6, 0.08, 0.03, glow).name = 'Shielded warm step marker';
+      box(steps, x, (top + baseFeet) / 2, z, width + step * flareFeet, top - baseFeet, 1.1, stepStone).name = 'Darker stone entry tread';
+      box(steps, x, top + (flushNosing ? -0.025 : 0.025), z + direction * 0.48, width + step * flareFeet, 0.05, 0.14, stepEdge).name = 'Contrasting step nosing';
+      box(steps, x, -step * riseFeet - 0.16, startZ + direction * (step * 1.1 + 0.015), 0.6, 0.08, 0.03, glow).name = 'Shielded warm step marker';
+      const wash = new THREE.PointLight('#ffd09a', 1.4, 3, 2);
+      wash.name = 'Shielded warm entry-step wash';
+      wash.position.set(x, -step * riseFeet - 0.16, startZ + direction * (step * 1.1 + 0.06));
+      steps.add(wash);
     }
   }
-  exteriorSteps(patio, 'Patio garden steps', patioStepX, patioStepStartZ, -1, 6);
+  const livingAccess = new THREE.Group();
+  livingAccess.name = 'Dining west door to covered patio access';
+  livingAccess.position.set(8.975, 0, livingPatioCenterZ);
+  livingAccess.rotation.y = -Math.PI / 2;
+  livingPatio.add(livingAccess);
+  exteriorSteps(livingAccess, 'Covered dining patio steps', 0, 0, 1, diningPatioStairWidth, { riseFeet: -patioGrade / 3, baseFeet: patioGrade - 0.3, treadCount: 2, flareFeet: 0, flushNosing: true });
   paving(group, 'Covered front porch', 0, 54.2, 31.2, 7, 0, 1.65);
   const porchPillars = [];
   for (const [index, x] of [1, 11.9, 19.3, 30.2].entries()) {
     const entryColumn = index === 1 || index === 2;
     const height = entryColumn ? 8 : 8.4;
-    const pillar = texturedBox(group, x, height / 2, 60.5, 0.65, height, 0.65);
-    pillar.name = 'Limestone porch column';
-    pillar.userData = { entryColumn, widthInches: 7.8, heightFeet: height, provisional: true };
+    const pillar = box(group, x, height / 2, 60.5, 1, height, 1, porchColumnFinish);
+    pillar.name = 'White porch column';
+    pillar.userData = { entryColumn, widthInches: 12, heightFeet: height, provisional: true };
     porchPillars.push(pillar);
-    box(group, x, 0.5, 60.5, 0.95, 1, 0.95, baseStone).name = 'Porch column stone foot';
-    if (!entryColumn) box(group, x, 8.25, 60.5, 0.95, 0.3, 0.95, trim).name = 'Outer porch column cap';
+    brickBox(group, x, 0.5, 60.5, 1.25, 1, 1.25);
+    if (!entryColumn) box(group, x, 8.25, 60.5, 1.25, 0.3, 1.25, trim).name = 'Outer porch column cap';
   }
-  const entryHeader = box(group, 15.6, 8.25, 60.5, 8.2, 0.5, 0.65, trim);
-  entryHeader.name = 'Single entry portico header';
-  entryHeader.userData = { clearOpeningWidthFeet: 6.75, undersideFeet: 8, structuralDesignVerified: false };
-  const porchRoof = texturedBox(group, 15.6, 9.1, 57.5, 32.5, 0.18, 9.5, true);
-  porchRoof.name = 'Brown-shingle porch canopy';
-  porchRoof.rotation.x = 0.22;
+  const porchMetal = mat('#716e62', 0.55);
+  const porchCanopyHeight = 9.1, porchCanopyAngle = 0.22, porchCanopyThickness = 0.18, porchCanopyCenterZ = 57.5;
+  function porchCanopyUndersideAt(z) {
+    return porchCanopyHeight - (z - porchCanopyCenterZ) * Math.tan(porchCanopyAngle) - porchCanopyThickness / 2 / Math.cos(porchCanopyAngle);
+  }
+  const porchRoof = new THREE.Group();
+  porchRoof.name = 'Standing-seam metal reference porch canopy';
+  group.add(porchRoof);
+  for (const [left, right] of [[-0.65, 11.5], [19.7, 31.85]]) {
+    const panel = box(porchRoof, (left + right) / 2, porchCanopyHeight, porchCanopyCenterZ, right - left, porchCanopyThickness, 9.5, porchMetal);
+    panel.name = 'Metal porch roof beside open entry gable';
+    panel.rotation.x = porchCanopyAngle;
+    for (let x = -(right - left) / 2 + 0.5; x < (right - left) / 2; x += 1.5) box(panel, x, 0.11, 0, 0.035, 0.06, 9.5, dark).name = 'Porch canopy standing seam';
+  }
   gable('Entry porch gable', 11.5, 19.7, 54.4, 61.7, 8.5, 4);
+  box(group, 15.6, 8.25, 60.5, 8.4, 0.5, 1, trim).name = 'Straight front entry header';
   for (const side of [-1, 1]) {
     const leaf = new THREE.Group();
     leaf.name = `Exterior front entry ${side < 0 ? 'left' : 'right'} door leaf`;
     leaf.position.set(15.6 + side * 2.455, 0, 54.48);
     leaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 180, openRotationSign: -side } };
     group.add(leaf);
-    box(leaf, -side * 1.215, 4, 0, 2.43, 7.96, 0.2, wood).name = 'Warm oak double entry door';
-    for (const y of [2, 5.8]) box(leaf, -side * 1.215, y, 0.13, 1.85, 3.1, 0.07, wood).name = 'Raised oak door panel';
+    box(leaf, -side * 1.215, 4, 0, 2.43, 7.96, 0.2, entryWood).name = 'Warm oak double entry door';
+    for (let plank = 0; plank < 5; plank++) box(leaf, -side * (0.25 + plank * 0.48), 4, 0.13, 0.025, 7.7, 0.025, garageDoorDetail).name = 'Light oak entry vertical plank joint';
     box(leaf, -side * 2.255, 3.1, 0.26, 0.07, 0.7, 0.1, dark).name = 'Entry pull';
   }
+  const garageCanopy = box(group, 43.25, 9.5, 49.4, 25.5, 0.16, 2.6, porchMetal);
+  garageCanopy.name = 'Reference garage standing-seam eyebrow canopy';
+  garageCanopy.rotation.x = 0.22;
+  for (let x = -12; x <= 12; x += 1.5) box(garageCanopy, x, 0.1, 0, 0.035, 0.05, 2.6, dark).name = 'Garage eyebrow standing seam';
   for (const center of [37, 48.5]) {
     const assembly = new THREE.Group();
-    assembly.name = 'Cream garage door with contrasting surround';
+    assembly.name = 'Natural wood garage door with white surround';
     assembly.position.set(center, garageFloorY, 49);
-    assembly.userData = { openingWidthFeet: 9, openingHeightFeet: 8, doorColor: '#e6d7b9', surroundColor: '#a18d70', sideTrimInches: 6, headerTrimInches: 8, trimDepthInches: 3, provisional: true };
+    assembly.userData = { openingWidthFeet: 9, openingHeightFeet: 8, doorColor: '#c99f6b', surroundColor: '#f5f2ea', sideTrimInches: 6, headerTrimInches: 8, trimDepthInches: 3, provisional: true };
     group.add(assembly);
     const garageLeaf = new THREE.Group();
     garageLeaf.name = 'Conceptual overhead garage door leaf';
     garageLeaf.position.set(0, 8, 0.28);
     garageLeaf.userData = { interactiveHouseDoor: { operation: 'overhead', open: false, maxAngleDegrees: 90 } };
     assembly.add(garageLeaf);
-    box(garageLeaf, 0, -4, 0, 9, 8, 0.16, garageDoorFinish).name = 'Cream carriage-style garage door';
-    for (let panel = 0; panel < 6; panel++) box(garageLeaf, -3.75 + panel * 1.5, -5, 0.11, 0.06, 5.6, 0.05, garageDoorDetail).name = 'Cream garage door panel detail';
+    box(garageLeaf, 0, -4, 0, 9, 8, 0.16, garageDoorFinish).name = 'Natural wood carriage-style garage door';
+    for (let panel = 0; panel < 6; panel++) box(garageLeaf, -3.75 + panel * 1.5, -5, 0.11, 0.06, 5.6, 0.05, garageDoorDetail).name = 'Natural wood garage door panel detail';
     for (const offset of [-3, -1, 1, 3]) box(garageLeaf, offset, -1.2, 0.13, 1.6, 1, 0.05, glass).name = 'Garage door glazing';
     for (const side of [-1, 1]) {
       box(garageLeaf, side * 0.25, -4.4, 0.17, 0.06, 0.6, 0.08, dark).name = 'Garage door dark handle';
@@ -434,7 +594,14 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   for (const pillar of porchPillars.filter((column) => column.userData.entryColumn)) lantern(pillar, 0, 5.8 - pillar.position.y, 0.45);
   for (const x of [37, 48.5]) lantern(group, x, 8.7, 49.7);
   exteriorSteps(group, 'Contrasting front entry steps', 15.6, 61.2, 1, 9);
-  box(group, lot.centerX, -1.8, (lot.rear + lot.front) / 2, lot.widthFeet, 0.35, lot.depthFeet, mat('#83936b')).name = '75 by 130 ft lot lawn, not surveyed grade';
+  const frontSteps = group.getObjectByName('Contrasting front entry steps');
+  for (const tread of frontSteps.children.filter((part) => part.name === 'Darker stone entry tread')) {
+    const brick = frontBrick.clone();
+    brick.map = frontBrick.map.clone();
+    brick.map.repeat.set(tread.geometry.parameters.width / 2, 0.8);
+    tread.material = brick;
+    tread.name = 'Reference brick front-entry tread';
+  }
   const driveway = new THREE.Group();
   driveway.name = 'Garage driveway concept';
   group.add(driveway);
@@ -444,12 +611,8 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   box(driveway, drivewayLeft + drivewayWidth / 2, garageFloorY - 0.18, (49 + lot.front) / 2, drivewayWidth, 0.16, lot.front - 49, drivewayMaterial).name = 'Continuous garage driveway and pedestrian crossing';
   const paths = new THREE.Group();
   paths.name = 'Fence-edge perimeter walkway';
-  const fenceLeft = lot.left + fenceBoundaryInset, fenceRight = lot.right - fenceBoundaryInset, fenceRear = lot.rear + fenceBoundaryInset;
   const westFenceReturnZ = westFrontWindowCenterZ - westFrontWindowWidth / 2 - 2;
   const eastFenceReturnZ = garageSideDoorCenterZ - garageSideDoorWidth / 2 - 3;
-  const fencePaverGap = 0.75;
-  const westPaverEdgeX = fenceLeft + fencePaverGap, eastPaverEdgeX = fenceRight - fencePaverGap;
-  const pathWidth = 3.5;
   const westGateCenterX = westPaverEdgeX + pathWidth / 2;
   const rearPaverEdgeZ = fenceRear + fencePaverGap;
   paths.userData = { minimumWidthFeet: pathWidth, fenceCenterlineGapFeet: fencePaverGap, placement: 'Inside rear and side fences; lawn toward house except access connectors', surface: 'Warm gray-brown paver stone', provisional: true };
@@ -487,7 +650,41 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   addWalk('Garage side door threshold connector', 55.725, garageSideDoorCenterZ - garageSideDoorWidth / 2, 56.5 - 55.725, garageSideDoorWidth);
   addWalk('Garage driveway to side path connector', drivewayLeft + drivewayWidth, 49, 56.5 - drivewayLeft - drivewayWidth, pathWidth);
   addWalk('Front paver walk west of driveway', westPaverEdgeX, 64.5, drivewayLeft - westPaverEdgeX, pathWidth);
-  addWalk('East fence walkway to patio steps', patioStepX - pathWidth / 2, patioBounds.rear - pathWidth, eastPaverEdgeX - patioStepX + pathWidth / 2, pathWidth);
+  const patioConnectorX = livingTerraceRight;
+  const patioRampEndX = eastPaverEdgeX - pathWidth;
+  const patioRampX = patioRampEndX - 3;
+  paving(paths, 'Ground-level patio garden connector', patioConnectorX, patioBounds.rear - pathWidth, patioRampX - patioConnectorX, pathWidth, patioGrade);
+  const patioRamp = paving(paths, 'Patio connector grade transition', patioRampX, patioBounds.rear - pathWidth, 3, pathWidth, patioGrade);
+  const rampPositions = patioRamp.geometry.attributes.position;
+  for (let index = 0; index < rampPositions.count; index++) rampPositions.setY(index, rampPositions.getY(index) + (rampPositions.getX(index) + 1.5) / 3 * (-1.35 - patioGrade));
+  rampPositions.needsUpdate = true;
+  patioRamp.geometry.computeVertexNormals();
+  patioRamp.userData = { ...patioRamp.userData, startTopFeet: patioGrade, endTopFeet: -1.35, slopeVerified: false };
+  const lawn = new THREE.Shape();
+  lawn.moveTo(lot.left, -lot.rear);
+  lawn.lineTo(lot.right, -lot.rear);
+  lawn.lineTo(lot.right, -lot.front);
+  lawn.lineTo(lot.left, -lot.front);
+  lawn.closePath();
+  const patioCutout = new THREE.Path();
+  for (const [index, [x, z]] of [
+    [livingTerraceLeft, livingTerraceRear], [livingTerraceLeft, livingTerraceFront],
+    [livingTerraceRight, livingTerraceFront], [livingTerraceRight, livingPatioBounds.rear],
+    [terraceLeft, patioBounds.rear], [terraceLeft, terraceFront],
+    [patioBounds.right, terraceFront], [patioBounds.right, patioBounds.rear],
+    [patioRampEndX, patioBounds.rear], [patioRampEndX, patioBounds.rear - pathWidth],
+    [patioConnectorX, patioBounds.rear - pathWidth], [patioConnectorX, livingTerraceRear]
+  ].entries()) {
+    if (index === 0) patioCutout.moveTo(x, -z);
+    else patioCutout.lineTo(x, -z);
+  }
+  patioCutout.closePath();
+  lawn.holes.push(patioCutout);
+  const lawnMesh = new THREE.Mesh(new THREE.ShapeGeometry(lawn), mat('#83936b'));
+  lawnMesh.name = '75 by 130 ft lot lawn, not surveyed grade';
+  lawnMesh.rotation.x = -Math.PI / 2;
+  lawnMesh.position.y = patioGrade;
+  group.add(lawnMesh);
   const cartWidth = 28 / 12, cartDepth = 32 / 12, cartWallGap = 1 / 12;
   const cartOuterX = eastWallFaceX + cartWallGap + cartWidth;
   addWalk('City collection cart storage pad', eastWallFaceX, 27.4, cartWidth + 2 * cartWallGap, 6.7);
@@ -629,24 +826,43 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   label('FRONT / STREET', lot.centerX, lot.front - 5);
   const lighting = new THREE.Group();
   lighting.name = 'Outdoor lighting additions';
-  lighting.userData = { colorTemperatureKelvin: 2700, shielded: true, photometryVerified: false, controls: 'Dimmable patio; motion-boost drive and side access; no path-post lights' };
+  lighting.userData = { colorTemperatureKelvin: 2700, shielded: true, photometryVerified: false, glareAndSpillVerified: false, productSelected: false, controls: 'Night/Day preview; dimmable patio and porch, motion-boost drive and side access are design intent only; no path-post lights' };
   group.add(lighting);
-  function downlight(name, x, y, z, targetX = x, targetZ = z, intensity = 22) {
+  function downlight(name, x, y, z, targetX = x, targetZ = z, intensity = 22, targetY = -1.35) {
     const fixture = new THREE.Group();
     fixture.name = name;
+    fixture.userData = { mount: 'ceiling', colorTemperatureKelvin: 2700, downwardOnly: true, productSelected: false, photometryVerified: false };
     fixture.position.set(x, y, z);
     lighting.add(fixture);
     box(fixture, 0, 0, 0, 0.3, 0.15, 0.3, dark);
     box(fixture, 0, -0.09, 0, 0.2, 0.025, 0.2, glow);
     const light = new THREE.SpotLight('#ffd09a', intensity, 16, Math.PI / 3.2, 0.65, 2);
+    light.name = `${name} light source`;
     light.position.set(x, y - 0.15, z);
-    light.target.position.set(targetX, -1.35, targetZ);
+    light.target.position.set(targetX, targetY, targetZ);
     lighting.add(light, light.target);
+    return fixture;
   }
-  for (const x of [patioCenterX - 5, patioCenterX + 5]) downlight('Shielded warm patio ceiling light', x, patioRoofUndersideAt(patioCenterZ) - 0.075, patioCenterZ);
-  downlight('Driveway motion-boost downlight', 43, 8.6, 49.6, 43, 58, 32);
-  downlight('West side-entry downlight', -0.6, 7, 42, westGateCenterX, westFenceReturnZ);
-  downlight('East side-entry downlight', 56, 7, garageSideDoorCenterZ, 58.25, eastFenceReturnZ);
+  function wallDownlight(name, x, y, z, rotation, targetX, targetZ, intensity = 22, targetY = -1.35) {
+    const fixture = downlight(name, x, y, z, targetX, targetZ, intensity, targetY);
+    fixture.rotation.y = rotation;
+    fixture.userData.mount = 'wall';
+    box(fixture, 0, 0, -0.2, 0.3, 0.3, 0.1, dark).name = 'Exterior downlight wall backplate';
+    return fixture;
+  }
+  for (const x of [patioRoofCenterX - patioRoofWidth / 4, patioRoofCenterX + patioRoofWidth / 4]) downlight('Shielded warm patio ceiling light', x, patioRoofUndersideAt(livingPatioCenterZ) - 0.075, livingPatioCenterZ);
+  downlight('Open-patio approach ceiling light', 3.3, patioRoofUndersideAt(0.8) - 0.075, 0.8, 0, -2, 26, patioGrade);
+  for (const x of [4.2, 26.5]) downlight('Front porch approach ceiling light', x, porchCanopyUndersideAt(58.5) - 0.075, 58.5, x, 60.5, 24, 0);
+  wallDownlight('Front door wall downlight', 15.6, 8.6, 54.675, 0, 15.6, 59.5, 26, 0);
+  wallDownlight('Driveway motion-boost downlight', 43, 8.6, 49.475, 0, 43, 58, 32);
+  for (const z of [14, 28]) wallDownlight('West side-path wall downlight', -0.475, 8.6, z, -Math.PI / 2, westGateCenterX, z, 30);
+  wallDownlight('West side-entry downlight', -0.475, 8.6, 42, -Math.PI / 2, westGateCenterX, westFenceReturnZ, 30);
+  for (const z of [18, 31]) wallDownlight('East side-path wall downlight', 55.975, 8.6, z, Math.PI / 2, 58.25, z, 26);
+  wallDownlight('East side-entry downlight', 55.975, 8.6, garageSideDoorCenterZ, Math.PI / 2, 58.25, eastFenceReturnZ, 26);
+  wallDownlight('Dining patio steps wall downlight', 12.725, 8.2, 1, -Math.PI / 2, 7.5, 1.25, 26, -1.1);
+  wallDownlight('Rear dining path wall downlight', 20.0375, 8.6, -0.575, Math.PI, 20.0375, -3, 22, patioGrade);
+  wallDownlight('Rear kitchen garden wall downlight', 38.75, 8.6, 6.525, Math.PI, 32, -1.75, 24, patioGrade);
+  wallDownlight('Rear prep garden wall downlight', 53.5, 8.6, 6.525, Math.PI, 47.4, -1.75, 24, patioGrade);
   const cameras = new THREE.Group();
   cameras.name = 'Outdoor camera placements';
   cameras.userData = { connection: 'Home-run exterior-rated CAT6 PoE to NVR', privacyMasksRequired: true, coverageVerified: false };
@@ -658,8 +874,8 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const cameraSchedule = [
     { id: 'C1', purpose: 'Front door visitor identification', position: [18.5, 4.2, 54.65], aim: [15.6, 61], doorbell: true },
     { id: 'C2', purpose: 'Garage doors and own driveway', position: [43, 7.8, 49.6], aim: [43, 80] },
-    { id: 'C3', purpose: 'Covered patio and dining access', position: [patioCenterX, 8.5, 6.05], aim: [28, 0] },
-    { id: 'C4', purpose: 'Rear lawn and rear fence approach', position: [patioBounds.left + 0.6, 7.8, patioBounds.rear + 0.35], aim: [22, -23] },
+    { id: 'C3', purpose: 'Covered living-room patio, wall-mounted after post removal', position: [12.9, 8, 6.65], aim: [5, 1] },
+    { id: 'C4', purpose: 'Rear lawn and rear fence approach', position: [25.8, 8.5, -0.5], aim: [22, -23] },
     { id: 'C5', purpose: 'West side path and gate', position: [-0.55, 7.5, 9], aim: [westGateCenterX, westFenceReturnZ] },
     { id: 'C6', purpose: 'East side access and gate', position: [56, 7.5, 15], aim: [58.25, eastFenceReturnZ] }
   ];

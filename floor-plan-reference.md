@@ -1,5 +1,501 @@
 # Ground-floor plan reference
 
+## Dining garden window interior face - October 25
+
+Correct the east/garden-facing dining casements so the white interior
+frame, Craftsman casing and inset sill face west into dining. Black frames
+remain outside. Preserve opening size, sill height and the inset-sill finish;
+no projecting sill or room-layout change.
+
+## Media shelf removed - October 25
+
+Owner rejected the compact Xbox/Switch shelf. Remove both boards, brackets
+and removable cable basket; leave the right/dining-side fireplace area open.
+Do not restore the full-width built-ins or add replacement storage.
+Piano, chairs, windows and under-stair shelves stay fixed. Console/controller
+storage and charging location remain undecided.
+
+## Dish inventory allocation - October 25
+
+| Island bank, sink toward refrigeration | Middle drawer | Bottom drawer |
+|---|---|---|
+| Small | 10 plates, 7 in diameter | 10 bowls, 4.5 in diameter |
+| Medium | 10 plates, 9 in diameter | 10 bowls, 6 in diameter |
+| Large | 10 plates, 10.5 in diameter | 10 bowls, 8 in diameter |
+
+Each drawer uses two stacks of five. Tapered bowl stacks rise about 6.2 in;
+plates about 2.4 in. Upper island drawers keep utensils. All dish contents
+move with the fronts. Cooking uppers hold an assumed ten cups and ten mugs,
+five of each per stack on the first two adjustable shelves, with top tiers
+spare. Two-row cup placement includes mug handles.
+
+Quantities are modeled exactly; dimensions are representative allowances,
+not the owner's measured inventory or load approval. Check actual nesting,
+diameters/handles, full-extension retrieval, loaded slide/shelf capacities,
+non-slip/peg accessories and safe reach. No cabinet/layout changes.
+
+## Remove remaining living built-in - October 25
+
+Remove the right/dining-side low fireplace cabinet, leaving its former
+74.88 x 11.76 in footprint open. Both low fireplace cabinets are now gone.
+Keep the piano on the left, window-side chairs/table, fireplace, windows,
+existing wall/baseboard and all four under-stair bookcases unchanged.
+Earlier paired-cabinet specifications are superseded. Media equipment,
+charging, cable routing and ventilation need a new location; none is added.
+
+## Living window-side chairs and joined windows - October 25
+
+Move both oatmeal chairs from the piano/stair side to the three-window
+return wall: centers (4.25,10.2) and (8.45,10.2) ft, facing south into the
+room (rotation 0). Move the oak end table and its lamp between them to
+(6.35,10.2). Retain the sofa, piano/bench and under-stair
+bookcases. Chair fronts leave 25.8 in to the sofa end; 2.2 in table-side
+gaps remain. These are local furniture gaps, not approved circulation.
+The old 1.5 in chair/bench conflict is removed, not a playing-access approval.
+
+Join the three 30 x 60 in return windows edge-to-edge into one 90 x 60 in
+opening, x = 2.85-10.35, z = 8, sill 36 in / head 96 in. Unit centers are
+x = 4.1 / 6.6 / 9.1: casement / fixed picture / casement. Remove both 10 in
+wall piers and individual casings; use one outer Craftsman surround with
+continuous header, sill and apron. Overall cap width is 98.75 in, top
+102.625 in. Retain the two outer sconces and fireplace-side windows.
+Window bank, mullions, continuous header, bracing, flashing and sash access
+require manufacturer/architect review; no structural approval is claimed.
+
+## Inset ordinary window sills - October 25
+
+Replace projecting white sill stools on both floors with opening-width
+inset white sill liners, nominal 1.5 in deep, terminating at the window
+frame datum inside the wall thickness. No horns or room-side sill shelf.
+Keep surrounding Craftsman casing/aprons, openings, glazing and exterior
+weathering details unchanged. Preserve the separately requested quartz
+kitchen plant ledge and its pots as an explicit exception. This is a finish
+study, not a wall/framing or waterproofing detail; verify actual jamb depth,
+condensation control, flashing and product installation requirements.
+
+## Warm whole-home lighting and piano - October 25
+
+Supersedes the dark perpendicular loveseat and the left low fireplace built-in
+(left when facing the fireplace, stair side): Yamaha CLP-825 Rosewood at
+(1.074, 23.655) ft, keyboard facing east into the living room. Retain the
+under-stair bookcases; both low fireplace cabinets are now removed. Cabinet dimensions:
+1350 x 411 x 849 mm (W/D/H); raised music rest reaches 1003 mm.
+The modeled 24 x 12 in bench is provisional, not a Yamaha specification.
+Its bench is tucked 15.6 in forward of the piano center. The chair pair now
+sits at the opposite window wall, removing the former 1.5 in chair conflict;
+occupied playing/pullout clearance remains unverified. Piano width
+leaves about 10.9 in at each end of the former 74.88 in cabinet run; rear edge
+x = 0.4 ft clears wall trim. Cabinet/rest screen the window above its 31.2 in
+sill; verify actual sash, apron and trim access.
+Main sofa, two chairs and centered end table remain: five lounge positions,
+not seven. Check bench pullout, occupied access, receptacle/cord routing and
+fireplace/product clearances before purchase. Geometry is a simplified
+product-size study, not manufacturer CAD.
+
+Both modeled floors now have 2700 K-intent deep-regressed recessed ceiling fixtures
+across rooms, closets and circulation, with three garage fixtures located
+over actual garage floor pieces. Living end-table and piano task lamps add
+local light. Existing kitchen task/pendant and exterior lighting remain.
+The added surface-mounted disks are replaced by 4 in apertures with small
+white trims, dark 2 in-deep baffles and frosted lenses recessed 2 in above
+the ceiling plane. Mount at the actual 9 ft room ceiling datum, including
+the garage's lowered floor datum. Wide vertical 90-degree beams are ambient
+only; retain the separate shaded piano/reading lamps. Kitchen's existing
+four recessed fixtures remain unchanged.
+Kitchen cans use wide, vertical beams for whole-room ambient light only;
+counter tasks remain with dedicated strips/hood/pendants.
+Night/Day controls the added sources without new UI. Plans and other floors
+disable them; close inspection views hide overhead hardware. Basement is not
+modeled. Dimming, CRI 90+, glare, wet-location ratings, actual lumen output,
+spacing, drivers and electrical compliance require professional selection.
+Rendered brightness is not verified photometry.
+
+## Interior door reference - October 25
+
+All solid interior room/closet leaves: one tall recessed panel, flat stiles,
+top rail and wider bottom rail; match surrounding trim material #FAF9F5
+on both faces. Includes pocket, bifold segments and house-to-garage leaf,
+superseding prior two-panel/oak/mudroom-color doors. Keep nominal 8 ft
+openings and existing widths, operations and poses. Upstairs door-width
+cased openings gain closed operable leaves; wide doorless passages remain.
+Exterior, glazed office/patio, shower, cabinet and appliance doors excluded.
+Verify actual products, rated assembly requirements and occupied swings.
+
+## All-brick cladding - October 25
+
+Supersede the white-siding/front-brick-base and side/rear limestone schemes:
+all house walls, exposed wall bases, gables and patio wall-head closures
+now use warm cream brick with warm gray-beige mortar, superseding the
+red-brown color trial. Remove all facade battens. White porch columns,
+trim/arch, gridded front windows, light-wood doors and roofs remain.
+The patio paving/steps, layout, openings and default door poses stay fixed.
+No facade toggle is added.
+
+Brick is a veneer finish concept, not approved structural masonry.
+Illustrative texture module: 8 in brick length and 2.625 in course height,
+including joints. Coordinate actual veneer depth/support, ties, insulation,
+drainage cavity, weeps/flashing, lintels, movement and frost durability.
+The earlier front/interior window mismatch and unassigned garage-upper
+volume remain; no extra room/floor or construction approval is implied.
+
+## Preferred farmhouse elevation study - October 25
+
+Use the owner's pictured light-wood farmhouse elevation, not the previous
+optional-brick finish variant. Fixed brick bases/column feet/front steps,
+white siding/trim, paired gridded windows, three vented front gables,
+light-wood doors, decorative arched entry casing and standing-seam
+porch/garage eyebrow canopies follow the picture.
+
+| Exterior-study surface | Arrangement |
+|---|---|
+| Ground front | Four 2.8 ft-wide windows, centers x = 4.2, 8.3, 23, 27.1 |
+| Main upper front | Six windows, centers x = 4.8, 8.6, 12.4, 20.2, 24, 28.1 |
+| Garage upper facade | Two 2.8 ft-wide windows, centers x = 39.4, 44 |
+| Three main front gables | Eaves 19 ft; nominal rise 8.8 ft |
+| Entry doors | Retain 8 ft height and closed defaults; arch is decorative |
+
+The taller garage-upper shell is an unassigned exterior roof-volume study:
+no interior room, floor, storage or access is created. Front facade windows
+are not yet coordinated with furnished room openings; the viewer notes
+state this limitation. Interior layouts/JSON, patio and side/rear window
+arrangements remain unchanged. Garage setback remains as modeled, so this
+is not an exact photographic reproduction. Review roof junctions, loads,
+egress, glazing, garage separation, height/setbacks and drainage before
+using the study as construction or ordering information.
+
+## Layered kitchen lighting - October 25
+
+| Layer | Model arrangement | Night behavior |
+|---|---|---|
+| Recessed ambient | Four 4 in regressed/baffled concepts at (32,10.5), (33.8,13.8), (33.8,20.1), (32,23.2); 9 ft ceiling | Soft beams on; hardware visible except front inspection presets |
+| Under-cabinet | Two diffused strips under the existing hood-side uppers, toward the front | Counter task beams on |
+| Hood | Retain concealed task strip and add downward illumination | On |
+| Island | Two existing pendant shades with recessed diffusers and actual downward beams | Island lights checked and sources on |
+| Family board | One 45 in shielded gold picture-light concept, center 85.2 in above floor | Two soft aimed beams illuminate the existing board |
+
+Night/Day uses the existing Menu control, not a new panel. Day switches the
+practical sources off and restores the previous daytime pendant visibility;
+normal views restore hardware hidden by inspection. Other floors, structural
+previews and plan/basement views disable this rig. Saved layouts, cabinetry,
+windows, room dimensions and door defaults remain unchanged.
+
+Design intent: warm 3000 K, CRI 90+, deep shielding/diffusers and separately
+dimmable ambient, pendant and task circuits. Four cans are a starting study,
+not a verified fixture count for required illumination. Consult
+[Cooper's layered-lighting guidance](https://www.cooperlighting.com/global/resources/the-lighting-resource/residential-contractors-guide-to-layering-light)
+and selected manufacturer IES/installation/dimming data. Model intensity
+units are not calibrated lumens or lux. Verify reflected glare, actual
+output/spacing, circuit/driver loads, ceiling/insulation fit and service
+access. Mock up the board light on the existing glass and check fixing,
+projection and headroom before construction.
+
+## Joined kitchen windows with one slim surround - October 25
+
+- Preserve 54 x 42 in fixed center and two 18 x 42 in side casements;
+  centers become x = 29 / 32 / 35 ft, moving the side units inward 9 in each.
+- Frames meet edge-to-edge in one 90 in opening at x = 28.25-35.75 ft,
+  z = 7. No wall piers remain between units. Sill/head stay 53/95 in.
+- One slim white perimeter: two 1 in side boards, one continuous
+  92.25 in head, 1/8 in reveals, no intermediate casing, bulky cap or apron.
+  The blue-gray quartz sill is 93.25 W x 3.5 D x 0.75 H in.
+- Sconces: x = 27.415625 / 36.584375, y = 6.3 ft. Three pots remain
+  at x = 28.58 / 33.75 / 35.42, side pots offset away from crank housings.
+- Ground-floor plan, furnished opening/trim and exterior cutout/trim share
+  the same bank. Units/glass area remain unchanged; assembly span reduces
+  108 to 90 in by removing the two 9 in inter-window piers.
+- House shape, room sizes, counters, sink, storage, prep bank and saved
+  layouts are unchanged. Window takeoff is 29 openings / 50 units.
+
+This is a conceptual mulled assembly, not approved manufacturer CAD.
+Verify factory joining, actual frame/rough-opening dimensions, header and
+pier removal, flashing, sealed joints, sill support and operation before
+construction. This supersedes the older separate trim and wide-divider
+studies below; do not restore their oversized header.
+
+## Exterior circulation lighting - October 25
+
+Add warm 2700 K-intent downward lights at the front door/porch, side paths,
+rear dining/garden approach and patio steps/open approach. Retain all
+four porch/garage lanterns; keep path-post/bollard lights removed.
+There are 17 downlights, four lanterns and five step markers with actual
+soft tread washes. Wall backplates meet exterior faces, and front porch
+fixtures mount to the sloping canopy underside. See the
+[placement and controls](electrical.html#outdoor-camera-lighting-plan).
+The existing Night/Day button gates every exterior light and emissive lens,
+including retained lanterns/markers; switching floors disables/restores them.
+Actual motion/dusk/timer controls are not simulated. Product/photometry,
+glare/spill, wet-location mounting, circuits and required illumination remain
+unverified. Preserve house openings, patio/steps, garden, cameras and all
+firepit storage restrictions; no plan geometry or saved JSON changes.
+
+## Covered patio moved behind living room - October 25
+
+Latest furniture/firepit revision tucks chairs/table to z = 6.65, keeping
+x = 1.6 / 3.5 / 5.4. The chair envelopes end at z = 7.5, about 3.3 in off
+the wall face, leaving the z = 0-5.5 static approach strip clear.
+Window/sill operation and occupied use remain unverified.
+Move the closed firepit to (-3.75, -2.325), feet at y = -1.625 on level
+patio stone, wholly outside the roof and graded strip. Remove its old
+rear-yard pad; update the firepit camera. It remains fully extinguished
+cold storage only: operating separation from the roof/house and cedar
+side fence is less than the required 15 ft. Birmingham's official page
+was rechecked October 25, 2026; actual product/manual is still unselected.
+See [firepit limits](patio.html#portable-firepit). Earlier furniture and
+rear firepit locations below are superseded; patio/roof/steps/garden stay.
+
+Latest fence-side extension closes the remaining lawn gap to the west
+fence-edge path (right in the patio view). Patio bounds now reach
+x = -8.855 to 12.95, z = -4.325 to 7.775, about 263.8 sq ft including
+a 3 ft-wide graded strip. The main flat area remains y = -1.625 and starts
+at x = -5.855; the strip blends up 3.3 in toward the existing path top
+y = -1.35 at x = -8.855. This is about 9.2% cross-slope, not verified
+accessible routing or drainage. Keep the existing 3.5 ft fence-side path
+and its 9 in fence-centerline gap (about 7 in to the rails); no paving
+touches the fence. No duplicate slab, lip or grass at the join.
+Roof, two-chair set, full-width steps, east path and garden stay fixed.
+Earlier patio widths/areas and the 5.1 ft lawn-gap notes below are superseded.
+Survey, setbacks, coverage, grading/drainage and frost base require review.
+
+Latest seating simplification replaces the four-chair dining set with
+two compact 20.4 in-square chairs centered at (1.6, 4.4) and (5.4, 4.4),
+facing the yard. An 18 in-square, 20 in-high side table sits between
+them at (3.5, 4.4). All sit on the ground-level terrace beneath the
+unchanged cover. Keep the full-width dining steps and both uncovered
+extensions. The static furniture envelopes leave z = 0-3.5 clear for
+approaching the steps and turning into the open yard section; this does
+not verify occupied seating or selected-product clearance. Earlier
+four-chair/large-table schedules are superseded.
+
+Latest right-side extension adds another 4 ft toward decreasing x (right
+in the exterior-patio camera). Overall bounds become x = -3.75 to 12.95,
+z = -4.325 to 7.775, top y = -1.625: 16.7 x 12.1 ft, about 202.1 sq ft.
+This adds 48.4 sq ft beyond the previous yard-extended patio. Keep the
+roof at x = 0-13.2 and z = -0.325 to 8.225; do not move steps, furniture,
+post, lights or garden. The existing west path ends at x = -8.855,
+leaving about 5.1 ft of lawn between it and the new patio edge. The lawn
+cutout expands with the paving; the east garden-path join stays fixed.
+This supersedes earlier overall widths/areas below. Survey, coverage,
+setbacks, base/frost design and drainage remain unapproved.
+
+Latest yard extension: expand the patio 4 ft toward the rear yard, to
+x = 0.25-12.95, z = -4.325 to 7.775, still y = -1.625. Total paving
+is 12.7 x 12.1 ft (about 153.7 sq ft); the extra 50.8 sq ft of patio is
+uncovered. Roof, beams, retained post, lights, seating and stairs stay fixed.
+Trim the existing garden connector to start at x = 12.95, meeting the
+expanded terrace edge without overlapping paving finishes. Its route,
+grade, east ramp and garden planting remain unchanged. Update the lawn
+cutout to the new rear edge; nominal rear-boundary distance is now 28 ft
+for paving, still 32 ft for the roof, not surveyed or approved setbacks.
+Net additional hardscape is about 35.2 sq ft after replacing the path strip.
+Verify coverage, setbacks, grading and drainage before construction.
+
+Full-width stair revision: keep the 12.7 x 12.1 ft patio flat at
+lawn datum y = -1.625, not level with the elevated dining floor. Lower
+furniture and the remaining post/foot accordingly; keep roof, beams and C3.
+Keep the garden-edge stairs and extended lower landing removed. Extend
+the 4 ft-deep landing and both treads
+along the whole dining side: x = 8.975-12.975 for the landing,
+z = -0.325 to 7.775, 8.1 ft wide, top y = 0. Both 13.2 in treads descend
+west through three 6.5 in risers, ending x = 6.775. Landing and treads meet
+the dining rear exterior face and living-wall exterior face at the ends.
+The patio front edge follows that wall face at z = 7.775; roof unchanged.
+Keep the threshold at door datum and the garden/path/crop elevations fixed.
+The raised-whole-patio study is superseded, not an approved safety design.
+Door swing, occupied access, landing edges, handrails, drainage/threshold
+waterproofing and reduced-post roof/foundation support require review.
+
+Latest marked-image revision: remove the three circled patio posts and
+their stone feet. Keep only the unmarked 9 in-square post and 12 in foot
+at (0.75, 0.275). Preserve roof, beams, terrace, steps and seating.
+C3 moves off its removed post to the solid dining west wall at
+(12.9, 8, 6.65), aimed toward (5, 1); mounting and coverage are unverified.
+This is a visual support-reduction study, not a determination that posts
+are structurally unnecessary. Roof bearing, lateral/uplift resistance,
+wall connections and footings require structural design and approval.
+Earlier four-post schedules are superseded.
+
+Latest circled-image correction: move the 36 x 96 in inward glazed door
+to the perpendicular dining west wall, centered (13.2, 3.95), replacing
+the former 6 ft window. Restore all three living return windows in their
+90 in bank; restore the original indoor chair/table positions.
+The 4 ft-deep, 3.5 ft-wide landing is x = 8.975-12.975, z = 2.2-5.7.
+Two 13.2 in treads descend west to x = 6.775 through three 6.5 in risers.
+Shift the outdoor table and four chairs 2 ft west, table center (3.5, 3.9),
+to clear the stairs. Tucked-chair clearance to the bottom tread is 2.7 in,
+not occupied chair-pullout clearance or a passing route.
+Remove the dining-side stairs and kitchen/prep terrace paving; show garden
+soil there. Retain the existing dining-door landing pending a decision on
+that door; it no longer has a stair route to grade. Do not use its unguarded
+edge. Keep the rear garden connector and covered seating. Static furniture
+and post clearance is not occupied access, door-sweep or guard approval.
+Header, threshold, landing edges, drainage and handrails require review.
+Oatmeal chair centers return to (4.25, 10.2) and (8.45, 10.2).
+The new inward door sweep intersects the west dining end chair even when
+tucked. Move that chair clear before opening; occupied access is unapproved.
+
+Latest follow-up removes the obsolete garden-side dining door and its
+landing completely. Replace its 6 x 8 ft assembly with a 6 x 5 ft paired
+casement window at a 3 ft sill; remove all old threshold/door hardware.
+The existing patio button now operates only the relocated west door,
+90 degrees inward, initially closed. Keep the centered table.
+Show two 5 ft trellis rows in the garden: cucumbers at x = 30.5-37 and
+green beans at x = 39.5-46, both z = 4.4. Add pumpkin vines and orange
+fruit at (49, 3) and (52.5, 3). These are illustrative growth, not verified
+sunlight, crop spacing, planting depth or drainage.
+Remove the decorative front-entry arch and curved gable notch; use a
+straight header with underside y = 8. Front porch posts become 12 in
+square on 15 in bases. Patio posts become 9 in square on 12 in feet.
+Post size is a visual study, not structural sizing or connection approval.
+The earlier retained-landing notes above are superseded.
+
+Owner explicitly means the living-room area, not the dining-door half.
+The new covered terrace is x = 0.25-12.95, z = -0.325-7.75 at lawn grade
+y = -1.625, about 102.6 sq ft. The roof spans x = 0-13.2,
+z = -0.325-8.225, center y = 9.1, pitch 3/16. Lower it to suit the
+living wall/upper-floor junction; four posts, two beams, two lights,
+the wall-head closures and camera C3 follow. Remove the previous
+kitchen/prep roof and closures. Both kitchen and prep glazing are open
+to the sky; living glazing now receives shade. Daylight is not simulated.
+
+Move the table/four chairs to (5.5, 3.9), leaving about 3.7 ft static
+clearance to the east post feet with chairs tucked. The existing 29 ft
+kitchen/prep patio, 4 ft-deep full-width dining landing and two treads/
+three 6.5 in risers remain unchanged and uncovered. No house opening
+changes: living windows remain windows, so this is not a covered entrance.
+The dining shoe-changing landing is still exposed; a direct living door
+requires a separate coordinated opening/layout/landing decision.
+
+The 3.5 ft-wide garden path extends around dining from x = 8.5 to 56.645,
+z = -3.825 to -0.325, joining both terraces at lawn grade before the
+existing final 3 ft transition to the higher east walkway.
+Remove grass below the joined paving. Rear edges remain about 32 ft from
+the rear boundary; added paving/coverage still needs survey/zoning review.
+C3 moves to the living patio post at (12.6, 8, 6.65), aimed at (5,1).
+C4 stays at (25.8, 8.5, -0.5). Camera coverage is not verified.
+
+This supersedes earlier split-cover schedules. Structure, roof junctions,
+glazing operation, occupied circulation, drainage, thresholds, landings,
+guards/handrails, path grades and step-free access remain unverified.
+
+## Kitchen passages widened to 36 in finished clear - October 25
+
+Both circled doorless passages now have 36 in finished clear width and 96 in
+height at shared wall x = 37.5. Prep: z = 9.725-12.725. Mudroom:
+z = 21.175-24.175. No leaves, tracks or thresholds are added. Wall returns
+define finished clear width; applied casing stays outside it. Rough framing
+must be sized separately for selected jamb/finish thickness and site tolerance.
+
+Outer jambs remain fixed beside the sink/prep counters and refrigeration.
+Move both inner jambs 6 in toward cooking; center z = 16.95 stays fixed.
+
+| Affected element | Before | Current |
+|---|---:|---:|
+| Each passage, finished clear | 30 in | 36 in |
+| Cooking counter length | 106.15 in | 94.15 in |
+| Side drawer base, each | 27 in | 21 in |
+| Hood-side upper width, each | 27 in | 21 in |
+| End fillers, each | 2.075 in | 2.075 in |
+| Cooktop base / narrow pull-outs | 36 / 6 / 6 in | Unchanged |
+| Counter depth / top elevation | 25.5 / 36.6 in | Unchanged |
+
+Counter spans z = 13.027083-20.872917. Modules total 90 in, with equal
+fillers completing 94.15 in. Hood remains 48 in, with 26.7 in from each
+hood edge to the adjacent opening. Single doors suit the 21 in upper tiers;
+stack heights remain 36 + 15 in. One full-size 10.56 in pan/pot per narrow
+drawer replaces the former pairs, retaining the stockpot below the oven.
+
+Shift the 24 x 12 x 105 in mudroom basket tower north 1.5 in to
+z = 18.775-20.775, preserving all ten baskets. Shorten the connecting return
+16.32 to 14.82 in and match its plinth/ceiling/trim closures. Sink run,
+prep counters/tower, refrigeration, island, coat closet, bench, garage entry,
+wall centerlines and saved layouts remain unchanged.
+
+These model dimensions do not approve header/structure, relocated services,
+finish thickness, accessibility or occupied use. Builder/supplier verification
+is required before framing or cabinet ordering.
+
+## Common-size cooking-wall cabinet schedule - October 25
+
+| Order along z, prep toward mudroom | Nominal width | Modeled use |
+|---|---:|---|
+| Fitted end allowance | 2.075 in | Scribe/filler, not usable storage |
+| Narrow base | 6 in | Three-tier spice pull-out, nine representative jars |
+| Drawer base | 21 in | Shallow utensil drawer, two deep cookware drawers |
+| Cooktop base | 36 in | Centered cooktop, coordinated drawer stack; product clearance unverified |
+| Drawer base | 21 in | Matching utensil/cookware drawers |
+| Narrow base | 6 in | Concept insert for one board and one baking tray |
+| Fitted end allowance | 2.075 in | Scribe/filler, not usable storage |
+
+Boxes total 90 in; fillers complete the revised 94.15 in span
+z = 13.027083-20.872917. Each base is nominal 24 D x 34.5 H in, with
+separate carcass panels, 4 in recessed toe, 1/8 in front reveals and
+5.5 / 12.25 / 12.25 in top-to-bottom drawer fronts. No broad upper filler
+rail is needed on these drawer stacks. Narrow fronts are 5.875 in wide.
+Narrow pull-outs extend 21 in and preserve the separate sink-wall organizer.
+
+Each hood-side stack is 21 W x 12 D in with 36 H + 15 H in upper boxes.
+Bottom y = 4.55, tier join y = 7.55, box top y = 8.8; scribe/cornice closes
+the last 2.4 in to the 9 ft ceiling. Outer stack edges align with the
+90 in base-module span. These dimensions supersede earlier 27.6 in uppers
+and 33.1 in side-front notes.
+
+Set base backs at the finished wall x = 37.325 and fronts x = 35.325.
+Counter depth is 25.5 in, front x = 35.2, rear x = 37.325; top y = 3.05
+is unchanged. Correct cooktop center x to 36.325, retaining z = 16.95,
+the 48 in hood, island and passages. The counter front moves 3.3 in toward
+the kitchen to remove the prior wall penetration, not to enlarge the room.
+Browser counter-edge separation to the island is 57.6 in, not a measured
+occupied aisle including hardware. Both 6 in pull-outs open/close through
+the picker and move their contents 21 in. Sampled travel of all eleven base
+fronts produced no modeled contents-to-cabinet panel intersections.
+
+These are common nominal planning modules, not an approved order for a
+chosen frameless oak line. A [retail 6 in spice-base example](https://cabinetselect.com/shop/natural-shaker-6-base-spice-rack-pull-out/)
+demonstrates a complete cabinet, not a bare filler insert; its construction
+and finish are not selected. Confirm matching 6/21/36 in cabinets, board
+insert, fillers, front drilling, loaded slides, cooktop services and heat
+clearances with the supplier. Do not assume the cooktop permits a top drawer.
+
+## Walkthrough presentation - October 25
+
+The 4:03 downloadable MP4 now includes original soft instrumental music.
+Only small room labels remain over the full-frame model; repeated concept
+text, date, floor headings, title/credits cards and progress stripe are removed.
+Credits and route details stay in the closed description beneath the player,
+with firepit storage, basement and equipment limitations preserved. The
+introductory paragraph above the video is removed. Native volume/mute controls
+and optional captions remain. This refresh records current model geometry;
+it changes no layout or door pose.
+
+## Kitchen furnished storage and corrections - October 25
+
+- All 27 ordinary kitchen/island/prep-extension drawers now carry organized
+  household stand-ins: cutlery/cooking tools above, plates/bowls/containers
+  or handled pans/saucepans below. Contents move with their fronts.
+- Six cooking-upper support shelves hold glasses and mugs. Prep cupboards
+  gain shelves, mixing bowls and serving platters. A new lower steam-oven
+  tower floor supports the stockpot and separate lids.
+- Fixed oak rails close the former gap over three-drawer banks, from
+  y = 2.62 ft to 2.87 ft (2.82 ft at the island counter underside).
+- Correct the trash pull-out's former mid-height floor to y = 0.5 ft,
+  surface y = 0.52 ft (6.24 in). Gray trash and blue recycling bins are
+  separate, removable, open-top allowances, each 13.2 x 8.4 x 19.8 in.
+  Front-to-back layout needs 21 in travel to expose the rear bin.
+  Browser mesh bounds give 2.7 in rear-bin clearance beyond the cabinet
+  front, but only 21.4 in from the extended handle to the island counter.
+  This is a retrieval pose, not a passing aisle; close it for circulation.
+- Ordinary drawer travel stays 18 in; the existing tray keeps 21 in.
+  Default closed poses, cabinets/counters, appliances, windows, seating,
+  passages and saved JSON are unchanged.
+- The sink-wall storage view temporarily hides island/pendants and the
+  foreground cooking run, preserving drawer poses. Other views restore them;
+  its control is in optional notes.
+
+See the [storage allocation and unresolved needs](kitchen.html#storage-inventory).
+Leave spare high-cupboard capacity and under-sink service space rather than
+claiming unselected products fit. Confirm actual inventory, bins/slides, loaded
+capacity, cooktop services, wet-area systems, reach and occupied retrieval.
+
 ## Livable-area display
 
 The footer omits the redundant "Furnished concept" legend and decorative dot.
@@ -17,6 +513,50 @@ View/layout changes recalculate; source geometry changes update on reload.
 Round only the final displayed values to whole square feet. This is a nominal
 model estimate, not a certified living-area measurement: wall thickness,
 headroom eligibility and stair-area conventions need independent review.
+
+## Slim kitchen window trim - October 24
+
+The bulky continuous header and 8.75 in white pier boards are superseded.
+Use 1 in white side/head edging, 1/2 in thick, with 1/8 in reveals around
+each existing opening. The 9 in piers retain 6.75 in of exposed quartz.
+No projecting cap, broad header or white apron remains.
+Keep the fixed center / operable sides, x = 27.5-36.5 ft outer opening
+edges, 53 in sills and 95 in heads. No transoms, grilles or structural changes.
+The continuous rounded blue-gray sill is 111.25 W x 3.5 D x 0.75 H in,
+with 1/2 in returns beyond the slim outer edging; retain all three pots.
+Sconces recenter at x = 27.040625 / 36.959375 ft, y = 6.3 ft.
+Verify actual window profiles, quartz support/seams and sealed joints,
+casement access and sconce mounting plates with the builder/dealer.
+
+## Cabinet and drawer operation - October 24
+
+Click fronts or attached pulls to toggle all modeled storage fronts on both
+floors. Cupboard doors swing outward 90 degrees about an edge; ordinary
+kitchen drawers extend 18 in, existing bathroom boxes 15 in, and upstairs
+drawers their modeled depth minus 2.4 in. The dedicated tray pull-out retains
+21 in travel. Existing closet and refrigeration operations are unchanged.
+All storage fronts start closed; camera/floor changes preserve their pose
+and reload resets it. Hollow carcasses and moving boxes make the open state
+readable. Display poses are not installation, occupied-clearance or load
+approval; close fronts for circulation and verify real products separately.
+
+## Required kitchen tray-divider pull-out - October 24
+
+Provide one door-mounted, full-extension base-cabinet organizer in the main
+kitchen with wooden vertical slots for cutting boards, baking sheets,
+muffin tins and serving trays. See the [owner's reference](assets/kitchen-tray-divider-reference.png)
+and [kitchen requirement](kitchen.html#tray-divider-pullout). Match the existing
+white-oak Shaker cabinetry and satin-gold pull, not the photo's painted finish.
+Approved location: far-right sink-wall base bay, immediately right of the
+dishwasher facing the windows, center x = 36.4 ft, z = 8.2 ft.
+Replace its three drawers within the unchanged 21.6 W x 24 D in cabinet
+footprint. The model has a hollow carcass, five vertical slots, stored boards
+and trays, and a full-height Shaker front with a gold bar pull. Click to
+extend 21 in toward the aisle (+z); default is closed. Counter, appliances,
+sink, trash/recycling, island seating and passages stay fixed. Slide hardware,
+slot spacing and stored items are conceptual. Confirm actual item fit, slide
+loading, projecting hardware and occupied-aisle retrieval before fabrication;
+the display is not operating-clearance or product approval.
 
 ## Dining side-wall / kitchen cabinet alignment - October 24
 
@@ -42,22 +582,93 @@ but 24-inch end pull-outs still reach it. This supersedes older dining
 widths/x coordinates, not the existing rear-wall depth. Structure,
 foundation/roof junctions, actual products and occupied use need review.
 
+## Mudroom finishes and hook heights - October 25
+
+Latest owner revision supersedes prior putty/dark-back/oak-inset colors:
+all built-in casework, shelves, fitted trim/returns, backs/vertical boards,
+closet frames/insets and entry leaf use warm off-white #E6DECE. Keep paint
+relief, satin response, gold hardware, baskets, stone/tile and names.
+Remove the basket-tower "Safe high access required" sign, retaining cautions
+in optional viewer/room notes. No geometry, hook-height or lighting changes;
+high access and loading remain unverified, not approved by sign removal.
+
+Latest owner request supersedes camera-specific base brightness: a Menu
+Night lighting / Day lighting toggle defaults to Night (0.5 ambient,
+250 fill, 0.75 exposure), with Day at 2.5/650/1.25. Selection stays fixed
+during Tour, floor/room/exterior/2D changes and Reset; reload starts Night.
+Existing spotlights and fixture controls remain independent. No geometry or
+paint changes; these are preview settings rather than solar/daylight analysis.
+
+Default ground Whole floor and 2D top use the owner's softer "lights off"
+preview: ambient 0.5, studio fill 250, exposure 0.75, no room-study key.
+Refresh and Reset return to this default; island lights stay unchecked.
+Other room/upstairs/exterior presets remain unchanged. This is a preview
+lighting preference rather than switching every modeled fixture.
+
+Latest owner direction supersedes earlier sage/olive/putty colors and the
+ten-hook schedule: muted warm ivory/light putty #C7BAA3 joinery/door frames
+after the owner rejected #E6DECE as still too white, with stained
+white-oak bifold insets, retaining stone, baskets and gold hardware.
+Latest photo-reference revision replaces exposed oak backs with warm
+painted #B5A68F backing and four #C7BAA3 vertical boards per cubby section,
+with real 1/8 in joints. Boards stop at the seat/shelves; names sit in front.
+Oak insets reuse the kitchen reference without modifying shared materials.
+Add rounded hook plates/tips, cylindrical arms/fixing screws, muted fabrics
+and two-step north/east cornices. No shoe opening or shelf position changes.
+Retain the selected paint color while replacing flat matte response with
+fine eggshell bump/roughness maps (about 0.09 mm relief), 1/32 in eased edges
+clamped to thickness, and low-strength local studio reflections. No albedo
+texture changes the paint color. Local brass clones receive reflections
+without changing shared materials or the global scene environment.
+Owner brightness correction: keep the paint/materials but reduce the
+side-positioned #FFF3E3 spotlight to 120, ambient to 0.5, fill to 250,
+and exposure to 0.75, retaining blurred shadows in mudroom views only; other
+views retain their existing lighting/exposure presets. This is an interactive
+visual study, not photographic realism or verified daylight performance.
+Browser comparison at ten fixed 3 x 3 pixel panel samples in Cubbies view:
+average linear display luminance fell from 0.53261 to 0.34610, about 35%.
+This is a matched-view rendering check, not a measured physical light level
+or a claim about every pixel, screen or camera view.
+Mudroom-only screen-space ambient occlusion adds joinery contact shading,
+following viewport size and perspective/orthographic camera changes.
+Dark-brown transparent script replaces pale-gold names for legibility.
+Peter's hooks now match Lila's at 66.6 in (interpreted as matching adult
+hook height, not body height). All first shelves stay at 76.2 in.
+Each child has two hooks at 50.4 in plus two at 66.6 in: sixteen total.
+Use lower hooks now; later move coats up and retain lower hooks for bags
+or remove/patch them. Rows are alternate hanging positions, not doubled
+long-coat capacity. Verify actual reach from the floor, clothing fit,
+blocking and hardware loads; do not rely on bench climbing.
+No room boundaries, storage footprint, door poses or saved layouts change.
+
 ## Mudroom rendering depth - October 24
 
 Mudroom overview, Cubbies and Coats + bins use a warm interior study spotlight,
 lower ambient fill and a 2048 px soft-filtered shadow map. Real shelf/divider
 geometry casts shadows onto recessed backs; no contrasting paint or geometry
-change is needed. Other floor/view presets restore the original lighting and
-disable the shadow pass. This is an interactive visualization, not photometric
+change is needed. Other floor/view presets disable the shadow pass; kitchen/prep
+views use the balanced lighting described below and other views restore the
+original lighting. This is an interactive visualization, not photometric
 verification or a selected fixture layout.
 
-## Prep backsplash contrast - October 24
+## Prep backsplash matches countertop - October 25
 
-Replace only the prep quartz backsplash with muted deep sage ceramic tile,
-running bond and warm-gray 1/16 in grout joints. Retain ivory quartz counters,
-all appliances and the main-kitchen quartz wall finish. The backsplash stays
-14.35 ft wide and 9.84 in high, bottom y = 3.04 ft, front z = 7.26 ft.
-No room geometry, window trim or appliance alignment changes. Finish samples,
+For countertop edge/corner readability, kitchen/prep views use ambient 0.8,
+studio fill 300 and exposure 1.1, with a warm-white directional study light
+at intensity 1.5. The key follows the kitchen/prep view and avoids hard
+cast silhouettes. The shared interior SSAO pass adds soft contact shading
+at slab undersides, sink corners and cabinet/wall joints (0.35 ft radius).
+The prep-counter camera looks slightly farther down onto the worktop
+(vertical offset 1.2 ft instead of 0.4 ft, same target and span). Keep the
+ivory quartz texture/color, material properties and all geometry unchanged. Mudroom retains
+its separate lighting; unrelated rooms/floors retain default lighting.
+These are rendering corrections, not verified daylight or finish samples.
+
+Replace the green ceramic tile and grout with the same warm ivory quartz
+material as the countertop, with no running-bond pattern. Retain quartz counters
+and the main-kitchen quartz wall finish. For the taller prep windows, the backsplash
+is 14.35 ft wide and 4 in high, bottom y = 3.04 ft, front z = 7.26 ft.
+The four-appliance row moves 1.98 in forward to clear the new sills. Finish samples,
 cleanability, substrate and sealed wet-area joints require verification.
 
 ## Kitchen fruit and bread organization - October 24
@@ -68,29 +679,34 @@ cleanability, substrate and sealed wet-area joints require verification.
 - Inspect with Kitchen and Prep shelves views. Refrigeration-dependent fruit stays in the fridge.
 - Browser mesh bounds confirm both baskets stay within shelf depth with about 1 in combined front/back margin. Bread-box depth including its handle is about 10.64 in, leaving about 0.36 in at the shelf front and 1 in behind. These are model fit checks, not selected-product approval.
 
-## Centered warm sofa - current J study
+## Warm photo U seating - current J study
 
-J now uses one centered sofa facing the fireplace, replacing the two facing
-sofas. Center on the actual shared Living room bounds x = 0-13.2,
-z = 8-25.7 ft, not the feature-wall midpoint. Retain warm taupe upholstery,
-muted camel chairs and earthy cushions, with no coffee table, end table/cart,
-lamp or rug. Expose existing hardwood. The earlier L and photo grouping
-are superseded. Performance
+J now follows the latest photo's U grouping: mushroom main sofa facing the
+fireplace, separate perpendicular deep brown-gray 66 in two-seat loveseat,
+and two warm oatmeal chairs opposite it. Add the requested small oak table
+between the chairs, superseding the earlier no-end-table direction.
+Keep no coffee table or rug. This
+supersedes the single centered sofa, L and older facing-sofa studies.
+Do not copy the photo's double-height ceiling or oversized chandelier.
+Performance
 upholstery is a selection target, not a verified product. Keep the fireplace/TV,
 full-length cabinets, windows, stairs, dining and hall tree unchanged.
-The warmer taupe/camel finish supersedes the bright ivory/blue direction.
+The mushroom/brown-gray/oatmeal finish supersedes the earlier palettes.
 A-I remain available as comparisons.
 
 | Item | Current J geometry |
 |---|---|
-| Sofa | One 90 x 39 in warm taupe sofa, center (6.6, 16.85), turn -90 degrees facing fireplace/TV. Three cushion positions |
-| Chairs | Two muted camel upholstered 30 x 33 x 34.8 in chairs, centers (7, 10.5) / (7, 23.2), facing west |
-| Open floor | No coffee table/books, end table, cart, lamp or rug; existing hardwood exposed |
-| Static gaps | 16.2 in chair-to-sofa-end; 43.14 in sofa-front-to-closed-cabinet line |
-| Main route | Retained 36 in strip x = 13.25-16.25, z = 10.5-25.5. Chairs end at x = 8.375 |
+| Sofa/piano | 90 x 39 in mushroom main at (10.8, 17.475), turn -90 degrees; former loveseat removed for the Yamaha piano, now in the left low cabinet space at (1.074, 23.655), keyboard east |
+| Chairs | Two warm oatmeal upholstered 30 x 33 x 34.8 in chairs, centers (4.25, 10.2) / (8.45, 10.2), facing south from the joined-window wall |
+| End table | 16 x 16 x 22 in oak concept at (6.35, 10.2), centered between chairs with 2.2 in side gaps. Stability/reach unverified |
+| Open floor | No coffee table/books, cart, lamp or rug; existing hardwood exposed |
+| Static gaps | Current chair fronts to main-sofa end: 25.8 in; loveseat removed for piano. Old loveseat measurements no longer apply |
+| Main route | Retained 36 in strip x = 13.25-16.25, z = 10.5-25.5. Main sofa ends at x = 12.425 |
 
-These are modeled design concepts, not selected products. The 16.2 in
-chair-to-sofa gaps are not main walking routes. Verify family comfort, upholstery,
+These are modeled design concepts, not selected products. Narrow local
+gaps are not main walking routes. Chair backs stop at z = 8.825,
+approximately 4.8 in from the projecting window sill; verify sash reach.
+Verify family comfort, upholstery,
 cabinet/window operation and fireplace heat clearances.
 The old still render predates this arrangement.
 
@@ -206,15 +822,16 @@ Garments now hang sideways from the right side-hook tips; backpack handles
 meet the left side-hook tips. They are not mounted against the backing.
 
 Relocate the 24 x 12 x 105 in sage-greige basket tower north of the kitchen
-opening, at x = 37.675-38.675, z = 18.9-20.9, center (38.175,19.9).
+opening, at x = 37.675-38.675, z = 18.775-20.775, center (38.175,19.775).
 Its former south/arrival-wall z = 24.55-26.55 position is empty.
 Connect the basket tower to the north enclosure through a matching
-16.32 x 12 x 105 in open return at x = 37.675-38.675, z = 17.54-18.9:
+14.82 x 12 x 105 in open return at x = 37.675-38.675, z = 17.54-18.775:
 six physically joined fixed shelves, matching backing and recessed plinths.
 The top aligns at 105 in. This completes the built-in run without adding
 counted basket/shoe capacity; verify supports, anchorage and loads.
 Ten removable woven basket allowances (9 x 10 x 12 in) sit on five levels,
-plus a top shelf. North kitchen casing clearance is 5.675 in. Tower-to-bench
+plus a top shelf. North kitchen casing clearance is 1.175 in to the flat
+board and 0.425 in to its projecting cap. Tower-to-bench
 gap stays 50.8 in. Upper baskets carry a safe-access label. Remove
 the pictured west 29 in bin tower, 14.32 in shoe tower and west top rail,
 including their contents and drop-counter/outlet allowance. Keep north/east
@@ -265,6 +882,17 @@ See [design context](design-context.md#living-room-cycles-study---october-24)
 for the rendering basis.
 
 ## Viewing saved layouts
+
+The [whole-house walkthrough video](floor-plan-design.html#house-walkthrough)
+provides a 4:03 alternative to manual navigation with original soft instrumental
+music. It is a downloadable 1280 x 720, 24 fps MP4 recorded October 25, 2026, with small room labels, gentle
+camera movement, captions and edited floor changes. It covers the exterior,
+ground floor, garage, upstairs and patio; the basement is only a stair study.
+Native video controls provide pause, seeking and full screen without loading
+Three.js. It does not autoplay or automatically reflect later model edits.
+The player, text description and asset credits are on the floor-plan page;
+the viewer Menu links there. Mechanical equipment, firepit storage and
+construction/code limits remain provisional, not approved by the recording.
 
 The viewer omits the decorative top slogan, concept badge and visible
 garage-door explanation banner. Door controls still provide accessible
@@ -445,15 +1073,15 @@ See [kitchen requirements](kitchen.html), [sink candidate and dispensers](kitche
 | Fixture deck | z = 7.175-7.495; fixtures at z = 7.36 | Main faucet x = 32, hot/cold filtered dispenser x = 30.95, soap x = 33.05 |
 | Trash / dishwasher | Trash x = 29.75; dishwasher x = 34.5, both z = 8.2 | Same appliance sizes and immediate-left/right relationships to sink |
 | Dish rack | 16 x 14 in pan, center (34.35, 8.3), base y = 3.05 | Same removable catch pan, no drain/spout |
-| Cooktop run | Center (36.5, 16.95); z = 12.527083-21.372917 | Unchanged 106.15 in length, cabinet/hood sizes and casing allowances; follows shared wall west 6 in |
+| Cooktop run | Cooktop center (36.325, 16.95); z = 13.027083-20.872917 | 94.15 in counter length; common 6 + 21 + 36 + 21 + 6 in boxes plus equal 2.075 in end fillers. True 24 in bases meet wall face; 25.5 in counter depth |
 | Induction cooktop | 36 in wide along z, 21 in deep along x | Centered between the two passages; central drawer bank below |
 | Hood | 48 in wide throughout; depth tapers from 24 to 13 in | Warm-white plaster, plain lower edge at y = 6.3-6.5, cornice aligned with cabinets at 9 ft; no walnut band |
-| Hood-side uppers | Two approximately 27.6 in-wide x 12 in-deep stacks; bottoms at 54.6 in | Directly adjoin hood; two tiers of paired white-oak frameless Shaker doors, gold pulls, task lights, ceiling cornices; 1.5 in inset from base-run ends clears casing |
+| Hood-side uppers | Two 21 in-wide x 12 in-deep stacks; 36 + 15 in-high boxes; bottoms at 54.6 in | Directly adjoin hood; single oak Shaker door per tier, gold pulls, task lights and ceiling closures. Outer ends inset 2.075 in from counter ends |
 | Hood insert | Concealed provisional 46 in allowance | No selected insert/liner; hood task light stays; no bridge storage; manufacturer must verify adjacent cabinet and insert clearances |
 | Quartz walls | North sink wall, east cooking/passages wall, south refrigeration wall | Floor-to-ceiling ivory quartz on kitchen-facing surfaces only; cutouts retained; modeled as face materials without added slab thickness |
 | Sink-wall storage | No upper stacks | Three windows replace the upper cabinets; no former under-cabinet task lights there |
 
-The three kitchen window sills retain smoky blue-gray quartz, 4.5 in depth, 0.75 in thickness, rounded edges and 0.5 in end returns. Top is 53 in; white aprons 2 in high, no faucet notch. Pots/saucers are at x = 28.25 / 33.75 / 35.75, z = 7.333333, unchanged scale/diameter. See the updated window schedule for tight inter-window cap joints.
+The joined kitchen bank has one blue-gray quartz sill, 93.25 in wide, 3.5 in deep and 0.75 in thick, top at 53 in. Keep rounded edges and 0.5 in outer returns, no apron or faucet notch. Pots/saucers are at x = 28.58 / 33.75 / 35.42, z = 7.320833, centered in the sill depth at unchanged scale/diameter; side pots clear the cranks. See the latest joined-window schedule.
 
 ### Refrigeration and steam-oven wall
 
@@ -467,7 +1095,7 @@ Both columns face decreasing z into the kitchen. From the kitchen, view-left to 
 | Each column | 30 in nominal bay; 29.75 x 84 x 24 in body; 25 in cavity-depth allowance |
 | Fridge / freezer bays | x = 29.25-31.75 / 34.5-37 |
 | Tower | x = 31.8125-34.4375, center x = 33.125; original 31.5 in bay, 30 in clear; 25 in deep; do not widen |
-| Steam oven | Generic 30 x 24 x 24 in W/H/D envelope, bottom 36 in above floor; no model selected |
+| Steam oven | Generic 30 x 24 x 24 in W/H/D envelope, bottom lowered to 30 in above floor; no model selected |
 | Storage | Original-width Shaker storage below/above oven; separate overhead cabinets above columns/tower; no end pull-out |
 | Full-depth upper storage | y = 7.15-8.85; cornice y = 8.85-9; stained oak, not the earlier cream-front trial |
 | Panels / filler | Four 0.75 in column framing panels; recessed 2.85 in wall-side filler |
@@ -499,15 +1127,16 @@ Both columns stay closed by default; click or tap either modeled door to toggle 
 |---|---|
 | Counter/base run | x = 40.85-55.2; 24 in base depth; counter z = 7.225-9.275, top about 36.5 in |
 | Sink | Provisional stainless 30 x 18 in single bowl in 36 in base, center (47.4, 8.25); actual opening through quartz |
-| Sink window | One nominal 60 x 42 in fixed picture at (47.4, 7), centered on sink; 51 in sill / 93 in head; replaces two casements and center pier |
-| End-wall window | 24 x 42 in casement at (55.5, 11.55), centered between counter front z = 9.275 and pantry front z = 13.825; about 10.9 in equal trim-to-front gaps |
-| Left counter base | x = 40.85-45.9, width 60.6 in; extends to the shifted tower without a new gap |
+| Joined counter window bank | Standard 2050 / 5050 / 2050 frames, 23.5 / 59.5 / 23.5 W x 59.5 H in; bank centered (47.4, 7), total frame 106.5 in, provisional opening 107 x 60 in; one outer casing/sill, no wall piers; factory mull/header unapproved |
+| Bank unit centers | x = 43.941667 / 47.4 / 50.858333, z = 7; frame sill/head 41.25 / 100.75 in; sink picture remains uninterrupted |
+| End-wall window | Standard 2060 casement at (55.5, 11.55), 23.5 x 71.5 in frame in 24 x 72 in opening; frame sill/head 29.25 / 100.75 in, centered in counter-to-pantry aisle |
+| Left counter base | Two standard 30 in boxes x = 40.9-45.9, plus 0.6 in left filler; unchanged quartz extent |
 | Left prep worktop | Continuous quartz, no cooktop or cooktop exhaust; the trial 12 in induction unit is removed |
-| Compact dishwasher | 18 in panel-ready bay x = 48.9-50.4, immediately right of sink; white-oak Shaker front/gold pull; actual product/services unselected |
-| Remaining right cupboard | x = 50.4-52.35, width 23.4 in; continuous quartz over dishwasher and cupboard |
-| Right extension | x = 52.35-55.2, 34.2 in wide; two banks of three drawers |
-| Microwave / wall-oven tower | x = 38-40.75; rear z = 7.25; unchanged 33 in width / 25 in depth / ceiling height |
-| Tower appliance allowance | 30 x 48 x 24 in W/H/D, y = 2-6; microwave above oven, storage above/below; no selected product |
+| Compact dishwasher | 18 in bay x = 48.9-50.4, immediately right of sink; exposed stainless front, black controls and steel handle, no cabinet overlay; actual product/services unselected |
+| Remaining right cupboard | Standard 24 in box x = 50.4-52.4; continuous quartz over dishwasher and cupboard |
+| Right extension | Standard 33 in box x = 52.4-55.15 plus 0.6 in end filler; two banks of three drawers |
+| Microwave / wall-oven tower | x = 38-40.75; rear z = 7.25; standard 33 W x 24 D x 96 H in; open space above rather than an oversize ceiling-height box |
+| Tower appliance allowance | 30 x 48 x 24 in W/H/D, y = 1-5; microwave above oven, lowered 12 in; controls center 58.8 in, microwave handle 44.64 in; no selected product |
 | Tower-to-left-base gap | 1.2 in body gap, about 0.84 in to counter overhang |
 | Opposite pantry shelves | x = 37.675-55.325, z = 13.825-14.825; 211.8 in (17 ft 7.8 in) overall; four food bays / one cleaning bay, all 12 in deep |
 | Food shelf organization | Three bays retain six usable levels at y = 1 / 2.3 / 3.6 / 4.9 / 6.2 / 7.5 ft; east-end robot bay omits y = 1 shelf and contents, retaining five food levels; empty ceiling caps and original uprights remain |
@@ -522,12 +1151,19 @@ Countertop appliance envelopes, left to right; dimensions are W x D x H:
 
 | Appliance | Approximate size | Placement |
 |---|---|---|
-| Stand mixer | 12.6 x 16.8 x 16.8 in | Right-hand row with blender, combined x = 50.3-52.1917; back aligned at backsplash, clear of refined picture-window trim |
+| Two-slice toaster | 11 x 7 x 8 in | Left counter, center (44.8, 7.9); about 41.9 in clear counter toward oven tower |
+| Stand mixer | 12.6 x 16.8 x 16.8 in | Right-hand row with blender, combined x = 50.3-52.1917; rear z = 7.425, forward of taller window trim |
 | Breville Super Q | 8.1 x 10.5 x 18.1 in | Family reference; 2 in gap to mixer and rice cooker |
 | Rice cooker | 12 x 14.4 x 12.6 in | Right pair with air fryer, combined x = 52.358-54.925 |
 | Provisional dual-drawer Ninja air fryer | 16.8 x 15.6 x 13.2 in | Compact pair has 2 in gap; no final product |
 
-Rear edges are aligned at backsplash face z = 7.26; bottoms y = 3.04. This is **stored placement**, not safe operating clearance. Pull appliances forward as needed; confirm heat/steam, lid/mixer-head travel, circuits, splash separation and oven landing space. No coffee placeholder remains.
+The right-hand appliance row's rear edges are aligned at z = 7.425, 1.98 in forward of the earlier backsplash alignment; bottoms y = 3.04. This is **stored placement**, not safe operating clearance. Pull appliances forward as needed; confirm heat/steam, lid/mixer-head travel, circuits, splash separation and oven landing space. No coffee placeholder remains.
+
+The rear alignment above applies to the four-appliance right row; the toaster
+sits forward of the backsplash. Main-kitchen combi/steam oven is lowered
+6 in to 30-54 in above floor. Reach and hot-dish handling require owner
+confirmation; selected-product cutouts, ventilation and services remain unverified.
+Use common vendor cabinet sizes and separate fillers for future changes.
 
 Mudroom details, coordinated with [family-entry requirements](mud-room.html):
 
@@ -561,9 +1197,9 @@ Select Upstairs, then Top view or Tour. Ground camera buttons return downstairs;
 | Tables | J has a 38 in square oak table and one textured end table/lamp. H retains two side tables; I/G/F omit them. No floor lamp or glass coffee table |
 | Seating clearance | Current J measurements are above. Earlier I/H/G/F dimensions remain comparison-only. Static gaps do not approve occupied access, product fit, cabinet/window operation or fireplace clearances |
 | Fireplace | Taupe-brown stacked-stone concept, 72 in wide x 108 in high, centered z = 17.475 on the 18.6 ft visible wall span; stone, TV, mantel, firebox and flames move together, 8.1 in toward stairs from former center. Finished face approximately x = 1.38 |
-| Fireplace details | Dark firebox, ember bed, 17 static flame shapes and TV; illustrative, not an actual installed appliance/heat analysis |
+| Fireplace details | Low-set dark firebox, 55.2 in wide x 15 in high, bottom 12 in and top 27 in above finished floor (previous bottom 21.3 in); ember bed and 17 static flame shapes lowered together. Provisional approximation of the owner's low-set photo, not photo-measured dimensions. Stone, mantel, TV and room layout unchanged; appliance floor/mantel/furniture clearances, TV heat exposure and venting remain unverified |
 | Mantel | White oak, 74.4 in wide x 3.6 in thick; underside 48 in high; approximately 6.9 in projection beyond stone |
-| Media/charging cabinets | Matching white-oak 74.88 x 11.76 x 26 in W/D/H runs extend from both stone returns to the wall ends: z = 8.175-14.415 / 20.535-26.775, centers 11.295 / 23.655. Supersedes the narrow 24 in pair. Rear edges x = 0.4 retain 3 in service gaps; door rails and top edges stay flush with stone face x = 1.38, not mantel. Four closed Shaker doors per run, concealed push latches, center support, internal charging shelves and clear tops below window aprons. Every live layout thumbnail follows the full runs; under-stair bookcases unchanged |
+| Media/charging cabinets | Current piano revision removes the left/stair-side run; retain only the right/dining-side white-oak 74.88 x 11.76 x 26 in W/D/H run. Earlier paired-run study: z = 8.175-14.415 / 20.535-26.775, centers 11.295 / 23.655. Supersedes the narrow 24 in pair. Rear edges x = 0.4 retain 3 in service gaps; door rails and top edges stay flush with stone face x = 1.38, not mantel. Four closed Shaker doors per run, concealed push latches, center support, internal charging shelves and clear tops below window aprons. Every live layout thumbnail follows the full runs; under-stair bookcases unchanged |
 | Dining table | Provisional eight-person walnut table, 84 x 38 x 29 in L/D/H, centered (19.85, 2.95), long axis across the wider room along x. Not the former Article Seno 71 in product; no eight-seat product selected |
 | Dining chairs | Eight Article Nosh walnut/black-leather size references, about 20 x 21 x 31 in W/D/H with 19 in seat height; three per long side at 24 in centers, one each end |
 | Chair placement | Side seat centers 5.2 in inside tabletop edges; end seat centers 3 in outside end edges to avoid corner-chair interference. Entire set rotates back across the wider room and centers on both axes; tree, windows and patio door stay fixed |
@@ -639,28 +1275,28 @@ Room requirements: [kids/living](foyer/living-room.html#connected-kids-room), [o
 
 ## Window schedule
 
-**Whole-house count, verified October 24, 2026:** 31 window openings/groups across the furnished floors, containing 48 modeled units: 42 casements and 6 fixed pictures. Ground floor: 20 openings / 29 units (23 casements + 6 pictures). Upstairs: 11 openings / 19 casements. This includes three high garage pictures, one prep picture replacing two casements, the single powder window replacing the pair and the earlier removal of the two-unit ground stairwell window. The exterior visualization's 31 groups are alternate representations, not additional windows; other placeholder sizes/divisions are not fully coordinated with the furnished model. Exclude all door-leaf glass, eight garage-door panes, and unmodeled basement windows/skylights. See the [room-by-room count and counting rules](windows.html#whole-house-window-count); this is not an approved procurement schedule.
+**Whole-house count, updated October 25, 2026:** 29 window openings/groups contain 50 modeled units: 44 casements and 6 fixed pictures. Ground floor: 18 openings / 31 units (25 casements + 6 pictures). Upstairs: 11 openings / 19 casements. Each joined kitchen/prep bank counts as one opening with three units; the prep end casement stays separate. Joining kitchen frames removes two wall openings, not units. The exterior's 29 openings represent the same house, not additional windows. Exclude all door-leaf glass, garage-door panes and unmodeled basement windows/skylights. See the [counting rules](windows.html#whole-house-window-count); this is not an approved procurement schedule.
 
 All sizes below are **provisional opening/group envelopes**, not confirmed catalog units, rough openings or clear glass, except where a verified standard frame is identified. Sill/head heights are inches above house datum unless explicitly labeled otherwise; the powder-window row uses feet and garage-relative heights are labeled separately. Coordinates identify the opening wall, not small frame insets.
 
 | Location / quantity | Opening W x H (in) | Sill / head (in) | Opening centers (x, z), ft | Concept grouping |
 |---|---|---|---|---|
 | Living fireplace side, 2 | 48 x 64.8 | 31.2 / 96 | (0, 11.675), (0, 23.275) | Two casement bays each; centers 5.8 ft either side of fireplace; equal 18 in opening-to-end returns |
-| Living return wall, 3 | 30 x 60 | 36 / 96 | (3.266667, 8), (6.6, 8), (9.933333, 8) | Casement / single fixed picture / casement |
+| Living return wall, 1 opening / 3 units | 90 x 60 combined; 30 x 60 each | 36 / 96 | (4.1, 8), (6.6, 8), (9.1, 8) | Joined casement / single fixed picture / casement, one outer trim, no wall piers |
 | Dining rear, 1 | 72 x 60 | 36 / 96 | (19.85, -2.1) | Two bays |
 | Dining west, 1 | 72 x 60 | 36 / 96 | (13.2, 2.95) | Two bays |
 | Dining patio-side window bay, 1 | 33.84 x 93.12 frame envelope within 72 x 96 assembly | 1.44 / 94.56 | (26.5, 1.53) | Two stacked casements; not a fixed picture pane |
 | Kitchen sink, 1 | 54 x 42 | 53 / 95 | (32, 7) | Single fixed picture, uninterrupted pane, no crank |
-| Kitchen side openings, 2 | 18 x 42 | 53 / 95 | (28.25, 7), (35.75, 7) | Single casement each; 9 in piers and tight cap joints require review |
-| Prep sink, 1 | 60 x 42 | 51 / 93 | (47.4, 7) | Single fixed picture, centered on sink; uninterrupted pane, no crank |
-| Prep end wall, 1 | 24 x 42 | 51 / 93 | (55.5, 11.55) | Single casement; centered in counter-to-pantry aisle |
+| Kitchen side units, 2 | 18 x 42 | 53 / 95 | (29, 7), (35, 7) | Casements joined to center picture in one 90 in opening; no wall piers, one slim outer surround; manufacturer/header approval pending |
+| Prep joined counter bank, 1 opening / 3 units | Standard 2050 / 5050 / 2050 frames total 106.5 x 59.5; provisional combined opening 107 x 60 | Frame 41.25 / 100.75; opening 41 / 101 | Bank (47.4, 7); unit x = 43.941667 / 47.4 / 50.858333 | One outer trim/sill, no wall piers; factory mull/header approval required |
+| Prep end wall, 1 | Standard 2060: 23.5 x 71.5 frame; 24 x 72 minimum opening | Frame 29.25 / 100.75; opening 29 / 101 | (55.5, 11.55) | Tallest standard single casement; no counter below |
 | Garage east wall, 3 | 72 x 18 each | 75 / 93 house datum; 90 / 108 above garage slab | (55.5, 19.5), (55.5, 29.5), (55.5, 39.5) | One fixed picture each; clear lower wall for storage; side door retained; headers, property-line/fire limits and daylight unverified |
 | Powder west, 1 | Standard 2640: approximately 2.4583 x 3.9583 ft frame; minimum 2.5 x 4 ft rough opening | Frame approximately 4.0208 / 7.9792 ft; rough 4 / 8 ft | (0, 38.05) | One taller casement, lower half frosted to 6 ft / upper clear; standard dimensions verified in [manufacturer chart](https://www.arlcoal.com/m/AndersenWindowsLearnMore/pdfs/Sizing/sizing-windows--100series-casement.pdf); product, installation and privacy unapproved |
 | Office side, 1 | 48 x 60 | 36 / 96 | (0, 49) | Two bays |
 | Office porch, 1 | 72 x 60 | 36 / 96 | (6, 54.2) | Two bays |
 | Bedroom porch, 1 | 91.2 x 60 | 36 / 96 | (25, 54.2) | Three bays |
 
-The table above totals **20 ground-floor groups / 29 units**, not the whole house: 23 operable casements plus six fixed pictures, including the stacked patio-side pair among the casements. Add the upstairs schedule below for the 31-opening whole-house total. Default direction is Andersen 100 Series, Black exterior / White interior, white crank/lock hardware where operable and no decorative grilles. Fixed pictures have no center mullion or crank/lock. Patio-adjacent frames/sashes are White inside and out. All operable windows are shown closed; divisions do not establish manufacturer combination approval. The powder window uses a verified standard-size frame; privacy treatment, safety glazing, installation allowances, outward sash clearance and weatherproofing remain provisional.
+The table above totals **20 ground-floor groups / 31 units**, not the whole house: 25 operable casements plus six fixed pictures, including the stacked patio-side pair among the casements. Add the upstairs schedule below for the 31-opening whole-house total. Default direction is Andersen 100 Series, Black exterior / White interior, white crank/lock hardware where operable and no decorative grilles. Fixed pictures have no center mullion or crank/lock. Patio-adjacent frames/sashes are White inside and out. All operable windows are shown closed; divisions do not establish manufacturer combination approval. The powder and prep units use verified standard-size frames, but the joined prep assembly is not approved; privacy treatment, safety glazing, installation allowances, outward sash clearance and weatherproofing remain provisional. Prep counter-window cap tops are about 107.375 in below the 108 in ceiling; actual structural headers and installation space require architectural review.
 
 ### Powder-room window options in feet
 
@@ -711,8 +1347,8 @@ All house doors and doorless cased passages have nominal **8 ft / 96 in heads** 
 
 | Connection | Current opening / location | Operation or limitation |
 |---|---|---|
-| Kitchen to prep | 30 x 96 in, x = 37.5, z = 9.725-12.225 | Doorless, Craftsman casing both faces |
-| Kitchen to mudroom | 30 x 96 in, x = 37.5, z = 21.675-24.175 | Doorless; both openings mirror about z = 16.95 |
+| Kitchen to prep | 36 in finished clear, nominal 96 in head; x = 37.5, z = 9.725-12.725 | Doorless, casing outside clear width on both faces; framing allowance separate |
+| Kitchen to mudroom | 36 in finished clear, nominal 96 in head; x = 37.5, z = 21.175-24.175 | Doorless; openings mirror about z = 16.95; framing allowance separate |
 | Hall to kids | 54 x 96 in, x = 19, z = 27-31.5 | Doorless west entry into relocated room; no direct living-side opening or sofa supervision |
 | Hall to office | Nominal 60 x 96 in envelope, x = 12.2, z = 42.75-47.75 | Two nominal 30 in white French leaves, each 2 columns x 5 rows of clear lites, white muntins, gold round knobs and dark hinges; white casing. Both start fully open inward at 90 degrees into the office, perpendicular to the opening. Click/tap a leaf to toggle closed or to the modeled 180-degree endpoint. Unit/jamb/rough opening, true/simulated divisions, safety glazing, handing and hardware unselected; see [office doors](office.html#doors) |
 | Hall to bedroom | 36 x 96 in, x = 19, z = 42-45 | Opening only; final door leaf/swing not detailed |
@@ -744,8 +1380,12 @@ blocking, fire separation, window headers and daylight remain unapproved.
 
 Main interior stair flights have warm-white (2700 K) LED strips beneath
 the oak tread edges, inset 1.5 inches at each side. Garage steps have no
-LED strips. Keep the interior LEDs off in the viewer: no strip emission
-or local tread-wash lighting.
+LED strips. The interior strips and soft local tread washes now turn on in
+Night mode (default), superseding the earlier off-only pose. Day, 2D plans,
+basement cutaway, exterior and structural previews turn them off; returning
+to an interior Night view restores them. These are continuous diffused
+strips, not individual exposed LED dots. Existing stair visibility/cutaways
+are preserved; hidden flights do not become visible just to show lighting.
 Diffusers, glare, wiring, driver access, controls and actual
 illumination remain subject to electrician verification; stair geometry
 and safety approvals remain unchanged.
@@ -804,6 +1444,19 @@ Physical samples must confirm stain, sheen, upholstery durability, quartz color,
 - Living layouts share placement data with their SVG comparisons; switching exits the tour and rebuilds obstacles. E restores on reload. Historical screenshots do not establish current placement.
 
 ## Open decisions and known differences
+
+### Upstairs bedroom revision - October 25, 2026
+
+This supersedes the bedroom sizes/nightstand arrangement in the October 24
+study below. Bedrooms 2-4 each have a full 54 x 75-inch mattress, one
+nightstand, 48 x 21.6-inch desk, chair and separate wall lamps over the desk
+and nightstand. Primary: queen 60 x 80-inch mattress, two nightstands with
+wall lamps, writing desk, wall TV and two sitting chairs with a shared table.
+Bed frames add 2.4 inches to mattress width and length; headboards are
+separate. Headboards avoid windows; dressers and desks avoid static furniture
+overlaps. Walls, openings and saved layout JSON remain unchanged. Checks
+cover displayed furniture, not occupied/pulled-out chairs, open drawers,
+door swings, egress approval or electrical installation.
 
 ### Upstairs furnishing update - October 24, 2026
 

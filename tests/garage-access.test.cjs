@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
-const { getGroundFloorDefaultPlan, getGarageClerestoryLayout } = require('../floor-plan-ground.js');
+const { getGroundFloorDefaultPlan, getGarageClerestoryLayout, getPrepWindowLayout } = require('../floor-plan-ground.js');
 
 test('three high garage picture openings share the lowered slab datum and preserve the side door', () => {
   const windows = getGarageClerestoryLayout();
@@ -35,6 +35,7 @@ test('exterior stone cuts reverse the east-wall windows correctly without coveri
   vm.runInNewContext(exterior.slice(start, end), {
     garageFloorY: -1.25, garageSideDoorCenterZ: 45.5, garageSideDoorWidth: 3,
     garageClerestories: getGarageClerestoryLayout(),
+    getPrepWindowLayout,
     win: (center, width, sill, height) => ({ center, width, sill, height }),
     wall(...args) { openings = args[7]; }
   });
@@ -80,7 +81,7 @@ test('garage entry retains contrasting nosings without LED lighting', () => {
   assert.equal(parts.filter((part) => part.name?.startsWith('Garage entry LED wash')).length, 0);
 });
 
-test('interior stair LEDs remain off and sit below and outside the risers on both flight directions', () => {
+test('interior stair LED strips sit below and outside the risers on both flight directions', () => {
   assert.match(source, /const stairStepGlow = new THREE\.MeshStandardMaterial\(\{[^\n]*emissiveIntensity: 0,/);
   const start = source.indexOf('    for (let step = 0; step < stairRisers - 1; step++)');
   const end = source.indexOf('    const endX =', start);

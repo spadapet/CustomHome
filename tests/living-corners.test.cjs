@@ -6,6 +6,47 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const { getLivingRoomFeatureLayout } = require('../floor-plan-ground.js');
 
+test('low-set fireplace keeps the ember bed and every flame inside the lowered firebox', () => {
+  class Group {
+    constructor() { this.children = []; }
+    add(child) { this.children.push(child); }
+  }
+  class Shape {
+    moveTo() {}
+    bezierCurveTo() {}
+    closePath() {}
+  }
+  class Mesh {
+    constructor() {
+      this.rotation = {};
+      this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } };
+      this.scale = { set() {} };
+    }
+  }
+  const scene = new Group();
+  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  vm.runInNewContext(source.slice(source.indexOf('  const fireboxBottom ='), source.indexOf('  const mantel =')), {
+    scene, fireplaceFaceX: 1.38, livingCenterZ: 17.475, black: {},
+    THREE: { Group, Shape, Mesh, ShapeGeometry: class {}, MeshStandardMaterial: class {}, MeshBasicMaterial: class {} },
+    box(parent, x, y, z, w, h, d) {
+      const mesh = { x, y, z, w, h, d };
+      parent.add(mesh);
+      return mesh;
+    }
+  });
+  const [firebox, ember, flames] = scene.children;
+  assert.equal(firebox.y - firebox.h / 2, 1);
+  assert.equal(firebox.y + firebox.h / 2, 2.25);
+  assert.ok(Math.abs(firebox.d * 12 - 55.2) < 1e-9);
+  assert.equal(firebox.userData.clearanceVerified, false);
+  assert.ok(ember.y - ember.h / 2 > 1);
+  assert.equal(flames.children.length, 34);
+  for (const flame of flames.children) {
+    assert.ok(Math.abs(flame.position.y - 1.265) < 1e-9);
+    assert.ok(flame.position.y + 0.68 < 2.25);
+  }
+});
+
 test('Christmas tree is centered on the shared hallway bounds for every seating option', () => {
   class Group {
     constructor() {

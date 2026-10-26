@@ -50,20 +50,19 @@ test('the shared kitchen wall and refrigeration bank move six inches without wid
 });
 
 test('sink/window bank stays centered and actual side counters fit the relocated cooking wall', () => {
-  const context = { casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12 };
+  const context = { casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12, getKitchenPassageLayout: require('../floor-plan-ground.js').getKitchenPassageLayout, getPrepWindowLayout: require('../floor-plan-ground.js').getPrepWindowLayout, getPrepWindowBankLayout: require('../floor-plan-ground.js').getPrepWindowBankLayout };
   const start = source.indexOf('  const kitchenWallLeft =');
+  context.getKitchenWindowBankLayout = require('../floor-plan-ground.js').getKitchenWindowBankLayout;
   const end = source.indexOf('  const kidsRoomNorthZ =', start);
   assert.ok(start >= 0 && end > start);
-  vm.runInNewContext(`${source.slice(start, end)}\nglobalThis.geometry = { kitchenWallLeft, kitchenWallRight, kitchenSinkX, kitchenSinkWindows, kitchenWindowCapExtension, kitchenEndSconceCenters };`, context);
+  vm.runInNewContext(`${source.slice(start, end)}\nglobalThis.geometry = { kitchenWallLeft, kitchenWallRight, kitchenSinkX, kitchenSinkWindows, kitchenWindowTrimExtension, kitchenEndSconceCenters };`, context);
   const geometry = context.geometry;
   assert.equal(geometry.kitchenWallRight, 37.5);
   assert.equal(geometry.kitchenSinkX, 32);
   assert.deepEqual(Array.from(geometry.kitchenSinkWindows, (window) => window.width), [1.5, 4.5, 1.5]);
-  assert.deepEqual(Array.from(geometry.kitchenSinkWindows, (window) => window.x), [28.25, 32, 35.75]);
+  assert.deepEqual(Array.from(geometry.kitchenSinkWindows, (window) => window.x), [29, 32, 35]);
   const [left, center, right] = geometry.kitchenSinkWindows;
-  const leftCap = left.x + left.width / 2 + geometry.kitchenWindowCapExtension;
-  const centerCap = center.x - center.width / 2 - geometry.kitchenWindowCapExtension;
-  assert.ok((centerCap - leftCap) * 12 >= 0.25 - 1e-9, 'Verify actual inter-window cap gap, not just opening piers');
+  assert.ok(Math.abs(left.x + left.width / 2 - (center.x - center.width / 2)) < 1e-9, 'Joined frames have no wall pier or duplicate casing between them');
   assert.ok(geometry.kitchenEndSconceCenters[0] > geometry.kitchenWallLeft + 0.175);
   assert.ok(geometry.kitchenEndSconceCenters[1] < geometry.kitchenWallRight - 0.175);
   assert.ok(Math.abs((left.x + right.x) / 2 - geometry.kitchenSinkX) < 1e-9);
@@ -72,8 +71,8 @@ test('sink/window bank stays centered and actual side counters fit the relocated
     kitchenSinkX: geometry.kitchenSinkX, kitchenSinkRunZ: 8.2, kitchen: {}, cabinetFinish: {}, countertop: {},
     box(parent, x, y, z, w, h, d) { const part = { x, y, z, w, h, d }; boxes.push(part); return part; }
   };
-  const counterStart = source.indexOf('  for (const [x, width] of [[kitchenSinkX - 3.4,');
-  const counterEnd = source.indexOf('  for (const [x, width] of [[kitchenSinkX - 4.125,', counterStart);
+  const counterStart = source.indexOf('  box(kitchen, kitchenSinkX - 3.4,');
+  const counterEnd = source.indexOf('  drawerFront(kitchenSinkX - 4.125,', counterStart);
   assert.ok(counterStart >= 0 && counterEnd > counterStart);
   vm.runInNewContext(source.slice(counterStart, counterEnd), cabinets);
   const counters = boxes.filter((part) => part.name === 'Top kitchen quartz counter');
@@ -92,7 +91,7 @@ test('shared-wall floor changes leave the gray wall, garage and all opening widt
   assert.equal(north[3], 29);
   const shared = plan.walls.find(([name]) => name === 'Kitchen east');
   assert.deepEqual(shared.slice(1, 5), [37.5, 7, 37.5, 25.3]);
-  assert.deepEqual(shared[5], [[2.725, 5.225, 0, 8], [14.675, 17.175, 0, 8]]);
+  assert.deepEqual(shared[5], [[2.725, 5.725, 0, 8], [14.175, 17.175, 0, 8]]);
   assert.equal(plan.rooms.find((room) => room.name === 'Kitchen').w, 11);
   assert.equal(plan.rooms.find((room) => room.name === 'Prep kitchen').w, 18);
   assert.equal(plan.rooms.find((room) => room.name === 'Mudroom').w, 7.4 - 2 / 12);
@@ -146,6 +145,14 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
   assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), true);
   assert.equal(slider.position.x, 2);
 
+  slider.userData.interactiveHouseDoor = { operation: 'sliding', axis: 'z', open: false, closedCenterX: 0, openCenterX: 1.75 };
+  slider.position.z = 0;
+  assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), true);
+  assert.equal(slider.position.z, 1.75);
+  assert.equal(slider.position.x, 2, 'Tray extension does not change the cabinet x position');
+  assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), true);
+  assert.equal(slider.position.z, 0);
+
   const foldPanel = { rotation: { y: 0 } };
   const bifold = { userData: { interactiveHouseDoor: { operation: 'bifold', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: -1, foldPanel } }, rotation: { y: 0 }, visible: true };
   context.intersections = [{ object: { parent: bifold, visible: true } }];
@@ -163,6 +170,8 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
   assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), true);
   assert.equal(overhead.rotation.x, 0);
   context.activeFloor = 'upstairs';
+  assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), true);
+  context.activeFloor = 'basement';
   assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), false);
 });
 

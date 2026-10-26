@@ -9,7 +9,7 @@ const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
 function controls() {
   const button = { attributes: {}, setAttribute(key, value) { this.attributes[key] = value; }, addEventListener(name, callback) { this[name] = callback; } };
   const status = {};
-  const leaf = { visible: true, userData: { openAngleDegrees: 0, maxAngleDegrees: 180 }, rotation: { y: 0 } };
+  const leaf = { visible: true, userData: { openAngleDegrees: 0, maxAngleDegrees: 90 }, rotation: { y: 0 } };
   const context = {
     activeFloor: 'ground', groundLayoutPreview: false, doorLeaf: leaf,
     document: { getElementById(id) { return id === 'patio-door-toggle' ? button : status; } },
@@ -35,11 +35,11 @@ function controls() {
 test('patio control toggles inward around the existing hinge and keeps accessible state in sync', () => {
   const { context, button, status, leaf } = controls();
   button.click();
-  assert.equal(leaf.userData.openAngleDegrees, 180);
-  assert.equal(leaf.rotation.y, Math.PI);
+  assert.equal(leaf.userData.openAngleDegrees, 90);
+  assert.equal(leaf.rotation.y, -Math.PI / 2);
   assert.equal(button.attributes['aria-pressed'], 'true');
   assert.equal(button.textContent, 'Close patio door');
-  assert.match(status.textContent, /open 180 degrees inward/);
+  assert.match(status.textContent, /open 90 degrees inward/);
   button.click();
   assert.equal(leaf.rotation.y, 0);
   assert.equal(leaf.userData.openAngleDegrees, 0);
@@ -59,7 +59,7 @@ test('direct picking accepts leaf glazing or hardware but not frames, windows, w
   const event = { clientX: 50, clientY: 50 };
   context.hits = [{ object: panel }];
   assert.equal(context.pickPatioDoor(event), true);
-  assert.equal(leaf.rotation.y, Math.PI);
+  assert.equal(leaf.rotation.y, -Math.PI / 2);
   context.hits = [{ object: handle }];
   assert.equal(context.pickPatioDoor(event), true);
   assert.equal(leaf.rotation.y, 0);
@@ -99,12 +99,14 @@ test('view changes close an opened door, while same-view resize keeps the chosen
   context.currentView = 'dining';
   button.click();
   context.setView('dining');
-  assert.equal(leaf.rotation.y, Math.PI);
+  assert.equal(leaf.rotation.y, -Math.PI / 2);
   context.setView('top');
   assert.equal(leaf.rotation.y, 0);
   assert.equal(button.attributes['aria-pressed'], 'false');
   assert.match(source, /doorLeaf\.rotation\.y = 0;/);
-  assert.match(source, /openAngleDegrees: 0, maxAngleDegrees: 180, nominalWidthFeet: 3/);
+  assert.match(source, /openAngleDegrees: 0, maxAngleDegrees: 90, nominalWidthFeet: 3/);
+  assert.match(source, /const doorLeaf = livingPatioHinge;/);
+  assert.doesNotMatch(source, /Dining casement windows and inswing patio door|Dining patio-side stacked casements/);
 });
 
 test('only taps pick the door before floor travel, and the dining warning retains the chair conflict', () => {

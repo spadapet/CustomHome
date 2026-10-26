@@ -25,7 +25,8 @@ test('project instructions and README link to existing guidance and the bundled 
     const text = fs.readFileSync(file, 'utf8');
     for (const [, link] of text.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
       if (/^https?:/.test(link)) continue;
-      assert.ok(fs.existsSync(path.resolve(path.dirname(file), link)), `${relative}: ${link}`);
+      const [target] = link.split(/[?#]/, 1);
+      assert.ok(fs.existsSync(path.resolve(path.dirname(file), target)), `${relative}: ${link}`);
     }
   }
   assert.ok(fs.existsSync(path.join(root, '.github', 'skills', 'home-model-editing', 'scripts', 'check-model.cjs')));

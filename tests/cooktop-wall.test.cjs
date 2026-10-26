@@ -38,8 +38,8 @@ function buildCookingWall() {
   }
   const context = {
     THREE: { Group, Mesh, CylinderGeometry }, kitchen: new Group(), ceilingHeight: 9, cookingWallShiftX: -0.5,
-    cooktopRunWidth: 21.675 - 12.225 - 2 * (3.625 / 12), cooktopEndFillerWidth: 1.5 / 12, cooktopCenterZ: 16.95,
-    ...Object.fromEntries(['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish', 'brass', 'black', 'light'].map((name) => [name, { name }])),
+    cooktopRunWidth: 21.175 - 12.725 - 2 * (3.625 / 12), cooktopFrontReveal: 0.125 / 12, cooktopCenterZ: 16.95,
+    ...Object.fromEntries(['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish', 'brass', 'black', 'light', 'kitchenTaskDiffuser'].map((name) => [name, { name }])),
     mat: (color) => ({ color }),
     box(parent, x, y, z, w, h, d, material) {
       assert.ok(material, 'Every part has a defined finish');
@@ -106,21 +106,26 @@ test('hood stays 48 inches wide, tapers only in depth and keeps a flush rear pla
   assert.equal(model.find('Cooktop hood task-light strip').length, 1);
 });
 
-test('two frameless oak stacks have two tiers, eight Shaker doors and gold pulls', () => {
+test('two standard-width oak stacks have two tiers, four Shaker doors and gold pulls', () => {
   const model = buildCookingWall();
   const stacks = model.all.filter((item) => item.name?.endsWith('upper stack'));
   assert.equal(stacks.length, 2);
-  assert.equal(model.find('Full-overlay Shaker cabinet front').length, 8);
-  assert.equal(model.find('Gold cabinet pull').length, 8);
+  assert.equal(model.find('Full-overlay Shaker cabinet front').length, 4);
+  assert.equal(model.find('Gold cabinet pull').length, 4);
   for (const stack of stacks) {
-    close(stack.userData.widthInches, 27.575);
+    close(stack.userData.widthInches, 21);
     assert.equal(stack.userData.construction, 'Frameless');
     assert.equal(stack.userData.finish, 'Stained white oak');
-    const carcass = stack.children.find((item) => item.name === 'Cooktop upper cabinet carcass');
-    close(bounds(carcass).minY, 4.55);
-    close(bounds(carcass).maxY, 8.85);
-    close(carcass.geometry.d, 1);
-    assert.equal(carcass.material, model.context.cabinetFinish);
+    const carcasses = stack.children.filter((item) => item.name === 'Cooktop upper cabinet carcass');
+    assert.equal(carcasses.length, 2);
+    close(bounds(carcasses[0]).minY, 4.55);
+    close(bounds(carcasses[0]).maxY, 7.55);
+    close(bounds(carcasses[1]).minY, 7.55);
+    close(bounds(carcasses[1]).maxY, 8.8);
+    for (const carcass of carcasses) {
+      close(carcass.geometry.d, 1);
+      assert.equal(carcass.material, model.context.cabinetFinish);
+    }
     close(bounds(stack).maxY, 9);
   }
   assert.equal(model.find('Cooktop under-cabinet task-light strip').length, 2);
@@ -133,12 +138,12 @@ test('upper cabinets touch the hood without overlap and leave the casing-end all
   const mudroom = bounds(model.find('Cooktop mudroom-side upper stack')[0]);
   close(prep.maxZ, hood.minZ);
   close(mudroom.minZ, hood.maxZ);
-  close(prep.minZ, 16.95 - model.context.cooktopRunWidth / 2 + 1.5 / 12);
-  close(mudroom.maxZ, 16.95 + model.context.cooktopRunWidth / 2 - 1.5 / 12);
+  close(prep.minZ, 16.95 - 90 / 24);
+  close(mudroom.maxZ, 16.95 + 90 / 24);
   close((prep.minZ + mudroom.maxZ) / 2, 16.95);
   close(bounds(model.find('Cooktop upper ceiling cornice')[0]).minX, bounds(model.find('Plaster hood ceiling cornice')[0]).minX);
 });
 
-test('Fridge wall inspection hides the new uppers together with the hood', () => {
-  assert.match(source, /cooktopHood\.visible = name !== 'fridge';\s*cooktopUppers\.visible = name !== 'fridge';/);
+test('Fridge wall and sink storage inspection hide the new uppers together with the hood', () => {
+  assert.match(source, /cooktopHood\.visible = name !== 'fridge' && !sinkStorageView;\s*cooktopUppers\.visible = name !== 'fridge' && !sinkStorageView;/);
 });

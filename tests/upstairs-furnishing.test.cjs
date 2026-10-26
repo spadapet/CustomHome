@@ -26,7 +26,7 @@ function build() {
   const context = { UpstairsLayout: layout };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'floor-plan-upstairs.js'), 'utf8'), context);
   const material = {};
-  return context.buildUpstairsModel({ Group, Mesh, CylinderGeometry }, {
+  const helpers = {
     box(parent, x, y, z, w, h, d) {
       const mesh = new Mesh({ w, h, d }, material);
       mesh.position.set(x, y, z);
@@ -36,9 +36,25 @@ function build() {
     mat: () => material, wood: material, wallMaterial: material, windowTrim: material,
     oak: material, cream: material, black: material, steel: material, linen: material,
     windowFrame() {}, openingCasing() {}
-  }, layout.stairOpening(), 10);
+  };
+  const source = fs.readFileSync(path.join(__dirname, '..', 'floor-plan-3d.js'), 'utf8');
+  const doorContext = { THREE: { Group }, box: helpers.box, windowTrim: material };
+  vm.runInNewContext(source.slice(source.indexOf('  function singlePanelDoor('), source.indexOf('  function shakerFront(')), doorContext);
+  helpers.singlePanelDoor = doorContext.singlePanelDoor;
+  return context.buildUpstairsModel({ Group, Mesh, CylinderGeometry }, helpers, layout.stairOpening(), 10);
 }
 const model = build();
+test('upstairs room-width openings receive trim-matched single-panel operable doors', () => {
+  const leaves = [];
+  model.group.traverse((part) => { if (part.userData.doorStyle === 'Single recessed panel') leaves.push(part); });
+  assert.equal(leaves.length, 17);
+  for (const leaf of leaves) {
+    assert.equal(leaf.children.filter((part) => part.name === 'Interior door single recessed field').length, 1);
+    assert.equal(leaf.userData.height, 7.96);
+    assert.equal(leaf.parent.userData.interactiveHouseDoor.openAngleDegrees, 0);
+    assert.equal(leaf.parent.userData.interactiveHouseDoor.maxAngleDegrees, 180);
+  }
+});
 const item = (name) => {
   const result = model.group.children.find((child) => child.name === `Upstairs ${name}`);
   assert.ok(result, `${name} exists`);
@@ -75,11 +91,43 @@ test('upstairs builds without canvas labels and retains navigation destinations'
 test('all bedrooms have bedside furniture, lighting and separate dressers', () => {
   for (const name of ['Primary', 'Bedroom 2', 'Bedroom 3', 'Bedroom 4']) {
     const bed = item(`${name} bed`);
-    assert.equal(bed.children.filter((mesh) => mesh.geometry.w === 0.8 && mesh.geometry.h === 0.65).length, 2);
-    assert.equal(bed.children.filter((mesh) => mesh.geometry.w === 1.55 && mesh.geometry.h === 1.9).length, 2);
+    assert.equal(bed.children.filter((mesh) => mesh.geometry.w === 1.55 && mesh.geometry.h === 1.9).length, name === 'Primary' ? 2 : 1);
+    const mattress = bed.children.find((mesh) => mesh.name === 'Bed mattress');
+    assert.equal(mattress.geometry.w * 12, name === 'Primary' ? 60 : 54);
+    assert.equal(mattress.geometry.d * 12, name === 'Primary' ? 80 : 75);
+    item(`${name} desk chair`);
+    item(`${name} writing desk`);
+    assert.equal(item(`${name} desk wall lamp`).userData.wallMounted, true);
+    assert.equal(item(`${name} bed bedside wall lamp left`).userData.wallMounted, true);
     item(`${name} dresser`);
   }
   for (const name of ['Loft reading chair', 'Loft media console', 'Loft coffee table and rug', 'Loft desk chair', 'Laundry wall cupboards']) item(name);
+});
+
+test('bedroom furnishings clear finished room edges and each other above rugs', () => {
+  for (const name of ['Primary', 'Bedroom 2', 'Bedroom 3', 'Bedroom 4']) {
+    const room = model.rooms.find((room) => room.name === (name === 'Primary' ? 'Primary bedroom' : name));
+    const furnishings = ['bed', 'dresser', 'writing desk', 'desk chair'].map((suffix) => item(`${name} ${suffix}`));
+    if (name === 'Primary') furnishings.push(item('Primary sitting chair 1'), item('Primary sitting chair 2'), item('Primary sitting side table'));
+    const solids = furnishings.map((furnishing) => {
+      const proxy = new Group();
+      proxy.position = furnishing.position;
+      proxy.rotation = furnishing.rotation;
+      proxy.children = furnishing.children.filter((mesh) => mesh.position.y > 0.1);
+      return bounds(proxy);
+    });
+    for (let i = 0; i < solids.length; i++) {
+      const a = solids[i];
+      assert.ok(a.minX >= room.x + 0.2 && a.maxX <= room.x + room.w - 0.2 && a.minZ >= room.z + 0.2 && a.maxZ <= room.z + room.d - 0.2, furnishings[i].name);
+      for (let j = 0; j < i; j++) {
+        const meshes = (furnishing) => furnishing.children.filter((mesh) => mesh.position.y > 0.1).map(bounds);
+        for (const first of meshes(furnishings[i])) for (const second of meshes(furnishings[j])) {
+          assert.ok(Math.min(first.maxX, second.maxX) <= Math.max(first.minX, second.minX) + 0.001 || Math.min(first.maxZ, second.maxZ) <= Math.max(first.minZ, second.minZ) + 0.001, `${furnishings[i].name} overlaps ${furnishings[j].name}`);
+        }
+      }
+    }
+  }
+  item('Primary wall TV');
 });
 
 test('closets have continuous rods and clothing rather than shelves called rails', () => {
@@ -90,6 +138,20 @@ test('closets have continuous rods and clothing rather than shelves called rails
     assert.ok(rods.every((rod) => rod.geometry.length > 3.5));
     assert.ok(bay.children.some((mesh) => mesh.geometry.h === (bay.userData.doubleHang ? 2.6 : 4.8)));
     assert.equal(bay.userData.storageDepthFeet, 2);
+  }
+});
+
+test('wall lamps mount on solid wall rather than across windows or door openings', () => {
+  for (const lamp of model.group.children.filter((object) => object.userData.wallMounted)) {
+    const { x, z } = lamp.position;
+    const host = model.plan.walls.find((wall) => {
+      const vertical = Math.abs(wall.x1 - wall.x2) < 0.001;
+      const along = vertical ? z - wall.z1 : x - wall.x1;
+      return Math.abs((vertical ? x : z) - (vertical ? wall.x1 : wall.z1)) < 0.3 && along > 0 && along < Math.hypot(wall.x2 - wall.x1, wall.z2 - wall.z1);
+    });
+    assert.ok(host, `${lamp.name} has a supporting wall`);
+    const along = Math.abs(host.x1 - host.x2) < 0.001 ? z - host.z1 : x - host.x1;
+    assert.ok(host.openings.every(([start, end, bottom, top]) => top < 4.9 || bottom > 5.6 || along + 0.28 <= start || along - 0.28 >= end), `${lamp.name} clears openings`);
   }
 });
 

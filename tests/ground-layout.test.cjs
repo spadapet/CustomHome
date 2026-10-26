@@ -155,6 +155,7 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
     cabinet() {},
     toilet(name, x, z, rotation) { items.push({ name, x, z, rotation }); }
   };
+  vm.runInNewContext(source.slice(source.indexOf('  function singlePanelDoor('), source.indexOf('  function shakerFront(')), context);
   vm.runInNewContext(source.slice(source.indexOf('  function vanity('), source.indexOf('  const powderStone =')), context);
   vm.runInNewContext(source.slice(source.indexOf("  const wardrobe = furnishing("), source.indexOf("  const guestCoats =")), context);
   vm.runInNewContext(source.slice(source.indexOf("  tiledFloor('Guest bathroom tile'"), source.indexOf("  const frontDoor =")), context);
@@ -269,7 +270,8 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
   assert.equal(door.userData.nominalWidthInches, 30);
   assert.equal(door.userData.targetClearWidthInches, 28);
   assert.equal(door.userData.heightInches, 96);
-  const leaf = door.children.find((part) => part.name === 'Guest bathroom painted-white pocket leaf');
+  const panelLeaf = door.children.find((part) => part.name === 'Guest bathroom painted-white pocket leaf');
+  const leaf = { h: panelLeaf.userData.height, w: panelLeaf.userData.width, y: panelLeaf.position.y };
   assert.equal(leaf.h, opening.height - 0.04);
   assert.equal(leaf.y, opening.height / 2);
   assert.ok(door.userData.openCenterX - leaf.w / 2 >= opening.pocket.x);
@@ -318,7 +320,7 @@ test('guest coat French doors span the opening and swing outward from opposite j
   let closet;
   const entry = getGuestEntryLayout();
   const context = {
-    THREE: { Group }, guestEntry: entry, powderNorthZ: entry.powder.z, cabinetFinish: {}, brass: {}, linen: {}, cream: {},
+    THREE: { Group }, guestEntry: entry, powderNorthZ: entry.powder.z, cabinetFinish: {}, brass: {}, linen: {}, cream: {}, windowTrim: {},
     furnishing() { closet = new Group(); return closet; },
     box() { return {}; },
     cylinder() { return { rotation: {} }; },
@@ -329,6 +331,7 @@ test('guest coat French doors span the opening and swing outward from opposite j
     },
     cabinetPull() {}
   };
+  vm.runInNewContext(source.slice(source.indexOf('  function singlePanelDoor('), source.indexOf('  function shakerFront(')), context);
   vm.runInNewContext(source.slice(source.indexOf('  const guestCoats ='), source.indexOf('  const powderDoor =')), context);
   const hinges = closet.children;
   assert.equal(hinges.length, 2);
@@ -337,16 +340,16 @@ test('guest coat French doors span the opening and swing outward from opposite j
     const hinge = hinges[index], leaf = hinge.children[0];
     close(9.65 + hinge.position.x, entry.closetDoor.x + index * entry.closetDoor.width);
     close(entry.powder.z + 1.2 + hinge.position.z, entry.closetDoor.z);
-    close(leaf.width, 1.96);
-    close(leaf.height, 7.96);
-    close(hinge.position.x + leaf.x - side * leaf.width / 2, side * 0.04);
+    close(leaf.userData.width, 1.96);
+    close(leaf.userData.height, 7.96);
+    close(hinge.position.x + leaf.position.x - side * leaf.userData.width / 2, side * 0.04);
     const operation = hinge.userData.interactiveHouseDoor;
     assert.equal(operation.operation, 'hinged');
     assert.equal(operation.openAngleDegrees, 0);
     assert.equal(operation.maxAngleDegrees, 90);
     for (let angle = 0; angle <= operation.maxAngleDegrees; angle++) {
       const radians = side * angle * Math.PI / 180;
-      const freeEdgeZ = hinge.position.z - Math.sin(radians) * -side * leaf.width;
+      const freeEdgeZ = hinge.position.z - Math.sin(radians) * -side * leaf.userData.width;
       assert.ok(freeEdgeZ >= hinge.position.z - 1e-9, 'Leaf swings toward alcove, not hanging coats');
     }
     assert.equal(operation.openRotationSign, side);
@@ -409,7 +412,7 @@ test('one standard-size powder window cuts the west wall and retains half-froste
     }
   };
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
-  vm.runInNewContext(source.slice(source.indexOf('  function windowFrame('), source.indexOf('  for (const { name, center, width, picture }')), context);
+  vm.runInNewContext(source.slice(source.indexOf('  function windowFrame('), source.indexOf('  const livingWindowBank =')), context);
   const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
   const exteriorContext = { ...context, glass: {}, privacyGlass: {}, windowBlack: {} };
   vm.runInNewContext(exterior.slice(exterior.indexOf('  function windowUnit('), exterior.indexOf('  function wall(')), exteriorContext);
@@ -469,7 +472,7 @@ test('powder vanity centers its sink and lighting between matching drawer banks 
   };
   context.cylinder = (parent, x, y, z, radius, height, material) => context.box(parent, x, y, z, radius * 2, height, radius * 2, material);
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
-  vm.runInNewContext(source.slice(source.indexOf('  function shakerFront('), source.indexOf('  function cabinetCupPull(')), context);
+  vm.runInNewContext(source.slice(source.indexOf('  function singlePanelDoor('), source.indexOf('  function cabinetCupPull(')), context);
   vm.runInNewContext(source.slice(source.indexOf('  const powderStone ='), source.indexOf("  tiledFloor('Guest bathroom tile'")), context);
   const vanity = items.find((item) => item.name === 'Powder vanity');
   const drawers = vanity.children.filter((part) => /^Powder vanity drawer \d$/.test(part.name));
@@ -575,71 +578,11 @@ test('kitchen-facing kids-room wall is flush with the tall cabinet fronts withou
   }
 });
 
-test('closed media cabinets adjoin both fireplace sides with no projection beyond the stone face', () => {
+test('both low fireplace media built-ins are removed without removing under-stair bookcases', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
-  class Group {
-    constructor() {
-      this.children = [];
-      this.userData = {};
-      this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } };
-      this.rotation = {};
-    }
-    add(child) { this.children.push(child); }
-  }
-  const scene = new Group();
-  const context = {
-    THREE: { Group }, scene, livingCenterZ: getLivingRoomFeatureLayout().centerZ, livingFeatureWall: getLivingRoomFeatureLayout(), fireplaceFaceX: 1.38,
-    cabinetFinish: {}, cabinetRailFinish: {}, black: {},
-    box(parent, x, y, z, width, height, depth) {
-      const mesh = { x, y, z, width, height, depth, userData: {} };
-      parent.add(mesh);
-      return mesh;
-    },
-    shakerFront(parent, x, y, z, width, height) {
-      const front = new Group();
-      Object.assign(front, { x, y, z, width, height });
-      parent.add(front);
-      return front;
-    }
-  };
-  vm.runInNewContext(source.slice(source.indexOf('  const mediaBuiltIns ='), source.indexOf('  const livingSconces =')), context);
-  assert.equal(scene.children.length, 2, 'One built-in on each side');
-  assert.ok(Math.abs((scene.children[0].position.z + scene.children[1].position.z) / 2 - context.livingCenterZ) < 1e-9, 'Pair is symmetric about the fireplace');
-  scene.children.forEach((cabinet, index) => {
-    assert.ok(Math.abs(cabinet.userData.widthInches - 74.88) < 1e-9);
-    assert.ok(Math.abs(cabinet.userData.depthInches - 11.76) < 1e-9);
-    assert.equal(cabinet.userData.heightInches, 26);
-    const side = index === 0 ? -1 : 1;
-    const innerEdge = cabinet.position.z - side * cabinet.userData.widthInches / 24;
-    assert.ok(Math.abs(innerEdge - (context.livingCenterZ + side * (3.03 + 0.06 / 2))) < 1e-9, 'Inner edge touches the actual stone side return without a gap or overlap');
-    assert.notEqual(cabinet.position.z, getLivingRoomFeatureLayout().windowCenters[index], 'Cabinet is not centered under the window');
-    assert.equal(cabinet.rotation.y, Math.PI / 2);
-    const rearEdge = cabinet.position.x - cabinet.userData.depthInches / 24;
-    assert.ok(Math.abs(rearEdge - 0.4) < 1e-9);
-    assert.ok(rearEdge > 0.175 + 0.075, 'Rear edge clears wall baseboard and shoe');
-    assert.ok(26 / 12 < 2.6 - 1 / 12 - 3.5 / 12, 'Top clears the sill and apron');
-    const outerEdge = cabinet.position.z + side * cabinet.userData.widthInches / 24;
-    assert.ok(Math.abs(outerEdge - (side === -1 ? context.livingFeatureWall.wallStartZ : baseline.stairs.z)) < 1e-9, 'Cabinet reaches its wall end without extending into the return or stair opening');
-    assert.equal(cabinet.userData.openBack, true);
-    assert.equal(cabinet.userData.openFront, false);
-    assert.equal(cabinet.userData.clearanceVerified, false);
-    const doors = cabinet.children.filter((child) => child.name === 'Closed media cabinet Shaker door');
-    assert.equal(doors.length, 4, 'Four appropriately sized cabinet doors are closed');
-    for (const door of doors) {
-      assert.ok(Math.abs(door.width - (cabinet.userData.widthInches / 48 - 0.04)) < 1e-9, 'Door widths follow the full cabinet run');
-      assert.ok(Math.abs(cabinet.position.x + door.z + 0.04 - context.fireplaceFaceX) < 1e-9, 'Outermost door rail is flush with stone');
-      assert.match(door.userData.hardware, /Concealed push latch/);
-    }
-    for (const part of cabinet.children.filter((child) => !(child instanceof Group))) {
-      assert.ok(cabinet.position.x + part.z + part.depth / 2 <= context.fireplaceFaceX + 1e-9, `${part.name} does not project beyond the fireplace`);
-      assert.ok(part.y + part.height / 2 <= 26 / 12 + 1e-9, 'No devices or chargers displayed on top');
-    }
-    assert.ok(cabinet.children.some((child) => child.name === 'Concealed equipment and charging shelf'));
-    const top = cabinet.children.find((child) => child.name === 'Clear oak cabinet top flush with fireplace');
-    assert.ok(Math.abs(top.width * 12 - 74.88) < 1e-9, 'Actual top spans the complete cabinet run');
-    assert.ok(cabinet.children.some((child) => child.name === 'Media cabinet center support'));
-    assert.ok(!cabinet.children.some((child) => /Xbox|Switch|Laptop|Phone|Tablet|hub|drawer/i.test(child.name)), 'No exposed electronics or drawer fronts');
-  });
+  assert.doesNotMatch(source, /mediaBuiltIns|mediaBuiltIn|Closed media cabinet Shaker door|Media cabinet recessed plinth/);
+  assert.match(source, /stairBookcases\.name = 'Recessed under-stair bookcases'/);
+  assert.match(source, /stairBookcases\.userData = \{ bays: 4/);
 });
 
 test('double-chaise sectional has exactly chaise-seat-seat-chaise modules and fits the living area', () => {
@@ -825,13 +768,14 @@ test('first-floor baseline matches the furnished model floors and canonical wall
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
   const floors = [], walls = [];
   const context = {
-    UpstairsLayout: layout, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, ceilingHeight: 9, garageFloorY: -1.25, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
+    UpstairsLayout: layout, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getKitchenPassageLayout: require('../floor-plan-ground.js').getKitchenPassageLayout, getPrepWindowLayout: require('../floor-plan-ground.js').getPrepWindowLayout, getPrepWindowBankLayout: require('../floor-plan-ground.js').getPrepWindowBankLayout, ceilingHeight: 9, garageFloorY: -1.25, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
     garageEntry: { x: 39.5, width: 3, height: 8 },
     garageFloorAreas: [{ x: 44.9 - 2 / 12, z: 15, w: 10.6 + 2 / 12, d: 11.9 }, { x: 29, z: 26.9, w: 26.5, d: 7.7 }, { x: 31.2, z: 34.6, w: 24.3, d: 14.4 }],
     scene: {}, shell: {},
     floor: (x, z, w, d) => floors.push([x, z, w, d]),
     wall: (x1, z1, x2, z2, furnished, openings = []) => walls.push([x1, z1, x2, z2, openings])
   };
+  context.getKitchenWindowBankLayout = require('../floor-plan-ground.js').getKitchenWindowBankLayout;
   vm.runInNewContext(source.slice(source.indexOf('  const kitchenWallLeft ='), source.indexOf('  joinWallCorners();')), context);
   const round = (value) => JSON.parse(JSON.stringify(value, (key, number) => typeof number === 'number' ? Math.round(number * 1000000) / 1000000 : number));
   assert.deepEqual(round(baseline.floors.map(({ x, z, w, d }) => [x, z, w, d]).sort()), round(floors.sort()));
