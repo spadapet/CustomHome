@@ -17,9 +17,10 @@ function buildKidsRoom() {
     add(child) { child.parent = this; this.children.push(child); }
   }
   const roots = [];
-  const kidsRoom = { x: 19, z: 26.725 - 25 / 12 - 0.08 + 0.175, width: 10 };
+  const kidsRoom = { x: 19, z: 26.725 - 25 / 12 - 0.08 + 0.175, width: 10, southWidth: 12.2 };
   const context = {
     kidsRoom,
+    guestSuite: require('../floor-plan-ground.js').getGuestSuiteLayout(),
     kidsDoorway: { x: 19, z: 27, width: 4.5, height: 8 },
     casingSideWidth: 3.5 / 12,
     casingReveal: 0.125 / 12,
@@ -101,12 +102,12 @@ test('two electric IKEA MITTZON desks use the referenced product dimensions', ()
   }
   for (const desk of desks) {
     assert.equal(desk.rotation.y, Math.PI);
-    assert.equal(desk.position.z, 32.9375);
-    assert.ok(Math.abs((34.425 - bounds(desk).maxZ) * 12 - 2.1) < 1e-9, 'Desks back onto south wall with trim clearance');
+    assert.equal(desk.position.z, 31.9375);
+    assert.ok(Math.abs((33.425 - bounds(desk).maxZ) * 12 - 2.1) < 1e-9, 'Desks back onto shifted south wall with trim clearance');
   }
-  const rightWallFace = model.kidsRoom.x + model.kidsRoom.width - 0.175;
+  const rightWallFace = model.kidsRoom.x + model.kidsRoom.southWidth - 0.175;
   assert.ok(Math.abs((rightWallFace - bounds(desks[1]).maxX) * 12 - 1) < 1e-9, 'Right desk is one inch off the finished east wall');
-  assert.ok(Math.abs(desks[0].position.x - 22.6729166667) < 1e-9, 'PC stays left of homework desk');
+  assert.ok(Math.abs(desks[0].position.x - 24.8729166667) < 1e-9, 'PC shifts east 26.4 inches and stays left of homework desk');
   const craftChair = model.find('Kids desk chair 2')[0];
   assert.equal(craftChair.rotation.y, 2 * Math.PI);
   assert.equal(craftChair.position.x, desks[1].position.x);
@@ -140,14 +141,15 @@ test('desks, chairs and relocated storage clear room edges and preserve a passag
   for (const root of model.roots) {
     if (['Family glass dry-erase and cork board', 'Family message wall panelling', 'Family message wall white edge trim', 'Hall-facing white wall panelling'].includes(root.name)) continue;
     const b = bounds(root);
-    assert.ok(b.minX >= 19.3 && b.maxX <= 28.825 + 1e-9, root.name);
-    assert.ok(b.minZ >= model.kidsRoom.z + 0.3 && b.maxZ <= 34.425 + 1e-9, root.name);
+    const eastFace = b.minZ < 26.9 + 0.175 ? 28.825 : 31.025;
+    assert.ok(b.minX >= 19.3 && b.maxX <= eastFace + 1e-9, root.name);
+    assert.ok(b.minZ >= model.kidsRoom.z + 0.3 && b.maxZ <= 33.425 + 1e-9, root.name);
   }
   const deskFront = desks[0].minZ;
   const pulledFront = toyFront + storage[0].userData.binPullAllowanceInches / 12;
-  assert.ok((deskFront - toyFront) * 12 > 61, 'Opposing furniture fronts have over 61 inches');
-  assert.ok((deskFront - 30 / 12 - pulledFront) * 12 > 13, 'Chair and full bin-pull allowances remain separate');
-  for (const chair of chairs) assert.ok((chair.minZ - pulledFront) * 12 > 34, 'Full bin pull leaves over 34 inches to tucked chairs');
+  assert.ok((deskFront - toyFront) * 12 > 49, 'Shifted opposing furniture fronts have over 49 inches');
+  assert.ok((deskFront - 30 / 12 - pulledFront) * 12 > 1, 'Chair and full bin-pull allowances remain separate but do not leave a passing aisle');
+  for (const chair of chairs) assert.ok((chair.minZ - pulledFront) * 12 > 22, 'Full bin pull leaves over 22 inches to tucked chairs, not occupied approval');
   assert.ok(Math.min(...toyBounds.map(b => b.minX)) > 21.9, 'Storage is east-aligned, not across west entrance');
   const approach = { minX: 19.175, maxX: 21.675, minZ: 27, maxZ: 30.625 };
   for (const b of [...desks, ...chairs, ...toyBounds]) {
@@ -277,7 +279,7 @@ test('white panelling continues along the hall to the foyer without blocking eit
   const white = model.find('Family vertical wall panel')[0].material;
   for (const panel of model.find('Hall vertical wall panel')) assert.equal(panel.material, white);
   const cutouts = [];
-  for (const [start, end] of [[27, 31.5], [42, 45]]) {
+  for (const [start, end] of [[27, 31.5], [43.8, 46.8]]) {
     const sideExtent = 3.625 / 12;
     const headerTop = 8 + 0.125 / 12 + 5.5 / 12;
     cutouts.push(
@@ -295,7 +297,7 @@ test('white panelling continues along the hall to the foyer without blocking eit
       assert.ok(p.maxZ <= cut.minZ + 1e-9 || p.minZ >= cut.maxZ - 1e-9 || top <= cut.bottom + 1e-9 || bottom >= cut.top - 1e-9, 'No panelling in door opening or casing envelope');
     }
   }
-  for (const [start, end] of [[27, 31.5], [42, 45]]) {
+  for (const [start, end] of [[27, 31.5], [43.8, 46.8]]) {
     assert.ok(hall.children.some(part => {
       const p = bounds(part);
       return p.minZ < (start + end) / 2 && p.maxZ > (start + end) / 2 && part.position.y - part.h / 2 > 8.5;

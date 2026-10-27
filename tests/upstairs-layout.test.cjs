@@ -111,7 +111,7 @@ test('stair protections reject covering the void with a room or wall', () => {
 
 test('relocated stairs fit the former kids room with an east-facing upper arrival', () => {
   close(stairs.x, 0.175);
-  close(stairs.z, 26.775);
+  close(stairs.z, 27 + 0.2 / 12);
   close(stairs.width, 9 + 10 / 12);
   close(stairs.depth, 7.825);
   close(stairs.rotation, Math.PI);
@@ -122,7 +122,7 @@ test('relocated stairs fit the former kids room with an east-facing upper arriva
   close(baseline.arrival.w, 44 / 12);
   close(baseline.arrival.d, 46.9 / 12);
   const laundry = room(baseline, 'Laundry (relocated)');
-  close(laundry.x, 19);
+  close(laundry.x, 24);
   assert.ok(laundry.x > baseline.arrival.x + baseline.arrival.w);
   for (const floor of baseline.floors) {
     assert.ok(floor.w > 0 && floor.d > 0, floor.name);
@@ -130,6 +130,33 @@ test('relocated stairs fit the former kids room with an east-facing upper arriva
     const zOverlap = Math.min(floor.z + floor.d, stairs.z + stairs.depth) - Math.max(floor.z, stairs.z);
     assert.ok(xOverlap < 0.001 || zOverlap < 0.001, `${floor.name} covers the relocated stair void`);
   }
+});
+
+test('powder-side gap closure translates shared voids without moving rooms or narrowing arrival', () => {
+  const ground = require('../floor-plan-ground.js');
+  const old = { ...stairs, z: 26.775 };
+  close((stairs.z - old.z) * 12, 2.9);
+  close((35.1 - 0.175 - stairs.z - stairs.depth) * 12, 1);
+  close((35.1 - 0.175 - 0.75 / 12 - stairs.z - stairs.depth) * 12, 0.25);
+  assert.deepEqual(ground.getGuestEntryLayout(stairs), ground.getGuestEntryLayout(old));
+  assert.deepEqual(ground.getLivingRoomFeatureLayout(stairs), ground.getLivingRoomFeatureLayout(old));
+  const lower = ground.getGroundFloorDefaultPlan();
+  close(lower.stairs.z, stairs.z);
+  close(lower.stairs.depth, stairs.depth);
+  for (const plan of [lower, baseline, layout.resolve(baseline, require('../upstairs-layout.json'))]) {
+    for (const f of plan.floors) {
+      const rect = Array.isArray(f) ? { x: f[0], z: f[1], w: f[2], d: f[3] } : f;
+      const dx = Math.min(rect.x + rect.w, stairs.x + stairs.width) - Math.max(rect.x, stairs.x);
+      const dz = Math.min(rect.z + rect.d, stairs.z + stairs.depth) - Math.max(rect.z, stairs.z);
+      assert.ok(dx < 0.001 || dz < 0.001, `${rect.name || 'ground slab'} crosses shared void`);
+    }
+  }
+  close(baseline.arrival.d * 12, 46.9);
+  const south = baseline.floors.find(f => f.name === 'South landing connection');
+  close(south.d * 12, 16.3);
+  const north = baseline.floors.find(f => f.name === 'North stair edge');
+  close(north.z + north.d, stairs.z);
+  close(south.z, stairs.z + stairs.depth);
 });
 
 test('walls cannot be shortened through an opening or overlapping openings', () => {

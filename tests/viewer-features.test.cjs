@@ -54,7 +54,7 @@ test('room navigation gives every room its own floor-aware camera and keeps insp
   assert.doesNotMatch(toolbar, /data-view="(?:social|prep|mudroom-cubbies|mudroom-storage)"/);
   for (const key of ['social:', 'prep:', "'mudroom-cubbies':", "'mudroom-storage':"]) assert.ok(source.includes(key), 'Legacy inspection/deep-link presets remain available');
   assert.ok(source.includes("presets[name].floor ??"));
-  assert.match(source, /'guest-bathroom': \{ target: \[27\.85, 1\.5, 38\.8\], offset: \[0\.2, 14, 1\], span: 10 \}/);
+  assert.match(source, /'guest-bathroom': \{ target: \[28\.45, 1\.5, 39\.4\], offset: \[0\.2, 14, 1\], span: 11 \}/);
   const startSource = source.slice(source.indexOf('  function startWalking('), source.indexOf('    buildWalkObstacles();', source.indexOf('  function startWalking(')));
   vm.runInNewContext(`${startSource}return { x, z, lookX, lookZ }; }`, context);
   for (const view of ['powder', 'prep-kitchen', 'office', upstairsButtons[0].dataset.view]) {
@@ -152,7 +152,8 @@ test('dimensioned 2D links show every current room and retain a plain plan optio
     assert.equal(elements['plan-dimension-list'].children.length, rooms.length);
     rooms.forEach((room, index) => {
       assert.equal(elements['plan-dimension-labels'].children[index].children[0].textContent, room.name);
-      assert.equal(elements['plan-dimension-list'].children[index].textContent, `${room.name}: ~ ${context.feet(room.w)} x ${context.feet(room.d)}`);
+      const size = floor === 'ground' && room.name === 'Kids room' ? '127.67 sq ft, stepped plan; west edge to z37.2, east edge to z33.6' : `${context.feet(room.w)} x ${context.feet(room.d)}`;
+      assert.equal(elements['plan-dimension-list'].children[index].textContent, `${room.name}: ~ ${size}`);
     });
   }
   context.activeFloor = 'ground';
@@ -238,7 +239,7 @@ test('firepit moves to uncovered patio cold storage and the wood rack stays besi
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext(source.slice(start, end), context);
   const firepit = group.children.find((part) => part.name === 'Portable firepit - uncovered patio cold storage only');
-  assert.equal(firepit.position.x, -3.75);
+  assert.equal(firepit.position.x, -3.5);
   assert.equal(firepit.position.y, -1.625);
   assert.ok(Math.abs(firepit.position.z + 2.325) < 1e-9);
   assert.ok(!group.children.some((part) => part.name === 'Rear firepit cold-storage pad, not a burn area'));
@@ -264,10 +265,9 @@ test('firepit moves to uncovered patio cold storage and the wood rack stays besi
   assert.equal(rack.userData.localStorageApprovalRequired, true);
   assert.equal(rack.userData.houseSeparationApproved, false);
   assert.ok(rack.position.z + 4.1 < 27.4, 'Rack stops north of the waste-bin pad');
-  assert.ok((60.145 - rack.position.x - 0.75) * 12 >= 32, 'Roof does not reduce the paved passage below 32 inches locally');
-  assert.ok((60.725 - rack.position.x - 0.75) * 12 >= 36, 'At least 36 inches to the modeled fence rail at the rack');
+  assert.ok((61.725 - rack.position.x - 0.75) * 12 >= 51.9 - 1e-8, 'Full-strip paving extends to the current rail face');
   const pad = group.children.find((part) => part.name === 'Firewood rack infill pad beside existing walkway');
-  assert.ok(pad.position.x + pad.w / 2 <= 56.645, 'New pad stops at the existing walk instead of adding a coplanar overlapping slab');
+  assert.equal(pad, undefined, 'Continuous east paving replaces the former rack infill pad');
   assert.ok(group.children.every((part) => part.position.z < 54.2), 'No firepit, rack or associated pads remain in the front yard');
   assert.equal(rack.children.filter((part) => part.name === 'Seasoned firewood placeholder').length, 112);
   assert.match(read('patio.html'), /Do not operate the firepit under (this|the patio) roof/);

@@ -7,11 +7,49 @@ const vm = require('node:vm');
 const exteriorSource = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
 const viewerSource = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
 
+test('exterior daylight isolates the raking sun, sky and exposure and restores both interior modes', () => {
+  const context = {
+    activeFloor: 'exterior', nightLighting: false, exteriorSun: {}, scene: {},
+    outdoorSky: {}, indoorBackground: {}, outdoorReflection: { texture: {} },
+    ambientLight: {}, studioFill: {}, renderer: {}
+  };
+  const start = viewerSource.indexOf('    const exteriorDaylight =');
+  const code = viewerSource.slice(start, viewerSource.indexOf('    mudroomKeyLight.visible', start));
+  function apply(floor, night) {
+    context.activeFloor = floor; context.nightLighting = night;
+    vm.runInNewContext(`{${code}}`, context);
+  }
+  apply('exterior', false);
+  assert.equal(context.exteriorSun.visible, true);
+  assert.equal(context.scene.environment, context.outdoorReflection.texture);
+  assert.equal(context.ambientLight.intensity, 0.55);
+  assert.equal(context.renderer.toneMappingExposure, 0.95);
+  for (const floor of ['ground', 'upstairs', 'exterior']) {
+    apply(floor, true);
+    assert.equal(context.exteriorSun.visible, false);
+    assert.equal(context.scene.environment, null);
+    assert.equal(context.scene.background, context.indoorBackground);
+    assert.equal(context.renderer.toneMappingExposure, 0.75);
+    assert.equal(context.ambientLight.intensity, 0.5);
+  }
+  for (const floor of ['ground', 'upstairs']) {
+    apply(floor, false);
+    assert.equal(context.scene.environment, null);
+    assert.equal(context.renderer.toneMappingExposure, 1.25);
+    assert.equal(context.ambientLight.intensity, 2.5);
+    assert.equal(context.studioFill.intensity, 650);
+  }
+  apply('exterior', false);
+  assert.equal(context.exteriorSun.visible, true);
+  assert.equal(context.renderer.toneMappingExposure, 0.95);
+});
+
 class Group {
   constructor() {
     this.children = [];
     this.userData = {};
     this.rotation = { y: 0 };
+    this.scale = { x: 1, y: 1, z: 1 };
     this.position = { x: 0, y: 0, z: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } };
   }
   add(...children) { for (const child of children) { child.parent = this; this.children.push(child); } }
@@ -21,6 +59,7 @@ class Group {
 function buildLighting() {
   const group = new Group();
   const context = {
+    HomeRoof: require('../floor-plan-roof.js'), floorToFloor: 10, white: {},
     THREE: {
       Group,
       SpotLight: class extends Group {
@@ -43,6 +82,7 @@ function buildLighting() {
     }
   };
   vm.createContext(context);
+  vm.runInContext(exteriorSource.match(/  const canopyLightXs = .*;/)[0], context);
   vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const canopyDepth ='), exteriorSource.indexOf('  function canopySection(')), context);
   vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const porchCanopyHeight ='), exteriorSource.indexOf('  const porchMetal =')), context);
   vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const lighting ='), exteriorSource.indexOf('  const cameras =')), context);
@@ -53,8 +93,8 @@ test('warm downward fixtures cover entrances, side paths, garden and patio witho
   const { lighting } = buildLighting();
   const fixtures = lighting.children.filter((part) => part.userData.mount);
   const sources = lighting.children.filter((part) => part.isLight);
-  assert.equal(fixtures.length, 17);
-  assert.equal(sources.length, 17);
+  assert.equal(fixtures.length, 29);
+  assert.equal(sources.length, 29);
   assert.equal(fixtures.filter((part) => part.userData.mount === 'wall').length, 12);
   for (const fixture of fixtures) {
     assert.equal(fixture.userData.colorTemperatureKelvin, 2700);
@@ -63,7 +103,7 @@ test('warm downward fixtures cover entrances, side paths, garden and patio witho
   }
   for (const source of sources) {
     assert.ok(source.target.position.y < source.position.y, 'No upward beam');
-    assert.ok(source.target.position.x >= -13.605 && source.target.position.x <= 61.395, 'Aim stays within the modeled lot');
+    assert.ok(source.target.position.x >= -12.605 && source.target.position.x <= 62.395, 'Aim stays within the modeled lot');
     assert.ok(source.target.position.z >= -32.325 && source.target.position.z <= 97.675);
     assert.equal(source.decay, 2);
     assert.ok(!source.castShadow, 'Do not add costly exterior shadow maps');
@@ -93,6 +133,14 @@ test('wall lights have correctly oriented mounting plates and porch housings mee
   }
   for (const fixture of fixtures.filter((part) => part.name === 'Front porch approach ceiling light')) {
     close(fixture.position.y + 0.075, context.porchCanopyUndersideAt(fixture.position.z));
+  }
+  const upper = fixtures.filter(part => part.userData.mount === 'upper soffit recessed');
+  assert.equal(upper.length, 12);
+  for (const fixture of upper) {
+    close(fixture.position.y, fixture.userData.soffitUndersideFeet);
+    const [housing, lens] = fixture.children;
+    assert.ok(housing.position.y + housing.height * housing.scale.y / 2 < 0.16);
+    assert.ok(lens.position.y - lens.height / 2 < 0);
   }
   for (const fixture of fixtures.filter((part) => /patio ceiling light|Open-patio approach ceiling/.test(part.name))) {
     close(fixture.position.y + 0.075, context.patioRoofUndersideAt(fixture.position.z) - 0.75 - 0.04);

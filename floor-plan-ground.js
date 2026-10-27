@@ -1,10 +1,40 @@
+// One product intent for furnished ground/upstairs and all masonry elevations.
+// Envelopes are not SKUs: the manufacturer's headline limits are only a screen.
+function getWindowProductIntent(width, height, picture = false, privacy = false) {
+  const columns = picture ? 1 : Math.ceil(width / 3);
+  const rows = picture ? 1 : Math.ceil(height / 6);
+  const unitWidth = width / columns, unitHeight = height / rows;
+  return {
+    manufacturer: 'Andersen', series: '100 Series', material: 'Fibrex composite',
+    exteriorFinish: 'White', interiorFinish: 'White', grilles: 'none',
+    operation: picture ? 'fixed picture window' : 'casement',
+    columns, rows, widthFeet: width, heightFeet: height,
+    unitWidthFeet: unitWidth, unitHeightFeet: unitHeight,
+    standardSizeVerified: false, productSelected: false, assemblyApproved: false,
+    sizeReview: picture
+      ? 'Dealer chart/area/aspect-ratio and combination review required; 8 ft headline is not an 8 x 8 approval'
+      : unitWidth < 17.5 / 12 || unitWidth > 35.5 / 12 || unitHeight < 23.5 / 12 || unitHeight > 71.5 / 12
+        ? 'Outside single-casement frame range 17.5–35.5 x 23.5–71.5 inches: reconcile rough opening, resize or review operation; concept preserved'
+        : 'Dealer size/rough-opening/egress and combination review required',
+    privacyReview: privacy ? 'Partial-height obscure treatment is a concept, not a verified factory option' : null
+  };
+}
+function getGroundFrontWindows() {
+  return [
+    {name: 'Office porch window', center: 6, width: 6, sill: 3, height: 5},
+    {name: 'Bedroom porch window', center: 25, width: 7.6, sill: 3, height: 5}
+  ];
+}
+if (typeof module !== 'undefined' && module.exports) module.exports.getWindowProductIntent = getWindowProductIntent;
 (function (root) {
   'use strict';
   const UpstairsLayout = typeof module !== 'undefined' && module.exports ? require('./upstairs-layout.js') : root.UpstairsLayout;
 
   function getLivingRoomFeatureLayout(stairs = UpstairsLayout.stairOpening()) {
     const wallStartZ = 8 + 0.35 / 2;
-    const wallEndZ = stairs.z;
+    // Keep the approved fireplace/window/furniture composition fixed when
+    // closing the stair's powder-side gap; this is its original design datum.
+    const wallEndZ = 26.775;
     const centerZ = (wallStartZ + wallEndZ) / 2;
     const sideWindowBank = {
       name: 'Living joined return window bank', x: 6.6, z: 8, width: 7.5, height: 5, sill: 3,
@@ -165,38 +195,38 @@
   }
 
   function getGuestEntryLayout(stairs = UpstairsLayout.stairOpening()) {
-    const northZ = stairs.z + stairs.depth + 0.5;
+    // Fixed room/door datum: moving the shared stair opening must not move rooms.
+    const northZ = 35.1;
     return {
       powder: { x: 0, z: northZ, w: 7.1, d: 5.9 },
-      coatCloset: { x: 7.1, z: northZ, w: 5.1, d: 2.4 },
-      alcove: { x: 7.1, z: northZ + 2.4, w: 5.1, d: 3.5 },
+      coatCloset: { x: 7.1, z: northZ + 3.5, w: 5.1, d: 2.4 },
+      alcove: { x: 7.1, z: northZ, w: 5.1, d: 3.5 },
       officeNorthZ: northZ + 5.9,
-      powderDoor: { x: 7.1, z: northZ + 2.9, width: 2.5, height: 8 },
-      closetDoor: { x: 7.65, z: northZ + 2.4, width: 4, height: 8 },
-      toilet: { x: 1.65, z: northZ + 1.35, rotation: 0 },
-      vanity: { x: 4.75, z: northZ + 1.125, width: 3.5, depth: 1.75, rotation: 0 },
+      powderDoor: { x: 7.1, z: northZ + 0.5, width: 2.5, height: 8 },
+      closetDoor: { x: 7.65, z: northZ + 3.5, width: 4, height: 8 },
+      toilet: { x: 1.65, z: northZ + 4.55, rotation: Math.PI },
+      vanity: { x: 4.75, z: northZ + 4.775, width: 3.5, depth: 1.75, rotation: Math.PI },
       windows: [{ x: 0, z: northZ + 2.95, width: 29.5 / 12, height: 47.5 / 12, sill: 48.25 / 12, openingWidth: 2.5, openingHeight: 4, openingSill: 4, standardSizeCode: '2640', privacyLowerHalf: true }]
     };
   }
 
   function getGuestSuiteLayout() {
     return {
-      closet: { x: 19, z: 34.6, w: 5.5, d: 7.4 },
-      closetDoor: { x: 21.35, z: 42, width: 2.5, height: 8, doorless: true },
-      bathroom: { x: 24.5, z: 34.6, w: 6.7, d: 5 },
-      sinkAlcove: { x: 24.5, z: 39.6, w: 6.7, d: 3.4 },
-      vanityPrivacyWall: { x: 29.3225, z: 43.2, w: 1.8775 },
+      closet: { x: 19, z: 37.2, w: 6.75, d: 6 },
+      kidsExtension: { x: 19, z: 34.6, w: 6.75, d: 2.6 },
+      bedroomDoor: { x: 19, z: 43.8, width: 3, height: 8 },
+      closetDoor: { x: 21.65, z: 43.2, width: 3, height: 8, doorless: true },
+      bathroom: { x: 25.75, z: 33.6, w: 5.45, d: 9.6 },
       closetStorage: {
         hanging: [
-          { x: 0.08, z: 0.08, w: 3.63, d: 1.84, double: false },
-          { x: 3.79, z: 0.08, w: 1.9, d: 1.84, double: true }
+          { x: 2.25, z: 0.25, w: 4.25, d: 2, double: true }
         ],
-        shelves: { x: 5.77, z: 0.08, w: 0.98, d: 1.84 }
+        shelves: { x: 0.25, z: 0.25, w: 2, d: 5.4 }
       },
-      bathroomDoor: { x: 25, z: 39.6, width: 2.5, height: 8, pocket: { x: 27.5, w: 2.65, targetClearWidth: 28 / 12, approvalRequired: true } },
-      shower: { x: 31.025, z: 34.775, w: 4.65, d: 3.2, rotation: -Math.PI / 2, clearWidth: 4.45, clearDepth: 3, entryOffset: 2, doorWidth: 2.5, height: 8 },
-      toilet: { x: 26, z: 35.95, rotation: 0 },
-      vanity: { x: 30.2, z: 41.4, width: 3, mirrorWidth: 2.5, rotation: -Math.PI / 2, basinCount: 1 }
+      bathroomDoor: { x: 26.2, z: 43.2, width: 28 / 12, height: 8, pocket: { x: 26.2 + 28 / 12, w: 2.45, targetClearWidth: 26 / 12, approvalRequired: true } },
+      shower: { x: 25.95, z: 33.8, w: 5.05, d: 3.2, rotation: 0, clearWidth: 4.85, clearDepth: 3, entryOffset: 0.2, doorWidth: 2.5, height: 8 },
+      toilet: { x: 29.9, z: 38.5, rotation: -Math.PI / 2 },
+      vanity: { x: 30.15, z: 41.4, width: 2.5, mirrorWidth: 2, rotation: -Math.PI / 2, basinCount: 1 }
     };
   }
 
@@ -232,33 +262,31 @@
     const rooms = [
       ['Living room', 0, 8, 13.2, 17.7], ['Dining room', 13.2, -0.1, 13.675, 8.1],
       ['Hall', 13.2, 8, 13.3, kidsNorthZ - 8], ['Kitchen', 26.5, 7, 11, 19.9],
-      ['Prep kitchen', 37.5, 7, 18, 8], ['Mudroom', 37.5, 15, 7.4 - 2 / 12, 11.9],
-      ['Kids room', 19, kidsNorthZ, 10, 34.6 - kidsNorthZ], ['Powder room', 0, powderZ, 7.1, guestEntry.powder.d],
-      ['Guest coat closet', 7.1, powderZ, 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 7.1, entryZ, 5.1, guestEntry.alcove.d],
+      ['Prep kitchen', 37.5, 7, 18, 8], ['Mudroom', 37.5, 15, 7.4 - 8 / 12, 11.9],
+      ['Kids room', 19, kidsNorthZ, 12.2, 33.6 - kidsNorthZ], ['Powder room', 0, powderZ, 7.1, guestEntry.powder.d],
+      ['Guest coat closet', 7.1, guestEntry.coatCloset.z, 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 7.1, entryZ, 5.1, guestEntry.alcove.d],
       ['Office', 0, officeZ, 12.2, 54.2 - officeZ], ['Entry hall', 12.2, 34.6, 6.8, 19.6],
-      ['Closet', 19, 34.6, 5.5, 7.4], ['Bathroom', 24.5, 34.6, 6.7, guestSuite.bathroom.d],
-      ['Guest sink alcove', guestSuite.sinkAlcove.x, guestSuite.sinkAlcove.z, guestSuite.sinkAlcove.w, guestSuite.sinkAlcove.d],
-      ['Guest room', 19, 43, 12.2, 11.2],
-      ['Guest room entry', 19, 42, 5.5, 1],
+      ...[['Kids room extension', guestSuite.kidsExtension], ['Closet', guestSuite.closet], ['Bathroom', guestSuite.bathroom]].map(([name, { x, z, w, d }]) => [name, x, z, w, d]),
+      ['Guest room', 19, 43.2, 12.2, 11],
       ['Garage', 29, 15, 26.5, 34], ['Front porch', 0, 54.2, 31.2, 7]
     ].map(([name, x, z, w, d]) => ({ name, x, z, w, d }));
     const floors = [
       [0, 8, 13.2, 17.7, 'Living room'], [13.2, -0.1, 13.675, 8.1, 'Dining room'],
       [13.2, 8, 5.8, 17.7, 'Hall'], [19, 8, 7.5, kidsNorthZ - 8, 'Hall'],
       [26.875, 7, 10.625, 1, 'Kitchen'], [26.5, 8, 11, kidsNorthZ - 8, 'Kitchen'], [29, kidsNorthZ, 8.5, 26.9 - kidsNorthZ, 'Kitchen'],
-      [37.5, 7, 7.9, 8, 'Prep kitchen'], [45.4, 7, 10.1, 8, 'Prep kitchen'], [37.5, 15, 7.4 - 2 / 12, 11.9, 'Mudroom'],
+      [37.5, 7, 7.9, 8, 'Prep kitchen'], [45.4, 7, 10.1, 8, 'Prep kitchen'], [37.5, 15, 7.4 - 8 / 12, 11.9, 'Mudroom'],
       [0, 25.7, 12.2, stairs.z - 25.7], [0, stairs.z, stairs.x, stairs.depth],
       [stairs.x + stairs.width, stairs.z, 12.2 - stairs.x - stairs.width, stairs.depth],
       [0, stairs.z + stairs.depth, 12.2, powderZ - stairs.z - stairs.depth],
-      [12.2, 25.7, 6.8, 8.9], [19, kidsNorthZ, 10, 34.6 - kidsNorthZ, 'Kids room'],
+      [12.2, 25.7, 6.8, 8.9], [19, kidsNorthZ, 6.75, 34.6 - kidsNorthZ, 'Kids room'],
+      [25.75, kidsNorthZ, 3.25, 33.6 - kidsNorthZ, 'Kids room'],
+      [29, 26.9, 2.2, 6.7, 'Kids room'],
       [12.2, 34.6, 6.8, 19.6, 'Entry hall'], [0, powderZ, 7.1, guestEntry.powder.d, 'Powder room'],
       [7.1, entryZ, 5.1, guestEntry.alcove.d, 'Guest entry alcove'], [0, officeZ, 12.2, 54.2 - officeZ, 'Office'],
-      [19, 34.6, 5.5, 7.4, 'Closet'], [24.5, 34.6, 6.7, guestSuite.bathroom.d, 'Bathroom'],
-      [guestSuite.sinkAlcove.x, guestSuite.sinkAlcove.z, guestSuite.sinkAlcove.w, guestSuite.sinkAlcove.d, 'Guest sink alcove'],
-      [19, 43, 12.2, 11.2, 'Guest room'],
-      [19, 42, 5.5, 1, 'Guest room entry'],
-      [7.1, powderZ, 5.1, guestEntry.coatCloset.d, 'Guest coat closet'],
-      [44.9 - 2 / 12, 15, 10.6 + 2 / 12, 11.9, 'Garage', -1.25], [29, 26.9, 26.5, 7.7, 'Garage', -1.25],
+      ...[['Kids room extension', guestSuite.kidsExtension], ['Closet', guestSuite.closet], ['Bathroom', guestSuite.bathroom]].map(([name, { x, z, w, d }]) => [x, z, w, d, name]),
+      [19, 43.2, 12.2, 11, 'Guest room'],
+      [7.1, guestEntry.coatCloset.z, 5.1, guestEntry.coatCloset.d, 'Guest coat closet'],
+      [44.9 - 8 / 12, 15, 10.6 + 8 / 12, 11.9, 'Garage', -1.25], [31.2, 26.9, 24.3, 7.7, 'Garage', -1.25],
       [31.2, 34.6, 24.3, 14.4, 'Garage', -1.25], [0, 54.2, 31.2, 7, 'Front porch']
     ].map(([x, z, w, d, room, elevation = 0]) => ({ x, z, w, d, room: room ?? null, elevation }));
     const sideWindows = [livingFeatureWall.sideWindowBank].map(({ x, openingWidth, openingSill, openingHeight }) => [x - openingWidth / 2, x + openingWidth / 2, openingSill, openingSill + openingHeight]);
@@ -283,24 +311,24 @@
       ['Kids north', 19, kidsNorthZ, 29, kidsNorthZ], ['Kids west', 19, kidsNorthZ, 19, 34.6, [[27 - kidsNorthZ, 31.5 - kidsNorthZ, 0, 8]]],
       ['Kids east return', 29, kidsNorthZ, 29, 26.9], ['Powder north', 0, powderZ, 12.2, powderZ],
       ['Powder east', 7.1, powderZ, 7.1, officeZ, [[guestEntry.powderDoor.z - powderZ, guestEntry.powderDoor.z - powderZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
-      ['Guest coat closet front', 7.1, entryZ, 12.2, entryZ, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
-      ['Guest coat closet east', 12.2, powderZ, 12.2, entryZ],
+      ['Guest coat closet front', 7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
+      ['Guest coat closet east', 12.2, guestEntry.coatCloset.z, 12.2, officeZ],
       ['Office east', 12.2, officeZ, 12.2, 54.2, [[45.25 - 2.5 - officeZ, 45.25 + 2.5 - officeZ, 0, 8]]],
       ['Office north', 0, officeZ, 12.2, officeZ],
-      ['House south', 0, 54.2, 31.2, 54.2, [[3, 9, 3, 8], [13.1, 18.1, 0, 8], [21.2, 28.8, 3, 8]]],
-      ['Guest west', 19, 34.6, 19, 54.2, [[7.4, 10.4, 0, 8]]],
-      ['Closet north', 19, 34.6, 24.5, 34.6], ['Closet east', 24.5, 34.6, 24.5, 42],
-      ['Closet south', 19, 42, 24.5, 42, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x - 19 + guestSuite.closetDoor.width, 0, guestSuite.closetDoor.height]]],
-      ['Bathroom south', 24.5, guestSuite.bathroomDoor.z, 31.2, guestSuite.bathroomDoor.z, [[guestSuite.bathroomDoor.x - 24.5, guestSuite.bathroomDoor.x - 24.5 + guestSuite.bathroomDoor.width, 0, guestSuite.bathroomDoor.height]]],
-      ['Guest vanity privacy return', guestSuite.vanityPrivacyWall.x, guestSuite.vanityPrivacyWall.z, guestSuite.vanityPrivacyWall.x + guestSuite.vanityPrivacyWall.w, guestSuite.vanityPrivacyWall.z],
-      ['Bathroom north', 24.5, 34.6, 29, 34.6], ['Garage southwest return', 29, 34.6, 31.2, 34.6],
-      ['Garage west', 31.2, 34.6, 31.2, 49], ['Garage west return', 29, 26.9, 29, 34.6],
-      ['Kitchen south left', 29, 26.9, 29.1875, 26.9], ['Kitchen south', 29.1875, 26.9, 37.3, 26.9],
+      ['House south', 0, 54.2, 31.2, 54.2, [...getGroundFrontWindows().map(w => [w.center-w.width/2,w.center+w.width/2,w.sill,w.sill+w.height]), [13.1,18.1,0,8]].sort((a,b)=>a[0]-b[0])],
+      ['Guest west', 19, 34.6, 19, 54.2, [[guestSuite.bedroomDoor.z - 34.6, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - 34.6, 0, 8]]],
+      ['Closet north', 19, guestSuite.closet.z, guestSuite.bathroom.x, guestSuite.closet.z], ['Closet east', guestSuite.bathroom.x, guestSuite.bathroom.z, guestSuite.bathroom.x, guestSuite.bathroomDoor.z],
+      ['Closet south', 19, guestSuite.closetDoor.z, guestSuite.bathroom.x, guestSuite.closetDoor.z, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x - 19 + guestSuite.closetDoor.width, 0, guestSuite.closetDoor.height]]],
+      ['Bathroom south', guestSuite.bathroom.x, guestSuite.bathroomDoor.z, 31.2, guestSuite.bathroomDoor.z, [[guestSuite.bathroomDoor.x - guestSuite.bathroom.x, guestSuite.bathroomDoor.x - guestSuite.bathroom.x + guestSuite.bathroomDoor.width, 0, guestSuite.bathroomDoor.height]]],
+      ['Bathroom north', guestSuite.bathroom.x, guestSuite.bathroom.z, 31.2, guestSuite.bathroom.z],
+      ['Garage west', 31.2, 34.6, 31.2, 49], ['Garage west return', 31.2, 26.9, 31.2, 34.6],
+      ['Kitchen south left', 29, 26.9, 29.1875, 26.9], ['Kids kitchen return', 29.1875, 26.9, 31.2, 26.9],
+      ['Kitchen south', 31.2, 26.9, 37.3, 26.9],
       ['Kitchen south right', 37.3, 26.9, 37.5, 26.9],
       ['Kitchen east', kitchenPassages.wallX, kitchenPassages.wallZ, kitchenPassages.wallX, 25.3, kitchenPassages.openings],
-      ['Kitchen east return', 37.5, 25.3, 37.5, 26.9], ['Mudroom north', 37.5, 15, 44.9 - 2 / 12, 15],
-      ['Garage north', 44.9 - 2 / 12, 15, 55.5, 15], ['Mudroom east', 44.9 - 2 / 12, 15, 44.9 - 2 / 12, 26.9],
-      ['Mudroom south', 37.5, 26.9, 44.9 - 2 / 12, 26.9, [[0.5, 3.5, 0, 8]]]
+      ['Kitchen east return', 37.5, 25.3, 37.5, 26.9], ['Mudroom north', 37.5, 15, 44.9 - 8 / 12, 15],
+      ['Garage north', 44.9 - 8 / 12, 15, 55.5, 15], ['Mudroom east', 44.9 - 8 / 12, 15, 44.9 - 8 / 12, 26.9],
+      ['Mudroom south', 37.5, 26.9, 44.9 - 8 / 12, 26.9, [[0.5, 3.5, 0, 8]]]
     ];
     return { rooms, floors, walls: segments, windows: [], stairs, floorName: 'first-floor' };
   }
@@ -360,5 +388,5 @@
       }
     };
   };
-  if (typeof module !== 'undefined' && module.exports) module.exports = { getGroundFloorDefaultPlan, getKitchenPassageLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getFrontEntryLayout, buildArchedFrontEntry };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { getGroundFrontWindows, getWindowProductIntent, getGroundFloorDefaultPlan, getKitchenPassageLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getFrontEntryLayout, buildArchedFrontEntry };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

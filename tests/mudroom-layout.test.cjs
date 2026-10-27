@@ -58,7 +58,7 @@ test('mudroom and kitchen lighting stay scoped and restore other floor/view sett
     const kitchenLighting = floor === 'ground' && ['kitchen', 'prep-counter', 'prep-kitchen', 'pantry', 'sink-storage', 'cooktop', 'island', 'fridge'].includes(view);
     assert.equal(kitchenKeyLight.visible, kitchenLighting, view);
     assert.equal(context.renderer.shadowMap.enabled, enabled || floor === 'exterior' && !night, view);
-    assert.equal(ambientLight.intensity, floor === 'exterior' && !night ? 0.7 : night ? 0.5 : 2.5, view);
+    assert.equal(ambientLight.intensity, floor === 'exterior' && !night ? 0.55 : night ? 0.5 : 2.5, view);
     assert.equal(studioFill.intensity, floor === 'exterior' && !night ? 0 : night ? 250 : 650, view);
     assert.equal(context.renderer.toneMappingExposure, floor === 'exterior' && !night ? 0.95 : night ? 0.75 : 1.25, view);
     assert.equal(context.renderer.shadowMap.type, enabled ? 'VSM' : 'PCFSoft', view);
@@ -338,9 +338,9 @@ test('five backed cubbies have side-panel hooks and unobstructed floor-level lar
   assert.ok((0.75 - (backing.position.z + backing.d / 2)) * 12 >= 16, 'At least 16-inch clear shoe depth');
 });
 
-test('enlarged coat closet has a transverse rail and standard 36-inch hinged door', () => {
+test('full north closet has a transverse rail and standard 48-inch French pair', () => {
   const model = buildMudroom();
-  assert.equal(model.roots.length, 6);
+  assert.equal(model.roots.length, 5);
   for (const name of ['Mudroom stacked washer and dryer', 'Mudroom washer concept', 'Mudroom dryer concept', 'Provisional laundry stacking kit', 'Laundry reservation side panel', 'Laundry overhead compartment floor']) {
     assert.equal(model.find(name).length, 0, `${name} must not remain in the mudroom`);
   }
@@ -352,13 +352,13 @@ test('enlarged coat closet has a transverse rail and standard 36-inch hinged doo
   assert.equal(model.find('Full-overlay Shaker cabinet front').length, 0, 'Mudroom uses simple builder-installed open shelving');
   assert.equal(model.find('Mudroom keys and charging drop zone').length, 0, 'Removed with the pictured west run');
   const closet = model.find('Mudroom hanging coat closet')[0];
-  assert.equal(closet.userData.widthInches, 42);
+  assert.equal(closet.userData.widthInches, 61.5);
   assert.equal(closet.userData.depthInches, 24);
   assert.equal(closet.userData.doorHeightInches, 96);
   assert.equal(closet.userData.railOrientation, 'Side to side');
-  assert.match(closet.userData.doorStyle, /36-inch hinged/);
-  assert.deepEqual(Array.from(closet.userData.roughOpeningReserveInches), [38, 98]);
-  assert.equal(model.find('Mudroom standard hinged closet door panel').length, 1);
+  assert.match(closet.userData.doorStyle, /48 x 96-inch solid/);
+  assert.deepEqual(Array.from(closet.userData.roughOpeningReserveInches), [50, 98]);
+  assert.equal(model.find('Mudroom standard hinged closet door panel').length, 2);
   for (const leaf of model.find('Mudroom standard hinged closet door panel')) {
     assert.equal(leaf.userData.height, 7.96);
     assert.ok(Math.abs((bounds(leaf).min[1] + bounds(leaf).max[1]) / 2 - 4) < 1e-9, 'Interactive leaves remain centered four feet above the floor');
@@ -505,17 +505,17 @@ test('daily boots and sneakers fit under the bench and shelf boots clear the she
   assert.equal(model.find('Stored shoe sole').length, 0, 'Old flat shoe blocks are gone');
 });
 
-test('clear west wall retains a 62.8-inch wall-to-bench aisle', () => {
+test('clear west wall retains a 56.8-inch wall-to-bench aisle', () => {
   const model = buildMudroom();
   const bench = bounds(model.find('Five-cubby mudroom bench')[0]);
   const closed = (bench.min[0] - 37.675) * 12;
-  assert.ok(Math.abs(closed - 62.8) < 1e-8, `Wall-to-bench aisle is ${closed} inches`);
+  assert.ok(Math.abs(closed - 56.8) < 1e-8, `Wall-to-bench aisle is ${closed} inches`);
   const coat = model.find('Mudroom hanging coat closet')[0];
-  assert.equal(coat.position.x, 41.2, 'Closet shifts slightly east for the separate north basket bay');
+  assert.equal(coat.position.x, 40.3875, 'Full frontage encloses the former basket bay');
   assert.equal(coat.rotation.y, 0, 'Closed coat doors face into the room, not sideways from the corner');
 });
 
-test('garage entry door defaults closed and its full inward sweep clears remaining storage', () => {
+test('garage entry door defaults 90 degrees and its full inward sweep clears remaining storage', () => {
   const model = buildMudroom();
   const door = model.find('Mudroom garage entry door')[0];
   const leaf = model.find('Mudroom inward garage door leaf')[0];
@@ -523,10 +523,10 @@ test('garage entry door defaults closed and its full inward sweep clears remaini
   assert.equal(door.userData.nominalWidthInches, 36);
   assert.equal(door.userData.nominalHeightInches, 96);
   assert.equal(door.userData.thicknessInches, 1.75);
-  assert.equal(operation.openAngleDegrees, 0);
+  assert.equal(operation.openAngleDegrees, 90);
   assert.equal(operation.maxAngleDegrees, 90);
   assert.equal(operation.openRotationSign, 1);
-  assert.equal(leaf.rotation.y, 0);
+  assert.equal(leaf.rotation.y, Math.PI / 2);
   const obstacles = model.all.filter((part) => {
     if (part.w === undefined) return false;
     for (let node = part; node; node = node.parent) if (node === door) return false;
@@ -554,7 +554,7 @@ test('garage entry door defaults closed and its full inward sweep clears remaini
   }
   const bench = bounds(model.find('Five-cubby mudroom bench')[0]);
   const openDoor = bounds(door);
-  assert.ok((bench.min[0] - openDoor.max[0]) * 12 > 18, 'Closed leaf clears bench; full open operating sweep checked above');
+  assert.ok((bench.min[0] - openDoor.max[0]) * 12 > 12, 'Closed leaf clears bench; full open operating sweep checked above');
   assert.match(door.userData.approval, /Rated\/self-closing.*professional review/);
 });
 
@@ -563,7 +563,7 @@ test('storage fits below the ceiling with no case overlap and keeps the entry ro
   const [bench, closet] = model.roots.map(bounds);
   for (const root of model.roots.filter((root) => root.name !== 'Mudroom garage entry door')) {
     const b = bounds(root);
-    assert.ok(b.min[0] >= 37.675 - 1e-9 && b.max[0] <= 44.6);
+    assert.ok(b.min[0] >= 37.675 - 1e-9 && b.max[0] <= 44.9 - 8 / 12 - 0.175 + 1e-9);
     const fitted = root.name === 'Continuous mudroom built-in enclosure';
     assert.ok(b.min[2] >= 14.8 && b.max[2] <= (fitted ? 26.725 : 26.9 - 0.175 - 1 / 12) + 1e-9, 'Cases retain their footprint; fitted end scribes meet the south wall');
     assert.ok(b.min[1] >= -1e-9 && b.max[1] <= (fitted ? 9 : 8.75) + 1e-9);
@@ -575,23 +575,23 @@ test('storage fits below the ceiling with no case overlap and keeps the entry ro
     }
   }
   assert.ok(closet.max[2] < 21.175 - (3.5 + 0.125) / 12, 'Closet clears kitchen-entry casing');
-  assert.ok(bench.min[0] > 42.5 + (3.5 + 0.125) / 12, 'Bench clears garage-entry casing');
-  assert.ok(closet.max[2] < 21.175 && bench.min[0] > 42.9, 'Kitchen-to-garage route remains open');
-  const entryTurningArea = { min: [39.875, 0, 21.5], max: [42.9, 6, 26.5] };
+  assert.ok(bench.min[0] > 41 + (2.5 + 0.125) / 12, 'Bench clears actual garage-entry casing');
+  assert.ok(closet.max[2] < 21.175 && bench.min[0] > 42.4, 'Kitchen-to-garage route remains open');
+  const entryTurningArea = { min: [39.875, 0, 21.5], max: [42.4, 6, 26.5] };
   const leaf = model.find('Mudroom inward garage door leaf')[0];
   leaf.rotation.y = Math.PI / 2;
   for (const part of model.all.filter((part) => part.w !== undefined)) {
     const b = bounds(part);
-    assert.ok(b.max.some((value, axis) => value <= entryTurningArea.min[axis] || b.min[axis] >= entryTurningArea.max[axis]), 'With the door parked open, keep a conservative 36.3 by 60 inch static passing strip, not accessibility approval');
+    assert.ok(b.max.some((value, axis) => value <= entryTurningArea.min[axis] || b.min[axis] >= entryTurningArea.max[axis]), 'With the door parked open, keep a conservative 30.3 by 60 inch static passing strip, not accessibility approval');
   }
   leaf.rotation.y = 0;
 });
 
-test('the 36-inch coat doorway has a 36-inch deep storage-free approach', () => {
+test('the 48-inch coat doorway has a 36-inch deep storage-free approach', () => {
   const model = buildMudroom();
   const coat = model.find('Mudroom hanging coat closet')[0];
   const c = bounds(coat);
-  const approach = { min: [coat.position.x - 1.5, 0, c.max[2]], max: [coat.position.x + 1.5, 6.4, c.max[2] + 3] };
+  const approach = { min: [coat.position.x - 4 / 12 - 2, 0, c.max[2]], max: [coat.position.x - 4 / 12 + 2, 6.4, c.max[2] + 3] };
   for (const part of model.all.filter((part) => part.w !== undefined)) {
     let inCoat = false;
     for (let node = part; node; node = node.parent) if (node === coat) inCoat = true;
@@ -601,41 +601,60 @@ test('the 36-inch coat doorway has a 36-inch deep storage-free approach', () => 
   }
 });
 
-test('north baskets withdraw clear of fixed cases and both standard doors sweep clear', () => {
+test('basket bay is removed and French leaves and garage door sweep clear of retained cases', () => {
   const model = buildMudroom();
-  const bay = model.find('Mudroom north basket shelves')[0];
-  assert.equal(bay.userData.widthInches, 18);
-  assert.equal(bay.userData.depthInches, 12);
-  assert.equal(model.find('Mudroom removable north basket').length, 4);
-  const filler = bounds(model.find('Mudroom north basket closet filler')[0]);
-  assert.ok(Math.abs((filler.max[0] - filler.min[0]) * 12 - 1.5) < 1e-8);
+  assert.equal(model.find('Mudroom north basket shelves').length, 0);
+  assert.equal(model.find('Mudroom removable north basket').length, 0);
+  assert.equal(model.find('Mudroom north basket closet filler').length, 0);
   const separate = (a, b) => a.max.some((v, k) => v <= b.min[k] + 1e-6 || b.max[k] <= a.min[k] + 1e-6);
   const closet = model.find('Mudroom hanging coat closet')[0];
-  for (const basket of model.find('Mudroom removable north basket')) {
-    const z = basket.position.z;
-    for (let inches = 0; inches <= 10; inches++) {
-      basket.position.z = z + inches / 12;
-      for (const root of model.roots.filter((r) => r !== bay)) {
-        for (const a of boxParts(model, basket)) for (const b of boxParts(model, root)) {
-          assert.ok(separate(bounds(a), bounds(b)), `Basket withdrawal clears ${b.name}`);
-        }
-      }
-    }
-    basket.position.z = z;
-  }
-  for (const name of ['Mudroom single hinged closet door', 'Mudroom inward garage door leaf']) {
+  const leafNames = ['Mudroom left French closet leaf', 'Mudroom right French closet leaf', 'Mudroom inward garage door leaf'];
+  const moving = leafNames.map((name) => model.find(name)[0]);
+  const fixed = model.all.filter((p) => p.w !== undefined && !moving.some((leaf) => {
+    for (let n = p; n; n = n.parent) if (n === leaf) return true;
+    return false;
+  }));
+  const cheeks = model.find('Coat closet side panel').map(bounds);
+  assert.ok(Math.abs((cheeks[1].max[0] - cheeks[0].min[0]) * 12 - 61.5) < 1e-8);
+  assert.ok(Math.abs(cheeks[0].min[0] - 37.825) < 1e-8);
+  assert.ok(Math.abs(cheeks[1].max[0] - 42.95) < 1e-8);
+  for (const leaf of moving.slice(0, 2)) assert.equal(leaf.userData.nominalWidthInches, 24);
+  for (const name of ['Mudroom left French closet leaf', 'Mudroom right French closet leaf', 'Mudroom inward garage door leaf']) {
     const leaf = model.find(name)[0];
     for (let degrees = 0; degrees <= 90; degrees++) {
       leaf.rotation.y = degrees * Math.PI / 180 * leaf.userData.interactiveHouseDoor.openRotationSign;
-      for (const root of model.roots.filter((r) => r !== leaf.parent)) {
-        for (const a of boxParts(model, leaf)) for (const b of boxParts(model, root)) {
+      {
+        for (const a of boxParts(model, leaf)) for (const b of fixed) {
           assert.ok(separate(bounds(a), bounds(b)), `${name} at ${degrees} clears ${b.name}`);
         }
       }
     }
-    leaf.rotation.y = 0;
+    leaf.rotation.y = leaf.userData.interactiveHouseDoor.openAngleDegrees * Math.PI / 180;
   }
-  assert.equal(closet.position.x, 41.2);
+  const sweeps = moving.map((leaf) => {
+    const poses = [];
+    for (let degrees = 0; degrees <= 90; degrees++) {
+      leaf.rotation.y = degrees * Math.PI / 180 * leaf.userData.interactiveHouseDoor.openRotationSign;
+      poses.push(boxParts(model, leaf).map(bounds));
+    }
+    leaf.rotation.y = leaf.userData.interactiveHouseDoor.openAngleDegrees * Math.PI / 180;
+    return poses;
+  });
+  for (const [first, second] of [[0, 1], [0, 2], [1, 2]]) {
+    for (const a of sweeps[first]) for (const b of sweeps[second]) {
+      for (const A of a) for (const B of b) assert.ok(separate(A, B), 'Independent door poses clear one another');
+    }
+  }
+  assert.equal(moving[0].rotation.y, 0);
+  assert.equal(moving[1].rotation.y, 0);
+  assert.equal(moving[2].rotation.y, Math.PI / 2);
+  assert.equal(closet.position.x, 40.3875);
+  assert.equal(closet.userData.doorOffsetInches, -4);
+  assert.deepEqual(Array.from(closet.userData.sideFillerWidthsInches), [2.75, 10.75]);
+  const jambs = model.find('Mudroom closet door jamb');
+  assert.deepEqual(jambs.map((part) => part.w * 12), [2.75, 10.75]);
+  assert.ok(Math.abs((moving[0].position.x + moving[1].position.x) / 2 + 4 / 12) < 1e-9);
+  assert.equal(model.find('Mudroom closet head jamb reserve')[0].position.x, -4 / 12);
 });
 
 test('kitchen opening stays fixed while garage entry shifts eighteen inches west', () => {
@@ -670,15 +689,15 @@ test('east blind corner remains enclosed and is not counted as storage', () => {
 
 test('prep/mudroom divider aligns with the garage wall while kitchen openings and garage entry stay fixed', () => {
   const plan = require('../floor-plan-ground.js').getGroundFloorDefaultPlan();
-  assert.deepEqual(plan.walls.find(([name]) => name === 'Mudroom north').slice(1), [37.5, 15, 44.9 - 2 / 12, 15]);
-  assert.deepEqual(plan.walls.find(([name]) => name === 'Mudroom east').slice(1), [44.9 - 2 / 12, 15, 44.9 - 2 / 12, 26.9]);
+  assert.deepEqual(plan.walls.find(([name]) => name === 'Mudroom north').slice(1), [37.5, 15, 44.9 - 8 / 12, 15]);
+  assert.deepEqual(plan.walls.find(([name]) => name === 'Mudroom east').slice(1), [44.9 - 8 / 12, 15, 44.9 - 8 / 12, 26.9]);
   const mud = plan.rooms.find((room) => room.name === 'Mudroom');
   assert.equal(mud.z, 15);
   assert.equal(mud.d, 11.9);
-  assert.equal(mud.w, 7.4 - 2 / 12);
+  assert.equal(mud.w, 7.4 - 8 / 12);
   const garageFloor = plan.floors.find((floor) => floor.room === 'Garage' && floor.z === 15);
-  assert.equal(garageFloor.x, 44.9 - 2 / 12);
-  assert.equal(garageFloor.w, 10.6 + 2 / 12);
+  assert.equal(garageFloor.x, 44.9 - 8 / 12);
+  assert.equal(garageFloor.w, 10.6 + 8 / 12);
   const prepFloors = plan.floors.filter((floor) => floor.room === 'Prep kitchen');
   assert.ok(Math.abs(prepFloors.reduce((area, floor) => area + floor.w * floor.d, 0) - 18 * 8) < 1e-9);
   assert.equal(plan.walls.find(([name]) => name === 'Mudroom south')[2], 26.9);
@@ -718,14 +737,14 @@ test('mudroom contrast palette separates shelf backs, casework and both door typ
       }
     }
   }
-  for (const [name, count] of [['Mudroom closet door jamb', 2], ['Mudroom closet headwall', 1], ['Mudroom standard hinged closet door panel', 1]]) {
+  for (const [name, count] of [['Mudroom closet door jamb', 2], ['Mudroom closet headwall', 1], ['Mudroom standard hinged closet door panel', 2]]) {
     const parts = model.find(name);
     assert.equal(parts.length, count);
     const caseMaterial = model.find('Mudroom cubby partition')[0].material;
     assert.ok(parts.every((part) => name === 'Mudroom standard hinged closet door panel' ? part.children.every((mesh) => mesh.material === caseMaterial) : part.material === caseMaterial));
   }
   const recessed = model.find('Interior door single recessed field');
-  assert.equal(recessed.length, 2);
+  assert.equal(recessed.length, 3);
   assert.equal(model.find('Mudroom bifold recessed panel').length, 0);
   const wood = model.all.filter((part) => ['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish'].includes(part.material?.name));
   assert.equal(wood.length, 0, 'Mudroom recoloring replaces local material assignments, not shared kitchen finishes');
@@ -822,7 +841,7 @@ test('only opted-in painted boxes get tiny eased edges within their unchanged en
 test('solid interior leaves have one genuinely recessed field and match trim on both faces', () => {
   const model = buildMudroom();
   const leaves = [...model.find('Mudroom standard hinged closet door panel'), ...model.find('Solid mudroom garage door panel')];
-  assert.equal(leaves.length, 2);
+  assert.equal(leaves.length, 3);
   for (const leaf of leaves) {
     const field = leaf.children.filter((part) => part.name === 'Interior door single recessed field');
     assert.equal(field.length, 1);
@@ -910,7 +929,7 @@ test('west return is removed and former storage volume is clear of constituent g
 
 test('scribed backs and ends close every perimeter gap and fitted top infills meet the ceiling', () => {
   const model = buildMudroom();
-  const west = 37.675, east = 44.9 - 2 / 12 - 0.175, north = 15.175, south = 26.725;
+  const west = 37.675, east = 44.9 - 8 / 12 - 0.175, north = 15.175, south = 26.725;
   const enclos = model.find('Continuous mudroom built-in enclosure')[0];
   assert.equal(enclos.userData.wallFitted, true);
   assert.equal(enclos.userData.fittedTopInches, 108);
@@ -964,7 +983,7 @@ test('mudroom floor uses 24 by 48 inch tile spacing with 1/16 inch matching grou
   const surface = model.floorParts.find((part) => part.name === 'Mudroom tile');
   assert.deepEqual({ ...surface.userData }, { tileWidthInches: 24, tileDepthInches: 48, groutWidthInches: 1 / 16 });
   assert.equal(surface.material.name, 'mudTileFinish');
-  assert.equal(surface.w, 7.4 - 2 / 12);
+  assert.equal(surface.w, 7.4 - 8 / 12);
   assert.equal(surface.d, 11.9);
   const joints = model.floorParts.filter((part) => part.name === 'Mudroom tile grout');
   assert.equal(joints.length, 5, 'Three long joints and two cross joints, not the old eight-joint square grid');
@@ -1016,7 +1035,7 @@ test('enclosure inspection uses an inside-room perspective without moving outsid
     };
     vm.runInNewContext(source.slice(start, end), context);
     assert.equal(context.camera, interior);
-    assert.ok(Math.abs(interior.position.values[0] - (41.2 - 1 / 12)) < 1e-9);
+    assert.ok(Math.abs(interior.position.values[0] - 40.3875) < 1e-9);
     assert.ok(Math.abs(interior.position.values[1] - 5.5) < 1e-9);
     assert.ok(Math.abs(interior.position.values[2] - 26.25) < 1e-9, 'Camera stays inside the garage-entry wall');
     assert.ok(Math.abs(Math.tan(interior.fov * Math.PI / 360) * Math.min(width / height, 1) - Math.tan(85 * Math.PI / 360)) < 1e-9);

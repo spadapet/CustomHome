@@ -4,24 +4,22 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-test('piano moves as a complete group to office with static desk and open-leaf separation', () => {
+test('piano leaves office as a complete group and backs onto living-side stair enclosure', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
   let parent;
   const piano = { position: { set(x, y, z) { Object.assign(this, { x, y, z }); } }, rotation: {}, userData: {} };
-  const start = source.indexOf('  rest.add(piano);');
+  const start = source.indexOf('  scene.add(piano);');
   const end = source.indexOf('\n', source.indexOf('  piano.userData.location =', start));
   assert.ok(start >= 0 && end > start);
-  vm.runInNewContext(source.slice(start, end), {
-    piano, rest: { add(object) { parent = object; } }, officeNorthZ: 41, pianoDepth: 411 / 304.8
-  });
+  const stairOpening = require('../upstairs-layout.js').stairOpening();
+  vm.runInNewContext(source.slice(start, end), { piano, scene: { add(object) { parent = object; } }, stairOpening, pianoDepth: 411 / 304.8 });
   assert.equal(parent, piano);
-  assert.equal(piano.rotation.y, 0);
+  assert.equal(piano.rotation.y, Math.PI);
   const halfWidth = 1350 / 304.8 / 2;
-  assert.ok(piano.position.x - halfWidth > 6.3, 'Piano clears north desktop');
-  assert.ok(piano.position.x + halfWidth < 12.2 - 0.175);
-  assert.ok(Math.abs(piano.position.z - 411 / 304.8 / 2 - 41.4) < 1e-9);
-  const benchRight = piano.position.x + 1;
-  assert.ok(12.2 - 29.75 / 12 - benchRight > 0.1, 'Bench clears open French leaf tip');
-  const benchRear = piano.position.z + 1.3 + 0.5;
-  assert.ok(benchRear < 50.45, 'Bench stays clear of south desk');
+  assert.equal(piano.position.x, 3.1);
+  assert.ok(piano.position.x - halfWidth > 0.2375, 'Console clears west wall and base trim');
+  assert.ok(Math.abs(stairOpening.z - piano.position.z - 411 / 304.8 / 2 - 0.4) < 1e-9, 'Rear service gap is 4.8 inches to stair wall');
+  assert.ok(piano.position.z + 411 / 304.8 / 2 < 35.1, 'Whole piano is outside office and powder room');
+  assert.ok(piano.position.x + 1 < 5.5, 'Bench remains on the west side of sectional return');
+  assert.match(piano.userData.location, /Living side of stair enclosure/);
 });

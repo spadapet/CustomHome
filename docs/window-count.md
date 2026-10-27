@@ -1,11 +1,28 @@
 # House window count
 
-Updated October 26, 2026 for the coordinated six-window upper front; includes hidden room groups.
+## Current product intent / ordering hold
 
-**30 window openings containing 50 individual modeled units: 44 operable casements and 6 fixed picture windows.**
+All 30 openings /52 modeled units below are Andersen 100 Series intent,
+White Fibrex inside/outside, no grilles. Both floors and every elevation use
+the same casement/picture division policy; door glazing is excluded.
+This preserves pending local loft-south window coordination (two real
+openings), not a revival of a historical layout. Older 28/48 counts omit them.
+No exact SKU or joined assembly is approved. See [windows](../windows.html)
+for official manufacturer sources and actual-frame versus rough-opening
+limits. Nominal 36-in casements and 72-in-high casement concepts need actual
+frame/rough-opening review; garage 72 x18 in fixed pictures, large pictures,
+kitchen flankers, banks and partial-height powder privacy need dealer review.
+Do not order from the modeled count or nominal study codes.
 
-The two former paired front-bedroom openings become six narrower casement
-openings, coordinated with the exterior. Bedroom 3 retains its west paired
+Updated October 27, 2026 for the coordinated four-window upper front; includes hidden room groups.
+
+**30 window openings containing 52 individual modeled units: 46 operable casements and 6 fixed picture windows.**
+
+Includes two new 48 x 60-inch paired-casement openings on the loft south wall,
+centered at x = 40.75 / 47.75 ft with 36-inch sills.
+
+The upper front has four equal 36 x 60 inch single-casement concept
+openings, two centered on each bedroom, coordinated with the exterior. Bedroom 3 retains its west paired
 window. Exterior-only garage attic windows remain excluded: no room/floor
 has been established behind that facade.
 
@@ -37,12 +54,12 @@ An **opening** is one window group in a wall. A **unit** is one casement or fixe
 | Upstairs / primary bath | 1 | 1 | 0 | 1 |
 | Upstairs / bedroom 2 | 1 | 2 | 0 | 2 |
 | Upstairs / bedroom 2 bath | 1 | 1 | 0 | 1 |
-| Upstairs / loft | 2 | 4 | 0 | 4 |
+| Upstairs / loft | 4 | 8 | 0 | 8 |
 | Upstairs / stairwell (former laundry) | 1 | 1 | 0 | 1 |
-| Upstairs / bedroom 3 | 4 | 5 | 0 | 5 |
-| Upstairs / bedroom 4 | 3 | 3 | 0 | 3 |
-| **Upstairs subtotal** | **15** | **21** | **0** | **21** |
-| **Whole house** | **30** | **44** | **6** | **50** |
+| Upstairs / bedroom 3 | 3 | 4 | 0 | 4 |
+| Upstairs / bedroom 4 | 2 | 2 | 0 | 2 |
+| **Upstairs subtotal** | **15** | **23** | **0** | **23** |
+| **Whole house** | **30** | **46** | **6** | **52** |
 
 ## Scope and sources
 

@@ -1,5 +1,197 @@
 # Ground-floor plan reference
 
+## Stair gap closure — October 27
+
+Translate stacked stairs and canonical opening **2.9 inches in world +Z**.
+West x=0.175 already meets the finished wall; do not move farther west.
+Opening: x=0.175–10.008333, z=27.016667–34.841667 ft.
+Powder wall stays z=35.1 (painted stair-side face 34.925): gap falls from
+3.9 to 1 inch, leaving 1/4 inch beyond its 3/4-inch baseboard.
+Both floor voids/slabs, upper arrival/guards, basement enclosure/excavation,
+grid and tour obstacle follow the shared baseline; saved JSON stays unchanged.
+Room/door and living fireplace/window/furniture datums stay fixed.
+Preserve 44/46.9-inch flights, 10-inch treads, 7.5-inch rises, 48-inch
+landings and owner-removed bookcases/wall-side guards/short landing rail.
+Upper south edge strip narrows 19.2 → 16.3 inches, not an approved route;
+upper arrival depth stays 46.9 inches. Review translated-opening headroom,
+framing, fire protection and continuous handrail/guard requirements
+professionally. Wall proximity does not approve the existing omissions.
+
+## Current west porch-side paving follow-up — October 27
+
+Assumed photo location, reversible study: x=-7.855 to -0.225,
+z=54.2–64.5 ft. Add 7.63 × 10.3 ft / 78.589 sq ft of matching
+pavers at y=-1.35, joining the west path and front crosswalk without
+duplicate surfaces. Stop at the porch-side wall plane; preserve gardens,
+open front lawn, existing steps and raised porch y=0 (16.2 inches higher).
+This is not a step-free porch connection. East strip remains 273 sq ft,
+east wall/fence clearance 6 ft, parcel 75 × 130 ft. Porch-edge transition,
+isolation, frost base and drainage require professional site design.
+
+## Current east side-yard paving — October 27
+
+Photo request “Cover with all paverstone”: full 6 × 45.5 ft strip, finished
+east wall x=55.725 to shared inner fence rail x=61.725, z=7–52.5.
+273 sq ft total strip union; 85.4835 sq ft net added versus existing paths,
+connectors, cart pad and rack infill pad (the separate rack pad is removed).
+Matching pavers at y=-1.35 ft, 16.2 inches below house floor, retain the
+garage threshold connection and storage-foot datum. No lawn slivers inside
+the strip; rear fence-path connection and front driveway approach remain.
+Six-foot wall/rail spacing, lot, rear garden, west path and patio unchanged.
+Edge isolation at masonry/posts, drainage, downspout discharge, permeability,
+frost base and structural detailing require professional site design; this
+is not code or operating-clearance approval.
+
+## Current mudroom east wall and closet opening — October 27
+
+Move the east/garage boundary exactly 6 inches west, x=44.733333 to
+44.233333 ft, z=15–26.9 unchanged. Nominal mudroom is now 6.733333 ×
+11.9 ft (80.8 × 142.8 inches); forward garage bay is 11.266667 ft
+(135.2 inches), gaining 6 inches and 5.95 sq ft from this revision.
+East bench, south shoe tower, tile, wall returns, scribes, baseboards and
+ceiling trim follow the wall; north blind return is 11.5 inches wide.
+The 61.5 × 24-inch closet stays centered at (40.3875, 16.4).
+Offset only its nominal 48 × 96-inch French opening 4 inches west:
+x=38.054167–42.054167, with 2.75/10.75-inch west/east nominal-opening
+filler zones (1.75/9.75 outside the 50-inch assembly reserve).
+Keep both nominal 24-inch leaves, offset head reserve and closed default.
+Wall-to-bench aisle is 56.8 inches, 56.05 past baseboard; conservative
+static entry strip x=39.875–42.4, z=21.5–26.5 is 30.3 × 60 inches.
+This supersedes earlier mudroom coordinates and clearance claims below.
+Kitchen passage, entry/steps, vehicles, storage capacities and floor datums
+remain fixed. No occupied-access, accessibility or fire-separation approval.
+Browser world-matrix constituent checks: 273 leaf poses (0–90° at 1°),
+including handles, against 303 fixed meshes; no positive overlaps.
+All independent leaf-pose combinations also clear. Minimum plan-axis gap
+to bench is 1.37 inches for closet operation and 16.98 inches for garage
+operation; parked-open garage leaf gap is 48.745 inches. Defaults restored
+to 0°/0°/90°. Sampling is not a continuous-sweep or product approval.
+
+## Kids-room partition alignment - October 27
+
+Kids/garage wall moves from x=29 to x=31.2 ft over z=26.9-34.6,
+aligning with the bathroom east wall. Remove the old 2.2 ft jog at z=34.6
+and extend the bathroom north partition to x=31.2. Keep the kitchen tall
+run and north kids bay fixed; a short return makes the room L-shaped.
+North/south widths are 10/12.2 ft; maximum depth 9.8633 ft.
+Floor area: 115.57 sq ft, up 16.94; garage loses 16.94 sq ft.
+Hardwood, baseboards, floor grid, navigation floors and live area totals
+follow the new boundary. South desks/chairs shift east 26.4 inches;
+north bins and family board remain. No exterior or upper-floor changes.
+Garage tool rack shifts to x=34.6 and uses 72-inch shelves/board, retaining
+all equipment; mower/toolbox offsets keep the new wall and entry trim clear.
+Areas use modeled floor centerlines, not appraisal measurements.
+Structure, garage fire separation and occupied access remain unapproved.
+
+## Current material, lighting and window selection — October 27
+
+Neutral warm-white relief brick with low-chroma mortar; decorative red-brown brick base
+and no-grille White Andersen 100 intent. Ground front now follows shared
+furnished banks: office center6,width6; guest center25,width7.6 ft,
+sill/head3/8. Remove four narrow facade-only substitutes, not room openings.
+Living west facade sills2.6/head8 now match furnished frames.
+Pending real loft-south openings remain; current total30 openings/52 units.
+The owner's white-brick collage supersedes the rejected pinkish/red-base
+study, not the accepted hip roof architecture. The latest close-up request restores
+red-brown ONLY on the raised base, not the main brick. Base tops at house
+y=2.5 ft: 30 in above house floor, 49.8 in above modeled lawn; use the
+same top at the depressed garage (45 in above garage floor). Every fill
+respects windows/doors; front sill-to-base clearance is 6 in.
+Porch exposed foundation, 30-in support bases, landing nose and stair
+risers share red-brown brick. Pale coping, porch walking surface and stone treads
+retain contrast. Both brick palettes use independently graded local CC0 Brick
+Wall 001 diffuse with original normal/roughness maps. Tile = five 8-inch modules
+by fourteen 3.125-inch courses; per-face physical UVs avoid giant column bricks.
+Horizontal paving requires exterior slip/frost
+selection; wall veneer is not a certified walking finish.
+All four shafts: 12 in square; bases14 in, caps/feet15 in. Keep support
+centers and beam underside8.9 ft. Approach between feet79.8 in,
+between shafts82.8 in; actual door crown96 in remains.
+Neutral diffuse grading removes all source hue tails, not merely their mean;
+independent relief maps and day/night lighting remain. Product unidentified,
+sample panel required; no exact brand/paint match or new texture downloads.
+Upper leaders follow actual side corners x=-0.4/31.4,z53.05; short offsets
+bypass canopy sides x=-0.95/32.1,z54.65, then return to lower corners
+west x=-0.4,z54.05 and east x30.9,z54.65 (front face, not garage interior).
+Connected diagonal elbows and short wall brackets;
+no full-height freestanding drops. Sizing, support and outlets unapproved.
+Twelve recessed 2700K upper lights: front x3.5/10/21/27.5,z54.3;
+west x=-0.5,z12/25/40/49; rear x15/22,z1.65; loft-east x52.4,z22/32.
+Mount at computed roof plane -0.16 ft; no new UI. Driver/framing/ventilation,
+wet-location product, glare/spill, gutter support/capacity and discharge
+remain professional design work.
+
+Every window representation now uses the shared Andersen 100 Series intent,
+White Fibrex inside/outside, no grilles, casement/picture as modeled.
+No ordering approval: actual frame range for single casements is
+17.5–35.5 x23.5–71.5 in (official 2022 guide printed p88).
+36-in nominal units/72-in casement concepts need
+rough-opening reconciliation or size review. Garage 72 x18 in units remain
+fixed pictures, not short casements. All pictures/banks need
+chart/area/aspect-ratio and combination review; partial powder frosting
+is not a verified factory option. All fixed openings/rooms/saved JSON stay.
+Official sources, candidates and unverified approvals: design context and
+windows schedule. This supersedes older front grilles/center-leader notes.
+
+## Exterior audit / lower roof coordination - October 27
+
+Close the exposed ground-floor setbacks behind and east of the upstairs:
+rear kitchen x=25.925-55.8, z=6.7-9.775; bath-side strip
+x=54.225-55.8, z=9.775-15.625; loft-side strip x=52.225-55.8,
+z=15.625-36.2 ft. These are continuous opaque low-slope metal roof
+surfaces, not lawn, terraces or added rooms. A shared 1/4:12 east fall
+ends at y=9.2 ft; closed undersides and perimeter fascia cover the lower
+9 ft wall heads. Fit closures behind the overhang to the roof underside.
+Dining/garage/setback surfaces are a single clipped lower envelope, not
+crossing roof skins. Wall abutments receive 4.2-inch conceptual
+counterflashing rather than fascia through the upper walls. The east
+collector has 3.84-inch width, 2.64-inch upstands and 1/16:12 rearward fall
+to a wall leader; discharge is only an underground placeholder.
+Upper rooms/interior windows remain unchanged; correct the facade to west
+z=12.6/21.6/31.1/47.2 and loft z=27/33 ft using shared frame data.
+Close the upper rear projection underside at y=9–9.06 ft. Notch the canopy
+constituent geometry at upper outside faces x=9.975, z=1.875; no crossing
+roof through the upper floor. Right canopy light/mount x=9.5 ft retains
+3.78-inch plate-to-wall clearance. This is finish/roof coordination only,
+not structural approval or a newly approved cantilever.
+Selected roof system/minimum slope, build-up, wall flashing, bearing,
+gutters/outlets and drainage away from the foundation require design.
+
+## Current upstairs/front composition — October 27
+
+Retain the cream-brick hipped envelope, accepted lower portal/porch, four
+bedrooms and all room boundaries. Bedrooms 3/4 stay 13 x 12 ft, with central
+closets 5 x 5.8 / 5 x 6.2 ft. Four equal nominal 36 x 60 in single-casement
+concept openings replace six uneven front windows: centers x=4.5, 8.5, 22.5,
+26.5 ft, wall z=53.2 ft; sill/head 3/8 ft above upstairs datum 10 ft.
+Pairs center on the rooms at x=6.5/24.5; each has a 1 ft masonry gap.
+The 11 ft solid central field includes the closet core; no false window.
+
+Current depth refinement: front veneer piers x=0.25–1.25,11.75–12.75,
+18.25–19.25,29.75–30.75 ft, y=10.2–18.3 ft;
+original face z=53.425, pier face53.625 (2.4 in projection).
+Two bays center on x=6.5/24.5; shared
+stone sills y=12.61–12.83 and bridging brick heads y=18.3–18.8.
+Central field remains solid. Loft south repeats three 12-inch piers;
+its pending real openings remain, with no added habitable floor.
+Former center leaders are replaced by the corner routes specified above.
+Piers/heads are conceptual thickened veneer, not structural roof supports;
+support, anchors, movement joints, weathering/drips and flashing need design.
+The globally shared cream brick now retains raw scan contrast and separate
+normal/roughness maps. Exterior-only raking sunlight/ambient/exposure correct
+washout; interior Day/Night states restore unchanged. See design context
+for reference sources and rendering settings. No saved JSON changes.
+
+Bedroom 3 dresser moves to east wall x=11.8,z=47.5; Bedroom 4 desk moves to
+west wall x=19.2,z=43.6, keeping its lamp off glazing and clear of the closet.
+Other furniture, ground floor, saved JSON, stairs, baths, loft, laundry and
+96 in doors remain. Opening-envelope area falls 4.5/6 sq ft respectively
+(not measured net glass). Schedule: 28 openings / 48 units; see
+[window count](docs/window-count.md). This supersedes six-front-window
+and gabled alternatives below. Actual stock product/rough openings,
+egress, crank reach, headers, veneer support/flashing and occupied operation
+require professional review; this is not construction documentation.
+
 ## Center garage tread on doorway - October 26
 
 Correct asymmetric widening: 48 in tread bounds x=37.5–41.5, midpoint
@@ -29,26 +221,32 @@ painted wall/baseboard south of the retained north enclosure. This supersedes
 instructions below**, retained only as historical studies.
 Keep east five cubbies/16 hooks/seven-pair shoe tower, enlarged north coat closet,
 off-white cabinetry and trim-matched 96-inch single-panel doors.
-Current north-wall composition: separate 18 W × 12 D-inch fixed basket bay
-x=37.825–39.325 ft; separate 1.5-inch filler; 42 W × 24 D-inch coat case
-x=39.45–42.95 ft, centered (41.2,16.4). Nominal 36 × 96-inch single door,
-left hinge, outward 90°, closed default, cabinet off-white; conceptual
-38 × 98-inch selected-jamb/rough-opening reserve, not a manufacturer specification.
-Internal coat width/rail 40.5 inches and depth 22.8 inches. Four removable
-14 W × 10 D × 12 H-inch baskets on fixed shelves at 2.4/20.4/38.4/56.4 inches;
-16.5-inch shelf width, 1.25 inches each side. Empty high shelves are seasonal,
-not extra basket capacity; highest basket rim 68.88 inches requires reach review.
-No west-wall replacement tower. Only the east corner remains blind/not storage.
-The 36-inch doorway has a 36-inch-deep clear approach; the outer east cheek
-projects 0.5 inch past the bench front and is not counted as accessible frontage.
-Both full 1°-sampled door sweeps, including handles, clear constituent casework;
-closet-to-bench minimum plan separating-axis gap 2.73 inches.
-Basket use assumes 10-inch withdrawal plus 24-inch standing depth to z=19.2333.
-A 24-inch-wide person centered on the basket bay leaves 40 inches to the
-unoccupied bench, only 16 inches with a 24-inch-projecting bench user.
-No simultaneous-use, accessibility or professional operating-clearance approval.
-36 inches is the sensible standard single leaf here, not a universal size limit.
-Keep selected assembly, fixings, loads, reach and occupied access under review.
+October 27 current north composition: one enclosed 61.5 W × 24 D-inch closet,
+x=37.825–42.95, z=15.4–17.4 ft, centered (40.3875,16.4).
+The former 18-inch basket bay and 1.5-inch filler are consumed completely.
+Standard nominal 48 × 96-inch solid single recessed panel French pair:
+two nominal 24-inch independent outward leaves, closed default, off-white
+#E6DECE with brass knobs. Conceptual 50 × 98-inch assembly reserve, not a
+manufacturer rough-opening specification. Separate side jamb/filler zones
+6.75 inches each from the nominal opening (5.75 beyond the assembly reserve).
+60-inch pair rejected: insufficient reserve in this enclosure.
+Internal width/rail 60 inches, usable hanging depth allowance 22.8 inches; four illustrated coats,
+two shoe shelves, two seasonal shelves plus cap. Center rod/shelf bracket
+and end supports are conceptual; no added capacity or span approval claimed.
+East blind corner remains excluded from storage; west wall stays clear.
+Do not pass through moving leaves or assume simultaneous occupied bench use.
+Selected assembly, supports, loads, owner reach and occupied access need review.
+Constituent measurements: 61.5 × 24 × 105-inch case, ceiling infill to 108.
+Backing-front to case-front clear depth 23.28 inches, to closed overlay leaf
+rear 24 inches. Actual illustrated leaves 23.76 × 95.52 × 1.375 inches
+within nominal 24 × 96 envelopes; center gap 0.24 inch.
+Full 1° mesh sweeps including knobs and own jambs clear fixed storage;
+minimum plan gap to bench 3.37 inches. Conservative bounds across every
+independent 91 × 91 leaf/garage angle combination retain 0.24-inch mutual
+pair separation and 50.64 inches to the garage leaf.
+48-inch nominal door-front approach is 36 inches deep. A centered 24-inch-wide
+standing user leaves 18.25 inches to empty bench, but overlaps a 24-inch
+seated projection by 5.75 inches: do not combine closet and occupied north bench use.
 Opposite-end relocation assumption: place the seven-cell shoe tower at the
 south end nearest the garage. The complete bench shifts north 18.72 inches:
 bench z=17.54–25.04 ft, tower z=25.04–26.60 ft; east-wall footprint unchanged.
@@ -270,7 +468,7 @@ unchanged. This supersedes the older floating 10.8 ft-base/12.9 ft-crown
 entry-pediment proportions. Framing, roof intersections, flashing/drainage
 and trim fixing remain architect/engineer review items.
 
-## Coordinated arched entry detail - October 26
+## Historical arched entry detail - October 26; support proportions superseded
 
 Owner's entry close-up now supersedes the rectangular-leaf approximation.
 Both exterior and furnished views use one shared arched-entry builder:
@@ -299,7 +497,7 @@ stretched mortar on the tread tops. Patio steps remain unchanged.
 Porch loads, step/guard/handrail requirements and surveyed grades remain
 unverified. This is a design study, not construction approval.
 
-## Latest white farmhouse reference - October 26
+## Historical white farmhouse reference - October 26; superseded by accepted hips
 
 Owner stops the brick/stucco direction and selects the white farmhouse
 image. This supersedes every earlier exterior palette/massing description:
@@ -328,7 +526,7 @@ wall/porch framing, veneer/siding anchorage, weatherproofing and headroom.
 This is an interactive appearance study, not a photographic match or
 construction approval.
 
-## Brick/stucco street-reference redesign and visible entry - October 26
+## Historical brick/stucco street-reference redesign - October 26
 
 Latest street-view reference supersedes the pale Belgian three-gable study.
 Use muted red-brown scanned brick, warm stucco panels with charcoal
@@ -393,7 +591,7 @@ Keep the latest post-free patio and stone entry geometry. This improves
 interactive material/shadow depth, not photorealistic rendering or approved
 masonry design. Older procedural-only material descriptions are superseded.
 
-## Brick and limestone contrast study - October 26
+## Historical brick and limestone contrast study - October 26
 
 Owner's brick/stone photograph supersedes the all-cream exterior palette.
 Use warm taupe queen brick with a subtle 0.025 ft bump relief and pale
@@ -528,18 +726,19 @@ wall service gap; verify equipment fit, ventilation, power, anchorage,
 window reach and combustible clearances before fabrication.
 Piano remains in office. Supersedes removed-built-in/offset-seating notes.
 
-## Piano moved to office - October 25
+## Piano against living-side stair wall - October 27
 
-Move piano, bench and attached lamp out of living into the office north-wall
-zone, center (8.6,42.0742) ft, keyboard south. Rear edge z = 41.4 clears
-wall/baseboard; cabinet x = 6.3854-10.8146. Keep bench local offset 1.3 ft;
-bench x = 7.6-9.6, z = 42.8742-43.8742.
-North desk ends at x = 6.3, so cabinet side gap is only about 1 in:
-not a passage. Bench clears the default 90-degree French leaf tip by about
-1.45 in; other door poses and occupied use require review. Do not claim
-full door-sweep approval. Existing office desks, loveseat and elliptical
-stay fixed; verify seated access, noise, receptacle/cord routing and actual fit.
-Living layout retains sectional, rug and two chairs, with no piano.
+Move the complete Yamaha CLP-825 group, bench and attached lamp out of the
+office to center (3.1,25.9425) ft, keyboard north. The console rear is
+4.8 in from the painted stair enclosure, leaving base-trim/service space.
+Keep the 24 x 12 in bench at local z = 1.3 ft, now north of the console.
+Nearest constituent piano/bench-to-sectional plan gap is 8.79 in, not a
+passing aisle; approach the bench from the open living-room side.
+Office furnishings and doors, living seating/rug and fireplace cabinets
+stay fixed. This supersedes the October 25 office placement and earlier
+fireplace-side piano studies. Verify occupied bench pullout, playing access,
+cord routing, actual product fit and enclosure construction; no circulation
+or structural approval is implied.
 
 ## L sectional, two chairs and rug - October 25
 
@@ -846,7 +1045,9 @@ Latest furniture/firepit revision tucks chairs/table to z = 6.65, keeping
 x = 1.6 / 3.5 / 5.4. The chair envelopes end at z = 7.5, about 3.3 in off
 the wall face, leaving the z = 0-5.5 static approach strip clear.
 Window/sill operation and occupied use remain unverified.
-Move the closed firepit to (-3.75, -2.325), feet at y = -1.625 on level
+Move the closed firepit to (-3.5, -2.325), corrected 3 inches east after the
+6 ft fence-clearance revision so its full footprint stays 0.9 inches inside
+the flat terrace. Feet at y = -1.625 on level
 patio stone, wholly outside the roof and graded strip. Remove its old
 rear-yard pad; update the firepit camera. It remains fully extinguished
 cold storage only: operating separation from the roof/house and cedar
@@ -1597,7 +1798,7 @@ Select Exterior in the [3D viewer](floor-plan-3d.html?view=exterior). Front, Rea
 
 The cream limestone shell follows the stepped house/garage envelopes, with medium-brown shingle roofs and black exterior window trim; interior trim stays white. Remove the separate full-height entry arch and its extra posts. One inner pair at x = 11.9 / 19.3, z = 60.5 supports a straight header beneath the small gable; two outer porch columns remain. Entry shafts are 7.8 in square, 8 ft high, with one 11.4 in-wide stone foot each; clear shaft gap 6 ft 9 in. Header is 8.2 ft wide, 6 in high, underside 8 ft. Lanterns follow the inner pair at (11.9 / 19.3, 5.8, 60.95). Doors, steps, mulch, and plants stay fixed. All support dimensions require structural coordination. Upper-floor datum remains 10 ft, eaves 19 ft, tallest nominal ridge 29 ft; garage has no upper room and retains 9 ft eaves / 15 ft ridge. Roof projections remain conceptual.
 
-Lot plan shows the unchanged 75 x 130 ft property with the house shifted 3.855 ft east from its former centered placement. In house-local coordinates, lot center x = 23.895, x boundaries -13.605 / 61.395, and z boundaries -32.325 / 97.675. The east wall face x = 55.725 is 5 ft from the inside fence rail at x = 60.725 (fence center x = 60.895). Property-line clearances are 5.67 ft east and 13.38 ft west; this is not a 5 ft zoning setback. The rear wall face at z = -2.325 remains exactly 30 ft from the boundary; front porch-edge clearance remains approximately 36.48 ft. Original house roof overhang clearance remains approximately 29.58 ft. The constrained patio cover/terrace/inset steps stop at z = -2.1, approximately 30.23 ft from the rear boundary. Only the driveway continues to the front boundary; retain the porch-side paver connection, not a straight front-lawn walk. See [lot assumptions](the-lot.html#modeled-placement); survey, grade and zoning approval remain unresolved.
+Lot plan — owner correction October 27: keep the house fixed and the property 75 x 130 ft; both side boundaries move 1 ft east from the preceding 5 ft study. Lot center x = 24.895, x boundaries -12.605 / 62.395, z boundaries -32.325 / 97.675. Finished east garage wall face x = 55.725 is exactly 6 ft from the nearest inside fence rail face x = 61.725 (fence center x = 61.895). Modeled property-line clearances are 6.67 ft east / 12.38 ft west, not legally verified setbacks. Reference rear wall z = -0.325 retains 32 ft; stepped rear projection z = -2.325 retains 30 ft. Front porch clearance remains 36.48 ft. The west path and its 3 ft patio grade transition move east 1 ft together, preserving their flush join; terrace area reduces 12.1 sq ft to about 251.7 sq ft. East garden connector lengthens 1 ft; roofs, seating, steps, rear boundary and rear path stay fixed. Only the driveway reaches the front boundary; retain the porch-side paver connection. See [lot assumptions](the-lot.html#modeled-placement); survey, roof projections, grades, drainage and zoning approval remain unresolved.
 
 Roof intersections/supports, site grades, porch details, and facade window styling are provisional. The above-garage room and upper window are removed, not merely hidden or reserved as unfinished space. This appearance study does not approve building height, setbacks, drainage, structure, or egress. See [elevation notes](elevations.html#modeled-exterior).
 
@@ -1614,7 +1815,8 @@ Covered patio and Cameras + lighting are additional exterior views; neither chan
 | Patio finish | Terrace and exposed slab edges match the house's taupe-brown base-stone color/texture; darker steps/nosings and surrounding garden paver finishes remain unchanged |
 | Patio setbacks | Roof, terrace, and steps stop at z = -2.1, approximately 30.23 ft from rear boundary. House wall face remains 30 ft away; uncovered garden walk lies outside the patio |
 | Fence | 6 ft cedar, inset 0.5 ft at rear/sides; nominal 4 ft west/east gates at z = 45 / 41. Move east return 2 ft backyardward from z = 43, leaving 3 ft to the side-door opening at z = 44-47. Connector, C6 aim, and east downlight target follow. West return/window spacing and boundary fences stay fixed; front yard/driveway remain open |
-| Paver route | 3.5 ft-wide fence-edge route. West x = -12.355 to -8.855; east x = 56.645-60.145; rear z = -31.075 to -27.575. Outer paving 0.75 ft from fence centerlines. Lawn toward house except access connectors. Gate/front connections remain; front paving stops at driveway x = 30.9 / 55.9 |
+| Paver route | 3.5 ft-wide fence-edge route. West x = -11.355 to -7.855; east x = 57.645-61.145; rear z = -31.075 to -27.575. Outer paving 0.75 ft from fence centerlines; nearest side-fence constituent gaps 0.58 ft east / 0.625 ft west. West graded patio join follows the path without overlap. Lawn toward house except access connectors. Gate/front connections remain; front paving stops at driveway x = 30.9 / 55.9 |
+| Wall-face datum | Primary finished masonry x = 55.725 to inner rail x = 61.725 is 6 ft. Projecting base coping x = 55.815 leaves 5.91 ft locally; roof/eaves and hardware are separate projections, not a surveyed/legal setback |
 | Steps and contrast | Front/patio each three 5.4 in rises and 13.2 in goings. Patio steps move 24 in left viewed from the garden toward the house: center x = 51, widest x = 47.6-54.4, z = -2.1-1.2. Resize the terrace pocket and spur to match; patio limits, roof, posts, and front steps stay fixed. Dark nosings/markers and exterior stone base remain |
 | Entry approach | Remove the 5 ft-wide straight walk at x = 13.1-18.1, z = 68 to the front boundary. Leave lawn there; reach the porch from the garage/driveway via the retained porch-side pavers. The drive stays continuous with no separate crossing apron |
 | Garage-side approach | 3.5 ft-wide strip x = 56.5-60 continues through the east gate to z = 52.5. Threshold connection x = 55.725-56.5, z = 44-47; driveway turn x = 55.9-56.5, z = 49-52.5. No grass crossing between gate, side door, and driveway; no long east strip to z = 68 |
@@ -1663,16 +1865,15 @@ Dimensions include nominal room envelopes, not guaranteed usable clear rectangle
 | Prep kitchen | 37.5-55.5 / 7-15 | 18 ft x 8 ft | Continuous south wall behind pantry; pantry/left counter meet relocated kitchen wall |
 | Mudroom | 37.5-45.4 / 15-26.9 | 7 ft 11 in x 11 ft 11 in | West wall/cases coordinated at x = 37.5; coat closet centered at x = 41.45; cubby bench and garage entry fixed |
 | Garage | 45.4-55.5 / 15-26.9 plus 29-55.5 / 26.9-34.6 plus 31.2-55.5 / 34.6-49 | 26 ft 6 in x 34 ft maximum | Stepped footprint; narrow forward bike alcove, two parking bays, lower slab |
-| Kids' room | 19-29 / 24.7367-34.6 | 10 ft x about 9 ft 10 in | Gray wall and original floor restored; no extra corner pocket; desks and west hall entry fixed |
+| Kids' room | West x19-25.75 / z24.7367-37.2; middle x25.75-29 / z24.7367-33.6; east x29-31.2 / z26.9-33.6 | Stepped, 127.67 sq ft | Closet shift adds 8.10; bathroom shift takes 5.45; net +2.65 sq ft. Both desks/chairs move 1 ft north; bins, board and hall entry fixed |
 | Powder room | 0-7.1 / 35.1-41 | 7 ft 1 in x 5 ft 11 in | Hall-facing east-wall entry; centered vanity sink with matching side drawers, east-wall towel hook, one centered west-wall half-frosted window |
-| Guest coat closet | 7.1-12.2 / 35.1-37.5 | 5 ft 1 in x 2 ft 5 in | Separate reach-in closet; 24.6 in clear depth, upper shelf/hanging rail, closed 48 in oak door pair facing alcove |
-| Guest entry alcove | 7.1-12.2 / 37.5-41 | 5 ft 1 in x 3 ft 6 in | Open east to entry hall; 37.8 in between finished north/south wall faces, not occupied/accessibility approval |
+| Guest coat closet | 7.1-12.2 / 38.6-41 | 5 ft 1 in x 2 ft 5 in | Mirrored against office-shared wall; 24.6 in clear depth, upper shelf/hanging rail, closed 48 x 96 in oak doors facing north into alcove |
+| Guest entry alcove | 7.1-12.2 / 35.1-38.6 | 5 ft 1 in x 3 ft 6 in | Open east to entry hall; 37.8 in between finished north/south wall faces, not occupied/accessibility approval |
 | Office | 0-12.2 / 41-54.2 | 12 ft 2 in x 13 ft 2 in | 161.04 sq ft nominal; return prior 12.2 sq ft expansion to guest-entry band; north desk/chair move 1 ft south, other furniture and French doors retained |
-| Guest walk-in closet | 19-24.5 / 34.6-42 | 5 ft 6 in x 7 ft 5 in | West-side long/short hanging and shelves; 24 in clothing allowance leaves 36.3 in aisle at opposite shoe; doorless bedroom entry |
+| Guest walk-in closet | 19-25.75 / 37.2-43.2 | 6.75 x 6 ft | Whole closet/storage moves 1.2 ft south; north 51 in hanging, west 24 in-deep shelves; 36 x 96 in doorless entry |
 | Entry hall | 12.2-19 / 34.6-54.2 | 6 ft 10 in x 19 ft 7 in | Full width restored, approximately 77.4 in between finished wall faces; no borrowed closet strip |
-| Guest shower bathroom | 24.5-31.2 / 34.6-39.6 | 6 ft 8 in x 5 ft | Toilet west, 36 x 53.4 in clear shower east; partition and approval-required 30 x 96 in pocket door separate sink alcove |
-| Guest sink alcove | 24.5-31.2 / 39.6-43 | 6 ft 8 in x 3 ft 5 in | South privacy return x = 29.26-31.2 at z = 43.2, flush with closed vanity hardware; open west passage, no door/header; hardwood, 36 in single-sink vanity with one left cupboard door and three right drawers, 30 in mirror and warm sconces |
-| Ground-floor bedroom | Main body 19-31.2 / 43-54.2, entry nook 19-24.5 / 42-43 | Main 12 ft 2 in x 11 ft 2 in, plus 5 ft 6 in x 1 ft entry | Nominal envelope and queen bed/nightstands unchanged; privacy return occupies part of envelope south of sink |
+| Guest shower bathroom | 25.75-31.2 / 33.6-43.2 | 5.45 x 9.6 ft | Entire room/fixtures move 1 ft north; shower 58.2 x 36 in curb-interior, east toilet/vanity; 28 x 96 in pocket entry targets 26 in passage |
+| Ground-floor bedroom | 19-31.2 / 43.2-54.2 | 12.2 x 11 ft; 134.2 sq ft | One rectangle, no nook/entry slabs. Hall entry z43.8-46.8; bed/nightstands, shell and hall width fixed. North nightstand gap 17.73 in, not an aisle |
 | Front porch | 0-31.2 / 54.2-61.2 | 31 ft 2 in x 7 ft | Paving, two benches, centered double front entry; low perimeter edges |
 
 The kitchen/prep exterior wall now lies at z = 7 rather than z = 8 across x = 26.5-55.5. The one-foot outward move adds about 29 sq ft to the conceptual footprint. Sink runs, five north windows, prep tower/appliances, floors, and wall returns move with it; island, cooktop, refrigeration, pantry shelves, end-wall prep window, and passages stay fixed. Setbacks, foundation, roof, elevations, and utilities are not resolved by this edit.
@@ -1701,7 +1902,7 @@ The joined kitchen bank has one blue-gray quartz sill, 93.25 in wide, 3.5 in dee
 
 ### Refrigeration and steam-oven wall
 
-Both columns face decreasing z into the kitchen. From the kitchen, view-left to view-right: wall filler, freezer, steam-oven/storage tower, refrigerator, stairs/bookcases. Handles face the central tower.
+Both columns face decreasing z into the kitchen. From the kitchen, view-left to view-right: wall filler, freezer, steam-oven/storage tower, refrigerator, painted stair enclosure. Handles face the central tower.
 
 | Element | Current model |
 |---|---|
@@ -1836,7 +2037,7 @@ Six matching satin-gold/opal sconces: two in living, two in dining, two in kitch
 
 The [living-room requirements](foyer/living-room.html) and [viewer reference notes](viewer-reference-notes.md) retain earlier layouts as comparisons, not separate current plans; the viewer shows only J. All options omit the lamp/rectangular table and keep the tree in dining. Confirm seating comfort, cabinet swings and fireplace/TV heat limits with actual products.
 
-## Stairs and under-stair storage
+## Stairs and painted under-stair enclosure
 
 | Element | Current dimensions / placement |
 |---|---|
@@ -1849,14 +2050,14 @@ The [living-room requirements](foyer/living-room.html) and [viewer reference not
 | Landing elevations | Turning platforms at y = +5 / -5 ft; arrivals at +10 / -10 ft |
 | Upper arrival landing | East side: x = 10.008333-13.675, z = 26.775-30.683333, y = 10; 44 in along x x 46.9 in across z |
 | Basement arrival landing | East side: x = 10.008333-13.675, z = 30.933333-34.6, y = -10; 44 x 44 in; basement rooms not modeled |
-| Four recessed bookcase bays | Widths 20 / 20 / 21.3 / 26.7 in; nominal 11 in depth; remain attached to lower-flight/landing enclosure, now facing south after rotation |
-| Bookcase finish and base | Cream open carcasses, oak shelves, books; plinths 0.72 ft high, first shelf 0.76 ft; continuous flat white baseboard with bottom-step and landing-end returns, no quarter-round or shoe molding |
+| Closed painted stair enclosure | All four recessed bays, carcasses, shelves and books removed by October 27 owner/builder decision; former 11 in recess zone filled continuously to existing lower-flight/landing soffits, facing south after rotation |
+| Enclosure finish and base | Painted wall finish; flat 8 in white baseboard, reduced at bottom step, with bottom-step and landing-end returns; no quarter-round or shoe molding; no doors or storage |
 
 The four-foot platforms and existing rise/run geometry are retained during the swap, not resized. The entire stair/retaining-wall assembly moves and turns together; the former central void is restored to floor for the kids room.
 
-Oak treads/stringers, light closed risers, hollow soffits, continuous lower-flight enclosure and recessed bookcases remain. No passage is cut through the under-stair enclosure.
+Oak treads/stringers, light closed risers and hollow soffits remain. The continuous lower-flight/landing painted enclosure replaces all four recessed bookcases, superseding all earlier keep-bookcase requirements in this document. No passage is cut through it. The model's filled finish envelope is not a specified structural or fire-rated assembly; framing, underside protection, fire separation and headroom require professional review. Restored paired fireplace built-ins remain unchanged.
 
-**Current guard layout:** omit the upper flight's powder-room-side outer oak handrail, dark guard bars, and posts, plus the adjoining turning-landing side assembly, against the existing wall (stair-local z = depth + 0.08, world z = 34.68). Preserve both lower-flight guards, the upper center-gap guard, and the opposite exposed landing-side guard at local z = -0.08. Keep all four stringers, treads/risers, and platform unchanged. The turning-platform west end remains wall-backed. Upstairs opening guards and all basement sloped rails/posts are unchanged. Required wall-mounted handrails, continuous wall enclosure, and final guard dimensions/climbability still need architect/code review; removing a modeled guard is not code approval.
+**Current guard layout:** retain the prior omission against the powder-room wall (stair-local z = depth + 0.08, world z = 34.68). The October 27 owner concept also removes the opposite short turning-landing assembly at local z = -0.08: one oak handrail, eight horizontal bars and two posts along the 48-inch landing at +5 ft. This living-side edge is exposed; the enclosure below is not landing protection. The photo-matched follow-up removes only the basement descending entry outer cap, eight bars and three posts at world z=34.52 ft, retaining its stringer. The basement wall spans z=34.60–34.76 ft, y=-10 to -0.465 ft; the powder wall above starts at z=34.925 ft. The 0.24-inch cap-envelope-to-basement-wall gap and offset above do not establish continuous entrance protection. Preserve both upstairs lower-flight guards, upper center-gap guard, all stringers, steps/platforms, enclosure, living stairwell guard, upstairs opening guards, basement entry center-gap guard and both basement return guards. Builder/designer review must establish continuous wall/guard protection, required graspable handrails, anchorage, guard dimensions/climbability and code compliance before construction; these removals are not approval for unguarded edges.
 
 The living-facing full-height wall at z = 25.7 is removed, not the under-stair enclosure. A separate 42-inch-high oak-capped guard follows x = 0.175-10.008333, center z = 26.675, just outside the north opening edge. Dark vertical balusters have clear gaps at most 3.75 inches; bottom clearance is 1.38 inches. Keep the east hall access open. Wall-removal support, guard anchorage/loads and code compliance remain unverified.
 
@@ -1881,10 +2082,10 @@ offsets differ from the selected east-aligned placement. Layout choice is not in
 | Office | Loveseat 60 x 33.6 in at (10.45, 50.4); SOLE E20 reference 65 x 22 x 64 in L/W/H at (1.65, 50.3) | Verify chair pull-back, window reach, pedal/user movement and headroom; no operating envelope certified |
 | Bedroom | Article Lenia queen reference 63.5 x 82.75 in W/D; center approximately (27.427083, 49.395), rotated -90 degrees | Headboard/rear edge x = 30.875 on east wall opposite west entry; faces decreasing x, not the porch |
 | Bedroom | Two nightstands, approximately 18 x 15.6 in, at (30.2, 45.695) / (30.2, 53.095) | Shifted toward porch with bed; porch-end stand limits further movement; keep trim/window clear |
-| Guest walk-in | Approximately 82 in west-side fittings run inside x = 19-24.5, z = 34.6-42; long hanging extended 9.96 in, unchanged short hanging/shelves shifted north; end z = 34.925 | 0.3 in modeled end gap to north shoe, field tolerance unapproved; 36.3 in aisle with 24 in clothing allowance; no opposing storage or bedroom reach-in; hall unchanged |
-| Powder | Northwest toilet (1.65, 36.45); 42 x 21 in vanity (4.75, 36.225): basin, faucet and mirror centered at x = 4.75, equal counter margins, symmetrical sconces; 22 in double-door center cupboard and two 10 in banks of three drawers with gold knobs; east-wall towel hook at 48 in; 7-inch engineered hardwood matching the hall, no tile overlay | 15 in drawer extension clears fixtures with entry parked 90 degrees inward; close right drawers before moving door because their extended position intersects its sweep. Drawers closed for sampled 28 in route. Keep 8 ft door; verify plumbing, usable interiors, slides, occupied use and flooring moisture/warranty requirements |
-| Guest shower bathroom and screened sink alcove | Toilet (26, 35.95), facing south; shower x = 27.825-31.025, z = 34.775-39.425, 36 x 53.4 in clear, west-facing 30 in open entry and fixed glass; west-wall towel hook at 48 in. Alcove has 36 x 18 in vanity (30.2, 41.4), facing west: 24 in left cupboard bay/one door, 12 in right bank/three pull-out drawers, gold knobs, centered 21 in basin/faucet, 30 in mirror and warm sconces | 7.5 in nominal counter each side; 15 in conceptual drawer travel, fronts closed by default. Full-height privacy return x = 29.26-31.2, z = 43.2 ends flush with closed vanity hardware, screening south without projecting past it; open west passage. Sampled 28 in route through retracted bathroom door into shower also clears extended drawers. Not occupied/accessibility approval; drawer interiors/slides, trap/services, compact products, sanitary clearances, step-over curb and splash control unverified |
-| Guest coats | Reach-in closet centered (9.65, 36.3), upper shelf, continuous hanging rail, four illustrative coats | Replaces powder linen cabinet; separate closed oak door pair faces the open hall alcove, not the bathroom |
+| Guest walk-in | L storage: north 51 in double hanging with 24 in clothing allowance; west shelves 24 x 64.8 in; no vanity | Closet sink iteration superseded by owner correction; storage, clothes and occupied retrieval remain provisional |
+| Powder | Southwest toilet (1.65, 39.65); 42 x 21 in vanity (4.75, 39.875), both facing north from office-shared wall. Centered basin/mirror, symmetrical sconces, 22 in double-door cupboard and two 10 in three-drawer banks retained. East-wall towel hook z38.85 at 48 in; hall hardwood retained | Mirrored 30 x 96 in entry z35.6-38.1, north-jamb hinge, 90-degree inward default. Close drawers before entry or door movement; 15 in extension retained. Verify plumbing, usable interiors, occupied use and flooring moisture/warranty requirements |
+| Guest bathroom vanity and fixtures | East-wall vanity (30.15,41.4), unchanged 30 x 18 in white-oak Shaker envelope; paired sink doors, pale countertop, gold bars/faucet; offset 14 in basin, 24 in mirror. Bay 16.875 in wide x 17.25 in deep; removable hollow 10 x 10 x 14 in basket at 4.215 in above floor; 12 x 12 x 18 in plumbing reservation. Three drawers in 12 in right bank; warm sconces/night light. Toilet (29.9,38.5) faces west; shower x25.95-31 / z33.8-37; towel hook (26.05,38) | Both sink doors open 90 degrees for basket extraction. Toilet centerline 18 in to curb / 19.44 in to counter. Close fronts before through-access: 38.7 in to west trim closed / 23.7 in with 15 in drawer extension. Closed-front 26 in route; not simultaneous-use approval. Verify products, plumbing/supports, pocket framing, sanitary clearance, curb, glazing and splash control |
+| Guest coats | Reach-in closet centered (9.65, 39.8), upper shelf, continuous hanging rail, four illustrative coats | Closed oak door pair faces north into the mirrored hall alcove; office unchanged |
 | Porch | Two 60 x 20.4 in benches at (5, 55.4) / (26.2, 55.4) | No entry runner indoors; no sidelights/transom around the front doors |
 
 Room requirements: [kids/living](foyer/living-room.html#connected-kids-room), [office](office.html), [bedroom/closet](bedrooms.html), [bathrooms](bathrooms.html), [front entry](front-entry.html). Check furniture anchorage, cordless shades, window fall protection/egress, rug grip, safety glazing, electrical services, door swings and sanitary clearances. Accessible fixture shutoffs and timed bathroom fans are requirements, not demonstrated by the simplified model.
@@ -1968,10 +2169,10 @@ All house doors and doorless cased passages have nominal **8 ft / 96 in heads** 
 | Hall to kids | 54 x 96 in, x = 19, z = 27-31.5 | Doorless west entry into relocated room; no direct living-side opening or sofa supervision |
 | Hall to office | Nominal 60 x 96 in envelope, x = 12.2, z = 42.75-47.75 | Two nominal 30 in white French leaves, each 2 columns x 5 rows of clear lites, white muntins, gold round knobs and dark hinges; white casing. Both start fully open inward at 90 degrees into the office, perpendicular to the opening. Click/tap a leaf to toggle closed or to the modeled 180-degree endpoint. Unit/jamb/rough opening, true/simulated divisions, safety glazing, handing and hardware unselected; see [office doors](office.html#doors) |
 | Hall to bedroom | 36 x 96 in, x = 19, z = 42-45 | Opening only; final door leaf/swing not detailed |
-| Bedroom to walk-in | Nominal 30 x 96 in cased opening, z = 42, x = 21.35-23.85 | Doorless; no swing or hall encroachment |
-| Bedroom to sink alcove | Open passage west of finished return x = 29.26-31.2, z = 43.2 | Full-height wall body x = 29.3225-31.2, 22.53 in nominal; 3/4 in baseboard end return reaches x = 29.26, flush with closed vanity hardware. Finished offset from closet east wall face 55.02 in, no door or spanning header; verify occupied passage |
-| Sink alcove to shower bathroom | Nominal 30 x 96 in, z = 39.6, x = 25-27.5; 28 in finished-clear target | White pocket leaf with flush privacy pulls, closed by default; click/tap slides east into proposed x = 27.5-30.15 cavity; framing, wall thickness, services and privacy hardware require approval; no swing |
-| Guest shower | West-facing opening x = 27.875, z = 36.775-39.275; modeled clear width 30 in | Doorless opening between fixed splash-glass panels; sampled 28 in-diameter route turns from retracted partition entry into 36 x 53.4 in clear shower; step-over curb retained; splash control, water containment, panel support and actual products unverified |
+| Hall to guest bedroom | Nominal 36 x 96 in, x19, z43.8-46.8 | White single-panel leaf, closed default, south-jamb inward 90-degree swing; sampled furniture sweep clear, not occupied approval |
+| Bedroom to walk-in | Nominal 36 x 96 in cased opening, z43.2, x21.65-24.65 | Doorless; storage only |
+| Bedroom to shower bathroom | Nominal 28 x 96 in, z43.2, x26.2-28.5333; 26 in passage target | Closed white pocket leaf slides east; cavity x28.5333-30.9833, only 0.5 in before east finished wall face. Header/corner framing, thickness, hardware and services require review; keep plumbing out of cavity |
+| Guest shower | South-facing opening x26.15-28.65 at z37.95; modeled width 30 in | Fixed glass, 58.2 x 36 in curb-interior; sampled 26 in route from separate bedroom door past toilet. Step-over curb, not accessible; splash control, glazing/support and products unverified |
 | Front entry | 60 x 96 in, z = 54.2, x = 13.1-18.1 | Two oak/glass leaves shown closed; click/tap either leaf to the modeled 180-degree endpoint; no sidelights/transom; final door unit unselected |
 | Front entry lock | Wyze brand selected; exact model/finish unconfirmed | One schematic interior smart-lock body above the existing pull, positive-x leaf provisionally active; exterior keypad/reader and product dimensions not assumed. Verify stile/glazing, bore/backset, latch/strike, inactive leaf, and egress with supplier; see [lock notes](front-entry.html#smart-lock) |
 | Dining patio | 72 x 96 in combined assembly, x = 26.5, z = 0-6 | Higher-z nominal 36 in inward-hinged door stays closed by default; click/tap toggles to a 180-degree display, with the dining-view button also available; other half stacked casements; patio-end chair conflicts with the sweep and must be moved clear |
@@ -1980,7 +2181,7 @@ All house doors and doorless cased passages have nominal **8 ft / 96 in heads** 
 | Garage overhead doors, 2 | Each 108 x 96 in, z = 49, x = 32.5-41.5 / 44-53 | Exterior view click/tap rotates each simplified panel to a conceptual overhead pose; tracks, ceiling storage, spring balance, stops and actual travel are not modeled or approved |
 | Powder entry | Nominal 30 x 96 in, x = 7.1, z = 38-40.5 | Opening centered between finished alcove walls with casing room at both jambs; painted-white leaf, south-jamb hinge, displayed 90 degrees open inward; click/tap toggles closed or to the modeled 180-degree endpoint |
 | Guest coat closet | Nominal 48 x 96 in, z = 37.5, x = 7.65-11.65 | Paired solid white-oak Shaker French doors, nominal 24 in per leaf, outer-jamb hinges and center meeting; closed by default, satin-gold pulls; click/tap each leaf to swing 90 degrees outward independently into alcove, never slide; actual stops/occupied circulation unverified |
-| Mudroom coat closet | Nominal 32 x 96 in bifold, centered at x = 41.1167, z = 16.4 | Closed by default; click/tap either paired leaf to fold to its modeled 90-degree endpoint; supplier mechanism and clearances require verification |
+| Mudroom coat closet | Nominal 48 x 96 in solid French pair, centered x = 40.3875, z = 16.4 | Two nominal 24-inch single recessed panel leaves, cabinet off-white #E6DECE, brass knobs; independently clickable 0/90, closed default; conceptual 50 x 98 assembly reserve within 61.5-inch enclosure; no bifold or basket bay; selected assembly and occupied access need review |
 
 Doorless openings do not provide acoustic separation. Simplified trim does not establish finished clear width or egress/accessibility compliance. See [door requirements](doors.html).
 
@@ -2034,7 +2235,7 @@ Exterior garage approaches are only provisional lowered pads, not driveway gradi
 | General walls | Sherwin-Williams Accessible Beige SW 7036 screen approximation, #D1C7B8; main-kitchen interior faces are ivory quartz instead |
 | Hardwood | Continuous 7 in natural honey-oak plank spacing/grain across living, dining, kitchen, prep, hall, kids, office, bedroom and closet; varied 4-8 ft board lengths |
 | Other floors | Mudroom/bathrooms tile, porch paving, garage epoxy; not the earlier prep-tile note |
-| Closed cabinetry | Light natural-stained white oak, Shaker recessed fronts, frameless/full-overlay; satin-gold hardware; open stair-bookcase carcasses stay cream |
+| Closed cabinetry | Light natural-stained white oak, Shaker recessed fronts, frameless/full-overlay; satin-gold hardware; stair bookcase carcasses removed, enclosure painted to match walls |
 | Mudroom exception | Pale sage cases/trim #C5CDB7; matte olive backs #627257; ivory bifold leaves #DFD5C2 with putty panels #B9AD95; off-white entry leaf #F2EEE4, never green; pale-gold names #FFF0C8. Warm ivory quartz bench, natural woven baskets #B89A70, gold hardware and large-format stone-look tile retained. Supersedes the single #AAA99A finish; kitchen materials unchanged. Confirm physical samples, products and supports; no accessory drawers |
 | Quartz | Warm ivory/soft warm-gray veining on counters, island and kitchen walls; three main-kitchen window sills are smoky blue-gray |
 | Drawer cups | Top Knobs Dakota Charlotte M2223, Honey Bronze, kitchen/island/prep-extension drawers; one cup below 30 in width, pairs at quarter points at 30 in or wider |
@@ -2061,7 +2262,52 @@ Physical samples must confirm stain, sheen, upholstery durability, quartz color,
 
 ## Open decisions and known differences
 
-### Upstairs bedroom revision - October 25, 2026
+### Upstairs arrival-gallery redesign — October 27, 2026
+
+The current model replaces the oversized central service block with an
+unfurnished arrival gallery and northern bedroom/loft connector. Fixed stairs,
+void and guards, exterior footprint/windows (including both south loft pairs),
+ground floor and both layout JSON files are unchanged. Retain four furnished
+bedrooms, their closets, primary bath and three kids' baths.
+
+| Zone / measured allowance | Current concept |
+|---|---|
+| Laundry | x=24–31.5, z=27.6–36.2 ft; 7.5 × 8.6 ft |
+| Linen | x=31.5–36.5, z=27.6–30.8 ft; 5 × 3.2 ft |
+| Mechanical reservation | x=31.5–36.5, z=30.8–36.2 ft; 5 × 5.4 ft |
+| Arrival guard to laundry baseboard | Approximately 165 in |
+| Northern connector between baseboards | 61.5 in |
+| Machine front to folding-cabinet handles | 36 in, plus 4.35 in rear allowance beyond baseboard |
+| Shared toilet fronts to opposite baseboard | Approximately 30.2 in |
+| Front-bedroom door openings | 30 in nominal; about 28.1 in past modeled open leaf/handle; selected jambs/hardware unresolved |
+
+Laundry has side-by-side generic machines, three 24-inch upper cupboards and
+three 24-inch base cabinets. Move shared showers to the outside ends so the
+toilet routes do not cross shower pans. Close the primary closet's opening
+into Bedroom 2. All 16 leaves retain 96-inch heads, start closed and sweep
+90 degrees. Both front-bedroom entries swing inward; move Bedroom 3 closet
+entry north and Bedroom 4 desk/lamp and closet entry south to clear their
+approaches. The loft remains a furnished seating/media/work destination,
+not part of the stair landing.
+
+Door-sweep and connected tour-route tests use constituent geometry and a
+12-inch-diameter avatar, not a human-accessibility envelope. Bedroom 4's
+chair/bedframe gap is approximately 25.8 in, or 16.8 in after 9 in pullback;
+not an occupied passing route. Verify actual doors, simultaneous use,
+occupied furniture/storage access, sanitary and equipment service zones,
+stair guards/headroom, structure, MEP/exhaust/dryer venting, waterproofing and
+egress professionally. This remains a local concept, not construction approval.
+See [current upstairs notes](upstairs.html#model-study).
+
+Front entries have slimmer 2.5-inch side casing; projecting caps clear the
+perpendicular wall returns. Regression checks sample every 3 degrees over
+0–90 degrees with both tucked and 9-inch-pulled desk chairs. Live world-space
+checks confirm constituent clearances, 18 connected destinations with doors
+open, collision refresh after door clicks and restored closed poses/visibility.
+Interior/service-room and all four elevation screenshots were inspected,
+including gallery/loft Day/Night. These checks do not approve occupied use.
+
+### Historical upstairs bedroom revision - October 25, 2026
 
 This supersedes the bedroom sizes/nightstand arrangement in the October 24
 study below. Bedrooms 2-4 each have a full 54 x 75-inch mattress, one
@@ -2074,7 +2320,7 @@ overlaps. Walls, openings and saved layout JSON remain unchanged. Checks
 cover displayed furniture, not occupied/pulled-out chairs, open drawers,
 door swings, egress approval or electrical installation.
 
-### Upstairs furnishing update - October 24, 2026
+### Historical upstairs furnishing update - October 24, 2026
 
 Remove floating upstairs room labels, retaining room navigation and opt-in 2D
 dimensions. Furnish all four bedrooms with nightstands, lamps, rugs, pillows
@@ -2097,7 +2343,7 @@ supports and code approval remain unresolved. See [upstairs notes](upstairs.html
 4. **Garage safety/access:** actual levels, rated door, required landings/rails, door tracks, vehicle/equipment movement and charger reach remain unverified; the two-step/no-rail concept is not approval.
 5. **Kitchen installation:** select actual steam oven, prep combination, hood/liner and fixture accessories; resolve cutouts, tower tolerance, appliance/door/drawer operation, services and quartz build-up/support.
 6. **Windows/exterior:** dealer/architect must confirm standard sizes, combinations, rough openings, structure/bracing, egress/safety glass, weatherproofing and sash operation. Exterior-wall extension needs site/elevation/foundation/roof review.
-7. **Guest bathroom detailing:** toilet/shower room is separated by a partition and pocket door from the sink alcove, which opens to the bedroom. Actual sanitary clearances, finished openings, occupied use, pocket framing, waterproofing, safety glazing, exhaust and plumbing still require professional review; this is not an approved installation.
+7. **Guest bathroom detailing:** owner reference adapts the enclosed bathroom vanity to white-oak Shaker paired doors concealing the removable basket, satin-gold bar pulls and three right-side drawers, without changing its 30 x 18 in footprint. Retain the earlier 1.2 ft south partition/entry shift; closet L storage, bed and nightstands stay fixed. Close bathroom doors/drawers before through-access. Actual sanitary clearances, compact vanity/trap/supports, finished openings, occupied use, pocket framing, waterproofing, safety glazing, exhaust and plumbing require professional review; not an approved installation.
 8. **Furniture/use:** seating counts and object gaps are not occupied-clearance or accessibility certifications; verify chair/stool pull-back, bed/nightstand circulation, exercise use and kids' safety with real products.
 
 ### Audit evidence
@@ -2107,3 +2353,12 @@ October 18 documentation audit compared current constants, floor/wall extents, o
 Final checks passed: 16 live-scene assertions, including 18 window groups / 26 casements / two picture panes / eight sconces, the revised living-window centers and dining-table center, island/landing bounds, and bedroom placement. All 42 checked local documentation links/anchors and the reference's room/system coverage passed, as did Git whitespace checks. The model source revision stayed unchanged during final verification.
 
 This audit changes documentation, not geometry, furniture placement, product selection or unresolved safety/code decisions.
+## Loft south windows - October 27
+
+Two nominal 48 x 60-inch paired casements occupy the formerly blank loft
+south wall, z = 36.2 ft, centers x = 40.75 / 47.75 ft, sill/head 36/96 in
+above upstairs floor. Shared furnished/exterior data replaces the blind
+masonry fields without changing rooms or furniture. Loft total: four openings,
+eight casement units. Whole house: 30 openings / 52 units (46 casements,
+6 pictures). Headers, veneer support, roof clearance, flashing and operation
+remain unapproved; see [window count](docs/window-count.md).

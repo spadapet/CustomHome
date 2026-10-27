@@ -49,7 +49,7 @@ test('actual clipped garage hip has a subordinate 12.475 ft crown without raisin
     assert.ok(roof.heightAt(face.plane, point) <= 12.475 + 1e-7);
     assert.ok(point[1] >= 35.55 - 1e-7);
   }
-  for (const window of resolved.windows.filter(([name]) => /^Loft /.test(name))) {
+  for (const window of resolved.windows.filter(([name]) => /^Loft [12]$/.test(name))) {
     assert.ok(window[2] + window[3] / 2 < garage.bounds[2], 'Loft glazing stays north of the garage roof');
   }
 });

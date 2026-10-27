@@ -123,6 +123,28 @@ test('real soffit vertices stay below the visible roof instead of projecting whi
   }
 });
 
+test('lower mixed roof renders clipped metal ribs and opaque undersides on the derived envelope', () => {
+  const definitions = HomeRoof.getLowerRoofDefinitions();
+  const { model } = render(false, definitions);
+  const plan = HomeRoof.buildRoofEnvelope(definitions);
+  const skins = model.children.filter(p => p.userData.roofSurface);
+  assert.equal(skins.length, plan.faces.length);
+  assert.equal(model.children.filter(p => p.name === 'Closed connected roof underside').length, skins.length);
+  for (const skin of skins) {
+    const face = plan.faces.find(f => f.id === skin.userData.patch &&
+      JSON.stringify(f.polygon) === JSON.stringify(skin.userData.polygon));
+    assert.ok(face);
+    const positions = skin.geometry.attributes.position.array;
+    for (let i = 0; i < positions.length; i += 3) {
+      assert.ok(Math.abs(positions[i + 1] - HomeRoof.heightAt(face.plane, [positions[i], positions[i + 2]])) < 1e-5);
+    }
+  }
+  assert.ok(model.children.some(p => p.name === 'Clipped standing-seam roof rib'));
+  const metalPerimeter = model.children.filter(p => /Connected roof .*fascia/.test(p.name) &&
+    p.position.x > 55.7 && p.position.z < 35.55);
+  assert.equal(metalPerimeter.length, 0, 'Metal eaves receive their own fitted sections, not slate fascia');
+});
+
 test('metal ribs follow clipped porch/entry polygons with one shared finish and no standalone intersecting panels', () => {
   const { model, definitions } = render(true);
   const finish = model.children.find((part) => part.userData.roofSurface).material;

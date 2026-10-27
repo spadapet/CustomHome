@@ -10,7 +10,11 @@
 
   function stairOpening(floorToFloor = 10) {
     const run = (Math.ceil(floorToFloor / (2 * 7.5 / 12)) - 1) * (10 / 12);
-    return { x: 0.175, z: 26.775, width: run + 4, depth: 34.6 - 0.175 - 26.6, rotation: Math.PI };
+    // West end already contacts the x=0.175 finished wall. Close the unused
+    // powder-side strip in +Z, leaving 1 in to paint / 1/4 in to baseboard.
+    const powderWallFace = 35.1 - 0.175;
+    const depth = 34.6 - 0.175 - 26.6;
+    return { x: 0.175, z: powderWallFace - 1 / 12 - depth, width: run + 4, depth, rotation: Math.PI };
   }
 
   function validate(baseline, document) {

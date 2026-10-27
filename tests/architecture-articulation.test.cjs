@@ -8,7 +8,7 @@ function harness() {
   class Group { constructor() { this.children = []; this.userData = {}; } add(o) { this.children.push(o); } }
   const meshes = [];
   return {
-    THREE: { Group }, group: new Group(), trim: {}, porchColumnFinish: {}, meshes,
+    THREE: { Group }, group: new Group(), trim: {}, baseBrick: {}, porchColumnFinish: {}, meshes,
     box(parent, x, y, z, w, h, d) {
       const mesh = { x, y, z, w, h, d, min: [x-w/2,y-h/2,z-d/2], max: [x+w/2,y+h/2,z+d/2] };
       meshes.push(mesh); parent.add(mesh); return mesh;
@@ -17,15 +17,16 @@ function harness() {
 }
 test('built portal constituents preserve approach and provide honest lintel depth', () => {
   const c = harness();
+  c.brickBox = c.box;
   vm.runInNewContext(source.slice(source.indexOf('  const entryPortal ='), source.indexOf('  const porchCanopyHeight =')), c);
-  const feet = c.meshes.filter(o => o.name === 'Entry portal stone foot');
+  const feet = c.meshes.filter(o => o.name === 'Entry portal brick foot');
   const shafts = c.meshes.filter(o => o.name === 'Entry portal masonry pier jacket');
   const beam = c.meshes.find(o => o.name === 'Entry portal deep stone entablature');
-  assert.ok(Math.abs((feet[1].min[0]-feet[0].max[0])*12-69.6)<1e-8);
-  assert.ok(Math.abs((shafts[1].min[0]-shafts[0].max[0])*12-73.2)<1e-8);
+  assert.ok(Math.abs((feet[1].min[0]-feet[0].max[0])*12-79.8)<1e-8);
+  assert.ok(Math.abs((shafts[1].min[0]-shafts[0].max[0])*12-82.8)<1e-8);
   assert.ok(Math.abs(beam.min[1]-8.9)<1e-8);
   assert.ok(Math.abs(beam.max[1]-9.7)<1e-8);
-  assert.ok(shafts.every(o=>o.d===2.2 && o.max[2]===61.6));
+  assert.ok(shafts.every(o=>o.d===1 && o.max[2]===61));
 });
 test('upper stone constituents border rather than fill actual glazing; cornice fits below wall head', () => {
   const c = harness();

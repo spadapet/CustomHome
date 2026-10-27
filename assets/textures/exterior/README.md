@@ -14,14 +14,28 @@ The viewer has no runtime dependency on Poly Haven.
 | Oak Veneer 01 | https://polyhaven.com/a/oak_veneer_01 | Jenelle van Heerden | diffuse, OpenGL normal, roughness |
 | Roof Slates 03 | https://polyhaven.com/a/roof_slates_03 | Rob Tuytel | diffuse, OpenGL normal, roughness |
 
-The brick diffuse is partially desaturated, contrast-reduced and brightened
-at runtime, then tinted warm red-brown for the latest farmhouse's brick
-bases, porch plinths and entry steps. Walls/gables now use white siding
-with actual projecting battens, not a white-painted brick texture.
+The owner-corrected warm-WHITE brick grades photographic diffuse luminance
+L at runtime: V=min(246,194+0.265L), RGB(V+4,V+3,V-2), rounded
+to clamped bytes. All source hue tails are removed: R-G <=1, G-B=5,
+not pink, peach, yellow or neutral grey. Mortar/face luminance survives.
+This supersedes rejected pinkish ivory; the collage
+is inspiration, not a selected product or an exact paint/brand match.
+The latest close-up request uses decorative red-brown brick ONLY on the raised
+base. Its independent diffuse Source uses the original Brick Wall 001 scan,
+not the white-graded map or tinted ashlar. Face RGB is
+(92+0.48L,38+0.34L,26+0.27L); pale low-chroma mortar (channel range <24,
+L>115) uses (164+0.18L,158+0.18L,145+0.18L). Original normal/roughness
+maps remain independent. No added random cracks or procedural noise.
+Porch exposed foundation, support bases, landing nose and step risers match.
+Pale coping, porch paving and stone treads retain contrast; walking finishes
+require exterior slip/frost selection. Wall veneer is not approved paving.
+All diffuse Sources are sRGB with white material multipliers.
+White trim/portal stay pale. Physical brick/mortar/stone panels required.
 Original JPGs remain unchanged. Normal and roughness
 maps remain non-color data; they are not derived from the color map.
 Brick repeats are interpreted as five nominal 8-inch face modules across and
-fourteen 3.125-inch courses high for the queen-brick study, not supplier CAD.
+fourteen 3.125-inch courses high for BOTH queen-brick palettes, not supplier CAD.
+Per-face physical projection includes narrow column returns; no 8-ft base tile.
 The stone scan is a visual reference, not a selected limestone product.
 
 Directional sunlight, HDR sky/reflections and one 2048-pixel shadow map are

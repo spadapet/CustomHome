@@ -24,7 +24,7 @@ test('all model trim excludes quarter-round and shoe molding while retaining fla
   assert.match(read('floor-plan-upstairs.js'), /box\(parent, .*2 \/ 3, 0\.0625, windowTrim\)\.name = 'Upstairs white baseboard'/);
 });
 
-test('under-stair flat boards retain their bottom-step and bookcase-end returns without extra molding', () => {
+test('under-stair flat boards retain their bottom-step and enclosure-end returns without extra molding', () => {
   class Group {
     constructor() { this.children = []; }
     add(part) { this.children.push(part); }
@@ -32,7 +32,7 @@ test('under-stair flat boards retain their bottom-step and bookcase-end returns 
   const stairs = new Group();
   const context = {
     THREE: { Group }, stairs, stairOpening: { width: 9 }, stairGoing: 10 / 12,
-    stairRise: 7.5 / 12, stairWidth: 44 / 12, landingEndX: 9, stairBookcaseDepth: 11 / 12,
+    stairRise: 7.5 / 12, stairWidth: 44 / 12, landingEndX: 9, stairEnclosureDepth: 11 / 12,
     windowTrim: {},
     box(parent, x, y, z, w, h, d) {
       const part = { x, y, z, w, h, d };
@@ -40,12 +40,12 @@ test('under-stair flat boards retain their bottom-step and bookcase-end returns 
       return part;
     }
   };
-  vm.runInNewContext(source.slice(source.indexOf('  const stairBaseTrim ='), source.indexOf('  const landingGuardZ =')), context);
+  vm.runInNewContext(source.slice(source.indexOf('  const stairBaseTrim ='), source.indexOf('  const upstairsStairParts =')), context);
   const trim = stairs.children[0];
   assert.deepEqual(Object.keys(trim.userData).sort(), ['heightInches', 'thicknessInches']);
   assert.deepEqual(trim.children.map((part) => part.name), [
     'Under-stair white baseboard', 'Bottom-step baseboard extension',
-    'Bottom-step front trim return', 'Bookcase end baseboard return'
+    'Bottom-step front trim return', 'Enclosure end baseboard return'
   ]);
   assert.equal(trim.children[0].h * 12, 8);
   assert.equal(trim.children[0].d * 12, 0.75);
@@ -68,13 +68,13 @@ test('baseboards stop behind the fitted mudroom cases and remain outside the kit
   assert.ok(start > 0 && end > start);
   vm.runInNewContext(source.slice(start, end), { THREE: { Vector2 }, cover(a, b, normal) { covered.push({ a, b, normal }); } });
   assert.equal(covered.length, 4);
-  const east = 44.9 - 2 / 12 - 0.175;
+  const east = 44.9 - 8 / 12 - 0.175;
   assert.deepEqual(covered.map(({ a, b, normal }) => [a.x, a.y, b.x, b.y, normal.x, normal.y]), [
     [37.675, 15.175, east, 15.175, 0, 1],
     [37.675, 15.175, 37.675, 17.54, 1, 0],
     [east, 15.175, east, 26.725, -1, 0],
-    [43.075 - 2 / 12, 26.725, east, 26.725, 0, -1]
+    [43.075 - 8 / 12, 26.725, east, 26.725, 0, -1]
   ]);
   assert.equal(covered[1].b.y, 17.54, 'Baseboard resumes at north enclosure, not at the removed west tower');
-  assert.ok(covered[3].a.x > 42.5, 'No fitted joinery or trim cuts across the garage opening');
+  assert.ok(covered[3].a.x > 41 + (2.5 + 0.125) / 12, 'No fitted joinery or trim cuts across the actual garage opening/casing');
 });

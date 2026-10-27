@@ -33,6 +33,8 @@ function build() {
       }
     },
     scene: new Group(), piano: new Group(), referenceEndTable: new Group(),
+    guestVanity: { children: [{ name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }, { name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }] },
+    powderGlow: { emissiveIntensity: 0.45 },
     upstairs: { group: Object.assign(new Group(), { userData: { ceilingHeightFeet: 9 } }), rooms: [{ name: 'Bedroom 2', x: 31, z: 10, w: 13, d: 12 }] },
     getGroundFloorDefaultPlan: require('../floor-plan-ground.js').getGroundFloorDefaultPlan,
     cream: {}, brass: {}, rosewood: {}, windowTrim: {}, black: { clone() { return {}; } }, ceilingHeight: 9, garageFloorY: -1.25,
@@ -51,6 +53,23 @@ function build() {
   context.homeLighting = context.buildHomeLighting();
   return context;
 }
+
+test('guest vanity real lights and night glow restore across Day/Night, plans and floors', () => {
+  const model = build();
+  for (const [floor, view, night, expected] of [
+    ['ground', 'whole', true, true], ['ground', 'whole', false, false],
+    ['upstairs', 'upstairs', true, false], ['ground', 'top', true, false],
+    ['exterior', 'exterior-front', true, false], ['ground', 'guest-suite', true, true]
+  ]) {
+    Object.assign(model, { activeFloor: floor, currentView: view, nightLighting: night });
+    model.updateHomeLighting();
+    for (const lamp of model.guestVanity.children) {
+      assert.equal(lamp.visible, expected);
+      assert.equal(lamp.intensity, expected ? 8 : 0);
+    }
+    assert.equal(model.powderGlow.emissiveIntensity, expected ? 0.45 : 0);
+  }
+});
 
 test('warm deep-regressed cans cover both floors with separate unchanged low-output task lamps', () => {
   const model = build();

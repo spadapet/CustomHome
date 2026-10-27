@@ -140,7 +140,7 @@ test('interior stair LED strips sit below and outside the risers on both flight 
     const context = {
       upper, direction: upper ? -1 : 1, startX: upper ? 7.5 : 0, baseHeight: upper ? 5 : 0,
       centerZ: 2, flightWidth: 44 / 12, stairRisers: 10, stairGoing: 10 / 12, stairRise: 0.5,
-      stairBookcaseDepth: 11 / 12, stairBookcaseFlightSplitStep: 6, stairBookcaseHeight() { return 0; },
+      stairEnclosureDepth: 11 / 12,
       THREE: { PointLight: class {
         constructor(color, intensity) { this.intensity = intensity; this.position = { set() {} }; }
       } },
@@ -298,8 +298,10 @@ test('downloaded garage props replace tools and bins without removing equipment 
   assert.equal(model.find('Garage tool shelf').length, 2);
   assert.equal(model.find('Removable tool battery and charging dock').length, 3);
   assert.equal(model.find('Large rolling shop vacuum').length, 1);
-  assert.equal(model.roots[0].position.x, 32.95);
+  assert.equal(model.roots[0].position.x, 34.6);
   assert.equal(model.roots[0].position.z, 27.115);
+  assert.ok(model.find('Garage tool shelf').every((shelf) => shelf.w === 6), 'Six-foot shelves fit the shortened garage wall bay');
+  assert.equal(model.find('Conventional floor-parked lawn mower')[0].position.x, -2.2);
 });
 
 test('rake broom and dustpan move intact to the north wall clear of the entry', () => {
@@ -312,7 +314,7 @@ test('rake broom and dustpan move intact to the north wall clear of the entry', 
   assert.equal(rail.position.y, -1.25);
   assert.equal(rail.userData.floorStorage, false);
   assert.equal(rail.userData.widthInches, 30);
-  assert.ok(rail.position.x - 1.25 > 44.9 - 2 / 12 + 0.175, 'Rail clears the mudroom return');
+  assert.ok(rail.position.x - 1.25 > 44.9 - 8 / 12 + 0.175, 'Rail clears the mudroom return');
   assert.ok(rail.position.x + 1.25 < 49, 'Rail stays west of the bike parking envelopes');
   for (const name of ['Wall-hung garage rake', 'Wall-hung garage broom', 'Wall-hung garage dustpan']) assert.equal(model.find(name)[0].userData.wallMounted, true);
   assert.equal(model.find('Rake steel tine').length, 16);

@@ -1,5 +1,14 @@
 # CustomHome
 
+Current exterior material study (October 27): neutral warm-white main brick
+is unchanged; decorative red-brown scanned queen brick wraps the raised lower
+walls, porch exposed foundation, column bases, landing nose and step risers.
+Pale coping, porch paving and stone treads retain contrast. The base remains
+30 inches above house floor; slim 12-inch column shafts and architecture remain.
+Brick/mortar sample panels, veneer support/flashing and coping/drips need design
+review. Walking finishes need separate exterior slip/frost and drainage approval;
+wall veneer is not an approved paver. See [elevations](elevations.html).
+
 A furnished Three.js home-design study with two-floor views, tours, exterior
 studies and a one-foot floor grid. Dimensions and storage/access arrangements
 are conceptual, not construction drawings or code approval.

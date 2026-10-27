@@ -6,6 +6,45 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
 
+test('one whole-house window policy distinguishes product intent from orderable sizes', () => {
+  const intent = require('../floor-plan-ground.js').getWindowProductIntent;
+  for (const [w,h,picture] of [[3,5,false],[4,5,false],[1.5,5,false],[6,1.5,true],[5,5,true],[2,6,false]]) {
+    const data = intent(w,h,picture);
+    assert.equal(data.series, '100 Series');
+    assert.equal(data.material, 'Fibrex composite');
+    assert.equal(data.grilles, 'none');
+    assert.equal(data.productSelected, false);
+    assert.equal(data.standardSizeVerified, false);
+    assert.equal(data.columns, picture ? 1 : Math.ceil(w/3));
+    assert.equal(data.rows, picture ? 1 : Math.ceil(h/6));
+  }
+  assert.match(intent(3,5).sizeReview, /Outside/);
+  assert.match(intent(2,6).sizeReview, /Outside/);
+  assert.match(intent(6,1.5,true).sizeReview, /aspect-ratio/);
+  assert.match(intent(2.5,4,false,true).privacyReview, /not a verified factory/);
+});
+
+test('upper corner leaders follow different upper/lower walls with a short canopy bypass', () => {
+  const routes=[];
+  const context={group:{},drainageRoute(parent,name,points,brackets){routes.push({name,points,brackets});}};
+  const start=source.indexOf('  for (const east of [false, true])');
+  vm.runInNewContext(source.slice(start,source.indexOf('  // Dining is hipped',start)),context);
+  assert.equal(routes.length,2);
+  for(const [index,r] of routes.entries()){
+    const p=r.points;
+    assert.equal(p.length,8);
+    assert.equal(p[0][2],54.95,'actual front gutter');
+    assert.equal(p[1][0],index?31.4:-0.4,'upper side-wall corner');
+    assert.equal(p[1][2],53.05);
+    assert.equal(p[5][0],index?30.9:-0.4,'different lower wall corner');
+    assert.equal(p[5][2],index?54.65:54.05);
+    assert.ok(p[3][0]+0.07 < -0.65 || p[3][0]-0.07>31.85,'canopy bypass');
+    assert.ok(p[3][2]-0.07>54.22,'garage-return clearance');
+    assert.ok(p.slice(1).every((v,i)=>v[1]<p[i][1]),'continuous descending route');
+    assert.ok(r.brackets.every(([a,b])=>Math.hypot(...a.map((v,i)=>v-b[i]))<0.24),'short wall-fixed brackets, not arms');
+  }
+});
+
 test('arched entry is coordinated through the same builder for furnished and exterior views', () => {
   const layout = require('../floor-plan-ground.js').getFrontEntryLayout();
   assert.equal(layout.width, 5);
@@ -21,7 +60,7 @@ test('farmhouse porch has four white columns and its raised beam clears the eigh
   const meshes = [];
   const context = {
     THREE: { Group: class { constructor() { this.userData = {}; } } },
-    group: { add() {} }, trim: {}, dark: {}, accentStone: {}, porchColumnFinish: {}, porchPillars: [], fitTrimTopToPorchRoof: (part) => part,
+    group: { add() {} }, trim: {}, baseBrick: {}, dark: {}, accentStone: {}, porchColumnFinish: {}, porchPillars: [], fitTrimTopToPorchRoof: (part) => part,
     box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d }; meshes.push(mesh); return mesh; },
     brickBox(parent, x, y, z, w, h, d) { const mesh = { name: 'Column brick base', x, y, z, w, h, d }; meshes.push(mesh); return mesh; }
   };
@@ -32,10 +71,13 @@ test('farmhouse porch has four white columns and its raised beam clears the eigh
   const columns = meshes.filter((mesh) => mesh.name === 'White farmhouse porch column');
   assert.equal(columns.length, 4);
   for (const column of columns) {
-    assert.equal(column.w, column.userData.entryColumn ? 1.3 : 1);
+    assert.equal(column.w, 1);
     assert.equal(column.d, column.w);
     assert.ok(Math.abs(column.userData.widthInches - column.w * 12) < 1e-9);
   }
+  const bases = meshes.filter(m => m.name === 'Red-brown brick porch-column base');
+  assert.equal(bases.length, 4);
+  assert.ok(bases.every(m => m.w === 7/6 && m.d === 7/6 && m.y+m.h/2===2.5));
   const header = source.split('\n').find((line) => line.includes("name = 'Raised farmhouse porch header clear of eight-foot door'"));
   assert.ok(header);
   vm.runInNewContext(header, context);
@@ -43,6 +85,27 @@ test('farmhouse porch has four white columns and its raised beam clears the eigh
   assert.ok(Math.abs(beam.y - beam.h / 2 - 9.7) < 1e-9, 'Header has 1.7 ft clearance above the door head');
   assert.equal(beam.w, 32.5);
   assert.doesNotMatch(source, /Continuous porch fascia and cornice|Continuous shingle porch roof/);
+});
+
+test('slim column lantern constituents mount at the face without positive embedding', () => {
+  const parts=[];
+  class Group {
+    constructor(){this.position={set(x,y,z){Object.assign(this,{x,y,z});}};}
+    add(o){o.parent=this;}
+  }
+  const context={THREE:{Group,PointLight:class extends Group{}},group:{},dark:{},glow:{},
+    mat:()=>({}),box(parent,x,y,z,w,h,d){
+      const m={x,y,z,w,h,d,parent};parts.push(m);return m;
+    }};
+  vm.createContext(context);
+  const start=source.indexOf('  function lantern('),end=source.indexOf('  for (const x of [37, 48.5])',start);
+  context.porchPillars=[{userData:{entryColumn:true},position:{y:4.85},add(o){o.parent=this;}}];
+  vm.runInContext(source.slice(start,end),context);
+  for(const p of parts) {
+    const minZ=p.parent.position.z+p.z-p.d/2;
+    assert.ok(minZ>=0.5-1e-8,`${p.name||'lantern frame'} embedded in 12-inch shaft`);
+  }
+  assert.ok(Math.abs(parts.find(p=>p.name==='Exterior lantern wall backplate').parent.position.z-0.72)<1e-8);
 });
 
 test('brick texture uses contrasting warm taupe variations and mortar relief with the original bond', () => {
@@ -56,8 +119,8 @@ test('brick texture uses contrasting warm taupe variations and mortar relief wit
   const start = source.indexOf('  const frontBrick =');
   const end = source.indexOf('  function brickBox(', start);
   vm.runInContext(source.slice(start, end), context);
-  assert.equal(fills[0].color, '#ddd5c5');
-  assert.deepEqual([...new Set(fills.slice(1).map((fill) => fill.color))].sort(), ['#d3c8b3', '#d8ccb8', '#e3d8c3', '#e8ddc8']);
+  assert.equal(fills[0].color, '#d7d6d1');
+  assert.deepEqual([...new Set(fills.slice(1).map((fill) => fill.color))].sort(), ['#e5e4df', '#eae9e4', '#f0efea', '#f6f5f0']);
   assert.equal(fills.length, 41);
   assert.ok(fills.slice(1).every((fill) => fill.bounds[2] === 60 && fill.bounds[3] === 28));
 });
@@ -68,12 +131,12 @@ test('farmhouse windows restore white trim on every elevation and inside', () =>
     constructor() { this.userData = {}; this.position = { set() {} }; }
     add(mesh) { meshes.push(mesh); }
   }
-  const context = { THREE: { Group }, dark: {}, trim: {}, windowBlack: {}, glass: {}, privacyGlass: {}, box(parent, x, y, z, w, h, d, material) { const mesh = { x, y, z, w, h, d, material }; parent.add(mesh); return mesh; } };
+  const context = { getWindowProductIntent: require('../floor-plan-ground.js').getWindowProductIntent, THREE: { Group }, dark: {}, trim: {}, windowBlack: {}, glass: {}, privacyGlass: {}, box(parent, x, y, z, w, h, d, material) { const mesh = { x, y, z, w, h, d, material }; parent.add(mesh); return mesh; } };
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  function windowUnit('), source.indexOf('  function wall(')), context);
   vm.runInContext('windowUnit(new THREE.Group(), 6, 3, 6, 5, false, false, true, true)', context);
-  assert.equal(meshes.filter((mesh) => mesh.name === 'Front window horizontal grille').length, 3);
-  assert.equal(meshes.filter((mesh) => mesh.name === 'Front window vertical grille').length, 1);
+  assert.equal(meshes.filter((mesh) => /grille/.test(mesh.name ?? '')).length, 0);
+  assert.equal(meshes.filter((mesh) => mesh.name === 'Casement combination mullion').length, 1);
   assert.ok(meshes.filter((mesh) => mesh.material && mesh.material !== context.glass).every((mesh) => mesh.material === context.trim));
   meshes.length = 0;
   vm.runInContext('windowUnit(new THREE.Group(), 6, 3, 6, 5)', context);
@@ -92,7 +155,7 @@ test('reference elevation uses fixed brick without an optional finish control', 
   vm.runInNewContext(source.slice(source.indexOf('  const brickTextureWidthFeet ='), source.indexOf('  group.userData.brickFormat =')) + '\nglobalThis.brickTextureWidthFeet = brickTextureWidthFeet; globalThis.brickTextureHeightFeet = brickTextureHeightFeet;', context);
   vm.createContext(context);
   const start = source.indexOf('  function brickBox(');
-  const end = source.indexOf('  function texturedBox(', start);
+  const end = source.indexOf('  if (masonryMaps) {', start);
   vm.runInContext(source.slice(start, end), context);
   const base = vm.runInContext('brickBox({}, 0, 0, 0, 6, 1, 0.45)', context);
   assert.equal(base.name, 'Cream exterior brick masonry');
@@ -109,20 +172,78 @@ test('cream brick constituents respect every fixed opening without applied sidin
     constructor() { this.userData = {}; this.position = { set() {} }; this.rotation = {}; }
     add(mesh) { meshes.push(mesh); }
   }
-  const context = { THREE: { Group }, white: {}, trim: {}, garageFloorY: -1.25, group: { add(wall) { walls.push(wall); } }, wallThickness: 0.45, box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'siding' }; parent.add(mesh); return mesh; }, brickBox(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'brick' }; parent.add(mesh); return mesh; }, windowUnit() {} };
+  const context = { accentStone: { clone: () => ({}) }, stoneTexture: { clone: () => ({repeat:{set(){}}}) }, THREE: { Group }, white: {}, trim: {}, garageFloorY: -1.25, group: { add(wall) { walls.push(wall); } }, wallThickness: 0.45, box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'siding' }; parent.add(mesh); return mesh; }, brickBox(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'brick' }; parent.add(mesh); return mesh; }, windowUnit() {} };
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  function wall('), source.indexOf('  const win =')), context);
-  for (const name of ['front ground floor', 'west ground floor', 'kitchen and prep rear', 'east ground floor', 'upper front bedrooms', 'upper loft south']) {
+  for (const name of ['front ground floor', 'west ground floor', 'kitchen and prep rear', 'east ground floor', 'upper west', 'upper bath rear', 'garage front']) {
     vm.runInContext(`wall('${name}', 0, 0, 10, 0, -0.4, 9, [{center:5,width:2,sill:3,height:5}])`, context);
   }
-  assert.equal(walls.length, 6);
+  assert.equal(walls.length, 7);
   assert.ok(walls.every((wall) => wall.name.startsWith('Exterior brick wall:')));
-  assert.ok(meshes.filter((mesh) => mesh.finish !== 'brick').every((mesh) => /course|Cornice|Upper window/.test(mesh.name)));
+  assert.ok(meshes.filter((mesh) => mesh.finish !== 'brick').every((mesh) => /course|Cornice|Upper window|limestone plinth/.test(mesh.name)));
   assert.ok(!meshes.some((mesh) => /batten|siding/.test(mesh.name ?? '')));
   for (const mesh of meshes.filter((mesh) => mesh.finish === 'brick')) {
     assert.ok(mesh.x + mesh.w / 2 <= 4 + 1e-9 || mesh.x - mesh.w / 2 >= 6 - 1e-9 || mesh.y + mesh.h / 2 <= 3 + 1e-9 || mesh.y - mesh.h / 2 >= 8 - 1e-9, 'Panels and battens do not fill the window opening');
   }
+  const stone = meshes.filter(m => m.name === 'Continuous red-brown brick base - 30 inch house datum');
+  assert.equal(stone.length, 21);
+  assert.ok(stone.every(m => Math.abs(m.y+m.h/2-2.5)<1e-8), 'one 30-inch house datum even at garage');
+  assert.ok(stone.every(m => 3-(m.y+m.h/2)>=0.5-1e-8), 'six inches below fixed sill');
   assert.doesNotMatch(source, /board-and-batten siding|siding vertical batten|gable vertical batten|Coursed cream limestone|Limestone gable end|White front gable end/);
+});
+
+test('slim paired masonry bays create 2.4-inch pockets without occupying fixed apertures', () => {
+  const meshes = [];
+  const context = {
+    trim: {},
+    brickBox(parent, x, y, z, w, h, d) { const m = { x, y, z, w, h, d }; meshes.push(m); return m; },
+    box(parent, x, y, z, w, h, d) { const m = { x, y, z, w, h, d }; meshes.push(m); return m; }
+  };
+  vm.createContext(context);
+  vm.runInContext(source.slice(source.indexOf('  function articulateUpperMasonry('), source.indexOf('  const win =')), context);
+  vm.runInContext("articulateUpperMasonry({name:'Exterior brick wall: upper front bedrooms',userData:{}},31,19,[])", context);
+  const piers = meshes.filter(m => m.name === 'Upper bay projecting masonry pier');
+  assert.deepEqual(piers.map(m => m.x), [0.75, 12.25, 18.75, 30.25]);
+  for (const pier of piers) {
+    assert.equal(pier.w, 1);
+    assert.ok(Math.abs((pier.z + pier.d / 2 - 0.225) * 12 - 2.4) < 1e-8);
+  }
+  const sills = meshes.filter(m => m.name === 'Paired window continuous stone sill');
+  assert.deepEqual(sills.map(m => [m.x, m.w]), [[6.5, 10], [24.5, 10]]);
+  for (const m of meshes) for (const x of [4.5, 8.5, 22.5, 26.5]) {
+    assert.ok(m.x + m.w / 2 <= x - 1.5 || m.x - m.w / 2 >= x + 1.5 ||
+      m.y + m.h / 2 <= 13 || m.y - m.h / 2 >= 18, `${m.name} crosses glazing`);
+  }
+});
+
+test('photographic cream grading preserves contrast and independent normal/roughness data', () => {
+  const pixels = { data: new Uint8ClampedArray([40,40,40,255,200,200,200,255]) };
+  let ivoryBytes;
+  const paint = { drawImage() {}, getImageData() { return pixels; }, putImageData() { if (!ivoryBytes) ivoryBytes = [...pixels.data]; } };
+  const normalMap = {}, roughnessMap = {};
+  const context = {
+    document: { createElement() { return { getContext: () => paint }; } },
+    masonryMaps: { brick: { map: { image: {} }, normalMap, roughnessMap } }, stoneTexture: { image: {} },
+    frontBrick: { color: { set() {} }, clone() { return {}; } },
+    THREE: { CanvasTexture: class {
+      constructor(image) { this.source = { data: image }; }
+      get image() { return this.source.data; }
+      set image(value) { this.source.data = value; }
+      clone() { const clone = new this.constructor(); clone.source = this.source; return clone; }
+    }, MeshStandardMaterial: class { constructor(options) { Object.assign(this,options); } }, Vector2: class { constructor(x,y) { Object.assign(this,{x,y}); } }, SRGBColorSpace: 'srgb', RepeatWrapping: 'repeat' }
+  };
+  const start = source.indexOf('  if (masonryMaps) {', source.indexOf('  function brickBox('));
+  vm.runInNewContext(source.slice(0, source.indexOf('function buildExteriorModel')) + '\nlet baseBrick;\n' + source.slice(start, source.indexOf('  function brickFaceUVs(', start)) + '\nglobalThis.testBaseBrick = baseBrick;', context);
+  assert.equal(paint.filter, 'none');
+  assert.deepEqual(ivoryBytes, [209,208,203,255,250,249,244,255], 'Warm white retains joint separation without red cast or clipped white');
+  assert.equal(context.frontBrick.normalMap, normalMap);
+  assert.equal(context.frontBrick.roughnessMap, roughnessMap);
+  assert.equal(context.frontBrick.bumpMap, null);
+  assert.equal(context.frontBrick.normalScale.x, 0.5);
+  assert.notEqual(context.testBaseBrick.map.source, context.frontBrick.map.source,
+    'actual palette construction must not share Three Texture Source');
+  assert.notEqual(context.testBaseBrick.map.image, context.frontBrick.map.image);
+  assert.equal(context.testBaseBrick.map.colorSpace, 'srgb');
 });
 
 test('brick gables and tapered closures use the same physical course scale', () => {
@@ -140,7 +261,10 @@ test('brick gables and tapered closures use the same physical course scale', () 
 
 test('hipped exterior removes applied front gables and retains fixed openings without adding a floor', () => {
   const walls = [], gables = [];
+  const getUpstairsFrontWindows = require('../floor-plan-upstairs.js').getUpstairsFrontWindows;
   const context = { group: { userData: {} }, dark: {}, box() { return {}; }, wall(name, ...args) { const value = { name, args, userData: {} }; walls.push(value); return value; }, win(center, width, sill = 3, height = 5) { return { center, width, sill, height }; }, floorToFloor: 10, upper: 10, eaves: 19 };
+  context.getUpstairsFrontWindows = getUpstairsFrontWindows;
+  context.getGroundFrontWindows = require('../floor-plan-ground.js').getGroundFrontWindows;
   vm.createContext(context);
   const lines = source.split('\n');
   for (const name of ['front ground floor', 'upper front bedrooms']) {
@@ -152,9 +276,9 @@ test('hipped exterior removes applied front gables and retains fixed openings wi
   const end = source.indexOf('  function renderRoofEnvelope(', start);
   vm.runInContext(source.slice(start, end), context);
   const ground = walls.find((wall) => wall.name === 'front ground floor').args.at(-1);
-  assert.equal(ground.filter((opening) => !opening.door).length, 4);
+  assert.deepEqual(JSON.parse(JSON.stringify(ground.filter((opening) => !opening.door))), require('../floor-plan-ground.js').getGroundFrontWindows());
   const upper = walls.find((wall) => wall.name === 'upper front bedrooms').args.at(-1);
-  assert.equal(upper.length, 6);
+  assert.equal(upper.length, 4);
   assert.ok(!walls.some((wall) => /Garage.*upper/.test(wall.name)));
   context.gable = (...args) => gables.push(args);
   context.hipRoof = (...args) => gables.push(args);
@@ -165,19 +289,29 @@ test('hipped exterior removes applied front gables and retains fixed openings wi
   assert.doesNotMatch(source, /gable\('Entry farmhouse pediment'/);
 });
 
-test('six exterior upper-front windows match furnished upstairs wall openings and frames', () => {
+test('four balanced exterior upper-front windows match furnished upstairs wall openings and frames', () => {
   const plan = require('../floor-plan-upstairs.js').getUpstairsDefaultPlan(require('../upstairs-layout.js').stairOpening());
   const wall = plan.walls.find(([name]) => name === 'Bedrooms south');
   const frames = plan.windows.filter(([name]) => /Bedroom [34] south/.test(name));
   let exteriorOpenings;
   const line = source.split('\n').find((text) => text.includes("wall('upper front bedrooms'"));
   vm.runInNewContext(line, {
+    getUpstairsFrontWindows: require('../floor-plan-upstairs.js').getUpstairsFrontWindows,
     upper: 10, eaves: 19,
     win: (center, width, sill, height = 5) => ({ center, width, sill, height }),
     wall(...args) { exteriorOpenings = args[7]; }
   });
-  assert.equal(frames.length, 6);
-  assert.equal(wall[5].length, 6);
+  assert.equal(frames.length, 4);
+  assert.equal(wall[5].length, 4);
+  assert.deepEqual(frames.map(f => f[1]), [4.5, 8.5, 22.5, 26.5]);
+  assert.equal((frames[0][1] + frames[1][1]) / 2, 6.5);
+  assert.equal((frames[2][1] + frames[3][1]) / 2, 24.5);
+  for (const name of ['Bedroom 3', 'Bedroom 4']) {
+    const room = plan.rooms.find(r => r.name === name);
+    assert.equal(room.w, 13);
+    assert.equal(room.d, 12);
+  }
+  assert.deepEqual(plan.rooms.filter(r => /Bedroom [34] closet/.test(r.name)).map(r => [r.x, r.z, r.w, r.d]), [[13, 41.2, 5, 5.8], [13, 47, 5, 6.2]]);
   for (const [index, frame] of frames.entries()) {
     const opening = exteriorOpenings[index];
     assert.ok(Math.abs(frame[1] - opening.center) < 1e-8);

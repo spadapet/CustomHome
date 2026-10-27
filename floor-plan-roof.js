@@ -105,6 +105,27 @@
     ];
   }
 
+  function getSetbackRoofDefinitions() {
+    const eastFall = [-1 / 48, 0, 9.2 + 55.8 / 48];
+    return [
+      // Stop at the exterior masonry faces, not the room-side wall faces.
+      { id: 'Rear kitchen setback roof', finish: 'metal', bounds: [25.925, 55.8, 6.7, 9.775], planes: [eastFall] },
+      { id: 'East bath setback roof', finish: 'metal', bounds: [54.225, 55.8, 9.775, 15.625], planes: [eastFall] },
+      { id: 'East loft setback roof', finish: 'metal', bounds: [52.225, 55.8, 15.625, 36.2], planes: [eastFall] }
+    ];
+  }
+
+  function getLowerRoofDefinitions() {
+    return [...getConnectedRoofDefinitions().filter(({ id }) => ['Garage hip', 'Dining rear projection'].includes(id)), ...getSetbackRoofDefinitions()];
+  }
+
+  function getSetbackAbutments() {
+    // Outside faces of the actual upper walls, in perimeter order.
+    return [[25.925, 6.7, 25.925, 9.775], [25.925, 9.775, 54.225, 9.775],
+      [54.225, 9.775, 54.225, 15.625], [54.225, 15.625, 52.225, 15.625],
+      [52.225, 15.625, 52.225, 36.2]];
+  }
+
   function getPorchRoofDefinitions() {
     const angle = 0.13, centerHeight = 10.5, centerZ = 57.5, halfWidth = 4.5;
     const slope = 2.4 / halfWidth;
@@ -236,6 +257,39 @@
     }
     return result;
   }
+  // Clip constituent triangles, including interpolated UVs, rather than hide a
+  // crossing roof with another opaque object. Vertices are [x,y,z,u,v].
+  function trianglesOutsideRectangle(triangles, bounds) {
+    const [left, right, rear, front] = bounds;
+    const constraints = [p => p[0] - left, p => right - p[0], p => p[2] - rear, p => front - p[2]];
+    function half(polygon, value, sign) {
+      const result = [];
+      for (let i = 0; i < polygon.length; i++) {
+        const a = polygon[i], b = polygon[(i + 1) % polygon.length];
+        const av = value(a) * sign, bv = value(b) * sign;
+        if (av >= 0) result.push(a);
+        if ((av < 0 && bv > 0) || (av > 0 && bv < 0)) {
+          const t = av / (av - bv);
+          result.push(a.map((v, j) => v + (b[j] - v) * t));
+        }
+      }
+      return result;
+    }
+    return triangles.flatMap(triangle => {
+      let remaining = triangle;
+      const pieces = [];
+      for (const constraint of constraints) {
+        if (remaining.length < 3) break;
+        pieces.push(half(remaining, constraint, -1));
+        remaining = half(remaining, constraint, 1);
+      }
+      return pieces.flatMap(polygon => polygon.slice(1, -1).map((p, i) => [polygon[0], p, polygon[i + 2]]))
+        .filter(([a, b, c]) => Math.hypot(
+          (b[1] - a[1]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[1] - a[1]),
+          (b[2] - a[2]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[2] - a[2]),
+          (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) > 1e-8);
+    });
+  }
   // Clip wall-head closures to the actual envelope faces. A roof skin above
   // a fixed 19 ft wall is not itself a vertical attic-wall closure.
   function wallHeadSegments(plan, start, end, wallTop, skinDepth = 0.16) {
@@ -259,7 +313,7 @@
     }
     return segments;
   }
-  const api = { getConnectedRoofDefinitions, getPorchRoofDefinitions, getGarageCanopyDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, wallHeadSegments };
+  const api = { getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, getGarageCanopyDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, wallHeadSegments };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.HomeRoof = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

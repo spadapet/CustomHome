@@ -25,13 +25,16 @@ function buildRoof() {
   class Group {
     constructor() { this.position = { x: 0, y: 0, z: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } }; this.rotation = {}; this.userData = {}; }
     add(mesh) { mesh.parent = this; meshes.push(mesh); }
+    // This fixture checks the untrimmed roof section. Constituent triangle
+    // clipping is covered separately in setback-roof and the live scene audit.
+    traverse() {}
   }
   const context = {
     masonryMaps: null,
-    lot: { left: -13.605, right: 61.395, rear: -32.325 }, fenceBoundaryInset: 0.5,
+    lot: { left: -12.605, right: 62.395, rear: -32.325 }, fenceBoundaryInset: 0.5,
     THREE: { BoxGeometry, SphereGeometry: class extends BoxGeometry { constructor(radius) { super(radius * 2, radius * 2, radius * 2); } }, PointLight: class extends Group { constructor(color, intensity, distance, decay) { super(); Object.assign(this, { color, intensity, distance, decay }); } }, Mesh, Group }, livingFeatureWall: require('../floor-plan-ground.js').getLivingRoomFeatureLayout(), glass: {}, mat: () => ({}), wallThickness: 0.45, frontBrick: {}, brickFaceUVs() {}, wood: {}, dark: {}, white: {}, baseStone: {}, stepStone: {}, stepEdge: {}, glow: {},
     patio: { add(mesh) { meshes.push(mesh); } },
-    group: { add(mesh) { meshes.push(mesh); } },
+    group: { add(mesh) { meshes.push(mesh); }, getObjectByName() { return { traverse() {} }; } },
     texturedBox(parent, x, y, z, w, h, d) {
       const mesh = new Mesh(new BoxGeometry(w, h, d), {});
       mesh.position.set(x, y, z);
@@ -205,15 +208,15 @@ test('post-free canopy has finished soffit and fascia while patio furniture stay
   assert.ok(!posts.some((post) => post.position.x > 10 || post.position.z > 6), 'All three circled posts are removed rather than hidden');
   const terrace = meshes.find((mesh) => mesh.name === 'Ground-level living-room patio terrace');
   assert.equal(terrace.userData.topFeet, -1.625);
-  assert.ok(Math.abs(terrace.userData.x + 5.855) < 1e-9);
-  assert.ok(Math.abs(terrace.userData.widthFeet - 18.805) < 1e-9);
+  assert.ok(Math.abs(terrace.userData.x + 4.855) < 1e-9);
+  assert.ok(Math.abs(terrace.userData.widthFeet - 17.805) < 1e-9);
   assert.ok(Math.abs(terrace.userData.depthFeet - 12.1) < 1e-9);
   assert.equal(terrace.userData.z, -4.325);
   const roof = meshes.find((mesh) => mesh.name === 'Brown-shingle covered patio roof');
   assert.equal(roof.userData.limits.rear - terrace.userData.z, 4, 'Four-foot yard extension is beyond the unchanged roof');
   assert.equal(roof.userData.limits.left, 0, 'No roof enlargement over the new side extension');
   const transition = meshes.find((mesh) => mesh.name === 'Patio to west fence-path grade transition');
-  assert.ok(Math.abs(transition.userData.x + 8.855) < 1e-9, 'Patio reaches the west fence-path inner edge');
+  assert.ok(Math.abs(transition.userData.x + 7.855) < 1e-9, 'Patio reaches the west fence-path inner edge');
   assert.ok(Math.abs(transition.userData.x + transition.userData.widthFeet - terrace.userData.x) < 1e-9, 'Graded strip joins the level terrace without overlap');
   assert.equal(transition.userData.depthFeet, terrace.userData.depthFeet);
   const positions = transition.geometry.attributes.position;
@@ -348,7 +351,7 @@ test('garden connector meets patio grade and transitions to the existing perimet
     for (let index = 0; index < positions.count; index++) if (positions.getX(index) === x) heights.push(ramp.position.y + positions.getY(index));
     assert.ok(Math.abs(Math.max(...heights) - expected) < 1e-9, 'Ramp endpoints join both finished surfaces');
   }
-  assert.ok(Math.abs(ramp.userData.x + ramp.userData.widthFeet - 56.645) < 1e-9);
+  assert.ok(Math.abs(ramp.userData.x + ramp.userData.widthFeet - 57.645) < 1e-9);
   class Shape {
     constructor() { this.points = []; this.holes = []; }
     moveTo(x, y) { this.points.push([x, y]); }
@@ -356,7 +359,7 @@ test('garden connector meets patio grade and transitions to the existing perimet
     closePath() {}
   }
   Object.assign(context.THREE, { Shape, Path: Shape, ShapeGeometry: class { constructor(shape) { this.shape = shape; } } });
-  Object.assign(context, { lot: { left: -13.605, right: 61.395, rear: -32.325, front: 97.675 }, mat() { return {}; } });
+  Object.assign(context, { lot: { left: -12.605, right: 62.395, rear: -32.325, front: 97.675 }, mat() { return {}; } });
   const lawnEnd = source.indexOf('  const cartWidth =', end);
   assert.ok(lawnEnd > end);
   vm.runInContext(source.slice(end, lawnEnd), context);
@@ -365,8 +368,8 @@ test('garden connector meets patio grade and transitions to the existing perimet
   assert.equal(lawn.geometry.shape.holes.length, 1);
   const hole = lawn.geometry.shape.holes[0].points;
   assert.equal(hole.length, 12, 'Original ground-level patio, garden and connector cutout is restored without the landing extension');
-  assert.ok(hole.some(([x, y]) => Math.abs(x + 8.855) < 1e-9 && Math.abs(y - 4.325) < 1e-9), 'Lawn cutout reaches the fence-path join beneath the graded strip');
+  assert.ok(hole.some(([x, y]) => Math.abs(x + 7.855) < 1e-9 && Math.abs(y - 4.325) < 1e-9), 'Lawn cutout reaches the fence-path join beneath the graded strip');
   assert.ok(hole.some(([x, y]) => Math.abs(x - 12.95) < 1e-9 && Math.abs(y - 4.325) < 1e-9));
   assert.ok(!hole.some(([, y]) => Math.abs(y - 6.025) < 1e-9), 'Removed lower landing extension returns to lawn');
-  assert.ok(hole.some(([x, y]) => Math.abs(x - 56.645) < 1e-9 && Math.abs(y - 3.825) < 1e-9));
+  assert.ok(hole.some(([x, y]) => Math.abs(x - 57.645) < 1e-9 && Math.abs(y - 3.825) < 1e-9));
 });

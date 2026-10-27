@@ -44,7 +44,7 @@ test('the shared kitchen wall and refrigeration bank move six inches without wid
   const endGapInches = (boxes[0].x - boxes[0].w / 2 - (movedWall[1] + 0.175)) * 12;
   assert.ok(endGapInches > 0 && endGapInches <= 0.25, 'Six-inch gap closes to a small modeled scribe gap, not another storage unit');
   assert.match(source, /\[29, kidsRoom\.z, 29, 26\.9, true, \[\], ceilingHeight, \[1\]\]/, 'Do not move the gray wall or bury trim inside the shifted bank');
-  assert.equal(plan.walls.find(([name]) => name === 'Garage west return')[1], 29, 'Do not move the garage wall');
+  assert.equal(plan.walls.find(([name]) => name === 'Garage west return')[1], 31.2, 'Garage partition aligns with the bathroom, independently of the kitchen return');
   assert.doesNotMatch(source, /Stair-side narrow pull-out cabinet|Narrow pull-out carcass|Narrow end overhead cabinet|endStorageFront|endUpperFront/);
   assert.match(source, /appliance.position.set\(x, 0, 25.725\)/);
 });
@@ -82,11 +82,28 @@ test('sink/window bank stays centered and actual side counters fit the relocated
   assert.ok(Math.abs(counters[1].x + counters[1].w / 2 - 37.3) < 1e-9);
 });
 
-test('shared-wall floor changes leave the gray wall, garage and all opening widths fixed', () => {
+test('kids-room expansion preserves kitchen return and all opening widths', () => {
   const plan = require('../floor-plan-ground.js').getGroundFloorDefaultPlan();
   const kids = plan.rooms.find((room) => room.name === 'Kids room');
-  assert.equal(kids.w, 10);
-  assert.equal(plan.floors.filter((floor) => floor.room === 'Kids room').length, 1, 'Remove the incorrectly added corner pocket');
+  assert.equal(kids.w, 12.2);
+  const kidsFloors = plan.floors.filter((floor) => floor.room === 'Kids room');
+  const kidsNorthZ = plan.walls.find(([name]) => name === 'Kids north')[2];
+  assert.deepEqual(kidsFloors.map(({ x, z, w, d, elevation }) => [x, z, w, d, elevation]), [
+    [19, kidsNorthZ, 6.75, 34.6 - kidsNorthZ, 0],
+    [25.75, kidsNorthZ, 3.25, 33.6 - kidsNorthZ, 0],
+    [29, 26.9, 2.2, 6.7, 0]
+  ], 'Guest-suite revision splits the western strip at x=25.75; the expanded east strip stops at the bathroom');
+  for (const floor of kidsFloors) {
+    assert.ok(floor.x + floor.w <= 29 || floor.z >= 26.9, 'No kids flooring may enter the preserved refrigeration run');
+  }
+  for (let i = 0; i < kidsFloors.length; i++) {
+    for (const other of kidsFloors.slice(i + 1)) {
+      const floor = kidsFloors[i];
+      assert.ok(Math.min(floor.x + floor.w, other.x + other.w) <= Math.max(floor.x, other.x)
+        || Math.min(floor.z + floor.d, other.z + other.d) <= Math.max(floor.z, other.z),
+      'Shared kids-room floor rectangles must not overlap');
+    }
+  }
   const north = plan.walls.find(([name]) => name === 'Kids north');
   assert.equal(north[3], 29);
   const shared = plan.walls.find(([name]) => name === 'Kitchen east');
@@ -94,8 +111,8 @@ test('shared-wall floor changes leave the gray wall, garage and all opening widt
   assert.deepEqual(shared[5], [[2.725, 5.725, 0, 8], [14.175, 17.175, 0, 8]]);
   assert.equal(plan.rooms.find((room) => room.name === 'Kitchen').w, 11);
   assert.equal(plan.rooms.find((room) => room.name === 'Prep kitchen').w, 18);
-  assert.equal(plan.rooms.find((room) => room.name === 'Mudroom').w, 7.4 - 2 / 12);
-  assert.equal(plan.walls.find(([name]) => name === 'Garage west return')[1], 29);
+  assert.equal(plan.rooms.find((room) => room.name === 'Mudroom').w, 7.4 - 8 / 12);
+  assert.equal(plan.walls.find(([name]) => name === 'Garage west return')[1], 31.2);
   assert.equal(plan.walls.find(([name]) => name === 'Mudroom south')[2], 26.9);
   assert.equal(plan.walls.find(([name]) => name === 'Kitchen north')[2], 7);
 });
@@ -114,6 +131,8 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
     scene: { children: [], updateMatrixWorld() {} },
     intersections: [{ object: panel }],
     renderCount: 0,
+    collisionRefreshCount: 0,
+    buildWalkObstacles() { context.collisionRefreshCount++; },
     THREE: {
       Vector2: class { constructor(x, y) { this.x = x; this.y = y; } },
       Raycaster: class { setFromCamera() {} intersectObjects() { return context.intersections; } },
@@ -171,6 +190,7 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
   assert.equal(overhead.rotation.x, 0);
   context.activeFloor = 'upstairs';
   assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), true);
+  assert.equal(context.collisionRefreshCount, 1, 'Only the upstairs operation refreshes its tour collision cache');
   context.activeFloor = 'basement';
   assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), false);
 });
