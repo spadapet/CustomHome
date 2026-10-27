@@ -44,3 +44,7 @@ before changing a layout. Room pages describe the owner's requirements.
 Use [home-model-editing](skills/home-model-editing/SKILL.md) for model changes
 and [home-model-publishing](skills/home-model-publishing/SKILL.md) when publishing.
 The [README](../README.md) has preview and validation commands.
+
+For coordinated architecture, elevation and interior design work, select the
+[House Design agent](agents/house-design.agent.md). It turns broad owner goals
+into complete design studies while preserving the recorded constraints.

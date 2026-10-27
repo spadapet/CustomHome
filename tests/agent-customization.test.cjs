@@ -7,6 +7,19 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 
+test('house design agent is discoverable and links to current project workflows', () => {
+  const file = path.join(root, '.github', 'agents', 'house-design.agent.md');
+  const text = fs.readFileSync(file, 'utf8');
+  assert.match(text, /^---\r?\nname: House Design\r?\ndescription: "[^"\r\n]+"\r?\nuser-invocable: true\r?\n---/);
+  assert.match(text, /elevations/);
+  assert.match(text, /Do not push without explicit authorization/);
+  assert.match(text, /not a licensed architect/);
+  assert.match(text, /a canvas existing does not prove/i);
+  for (const [, link] of text.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
+    assert.ok(fs.existsSync(path.resolve(path.dirname(file), link)), `Agent link: ${link}`);
+  }
+});
+
 test('project skills have matching names, valid simple frontmatter and resolvable local links', () => {
   for (const name of ['home-model-editing', 'home-model-publishing']) {
     const file = path.join(root, '.github', 'skills', name, 'SKILL.md');
