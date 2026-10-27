@@ -25,6 +25,14 @@ Open [the viewer](http://127.0.0.1:4173/floor-plan-3d.html). Three.js loads from
 jsDelivr, so the browser needs network access. Both floor designers were
 removed; existing layout JSON still loads read-only in the page.
 
+Preview performance: drawing is event-driven and orbit/tour camera updates
+coalesce into animation frames. Kitchen/mudroom contact shading pauses while
+orbiting and returns on release; stationary detail and lighting are unchanged.
+Post-processing buffers resize only when the viewport changes. The local
+server revalidates assets with ETags instead of downloading unchanged models
+and textures again; code and saved layouts remain uncached. Restart an older
+preview-server process once to enable the asset-cache behavior.
+
 The collapsible **Menu** on the left groups floor/view choices, exploration,
 display options and rooms. Collapse it for more canvas space. On phones it
 starts closed above the model and closes after choosing a camera. **Show

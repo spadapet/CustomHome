@@ -108,6 +108,7 @@ test('direct panel picking toggles the nearest visible door, never a door behind
   let clicks = 0;
   const context = {
     vehicleDoorStatus: { hidden: false },
+    visiblePickTargets() { return []; },
     renderer: { domElement: { getBoundingClientRect() { return { left: 0, top: 0, width: 100, height: 100 }; } } },
     scene: { children: [], updateMatrixWorld() {} }, camera: { updateMatrixWorld() {} },
     vehicleDoorControls: [{ door, button: { click() { clicks++; } } }],

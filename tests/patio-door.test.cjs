@@ -19,7 +19,7 @@ function controls() {
       Raycaster: class { setFromCamera() {} intersectObjects() { return context.hits; } }
     },
     renderer: { domElement: { getBoundingClientRect() { return { left: 0, top: 0, width: 100, height: 100 }; } } },
-    scene: { children: [], updateMatrixWorld() {} }, camera: { updateMatrixWorld() {} },
+    scene: { children: [], updateMatrixWorld() {}, traverseVisible() {} }, camera: { updateMatrixWorld() {} },
     renders: 0, rebuilds: 0, stops: 0, hits: [],
     render() { context.renders++; },
     buildWalkObstacles() { context.rebuilds++; },

@@ -411,6 +411,7 @@ test('real upstairs door/cabinet click handler invalidates tour collisions after
   for(let n=selected;n;n=n.parent)n.visible=true;
   const context={
     activeFloor:'upstairs',groundLayoutPreview:null,
+    visiblePickTargets(){return[];},
     renderer:{domElement:{getBoundingClientRect:()=>({left:0,top:0,width:800,height:600})}},
     scene:{children:[],updateMatrixWorld(){}},camera:{updateMatrixWorld(){}},
     THREE:{Vector2:class{},Raycaster:class{setFromCamera(){}intersectObjects(){return[{object:selected}]}},MathUtils:{degToRad:d=>d*Math.PI/180}},

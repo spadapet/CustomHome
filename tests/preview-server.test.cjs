@@ -60,6 +60,33 @@ test('autosave validates, persists and confirms the exact layout without leaving
   assert.deepEqual((await fs.readdir(root)).sort(), ['index.html', 'upstairs-layout.json']);
 });
 
+test('model assets revalidate without retransferring unchanged bytes and changed assets remain fresh', async (t) => {
+  const { root, origin } = await fixture(t);
+  await fs.mkdir(path.join(root, 'assets'));
+  const file = path.join(root, 'assets', 'model.glb');
+  await fs.writeFile(file, 'model-v1');
+  const first = await fetch(`${origin}/assets/model.glb`);
+  assert.equal(first.status, 200);
+  assert.equal(first.headers.get('cache-control'), 'no-cache');
+  const etag = first.headers.get('etag');
+  assert.ok(etag);
+  assert.equal(await first.text(), 'model-v1');
+  const unchanged = await fetch(`${origin}/assets/model.glb`, { headers: { 'If-None-Match': etag } });
+  assert.equal(unchanged.status, 304);
+  assert.equal(await unchanged.text(), '');
+  const head = await fetch(`${origin}/assets/model.glb`, { method: 'HEAD', headers: { 'If-None-Match': etag } });
+  assert.equal(head.status, 304);
+  await fs.writeFile(file, 'updated-model-v2');
+  const changed = await fetch(`${origin}/assets/model.glb`, { headers: { 'If-None-Match': etag } });
+  assert.equal(changed.status, 200);
+  assert.notEqual(changed.headers.get('etag'), etag);
+  assert.equal(await changed.text(), 'updated-model-v2');
+  const html = await fetch(origin, { headers: { 'If-None-Match': etag } });
+  assert.equal(html.headers.get('cache-control'), 'no-store');
+  const layoutFile = await fetch(`${origin}/upstairs-layout.json`);
+  assert.equal(layoutFile.headers.get('cache-control'), 'no-store');
+});
+
 test('walkthrough video and captions have native playback MIME types and HEAD lengths', async (t) => {
   const { origin, root } = await fixture(t);
   for (const [file, content, mime] of [['tour.mp4', 'test-video', 'video/mp4'], ['tour.vtt', 'WEBVTT\n\n', 'text/vtt; charset=utf-8']]) {

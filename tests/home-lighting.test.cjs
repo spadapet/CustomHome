@@ -63,6 +63,9 @@ test('guest vanity real lights and night glow restore across Day/Night, plans an
   ]) {
     Object.assign(model, { activeFloor: floor, currentView: view, nightLighting: night });
     model.updateHomeLighting();
+    for (const rig of model.homeLighting) {
+      assert.equal(rig.lamp.visible, rig.group.visible && night);
+    }
     for (const lamp of model.guestVanity.children) {
       assert.equal(lamp.visible, expected);
       assert.equal(lamp.intensity, expected ? 8 : 0);

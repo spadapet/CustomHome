@@ -881,6 +881,11 @@ require manufacturer/architect review; no structural approval is claimed.
 
 ## Flush window installation concept — October 27
 
+Viewer performance updates do not alter model dimensions or layout data.
+Orbit interaction temporarily omits kitchen/mudroom contact shading, restoring
+it on release. Asset revalidation, coalesced draws, visible-only picking and
+reused post-processing targets reduce repeated work without changing geometry.
+
 The viewer footer reports whole-house window openings and units beside
 floor area. Counts include hidden windows on both floors and garage glazing,
 exclude door glazing/exterior duplicates, and derive from furnished assemblies.

@@ -130,6 +130,7 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
     camera: { updateMatrixWorld() {} },
     scene: { children: [], updateMatrixWorld() {} },
     intersections: [{ object: panel }],
+    visiblePickTargets() { return []; },
     renderCount: 0,
     collisionRefreshCount: 0,
     buildWalkObstacles() { context.collisionRefreshCount++; },

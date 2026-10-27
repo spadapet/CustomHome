@@ -17,8 +17,8 @@ test('mudroom and kitchen lighting stay scoped and restore other floor/view sett
   }
   const context = {
     THREE: { AmbientLight: Light, PointLight: Light, SpotLight: Light, DirectionalLight: Light, VSMShadowMap: 'VSM', PCFSoftShadowMap: 'PCFSoft' },
-    scene: { add() {} }, renderer: { shadowMap: { enabled: false } },
-    activeFloor: 'ground', currentView: 'mudroom', nightLighting: true,
+    scene: { add() {}, updateMatrixWorld() {} }, renderer: { shadowMap: { enabled: false } },
+    activeFloor: 'ground', currentView: 'mudroom', nightLighting: true, renderFrame: null, pickTargets: null,
     exteriorSun: { visible: false },
     indoorBackground: {}, outdoorSky: {}, outdoorReflection: { texture: {} },
     updateKitchenLighting() {}, updateHomeLighting() {}, updateStairLighting() {}, updateExteriorLighting() {}
@@ -115,18 +115,19 @@ test('interior contact shading reuses its composer and follows camera projection
   class Composer {
     constructor() { this.passes = []; this.renders = 0; this.renderTarget1 = {}; this.renderTarget2 = {}; }
     addPass(pass) { this.passes.push(pass); }
-    setSize(width, height) { this.size = [width, height]; }
+    setSize(width, height) { this.size = [width, height]; this.resizes = (this.resizes ?? 0) + 1; }
     render() { this.renders++; }
   }
   class Pass {
     constructor(scene, camera) {
       Object.assign(this, { scene, camera });
-      this.ssaoMaterial = { defines: {}, uniforms: { cameraNear: {}, cameraFar: {} } };
+      const matrix = () => ({ value: { copy(value) { this.copied = value; } } });
+      this.ssaoMaterial = { defines: {}, uniforms: { cameraNear: {}, cameraFar: {}, cameraProjectionMatrix: matrix(), cameraInverseProjectionMatrix: matrix() } };
     }
   }
   const context = {
     EffectComposer: Composer, RenderPass: Pass, SSAOPass: Pass, OutputPass: Pass,
-    renderer: { capabilities: { maxSamples: 8 } }, scene: {}, camera: { isPerspectiveCamera: false, near: 0.1, far: 500 },
+    renderer: { capabilities: { maxSamples: 8 } }, scene: {}, camera: { isPerspectiveCamera: false, near: 0.1, far: 500, projectionMatrix: {}, projectionMatrixInverse: {} },
     viewport: { clientWidth: 900, clientHeight: 700 }
   };
   const start = source.indexOf('  function renderInterior() {');
@@ -134,14 +135,14 @@ test('interior contact shading reuses its composer and follows camera projection
   vm.runInNewContext('let interiorPost = null;\n' + source.slice(start, end) + '\nglobalThis.post = () => interiorPost;', context);
   context.renderInterior();
   const first = context.post();
-  assert.equal(first.composer.passes.length, 3);
+  assert.equal(first.composer.passes.length, 3, 'SSAO blends over scene color from the required beauty pass');
   assert.equal(first.composer.renderTarget1.samples, 4);
   assert.equal(first.composer.renderTarget2.samples, 4);
   assert.equal(first.occlusion.kernelRadius, 0.35, 'Contact shading radius is in modeled feet');
   assert.equal(first.occlusion.ssaoMaterial.defines.PERSPECTIVE_CAMERA, 0);
   assert.equal(first.occlusion.ssaoMaterial.uniforms.cameraFar.value, 500);
   assert.deepEqual(first.composer.size, [900, 700]);
-  context.camera = { isPerspectiveCamera: true, near: 0.2, far: 300 };
+  context.camera = { isPerspectiveCamera: true, near: 0.2, far: 300, projectionMatrix: {}, projectionMatrixInverse: {} };
   context.viewport.clientWidth = 600;
   context.renderInterior();
   assert.equal(context.post(), first, 'No new composer or targets are created for every frame');
@@ -151,7 +152,12 @@ test('interior contact shading reuses its composer and follows camera projection
   assert.equal(first.occlusion.ssaoMaterial.uniforms.cameraNear.value, 0.2);
   assert.deepEqual(first.composer.size, [600, 700]);
   assert.equal(first.composer.renders, 2);
-  assert.match(source, /if \(mudroomLighting \|\| kitchenLighting\) renderInterior\(\);\s+else renderer\.render\(scene, camera\);/);
+  assert.equal(first.composer.resizes, 2);
+  context.renderInterior();
+  assert.equal(first.composer.resizes, 2, 'Unchanged viewport must not reallocate post-processing targets');
+  assert.equal(first.occlusion.ssaoMaterial.uniforms.cameraProjectionMatrix.value.copied, context.camera.projectionMatrix);
+  assert.equal(first.occlusion.ssaoMaterial.uniforms.cameraInverseProjectionMatrix.value.copied, context.camera.projectionMatrixInverse);
+  assert.match(source, /if \(\(mudroomLighting \|\| kitchenLighting\) && !orbitInteracting\) renderInterior\(\);\s+else renderer\.render\(scene, camera\);/);
 });
 
 function buildMudroom() {

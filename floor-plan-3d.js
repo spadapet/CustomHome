@@ -210,7 +210,7 @@ async function initializePreview() {
     };
     const textureLoader = new THREE.TextureLoader();
     const masonryMaps = {};
-    for (const [name, prefix, diffuse] of [['brick', 'brick_wall_001', 'diffuse'], ['stone', 'stone_wall', 'diff'], ['grass', 'grass_ground', 'diff'], ['oak', 'oak_veneer_01', 'diff'], ['roof', 'roof_slates_03', 'diff']]) {
+    await Promise.all([['brick', 'brick_wall_001', 'diffuse'], ['stone', 'stone_wall', 'diff'], ['grass', 'grass_ground', 'diff'], ['oak', 'oak_veneer_01', 'diff'], ['roof', 'roof_slates_03', 'diff']].map(async ([name, prefix, diffuse]) => {
       const maps = await Promise.all([diffuse, 'nor_gl', 'rough'].map((suffix) => textureLoader.loadAsync(`assets/textures/exterior/${prefix}_${suffix}_1k.jpg`)));
       if (name === 'roof') {
         for (let index = 0; index < maps.length; index++) {
@@ -230,7 +230,7 @@ async function initializePreview() {
         texture.anisotropy = 4;
       });
       masonryMaps[name] = { map: maps[0], normalMap: maps[1], roughnessMap: maps[2] };
-    }
+    }));
     const { RGBELoader } = await import('three/addons/loaders/RGBELoader.js');
     const outdoorSky = await new RGBELoader().loadAsync('assets/textures/exterior/kloppenheim_06_puresky_1k.hdr');
     outdoorSky.mapping = THREE.EquirectangularReflectionMapping;
@@ -277,6 +277,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   ];
   const garageEntry = { x: 38, z: 26.725, width: 3, treadWidth: 4, going: 11 / 12, height: 8, thresholdDepth: 0.35 };
   const scene = new THREE.Scene();
+  scene.matrixWorldAutoUpdate = false;
   scene.background = new THREE.Color('#eeeee6');
   const indoorBackground = scene.background;
   const perspectiveCamera = new THREE.PerspectiveCamera(38, 1, 0.1, 500);
@@ -303,7 +304,21 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   controls.maxDistance = 250;
   controls.maxPolarAngle = Math.PI / 2.12;
   controls.target.set(14, 0, 12);
-  controls.addEventListener('change', render);
+  let renderFrame = null;
+  let orbitInteracting = false;
+  function requestRender() {
+    if (renderFrame !== null) return;
+    renderFrame = requestAnimationFrame(() => {
+      renderFrame = null;
+      render();
+    });
+  }
+  controls.addEventListener('change', requestRender);
+  controls.addEventListener('start', () => { orbitInteracting = true; });
+  controls.addEventListener('end', () => {
+    orbitInteracting = false;
+    requestRender();
+  });
   function setNavigationMode(mode, start) {
     if (mode === 'walk' && activeFloor === 'exterior') return;
     if (mode === 'walk' && activeFloor === 'ground' && groundLayoutPreview) {
@@ -3445,6 +3460,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   const patioDoorButton = document.getElementById('patio-door-toggle');
   const patioDoorState = document.getElementById('patio-door-state');
+  let pickTargets = null;
+  function visiblePickTargets() {
+    if (pickTargets === null) {
+      pickTargets = [];
+      scene.traverseVisible(object => {
+        if (object.isMesh) pickTargets.push(object);
+      });
+    }
+    return pickTargets;
+  }
   function setPatioDoorOpen(open) {
     const angle = open ? doorLeaf.userData.maxAngleDegrees : 0;
     if (doorLeaf.userData.openAngleDegrees === angle) return;
@@ -3470,7 +3495,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     scene.updateMatrixWorld(true);
     camera.updateMatrixWorld(true);
     raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObjects(scene.children, true).find(({ object }) => {
+    const hit = raycaster.intersectObjects(visiblePickTargets(), false).find(({ object }) => {
       for (let part = object; part; part = part.parent) if (!part.visible) return false;
       return true;
     });
@@ -3522,9 +3547,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const { door, button, height } of vehicleDoorControls) {
       const anchor = door.localToWorld(new THREE.Vector3(door.userData.side * 0.1, height - 0.25, door.userData.doorLengthInches / 24));
       const point = anchor.clone().project(camera);
+      if (Math.abs(point.x) > 0.95 || Math.abs(point.y) > 0.95 || Math.abs(point.z) > 1) {
+        button.hidden = true;
+        continue;
+      }
       raycaster.setFromCamera(new THREE.Vector2(point.x, point.y), camera);
       const distance = anchor.distanceTo(raycaster.ray.origin);
-      const obstruction = show && raycaster.intersectObjects(scene.children, true).find((hit) => {
+      raycaster.far = Math.max(0, distance - 0.25);
+      const obstruction = show && raycaster.intersectObjects(visiblePickTargets(), false).find((hit) => {
         for (let part = hit.object; part; part = part.parent) if (!part.visible) return false;
         return hit.distance < distance - 0.25;
       });
@@ -3541,7 +3571,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     scene.updateMatrixWorld(true);
     camera.updateMatrixWorld(true);
     raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObjects(scene.children, true).find(({ object }) => {
+    const hit = raycaster.intersectObjects(visiblePickTargets(), false).find(({ object }) => {
       for (let part = object; part; part = part.parent) if (!part.visible) return false;
       return true;
     });
@@ -3562,7 +3592,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     scene.updateMatrixWorld(true);
     camera.updateMatrixWorld(true);
     raycaster.setFromCamera(pointer, camera);
-    const hit = raycaster.intersectObjects(scene.children, true).find(({ object }) => {
+    const hit = raycaster.intersectObjects(visiblePickTargets(), false).find(({ object }) => {
       for (let part = object; part; part = part.parent) if (!part.visible) return false;
       return true;
     });
@@ -4840,6 +4870,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const rig of homeLighting) {
       const visible = activeFloor === rig.floor && !plan && !(rig.floor === 'ground' && groundLayoutPreview);
       rig.group.visible = visible && (!inspection || rig.task);
+      rig.lamp.visible = visible && nightLighting && (!inspection || rig.task);
       rig.lamp.intensity = visible && nightLighting ? rig.intensity : 0;
       rig.diffuser.emissiveIntensity = visible && nightLighting ? 0.4 : 0;
     }
@@ -4894,7 +4925,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   });
   function updateExteriorLighting() {
     const enabled = nightLighting && activeFloor === 'exterior';
-    for (const rig of exteriorLighting) rig.lamp.intensity = enabled ? rig.intensity : 0;
+    for (const rig of exteriorLighting) {
+      rig.lamp.visible = enabled;
+      rig.lamp.intensity = enabled ? rig.intensity : 0;
+    }
     for (const [material, intensity] of exteriorGlowMaterials) material.emissiveIntensity = enabled ? intensity : 0;
   }
   const floorGrid = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: '#2c6975', transparent: true, opacity: 0.65, depthWrite: false }));
@@ -5406,7 +5440,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     camera.updateMatrixWorld();
     drawTourMap();
-    render();
+    requestRender();
   }
 
   function clearWalkInput() {
@@ -5554,7 +5588,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const bounds = renderer.domElement.getBoundingClientRect();
     if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) return;
     tourRaycaster.setFromCamera(new THREE.Vector2((event.clientX - bounds.left) / bounds.width * 2 - 1, 1 - (event.clientY - bounds.top) / bounds.height * 2), camera);
-    const hit = tourRaycaster.intersectObjects(scene.children, true).find(({ object }) => {
+    const hit = tourRaycaster.intersectObjects(visiblePickTargets(), false).find(({ object }) => {
       for (let parent = object; parent; parent = parent.parent) if (!parent.visible || parent.userData.tourDecoration) return false;
       return true;
     });
@@ -5811,14 +5845,21 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   setNavigationMode('rotate');
   renderer.domElement.addEventListener('webglcontextlost', (event) => {
     event.preventDefault();
+    if (renderFrame !== null) cancelAnimationFrame(renderFrame);
+    renderFrame = null;
     cancelAnimationFrame(walkFrame);
     clearWalkInput();
     console.error('The 3D floor plan lost its WebGL context.');
     showModelError('The 3D renderer lost its graphics connection. Reload this page to try again.');
   });
+  let viewportWidth = 0, viewportHeight = 0;
   function resize() {
     if (!viewport.clientWidth || !viewport.clientHeight) return;
-    renderer.setSize(viewport.clientWidth, viewport.clientHeight);
+    const width = viewport.clientWidth, height = viewport.clientHeight;
+    if (width === viewportWidth && height === viewportHeight) return;
+    viewportWidth = width;
+    viewportHeight = height;
+    renderer.setSize(width, height);
     if (navigationMode === 'walk') {
       camera.aspect = viewport.clientWidth / viewport.clientHeight;
       camera.updateProjectionMatrix();
@@ -5838,7 +5879,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       composer.addPass(beauty);
       composer.addPass(occlusion);
       composer.addPass(new OutputPass());
-      interiorPost = { composer, beauty, occlusion };
+      interiorPost = { composer, beauty, occlusion, width: 0, height: 0 };
     }
     const { composer, beauty, occlusion } = interiorPost;
     beauty.camera = camera;
@@ -5850,10 +5891,21 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     occlusion.ssaoMaterial.uniforms.cameraNear.value = camera.near;
     occlusion.ssaoMaterial.uniforms.cameraFar.value = camera.far;
-    composer.setSize(viewport.clientWidth, viewport.clientHeight);
+    occlusion.ssaoMaterial.uniforms.cameraProjectionMatrix.value.copy(camera.projectionMatrix);
+    occlusion.ssaoMaterial.uniforms.cameraInverseProjectionMatrix.value.copy(camera.projectionMatrixInverse);
+    if (interiorPost.width !== viewport.clientWidth || interiorPost.height !== viewport.clientHeight) {
+      interiorPost.width = viewport.clientWidth;
+      interiorPost.height = viewport.clientHeight;
+      composer.setSize(interiorPost.width, interiorPost.height);
+    }
     composer.render();
   }
   function render() {
+    pickTargets = null;
+    if (renderFrame !== null) {
+      cancelAnimationFrame(renderFrame);
+      renderFrame = null;
+    }
     updateKitchenLighting();
     updateHomeLighting();
     updateStairLighting();
@@ -5869,6 +5921,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     scene.environmentIntensity = exteriorDaylight ? 0.15 : 1;
     ambientLight.intensity = exteriorDaylight ? 0.55 : nightLighting ? 0.5 : 2.5;
     studioFill.intensity = exteriorDaylight ? 0 : nightLighting ? 250 : 650;
+    studioFill.visible = !exteriorDaylight;
     renderer.toneMappingExposure = exteriorDaylight ? 0.95 : nightLighting ? 0.75 : 1.25;
     mudroomKeyLight.visible = mudroomLighting;
     kitchenKeyLight.visible = kitchenLighting;
@@ -5876,9 +5929,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     kitchenKeyLight.target.position.set(prepLighting ? 48.5 : 35, 2.5, prepLighting ? 8 : 17);
     renderer.shadowMap.enabled = mudroomLighting || exteriorDaylight;
     renderer.shadowMap.type = mudroomLighting ? THREE.VSMShadowMap : THREE.PCFSoftShadowMap;
+    scene.updateMatrixWorld();
     updateVehicleDoorControls();
     positionPlanDimensions();
-    if (mudroomLighting || kitchenLighting) renderInterior();
+    if ((mudroomLighting || kitchenLighting) && !orbitInteracting) renderInterior();
     else renderer.render(scene, camera);
   }
   function applyLivingLayout(layout, showLiving = true) {

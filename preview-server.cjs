@@ -104,13 +104,26 @@ function createPreviewServer({ root = __dirname } = {}) {
     try {
       resolved = await fs.realpath(file);
       if (!inside(await fs.realpath(root), resolved)) throw new RequestError(404, 'Preview file not found.');
+      if (inside(path.join(root, 'assets'), resolved)) {
+        const stat = await fs.stat(resolved);
+        if (!stat.isFile()) throw new RequestError(404, 'Preview file not found.');
+        const etag = `W/"${stat.size.toString(16)}-${stat.mtimeMs.toString(16)}"`;
+        response.setHeader('Cache-Control', 'no-cache');
+        response.setHeader('ETag', etag);
+        response.setHeader('X-Content-Type-Options', 'nosniff');
+        if (request.headers['if-none-match']?.split(',').some(value => value.trim() === etag || value.trim() === '*')) {
+          response.writeHead(304);
+          response.end();
+          return;
+        }
+      }
       contents = await fs.readFile(resolved);
     } catch (error) {
       if (['ENOENT', 'EISDIR', 'ENOTDIR'].includes(error.code)) throw new RequestError(404, 'Preview file not found.');
       throw error;
     }
     const extension = path.extname(resolved).toLowerCase();
-    const headers = { 'Content-Type': types[extension] ?? 'application/octet-stream', 'Content-Length': contents.length, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' };
+    const headers = { 'Content-Type': types[extension] ?? 'application/octet-stream', 'Content-Length': contents.length, 'Cache-Control': response.getHeader('Cache-Control') ?? 'no-store', 'X-Content-Type-Options': 'nosniff' };
     let status = 200;
     if (extension === '.mp4') {
       headers['Accept-Ranges'] = 'bytes';

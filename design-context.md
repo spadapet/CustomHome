@@ -1015,6 +1015,13 @@ remain subject to manufacturer/architect review, not approved construction.
 
 ## Flush window installation concept — October 27
 
+Viewer performance changes preserve geometry, trim, saved layouts and light
+placements. Draw requests coalesce; picking skips hidden scene branches.
+Kitchen/mudroom contact shading pauses only during orbit interaction and
+returns on release. Post-processing targets resize only with the viewport;
+camera projection uniforms still update on every draw. Local assets
+revalidate with ETags; code and layout JSON stay uncached.
+
 The viewer footer shows the whole-house window opening/unit count beside
 floor area, derived from furnished assemblies regardless of active floor
 or visibility. Its tooltip gives the casement/picture breakdown; door
