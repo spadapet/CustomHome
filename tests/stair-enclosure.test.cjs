@@ -81,6 +81,8 @@ test('treads, platforms, guards and flat trim remain with no projecting casework
   }
   const landing = meshes.find(m => m.name === 'U-turn stair landing');
   close(landing.w, 4); close(landing.y + landing.h / 2, 5);
+  assert.equal(meshes.filter(m => m.name === 'Upper stair arrival landing').length, 0,
+    'No tan upper platform remains in the always-visible stair assembly');
   assert.equal(beams.filter(b => b.name === 'Stair stringer').length, 4);
   assert.equal(beams.filter(b => b.name === 'Sloped stair handrail').length, 3);
   assert.equal(beams.filter(b => b.name === 'Horizontal stair guard rail').length, 24);

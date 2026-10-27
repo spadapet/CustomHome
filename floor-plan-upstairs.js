@@ -152,7 +152,13 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     mesh.userData.walkSurface = true;
     areas.push({ x: floor.x, z: floor.z, w: floor.w, d: floor.d, elevation });
   }
-  areas.push({ ...baseline.arrival, elevation });
+  // Fixed stair arrival follows the canonical opening, not saved room edits.
+  // Match the adjoining hardwood slab and its floor visibility; keep access.
+  const arrival = baseline.arrival;
+  const arrivalFloor = box(group, arrival.x + arrival.w / 2, -0.12, arrival.z + arrival.d / 2, arrival.w, 0.24, arrival.d, wood);
+  arrivalFloor.name = 'Upstairs floor: Stair arrival';
+  arrivalFloor.userData.walkSurface = true;
+  areas.push({ ...arrival, elevation });
   const wallHeight = 9;
   for (const wall of plan.walls) {
     const { name, x1, z1, x2, z2, openings, sides, thickness } = wall;
@@ -202,7 +208,7 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     }
     section(cursor, length, 0, wallHeight);
   }
-  for (const [name, x, z, width, rotation, side] of plan.windows) windowFrame(`Upstairs ${name} window`, x, z, width, 5, 3, rotation, group, side);
+  for (const [name, x, z, width, rotation, side] of plan.windows) windowFrame(`Upstairs ${name} window`, x, z, width, 5, 3, rotation, group, side, { installationWalls: plan.walls });
   const furnitureAnchors = [];
   function furniture(name, x, z, rotation = 0) {
     const item = new THREE.Group();
@@ -434,7 +440,7 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     for (const y of [0.7, 1.5, 2.3, 3]) box(rail, 0, y, 0, length, 0.07, 0.07, black);
     for (let position = -length / 2; position <= length / 2 + 0.01; position += length / Math.ceil(length / 3)) box(rail, position, guardY, 0, 0.08, 3, 0.08, black);
   }
-  // The upper flight stays visible below this level without duplicating its arrival slab.
+  // The upper flight stays visible below the flush hardwood arrival floor.
   const coordinationWarnings = [];
   group.updateMatrixWorld(true);
   for (const { item, x, z } of furnitureAnchors) {

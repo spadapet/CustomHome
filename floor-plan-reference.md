@@ -2,6 +2,14 @@
 
 ## Stair gap closure — October 27
 
+Photo-matched arrival correction: remove the tan stair-owned upper slab,
+not the required arrival surface. Its 44 × 46.9-inch footprint is now one
+flush upstairs hardwood slab (0.24 ft deep, top y=10 ft),
+x=10.008333–13.675, z=30.933333–34.841667 ft. Gallery contact, walk coverage
+and stair opening remain unchanged. The slab now follows upstairs floor
+visibility rather than floating over the ground-floor cutaway. No guard
+restoration or support/headroom approval is implied.
+
 Translate stacked stairs and canonical opening **2.9 inches in world +Z**.
 West x=0.175 already meets the finished wall; do not move farther west.
 Opening: x=0.175–10.008333, z=27.016667–34.841667 ft.
@@ -775,14 +783,12 @@ earlier owner constraints, not copied photo features. Chaise envelope reaches
 x = 7.175 and z = 14.225-16.392, clear of the chair and main hall strip.
 Occupied comfort, piano access and fireplace heat clearance need review.
 
-## Reference-photo interior window casing - October 25
+## Historical reference-photo window casing - October 25 (superseded)
 
-Use white Craftsman casing throughout both floors: 3.5 in flat side boards,
-5.5 in header, bead and projecting top cap. Kitchen bank now matches this
-profile instead of the slim edging; joined banks keep one outer surround.
-Retain inset ordinary sills and the kitchen quartz plant ledge, not the
-photo's projecting white stool. Window types/grids and exterior trim stay
-unchanged. Confirm joinery, ceiling and sconce fit with selected products.
+The applied window casing/header/cap and kitchen quartz-ledge study is
+superseded by the October 27 flush installation concept. Current windows
+have white drywall returns and opening-width white sills, 6 in deep and
+1 in thick. Door casing remains unchanged.
 
 ## Split living chair placement - October 25
 
@@ -873,16 +879,31 @@ continuous header, sill and apron. Overall cap width is 98.75 in, top
 Window bank, mullions, continuous header, bracing, flashing and sash access
 require manufacturer/architect review; no structural approval is claimed.
 
-## Inset ordinary window sills - October 25
+## Flush window installation concept — October 27
 
-Replace projecting white sill stools on both floors with opening-width
-inset white sill liners, nominal 1.5 in deep, terminating at the window
-frame datum inside the wall thickness. No horns or room-side sill shelf.
-Keep surrounding Craftsman casing/aprons, openings, glazing and exterior
-weathering details unchanged. Preserve the separately requested quartz
-kitchen plant ledge and its pots as an explicit exception. This is a finish
-study, not a wall/framing or waterproofing detail; verify actual jamb depth,
-condensation control, flashing and product installation requirements.
+The viewer footer reports whole-house window openings and units beside
+floor area. Counts include hidden windows on both floors and garage glazing,
+exclude door glazing/exterior duplicates, and derive from furnished assemblies.
+
+Every window, including both floors, joined banks, garage and privacy units:
+white sill 1 in thick, opening width, exactly 6 in from interior frame face
+to front edge flush with the finished room wall. White drywall jamb/head
+returns behind a complete white surround matching the latest owner photo:
+3.5 in flat sides and bottom, 3/4 in thick, plus the retained white 5.5 in
+header, bead and 1 in top cap. Bottom-board ends/face align with the sides;
+the recessed sill has no projecting stool or horns. No separate apron.
+Door casing stays unchanged.
+Kitchen quartz plant ledge stays removed; its joined bank has the same top trim.
+Room planes/areas, footprint, plan coordinates and sill/head/size datums
+are fixed; frames move outward only in the wall-normal direction.
+Exterior frames share actual interior installation positions; solid local
+depth allowances connect them to masonry, retaining exterior ornament.
+Reversible deeper-installation concept only: framing/header support,
+insulation/thermal continuity, bucks/anchors, sash operation, flashing,
+drainage and condensation require professional/manufacturer review.
+Measured scene coverage: 30 sill assemblies / 52 furnished units and 36
+matching exterior groups. The simplified room-face-to-outer-frame envelope
+is 8.88 in, not an engineered wall thickness. Saved layout JSON is unchanged.
 
 ## Warm whole-home lighting and piano - October 25
 
@@ -1000,15 +1021,15 @@ output/spacing, circuit/driver loads, ceiling/insulation fit and service
 access. Mock up the board light on the existing glass and check fixing,
 projection and headroom before construction.
 
-## Joined kitchen windows with one slim surround - October 25
+## Joined kitchen window positions - October 25; finish updated October 27
 
 - Preserve 54 x 42 in fixed center and two 18 x 42 in side casements;
   centers become x = 29 / 32 / 35 ft, moving the side units inward 9 in each.
 - Frames meet edge-to-edge in one 90 in opening at x = 28.25-35.75 ft,
   z = 7. No wall piers remain between units. Sill/head stay 53/95 in.
-- One slim white perimeter: two 1 in side boards, one continuous
-  92.25 in head, 1/8 in reveals, no intermediate casing, bulky cap or apron.
-  The blue-gray quartz sill is 93.25 W x 3.5 D x 0.75 H in.
+- Current perimeter: flat white side/bottom casing, retained white top header/bead/cap, and recessed drywall returns; no projecting stool or separate apron.
+  White sill is 90 W x 6 D x 1 H in, front flush with room wall; the earlier
+  quartz ledge is superseded by the October 27 installation concept.
 - Sconces: x = 27.415625 / 36.584375, y = 6.3 ft. Three pots remain
   at x = 28.58 / 33.75 / 35.42, side pots offset away from crank housings.
 - Ground-floor plan, furnished opening/trim and exterior cutout/trim share
@@ -1331,7 +1352,7 @@ Round only the final displayed values to whole square feet. This is a nominal
 model estimate, not a certified living-area measurement: wall thickness,
 headroom eligibility and stair-area conventions need independent review.
 
-## Slim kitchen window trim - October 24
+## Historical slim kitchen trim - October 24 (superseded)
 
 The bulky continuous header and 8.75 in white pier boards are superseded.
 Use 1 in white side/head edging, 1/2 in thick, with 1/8 in reveals around
@@ -2241,7 +2262,7 @@ Exterior garage approaches are only provisional lowered pads, not driveway gradi
 | Drawer cups | Top Knobs Dakota Charlotte M2223, Honey Bronze, kitchen/island/prep-extension drawers; one cup below 30 in width, pairs at quarter points at 30 in or wider |
 | Cup-pull dimensions | 3.75 in overall width, 1.125 in height, 15/16 in projection, 2 9/16 in mounting centers; geometry/drilling not installation CAD |
 | Other hardware | Existing bars retained on cabinet doors, tall/trash pull-outs and appliances |
-| Interior casing | Painted-white Craftsman: 3.5 in side boards, 5.5 in headers, bead/cap; window sills/aprons, no bottom trim across doorways |
+| Interior trim | Door casing retains painted-white Craftsman sides/header/bead/cap, no doorway bottom trim. Windows have white 3.5 in flat side/bottom casing, 3/4 in thick, with retained top headers/beads/caps. Recessed white sills stay 6 in deep from interior frame face to wall edge, 1 in thick; no projecting stool, horns or separate apron. Deeper installation concept requires review. |
 | Casing faces | Both sides of interior passages; interior face only at exterior doors; patio door/window share outer casing |
 | Baseboards | No quarter-round or shoe molding anywhere in the house, including upstairs and under the stairs. Retain flat white profiles; ground-floor base is 8 in high, provisional 0.75 in thick, with exposed finished wall faces, mitered corners/returns and stops at casing. Coordinate flooring edges beneath baseboards |
 | Base trim exclusions | Exterior/porch/garage and kitchen quartz faces; under-stair base has reduced-height bottom-step section and end returns |

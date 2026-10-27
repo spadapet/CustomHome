@@ -1,5 +1,10 @@
 # House window count
 
+The 3D viewer footer shows the whole-house opening/unit count beside the
+livable floor area, derived from furnished window assemblies on both floors,
+including hidden windows and garage glazing. Hover for the casement/picture
+breakdown and counting rules. Door glazing and exterior duplicates are excluded.
+
 ## Current product intent / ordering hold
 
 All 30 openings /52 modeled units below are Andersen 100 Series intent,

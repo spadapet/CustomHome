@@ -32,7 +32,7 @@ function mapBrickBoxUVs(geometry, widthFeet, heightFeet) {
   uv.needsUpdate = true;
 }
 
-function buildExteriorModel(THREE, { box, mat, masonryMaps }, floorToFloor, garageFloorY) {
+function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations = [] }, floorToFloor, garageFloorY) {
   const group = new THREE.Group();
   group.name = 'Hipped cream-brick transitional exterior concept';
   group.visible = false;
@@ -277,22 +277,43 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps }, floorToFloor, gara
     if (privacyLowerHalf) Object.assign(frame.userData, { room: 'Powder room', privacyLowerHalf: true, privacyVerified: false });
     frame.position.set(center, sill, 0.25);
     parent.add(frame);
+    parent.updateWorldMatrix(true, false);
+    const openingWorld = parent.localToWorld(new THREE.Vector3(center, sill, 0));
+    const installation = windowInstallations.filter((unit) =>
+      Math.abs(unit.y - openingWorld.y) < 0.02 && Math.abs(unit.width - width) < 0.02 &&
+      Math.hypot(unit.x - openingWorld.x, unit.z - openingWorld.z) < 0.8
+    ).sort((a, b) => Math.hypot(a.x - openingWorld.x, a.z - openingWorld.z) - Math.hypot(b.x - openingWorld.x, b.z - openingWorld.z))[0];
+    if (installation) {
+      frame.position.z = parent.worldToLocal(new THREE.Vector3(installation.x, installation.y, installation.z)).z;
+      frame.userData.installationConcept = true;
+    }
+    // Solid local installation bucks connect the displaced frame to existing
+    // masonry. These are depth allowances, NOT engineered framing or flashing.
+    const outerFace = frame.position.z + 0.12;
+    const revealStart = installation ? frame.position.z - 0.62 : -wallThickness / 2;
+    const revealDepth = outerFace - revealStart;
+    for (const edge of [-1, 1]) {
+      box(parent, center + edge * (width / 2 + 0.05), sill + height / 2,
+        (outerFace + revealStart) / 2, 0.1, height, revealDepth, trim).name = 'Window installation solid jamb depth allowance';
+      box(parent, center, sill + (edge < 0 ? -0.05 : height + 0.05),
+        (outerFace + revealStart) / 2, width + 0.2, 0.1, revealDepth, trim).name = 'Window installation solid head/sill depth allowance';
+    }
     if (privacyLowerHalf) {
       box(frame, 0, height / 4, 0, width, height / 2, 0.12, privacyGlass).name = 'Exterior powder frosted lower-half pane';
       box(frame, 0, height * 3 / 4, 0, width, height / 2, 0.12, glass).name = 'Exterior powder clear upper-half pane';
     } else {
       box(frame, 0, height / 2, 0, width, height, 0.12, glass);
     }
-    for (const x of [-width / 2, width / 2]) box(frame, x, height / 2, 0.08, front ? 0.28 : 0.16, height + 0.3, 0.16, windowFinish);
-    for (const y of [0, height]) box(frame, 0, y, 0.08, width + 0.3, 0.16, 0.16, windowFinish);
+    for (const x of [-(width - 0.12) / 2, (width - 0.12) / 2]) box(frame, x, height / 2, 0, 0.12, height, 0.24, windowFinish);
+    for (const y of [0.06, height - 0.06]) box(frame, 0, y, 0, width - 0.24, 0.12, 0.24, windowFinish);
     // Structural unit divisions, never decorative grilles; match furnished units.
     for (let column = 1; column < intent.columns; column++)
       box(frame, -width / 2 + width * column / intent.columns, height / 2, 0.1, 0.12, height, 0.08, windowFinish).name = 'Casement combination mullion';
     for (let row = 1; row < intent.rows; row++)
       box(frame, 0, height * row / intent.rows, 0.1, width, 0.12, 0.08, windowFinish).name = 'Casement combination horizontal mullion';
     if (perimeterTrim) {
-      box(frame, 0, -0.13, 0.05, width + 0.65, 0.22, 0.45, windowFinish);
-      box(frame, 0, height + 0.2, 0.03, width + 0.65, 0.3, 0.3, windowFinish);
+      box(parent, center, sill - 0.13, 0.3, width + 0.65, 0.22, 0.45, windowFinish);
+      box(parent, center, sill + height + 0.2, 0.28, width + 0.65, 0.3, 0.3, windowFinish);
     }
   }
   function wall(name, x1, z1, x2, z2, bottom, top, openings = []) {

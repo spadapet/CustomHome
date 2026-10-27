@@ -21,6 +21,7 @@ function buildPrepCounter() {
   const context = {
     THREE: { Group, MeshStandardMaterial: class {} },
     prepSinkX: 47.4, prepCounterZ: 8.25, kitchenWindowWallZ: 7, rest: new Group(),
+    prepCounterWindowBank: require('../floor-plan-ground.js').getPrepWindowBankLayout(), casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
     ...Object.fromEntries(['cabinetFinish', 'cabinetPanelFinish', 'cabinetRailFinish', 'countertop', 'steel', 'black', 'brass', 'porcelain'].map(name => [name, { name }])),
     furnishing(name, x, z) {
       const group = new Group();
@@ -77,12 +78,20 @@ test('prep cooktop is removed while the continuous left quartz counter and main 
   assert.match(source, /cooktop\.name = '36 inch induction cooktop'/, 'Keep the separate main-kitchen cooktop');
 });
 
-test('prep backsplash matches the countertop quartz without changing its envelope', () => {
+test('prep backsplash matches the countertop quartz and is notched behind the flat window bottom board', () => {
   const model = buildPrepCounter();
   const backsplash = model.find('Prep quartz backsplash');
-  assert.equal(backsplash.length, 1);
+  assert.equal(backsplash.length, 3);
   assert.equal(backsplash[0].material, model.find('Prep continuous left quartz counter')[0].material);
-  const b = bounds(backsplash[0]);
+  const pieces = backsplash.map(bounds);
+  const b = Object.fromEntries(['X', 'Y', 'Z'].flatMap(axis => [
+    [`min${axis}`, Math.min(...pieces.map(piece => piece[`min${axis}`]))],
+    [`max${axis}`, Math.max(...pieces.map(piece => piece[`max${axis}`]))]
+  ]));
+  const bank = require('../floor-plan-ground.js').getPrepWindowBankLayout();
+  const trimBottom = bank.sill - 1 / 12 - 3.5 / 12;
+  const halfWidth = bank.width / 2 + (3.5 + 0.125) / 12;
+  for (const piece of pieces) assert.ok(piece.maxY <= trimBottom + 1e-9 || piece.maxX < bank.x - halfWidth || piece.minX > bank.x + halfWidth);
   for (const [actual, expected] of [[b.minX, 40.85], [b.maxX, 55.2], [b.minY, 3.04], [b.maxY, 3.04 + 4 / 12], [b.minZ, 7.18], [b.maxZ, 7.26]]) assert.ok(Math.abs(actual - expected) < 1e-9);
   assert.equal(model.find('Prep sage running-bond backsplash tile').length, 0);
   assert.equal(model.find('Prep backsplash warm-gray grout backing').length, 0);
@@ -182,7 +191,7 @@ test('prep adds two standard tall casements and uses the tallest fitting standar
     casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12, rest: { add() {} }, garageClerestories: [], ...require('../floor-plan-ground.js'),
     THREE: { Group: class { constructor() { this.userData = {}; this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } }; } } },
     windowFrame(...args) { frames.push(args); return { userData: {} }; },
-    openingCasing(...args) { casings.push(args); }
+    openingCasing(...args) { casings.push(args); }, windowFaceDepth: () => 0.075
   };
   const start = source.indexOf('  const kitchenWallLeft =');
   context.getKitchenWindowBankLayout = require('../floor-plan-ground.js').getKitchenWindowBankLayout;
@@ -212,13 +221,11 @@ test('prep adds two standard tall casements and uses the tallest fitting standar
   assert.ok(Math.abs(casement[2] - (9.275 + 13.825) / 2) < 1e-9);
   for (const frame of frames) {
     assert.ok(Math.abs((frame[5] + frame[4]) * 12 - 100.75) < 1e-9);
-    const capTop = (frame[5] + frame[4]) * 12 + 0.125 + 5.5 + 1;
-    assert.ok(capTop < 108, 'Projecting Craftsman cap stays below ceiling');
+    assert.ok((frame[5] + frame[4]) * 12 + 0.6 < 108, 'Flat drywall head return stays below ceiling');
     if (frame !== casement) {
       assert.equal(frame[4] * 12, 59.5);
       assert.equal(frame[5] * 12, 41.25);
-      assert.ok(frame[5] - 0.75 / 12 > 3.04 + 4 / 12, 'Sill clears the reduced matching quartz backsplash');
-      assert.ok(capTop + 6 > 108, 'Next standard six-inch height increment cannot fit over the retained worktop');
+      assert.ok(7 + 0.175 < 7 + 0.22 - 0.08 / 2, 'Flush sill is behind the retained backsplash normal plane, not a projecting shelf');
     }
   }
   const plan = require('../floor-plan-ground.js').getGroundFloorDefaultPlan();
@@ -272,13 +279,16 @@ test('exterior prep openings match the furnished windows and the picture pane ha
   class Group {
     constructor() { this.userData = {}; this.position = { set() {} }; }
     add() {}
+    updateWorldMatrix() {}
+    localToWorld(vector) { return vector; }
   }
   const helperStart = exterior.indexOf('  function windowUnit(');
   const helperEnd = exterior.indexOf('  function wall(', helperStart);
   assert.ok(helperStart >= 0 && helperEnd > helperStart);
   vm.runInNewContext(exterior.slice(helperStart, helperEnd) + '\nwindowUnit(new THREE.Group(), 8.1, 4.25, 5, 3.5, false, true);', {
     getWindowProductIntent: require('../floor-plan-ground.js').getWindowProductIntent,
-    THREE: { Group }, glass: {}, privacyGlass: {}, windowBlack: {}, trim: {},
+    windowInstallations: [], wallThickness: 0.45,
+    THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, glass: {}, privacyGlass: {}, windowBlack: {}, trim: {},
     box(parent, x, y, z, w, h, d) { const part = { x, y, z, w, h, d }; parts.push(part); return part; }
   });
   assert.equal(parts.filter(part => part.x === 0 && part.w === 0.1 && part.h === 3.5 && part.d === 0.08).length, 0, 'Exterior picture glazing is uninterrupted too');

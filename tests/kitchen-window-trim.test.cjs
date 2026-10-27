@@ -27,7 +27,7 @@ function build() {
     kitchenSinkX: 32, kitchenWindowWallZ: 7, kitchenSinkWindowSill: 53 / 12, kitchenSinkWindowHeight: 3.5,
     kitchenCounterWindowBank: require('../floor-plan-ground.js').getKitchenWindowBankLayout(),
     kitchenSinkWindows: require('../floor-plan-ground.js').getKitchenWindowBankLayout().units,
-    windowTrim: { name: 'White trim' }, kitchenSillQuartz: { name: 'Quartz' },
+    windowTrim: { name: 'White trim' }, wallMaterial: { name: 'White drywall' }, kitchenSillQuartz: { name: 'Quartz' },
     windowFrame(...args) { frames.push(args); return new Group(); },
     box(parent, x, y, z, w, h, d, material) {
       const part = new Group();
@@ -39,13 +39,14 @@ function build() {
   };
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  const casingSideWidth ='), source.indexOf('  const baseTrimSections =')), context);
+  vm.runInContext('windowFaceDepth = () => 0.075', context);
   vm.runInContext(source.slice(source.indexOf('  const kitchenWindowTrim ='), source.indexOf('  const sillFlowers =')), context);
   return { context, frames, parts: context.walls };
 }
 
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `${a} should equal ${b}`);
 
-test('three joined kitchen units share Craftsman header and cap while retaining quartz ledge', () => {
+test('three joined kitchen units share a flush white sill and retained header', () => {
   const { context, frames, parts } = build();
   assert.equal(frames.length, 3);
   frames.forEach((frame, index) => {
@@ -58,29 +59,34 @@ test('three joined kitchen units share Craftsman header and cap while retaining 
     assert.equal(frame[9].casing, false);
     assert.equal(frame[9].picture, spec.picture);
   });
-  for (const name of ['White window apron', 'Kitchen window flat intermediate casing']) {
+  for (const name of ['White window apron', 'Kitchen window flat intermediate casing', 'Quartz plant window sill']) {
     assert.equal(parts.filter((part) => part.name === name).length, 0, name);
   }
-  for (const name of ['White casing header', 'White casing header bead', 'White casing projecting cap']) assert.equal(parts.filter((part) => part.name === name).length, 1);
-  close(parts.find((part) => part.name === 'White casing header').w * 12, 97.25);
-  close(parts.find((part) => part.name === 'White casing projecting cap').userData.top * 12, 101.625);
-  assert.equal(parts.filter((part) => part.name === 'Quartz plant window sill').length, 1);
-  const sill = parts.find((part) => part.name === 'Quartz plant window sill');
-  close(sill.h * 12, 0.75);
-  close(sill.d * 12, 3.5);
-  close(sill.w * 12, 98.25);
-  assert.equal(sill.material, context.kitchenSillQuartz);
+  for (const name of ['White casing header', 'White casing header bead', 'White casing projecting cap']) {
+    assert.equal(parts.filter((part) => part.name === name).length, 1, name);
+  }
+  const header = parts.find((part) => part.name === 'White casing header');
+  close(header.h * 12, 5.5);
+  const cap = parts.find((part) => part.name === 'White casing projecting cap');
+  close(cap.h * 12, 1);
+  assert.ok(cap.userData.bottom > header.userData.bottom);
+  assert.equal(parts.filter((part) => part.name === 'White inset window sill').length, 1);
+  const sill = parts.find((part) => part.name === 'White inset window sill');
+  close(sill.h * 12, 1);
+  close(sill.d * 12, 6);
+  close(sill.w * 12, 90);
+  assert.equal(sill.material, context.windowTrim);
 });
 
-test('only two outer side boards surround the bank and joined unit frames have no wall gaps', () => {
+test('two flat drywall returns surround the bank and joined unit frames have no wall gaps', () => {
   const { context, parts } = build();
-  const boards = parts.filter((part) => part.name === 'Slim kitchen window side edging');
+  const boards = parts.filter((part) => part.name === 'White drywall jamb return');
   assert.equal(boards.length, 2);
   boards.forEach((board) => {
-    close(board.w * 12, 3.5);
-    close(board.d * 12, 0.75);
+    close(board.w * 12, 0.6);
+    close(board.d * 12, 6);
     close(board.userData.bottom, 53 / 12);
-    close(board.userData.top, (95 + 0.125) / 12);
+    close(board.userData.top, 95 / 12);
     assert.equal(board.material, context.windowTrim);
   });
   for (let index = 0; index < 2; index++) {
@@ -88,9 +94,9 @@ test('only two outer side boards surround the bank and joined unit frames have n
     const right = context.kitchenSinkWindows[index + 1];
     close(right.x - right.width / 2, left.x + left.width / 2);
   }
-  const sill = parts.find((part) => part.name === 'Quartz plant window sill');
+  const sill = parts.find((part) => part.name === 'White inset window sill');
   const sillZ = sill.getWorldPosition({}).z;
-  const potZ = 7 + 0.175 + 3.5 / 24;
+  const potZ = 7 + 0.175 - 0.25;
   const potRadius = 3.168 / 24;
   assert.ok(potZ - potRadius > sillZ - sill.d / 2);
   assert.ok(potZ + potRadius < sillZ + sill.d / 2);

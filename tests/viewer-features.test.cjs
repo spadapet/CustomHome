@@ -9,7 +9,7 @@ const read = (file) => fs.readFileSync(require.resolve(`../${file}`), 'utf8');
 test('footer keeps area totals and controls without the furnished-concept legend', () => {
   const footer = read('floor-plan-3d.html').split('<div class="model-footer">')[1].split('</div>')[0];
   assert.doesNotMatch(footer, /Furnished concept|legend-dot/);
-  for (const id of ['livable-area', 'refresh-model', 'reset-view']) assert.ok(footer.includes(`id="${id}"`));
+  for (const id of ['livable-area', 'window-count', 'refresh-model', 'reset-view']) assert.ok(footer.includes(`id="${id}"`));
   assert.doesNotMatch(read('floor-plan-3d.js'), /querySelector\('\.model-footer span'\)/);
 });
 

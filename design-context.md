@@ -55,6 +55,16 @@ these samples do not establish continuous swept-volume or occupied safety.
 
 ## Current stair enclosure — October 27 owner/builder decision
 
+Arrival finish correction: the photo's tan rectangle was the required
+44 × 46.9-inch upper arrival, not spare enclosure or bookcase geometry.
+Remove the separate stair-owned oak platform; retain its exact footprint
+as one 0.24-ft-deep upstairs hardwood floor constituent, top y=10 ft,
+x=10.008333–13.675, z=30.933333–34.841667 ft. It joins the gallery flush
+and follows upstairs floor visibility, so no tan platform floats over the
+ground-floor cutaway. No stair void, tread, turning landing, route or saved
+layout changes. This finish/display correction does not approve the
+previously removed guards or establish structural support/headroom.
+
 Gap follow-up: translate the shared stacked stair/opening datum **2.9 inches
 in world +Z**, z=26.775 → 27.016667 ft; back edge=34.841667 ft.
 The photo's apparent left is not world west: the west landing end already
@@ -914,15 +924,11 @@ remove the second chair. Four lounge planning positions, not five/six.
 Do not revive cream upholstery, coffee table, rug or removed cabinets without
 owner direction. Product fit, occupied access and heat clearances unverified.
 
-## Consistent photo-reference Craftsman window trim - October 25
+## Historical Craftsman window trim study - October 25 (superseded)
 
-Match white flat sides and layered header/cap in the owner's reference on
-all interior windows. Existing shared casing already supplies the profile
-on both floors; replace the kitchen bank's slim sides/header with matching
-3.5 in sides and 5.5 in header, bead and cap. Preserve inset ordinary sills
-and quartz kitchen ledge as earlier owner requirements, plus all window
-types, grids and joined outer surrounds. Kitchen trim top is 101.625 in;
-verify actual joinery, fixtures and product installation.
+The earlier applied Craftsman window casing and kitchen quartz-ledge study
+is superseded by the October 27 flush installation concept: white drywall
+returns and 6 in-deep, 1 in-thick white sills. Craftsman door trim remains.
 
 ## Move one chair to dining-side gap - October 25
 
@@ -1007,15 +1013,38 @@ windows. Coordinate shared plan, furnished model and exterior bank.
 Factory mullions, structural header/bracing, flashing and sash access
 remain subject to manufacturer/architect review, not approved construction.
 
-## Inset interior window sills - October 25
+## Flush window installation concept — October 27
 
-Owner wants window sills within the wall rather than sticking into rooms.
-Ordinary white sills on both floors become opening-width 1.5 in-deep liners
-inside the wall at the window frame datum; remove projecting stool horns.
-Retain surrounding casing/aprons, window operations and exterior sills.
-Preserve the earlier purpose-built quartz kitchen plant ledge/pots pending
-explicit direction to remove that feature. This finish change does not
-approve wall build-ups, flashing, condensation or installation details.
+The viewer footer shows the whole-house window opening/unit count beside
+floor area, derived from furnished assemblies regardless of active floor
+or visibility. Its tooltip gives the casement/picture breakdown; door
+glazing and exterior duplicates are excluded.
+
+All windows on both floors, joined banks, garage clerestories and powder
+privacy glazing use white opening-width sills, 1 in thick and exactly 6 in
+from the interior frame face to the sill front at the finished room wall.
+Latest owner photo requires a complete white surround on every window and
+joined bank: 3.5 in flat side boards and a 3.5 in flat bottom board, all
+3/4 in thick, with the retained 5.5 in header, bead and 1 in top cap.
+Bottom-board ends and face align with the side boards; the recessed sill
+stays behind that trim face, without a projecting stool or horns. White
+drywall returns remain inside the opening; no separate apron. Door casing is
+unchanged. The kitchen quartz plant ledge stays removed; pots sit within
+the new recess.
+Frames move only normal to the wall; opening widths, heights, sill/head
+datums, room planes, floor areas and footprint remain fixed. Exterior frames
+follow the actual furnished positions, with solid local installation-depth
+allowances behind them; exterior decorative sill/header positions remain.
+This is an authorized reversible deeper-installation CONCEPT, not a shallow
+existing-wall solution. Hold framing/header support, insulation continuity,
+thermal/condensation performance, installation bucks, flashings, drainage
+and manufacturer anchorage/operation for architect/engineer/builder review.
+The modeled allowances do not establish an approved structural wall assembly.
+World-space constituent checks cover 30 sill assemblies / 52 furnished
+units and 36 matching exterior groups. Room face to outer frame face is
+8.88 in in this simplified concept (6 in recess + 2.88 in frame envelope),
+not a specified whole-wall thickness. Floor/view restoration preserves
+window placement tuples and visibility. Saved layout JSON is unchanged.
 
 ## Exterior circulation lighting - October 25
 
@@ -1307,16 +1336,16 @@ electrical/ceiling fit and reflections on quartz/board glass. Board fixing,
 projection/headroom and eye-level glare require physical mock-up review.
 No room, cabinet, window, saved layout or default door poses change.
 
-## Joined main-kitchen window bank - October 25
+## Joined main-kitchen window positions - October 25; finish updated October 27
 
 Match the prep bank's joined arrangement, but retain the kitchen's existing
 54 x 42 in fixed center and two 18 x 42 in casements. Move the side units
 9 in inward to centers x = 29 / 32 / 35. They meet edge-to-edge across one
 90 in opening, x = 28.25-35.75, with sill/head still 53/95 in.
-Remove both former 9 in wall piers. A single slim white outer surround
-uses 1 in boards and a 92.25 in continuous head, no separate internal
-casing, broad header, cap or apron. Quartz sill becomes 93.25 in wide,
-retaining 3.5 in depth and 0.75 in thickness.
+Remove both former 9 in wall piers. Current finish is a single 90 in-wide
+white sill, 6 in deep and 1 in thick, flush to the finished room wall,
+with white drywall returns. Applied header/casing and quartz ledge are
+superseded by the October 27 deeper-installation concept and review hold.
 
 Shared ground-floor, furnished and exterior openings follow the same bank.
 Sconces recenter at x = 27.415625 / 36.584375; y stays 6.3 ft.
@@ -1559,7 +1588,7 @@ in the existing closed description, retaining specific firepit, basement and
 equipment limitations. Remove the introductory paragraph above the player.
 Keep native playback/volume controls, optional captions and no autoplay.
 
-## Simplified kitchen window-bank trim - October 24
+## Historical simplified kitchen trim - October 24 (superseded)
 
 The owner rejected the oversized continuous header and wide white pier
 boards. Use the [new reference](assets/kitchen-slim-window-reference.png)
@@ -2776,7 +2805,7 @@ Steam-oven placement: relocate the tower between the separated fridge and freeze
 Latest island treatment: retain the [waterfall reference](assets/waterfall-island-reference.png), plain oak base, three drawer banks, gold pulls, and two 2-inch quartz ends, now at 8 x 3.5 ft centered (28.65, 16.95). Preserve the 2 ft living-room shift. Four 18 in stools sit hall-side at 24 in centers, with 6 in nominal seat gaps and 3 in end margins. Pendants follow the new center. Comfort, stone support, knee room, occupied circulation, and appliance access remain to verify. This supersedes earlier island sizes and checks below.
 
 - Ceiling study: 9 ft throughout, controlled by `ceilingHeight` in the model. Lower the fireplace veneer, refrigeration tower framing and uppers, hood chimney, and pendant cords to suit. Keep appliance sizes, pendant shades, 8 ft openings, and low porch walls. Stair floor-to-floor height now follows the ceiling plus a provisional 12-inch floor assembly, giving 10 ft rather than the old 11 ft placeholder. Actual floor assembly depth and stair headroom remain unverified.
-- Windows: Andersen 100 Series casements where operable, fixed picture windows where specified by the current room schedules, Black exterior / White interior with white Craftsman trim. Use the shared helper's picture option for one fixed pane without a crank; operable units retain white crank/lock hardware and no decorative grilles. Models and dimensions are concepts, not manufacturer CAD or approved standard units. Preserve custom kitchen quartz sills and use the current room schedules for opening sizes. Verify units/combinations, framing, egress, safety glazing, and hardware. Keep the front double-door opening at x = 13.1-18.1, z = 54.2, without sidelights/transom. See [window schedules](windows.html) and manufacturer resources; door leaves/glazing stay unchanged.
+- Windows: Andersen 100 Series casement/picture intent per current schedules, white inside/outside. All use white drywall returns and white opening-width sills, 1 in thick and exactly 6 in from interior frame face to front flush with the room wall. Window casing/aprons and kitchen quartz ledges are superseded. Frames move outward only normal to the wall with solid local backing allowances; door casing stays unchanged. Models are concepts, not manufacturer CAD or approved wall assemblies. Review units/combinations, deeper framing/header support, insulation/condensation, bucks/anchors, flashing/drainage, operation, egress and safety glazing. Keep the front double-door opening at x = 13.1-18.1, z = 54.2, without sidelights/transom. See [window schedules](windows.html); door leaves/glazing stay unchanged.
 - Interior casing: match the supplied craftsman-style reference with white 3.5-inch flat side boards, 5.5-inch headers, small header beads and projecting caps, plus window sills and aprons. Add casing to every modeled window assembly and both faces of internal floor-level openings; exterior door assemblies receive interior casing only. Floor-level openings have no sill/apron across the walkway. Walls and trim remain at full modeled height. Profiles are provisional; cabinet junctions, scribing, returns, and door operation need finish-carpentry coordination.
 - Base trim: clean, flat painted baseboards matching the white interior casing; no quarter-round or shoe molding anywhere in the house, including upstairs and under the stairs. Ground-floor baseboards remain 8 inches high with provisional 3/4-inch thickness; retain existing upstairs flat profiles. Extend perpendicular wall-end junctions to adjoining wall faces for flush corners, without extending into doorway jambs. Trace exposed wall faces across the plan, including inside/outside corner miters and wall-end returns; remove portions buried in intersecting walls. Stop at doorway casing without crossing openings. Casing side boards meet their headers without a floating gap. Apply to finished interior faces, including prep kitchen, mudroom, and bathrooms; omit exterior, porch, garage, and main-kitchen quartz faces. Built-ins may conceal trim; coordinate flooring edges beneath baseboards and final cabinet junctions with finish carpentry.
 

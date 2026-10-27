@@ -52,6 +52,54 @@ function build() {
   return context.buildUpstairsModel({ Group, Mesh, CylinderGeometry }, helpers, layout.stairOpening(), 10);
 }
 const model = build();
+test('upper arrival is one flush hardwood floor constituent with continuous gallery access', () => {
+  const parts = [];
+  model.group.traverse(part => { if (part.name === 'Upstairs floor: Stair arrival') parts.push(part); });
+  assert.equal(parts.length, 1);
+  const arrival = parts[0];
+  const a = layout.stairOpening();
+  const close = (x, y) => assert.ok(Math.abs(x - y) < 1e-8, `${x} != ${y}`);
+  const b = bounds(arrival);
+  close(b.minX, a.x + a.width);
+  close(b.maxX, 13.675);
+  close(b.minZ, a.z + 44 / 12 + 0.25);
+  close(b.maxZ, a.z + a.depth);
+  close(arrival.geometry.w * 12, 44);
+  close(arrival.geometry.d * 12, 46.9);
+  close(model.group.position.y + arrival.position.y + arrival.geometry.h / 2, 10);
+  const gallery = model.group.children.find(p => p.name === 'Upstairs floor: Arrival gallery');
+  close(bounds(gallery).minX, b.maxX);
+  close(gallery.position.y + gallery.geometry.h / 2, arrival.position.y + arrival.geometry.h / 2);
+  assert.equal(arrival.material, gallery.material);
+  assert.equal(arrival.userData.walkSurface, true);
+  const matchingAreas = model.areas.filter(p => Math.abs(p.x - b.minX) < 1e-8 && Math.abs(p.z - b.minZ) < 1e-8);
+  assert.equal(matchingAreas.length, 1, 'Arrival remains in walk-surface coverage exactly once');
+  close(matchingAreas[0].w, arrival.geometry.w);
+  close(matchingAreas[0].d, arrival.geometry.d);
+});
+test('arrival floor hides and restores through the production floor selector without losing coverage', () => {
+  const source = fs.readFileSync(path.join(__dirname, '..', 'floor-plan-3d.js'), 'utf8');
+  const object = () => ({ visible: true });
+  const element = () => ({ setAttribute() {}, closest: () => ({}) });
+  const state = {
+    upstairs: model, stairs: object(), basementStairs: object(), upstairsStairParts: [],
+    activeFloor: 'ground', groundVisibility: new Map(), groundModelRoots: [],
+    groundLayoutPreview: null, exterior: object(), tourMapBounds: {}, tourMap: { width: 200, setAttribute() {} },
+    viewport: element(), islandLightsInput: element(), navigationMode: 'rotate',
+    document: { getElementById: element, querySelector: element, querySelectorAll: () => [] },
+    floorAreas: () => model.areas
+  };
+  vm.runInNewContext(source.slice(source.indexOf('  function selectFloor(floor) {'),
+    source.indexOf('  function refreshUpstairsDimensions() {')), state);
+  const arrival = model.group.children.find(p => p.name === 'Upstairs floor: Stair arrival');
+  for (const floor of ['upstairs', 'ground', 'exterior', 'upstairs', 'ground', 'upstairs']) {
+    state.selectFloor(floor);
+    assert.equal(model.group.visible, floor === 'upstairs');
+    assert.equal(arrival.parent, model.group);
+    assert.equal(arrival.userData.walkSurface, true);
+    assert.equal(model.group.children.filter(p => p.name === arrival.name).length, 1);
+  }
+});
 test('upstairs room-width openings receive trim-matched single-panel operable doors', () => {
   const leaves = [];
   model.group.traverse((part) => { if (part.userData.doorStyle === 'Single recessed panel') leaves.push(part); });

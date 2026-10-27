@@ -130,8 +130,10 @@ test('farmhouse windows restore white trim on every elevation and inside', () =>
   class Group {
     constructor() { this.userData = {}; this.position = { set() {} }; }
     add(mesh) { meshes.push(mesh); }
+    updateWorldMatrix() {}
+    localToWorld(vector) { return vector; }
   }
-  const context = { getWindowProductIntent: require('../floor-plan-ground.js').getWindowProductIntent, THREE: { Group }, dark: {}, trim: {}, windowBlack: {}, glass: {}, privacyGlass: {}, box(parent, x, y, z, w, h, d, material) { const mesh = { x, y, z, w, h, d, material }; parent.add(mesh); return mesh; } };
+  const context = { windowInstallations: [], wallThickness: 0.45, getWindowProductIntent: require('../floor-plan-ground.js').getWindowProductIntent, THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, dark: {}, trim: {}, windowBlack: {}, glass: {}, privacyGlass: {}, box(parent, x, y, z, w, h, d, material) { const mesh = { x, y, z, w, h, d, material }; parent.add(mesh); return mesh; } };
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  function windowUnit('), source.indexOf('  function wall(')), context);
   vm.runInContext('windowUnit(new THREE.Group(), 6, 3, 6, 5, false, false, true, true)', context);

@@ -509,9 +509,13 @@ test('one standard-size powder window cuts the west wall and retains half-froste
     }
     add(child) { this.children.push(child); }
   }
+  Group.prototype.updateWorldMatrix = function () {};
+  Group.prototype.localToWorld = function (vector) { return vector; };
+  Group.prototype.worldToLocal = function (vector) { return vector; };
   const context = {
     getWindowProductIntent: require('../floor-plan-ground.js').getWindowProductIntent,
-    THREE: { Group }, scene: new Group(), windowTrim: {}, windowExterior: {}, glass: {}, privacyGlass: {},
+    THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, scene: new Group(), windowTrim: {}, windowExterior: {}, glass: {}, privacyGlass: {},
+    windowFaceDepth: () => 0.075, windowInstallations: [], wallThickness: 0.45,
     openingCasing() {},
     box(parent, x, y, z, width, height, depth, material) {
       const part = { x, y, z, width, height, depth, material };
