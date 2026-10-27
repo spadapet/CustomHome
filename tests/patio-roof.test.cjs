@@ -27,6 +27,7 @@ function buildRoof() {
     add(mesh) { mesh.parent = this; meshes.push(mesh); }
   }
   const context = {
+    masonryMaps: null,
     lot: { left: -13.605, right: 61.395, rear: -32.325 }, fenceBoundaryInset: 0.5,
     THREE: { BoxGeometry, SphereGeometry: class extends BoxGeometry { constructor(radius) { super(radius * 2, radius * 2, radius * 2); } }, PointLight: class extends Group { constructor(color, intensity, distance, decay) { super(); Object.assign(this, { color, intensity, distance, decay }); } }, Mesh, Group }, livingFeatureWall: require('../floor-plan-ground.js').getLivingRoomFeatureLayout(), glass: {}, mat: () => ({}), wallThickness: 0.45, frontBrick: {}, brickFaceUVs() {}, wood: {}, dark: {}, white: {}, baseStone: {}, stepStone: {}, stepEdge: {}, glow: {},
     patio: { add(mesh) { meshes.push(mesh); } },
@@ -40,6 +41,7 @@ function buildRoof() {
     wall(name, x1, z1, x2, z2, bottom, top) { walls.push({ name, x1, z1, x2, z2, bottom, top }); }
   };
   context.box = context.texturedBox;
+  context.trim = {};
   context.paving = (parent, name, x, z, w, d, top = -1.35, thickness = 0.3) => {
     const mesh = context.box(parent, x + w / 2, top - thickness / 2, z + d / 2, w, thickness, d);
     mesh.name = name;
@@ -73,7 +75,7 @@ test('sloping cover relocates behind living room and leaves both kitchen frontag
   assert.equal(roof.userData.limits.right, 13.2);
   assert.equal(roof.geometry.parameters.width, 13.2);
   assert.equal(roof.position.x, 6.6);
-  assert.equal(roof.position.y, 9.1);
+  assert.equal(roof.position.y, 9.5);
   assert.ok(underside(0.625) > 8.35, 'Roof clears the dining west-window head trim including its projection beyond the opening');
   assert.equal(roof.userData.kitchenAndPrepFrontageOpen, true);
   assert.equal(roof.userData.coversDiningLanding, false);
@@ -86,6 +88,64 @@ test('sloping cover relocates behind living room and leaves both kitchen frontag
   assert.equal(headwall.bottom, 9);
   assert.ok(headwall.top >= underside(8 + 0.225), 'Wall reaches the underside across its full thickness');
   assert.ok(!walls.some((wall) => wall.name === 'Patio roof upper-wall return'), 'No obsolete prep-side upper return remains');
+});
+
+// Transform constituent vertices, including rotation and parent datums. Never
+// infer roof clearance from names or a bounding box around an empty group.
+function worldVertices(mesh) {
+  const p = mesh.geometry.attributes.position;
+  return Array.from({ length: p.count }, (_, i) => {
+    let [x, y, z] = [p.getX(i), p.getY(i), p.getZ(i)];
+    for (let node = mesh; node; node = node.parent) {
+      const rx = node.rotation?.x || 0, rz = node.rotation?.z || 0;
+      [y, z] = [y * Math.cos(rx) - z * Math.sin(rx), y * Math.sin(rx) + z * Math.cos(rx)];
+      [x, y] = [x * Math.cos(rz) - y * Math.sin(rz), x * Math.sin(rz) + y * Math.cos(rz)];
+      x += node.position?.x || 0; y += node.position?.y || 0; z += node.position?.z || 0;
+    }
+    return { x, y, z };
+  });
+}
+
+test('canopy finishes share exact slope, closed endpoints and nine-inch vertical section', () => {
+  const { meshes, underside } = buildRoof();
+  const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
+  const soffit = meshes.find((m) => m.name?.startsWith('Post-free canopy warm-white'));
+  const vertices = worldVertices(soffit);
+  close(Math.min(...vertices.map((p) => p.z)), -0.325);
+  close(Math.max(...vertices.map((p) => p.z)), 8.225);
+  for (const p of vertices) {
+    const gap = underside(p.z) - p.y;
+    assert.ok(Math.abs(gap - 0.75) < 1e-8 || Math.abs(gap - 0.69) < 1e-8);
+  }
+  for (const mesh of meshes.filter((m) => /canopy side fascia|canopy outer fascia|closed house abutment/.test(m.name))) {
+    for (const p of worldVertices(mesh)) {
+      const gap = underside(p.z) - p.y;
+      assert.ok(Math.abs(gap) < 1e-8 || Math.abs(gap - 0.75) < 1e-8, 'Fascia never penetrates roofing or hangs below soffit');
+    }
+  }
+  // Door head/casing region at west dining wall; nominal leaf remains 96 in.
+  const doorLowZ = 3.95 - 1.5 - 0.1;
+  assert.ok(underside(doorLowZ) - 0.75 > 8.2, 'Soffit clears the fixed eight-foot door and head casing');
+  assert.ok(underside(-0.325) - 0.75 + 1.625 > 9.4, 'Low edge has over 9 ft 4.8 in above terrace datum');
+  const plates = meshes.filter((m) => m.name === 'Canopy downlight sloped mounting plate');
+  assert.equal(plates.length, 3);
+  for (const plate of plates) for (const p of worldVertices(plate)) {
+    assert.ok(p.y <= underside(p.z) - 0.75 + 1e-8, 'Mounting wedge does not pierce the finished soffit');
+  }
+});
+
+test('canopy gutter is an open falling trough with leader outside the landing and stair widths', () => {
+  const { meshes } = buildRoof();
+  const base = meshes.find((m) => m.name === 'Canopy gutter trough base');
+  const points = worldVertices(base);
+  const west = points.filter((p) => p.x < 0.1), east = points.filter((p) => p.x > 13.4);
+  const avg = (ps) => ps.reduce((sum, p) => sum + p.y, 0) / ps.length;
+  assert.ok(avg(west) - avg(east) > 0.07, 'Real trough constituent falls at least 0.84 inches to east');
+  assert.equal(meshes.filter((m) => m.name === 'Canopy gutter upstand').length, 2);
+  assert.equal(meshes.filter((m) => m.name === 'Canopy gutter end closure').length, 2);
+  const leader = meshes.find((m) => m.name?.startsWith('Canopy dining-wall rainwater leader'));
+  assert.ok(Math.min(...worldVertices(leader).map((p) => p.x)) > 13.2, 'Leader is beyond terrace, stairs and dining doorway');
+  assert.ok(Math.min(...worldVertices(leader).map((p) => p.y)) < -1.625, 'Outlet is a below-grade placeholder, not a spill onto steps');
 });
 
 test('dining-side tapered closure meets the roof slope without adding a wall on the open west side', () => {
@@ -104,22 +164,22 @@ test('dining-side tapered closure meets the roof slope without adding a wall on 
   }
 });
 
-test('one retained post and two compact patio chairs leave the dining-step approach open', () => {
+test('post-free canopy has finished soffit and fascia while patio furniture stays fixed', () => {
   const { meshes } = buildRoof();
   const posts = meshes.filter((mesh) => mesh.name === 'Patio timber support post');
   const feet = meshes.filter((mesh) => mesh.name === 'Patio post stone foot');
-  assert.equal(posts.length, 1);
-  assert.equal(feet.length, 1);
-  assert.equal(posts[0].position.x, 0.75);
-  assert.ok(Math.abs(posts[0].position.z - 0.275) < 1e-9);
-  assert.equal(feet[0].position.x, posts[0].position.x);
-  assert.equal(feet[0].position.z, posts[0].position.z);
+  assert.equal(posts.length, 0);
+  assert.equal(feet.length, 0);
+  const soffit = meshes.find((mesh) => mesh.name === 'Post-free canopy warm-white soffit - engineering required');
+  assert.ok(soffit);
+  assert.equal(soffit.userData.structuralApproval, false);
+  assert.equal(meshes.filter((mesh) => mesh.name?.includes('canopy side fascia')).length, 2);
   for (const post of meshes.filter((mesh) => mesh.name === 'Patio timber support post')) {
     assert.equal(post.geometry.parameters.width, 0.75);
     assert.equal(post.geometry.parameters.depth, 0.75);
     assert.equal(post.userData.widthInches, 9);
   }
-  assert.equal(meshes.filter((mesh) => mesh.name === 'Patio perimeter beam').length, 2);
+  assert.equal(meshes.filter((mesh) => mesh.name === 'Patio perimeter beam').length, 0);
   const chairs = meshes.filter((mesh) => mesh.name === 'Outdoor patio chair');
   assert.equal(chairs.length, 2);
   assert.ok(!meshes.some((mesh) => /Outdoor dining chair|Outdoor dining table/.test(mesh.name)), 'Old four-seat dining set is removed');
@@ -164,7 +224,7 @@ test('one retained post and two compact patio chairs leave the dining-step appro
   }
 });
 
-test('landing and both treads span the entire dining side while the patio stays at lawn grade', () => {
+test('compact landing turns a four-foot flight toward the yard with clear bottom arrival', () => {
   const { meshes } = buildRoof();
   const terrace = meshes.find((mesh) => mesh.name === 'Kitchen-prep garden soil');
   assert.equal(terrace.userData.topFeet, -1.645);
@@ -178,13 +238,13 @@ test('landing and both treads span the entire dining side while the patio stays 
   const threshold = meshes.find((mesh) => mesh.name === 'Dining patio threshold');
   assert.equal(deck.userData.topFeet, -1.625);
   assert.equal(threshold.userData.topFeet, 0);
-  assert.equal(threshold.userData.x, deck.userData.x + deck.userData.widthFeet);
+  assert.equal(threshold.userData.x, 12.95);
   assert.equal(threshold.userData.x + threshold.userData.widthFeet, 13.2);
   const access = meshes.find((mesh) => mesh.name === 'Dining west door to covered patio access');
-  assert.equal(access.position.x, 8.975);
+  assert.equal(access.position.x, 10.95);
   assert.equal(access.position.y, 0);
-  assert.ok(Math.abs(access.position.z - 3.725) < 1e-9);
-  assert.equal(access.rotation.y, -Math.PI / 2);
+  assert.ok(Math.abs(access.position.z - 1.95) < 1e-9);
+  assert.equal(access.rotation.y || 0, 0);
   const steps = meshes.find((mesh) => mesh.name === 'Covered dining patio steps');
   assert.equal(steps.userData.risers, 3);
   assert.equal(steps.userData.riseFeet * 12, 6.5);
@@ -193,20 +253,36 @@ test('landing and both treads span the entire dining side while the patio stays 
   assert.equal(treads.length, 2, 'Patio is the surface after the third riser');
   for (const [index, tread] of treads.entries()) {
     assert.ok(Math.abs(tread.position.y + tread.geometry.parameters.height / 2 + (index + 1) * 1.625 / 3) < 1e-9);
-    assert.equal(tread.geometry.parameters.width, 8.1);
-    assert.ok(Math.abs(access.position.z - tread.geometry.parameters.width / 2 + 0.325) < 1e-9, 'Each tread starts at the dining rear exterior face');
-    assert.ok(Math.abs(access.position.z + tread.geometry.parameters.width / 2 - 7.775) < 1e-9, 'Each tread reaches the living-wall exterior face at the dining end');
-    const westEdge = access.position.x - tread.position.z - tread.geometry.parameters.depth / 2;
-    assert.ok(westEdge > 6.55, 'Door-side steps clear tucked chairs');
+    assert.equal(tread.geometry.parameters.width, 4);
+    const points = worldVertices(tread);
+    assert.ok(Math.abs(Math.min(...points.map(p => p.x)) - 8.95) < 1e-9);
+    assert.ok(Math.abs(Math.max(...points.map(p => p.x)) - 12.95) < 1e-9);
+    assert.ok(Math.abs(Math.min(...points.map(p => p.z)) - (1.95 - (index + 1) * 1.1)) < 1e-9);
     assert.equal(tread.geometry.parameters.depth, 1.1);
   }
   const livingLanding = meshes.find((mesh) => mesh.name === 'Covered dining patio door landing');
   assert.equal(livingLanding.userData.topFeet, 0);
   assert.equal(livingLanding.userData.widthFeet, 4);
-  assert.equal(livingLanding.userData.depthFeet, 8.1);
-  assert.equal(livingLanding.userData.x, 8.975);
-  assert.equal(livingLanding.userData.z, -0.325);
-  assert.ok(Math.abs(livingLanding.userData.z + livingLanding.userData.depthFeet - 7.775) < 1e-9);
+  assert.equal(livingLanding.userData.depthFeet, 4);
+  assert.equal(livingLanding.userData.x, 8.95);
+  assert.ok(Math.abs(livingLanding.userData.z - 1.95) < 1e-9);
+  // Bottom arrival uses the existing continuous terrace, not a stacked pad.
+  const arrival = { left: 8.95, right: 12.95, rear: -4.25, front: -0.25 };
+  assert.ok(deck.userData.z <= arrival.rear);
+  assert.ok(deck.userData.z + deck.userData.depthFeet >= arrival.front);
+  assert.ok(deck.userData.x <= arrival.left);
+  assert.ok(deck.userData.x + deck.userData.widthFeet >= arrival.right);
+  for (const mesh of meshes.filter(m => m.geometry && /Outdoor|support post|post stone foot|entry tread|door landing/.test(m.name))) {
+    const points = worldVertices(mesh);
+    const xs = points.map(p => p.x), zs = points.map(p => p.z);
+    assert.ok(Math.max(...xs) <= arrival.left || Math.min(...xs) >= arrival.right ||
+      Math.max(...zs) <= arrival.rear || Math.min(...zs) >= arrival.front - 1e-9, `${mesh.name} clears bottom arrival`);
+  }
+  const washes = meshes.filter(m => m.name === 'Shielded warm entry-step wash');
+  for (const wash of washes) {
+    assert.equal(wash.parent.parent, access);
+    assert.ok(wash.position.z < 0, 'Light follows yard-running riser');
+  }
   const door = meshes.find((mesh) => mesh.name === 'Dining covered-patio glazed exterior door, 36 by 96 inches');
   assert.equal(door.position.x, 13.2);
   assert.equal(door.position.z, 3.95);

@@ -208,7 +208,33 @@ async function initializePreview() {
       widthInches: sideTableSize.x * 12, depthInches: sideTableSize.z * 12, heightInches: sideTableSize.y * 12,
       uniformScale: true, manufacturerCAD: false, source: 'https://polyhaven.com/a/side_table_01', license: 'CC0-1.0'
     };
-    buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLayout, savedGroundLayout, bicycleGeometry, armchairGeometry, garageAssets, sofaGeometry, sideTableGeometry, mudroomAssets, { EffectComposer, RenderPass, SSAOPass, OutputPass, RoomEnvironment });
+    const textureLoader = new THREE.TextureLoader();
+    const masonryMaps = {};
+    for (const [name, prefix, diffuse] of [['brick', 'brick_wall_001', 'diffuse'], ['stone', 'stone_wall', 'diff'], ['grass', 'grass_ground', 'diff'], ['oak', 'oak_veneer_01', 'diff'], ['roof', 'roof_slates_03', 'diff']]) {
+      const maps = await Promise.all([diffuse, 'nor_gl', 'rough'].map((suffix) => textureLoader.loadAsync(`assets/textures/exterior/${prefix}_${suffix}_1k.jpg`)));
+      if (name === 'roof') {
+        for (let index = 0; index < maps.length; index++) {
+          const image = maps[index].image;
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 1024;
+          const context = canvas.getContext('2d');
+          if (!context) throw new Error('Roof texture cropping requires a 2D canvas context.');
+          context.drawImage(image, 0, image.height * 0.05, image.width, image.height * 0.95, 0, 0, 1024, 1024);
+          maps[index].dispose();
+          maps[index] = new THREE.CanvasTexture(canvas);
+        }
+      }
+      maps.forEach((texture, index) => {
+        texture.colorSpace = index === 0 ? THREE.SRGBColorSpace : THREE.NoColorSpace;
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.anisotropy = 4;
+      });
+      masonryMaps[name] = { map: maps[0], normalMap: maps[1], roughnessMap: maps[2] };
+    }
+    const { RGBELoader } = await import('three/addons/loaders/RGBELoader.js');
+    const outdoorSky = await new RGBELoader().loadAsync('assets/textures/exterior/kloppenheim_06_puresky_1k.hdr');
+    outdoorSky.mapping = THREE.EquirectangularReflectionMapping;
+    buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLayout, savedGroundLayout, bicycleGeometry, armchairGeometry, garageAssets, sofaGeometry, sideTableGeometry, mudroomAssets, { EffectComposer, RenderPass, SSAOPass, OutputPass, RoomEnvironment, masonryMaps, outdoorSky });
   } catch (error) {
     console.error('The 3D floor plan could not start.', error);
     showModelError(`The 3D preview could not load: ${error.message}. WebGL, a valid upstairs layout, and access to jsDelivr are required.`);
@@ -235,7 +261,7 @@ function showModelError(text) {
   viewport.classList.remove('walking');
 }
 
-function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLayout, savedGroundLayout, bicycleGeometry, armchairGeometry, garageAssets, sofaGeometry, sideTableGeometry, mudroomAssets, { EffectComposer, RenderPass, SSAOPass, OutputPass, RoomEnvironment }) {
+function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLayout, savedGroundLayout, bicycleGeometry, armchairGeometry, garageAssets, sofaGeometry, sideTableGeometry, mudroomAssets, { EffectComposer, RenderPass, SSAOPass, OutputPass, RoomEnvironment, masonryMaps, outdoorSky }) {
   let nightLighting = true;
   let daytimeIslandLights = islandLightsInput.checked;
   if (nightLighting) islandLightsInput.checked = true;
@@ -249,9 +275,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     { x: 29, z: 26.9, w: 26.5, d: 7.7 },
     { x: 31.2, z: 34.6, w: 24.3, d: 14.4 }
   ];
-  const garageEntry = { x: 39.5, z: 26.725, width: 3, going: 11 / 12, height: 8 };
+  const garageEntry = { x: 38, z: 26.725, width: 3, treadWidth: 4, going: 11 / 12, height: 8, thresholdDepth: 0.35 };
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#eeeee6');
+  const indoorBackground = scene.background;
   const perspectiveCamera = new THREE.PerspectiveCamera(38, 1, 0.1, 500);
   const mudroomInteriorCamera = new THREE.PerspectiveCamera(85, 1, 0.1, 500);
   const cooktopElevationCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 500);
@@ -655,9 +682,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     casing.name = window ? 'Craftsman window casing' : 'Craftsman opening casing';
     casing.position.set(x, bottom, side * faceDepth);
     casing.rotation.y = side === -1 ? Math.PI : 0;
-    casing.userData = { width, height, window, side, sideWidthInches: 3.5, headerHeightInches: 5.5 };
+    const sideWidth = sillOptions.sideWidth ?? casingSideWidth;
+    casing.userData = { width, height, window, side, sideWidthInches: sideWidth * 12, headerHeightInches: 5.5 };
     parent.add(casing);
-    const sideWidth = casingSideWidth;
     const reveal = casingReveal;
     const outerWidth = width + 2 * (sideWidth + reveal);
     function part(name, x, y, z, w, h, d, material = sillOptions.casingMaterial ?? windowTrim, rounded = false) {
@@ -668,7 +695,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       walls.push(mesh);
     }
     for (const edge of [-1, 1]) {
-      part('White casing side board', edge * (width / 2 + reveal + sideWidth / 2), (height + reveal) / 2, 0.03125, sideWidth, height + reveal, 0.0625);
+      const legBottom = sillOptions.legBottom ?? 0;
+      part('White casing side board', edge * (width / 2 + reveal + sideWidth / 2), (height + reveal + legBottom) / 2, 0.03125, sideWidth, height + reveal - legBottom, 0.0625);
     }
     part('White casing header', 0, height + reveal + 5.5 / 24, 0.03125, outerWidth, 5.5 / 12, 0.0625);
     part('White casing header bead', 0, height + reveal + 0.03125, 0.05, outerWidth + 0.0625, 0.0625, 0.1);
@@ -688,14 +716,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   const baseTrimSections = [];
-  function wall(x1, z1, x2, z2, furnished = false, openings = [], height = ceilingHeight, trimSides = [-1, 1], quartzSide = 0, base = 0) {
+  function wall(x1, z1, x2, z2, furnished = false, openings = [], height = ceilingHeight, trimSides = [-1, 1], quartzSide = 0, base = 0, casingOptions = {}) {
     const length = Math.hypot(x2 - x1, z2 - z1);
     const group = new THREE.Group();
     group.position.set(x1, 0, z1);
     group.rotation.y = -Math.atan2(z2 - z1, x2 - x1);
     (furnished ? scene : shell).add(group);
     function baseTrim(start, end, mesh) {
-      const casingWidth = (3.5 + 0.125) / 12;
+      const casingWidth = (casingOptions.sideWidth ?? casingSideWidth) + casingReveal;
       const startCasing = openings.some(([a, b, bottom]) => bottom === 0 && Math.abs(b - start) < 0.001);
       const endCasing = openings.some(([a, b, bottom]) => bottom === 0 && Math.abs(a - end) < 0.001);
       const dx = (x2 - x1) / length;
@@ -723,8 +751,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       part(cursor, start, base, height);
       part(start, end, base, bottom);
       part(start, end, top, height);
-      if (bottom === 0 || bottom === base) {
-        for (const side of trimSides) openingCasing(group, (start + end) / 2, bottom, end - start, top - bottom, 0.175, side);
+      if ((bottom === 0 || bottom === base) && !(z1 === 54.2 && z2 === 54.2 && start === 13.1 && end === 18.1)) {
+        for (const side of trimSides) openingCasing(group, (start + end) / 2, bottom, end - start, top - bottom, 0.175, side, false,
+          { ...casingOptions, legBottom: casingOptions.splitFloor ? (side === -1 ? 0.0405 : -garageRise) : 0 });
       }
       cursor = end;
     });
@@ -829,7 +858,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       cover(new THREE.Vector2(31.025, guestSuite.vanity.z - 1.6), new THREE.Vector2(31.025, guestSuite.vanity.z + 1.6), new THREE.Vector2(-1, 0));
       // Fitted mudroom joinery meets these wall faces without baseboards behind it.
       cover(new THREE.Vector2(37.675, 15.175), new THREE.Vector2(44.9 - 2 / 12 - 0.175, 15.175), new THREE.Vector2(0, 1));
-      cover(new THREE.Vector2(37.675, 15.175), new THREE.Vector2(37.675, 20.775), new THREE.Vector2(1, 0));
+      cover(new THREE.Vector2(37.675, 15.175), new THREE.Vector2(37.675, 17.54), new THREE.Vector2(1, 0));
       cover(new THREE.Vector2(44.9 - 2 / 12 - 0.175, 15.175), new THREE.Vector2(44.9 - 2 / 12 - 0.175, 26.725), new THREE.Vector2(-1, 0));
       cover(new THREE.Vector2(43.075 - 2 / 12, 26.725), new THREE.Vector2(44.9 - 2 / 12 - 0.175, 26.725), new THREE.Vector2(0, -1));
       for (const wall of baseTrimSections) {
@@ -1047,7 +1076,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [37.5, 25.3, 37.5, 26.9, true, [], ceilingHeight, [-1], 1], [37.5, 15, 44.9 - 2 / 12, 15],
     [44.9 - 2 / 12, 15, 55.5, 15, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
     [44.9 - 2 / 12, 15, 44.9 - 2 / 12, 26.9, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
-    [37.5, 26.9, 44.9 - 2 / 12, 26.9, false, [[garageEntry.x - 37.5, garageEntry.x - 37.5 + garageEntry.width, 0, garageEntry.height]], ceilingHeight, [-1, 1], 0, garageFloorY]
+    // Stock 1x3 legs on BOTH faces leave the west corner clear, including the cap.
+    // Garage legs land on the centered tread; mudroom legs land on finished tile.
+    [37.5, 26.9, 44.9 - 2 / 12, 26.9, false, [[garageEntry.x - 37.5, garageEntry.x - 37.5 + garageEntry.width, 0, garageEntry.height]], ceilingHeight, [-1, 1], 0, garageFloorY, { sideWidth: 2.5 / 12, splitFloor: true }]
   ].forEach((segment) => wall(...segment));
 
   joinWallCorners();
@@ -3046,7 +3077,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   mudHardwareFinish.name = 'Satin brass mudroom hardware';
   mudHardwareFinish.envMap = mudReflectionTarget.texture;
   mudHardwareFinish.envMapIntensity = 0.7;
-  const mudBench = furnishing('Five-cubby mudroom bench', 43.825 - 2 / 12, 22.85, -Math.PI / 2);
+  const mudBench = furnishing('Five-cubby mudroom bench', 43.825 - 2 / 12, 21.29, -Math.PI / 2);
   const mudStorageTop = ceilingHeight - 0.25;
   const mudBenchWidth = 7.5;
   const mudPanel = 0.75 / 12;
@@ -3200,8 +3231,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const side of [-1, 1]) mudroomFootwear(cubby, side * 0.225, 0.0405, 0, i < 2 ? 'boot' : 'shoe', side, i < 2 ? 1 : 0.75, 'Mudroom daily footwear');
   }
 
-  const mudCoats = furnishing('Mudroom hanging coat closet', (37.5 + 44.9 - 2 / 12) / 2, 16.4);
-  const mudCoatWidth = 3;
+  const mudCoats = furnishing('Mudroom hanging coat closet', 41.2, 16.4);
+  const mudCoatWidth = 42 / 12;
   mudCoats.userData = { widthInches: 36, depthInches: 24, heightInches: mudStorageTop * 12, doorHeightInches: 96, doorStyle: 'Nominal 32-inch bifold closet door, 96 inches tall, shown closed; product unselected', railOrientation: 'Side to side', construction: 'Builder-installed enclosed closet, fixed rod and shelves; standard door, not drawer cabinetry', hangingRail: true, shoeShelves: 2, seasonalShelves: 2, provisional: true };
   for (const x of [-1, 1]) box(mudCoats, x * (mudCoatWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 2, mudCaseFinish).name = 'Coat closet side panel';
   box(mudCoats, 0, mudStorageTop / 2, -0.97, mudCoatWidth - 2 * mudPanel, mudStorageTop, 0.06, mudBackingFinish).name = 'Coat closet backing';
@@ -3213,10 +3244,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(mudCoats, x, 4.05, -0.05, 0.18, 3, 1.7, x < 0 ? linen : cream, true).name = 'Mudroom hanging coat';
     box(mudCoats, x, 5.72, -0.05, 0.03, 0.34, 0.03, brass).name = 'Mudroom coat hanger';
   }
-  const mudDoorWidth = 32 / 12;
+  const mudDoorWidth = 36 / 12;
   for (const side of [-1, 1]) box(mudCoats, side * (mudCoatWidth + mudDoorWidth) / 4, 4, 1.01, (mudCoatWidth - mudDoorWidth) / 2, 8, 0.08, mudCaseFinish).name = 'Mudroom closet door jamb';
-  box(mudCoats, 0, (8 + mudStorageTop) / 2, 1.01, mudCoatWidth, mudStorageTop - 8, 0.08, mudCaseFinish).name = 'Mudroom closet headwall';
-  mudCoats.userData.doorStyle = 'Nominal 32-inch hinged interior closet door, 96 inches tall, shown closed; product unselected';
+  box(mudCoats, 0, (98 / 12 + mudStorageTop) / 2, 1.01, mudCoatWidth, mudStorageTop - 98 / 12, 0.08, mudCaseFinish).name = 'Mudroom closet headwall';
+  box(mudCoats, 0, 97 / 12, 1.01, 38 / 12, 2 / 12, 0.08, mudCaseFinish).name = 'Mudroom closet head jamb reserve';
+  Object.assign(mudCoats.userData, { widthInches: 42, doorStyle: 'Nominal 36-inch hinged interior closet door, 96 inches tall, shown closed; product unselected', roughOpeningReserveInches: [38, 98], clearInternalWidthInches: 40.5, clearInternalDepthInches: 22.8, approval: '38 x 98-inch conceptual jamb/rough-opening reserve; selected assembly, blocking and occupied access require professional review' });
   const mudClosetHinge = new THREE.Group();
   mudClosetHinge.name = 'Mudroom single hinged closet door';
   mudClosetHinge.position.set(-mudDoorWidth / 2, 4, 1.015);
@@ -3224,6 +3256,28 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   mudCoats.add(mudClosetHinge);
   singlePanelDoor(mudClosetHinge, mudDoorWidth / 2, 0, 0, mudDoorWidth - 0.04, 7.96, 1.375 / 12, mudCaseFinish).name = 'Mudroom standard hinged closet door panel';
   cylinder(mudClosetHinge, mudDoorWidth - 0.2, -0.8, 0.12, 0.05, 0.08, brass).name = 'Mudroom closet gold knob';
+
+  // North wall only: standard 18-inch case, separate 1.5-inch filler.
+  // Baskets lift/withdraw independently; these are not built-in drawers.
+  const mudNorthBaskets = furnishing('Mudroom north basket shelves', 38.575, 15.9);
+  const mudBasketFinish = mat('#b19a78', 0.94);
+  mudNorthBaskets.userData = { widthInches: 18, depthInches: 12, basketCount: 4, basketEnvelopeInches: [14, 10, 12], clearShelfWidthInches: 16.5, withdrawalInches: 10, occupiedDepthInches: 24, construction: 'Fixed shelves with removable purchased baskets; north wall only', provisional: true };
+  for (const side of [-1, 1]) box(mudNorthBaskets, side * (1.5 - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 1, mudCaseFinish).name = 'North basket bay side';
+  box(mudNorthBaskets, 0, mudStorageTop / 2, -0.47, 1.5 - 2 * mudPanel, mudStorageTop, 0.06, mudBackingFinish).name = 'North basket bay backing';
+  for (const y of [0.2, 1.7, 3.2, 4.7, 6.2, mudStorageTop - 0.04]) {
+    box(mudNorthBaskets, 0, y, 0, 1.5 - 2 * mudPanel, 0.08, 0.88, mudCaseFinish).name = 'North fixed basket shelf';
+    if (y > 5) continue;
+    const basket = new THREE.Group();
+    basket.name = 'Mudroom removable north basket';
+    basket.position.set(0, y + 0.54, 0);
+    basket.userData = { envelopeInches: [14, 10, 12], removable: true, notDrawer: true };
+    mudNorthBaskets.add(basket);
+    box(basket, 0, -0.48, 0, 14 / 12, 0.04, 10 / 12, mudBasketFinish).name = 'North basket bottom';
+    for (const side of [-1, 1]) {
+      box(basket, side * (14 / 24 - 0.025), 0, 0, 0.05, 1, 10 / 12, mudBasketFinish).name = 'North basket side';
+      box(basket, 0, 0, side * (10 / 24 - 0.025), 14 / 12, 1, 0.05, mudBasketFinish).name = 'North basket face';
+    }
+  }
 
   function mudroomShoeCell(parent, x, y, width, depth, nextShelf, envelope, zone) {
     const cell = new THREE.Group();
@@ -3237,7 +3291,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   const mudCornerShoeWidth = 19.1 - mudNorthFront;
-  const mudCornerShoes = furnishing('Mudroom corner shoe tower', 43.825 - 2 / 12, (mudNorthFront + 19.1) / 2, -Math.PI / 2);
+  // Swap the complete cases within the existing east-wall run, not the room.
+  const mudEastRunSouth = 26.6;
+  const mudCornerShoes = furnishing('Mudroom corner shoe tower', 43.825 - 2 / 12, mudEastRunSouth - mudCornerShoeWidth / 2, -Math.PI / 2);
   mudCornerShoes.userData = { widthInches: mudCornerShoeWidth * 12, depthInches: 18, heightInches: mudStorageTop * 12, shoeLevels: 7, extraPairTarget: 7, pairEnvelopeInches: [14, 16, 12], provisional: true };
   for (const side of [-1, 1]) box(mudCornerShoes, side * (mudCornerShoeWidth - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 1.5, mudCaseFinish).name = 'Corner shoe tower side';
   box(mudCornerShoes, 0, mudStorageTop / 2, -0.72, mudCornerShoeWidth - 2 * mudPanel, mudStorageTop, 0.06, mudBackingFinish).name = 'Corner shoe tower backing';
@@ -3248,8 +3304,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(mudCornerShoes, 0, mudStorageTop - 0.04, 0, mudCornerShoeWidth - 2 * mudPanel, 0.08, 1.5, mudCaseFinish).name = 'Corner shoe tower top cap';
 
   const mudJoinery = furnishing('Continuous mudroom built-in enclosure', 0, 0);
-  mudJoinery.userData = { joinedBuiltIns: true, enclosureStyle: 'Wall-fitted north, east and basket built-ins with ceiling infill', uniformTopInches: mudStorageTop * 12, fittedTopInches: ceilingHeight * 12, topRailUndersideInches: mudTopRailBottom * 12, extraPairTarget: 7, enclosedBlindCorners: 2, blindCornersCountedAsStorage: false, basketReturnConnected: true, wallFitted: true, provisional: true };
-  for (const [left, right] of [[37.825, 39.7 - 1 / 12], [42.7 - 1 / 12, 44.575 - 2 / 12]]) {
+  mudJoinery.userData = { joinedBuiltIns: true, enclosureStyle: 'Wall-fitted north and east built-ins with ceiling infill; west arrival wall clear', uniformTopInches: mudStorageTop * 12, fittedTopInches: ceilingHeight * 12, topRailUndersideInches: mudTopRailBottom * 12, extraPairTarget: 7, enclosedBlindCorners: 1, blindCornersCountedAsStorage: false, wallFitted: true, provisional: true };
+  for (const [left, right] of [[42.95, 44.575 - 2 / 12]]) {
     const corner = new THREE.Group();
     corner.name = 'Mudroom enclosed corner return';
     corner.userData = { accessibleStorage: false, construction: 'Builder-fitted blind corner, not an open gap or counted storage' };
@@ -3261,8 +3317,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(corner, 0, mudStorageTop / 2, depth / 2 - mudPanel / 2, width, mudStorageTop - 0.16, mudPanel, mudCaseFinish).name = 'Enclosed corner front';
     for (const side of [-1, 1]) box(corner, side * (width - mudPanel) / 2, mudStorageTop / 2, (0.06 - mudPanel) / 2, mudPanel, mudStorageTop - 0.16, depth - 0.06 - mudPanel, mudCaseFinish).name = 'Enclosed corner cheek';
   }
-  box(mudJoinery, 41.2 - 1 / 12, mudStorageTop - 0.04, (17.45 + mudNorthFront) / 2, mudCoatWidth, 0.08, mudNorthFront - 17.45, mudCaseFinish).name = 'Coat header top return';
-  const mudWestFront = 37.825 + 14 / 12, mudEastFront = 43.075 - 2 / 12;
+  box(mudJoinery, 41.2, mudStorageTop - 0.04, (17.45 + mudNorthFront) / 2, mudCoatWidth, 0.08, mudNorthFront - 17.45, mudCaseFinish).name = 'Coat header top return';
+  const mudWestFront = 37.675, mudEastFront = 43.075 - 2 / 12;
   box(mudJoinery, (mudWestFront + mudEastFront) / 2, mudStorageTop - mudTopRailHeight / 2, mudNorthFront + 0.025, mudEastFront - mudWestFront - 0.1, mudTopRailHeight, 0.05, mudCaseFinish).name = 'Mudroom continuous north top rail';
   box(mudJoinery, mudEastFront - 0.025, mudStorageTop - mudTopRailHeight / 2, (mudNorthFront + 26.6) / 2, 0.05, mudTopRailHeight, 26.6 - mudNorthFront, mudCaseFinish).name = 'Mudroom continuous east top rail';
   for (const [height, projection] of [[8.79, 0.025], [8.89, 0.04]]) {
@@ -3275,68 +3331,24 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     closure.name = name;
     closure.userData = { construction: 'Site-fitted scribe/pack-out, not added storage', countedAsStorage: false, provisional: true };
   }
+  mudroomFittedClosure('Mudroom north basket closet filler', 39.325, 39.45, 15.4, 17.4);
   const mudFinishedWest = 37.5 + 0.175, mudFinishedEast = 44.9 - 2 / 12 - 0.175;
   const mudFinishedNorth = 15 + 0.175, mudFinishedSouth = 26.9 - 0.175;
   const mudNorthBack = mudCoats.position.z - 1, mudEastBack = mudBench.position.x + 0.75;
-  const mudBenchSouth = mudBench.position.z + mudBenchWidth / 2;
+  const mudBenchSouth = mudEastRunSouth; // Fitted end belongs to the whole run, now the shoe tower.
   mudroomFittedClosure('Mudroom north wall scribe', mudFinishedWest, mudFinishedEast, mudFinishedNorth, mudNorthBack);
   mudroomFittedClosure('Mudroom west wall scribe', mudFinishedWest, 37.825, mudNorthBack, mudNorthFront);
   mudroomFittedClosure('Mudroom east wall scribe', mudEastBack, mudFinishedEast, mudNorthBack, mudBenchSouth);
   mudroomFittedClosure('Mudroom cubby end scribe', mudEastFront, mudFinishedEast, mudBenchSouth, mudFinishedSouth);
   mudroomFittedClosure('Mudroom north ceiling infill', mudFinishedWest, mudFinishedEast, mudFinishedNorth, mudNorthFront + 0.05, mudStorageTop, ceilingHeight);
-  mudroomFittedClosure('Mudroom west ceiling infill', mudFinishedWest, 38.675, mudNorthFront + 0.05, 20.775, mudStorageTop, ceilingHeight);
   mudroomFittedClosure('Mudroom east ceiling infill', mudEastFront - 0.05, mudFinishedEast, mudNorthFront + 0.05, mudFinishedSouth, mudStorageTop, ceilingHeight);
 
-  const mudBasketReturn = new THREE.Group();
-  mudBasketReturn.name = 'Mudroom basket built-in return';
-  mudBasketReturn.position.set(38.175, 0, (mudNorthFront + 18.775) / 2);
-  mudBasketReturn.rotation.y = Math.PI / 2;
-  mudBasketReturn.userData = { construction: 'Fixed open shelves and matching backing joining basket tower to north enclosure', widthInches: (18.775 - mudNorthFront) * 12, depthInches: 12, heightInches: 105, addedBasketCount: 0, capacityVerified: false };
-  mudJoinery.add(mudBasketReturn);
-  box(mudBasketReturn, 0, mudStorageTop / 2, -0.5 + mudPanel / 2, 18.775 - mudNorthFront, mudStorageTop, mudPanel, mudBackingFinish).name = 'Basket return continuous backing';
-  for (const y of [0.25, 1.9, 3.55, 5.2, 6.85, mudStorageTop - mudPanel / 2]) {
-    box(mudBasketReturn, 0, y, mudPanel / 2, 18.775 - mudNorthFront, mudPanel, 1 - mudPanel, mudCaseFinish).name = 'Basket return connecting shelf';
-  }
-  const mudPlinthTop = 0.25 - mudPanel / 2;
-  for (const [start, end] of [[mudNorthFront, 18.775], [18.775 + mudPanel, 20.775 - mudPanel]]) {
-    box(mudJoinery, 38.175, (0.0405 + mudPlinthTop) / 2, (start + end) / 2, 0.75, mudPlinthTop - 0.0405, end - start, mudCaseFinish).name = 'Mudroom continuous recessed plinth';
-  }
-
-  const mudBasketTower = furnishing('Mudroom arrival-wall basket shelves', 37.675 + 6 / 12, 19.775, Math.PI / 2);
-  mudBasketTower.userData = { widthInches: 24, depthInches: 12, heightInches: 105, baskets: 10, basketEnvelopeInches: [9, 10, 12], construction: 'Builder-installed fixed shelves with separately purchased removable baskets', highStorage: 'Upper baskets require safe access; anchorage and shelf loads unverified', provisional: true };
-  const mudBasketFinish = mat('#b89a70', 0.95);
-  mudBasketFinish.name = 'Natural woven mudroom baskets';
-  const mudBasketRim = mat('#987c55', 0.95);
-  mudBasketRim.name = 'Natural woven basket edging';
-  for (const side of [-1, 1]) box(mudBasketTower, side * (2 - mudPanel) / 2, mudStorageTop / 2, 0, mudPanel, mudStorageTop, 12 / 12, mudCaseFinish).name = 'Arrival basket tower side';
-  box(mudBasketTower, 0, mudStorageTop / 2, -6 / 12 + mudPanel / 2, 2 - 2 * mudPanel, mudStorageTop, mudPanel, mudBackingFinish).name = 'Arrival basket tower backing';
-  for (const y of [0.25, 1.9, 3.55, 5.2, 6.85, mudStorageTop - mudPanel / 2]) {
-    box(mudBasketTower, 0, y, mudPanel / 2, 2 - 2 * mudPanel, mudPanel, 12 / 12 - mudPanel, mudCaseFinish).name = 'Arrival basket fixed shelf';
-    if (y > 8) continue;
-    const nextShelf = y < 6.85 ? y + 1.65 : mudStorageTop - mudPanel / 2;
-    box(mudBasketTower, 0, (y + nextShelf) / 2, mudPanel / 2, mudPanel, nextShelf - y - mudPanel, 12 / 12 - mudPanel, mudCaseFinish).name = 'Arrival basket center divider';
-    for (const side of [-1, 1]) {
-      const basket = new THREE.Group();
-      basket.name = 'Removable arrival-wall basket';
-      basket.position.set(side * 0.48, y + mudPanel / 2, 0.02);
-      basket.userData = { purchasedSeparately: true, envelopeInches: [9, 10, 12], access: y > 5 ? 'Safe high-storage access required' : 'Removable basket' };
-      mudBasketTower.add(basket);
-      box(basket, 0, 0.025, 0, 0.75, 0.05, 10 / 12, mudBasketFinish).name = 'Arrival basket bottom';
-      for (const edge of [-1, 1]) {
-        box(basket, edge * 0.355, 0.525, 0, 0.04, 0.95, 10 / 12, mudBasketFinish).name = 'Arrival basket side';
-        box(basket, 0, 0.525, edge * (5 / 12 - 0.02), 0.67, 0.95, 0.04, mudBasketFinish).name = 'Arrival basket face';
-        box(basket, 0, 0.98, edge * (5 / 12 - 0.02), 0.75, 0.04, 0.04, mudBasketRim).name = 'Arrival basket rim';
-      }
-      for (let rib = 0; rib < 8; rib++) box(basket, -0.315 + rib * 0.09, 0.525, 5 / 12 - 0.004, 0.018, 0.9, 0.008, mudBasketRim).name = 'Arrival basket woven rib';
-    }
-  }
-
   const mudGarageDoor = furnishing('Mudroom garage entry door', garageEntry.x + 0.125 / 12, garageEntry.z - 1.75 / 24);
-  mudGarageDoor.userData = { nominalWidthInches: 36, nominalHeightInches: 96, thicknessInches: 1.75, swing: 'Inward into mudroom, west hinge', defaultOpenAngleDegrees: 90, approval: 'Rated/self-closing assembly, landing and fire separation unverified; open display is not hold-open approval', provisional: true };
+  mudGarageDoor.userData = { nominalWidthInches: 36, nominalHeightInches: 96, thicknessInches: 1.75, swing: 'Inward into mudroom, west hinge', defaultOpenAngleDegrees: 0, approval: 'Rated/self-closing assembly, threshold, landing, rails and fire separation require professional review', provisional: true };
   const mudGarageLeaf = new THREE.Group();
   mudGarageLeaf.name = 'Mudroom inward garage door leaf';
-  mudGarageLeaf.rotation.y = Math.PI / 2;
-  mudGarageLeaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 90, openRotationSign: 1 } };
+  mudGarageLeaf.rotation.y = 0;
+  mudGarageLeaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: 1 } };
   mudGarageDoor.add(mudGarageLeaf);
   const mudGarageLeafWidth = (36 - 0.25) / 12, mudGarageLeafThickness = 1.75 / 12;
   const mudGarageLeafBottom = 0.0405 + 0.5 / 12, mudGarageLeafTop = 8 - 0.125 / 12;
@@ -3346,7 +3358,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(mudGarageLeaf, mudGarageLeafWidth - 0.38, 3.15, mudGarageLeafThickness / 2 + side * (mudGarageLeafThickness / 2 + 0.15), 0.3, 0.06, 0.08, brass).name = 'Mudroom garage door lever';
   }
   for (const y of [1, 4, 7]) cylinder(mudGarageLeaf, 0, y, 0, 0.035, 0.25, brass).name = 'Mudroom garage door hinge';
-  for (const group of [mudBench, mudCoats, mudCornerShoes, mudJoinery, mudBasketTower, mudGarageDoor]) {
+  for (const group of [mudBench, mudCoats, mudCornerShoes, mudJoinery, mudGarageDoor]) {
     group.traverse((part) => {
       if (part.material === brass) part.material = mudHardwareFinish;
     });
@@ -3369,14 +3381,24 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(garageSideLeaf, side * 0.14, 3.1, 0.35, 0.08, 0.5, 0.12, black).name = 'Exterior door lockset';
     box(garageSideLeaf, side * 0.2, 3.1, 0.48, 0.1, 0.08, 0.35, black).name = 'Exterior door lever';
   }
-  const garageStair = furnishing('Two-step garage-to-house entry', garageEntry.x + garageEntry.width / 2, garageEntry.z);
-  garageStair.userData = { risers: garageRisers, riseInches: garageRise * 12, totalRiseInches: -garageFloorY * 12, treadDepthInches: 11, widthInches: garageEntry.width * 12, landing: false, rails: false, provisional: true };
-  for (let step = 0; step < garageRisers; step++) {
-    const top = -step * garageRise;
-    const tread = box(garageStair, 0, (garageFloorY + top) / 2, (step + 0.5) * garageEntry.going, garageEntry.width, top - garageFloorY, garageEntry.going, epoxy);
-    tread.name = `Garage entry tread ${step + 1}`;
-    tread.userData.walkSurface = true;
-    const nosing = box(garageStair, 0, top - 0.008, (step + 1) * garageEntry.going - 0.04, garageEntry.width - 0.12, 0.016, 0.08, cream);
+  const garageStair = furnishing('One intermediate tread garage entry — no top landing concept', garageEntry.x + garageEntry.width / 2, garageEntry.z);
+  garageStair.userData = { risers: garageRisers, riseInches: garageRise * 12, totalRiseInches: -garageFloorY * 12, treadDepthInches: 11, widthInches: garageEntry.treadWidth * 12, landing: false, thresholdDepthInches: 4.2, ascent: 'North through door', rails: false, provisional: true };
+  // Wall-thickness threshold only: no house-level platform beyond the garage wall face.
+  const threshold = box(garageStair, 0, garageFloorY / 2, garageEntry.thresholdDepth / 2, garageEntry.width, -garageFloorY, garageEntry.thresholdDepth, epoxy);
+  threshold.name = 'Garage entry wall-thickness threshold';
+  threshold.userData.walkSurface = true;
+  const saddle = box(garageStair, 0, 0.0405 / 2, garageEntry.thresholdDepth / 2, garageEntry.width, 0.0405, garageEntry.thresholdDepth, windowTrim);
+  saddle.name = 'Garage entry finished threshold saddle';
+  saddle.userData = { walkSurface: true, approval: 'Concept finish only; select rated assembly and verify landing, sill and drainage. Not operating approval.' };
+  // Widen east only: keep the west edge clear of the adjoining wall and mower route.
+  const treadOffsetX = 0;
+  const tread = box(garageStair, treadOffsetX, (garageFloorY - garageRise) / 2, garageEntry.thresholdDepth + garageEntry.going / 2, garageEntry.treadWidth, -garageRise - garageFloorY, garageEntry.going, epoxy);
+  tread.name = 'Garage entry intermediate tread';
+  tread.userData.walkSurface = true;
+  for (let edge = 0; edge < garageRisers; edge++) {
+    const top = -edge * garageRise;
+    const edgeZ = garageEntry.thresholdDepth + edge * garageEntry.going;
+    const nosing = box(garageStair, edge ? treadOffsetX : 0, top - 0.008, edgeZ - 0.04, (edge ? garageEntry.treadWidth : garageEntry.width) - 0.12, 0.016, 0.08, cream);
     nosing.name = 'Contrasting garage stair nosing';
     nosing.userData.walkSurface = true;
   }
@@ -3686,8 +3708,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   blower.userData = { wallMounted: true, dedicatedCradle: true, provisional: true };
   stairBeam('Leaf blower nozzle', [-2.25, 5.3, 0.85], [-2.25, 4.8, 1.45], 0.22, 0.22, black, yardTools);
   for (const x of [-2.1, -0.7, 0.7, 2.1]) garageProp('plastic_crate_01', 'Garage tool storage bin', yardTools, x, 6.56, 0.8);
-  const hangingTools = furnishing('Accessible garage garden-tool rail', 37.75, 27.115, 0, garageFloorY);
-  hangingTools.userData = { widthInches: 30, location: 'House-side wall between the equipment station and garage entry', contents: 'Rake, broom and dustpan, with four spare hooks', floorStorage: false, anchorageVerified: false, provisional: true };
+  const hangingTools = furnishing('Accessible garage garden-tool rail', 46.75, 15.175, 0, garageFloorY);
+  hangingTools.userData = { widthInches: 30, location: 'North garage wall west of the bikes, with a clear retrieval approach', contents: 'Rake, broom and dustpan, with four spare hooks', floorStorage: false, anchorageVerified: false, provisional: true };
   for (const y of [3.2, 5.05]) box(hangingTools, 0, y, 0.03, 2.5, 0.15, 0.12, black).name = 'Garage garden-tool mounting rail';
   for (const [x, y] of [[-0.8, 4.95], [-0.2, 5.05], [0.8, 5.05]]) {
     box(hangingTools, x, y, 0.12, 0.12, 0.18, 0.12, steel).name = 'Garage garden-tool wall clip';
@@ -4280,18 +4302,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const frontDoor = furnishing('Double front entry', 15.6, 54.2);
   frontDoor.userData = { heightInches: 96, lockBrand: 'Wyze', lockModel: null, activeLeafHandingVerified: false, hardwareCompatibilityVerified: false };
-  let activeFrontEntryLeaf;
-  for (const side of [-1, 1]) {
-    const leaf = new THREE.Group();
-    leaf.name = `Front entry ${side < 0 ? 'left' : 'right'} oak door leaf`;
-    leaf.position.x = side * 2.475;
-    leaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 180, openRotationSign: -side } };
-    frontDoor.add(leaf);
-    box(leaf, -side * 1.225, 4, 0, 2.45, 7.96, 0.12, oak).name = 'Front entry oak door leaf';
-    box(leaf, -side * 1.225, 4.65, -0.08, 1.65, 4.6, 0.04, glass).name = 'Front entry door glazing';
-    box(leaf, -side * 2.255, 3.15, -0.14, 0.06, 1, 0.08, brass);
-    if (side === 1) activeFrontEntryLeaf = leaf;
-  }
+  const frontEntryLeaves = buildArchedFrontEntry(THREE, { box, wood: mat('#c99f6b'), field: mat('#b88e5a'), oakMaps: masonryMaps.oak, trim: windowTrim, hardware: black }, frontDoor);
+  const activeFrontEntryLeaf = frontEntryLeaves[1];
   const entrySmartLock = new THREE.Group();
   entrySmartLock.name = 'Wyze smart-lock selection placeholder';
   entrySmartLock.position.set(-2.255, 4.15, -0.08);
@@ -4805,8 +4817,25 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   furnishKitchenStorage();
   const kitchenPracticalLights = buildKitchenLighting();
   const homeLighting = buildHomeLighting();
-  const exterior = buildExteriorModel(THREE, { box, mat }, stairFloorToFloor, garageFloorY);
+  const exterior = buildExteriorModel(THREE, { box, mat, masonryMaps }, stairFloorToFloor, garageFloorY);
   scene.add(exterior);
+  const exteriorSun = new THREE.DirectionalLight('#fff1d9', 3);
+  exteriorSun.name = 'Exterior afternoon sun with architectural shadows';
+  exteriorSun.position.set(-35, 65, 90);
+  exteriorSun.target.position.set(25, 5, 25);
+  exteriorSun.castShadow = true;
+  exteriorSun.shadow.mapSize.set(2048, 2048);
+  Object.assign(exteriorSun.shadow.camera, { left: -65, right: 65, top: 65, bottom: -65, near: 1, far: 200 });
+  exteriorSun.shadow.normalBias = 0.04;
+  exteriorSun.shadow.bias = -0.0001;
+  exteriorSun.visible = false;
+  scene.add(exteriorSun, exteriorSun.target);
+  const outdoorEnvironmentGenerator = new THREE.PMREMGenerator(renderer);
+  const outdoorReflection = outdoorEnvironmentGenerator.fromEquirectangular(outdoorSky);
+  outdoorEnvironmentGenerator.dispose();
+  exterior.traverse((part) => {
+    if (part.isMesh) { part.castShadow = !part.userData.noExteriorShadow; part.receiveShadow = true; }
+  });
   const exteriorLighting = [];
   const exteriorGlowMaterials = new Map();
   exterior.traverse((part) => {
@@ -4902,12 +4931,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   refreshUpstairsDimensions();
   const presets = {
-    exterior: { target: [27, 11, 29], offset: [64, 24, 82], span: 68 },
+    exterior: { target: [27.75, 12, 47], offset: [-18, -3, 100], span: 52 },
+    'exterior-street': { target: [27.75, 12, 47], offset: [0, -6.5, 115], span: 34 },
+    'exterior-threequarter': { target: [27.75, 12, 32], offset: [-80, -6.5, 115], span: 40 },
     'exterior-front': { target: [27.75, 13, 49], offset: [0, 0, 120], span: 42 },
+    'exterior-entry': { target: [15.6, 5.5, 57], offset: [0, 0, 80], span: 14.5 },
     'exterior-rear': { target: [27.75, 13, 7], offset: [0, 0, -120], span: 42 },
     'exterior-west': { target: [0, 13, 29.5], offset: [-120, 0, 0], span: 46 },
     'exterior-east': { target: [55.5, 13, 29.5], offset: [120, 0, 0], span: 46 },
     'exterior-site': { target: [exterior.userData.lot.centerX, 0, (exterior.userData.lot.rear + exterior.userData.lot.front) / 2], offset: [0, 160, 0.01], span: 150 },
+    'exterior-roof': { target: [27.75, 12, 31], offset: [0, 120, 0.01], span: 70 },
     'exterior-patio': { target: [6.6, 2.5, 3.7], offset: [-16, 5, -28], span: 28 },
     'exterior-firepit': { target: [-3.75, -0.5, -2.325], offset: [-12, 12, -16], span: 18 },
     'exterior-wood': { target: [57, 0.5, 26.5], offset: [18, 24, -16], span: 24 },
@@ -4929,7 +4962,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     bikes: { target: [52, 0.5, 21], offset: [-9, 22, 7], span: 15 },
     prep: { target: [44, 1, 16], offset: [-28, 44, 30], span: 28 },
     mudroom: { target: [41.55, 2, 20.9], offset: [0, 22, 20], span: 17 },
-    'mudroom-cubbies': { target: [44, 4.4, 22.85], offset: [-4, 1, 0], span: 9.5 },
+    'mudroom-cubbies': { target: [44, 4.4, 22.07], offset: [-4, 1, 0], span: 10.5 },
     'mudroom-storage': { target: [41.11666666666667, 4.8, 17.9], offset: [0, 0.7, 8.35], span: 12 },
     pantry: { target: [46.75, 4.5, 14.325], offset: [0, 0.2, -2.5], span: 14 },
     'prep-counter': { target: [46.6, 4.5, prepCounterZ], offset: [0, 1.2, 2.6], span: 14 },
@@ -5062,8 +5095,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       if (x >= area.x && x <= area.x + area.w && z >= area.z && z <= area.z + area.d) elevation = Math.max(elevation ?? -Infinity, area.elevation);
     }
     if (elevation === null) return null;
-    if (activeFloor === 'ground' && x >= garageEntry.x && x <= garageEntry.x + garageEntry.width && z >= garageEntry.z && z < garageEntry.z + garageRisers * garageEntry.going) {
-      return -Math.floor((z - garageEntry.z) / garageEntry.going) * garageRise;
+    const garageTreadLeft = garageEntry.x + (garageEntry.width - garageEntry.treadWidth) / 2;
+    if (activeFloor === 'ground' && x >= garageTreadLeft && z >= garageEntry.z && z < garageEntry.z + garageEntry.thresholdDepth + garageEntry.going) {
+      if (z < garageEntry.z + garageEntry.thresholdDepth) {
+        if (x >= garageEntry.x && x <= garageEntry.x + garageEntry.width) return 0;
+      } else if (x <= garageTreadLeft + garageEntry.treadWidth) return -garageRise;
     }
     return elevation;
   }
@@ -5139,10 +5175,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     context.strokeStyle = '#777e73';
     context.lineWidth = 1;
     for (let step = 0; activeFloor === 'ground' && step < garageRisers; step++) {
-      const z = garageEntry.z + (step + 1) * garageEntry.going;
+      const z = garageEntry.z + garageEntry.thresholdDepth + step * garageEntry.going;
       context.beginPath();
-      context.moveTo(mapX(garageEntry.x), mapZ(z));
-      context.lineTo(mapX(garageEntry.x + garageEntry.width), mapZ(z));
+      const stepLeft = garageEntry.x + (step ? (garageEntry.width - garageEntry.treadWidth) / 2 : 0);
+      context.moveTo(mapX(stepLeft), mapZ(z));
+      context.lineTo(mapX(stepLeft + (step ? garageEntry.treadWidth : garageEntry.width)), mapZ(z));
       context.stroke();
     }
     context.font = 'bold 10px sans-serif';
@@ -5465,6 +5502,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   function pickTourFloor(event) {
+    if (activeFloor === 'exterior') return;
     const bounds = renderer.domElement.getBoundingClientRect();
     if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) return;
     tourRaycaster.setFromCamera(new THREE.Vector2((event.clientX - bounds.left) / bounds.width * 2 - 1, 1 - (event.clientY - bounds.top) / bounds.height * 2), camera);
@@ -5483,7 +5521,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   renderer.domElement.addEventListener('pointerdown', (event) => {
-    if (activeFloor === 'exterior') return;
     if (walkDrag) {
       walkDrag.moved = true;
       return;
@@ -5582,10 +5619,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const mudroomInspectionView = name === 'mudroom-cubbies' || name === 'mudroom-storage';
     const mudroomInteriorView = name === 'mudroom-storage';
     const sinkStorageView = name === 'sink-storage';
-    const exteriorElevation = outside && !['exterior', 'exterior-patio', 'exterior-firepit', 'exterior-wood'].includes(name);
+    const exteriorElevation = outside && !['exterior', 'exterior-street', 'exterior-threequarter', 'exterior-patio', 'exterior-firepit', 'exterior-wood'].includes(name);
     const elevationView = name === 'fridge' || name === 'cooktop' || sinkStorageView || prepElevationView || mudroomInspectionView || exteriorElevation;
     controls.minDistance = prepElevationView || mudroomInspectionView ? 1 : 12;
-    controls.maxPolarAngle = elevationView ? Math.PI / 2 : Math.PI / 2.12;
+    const streetEyeView = name === 'exterior-street' || name === 'exterior-threequarter';
+    controls.maxPolarAngle = streetEyeView ? Math.PI * 0.55 : elevationView ? Math.PI / 2 : Math.PI / 2.12;
     const preset = presets[name];
     const aspect = viewport.clientWidth / viewport.clientHeight;
     const offset = new THREE.Vector3(...preset.offset);
@@ -5594,7 +5632,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     controls.object = camera;
     camera.zoom = 1;
     if (camera.isOrthographicCamera) {
-      const exteriorWidth = name === 'exterior-site' || name === 'exterior-security' ? 128 : name === 'exterior-west' || name === 'exterior-east' ? 74 : 66;
+      const exteriorWidth = name === 'exterior-entry' ? 20 : name === 'exterior-site' || name === 'exterior-security' ? 128 : name === 'exterior-west' || name === 'exterior-east' ? 74 : 66;
       const halfHeight = exteriorElevation ? Math.max(preset.span / 2, exteriorWidth / (2 * aspect)) : preset.span * portraitPadding / (2 * Math.min(aspect, 1));
       camera.left = -halfHeight * aspect;
       camera.right = halfHeight * aspect;
@@ -5606,6 +5644,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
         // Widen portrait framing without moving the camera through the garage wall.
         camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(85 / 2)) / Math.min(aspect, 1)));
       } else {
+        camera.fov = streetEyeView ? 26 : 38;
         const verticalFov = THREE.MathUtils.degToRad(camera.fov);
         const minimumDistance = preset.span * portraitPadding / (2 * Math.tan(verticalFov / 2) * Math.min(aspect, 1));
         offset.setLength(Math.max(offset.length(), minimumDistance));
@@ -5644,7 +5683,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     viewButtons.forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.view === name || (button.closest('.model-toolbar') && button.dataset.view === 'exterior' && outside) || (button.dataset.view === 'upstairs' && floor === 'upstairs') || (button.dataset.view === 'top' && name === 'upstairs-top')));
     });
-    const exteriorLabel = name === 'exterior-security' ? 'camera directions and warm outdoor lighting plan, coverage unverified' : name === 'exterior-site' ? '75 by 130 ft lot plan, provisional setbacks' : name === 'exterior-patio' ? 'two chairs and a small table tucked against the house wall; closed firepit in the uncovered outer patio corner, cold storage only, do not light; fence-side path join preserved; slope, access, setbacks, drainage and structural support require review' : name === 'exterior-firepit' ? 'closed firepit in uncovered patio corner, cold storage only, not an approved burn location' : name === 'exterior-wood' ? 'side-yard firewood beside waste bins, clearance review required' : exteriorElevation ? name.slice(9) + ' elevation' : 'perspective view';
+    const exteriorLabel = name === 'exterior-security' ? 'camera directions and warm outdoor lighting plan, coverage unverified' : name === 'exterior-site' ? '75 by 130 ft lot plan, provisional setbacks' : name === 'exterior-roof' ? 'roof plan with computed ridges and valleys, structure and drainage unverified' : name === 'exterior-patio' ? 'two chairs and a small table tucked against the house wall; closed firepit in the uncovered outer patio corner, cold storage only, do not light; fence-side path join preserved; slope, access, setbacks, drainage and structural support require review' : name === 'exterior-firepit' ? 'closed firepit in uncovered patio corner, cold storage only, not an approved burn location' : name === 'exterior-wood' ? 'side-yard firewood beside waste bins, clearance review required' : exteriorElevation ? name.slice(9) + ' elevation' : 'perspective view';
     if (groundLayoutPreview && activeFloor === 'ground') {
       for (const object of originalGroundRoots) object.visible = object === stairs;
       groundLayoutPreview.group.visible = true;
@@ -5655,7 +5694,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (planView) {
       viewport.setAttribute('aria-label', '2D floor plan. Drag to pan; scroll or pinch to zoom. Select Whole floor or Upstairs to return to 3D.');
     }
-    renderer.domElement.setAttribute('aria-label', planView ? `2D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground-floor'} orthographic furnished plan, north at top` : outside ? `3D all-brick farmhouse exterior concept: ${exteriorLabel}, brick veneer and roof construction unverified` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
+    renderer.domElement.setAttribute('aria-label', planView ? `2D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground-floor'} orthographic furnished plan, north at top` : outside ? `3D white farmhouse concept: ${exteriorLabel}, raised siding, oak doors and brick bases; daylight sky and shadows are illustrative; roof and cladding construction unverified` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
     updateFloorGrid();
     updateLivableArea();
     updatePlanDimensions();
@@ -5771,14 +5810,20 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const mudroomLighting = activeFloor === 'ground' && currentView.startsWith('mudroom');
     const kitchenLighting = activeFloor === 'ground' && ['kitchen', 'sink-storage', 'cooktop', 'island', 'fridge', 'prep', 'prep-kitchen', 'prep-counter', 'pantry'].includes(currentView);
     const prepLighting = ['prep', 'prep-kitchen', 'prep-counter', 'pantry'].includes(currentView);
-    ambientLight.intensity = nightLighting ? 0.5 : 2.5;
-    studioFill.intensity = nightLighting ? 250 : 650;
-    renderer.toneMappingExposure = nightLighting ? 0.75 : 1.25;
+    const exteriorDaylight = activeFloor === 'exterior' && !nightLighting;
+    exteriorSun.visible = exteriorDaylight;
+    scene.background = exteriorDaylight ? outdoorSky : indoorBackground;
+    scene.backgroundIntensity = exteriorDaylight ? 0.25 : 1;
+    scene.environment = exteriorDaylight ? outdoorReflection.texture : null;
+    scene.environmentIntensity = exteriorDaylight ? 0.15 : 1;
+    ambientLight.intensity = exteriorDaylight ? 0.7 : nightLighting ? 0.5 : 2.5;
+    studioFill.intensity = exteriorDaylight ? 0 : nightLighting ? 250 : 650;
+    renderer.toneMappingExposure = exteriorDaylight ? 0.95 : nightLighting ? 0.75 : 1.25;
     mudroomKeyLight.visible = mudroomLighting;
     kitchenKeyLight.visible = kitchenLighting;
     kitchenKeyLight.position.set(prepLighting ? 40.5 : 29, 8.6, prepLighting ? 12 : 13);
     kitchenKeyLight.target.position.set(prepLighting ? 48.5 : 35, 2.5, prepLighting ? 8 : 17);
-    renderer.shadowMap.enabled = mudroomLighting;
+    renderer.shadowMap.enabled = mudroomLighting || exteriorDaylight;
     renderer.shadowMap.type = mudroomLighting ? THREE.VSMShadowMap : THREE.PCFSoftShadowMap;
     updateVehicleDoorControls();
     positionPlanDimensions();

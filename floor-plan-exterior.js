@@ -1,8 +1,8 @@
-function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
+function buildExteriorModel(THREE, { box, mat, masonryMaps }, floorToFloor, garageFloorY) {
   const group = new THREE.Group();
   group.name = 'English-country exterior concept';
   group.visible = false;
-  group.userData = { provisional: true, style: 'All-brick farmhouse exterior: warm cream brick walls and gables on all sides, white trim, light-wood doors and square entry posts without a decorative arch', floorToFloorFeet: floorToFloor, coordinatedConstructionDrawings: false, frontElevationStudy: true, frontOpeningsCoordinatedWithInteriors: false, garageUpperVolume: 'Unassigned exterior roof-volume study only; no room, floor, storage or access approval', wallCladding: 'Brick veneer finish study; wall assembly and support not designed' };
+  group.userData = { provisional: true, style: 'Restrained transitional cream-brick house with quiet hipped roofs, white eaves and natural oak doors', floorToFloorFeet: floorToFloor, coordinatedConstructionDrawings: false, frontElevationStudy: true, frontOpeningsCoordinatedWithInteriors: false, garageUpperVolume: 'Unoccupied roof void only; no room, storage or access approval', wallCladding: 'Cream queen brick veneer; support and wall assembly require design' };
   const wallThickness = 0.45;
   const fenceBoundaryInset = 0.5, fenceRailOffset = 0.1, fenceRailDepth = 0.14;
   const eastWallFaceX = 55.5 + wallThickness / 2;
@@ -21,15 +21,14 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const eaves = floorToFloor + 9;
   const trim = mat('#f5f2ea');
   const white = mat('#f3eddf');
-  const garageDoorFinish = mat('#c99f6b');
-  garageDoorFinish.name = 'Natural wood garage door - screen approximation';
-  const garageDoorDetail = mat('#af8554');
+  const garageDoorFinish = mat('#c6a274');
+  garageDoorFinish.name = 'Natural oak carriage garage door - screen approximation';
+  const garageDoorDetail = mat('#98784e');
   garageDoorDetail.name = 'Natural wood garage door panel detail - screen approximation';
   const garageSurround = mat('#f5f2ea');
-  garageSurround.name = 'White garage opening surround - screen approximation';
+  garageSurround.name = 'Pale limestone garage opening surround - screen approximation';
   const dark = mat('#393b38', 0.65);
   const windowBlack = mat('#202321');
-  const roofCap = mat('#8e7255');
   const wood = mat('#956c3e');
   const entryWood = mat('#c99f6b');
   const glass = new THREE.MeshStandardMaterial({ color: '#819ba2', metalness: 0.25, roughness: 0.22 });
@@ -73,7 +72,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     canvas.width = canvas.height = 512;
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Exterior masonry and roof textures require a 2D canvas context.');
-    context.fillStyle = roof ? '#837b6c' : '#b9aa8e';
+    context.fillStyle = roof ? '#625f57' : '#b9aa8e';
     context.fillRect(0, 0, 512, 512);
     let seed = roof ? 73 : 19;
     function random() {
@@ -87,7 +86,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
       while (x < 512) {
         const width = roof ? 32 : 43 + Math.floor(random() * 47);
         const shade = Math.floor(random() * (roof ? 22 : 16));
-        context.fillStyle = roof ? `rgb(${151 + shade},${140 + shade},${120 + shade})` : `rgb(${211 + shade},${198 + shade},${174 + shade})`;
+        context.fillStyle = roof ? `rgb(${116 + shade},${112 + shade},${102 + shade})` : `rgb(${211 + shade},${198 + shade},${174 + shade})`;
         context.fillRect(x + 1, row * height + 1, width - 2, height - 2);
         context.fillStyle = roof ? '#ffffff0b' : '#ffffff28';
         context.fillRect(x + 2, row * height + 2, width - 4, 2);
@@ -102,34 +101,79 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   }
   const stoneTexture = surfaceTexture(false);
   baseStone.map = stoneTexture;
-  const roofTexture = surfaceTexture(true);
+  const accentStone = new THREE.MeshStandardMaterial({ color: '#eee3ce', map: stoneTexture, bumpMap: stoneTexture, bumpScale: 0.035, roughness: 0.95 });
+  if (masonryMaps) {
+    for (const material of [accentStone, garageSurround]) {
+      Object.assign(material, masonryMaps.stone);
+      material.bumpMap = null;
+      material.normalScale = new THREE.Vector2(0.4, 0.4);
+      material.color.set('#fff4df');
+    }
+  }
+  garageSurround.color.set('#f1ecdf');
+  garageSurround.map = null;
+  garageSurround.bumpMap = masonryMaps ? null : stoneTexture;
+  garageSurround.bumpScale = 0.025;
+  group.userData.materialStudy = 'Cream queen brick with white entry piers, headers and garage surrounds; veneer support unverified';
+  const roofTexture = masonryMaps?.roof?.map ?? surfaceTexture(true);
   const porchColumnFinish = mat('#f4f1e9', 0.95);
-  const brickTextureWidthFeet = 8 / 3;
-  const brickTextureHeightFeet = 25 / 12;
+  const brickTextureWidthFeet = masonryMaps ? 10 / 3 : 8 / 3;
+  const brickTextureHeightFeet = masonryMaps ? 175 / 48 : 25 / 12;
   group.userData.brickFormat = 'Cream queen face brick; nominal 8 x 3.125 inch face module including mortar';
   const frontBrick = (() => {
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 256;
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Exterior brick texture requires a 2D canvas context.');
-    context.fillStyle = '#bfb3a0';
+    context.fillStyle = '#ddd5c5';
     context.fillRect(0, 0, 256, 256);
     for (let row = 0; row < 8; row++) for (let column = -1; column < 4; column++) {
-      context.fillStyle = ['#e8ddc4', '#e0d2b7', '#efe5d0', '#dccdb0'][(row * 3 + column + 4) % 4];
+      context.fillStyle = ['#d3c8b3', '#e3d8c3', '#d8ccb8', '#e8ddc8'][(row * 3 + column + 4) % 4];
       context.fillRect(column * 64 + (row % 2) * 32 + 2, row * 32 + 2, 60, 28);
     }
     const map = new THREE.CanvasTexture(canvas);
     map.colorSpace = THREE.SRGBColorSpace;
     map.wrapS = map.wrapT = THREE.RepeatWrapping;
-    return new THREE.MeshStandardMaterial({ map, roughness: 0.98 });
+    return new THREE.MeshStandardMaterial({ map, bumpMap: map, bumpScale: 0.025, roughness: 0.98 });
   })();
   function brickBox(parent, x, y, z, w, h, d) {
     const brick = frontBrick.clone();
     brick.map = frontBrick.map.clone();
     brick.map.repeat.set(Math.max(w, d) / brickTextureWidthFeet, h / brickTextureHeightFeet);
+    brick.bumpMap = masonryMaps ? null : brick.map;
+    if (masonryMaps) for (const key of ['normalMap', 'roughnessMap']) {
+      brick[key] = frontBrick[key].clone();
+      brick[key].repeat.copy(brick.map.repeat);
+    }
     const mesh = box(parent, x, y, z, w, h, d, brick);
     mesh.name = 'Cream exterior brick masonry';
     return mesh;
+  }
+  if (masonryMaps) {
+    const colorCanvas = document.createElement('canvas');
+    colorCanvas.width = colorCanvas.height = 1024;
+    const paint = colorCanvas.getContext('2d');
+    if (!paint) throw new Error('Masonry color grading requires a 2D canvas context.');
+    paint.filter = 'saturate(0.65) contrast(0.75) brightness(1.25)';
+    paint.drawImage(masonryMaps.brick.map.image, 0, 0, 1024, 1024);
+    // Retain the photographed queen-brick joints and variation, but grade the
+    // albedo to the owner's cream brick, not the source photograph's red/brown.
+    const pixels = paint.getImageData(0, 0, 1024, 1024);
+    for (let i = 0; i < pixels.data.length; i += 4) {
+      const luminance = (pixels.data[i] + pixels.data[i + 1] + pixels.data[i + 2]) / 3;
+      const value = 182 + luminance * 0.24;
+      pixels.data[i] = value + 10;
+      pixels.data[i + 1] = value + 5;
+      pixels.data[i + 2] = value - 5;
+    }
+    paint.putImageData(pixels, 0, 0);
+    const brickColor = new THREE.CanvasTexture(colorCanvas);
+    brickColor.colorSpace = THREE.SRGBColorSpace;
+    brickColor.wrapS = brickColor.wrapT = THREE.RepeatWrapping;
+    brickColor.anisotropy = 4;
+    Object.assign(frontBrick, masonryMaps.brick, { map: brickColor, bumpMap: null });
+    frontBrick.color.set('#fff4df');
+    frontBrick.normalScale = new THREE.Vector2(0.25, 0.25);
   }
   function brickFaceUVs(geometry, axis = 'x') {
     const positions = geometry.attributes.position;
@@ -139,7 +183,21 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   }
   function texturedBox(parent, x, y, z, w, h, d, roof = false) {
     const material = new THREE.MeshStandardMaterial({ map: (roof ? roofTexture : stoneTexture).clone(), roughness: 0.95 });
-    material.map.repeat.set((roof ? d : Math.max(w, d)) / 8, (roof ? w : h) / 8);
+    if (roof && masonryMaps?.roof) {
+      for (const key of ['normalMap', 'roughnessMap']) material[key] = masonryMaps.roof[key].clone();
+      material.normalScale.set(0.35, 0.35);
+      material.map.repeat.set(d / (3 / 0.3048), w / (3 / 0.3048));
+      for (const key of ['normalMap', 'roughnessMap']) material[key].repeat.copy(material.map.repeat);
+      const panel = box(parent, x, y, z, w, h, d, material);
+      const uv = panel.geometry.attributes.uv;
+      for (let index = 0; index < uv.count; index++) {
+        const u = uv.getX(index), v = uv.getY(index);
+        uv.setXY(index, v, u);
+      }
+      uv.needsUpdate = true;
+      return panel;
+    }
+    material.map.repeat.set((roof ? w : Math.max(w, d)) / 8, (roof ? d : h) / 8);
     return box(parent, x, y, z, w, h, d, material);
   }
   function windowUnit(parent, center, sill, width, height, privacyLowerHalf = false, picture = false, perimeterTrim = true, front = false) {
@@ -161,8 +219,8 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     for (const y of [0, height]) box(frame, 0, y, 0.08, width + 0.3, 0.16, 0.16, windowFinish);
     if (!privacyLowerHalf && !picture && !front) box(frame, 0, height / 2, 0.1, 0.1, height, 0.08, windowFinish);
     if (front) {
-      for (const fraction of [0.25, 0.5, 0.75]) box(frame, 0, height * fraction, 0.13, width, 0.045, 0.06, trim).name = 'Front window horizontal grille';
-      box(frame, 0, height / 2, 0.13, 0.045, height, 0.06, trim).name = 'Front window vertical grille';
+      for (const fraction of [0.25, 0.5, 0.75]) box(frame, 0, height * fraction, 0.13, width, 0.045, 0.06, windowFinish).name = 'Front window horizontal grille';
+      box(frame, 0, height / 2, 0.13, 0.045, height, 0.06, windowFinish).name = 'Front window vertical grille';
     }
     if (perimeterTrim) {
       box(frame, 0, -0.13, 0.05, width + 0.65, 0.22, 0.45, windowFinish);
@@ -170,7 +228,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     }
   }
   function wall(name, x1, z1, x2, z2, bottom, top, openings = []) {
-    const front = ['front ground floor', 'upper front bedrooms', 'upper loft south', 'garage front', 'garage porch return', 'Garage front upper elevation study', 'Garage upper east return study', 'Garage upper west return study'].includes(name);
+    const front = ['front ground floor', 'upper front bedrooms', 'upper loft south', 'garage front', 'garage porch return'].includes(name);
     const wallGroup = new THREE.Group();
     wallGroup.name = `Exterior brick wall: ${name}`;
     wallGroup.position.set(x1, 0, z1);
@@ -180,7 +238,11 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     function fill(start, end, low, high) {
       if (end <= start || high <= low) return;
       const baseLow = low === bottom && bottom < 0 ? Math.min(low, -1.65) : low;
-      brickBox(wallGroup, (start + end) / 2, (baseLow + high) / 2, 0, end - start, high - baseLow, wallThickness);
+      const plinthTop = name === 'garage front' ? garageFloorY + 0.75 : 0.75;
+      if (baseLow < plinthTop) brickBox(wallGroup, (start + end) / 2, (baseLow + Math.min(high, plinthTop)) / 2, 0.025, end - start, Math.min(high, plinthTop) - baseLow, wallThickness + 0.05);
+      const panelLow = Math.max(baseLow, plinthTop);
+      if (high <= panelLow) return;
+      brickBox(wallGroup, (start + end) / 2, (panelLow + high) / 2, 0, end - start, high - panelLow, wallThickness);
     }
     let cursor = 0;
     for (const opening of openings) {
@@ -196,7 +258,30 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
       cursor = center + width / 2;
     }
     fill(cursor, length, bottom, top);
+    if (name.startsWith('upper ')) articulateUpperMasonry(wallGroup, length, top, openings);
     return wallGroup;
+  }
+  // Applied stone is a supported veneer concept, never a substitute for headers.
+  // Work in each actual wall's local coordinates so every return is coordinated.
+  function articulateUpperMasonry(parent, length, top, openings) {
+    const stone = trim;
+    for (const [y, height, depth, label] of [
+      [10.05, 0.3, 0.36, 'Upper masonry base course'],
+      [top - 0.65, 0.18, 0.38, 'Cornice lower bed molding'],
+      [top - 0.36, 0.4, 0.28, 'Cornice frieze'],
+      [top - 0.1, 0.12, 0.46, 'Cornice projecting crown']
+    ]) {
+      box(parent, length / 2, y, 0.27, length, height, depth, stone).name = label;
+    }
+    for (const { center, width, sill, height } of openings) {
+      box(parent, center, sill - 0.23, 0.32, width + 0.9, 0.2, 0.64, stone).name = 'Upper window stone stool';
+      box(parent, center, sill + height + 0.32, 0.3, width + 0.9, 0.38, 0.5, stone).name = 'Upper window stone lintel';
+      for (const side of [-1, 1]) {
+        box(parent, center + side * (width / 2 + 0.29), sill + height / 2, 0.28,
+          0.24, height + 0.2, 0.36, stone).name = 'Upper window stone jamb';
+      }
+    }
+    parent.userData.stonework = 'Supported veneer, flashing, drip grooves and anchors require professional detailing';
   }
   const win = (center, width = 4, sill = 3, height = 5) => ({ center, width, sill, height });
   const garageSideDoorCenterZ = 45.5;
@@ -205,6 +290,15 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const westFrontWindowCenterZ = 49;
   const westFrontWindowWidth = 4;
   wall('front ground floor', 0, 54.2, 31.2, 54.2, -0.4, 9, [win(4.2, 2.8), win(8.3, 2.8), { center: 15.6, width: 5, sill: 0, height: 8, door: true }, win(23, 2.8), win(27.1, 2.8)]);
+  const archedEntry = new THREE.Group();
+  archedEntry.name = 'Coordinated arched oak entry and deep white surround';
+  archedEntry.position.set(15.6, 0, 54.2);
+  group.add(archedEntry);
+  buildArchedFrontEntry(THREE, { box, wood: entryWood, field: mat('#b88e5a'), oakMaps: masonryMaps?.oak, trim, hardware: dark }, archedEntry);
+  for (const x of [4.2, 8.3, 23, 27.1]) {
+    box(group, x, 8.32, 54.54, 3.45, 0.35, 0.24, trim).name = 'Front window projecting limestone lintel';
+    box(group, x, 2.78, 54.55, 3.4, 0.18, 0.3, trim).name = 'Front window cut-stone sill';
+  }
   const livingFeatureWall = getLivingRoomFeatureLayout();
   const guestEntry = getGuestEntryLayout();
   wall('west ground floor', 0, 8, 0, 54.2, -0.4, 9, [
@@ -248,7 +342,7 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   ]);
   wall('garage porch return', 31.2, 54.2, 31.2, 49, -0.4, 9);
   const upper = floorToFloor;
-  wall('upper front bedrooms', 0, 53.2, 31, 53.2, 9, eaves, [win(4.8, 2.4, upper + 3), win(8.6, 2.4, upper + 3), win(12.4, 1.8, upper + 3), win(20.2, 2.4, upper + 3), win(24, 2.4, upper + 3), win(28.1, 1.8, upper + 3)]);
+  wall('upper front bedrooms', 0, 53.2, 31, 53.2, 9, eaves, [win(4.8, 2.4, upper + 3), win(8.6, 2.4, upper + 3), win(11.6, 1.5, upper + 3), win(20.2, 2.4, upper + 3), win(24, 2.4, upper + 3), win(28.1, 1.8, upper + 3)]);
   wall('upper west', 0, 7.6, 0, 53.2, 9, eaves, [win(5, 4, upper + 3), win(14, 4, upper + 3), win(22, 3, upper + 3), win(37.6, 4, upper + 3)]);
   wall('upper primary rear', 10.2, 7.6, 0, 7.6, 9, eaves);
   wall('upper bath west return', 10.2, 2.1, 10.2, 7.6, 9, eaves);
@@ -259,55 +353,165 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   wall('upper closet return', 52, 15.4, 54, 15.4, 9, eaves);
   wall('upper east loft', 52, 36.2, 52, 15.4, 9, eaves, [win(8.2, 4, upper + 3), win(14.2, 4, upper + 3)]);
   wall('upper loft south', 36.5, 36.2, 52, 36.2, 9, eaves);
+  // The resolved Storage south wall continues to the bedroom return.
+  // Do not leave a facade slit when the lower garage roof exposes this wall.
+  wall('upper storage south', 31, 36.2, 36.5, 36.2, 9, eaves);
   wall('upper bedroom east return', 31, 53.2, 31, 36.2, 9, eaves);
-  const garageUpperStudy = wall('Garage front upper elevation study', 31.2, 49, 55.5, 49, 9, eaves, [win(8.2, 2.8, upper + 3), win(12.8, 2.8, upper + 3)]);
-  garageUpperStudy.userData = { exteriorStudyOnly: true, habitableRoom: false, floorAdded: false, openingCoordinationRequired: true };
-  wall('Garage upper east return study', 55.5, 49, 55.5, 36.2, 9, eaves);
-  wall('Garage upper west return study', 31.2, 36.2, 31.2, 49, 9, eaves);
+  // The resolved upstairs stops at z=36.2 east of x=31.
+  // This is a garage roof void, not a second-floor facade or bonus room.
+  const garageFacadeEaves = 9;
+  group.userData.garageUpperVolume = 'Unoccupied garage roof void only; no upper room, floor, windows, storage or access approval';
 
-  function gable(name, left, right, back, front, base, rise) {
-    const roof = new THREE.Group();
-    roof.name = name;
-    group.add(roof);
-    const center = (left + right) / 2;
-    const half = (right - left) / 2;
-    for (const z of [back, front]) {
+  function renderRoofEnvelope(name, definitions, material, metal = false) {
+    const plan = HomeRoof.buildRoofEnvelope(definitions);
+    const model = new THREE.Group();
+    model.name = name;
+    model.userData = { connectedRoof: true, faceCount: plan.faces.length, valleyCount: plan.joins.filter((join) => join.type === 'valley').length, framingAndDrainageVerified: false };
+    group.add(model);
+    const soffitFinish = white.clone();
+    soffitFinish.side = THREE.DoubleSide;
+    function surface(polygon, plane, finish, label, offset = 0) {
+      const positions = [], uv = [];
+      const gradient = Math.hypot(plane[0], plane[1]);
+      const tileFeet = 3 / 0.3048;
+      const vertex = (point) => {
+        positions.push(point[0], HomeRoof.heightAt(plane, point) + offset, point[1]);
+        uv.push(
+          gradient ? (plane[1] * point[0] - plane[0] * point[1]) / gradient / tileFeet : point[0] / tileFeet,
+          gradient ? (plane[0] * point[0] + plane[1] * point[1]) / gradient * Math.sqrt(1 + gradient * gradient) / tileFeet : point[1] / tileFeet
+        );
+      };
+      for (let index = 1; index < polygon.length - 1; index++) {
+        vertex(polygon[0]); vertex(polygon[index + 1]); vertex(polygon[index]);
+      }
       const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute([left, base, z, right, base, z, center, base + rise, z], 3));
-      geometry.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, half / 4, 0, half / 8, rise / 8], 2));
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
       geometry.computeVertexNormals();
-      const referenceFront = z === front && ['West bedroom gable', 'Central bedroom gable', 'Rear east-wing roof', 'Reference garage-front gable study', 'Entry porch gable'].includes(name);
-      const faceMaterial = frontBrick.clone();
-      faceMaterial.side = THREE.DoubleSide;
-      brickFaceUVs(geometry);
-      const face = new THREE.Mesh(geometry, faceMaterial);
-      face.name = 'Brick gable end';
-      roof.add(face);
-      if (referenceFront) {
-        if (rise > 5) {
-          box(roof, center, base + rise * 0.65, z + 0.08, 0.9, 1.5, 0.12, trim).name = 'Front gable vent surround';
-          for (let slat = 0; slat < 7; slat++) box(roof, center, base + rise * 0.65 - 0.55 + slat * 0.18, z + 0.16, 0.65, 0.055, 0.08, garageDoorDetail).name = 'Front gable vent louver';
+      const mesh = new THREE.Mesh(geometry, finish);
+      mesh.name = label;
+      mesh.castShadow = mesh.receiveShadow = true;
+      model.add(mesh);
+      return mesh;
+    }
+    function linePart(start, end, width, height, finish, label, lift = 0) {
+      const a = new THREE.Vector3(start[0], start[1] + lift, start[2]);
+      const b = new THREE.Vector3(end[0], end[1] + lift, end[2]);
+      const direction = b.clone().sub(a);
+      if (direction.length() < 0.01) return;
+      const part = box(model, (a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2, direction.length(), height, width, finish);
+      part.name = label;
+      part.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), direction.normalize());
+      return part;
+    }
+    for (const face of plan.faces) {
+      const mesh = surface(face.polygon, face.plane, material, `${face.roof} connected roof surface`);
+      mesh.userData = { roofSurface: true, roof: face.roof, patch: face.id, plane: face.plane, polygon: face.polygon };
+      const underside = surface(face.polygon, face.plane, soffitFinish, 'Closed connected roof underside', -0.16);
+      underside.userData.noExteriorShadow = true;
+      if (metal) {
+        const [gx, gz] = face.plane, gradient = Math.hypot(gx, gz);
+        const u = gradient ? [gz / gradient, -gx / gradient] : [1, 0];
+        const projections = face.polygon.map(([x, z]) => x * u[0] + z * u[1]);
+        for (let seam = Math.ceil(Math.min(...projections) / 1.5) * 1.5; seam < Math.max(...projections); seam += 1.5) {
+          const points = [];
+          for (let index = 0; index < face.polygon.length; index++) {
+            const a = face.polygon[index], b = face.polygon[(index + 1) % face.polygon.length];
+            const av = a[0] * u[0] + a[1] * u[1] - seam, bv = b[0] * u[0] + b[1] * u[1] - seam;
+            if (Math.abs(av) < 1e-7) points.push(a);
+            if (av * bv < 0) {
+              const t = av / (av - bv);
+              points.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+            }
+          }
+          const unique = points.filter((point, index) => !points.slice(0, index).some((other) => Math.hypot(point[0] - other[0], point[1] - other[1]) < 1e-6));
+          if (unique.length >= 2) {
+            unique.sort((a, b) => a[0] * -u[1] + a[1] * u[0] - b[0] * -u[1] - b[1] * u[0]);
+            const point = (p) => [p[0], HomeRoof.heightAt(face.plane, p), p[1]];
+            const rib = linePart(point(unique[0]), point(unique.at(-1)), 0.025, 0.045, material, 'Clipped standing-seam roof rib', 0.035);
+            if (rib) rib.userData.noExteriorShadow = true;
+          }
         }
       }
     }
-    const pitch = Math.atan2(rise, half);
-    const overhang = 0.65;
-    const slope = Math.hypot(half, rise) + overhang;
-    for (const side of [-1, 1]) {
-      const panel = texturedBox(roof, center + side * (half / 2 + overhang * Math.cos(pitch) / 2), base + rise / 2 - overhang * Math.sin(pitch) / 2, (back + front) / 2, slope, 0.16, front - back + 1.3, true);
-      panel.name = 'Brown-shingle pitched roof';
-      panel.rotation.z = -side * pitch;
-      const fascia = box(roof, panel.position.x, panel.position.y - 0.09, front + 0.68, slope, 0.16, 0.18, trim);
-      fascia.rotation.z = panel.rotation.z;
-      box(roof, side < 0 ? left - 0.5 : right + 0.5, base - 0.35, (back + front) / 2, 0.2, 0.2, front - back + 1.3, dark).name = 'Dark eaves gutter';
+    const valleyFinish = metal ? material : mat('#655f53', 0.8);
+    for (const join of plan.joins) {
+      const part = linePart(join.start, join.end, join.type === 'valley' ? 0.14 : 0.24, join.type === 'valley' ? 0.015 : 0.12, join.type === 'valley' ? valleyFinish : material, `Connected roof ${join.type}`, join.type === 'valley' ? 0.018 : 0.045);
+      if (part) part.userData = { roofJoin: join.type, roofs: join.roofs };
     }
-    box(roof, center, base + rise + 0.1, (back + front) / 2, 0.22, 0.16, front - back + 1.4, roofCap).name = 'Brown-shingle roof ridge cap';
+    for (const edge of plan.boundaries) {
+      const dx = edge.end[0] - edge.start[0], dz = edge.end[2] - edge.start[2], length = Math.hypot(dx, dz);
+      if (length < 0.02) continue;
+      const outside = [(edge.start[0] + edge.end[0]) / 2 + dz / length * 0.005, (edge.start[2] + edge.end[2]) / 2 - dx / length * 0.005];
+      const outsideRoof = plan.patches.filter((patch) => HomeRoof.contains(patch.polygon, outside));
+      const outsideHeight = Math.max(-Infinity, ...outsideRoof.map((patch) => HomeRoof.heightAt(patch.plane, outside)));
+      const edgeHeight = (edge.start[1] + edge.end[1]) / 2;
+      if (outsideHeight > edgeHeight + 0.01) {
+        linePart(edge.start, edge.end, 0.12, 0.12, valleyFinish, 'Stepped roof wall-abutment flashing', 0.02);
+        continue;
+      }
+      if (metal) continue;
+      const rake = Math.abs(edge.start[1] - edge.end[1]) > 0.05;
+      linePart(edge.start, edge.end, 0.26, 0.45, trim, rake ? 'Connected roof rake fascia' : 'Connected roof eaves fascia', -0.3);
+      const width = 0.65;
+      const a = [edge.start[0], edge.start[2]], b = [edge.end[0], edge.end[2]];
+      const c = [b[0] - dz / length * width, b[1] + dx / length * width], d = [a[0] - dz / length * width, a[1] + dx / length * width];
+      // Level eaves, not extensions of the steep hip plane: the latter rose
+      // through adjoining roof slopes at both rear corners. Clip rake/eaves
+      // strips to their actual visible face, including valley terminations.
+      for (const face of plan.faces) {
+        if (!face.plane.every((value, i) => Math.abs(value - edge.plane[i]) < 1e-7)) continue;
+        const polygon = HomeRoof.intersectPolygons([a, b, c, d], face.polygon);
+        if (polygon.length) surface(polygon, rake ? edge.plane : [0, 0, edge.start[1]],
+          white, 'Connected roof closed edge soffit', -0.2);
+      }
+      if (!rake) linePart(edge.start, edge.end, 0.24, 0.2, trim, 'Connected roof perimeter gutter', -0.1);
+    }
+    return model;
   }
-  gable('West bedroom gable', 0, 14.2, 7.6, 53.2, eaves, 8.8);
-  gable('Central bedroom gable', 14.2, 31, 2.1, 53.2, eaves, 8.8);
-  gable('Rear east-wing roof', 25.7, 54, 10, 36.2, eaves, 6);
-  gable('Reference garage-front gable study', 31, 55.5, 36.2, 49.2, eaves, 8.8);
-  gable('Dining rear projection roof', 13.2, 26.875, -0.1, 2.1, 9, 5.5);
+  const slateFinish = new THREE.MeshStandardMaterial({ ...(masonryMaps?.roof ?? {}), map: roofTexture, roughness: 0.95, side: THREE.DoubleSide });
+  slateFinish.normalScale.set(0.35, 0.35);
+  const houseRoof = renderRoofEnvelope('Connected main-house roof system', HomeRoof.getConnectedRoofDefinitions(floorToFloor), slateFinish);
+  const houseRoofPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getConnectedRoofDefinitions(floorToFloor));
+  // Fixed room walls/windows stay put; close the attic-wall band up to the
+  // real roof underside, including the stepped loft/garage abutment.
+  const upperWallHeads = [
+    [0, 53.2, 31, 53.2],
+    [0, 7.6, 0, 53.2], [10.2, 7.6, 0, 7.6],
+    [10.2, 2.1, 10.2, 7.6], [25.7, 2.1, 10.2, 2.1],
+    [25.7, 10, 25.7, 2.1], [54, 10, 25.7, 10],
+    [54, 15.4, 54, 10], [52, 15.4, 54, 15.4],
+    [52, 36.2, 52, 15.4], [36.5, 36.2, 52, 36.2],
+    [31, 53.2, 31, 36.2], [31, 36.2, 36.5, 36.2]
+  ];
+  for (const [x1, z1, x2, z2] of upperWallHeads) {
+    for (const { start: a, end: b, bottom } of HomeRoof.wallHeadSegments(houseRoofPlan, [x1, z1], [x2, z2], eaves)) {
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute([
+        a[0], bottom, a[2], b[0], bottom, b[2], b[0], b[1], b[2],
+        a[0], bottom, a[2], b[0], b[1], b[2], a[0], a[1], a[2]
+      ], 3));
+      geometry.computeVertexNormals();
+      brickFaceUVs(geometry, Math.abs(x2 - x1) > Math.abs(z2 - z1) ? 'x' : 'z');
+      const finish = frontBrick.clone();
+      finish.side = THREE.DoubleSide;
+      const closure = new THREE.Mesh(geometry, finish);
+      closure.name = 'Fitted upper attic wall-head closure';
+      closure.userData = { finishOnly: true, structuralSupportDesigned: false };
+      closure.castShadow = closure.receiveShadow = true;
+      houseRoof.add(closure);
+    }
+  }
+  houseRoof.userData.drainageIntent = 'Main and wing hips fall to perimeter gutters; their derived valley drains outward. Garage hip meets the taller walls through stepped flashing, not a fictional continuous valley. Upper rear rainwater must be piped separately, never discharged onto the post-free canopy; outlet sizing and routes remain to design.';
+  houseRoof.userData.framingAllowanceInches = 18;
+  houseRoof.userData.framingAllowanceVerified = false;
+
+  for (const x of [13.05, 29.9]) {
+    box(group, x, 15.05, 53.67, 0.14, 8.1, 0.14, trim).name = 'Upper front rainwater downspout';
+    box(group, x, 19.05, 54.31, 0.14, 0.18, 1.28, trim).name = 'Upper downspout eaves offset';
+  }
+  // Dining is hipped in the shared envelope; no independent triangle at
+  // z = 2.1 (it would rise through that hip's surface).
   const patio = new THREE.Group();
   patio.name = 'Kitchen-prep vegetable garden';
   const patioBounds = { left: 26.5, right: 55.5, rear: -0.1 - wallThickness / 2, front: 7 };
@@ -377,7 +581,9 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const livingTerraceRear = livingPatioBounds.rear - 4;
   const livingTerraceFront = livingPatioBounds.front - wallThickness / 2;
   const livingPatioCenterZ = (livingPatioBounds.rear + livingTerraceFront) / 2;
-  const diningPatioStairWidth = livingTerraceFront - livingPatioBounds.rear;
+  const diningPatioStairWidth = 4;
+  const diningLandingRear = livingFeatureWall.patioDoor.z - 2;
+  const diningLandingLeft = livingTerraceRight - diningPatioStairWidth;
   livingPatio.userData = { limits: { left: livingTerraceLeft, right: livingTerraceRight, rear: livingTerraceRear, front: livingTerraceFront }, coveredLimits: livingPatioBounds, uncoveredYardExtensionFeet: 4, connectsToWestFencePath: true, flatAreaLeftFeet: livingTerraceFlatLeft, topFeet: patioGrade, directHouseDoor: true, levelDiningWalkout: false, stepsAtDiningDoor: true, connectedByGardenPath: true, structureVerified: false, drainageVerified: false, daylightPerformanceVerified: false };
   group.add(livingPatio);
   const livingExit = new THREE.Group();
@@ -396,8 +602,10 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   westPatioPositions.needsUpdate = true;
   westPatioTransition.geometry.computeVertexNormals();
   westPatioTransition.userData = { ...westPatioTransition.userData, westTopFeet: -1.35, eastTopFeet: patioGrade, slopeVerified: false, accessibleRouteVerified: false };
-  paving(livingPatio, 'Covered dining patio door landing', 8.975, livingPatioBounds.rear, 4, diningPatioStairWidth, 0, -patioGrade + 0.3, baseStone);
-  paving(livingPatio, 'Dining patio threshold', livingTerraceRight, livingFeatureWall.patioDoor.z - 1.5, livingFeatureWall.patioDoor.x - livingTerraceRight, 3, 0, 0.3, baseStone);
+  // The continuous terrace below restores the removed platform/flight footprint.
+  paving(livingPatio, 'Covered dining patio door landing', diningLandingLeft, diningLandingRear, 4, 4, 0, -patioGrade + 0.3, baseStone);
+  paving(livingPatio, 'Dining patio threshold', diningLandingLeft + 4, livingFeatureWall.patioDoor.z - 1.5, livingFeatureWall.patioDoor.x - diningLandingLeft - 4, 3, 0, 0.3, baseStone);
+  livingPatio.userData.stairReview = 'Concept only: 48 by 48 inch top landing, 48 inch flight toward yard, three 6.5 inch risers, two 13.2 inch goings. Keep 48 by 48 inch bottom arrival clear on existing terrace. No guard or handrail approval: review exposed 19.5 inch landing edges, handhold/guard requirements, foundations, frost, slip resistance, drainage and threshold waterproofing before construction.';
   const patioRoofPitch = 3 / 16;
   const patioRoofLeft = livingPatioBounds.left;
   const patioRoofRight = livingPatioBounds.right;
@@ -407,12 +615,19 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   const patioRoofThickness = 0.18;
   const patioRoofFront = livingPatioBounds.front + wallThickness / 2;
   const patioRoofCenterZ = (livingPatioBounds.rear + patioRoofFront) / 2;
-  const patioRoofY = 9.1;
-  const patioRoofLength = (patioRoofFront - livingPatioBounds.rear - patioRoofThickness * Math.sin(patioRoofAngle)) / Math.cos(patioRoofAngle);
+  // Lift only the canopy, not the openings: the deeper soffit must clear the
+  // eight-foot dining door and its head trim at the low end of the opening.
+  const patioRoofY = 9.5;
+  const patioRoofLength = patioRoofFront - livingPatioBounds.rear;
   const patioRoof = texturedBox(livingPatio, patioRoofCenterX, patioRoofY, patioRoofCenterZ, patioRoofWidth, patioRoofThickness, patioRoofLength, true);
   patioRoof.name = 'Brown-shingle covered patio roof';
   patioRoof.userData = { location: 'Behind living room', limits: { ...livingPatioBounds, front: patioRoofFront }, centerHeightFeet: patioRoofY, pitch: patioRoofPitch, kitchenAndPrepFrontageOpen: true, coversDiningLanding: false, livingRoomDaylightReduced: true, attachmentVerified: false, daylightPerformanceVerified: false };
-  patioRoof.rotation.x = -patioRoofAngle;
+  const patioRoofVertices = patioRoof.geometry.attributes.position;
+  for (let i = 0; i < patioRoofVertices.count; i++) {
+    patioRoofVertices.setY(i, patioRoofVertices.getZ(i) * patioRoofPitch
+      + (patioRoofVertices.getY(i) > 0 ? 1 : -1) * patioRoofThickness / (2 * Math.cos(patioRoofAngle)));
+  }
+  patioRoof.geometry.computeVertexNormals();
   function patioRoofUndersideAt(z) {
     return patioRoofY + (z - patioRoofCenterZ) * patioRoofPitch - patioRoofThickness / (2 * Math.cos(patioRoofAngle));
   }
@@ -429,22 +644,78 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     }
     geometry.computeVertexNormals();
     brickFaceUVs(geometry, 'z');
-    const closure = new THREE.Mesh(geometry, frontBrick);
+    const closure = new THREE.Mesh(geometry, white);
     closure.name = name;
     closure.position.set(x, 9, centerZ);
     livingPatio.add(closure);
   }
-  for (const z of [livingPatioBounds.rear + 0.6, livingPatioBounds.front - 1]) {
-    const beamTop = patioRoofUndersideAt(z);
-    for (const x of [patioRoofLeft + 0.75, patioRoofRight - 0.75]) {
-      if (z !== livingPatioBounds.rear + 0.6 || x !== patioRoofLeft + 0.75) continue;
-      const post = box(livingPatio, x, (beamTop - 0.32 + patioGrade) / 2, z, 0.75, beamTop - 0.32 - patioGrade, 0.75, wood);
-      post.name = 'Patio timber support post';
-      post.userData = { widthInches: 9, structuralApproval: false };
-      box(livingPatio, x, patioGrade + 0.6, z, 1, 1.2, 1, baseStone).name = 'Patio post stone foot';
+  patioRoof.userData.supportConcept = 'Post-free house-supported cantilever; structural engineering required, do not build from model';
+  patioRoof.userData.structuralApproval = false;
+  patioRoof.userData.conceptFasciaDepthInches = 9;
+  // All finish edges share the same world-space section. Rotating separate
+  // boxes shifts their end points and previously put fascia through the roof.
+  const canopyDepth = 9 / 12;
+  const canopySoffitBottomAt = (z) => patioRoofUndersideAt(z) - canopyDepth;
+  function canopySection(name, left, right, rear, front, bottomAt, topAt, material = trim) {
+    const geometry = new THREE.BoxGeometry(right - left, 1, front - rear);
+    const p = geometry.attributes.position;
+    const zCenter = (rear + front) / 2;
+    for (let i = 0; i < p.count; i++) {
+      const z = zCenter + p.getZ(i);
+      p.setY(i, p.getY(i) > 0 ? topAt(z) : bottomAt(z));
     }
-    box(livingPatio, patioRoofCenterX, beamTop - 0.16, z, patioRoofWidth - 0.75, 0.32, 0.3, wood).name = 'Patio perimeter beam';
+    geometry.computeVertexNormals();
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.name = name;
+    mesh.position.set((left + right) / 2, 0, zCenter);
+    livingPatio.add(mesh);
+    return mesh;
   }
+  const canopySoffit = canopySection('Post-free canopy warm-white soffit - engineering required',
+    patioRoofLeft, patioRoofRight, livingPatioBounds.rear, patioRoofFront,
+    canopySoffitBottomAt, (z) => canopySoffitBottomAt(z) + 0.06);
+  canopySoffit.name = 'Post-free canopy warm-white soffit - engineering required';
+  canopySoffit.userData = { structuralApproval: false, framingAndBackspanDesigned: false, finishOnly: true };
+  for (const [x, z] of [[patioRoofCenterX - patioRoofWidth / 4, livingPatioCenterZ],
+    [patioRoofCenterX + patioRoofWidth / 4, livingPatioCenterZ], [3.3, 0.8]]) {
+    canopySection('Canopy downlight sloped mounting plate', x - 0.16, x + 0.16,
+      z - 0.16, z + 0.16, () => canopySoffitBottomAt(z) - 0.04, canopySoffitBottomAt, dark);
+  }
+  for (const x of [patioRoofLeft, patioRoofRight - 0.1]) {
+    canopySection('Cantilever canopy side fascia - concept depth only', x, x + 0.1,
+      livingPatioBounds.rear, patioRoofFront, canopySoffitBottomAt, patioRoofUndersideAt);
+  }
+  canopySection('Cantilever canopy outer fascia', patioRoofLeft, patioRoofRight,
+    livingPatioBounds.rear, livingPatioBounds.rear + 0.1, canopySoffitBottomAt, patioRoofUndersideAt);
+  canopySection('Canopy closed house abutment', patioRoofLeft, patioRoofRight,
+    7.98, 8.08, canopySoffitBottomAt, patioRoofUndersideAt);
+  canopySection('Canopy dining-wall stepped abutment flashing', patioRoofRight - 0.02, patioRoofRight + 0.04,
+    livingPatioBounds.rear, 7.5,
+    (z) => Math.min(patioRoofUndersideAt(z) + 0.16, 9.2),
+    (z) => Math.max(patioRoofUndersideAt(z) + 0.2, 9.2) + 0.15, dark);
+  canopySection('Canopy house counterflashing - waterproofing concept', patioRoofLeft, patioRoofRight,
+    7.94, 8.02, (z) => patioRoofUndersideAt(z) + 0.16,
+    (z) => patioRoofUndersideAt(z) + 0.55, dark);
+  // Open trough, falling east to a wall-mounted leader, not a new patio post.
+  const gutterRear = livingPatioBounds.rear - 0.3;
+  const gutterFront = livingPatioBounds.rear;
+  const gutterHigh = patioRoofUndersideAt(livingPatioBounds.rear) - 0.12;
+  const gutterEndX = patioRoofRight + 0.3;
+  function gutterPart(name, x, z, width, height, depth, offset) {
+    const mesh = box(livingPatio, x, gutterHigh - x / 192 + offset, z, width, height, depth, trim);
+    // Fall along x; constituent geometry is measured in regression tests.
+    mesh.rotation.z = -Math.atan(1 / 192);
+    mesh.name = name;
+    return mesh;
+  }
+  gutterPart('Canopy gutter trough base', gutterEndX / 2, (gutterRear + gutterFront) / 2, gutterEndX, 0.04, 0.3, -0.2);
+  for (const z of [gutterRear, gutterFront]) gutterPart('Canopy gutter upstand', gutterEndX / 2, z, gutterEndX, 0.22, 0.04, -0.11);
+  for (const x of [0.02, gutterEndX - 0.02]) gutterPart('Canopy gutter end closure', x, (gutterRear + gutterFront) / 2, 0.04, 0.22, 0.3, -0.11);
+  const leaderTop = gutterHigh - gutterEndX / 192 - 0.2;
+  box(livingPatio, gutterEndX - 0.08, (leaderTop + patioGrade - 0.3) / 2, gutterRear + 0.15,
+    0.14, leaderTop - patioGrade + 0.3, 0.14, trim).name = 'Canopy dining-wall rainwater leader - drain design required';
+  for (const y of [1, 5, 8]) box(livingPatio, gutterEndX - 0.08, y, -0.47, 0.22, 0.08, 0.3, dark).name = 'Canopy leader wall bracket';
+  patioRoof.userData.drainageIntent = 'East-falling open gutter to dining-wall leader; below-grade outlet placeholder, capacity and stormwater design unverified';
   const patioTableX = 3.5;
   const patioTableZ = 6.65;
   const patioFurniture = new THREE.Group();
@@ -496,83 +767,112 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     firewoodRack.add(splitLog);
   }
 
-  function exteriorSteps(parent, name, x, startZ, direction, width, { riseFeet = 0.45, baseFeet = -1.65, treadCount = 3, flareFeet = 0.4, flushNosing = false } = {}) {
+  function exteriorSteps(parent, name, x, startZ, direction, width, { riseFeet = 0.45, baseFeet = -1.65, treadCount = 3, goingFeet = 1.1, flareFeet = 0.4, flushNosing = false } = {}) {
     const steps = new THREE.Group();
     steps.name = name;
-    steps.userData = { risers: 3, riseFeet, goingFeet: 1.1, contrastNosing: true, provisional: true };
+    steps.userData = { risers: 3, riseFeet, goingFeet, contrastNosing: true, provisional: true };
     parent.add(steps);
     for (let step = 0; step < treadCount; step++) {
       const top = -(step + 1) * riseFeet;
-      const z = startZ + direction * (step * 1.1 + 0.55);
-      box(steps, x, (top + baseFeet) / 2, z, width + step * flareFeet, top - baseFeet, 1.1, stepStone).name = 'Darker stone entry tread';
-      box(steps, x, top + (flushNosing ? -0.025 : 0.025), z + direction * 0.48, width + step * flareFeet, 0.05, 0.14, stepEdge).name = 'Contrasting step nosing';
-      box(steps, x, -step * riseFeet - 0.16, startZ + direction * (step * 1.1 + 0.015), 0.6, 0.08, 0.03, glow).name = 'Shielded warm step marker';
+      const z = startZ + direction * (step * goingFeet + goingFeet / 2);
+      box(steps, x, (top + baseFeet) / 2, z, width + step * flareFeet, top - baseFeet, goingFeet, stepStone).name = 'Darker stone entry tread';
+      box(steps, x, top + (flushNosing ? -0.025 : 0.025), z + direction * (goingFeet / 2 - 0.07), width + step * flareFeet, 0.05, 0.14, stepEdge).name = 'Contrasting step nosing';
+      box(steps, x, -step * riseFeet - 0.16, startZ + direction * (step * goingFeet + 0.015), 0.6, 0.08, 0.03, glow).name = 'Shielded warm step marker';
       const wash = new THREE.PointLight('#ffd09a', 1.4, 3, 2);
       wash.name = 'Shielded warm entry-step wash';
-      wash.position.set(x, -step * riseFeet - 0.16, startZ + direction * (step * 1.1 + 0.06));
+      wash.position.set(x, -step * riseFeet - 0.16, startZ + direction * (step * goingFeet + 0.06));
       steps.add(wash);
     }
   }
   const livingAccess = new THREE.Group();
   livingAccess.name = 'Dining west door to covered patio access';
-  livingAccess.position.set(8.975, 0, livingPatioCenterZ);
-  livingAccess.rotation.y = -Math.PI / 2;
+  livingAccess.position.set(diningLandingLeft + diningPatioStairWidth / 2, 0, diningLandingRear);
   livingPatio.add(livingAccess);
-  exteriorSteps(livingAccess, 'Covered dining patio steps', 0, 0, 1, diningPatioStairWidth, { riseFeet: -patioGrade / 3, baseFeet: patioGrade - 0.3, treadCount: 2, flareFeet: 0, flushNosing: true });
+  exteriorSteps(livingAccess, 'Covered dining patio steps', 0, 0, -1, diningPatioStairWidth, { riseFeet: -patioGrade / 3, baseFeet: patioGrade - 0.3, treadCount: 2, flareFeet: 0, flushNosing: true });
   paving(group, 'Covered front porch', 0, 54.2, 31.2, 7, 0, 1.65);
   const porchPillars = [];
-  for (const [index, x] of [1, 11.9, 19.3, 30.2].entries()) {
-    const entryColumn = index === 1 || index === 2;
-    const height = entryColumn ? 8 : 8.4;
-    const pillar = box(group, x, height / 2, 60.5, 1, height, 1, porchColumnFinish);
-    pillar.name = 'White porch column';
-    pillar.userData = { entryColumn, widthInches: 12, heightFeet: height, provisional: true };
+  for (const x of [1, 11.65, 19.55, 30.2]) {
+    const height = 9.7;
+    const entryColumn = x === 11.65 || x === 19.55;
+    const width = entryColumn ? 1.3 : 1;
+    const pillar = box(group, x, height / 2, 60.5, width, height, width, porchColumnFinish);
+    pillar.name = 'White farmhouse porch column';
+    pillar.userData = { entryColumn, widthInches: width * 12, heightFeet: height, provisional: true };
     porchPillars.push(pillar);
-    brickBox(group, x, 0.5, 60.5, 1.25, 1, 1.25);
-    if (!entryColumn) box(group, x, 8.25, 60.5, 1.25, 0.3, 1.25, trim).name = 'Outer porch column cap';
+    brickBox(group, x, entryColumn ? 0.45 : 0.375, 60.5, entryColumn ? 1.7 : 1.25, entryColumn ? 0.9 : 0.75, entryColumn ? 1.7 : 1.25).name = 'Red brick porch-column plinth';
+    box(group, x, 9.6, 60.5, entryColumn ? 1.8 : 1.25, 0.2, entryColumn ? 1.8 : 1.25, trim).name = 'White porch column capital';
+    if (entryColumn) box(group, x, 9.38, 60.5, 1.5, 0.24, 1.5, trim).name = 'Layered entry capital neck';
   }
-  const porchMetal = mat('#716e62', 0.55);
-  const porchCanopyHeight = 9.1, porchCanopyAngle = 0.22, porchCanopyThickness = 0.18, porchCanopyCenterZ = 57.5;
+  // Deep, flat-headed entry portal beneath the retained single roof plane.
+  // Preserve the existing posts/support positions and the full central approach.
+  const entryPortal = new THREE.Group();
+  entryPortal.name = 'Deep limestone entrance portal - support concept';
+  entryPortal.userData = { supportApproved: false, beamUndersideFeet: 8.9, clearWidthFeet: 5.8 };
+  group.add(entryPortal);
+  for (const x of [11.65, 19.55]) {
+    box(entryPortal, x, 4.45, 60.5, 1.8, 8.9, 2.2, trim).name = 'Entry portal masonry pier jacket';
+    box(entryPortal, x, 0.2, 60.5, 2.1, 0.4, 2.5, trim).name = 'Entry portal stone foot';
+    box(entryPortal, x, 8.73, 60.5, 2, 0.34, 2.4, trim).name = 'Entry portal impost';
+  }
+  box(entryPortal, 15.6, 9.3, 60.5, 9.7, 0.8, 2.2, trim).name = 'Entry portal deep stone entablature';
+  // Recessed inner face makes the structural depth legible from street eye.
+  box(entryPortal, 15.6, 9.03, 61.64, 5.9, 0.16, 0.12, porchColumnFinish).name = 'Entry portal recessed lintel face';
+  const porchCanopyHeight = 10.5, porchCanopyAngle = 0.13, porchCanopyThickness = 0.22, porchCanopyCenterZ = 57.5;
   function porchCanopyUndersideAt(z) {
     return porchCanopyHeight - (z - porchCanopyCenterZ) * Math.tan(porchCanopyAngle) - porchCanopyThickness / 2 / Math.cos(porchCanopyAngle);
   }
-  const porchRoof = new THREE.Group();
-  porchRoof.name = 'Standing-seam metal reference porch canopy';
-  group.add(porchRoof);
-  for (const [left, right] of [[-0.65, 11.5], [19.7, 31.85]]) {
-    const panel = box(porchRoof, (left + right) / 2, porchCanopyHeight, porchCanopyCenterZ, right - left, porchCanopyThickness, 9.5, porchMetal);
-    panel.name = 'Metal porch roof beside open entry gable';
-    panel.rotation.x = porchCanopyAngle;
-    for (let x = -(right - left) / 2 + 0.5; x < (right - left) / 2; x += 1.5) box(panel, x, 0.11, 0, 0.035, 0.06, 9.5, dark).name = 'Porch canopy standing seam';
+  function fitTrimTopToPorchRoof(part) {
+    const positions = part.geometry.attributes.position;
+    for (let index = 0; index < positions.count; index++) {
+      if (positions.getY(index) > 0) positions.setY(index, porchCanopyUndersideAt(part.position.z + positions.getZ(index)) - part.position.y);
+    }
+    part.geometry.computeVertexNormals();
+    part.userData.topFollowsPorchUnderside = true;
+    return part;
   }
-  gable('Entry porch gable', 11.5, 19.7, 54.4, 61.7, 8.5, 4);
-  box(group, 15.6, 8.25, 60.5, 8.4, 0.5, 1, trim).name = 'Straight front entry header';
-  for (const side of [-1, 1]) {
-    const leaf = new THREE.Group();
-    leaf.name = `Exterior front entry ${side < 0 ? 'left' : 'right'} door leaf`;
-    leaf.position.set(15.6 + side * 2.455, 0, 54.48);
-    leaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 180, openRotationSign: -side } };
-    group.add(leaf);
-    box(leaf, -side * 1.215, 4, 0, 2.43, 7.96, 0.2, entryWood).name = 'Warm oak double entry door';
-    for (let plank = 0; plank < 5; plank++) box(leaf, -side * (0.25 + plank * 0.48), 4, 0.13, 0.025, 7.7, 0.025, garageDoorDetail).name = 'Light oak entry vertical plank joint';
-    box(leaf, -side * 2.255, 3.1, 0.26, 0.07, 0.7, 0.1, dark).name = 'Entry pull';
+  const porchMetal = mat('#665e4f', 0.65);
+  const porchRoof = renderRoofEnvelope('Connected standing-seam porch and entry roof', HomeRoof.getPorchRoofDefinitions(), porchMetal, true);
+  const garageCanopy = renderRoofEnvelope('Stepped garage metal canopy and porch return', HomeRoof.getGarageCanopyDefinitions(), porchMetal, true);
+  const garageCanopyPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getGarageCanopyDefinitions());
+  // Match the porch's white 3.6-inch fascia; close every exposed brow edge
+  // and collect the low edge rather than leaving a floating metal sheet.
+  for (const edge of garageCanopyPlan.boundaries) {
+    const a = new THREE.Vector3(...edge.start), b = new THREE.Vector3(...edge.end);
+    const direction = b.clone().sub(a);
+    const part = box(garageCanopy, (a.x + b.x) / 2, (a.y + b.y) / 2 - 0.31, (a.z + b.z) / 2,
+      direction.length(), 0.3, 0.18, trim);
+    part.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), direction.normalize());
+    part.name = 'Garage metal canopy closed white fascia';
+    if (Math.abs(a.y - b.y) < 0.01 && a.z > 51) {
+      box(garageCanopy, (a.x + b.x) / 2, a.y - 0.08, a.z + 0.12, Math.abs(b.x - a.x), 0.18, 0.24, trim).name = 'Garage brow low-edge gutter';
+    }
   }
-  const garageCanopy = box(group, 43.25, 9.5, 49.4, 25.5, 0.16, 2.6, porchMetal);
-  garageCanopy.name = 'Reference garage standing-seam eyebrow canopy';
-  garageCanopy.rotation.x = 0.22;
-  for (let x = -12; x <= 12; x += 1.5) box(garageCanopy, x, 0.1, 0, 0.035, 0.05, 2.6, dark).name = 'Garage eyebrow standing seam';
+  box(garageCanopy, 55.8, 8.14, 50.3, 0.16, 0.16, 2.16, trim).name = 'Garage brow gutter return to wall leader';
+  box(garageCanopy, 55.8, 3.245, 49.3, 0.16, 9.79, 0.16, trim).name = 'Garage brow rainwater leader concept';
+  // Closed stepped wall abutment at the porch end; no invented level
+  // roof or new support post between the two different wall heights.
+  const canopyStepBottom = 7.55 - 0.16;
+  const canopyStepTop = porchCanopyUndersideAt(54.22);
+  fitTrimTopToPorchRoof(box(garageCanopy, 30.4375, (canopyStepBottom + canopyStepTop) / 2, 54.16,
+    1.075, canopyStepTop - canopyStepBottom, 0.12, trim)).name = 'Canopy stepped porch-end closure and flashing concept';
+  garageCanopy.userData = { supportConcept: 'Wall-ledger and outriggers; connections and garage header loads not designed',
+    drainageIntent: 'Brow gutter to east leader; return falls to porch-end collector, outlets unverified', constructionApproved: false };
+  fitTrimTopToPorchRoof(box(group, 15.6, 9.95, 60.5, 32.5, 0.5, 0.7, trim)).name = 'Raised farmhouse porch header clear of eight-foot door';
+  const porchFasciaZ = 62.15, porchFasciaDepth = 0.3, porchFasciaHeight = 0.3;
+  const porchFasciaTop = porchCanopyUndersideAt(porchFasciaZ + porchFasciaDepth / 2);
+  box(group, 15.6, porchFasciaTop - porchFasciaHeight / 2, porchFasciaZ, 32.5, porchFasciaHeight, porchFasciaDepth, trim).name = 'White farmhouse porch fascia';
   for (const center of [37, 48.5]) {
     const assembly = new THREE.Group();
-    assembly.name = 'Natural wood garage door with white surround';
+    assembly.name = 'Natural oak carriage garage door with white surround';
     assembly.position.set(center, garageFloorY, 49);
-    assembly.userData = { openingWidthFeet: 9, openingHeightFeet: 8, doorColor: '#c99f6b', surroundColor: '#f5f2ea', sideTrimInches: 6, headerTrimInches: 8, trimDepthInches: 3, provisional: true };
+    assembly.userData = { openingWidthFeet: 9, openingHeightFeet: 8, doorColor: '#c6a274', surroundColor: '#eee3ce', sideTrimInches: 6, headerTrimInches: 8, trimDepthInches: 3, provisional: true };
     group.add(assembly);
     const garageLeaf = new THREE.Group();
     garageLeaf.name = 'Conceptual overhead garage door leaf';
     garageLeaf.position.set(0, 8, 0.28);
     garageLeaf.userData = { interactiveHouseDoor: { operation: 'overhead', open: false, maxAngleDegrees: 90 } };
     assembly.add(garageLeaf);
-    box(garageLeaf, 0, -4, 0, 9, 8, 0.16, garageDoorFinish).name = 'Natural wood carriage-style garage door';
+    box(garageLeaf, 0, -4, 0, 9, 8, 0.16, garageDoorFinish).name = 'Natural oak carriage-style garage door';
     for (let panel = 0; panel < 6; panel++) box(garageLeaf, -3.75 + panel * 1.5, -5, 0.11, 0.06, 5.6, 0.05, garageDoorDetail).name = 'Natural wood garage door panel detail';
     for (const offset of [-3, -1, 1, 3]) box(garageLeaf, offset, -1.2, 0.13, 1.6, 1, 0.05, glass).name = 'Garage door glazing';
     for (const side of [-1, 1]) {
@@ -587,21 +887,35 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     fixture.name = parent === group ? 'Garage wall lantern' : 'Porch pillar lantern';
     fixture.position.set(x, y, z);
     parent.add(fixture);
+    const metal = parent === group ? dark : mat('#aa8240', 0.45);
+    if (parent !== group) metal.metalness = 0.65;
+    box(fixture, 0, 0, -0.18, 0.24, 0.6, 0.08, metal).name = 'Exterior lantern wall backplate';
     box(fixture, 0, 0, 0, 0.32, 0.8, 0.25, glow).name = 'Warm exterior lantern';
-    for (const side of [-1, 1]) box(fixture, side * 0.19, 0, 0.04, 0.04, 0.9, 0.3, dark);
-    for (const dy of [-0.48, 0.48]) box(fixture, 0, dy, 0, 0.48, 0.1, 0.4, dark);
+    for (const side of [-1, 1]) box(fixture, side * 0.19, 0, 0.04, 0.04, 0.9, 0.3, metal);
+    for (const dy of [-0.48, 0.48]) box(fixture, 0, dy, 0, 0.48, 0.1, 0.4, metal);
     const light = new THREE.PointLight('#ffcf8c', 15, 7, 2);
     light.position.set(0, 0, 0.4);
     fixture.add(light);
   }
-  for (const pillar of porchPillars.filter((column) => column.userData.entryColumn)) lantern(pillar, 0, 5.8 - pillar.position.y, 0.45);
+  for (const pillar of porchPillars.filter((column) => column.userData.entryColumn)) lantern(pillar, 0, 5.8 - pillar.position.y, 1.32);
   for (const x of [37, 48.5]) lantern(group, x, 8.7, 49.7);
-  exteriorSteps(group, 'Contrasting front entry steps', 15.6, 61.2, 1, 9);
+  brickBox(group, 15.6, -0.15, 61.275, 10.8, 0.3, 0.15).name = 'Entry landing brick nose';
+  exteriorSteps(group, 'Contrasting front entry steps', 15.6, 61.35, 1, 10.8, { riseFeet: 0.45, baseFeet: -1.65, treadCount: 3, goingFeet: 1.05, flareFeet: 0, flushNosing: true });
   const frontSteps = group.getObjectByName('Contrasting front entry steps');
   for (const tread of frontSteps.children.filter((part) => part.name === 'Darker stone entry tread')) {
     const brick = frontBrick.clone();
     brick.map = frontBrick.map.clone();
-    brick.map.repeat.set(tread.geometry.parameters.width / 2, 0.8);
+    brick.map.repeat.set(1, 1);
+    for (const key of ['normalMap', 'roughnessMap']) if (brick[key]) {
+      brick[key] = brick[key].clone();
+      brick[key].repeat.set(1, 1);
+    }
+    const positions = tread.geometry.attributes.position, normals = tread.geometry.attributes.normal, uv = tread.geometry.attributes.uv;
+    for (let index = 0; index < positions.count; index++) {
+      const x = positions.getX(index) + tread.position.x, y = positions.getY(index) + tread.position.y, z = positions.getZ(index) + tread.position.z;
+      uv.setXY(index, (Math.abs(normals.getX(index)) > 0.5 ? z : x) / brickTextureWidthFeet, (Math.abs(normals.getY(index)) > 0.5 ? z : y) / brickTextureHeightFeet);
+    }
+    uv.needsUpdate = true;
     tread.material = brick;
     tread.name = 'Reference brick front-entry tread';
   }
@@ -683,7 +997,18 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
   }
   patioCutout.closePath();
   lawn.holes.push(patioCutout);
-  const lawnMesh = new THREE.Mesh(new THREE.ShapeGeometry(lawn), mat('#83936b'));
+  const lawnGeometry = new THREE.ShapeGeometry(lawn);
+  const lawnMaterial = mat('#83936b');
+  if (masonryMaps?.grass) {
+    Object.assign(lawnMaterial, masonryMaps.grass);
+    lawnMaterial.color.set('#bdd596');
+    lawnMaterial.normalScale.set(0.2, 0.2);
+    const positions = lawnGeometry.attributes.position;
+    const uv = lawnGeometry.attributes.uv;
+    for (let index = 0; index < positions.count; index++) uv.setXY(index, (positions.getX(index) - lot.left) / 12, (-positions.getY(index) - lot.rear) / 12);
+    uv.needsUpdate = true;
+  }
+  const lawnMesh = new THREE.Mesh(lawnGeometry, lawnMaterial);
   lawnMesh.name = '75 by 130 ft lot lawn, not surveyed grade';
   lawnMesh.rotation.x = -Math.PI / 2;
   lawnMesh.position.y = patioGrade;
@@ -853,16 +1178,21 @@ function buildExteriorModel(THREE, { box, mat }, floorToFloor, garageFloorY) {
     box(fixture, 0, 0, -0.2, 0.3, 0.3, 0.1, dark).name = 'Exterior downlight wall backplate';
     return fixture;
   }
-  for (const x of [patioRoofCenterX - patioRoofWidth / 4, patioRoofCenterX + patioRoofWidth / 4]) downlight('Shielded warm patio ceiling light', x, patioRoofUndersideAt(livingPatioCenterZ) - 0.075, livingPatioCenterZ);
-  downlight('Open-patio approach ceiling light', 3.3, patioRoofUndersideAt(0.8) - 0.075, 0.8, 0, -2, 26, patioGrade);
+  function canopyDownlight(name, x, z, targetX = x, targetZ = z, intensity = 22) {
+    const fixture = downlight(name, x, canopySoffitBottomAt(z) - 0.115, z, targetX, targetZ, intensity, patioGrade);
+    // Slope-fitting mounting plate; fixture and beam remain vertical.
+    return fixture;
+  }
+  for (const x of [patioRoofCenterX - patioRoofWidth / 4, patioRoofCenterX + patioRoofWidth / 4]) canopyDownlight('Shielded warm patio ceiling light', x, livingPatioCenterZ);
+  canopyDownlight('Open-patio approach ceiling light', 3.3, 0.8, 0, -2, 26);
   for (const x of [4.2, 26.5]) downlight('Front porch approach ceiling light', x, porchCanopyUndersideAt(58.5) - 0.075, 58.5, x, 60.5, 24, 0);
-  wallDownlight('Front door wall downlight', 15.6, 8.6, 54.675, 0, 15.6, 59.5, 26, 0);
+  wallDownlight('Front door wall downlight', 15.6, 8.6, 54.875, 0, 15.6, 59.5, 26, 0);
   wallDownlight('Driveway motion-boost downlight', 43, 8.6, 49.475, 0, 43, 58, 32);
   for (const z of [14, 28]) wallDownlight('West side-path wall downlight', -0.475, 8.6, z, -Math.PI / 2, westGateCenterX, z, 30);
   wallDownlight('West side-entry downlight', -0.475, 8.6, 42, -Math.PI / 2, westGateCenterX, westFenceReturnZ, 30);
   for (const z of [18, 31]) wallDownlight('East side-path wall downlight', 55.975, 8.6, z, Math.PI / 2, 58.25, z, 26);
   wallDownlight('East side-entry downlight', 55.975, 8.6, garageSideDoorCenterZ, Math.PI / 2, 58.25, eastFenceReturnZ, 26);
-  wallDownlight('Dining patio steps wall downlight', 12.725, 8.2, 1, -Math.PI / 2, 7.5, 1.25, 26, -1.1);
+  wallDownlight('Dining patio steps wall downlight', 12.725, 8.2, 1, -Math.PI / 2, 10.95, 0.85, 26, -1.1);
   wallDownlight('Rear dining path wall downlight', 20.0375, 8.6, -0.575, Math.PI, 20.0375, -3, 22, patioGrade);
   wallDownlight('Rear kitchen garden wall downlight', 38.75, 8.6, 6.525, Math.PI, 32, -1.75, 24, patioGrade);
   wallDownlight('Rear prep garden wall downlight', 53.5, 8.6, 6.525, Math.PI, 47.4, -1.75, 24, patioGrade);

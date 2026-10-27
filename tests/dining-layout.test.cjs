@@ -192,7 +192,10 @@ test('dining side wall aligns with kitchen base cabinets without moving the back
   assert.equal(plan.walls.find(([name]) => name === 'Kitchen north')[2], 7);
   assert.equal(plan.walls.find(([name]) => name === 'Mudroom north')[2], 15);
   const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-  assert.match(exterior, /gable\('Dining rear projection roof', 13\.2, 26\.875, -0\.1, 2\.1/);
+  const diningRoof = require('../floor-plan-roof.js').getConnectedRoofDefinitions().find((roof) => roof.id === 'Dining rear projection');
+  assert.equal(diningRoof.bounds[0], 13.2, 'Dining west roof stops at the shared canopy wall');
+  assert.equal(diningRoof.bounds[2], -0.75);
+  assert.doesNotMatch(exterior, /gable\('Dining rear projection roof'/, 'Hipped dining roof has no obsolete triangle piercing its surface');
   const lot = exterior.match(/const lot = (\{[^\n]+\});/);
   const data = vm.runInNewContext(`(${lot[1]})`, { wallThickness: 0.45 });
   assert.ok(Math.abs(data.rearWallZ - data.rearSetbackFeet - (-32.325)) < 1e-9, 'Property boundary is not moved to fake the old setback');

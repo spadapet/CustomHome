@@ -1,8 +1,13 @@
 # House window count
 
-Updated October 25, 2026 for joined living-room, main-kitchen and prep banks; includes hidden room groups.
+Updated October 26, 2026 for the coordinated six-window upper front; includes hidden room groups.
 
-**26 window openings containing 48 individual modeled units: 42 operable casements and 6 fixed picture windows.**
+**30 window openings containing 50 individual modeled units: 44 operable casements and 6 fixed picture windows.**
+
+The two former paired front-bedroom openings become six narrower casement
+openings, coordinated with the exterior. Bedroom 3 retains its west paired
+window. Exterior-only garage attic windows remain excluded: no room/floor
+has been established behind that facade.
 
 The circled dining west paired-casement window is replaced by a 36 x 96 in
 glazed patio door, excluded from the window count. The living return bank
@@ -34,10 +39,10 @@ An **opening** is one window group in a wall. A **unit** is one casement or fixe
 | Upstairs / bedroom 2 bath | 1 | 1 | 0 | 1 |
 | Upstairs / loft | 2 | 4 | 0 | 4 |
 | Upstairs / stairwell (former laundry) | 1 | 1 | 0 | 1 |
-| Upstairs / bedroom 3 | 2 | 4 | 0 | 4 |
-| Upstairs / bedroom 4 | 1 | 2 | 0 | 2 |
-| **Upstairs subtotal** | **11** | **19** | **0** | **19** |
-| **Whole house** | **26** | **42** | **6** | **48** |
+| Upstairs / bedroom 3 | 4 | 5 | 0 | 5 |
+| Upstairs / bedroom 4 | 3 | 3 | 0 | 3 |
+| **Upstairs subtotal** | **15** | **21** | **0** | **21** |
+| **Whole house** | **30** | **44** | **6** | **50** |
 
 ## Scope and sources
 

@@ -57,8 +57,8 @@ test('garage entry retains contrasting nosings without LED lighting', () => {
         }
       }
     },
-    garageEntry: { x: 39.5, z: 26.725, width: 3, going: 11 / 12 },
-    garageRisers: 2, garageRise: 0.625, garageFloorY: -1.25, epoxy: {}, cream: {},
+    garageEntry: { x: 38, z: 26.725, width: 3, treadWidth: 4, going: 11 / 12, thresholdDepth: 0.35 },
+    garageRisers: 2, garageRise: 0.625, garageFloorY: -1.25, epoxy: {}, cream: {}, windowTrim: {},
     furnishing() { return stair; },
     box(parent, x, y, z, w, h, d, material) {
       const part = { x, y, z, w, h, d, material, userData: {} };
@@ -72,13 +72,62 @@ test('garage entry retains contrasting nosings without LED lighting', () => {
   vm.runInNewContext(source.slice(start, end), context);
   const strips = parts.filter((part) => part.name?.startsWith('Garage entry LED strip'));
   assert.equal(strips.length, 0);
-  for (let index = 0; index < 2; index++) {
-    const tread = parts.find((part) => part.name === `Garage entry tread ${index + 1}`);
-    assert.equal(tread.w, 3);
-    assert.equal(tread.d, 11 / 12);
+  const tread = parts.find((part) => part.name === 'Garage entry intermediate tread');
+  assert.equal(parts.filter((part) => /tread/.test(part.name)).length, 1);
+  assert.equal(tread.w, 4);
+  assert.equal(tread.x, 0, 'Tread and nosing center on door, extending six inches each side');
+  assert.equal(tread.d, 11 / 12);
+  assert.equal(tread.y + tread.h / 2, -0.625);
+  assert.ok(Math.abs(tread.z - tread.d / 2 - 0.35) < 1e-9);
+  const threshold = parts.find((part) => part.name === 'Garage entry wall-thickness threshold');
+  assert.equal(threshold.y + threshold.h / 2, 0);
+  assert.equal(threshold.d, 0.35);
+  assert.equal(threshold.z - threshold.d / 2, 0);
+  const saddle = parts.find((part) => part.name === 'Garage entry finished threshold saddle');
+  assert.equal(saddle.y - saddle.h / 2, 0);
+  assert.equal(saddle.y + saddle.h / 2, 0.0405);
+  assert.equal(saddle.w, 3);
+  assert.equal(saddle.d, 0.35);
+  assert.equal(stair.userData.landing, false);
+  assert.equal(parts.filter((part) => part.material === context.epoxy).length, 2, 'Only wall threshold and intermediate tread; no platform or L return');
+  for (const part of parts) {
+    assert.ok(part.x - part.w / 2 >= -2 && part.x + part.w / 2 <= 2);
+    assert.ok(part.z + part.d / 2 <= 0.35 + 11 / 12 + 1e-9);
   }
+  // This group is unrotated: translate each constituent, never use a whole-group void.
+  const world = (part) => ({
+    min: [39.5 + part.x - part.w / 2, part.y - part.h / 2, 26.725 + part.z - part.d / 2],
+    max: [39.5 + part.x + part.w / 2, part.y + part.h / 2, 26.725 + part.z + part.d / 2]
+  });
+  const actual = world(tread);
+  for (const [values, expected] of [[actual.min, [37.5, -1.25, 27.075]], [actual.max, [41.5, -0.625, 27.991666666666667]]]) {
+    values.forEach((value, axis) => assert.ok(Math.abs(value - expected[axis]) < 1e-9));
+  }
+  assert.ok(Math.abs((32.14583333333333 - actual.max[2]) * 12 - 49.85) < 1e-9, 'Unchanged BMW nose leaves a direct bottom approach');
   assert.equal(parts.filter((part) => part.name === 'Contrasting garage stair nosing').length, 2);
   assert.equal(parts.filter((part) => part.name?.startsWith('Garage entry LED wash')).length, 0);
+});
+
+test('minimap draws two transverse riser edges without the removed L return', () => {
+  const lines = [];
+  let line;
+  const context = {
+    garageEntry: { x: 38, z: 26.725, width: 3, treadWidth: 4, going: 11 / 12, thresholdDepth: 0.35 },
+    garageRisers: 2, activeFloor: 'ground', mapX: x => x, mapZ: z => z,
+    context: { beginPath() { line = []; }, moveTo(...p) { line.push(p); }, lineTo(...p) { line.push(p); }, stroke() { lines.push(line); } }
+  };
+  const start = source.indexOf("    for (let step = 0; activeFloor === 'ground' && step < garageRisers;");
+  const end = source.indexOf("    context.font = 'bold 10px sans-serif';", start);
+  vm.runInNewContext(source.slice(start, end), context);
+  assert.equal(lines.length, 2);
+  lines.forEach((points, index) => {
+    assert.deepEqual(points.map(p => p[0]), [index ? 37.5 : 38, index ? 41.5 : 41]);
+    points.forEach(p => assert.ok(Math.abs(p[1] - (27.075 + index * 11 / 12)) < 1e-9));
+  });
+  lines.length = 0;
+  context.activeFloor = 'upstairs';
+  vm.runInNewContext(source.slice(start, end), context);
+  assert.equal(lines.length, 0);
 });
 
 test('interior stair LED strips sit below and outside the risers on both flight directions', () => {
@@ -253,17 +302,18 @@ test('downloaded garage props replace tools and bins without removing equipment 
   assert.equal(model.roots[0].position.z, 27.115);
 });
 
-test('rake broom and dustpan hang beside the entry instead of behind the mower', () => {
+test('rake broom and dustpan move intact to the north wall clear of the entry', () => {
   const model = buildEquipment();
   const rail = model.find('Accessible garage garden-tool rail')[0];
   assert.ok(rail);
-  assert.equal(rail.position.x, 37.75);
-  assert.equal(rail.position.z, 27.115);
+  assert.equal(rail.position.x, 46.75);
+  assert.equal(rail.position.z, 15.175);
+  assert.equal(rail.rotation.y, 0);
   assert.equal(rail.position.y, -1.25);
   assert.equal(rail.userData.floorStorage, false);
   assert.equal(rail.userData.widthInches, 30);
-  assert.ok(rail.position.x - 1.25 > 36.35, 'Rail is beside, not above the equipment station');
-  assert.ok(rail.position.x + 1.25 < 39.5 - 3.625 / 12, 'Rail clears the full house-entry casing');
+  assert.ok(rail.position.x - 1.25 > 44.9 - 2 / 12 + 0.175, 'Rail clears the mudroom return');
+  assert.ok(rail.position.x + 1.25 < 49, 'Rail stays west of the bike parking envelopes');
   for (const name of ['Wall-hung garage rake', 'Wall-hung garage broom', 'Wall-hung garage dustpan']) assert.equal(model.find(name)[0].userData.wallMounted, true);
   assert.equal(model.find('Rake steel tine').length, 16);
   assert.equal(model.find('Broom bristle bundle').length, 24);
@@ -299,4 +349,30 @@ test('truck remains in the right bay while parking alignment and BMW rear cleara
   assert.ok((truck.x - truck.mirrors / 24 - bmw.x - bmw.mirrors / 24) * 12 >= 49, 'Center mirror aisle gains six inches');
   assert.ok((55.325 - truck.x - truck.mirrors / 24) * 12 >= 34, 'Truck retains side-wall mirror clearance');
   assert.ok((truck.x - truck.width / 24 - 42.5) * 12 >= 30, 'Truck body gains separation from the mudroom steps');
+});
+
+test('one intermediate tread walk datums exclude any top platform and restore on floor change', () => {
+  const entry = vm.runInNewContext(`(${source.match(/const garageEntry = (\{[^\n]+\});/)[1]})`);
+  const context = {
+    garageEntry: entry, garageRise: 0.625, activeFloor: 'ground',
+    floorAreas: () => [{ x: 29, z: 15, w: 26.5, d: 34, elevation: -1.25 }]
+  };
+  const start = source.indexOf('  function walkElevationAt(');
+  vm.runInNewContext(source.slice(start, source.indexOf('  function buildWalkObstacles(', start)), context);
+  assert.equal(context.walkElevationAt(39.5, 27.5), -0.625);
+  assert.equal(context.walkElevationAt(37.6, 27.5), -0.625, 'Centered west extension is walkable at its actual datum');
+  assert.equal(context.walkElevationAt(41.8, 27.5), -1.25, 'Old asymmetric east extension is removed');
+  assert.equal(context.walkElevationAt(42.01, 27.5), -1.25, 'No phantom tread beyond 48 inches');
+  assert.equal(context.walkElevationAt(39.5, 26.9), 0, 'Threshold extension remains at landing datum');
+  assert.equal(context.walkElevationAt(41.45, 28.5), -1.25, 'Old east return is gone');
+  assert.equal(context.walkElevationAt(41.45, 26.9), -1.25, 'No phantom tread inside solid wall north of lower step');
+  assert.equal(context.walkElevationAt(42.2, 28.5), -1.25);
+  assert.equal(context.walkElevationAt(39.5, 28.5), -1.25, 'Old top landing is gone');
+  assert.equal(context.walkElevationAt(39.5, 27.075 - 0.001), 0);
+  assert.equal(context.walkElevationAt(39.5, 27.075 + 0.001), -0.625);
+  assert.equal(context.walkElevationAt(39.5, 27.991667), -1.25);
+  context.activeFloor = 'upstairs';
+  assert.equal(context.walkElevationAt(39.5, 28.5), -1.25, 'Ground entry override is not applied upstairs');
+  context.activeFloor = 'ground';
+  assert.equal(context.walkElevationAt(39.5, 27.5), -0.625);
 });

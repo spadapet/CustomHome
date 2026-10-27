@@ -181,5 +181,6 @@ test('modeled room doors and exterior overhead leaves carry click-operation meta
   assert.match(source, /bathroomPocketDoor\.userData\.interactiveHouseDoor = \{ operation: 'sliding', open: false, closedCenterX:/);
   assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 180/);
   assert.match(exteriorSource, /interactiveHouseDoor: \{ operation: 'overhead', open: false, maxAngleDegrees: 90/);
-  assert.match(exteriorSource, /leaf\.name = `Exterior front entry/);
+  assert.match(exteriorSource, /buildArchedFrontEntry\(THREE,/);
+  assert.match(fs.readFileSync(require.resolve('../floor-plan-ground.js'), 'utf8'), /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 110/);
 });

@@ -1,5 +1,413 @@
 # Ground-floor design context
 
+## Even garage step alignment - October 26
+
+Owner rejects east-only widening. Center 48 in tread/nosing under 36 in
+door: x=37.5–41.5, midpoint39.5, 6 in extension each side. Preserve
+door pose, floor datums and no-landing concept. Coordinate walk/map.
+Earlier asymmetric bounds are superseded; operating approval unresolved.
+
+Garage entry trim: use matching stock 2.5-inch legs on both faces, retaining
+the 5.5-inch Craftsman head, bead, cap and 1/8-inch reveal. The old 3.5-inch
+profile's cap crossed the mudroom west wall face by 0.475 inch; the revised
+cap clears it by 0.525 inch. Baseboard ends follow the narrower legs.
+Mudroom legs end on tile y=0.0405; garage legs extend to the tread y=-0.625,
+not the slab or a floating house-datum endpoint. A 36 × 4.2-inch finish
+saddle tops the structural threshold at tile level, 0.486 inch above datum.
+Structural rises remain 7.5 inches; finished upper rise is 7.986 inches:
+landing, finished riser uniformity, selected rated sill/door, water management
+and fire separation still require professional review. Keep the 36 × 96-inch
+opening, closed default, west hinge and centered 48 × 11-inch tread unchanged.
+
+## Current mudroom / garage arrival — October 26
+
+Remove the entire west ten-basket tower and connecting open return, including
+backing, shelves, plinth and west ceiling infill. Leave painted wall and restored
+baseboard, with no replacement storage. This supersedes **all earlier mudroom
+basket-capacity, relocation, withdrawal and connected-return studies below**;
+those passages are historical, not the current layout.
+Preserve the east five cubbies, 16 hooks, seven-pair shoe tower, north coat
+closet, off-white finishes and trim-matched 96-inch single-panel doors.
+Current north-wall enlargement supersedes the earlier centered 36-inch case:
+42 W × 24 D inches at (41.2, 16.4) ft, with a standard nominal 36 × 96-inch
+off-white single-panel door, left hinge/outward 90°, closed default.
+Reserve 38 × 98 inches conceptually for the unselected jamb/rough opening;
+the 42-inch case has 40.5-inch internal width, 22.8-inch depth, and a
+40.5-inch side-to-side rail. This is the largest sensible standard single
+leaf for this composition, not a universal maximum door size.
+An independent 18 W × 12 D-inch fixed shelf bay sits WEST of it on the NORTH
+wall, x=37.825–39.325 ft, with a separate 1.5-inch filler to the closet.
+Four removable 14 W × 10 D × 12 H-inch basket allowances occupy shelves at
+2.4, 20.4, 38.4 and 56.4 inches; top rim is 68.88 inches. Verify owner reach;
+upper empty shelves are seasonal, not extra basket capacity. Clear shelf width
+16.5 inches gives 1.25 inches each side. No west-wall tower returns.
+Only the east corner is blind and excluded from storage. The closet cheek
+extends 0.5 inch past the bench front; the 36-inch doorway, not the entire
+42-inch enclosure frontage, has a 36-inch-deep storage-free approach.
+Full 1° sampled closet/garage sweeps including handles clear constituent
+casework; closet minimum separating-axis plan gap to bench is 2.73 inches.
+Basket withdrawal assumes 10 inches plus 24 inches occupied depth, reaching
+z=19.2333 ft. A 24-inch-wide person centered on the bay leaves 40 inches
+to the unoccupied bench, but only 16 inches if a bench user projects 24 inches.
+Do not treat this as simultaneous retrieval/seating or accessibility approval.
+Door use occupies the coat approach; do not retrieve baskets through a moving leaf.
+Night-default lighting, garage door, openings, east run and saved JSON remain fixed.
+Interpret “move this to the end” as the opposite, south end nearest the garage:
+the 90 × 18-inch bench now spans z=17.54–25.04 ft and the seven-cell
+shoe tower z=25.04–26.60 ft, in the same east-wall footprint. Peter, Lila,
+Jacob, Ada and Lucas remain in north-to-south order. Move the complete cases,
+including backs and contents; retain the north blind-corner closure and
+south fitted scribe, neither counted as storage. Saved layout JSON is unchanged.
+The sampled 0–90-degree garage-door sweep, including handles, clears the
+constituent casework. Move the garage opening 18 inches west to x=38–41 ft;
+keep its 36 × 96-inch size and west hinge, but default it closed.
+At 90 degrees the bench has 54.745 inches to the open door/handles.
+The coat doorway retains its 36-inch-deep storage-free approach.
+The wall-to-bench aisle is 62.8 inches, or 62.05 inches past the 3/4-inch
+baseboard projection. Keep the kitchen opening fixed.
+Garage arrival: ONE intermediate 48 × 11-inch tread directly south of the
+door at y=-0.625 ft, x=38–42, z=27.075–27.991667. Widen east by 12 inches
+only, preserving the west wall/mower side and the 36-inch doorway/threshold.
+The extra foot narrows east-side passage by 12 inches; use the direct south
+approach, not an assumed 36-inch east corridor. Remove the entire L
+landing/return. House y=0 and garage slab y=-1.25 remain: TWO 7.5-inch rises,
+not one 15-inch riser. Only the 4.2-inch wall-thickness threshold remains
+at y=0, z=26.725–27.075; it is not a top landing.
+The tread leaves 49.85 inches to the BMW front body, not the former
+13.85-inch straight-flight gap. Vehicles, mirrors and tool locations are
+unchanged; the inter-vehicle mirror aisle remains 49.35 inches. These
+static model gaps are not occupied-route or simultaneous door-use approval.
+This no-top-landing concept is NOT code/operating approved. The selected
+garage rated assembly, landing exception, inward swing, self-closing/latching,
+handrails/guards, threshold transition, structure and drainage require
+professional review before construction or use; no step-free route is provided.
+Move the complete 30-inch rake/broom/dustpan rail to the north garage wall,
+center (46.75, 15.175), west of the bikes; no equipment/storage is removed.
+The rejected west-return rail location constrained retrieval behind the mower.
+Existing bikes, vehicles, lighting and storage remain. No exterior opening
+or roof geometry changes. Required rails would reduce the measured route;
+threshold finish transition, landing/rails, supports, drainage, rated
+self-closing/latching assembly, occupied operation and fire separation need
+professional review. This is a reversible design study, not code approval.
+
+## Current exterior — articulated hipped transitional, October 26
+
+The owner rejected the paired projecting-gable architecture. Rendered trials
+compared a four-sided hip with a single longitudinal gable; select the hip
+to avoid a blank front triangle and competing peaks. Remove all three
+applied front gables, their vents/battens and the entry pediment.
+Use cream queen brick throughout, white windows/eaves and light oak doors.
+Main and east-wing roofs have equal 4:12 slopes, crowns 24.6167/23.8083 ft,
+with 19.2 ft outer eaves above unchanged 19 ft upper walls.
+The one-story garage has a four-sided 6:12 hip: 8.9 ft outer eaves,
+12.475 ft crown, bounds x=30.3–56.2, z=35.55–49.85.
+No garage room, upper window or storage floor is added.
+
+The porch retains its uninterrupted standing-seam plane and support positions.
+A deep pale-stone entrance portal jackets the two central posts: 21.6-inch
+piers, 26.4-inch depth and a 9.6-inch entablature with underside at 8.9 ft.
+The 25.2-inch feet leave 69.6 inches between them; pier shafts leave
+73.2 inches. Arched 96-inch-crown doors, steps and closed pose are unchanged.
+Upper walls now have a continuous 3.6-inch base course and three-part
+cornice following every actual footprint return. Upper windows retain
+their locations and sizes, with 2.88-inch stone jambs, projecting stools
+and 4.56-inch lintels. Stone is a screen approximation, not a selected product.
+These are supported-veneer concepts: anchors, lintels, beam/support sizing,
+flashing, drip grooves and water management need professional detailing.
+Lanterns move forward onto the deeper portal faces; no light is buried.
+Keep the stepped garage brow/return, fitted brick attic closures, white
+fascia, closed soffits and perimeter gutters. All actual room footprints,
+ceilings, windows, saved JSON, site and furniture remain unchanged.
+Street eye and Three-quarter are optional perspective presets.
+The garage brow/return is six inches lower than the rejected study:
+8.8 ft attachment, 8.6125–8.3 ft full-width brow, 7.55 ft return end
+outside the entry route. Its gutter returns to a wall-mounted leader
+rather than leaving a suspended pipe at the canopy edge.
+
+The 18-inch framing zone is an assumption, not a designed assembly.
+Framing and insulation must stay above the retained 19 ft ceiling envelope;
+the shallow eaves need a raised-heel/support detail, not lowered ceilings.
+Roof support/bearing, the retained 6.25 ft rear projection, ventilation,
+garage separation, porch/brow ledgers and drainage require professional
+design. Upper rear runoff needs separate collection, never discharge onto
+the post-free patio. That canopy remains approval-required; firepit stays
+cold storage only. These are local design-study changes, not construction
+drawings or owner approval of a completed building.
+
+Verification after articulation: 273 tests pass in 45 suites, including the
+new constituent-geometry checks and the existing base-trim suite; JavaScript
+syntax and whitespace checks pass. Browser Three.js world-space bounds
+confirm the portal dimensions above. Ground/upstairs/exterior cycling
+restores all 1,531 exterior mesh visibility/matrix tuples. Front, rear,
+west, east, street-eye and three-quarter screenshots were inspected, with
+Day/Night lighting checks. Temporary browser instrumentation was removed;
+production reload reports no page errors and one visible render canvas.
+Final images: `artifacts/architecture-final-{front,rear,west,east,street-eye,threequarter}.png`.
+The shared worktree includes other pending work; nothing was staged,
+committed or pushed by this refinement.
+
+## Historical rejected paired-gable study — superseded
+
+The following roof narrative and its verification refer to the rejected
+25.2/25.6 ft main and 21.25 ft garage crowns, not the current model.
+All older exterior alternatives below are historical where they conflict
+with the current exterior brief above; unrelated room decisions remain active.
+
+The two main roof volumes continue north to hipped terminations at z=1.35,
+instead of leaving isolated front-gable tips visible above a broad pyramid
+from the rear. Their ridges start at z=8.25/8.65 and end at z=54.95.
+The low linking hip has equal 3:12 slopes, crown 23.2625 ft and longitudinal
+ridge x=15.5, z=17.6–38.7. The east wing has equal 4:12 slopes and a
+23.8083 ft crown. No 15.54:12 pinched end hips or tall background cross-ridge
+remain. Rear elevation deliberately reads as paired hipped roof volumes;
+this is an adaptation to the deep footprint, not an exact reference copy.
+Fitted attic closures include the front wall between gables as well as all
+side/rear returns, above the unchanged 19 ft room walls.
+
+Keep the corrected entry/porch metal roof and 12.6 ft pediment crown.
+Add a matching garage metal brow from x=29.9–56, z=49.95–51.2:
+9.1125–8.8 ft at 3:12. Its narrower wall attachment x=31.8–54.7,
+z=49.2–49.95 begins at 9.3 ft, clearing the low gable corners. A return
+at x=29.9–30.975 reaches the porch pier at z=54.2, with a closed stepped
+abutment, white fascia, underside, gutter and east leader concept.
+The return finishes at 8.05 ft surface height, outside the entrance route.
+A genuinely level continuous canopy would require changing the garage
+wall or porch height; use the honest stepped connection instead.
+Canopy ledgers/outriggers, garage header loads, collector/outlets and
+waterproofing are not designed. No support post or floor-plan change is added.
+
+Retain the corrected porch/entry metal envelope, dining projection and
+post-free patio roof/soffit/gutter assembly. Main and wing runoff belongs
+in perimeter gutters; front-gable valleys fall outward. Upper rear runoff
+must have separate piped collection, not discharge onto the canopy.
+Upper rear outlet routes/capacities are not modeled or approved. Reserve
+an assumed 18 in framing zone below the main roof for professional study;
+the rendered 1.92 in skin is not a rafter assembly or headroom approval.
+The existing rear upper-roof outline includes a 6.25 ft projection beyond
+the west primary wall; support of that retained overhang is unresolved.
+Post-free patio backspan, connections and foundations remain unengineered.
+Keep room footprints, upper windows, cream queen brick, white trim,
+saved layouts, floor area, site and firepit cold-storage restrictions.
+
+Earlier 28.2 ft cross-hip, 27.4/27.8 ft front crowns, 17 ft garage crown,
+short front roofs and facade-only garage windows are superseded studies.
+Roof covering/underlayment suitability for the 3:12 linking surfaces, valley
+collection, trusses/bearing, ventilation, fire separation and the assumed
+18-inch framing zone require professional review. Neither tests nor the
+rendered finish geometry establish buildability.
+
+Verification: 271 tests pass in all 44 suites, including actual clipped
+roof/brow/underside vertices, footprint coverage, shared joins, fitted
+soffits and canopy clearance from the garage roof and solid return wall.
+HTTP-served front/rear/west/east, roof plan and perspective were inspected;
+Day/Night and floor switching checked. Updated world-space roof vertices
+measure crowns 25.200001/25.600000/21.25 ft and linking/wing crowns
+23.262501/23.808332 ft. All 10,958 mesh matrix/visibility tuples restore
+after ground/upstairs/exterior cycling; saved layout JSON is unchanged.
+Temporary browser-only capture was removed; clean production reload has
+one visible rendering canvas and no page runtime errors. These checks are
+model evidence, not proof of aesthetics, drainage performance or construction safety.
+
+### Retained connected-surface method
+
+Owner supplies front/top/side/rear views and requests the roof relationship
+shown, not more independent roof boxes. Use a shared clipped height-plane
+envelope for main house, two front gables, east rear wing, garage and dining
+projection. Keep the house layout; crown changes are listed above. Gables
+join the larger roof through computed valleys and rear hip terminations.
+Discard hidden overlapping planes and rear end walls. Generate ridge/hip/
+valley details and white eaves/soffits only from the visible surface edges,
+with stepped flashing where lower roofs meet upper walls.
+Correction after all-elevation inspection: keep eaves soffits level and
+clip all eave/rake soffit strips to their visible roof faces. Extending
+the steep hip plane inward had pushed white panels through the adjacent
+rear roof slopes on both sides. Remove the obsolete interior dining
+gable triangle, which conflicted with the hipped dining envelope.
+Keep main/east hip eaves at 19.2 ft so the 19 ft upper wall heads remain
+under the roofing rather than appearing as white lines through it.
+
+Apply the same approach to the metal porch/entry, clipping both surfaces
+and their ribs at the two real valleys. Preserve the existing boxed
+pediment, corrected trim heights, arched doors and their closed pose.
+Add Roof plan to the existing exterior view choices for direct inspection.
+Validate exact footprint coverage, one top surface at 24,000 sampled
+points and matching heights along all modeled shared joins. These are
+geometry checks, not drainage/structural approval. Reference views may
+contain inconsistencies and do not establish measured framing.
+Keep saved layouts, interiors/upper windows, floor area, site/garden,
+post-free rear patio and firepit restrictions. Roof structure, loads,
+headroom, water flow, flashing/valleys, ventilation and products still
+require architect/engineer review. Earlier separate roof studies below
+are superseded by this connected-envelope model.
+
+## Historical roof-depth study — superseded dimensions
+
+Owner supplies front and oblique farmhouse references emphasizing depth.
+Give the main roof a long cross-ridge with short hipped ends and extend
+front gable roof runs to z = 38.9. Preserve ridge heights and room layout.
+Use deeper white fascia and closed projecting rake/eaves soffits, cornice
+returns, gutters and upper-pier downspouts so edges have physical depth.
+Apply local CC0 scanned slate-style color/normal/roughness maps with
+consistent physical UV scale, not the procedural checkerboard pattern.
+The scan is a visual reference, not a selected shingle or roofing assembly.
+Keep the corrected metal porch/entry roof, arched door visibility, saved
+layouts, upstairs openings and rear patio decisions. Roof intersections,
+valleys, flashing, drainage, structure and headroom remain unverified.
+
+## Match the entry roof to its porch - October 26
+
+Owner flags the shingled entry cap on the metal porch and the white stripe.
+Use one shared metal finish for both porch and entry roof, including seams
+and ridge cap. Extend the entry ridge back to the house (z = 53.2); remove
+the unneeded rear white triangle at the roof intersection.
+The fascia and raised porch header were crossing the roof surface: compute
+the fascia top below the underside across its depth and fit header top
+vertices to the roof plane, preserving the 9.7 ft bottom. Retain edge trim and
+boxed front pediment, not a white strip through the metal surface.
+Keep doors, columns, steps, other gables and saved layouts unchanged.
+Roof valleys/flashing, support, fixings and drainage need professional review.
+
+## Close the entry pediment - October 26
+
+Owner flags the thin triangle and black gap above the entrance. Make it
+a finished white pediment: smooth face near the front rake trim, broader
+sloping boards, boxed base cornice/cap, and closed white underside joined
+back to the porch beam. Face base/crown now y = 10.2/12.6; trim stays at
+or above y = 9.7 so it does not hide the arched doors. Do not retain dark
+independent gutters or vertical battens on this small pediment.
+Other gables, entry leaves, columns, roof/steps, rooms and saved JSON stay
+fixed. Earlier 10.8/12.9 pediment notes are superseded. Connections,
+roof valleys/flashing and drainage remain unverified construction details.
+
+## Match the actual entry close-up - October 26
+
+Replace the rectangular doors beneath applied arch with genuinely curved
+oak double leaves, their matching infilled opening, continuous deep white
+surround and layered outer molding in both model surfaces. Shared geometry
+keeps the nominal 60 x 96 in unit coordinated; the arch springs at 85.2 in,
+so 96 in is the crown, not uniform clear height. Use local CC0 oak maps,
+arched upper/recessed lower panels and paired dark pulls; remove glazing.
+Keep the Wyze selection placeholder and closed default. Display swing is
+110 degrees inward; hinge plane is inside the interior trim so sampled
+leaf contours do not bind on the arch. Actual product/hinge geometry,
+hardware, egress, threshold and weatherproofing remain unapproved.
+
+Keep the raised porch beam/pediment and strengthen the entry-column
+composition: 15.6 in inner shafts, larger brick plinths and layered white
+capitals; outer posts remain 12 in. Move brass entry lanterns onto the
+new outside faces. Broaden front stairs to 10.8 ft, three equal 5.4 in
+risers and 12.6 in goings, flush nosings, ending at the existing path.
+Do not change patio stairs, rooms, furniture, saved JSON or unrelated
+exterior choices. Earlier rectangular-door and narrower-front-step notes
+below are superseded; structural, access and grade review remains required.
+
+## Definitive white farmhouse target - October 26
+
+Owner explicitly stops the brick/stucco redesign and supplies a white
+board-and-batten farmhouse with oak doors, red-brick bases/steps, three
+gables, a standing-seam porch and central entry pediment. Follow this image,
+not the preceding Tudor/Belgian palettes. Model real narrow projecting
+battens and trim instead of recoloring the brick texture. Side/rear siding
+and all window frames are white; no charcoal upper panels remain.
+Main/central/garage front ridges: 27.4/27.8/24 ft. Connecting roof ridge
+runs horizontally behind them. No new rooms or floor area are added.
+
+Keep the full-width porch beam raised to 9.7 ft underside and the full
+eight-foot closed entry leaves visible. Four white posts on brick plinths,
+white arch surround and entry pediment replace the shallow dark portico.
+Actual canopy underside determines light mounts. Add local CC0 HDR sky/
+reflections and lawn maps for exterior Day; restore interior/Night settings.
+Keep room bounds, six upper openings, saved JSON, rear patio, garden and
+firepit restrictions. Roof/porch structure, cladding fixing, drainage,
+headroom, products and egress require professional review. Earlier facade
+descriptions below are historical, not current instructions.
+
+## Street-reference massing and entry sightline - October 26
+
+Owner rejects the flat pale facade and the porch hiding the door head.
+New reference is brick/stucco with dark trim, a dominant projecting gable
+and quieter hipped roof masses. Replace the repetitive gables/full-width
+porch with that composition: brick gable x = 0-19.5, ridge 28 ft, front
+z = 54.3; main/rear/garage hip ridges 26.5/22/20.5 ft. Upper right/garage
+attic are warm stucco with charcoal trim. Front frames become charcoal,
+garage doors walnut; keep interior and side/rear windows white.
+
+Use a shallow, taller entry canopy instead of the long low beam. Beam
+underside is 9.7 ft, above the unchanged eight-foot doors; stone arch sits
+above the opening. Browser ray checks confirm both door heads are visible
+in Front view. Two entry columns replace the former four porch columns;
+downlight mounts follow the new canopy. Keep porch slab, room/closet
+layouts, six coordinated upstairs openings, JSON and rear patio unchanged.
+New roofs/attic panels are appearance studies, not established new living
+area. Verify structure, valleys, drainage, veneer/arch anchors and headroom.
+All earlier pale/ivory/continuous-low-porch instructions are superseded.
+
+## Light Belgian-reference composition - October 26
+
+Owner explicitly allows upstairs adjustments to improve the facade.
+Recompose instead of another texture-only change: pale warm masonry,
+ivory garage doors, continuous low shingle porch roof/cornice, narrower
+main gables with a recessed connecting roof, and a lower garage gable.
+Remove the small entry gable, split metal canopy and garage eyebrow.
+Main ridges: 27.4/28.4 ft; garage eaves/ridge: 16/24 ft. Keep ground
+openings/outline, eight-foot doors and the post-free patio concept.
+
+Coordinate six upper-front openings with Bedrooms 3/4, maintaining rooms,
+closets and floors. Centers x = 4.8/8.6/11.6 and 20.2/24/28.1 at z = 53.2;
+widths 2.4/2.4/1.5 and 2.4/2.4/1.8, sills/heads 3/8 ft above floor.
+Move Bedroom 4 desk/lamp to x = 22.1 to clear the new windows. Product
+sizes/egress/curtain use and occupied access still require review.
+Garage attic facade remains unassigned exterior volume, not a new room.
+Roof valleys, ridge connections, support, drainage and envelope details
+are conceptual, not construction approval. Earlier dark-brick palettes,
+wood garage doors, same-height garage/main gables and split-porch notes
+are superseded. Keep saved layout JSON intact.
+
+## Exterior rendering depth - October 26
+
+Owner rejects flat diagram-like rendering relative to French/Belgian
+concept references. Use locally bundled CC0 scanned masonry with separate
+color, normal and roughness maps, not color-as-bump in production. Grade
+brick toward restrained warm taupe without modifying original files.
+Add exterior-only Day sunlight/shadows and reduce flat ambient/studio fill.
+Keep Night practical lights, interior lighting and all layout decisions.
+One bounded 2048 shadow map limits cost; no per-fixture shadow maps.
+See [texture sources](assets/textures/exterior/README.md). This is still a
+concept viewer; material products, veneer support and weathering require
+professional review, and the inspiration images are not model-accurate CAD.
+
+## Brick and stone depth - October 26
+
+Owner's new reference requests a less flat exterior: warm taupe queen brick
+with mortar relief, pale limestone entry ashlar piers, straight stone header
+and cap, projecting front-window lintels/sills and pale stone garage surrounds.
+This supersedes the uniform cream-brick finish, not white window frames or
+the house shape. Keep existing openings, eight-foot doors, straight entry,
+roof geometry, post-free patio concept and all indoor layouts. Ashlar blocks
+have shallow varied face projection and visible joints; the door light moves
+out to the stone face. This is an appearance study, not engineered veneer:
+verify samples, support, anchors, weathering/flashing and movement joints.
+
+## Cantilevered patio visualization - October 26
+
+Owner accepts post-free canopy concept. Remove final timber post/stone foot
+and exposed beams. Correct the canopy with one shared sloping section:
+roof, warm-white soffit, 9 in vertical fascia, closed ends/house abutment
+and slope-fitting downlight mounting wedges. Raise roof center from 9.1
+to 9.5 ft to clear the fixed 96 in dining door/head casing; retain the
+13.2 x 8.55 ft roof footprint, 3:16 fall, terrace, stairs and furniture.
+Low soffit is about 9 ft 5.8 in above terrace; door-zone soffit exceeds
+8.29 ft above house floor. Trim the dining roof's west overhang to the
+shared wall x = 13.2, lift its eave allowance 0.2 ft while keeping its
+14.5 ft ridge, and show stepped abutment flashing rather than crossing
+eaves. Add an open gutter falling east 1:192 to a dining-wall leader
+outside the landing/stairs. Below-grade outlet is only a placeholder;
+capacity, stormwater connection and path-side projection need review.
+This is an appearance study requiring structural design,
+not proof the retained projection is feasible. Verify house framing/backspan,
+loads, connections, foundations, headroom, drainage and waterproofing;
+brick veneer is not the support. Supersedes retained-post notes below.
+
 ## Unify decorative wall lights - October 25
 
 Owner requests all decorative wall sconces match corrected Aleena ivory
@@ -311,13 +719,24 @@ setbacks and drainage still need review. Garden grades and planting stay.
 Latest owner reversal rejects the raised whole patio: restore the terrace,
 furniture and remaining post/foot to lawn grade y = -1.625. Remove the
 garden-edge stair and extended lower landing and restore the lawn cutout.
-Latest extension spans the full dining side: landing at y = 0,
-x = 8.975-12.975, z = -0.325 to 7.775, 4 ft deep and 8.1 ft wide.
-Both treads share those z endpoints, descending west onto the patio:
-two 13.2 in treads and
-three 6.5 in risers. Roof, beams, C3, crops and paths stay unchanged.
+Current approved stair direction, October 26: a 48 × 48 in landing at y = 0,
+x = 8.95–12.95, z = 1.95–5.95, outside the unchanged dining west door.
+Turn the 48 in-wide single flight toward decreasing z along the dining wall:
+two 13.2 in goings, three equal 6.5 in risers, bottom at z = -0.25 and
+y = -1.625. Reserve x = 8.95–12.95, z = -4.25–-0.25 on existing terrace
+as the clear 48 × 48 in arrival; it opens west to patio and east to the
+42 in garden connector. Continuous terrace stone fills the old footprint.
+Net raised-footprint reduction is 25.42 sq ft; flight west edge moves
+26.1 in away from seating. Flush nosings and both marker/wash lights turn
+with the flight; wall downlight targets its center. No openings or floor
+layouts move. Preserve post-free roof, two chairs/table, cold-storage-only
+firepit, garden and paths. Door stays closed/inward; move conflicting
+west dining end chair before opening. No guard is modeled; landing edges,
+guard/handrail requirements, slip resistance, frost/foundations, threshold
+waterproofing, drainage and occupied operation need professional review.
+This supersedes every earlier full-width/west-descending stair description.
 Align the ground-level patio's front edge with z = 7.775, the living-wall
-exterior face. The earlier small door-only landing is superseded.
+exterior face. Earlier landing dimensions below are historical only.
 This supersedes the level-walkout study. Do not claim safety approval:
 door sweep, occupied access, landing edges, handrails, waterproofing,
 drainage, foundations and reduced-post roof support remain unverified.

@@ -770,7 +770,7 @@ test('first-floor baseline matches the furnished model floors and canonical wall
   const floors = [], walls = [];
   const context = {
     UpstairsLayout: layout, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getKitchenPassageLayout: require('../floor-plan-ground.js').getKitchenPassageLayout, getPrepWindowLayout: require('../floor-plan-ground.js').getPrepWindowLayout, getPrepWindowBankLayout: require('../floor-plan-ground.js').getPrepWindowBankLayout, ceilingHeight: 9, garageFloorY: -1.25, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
-    garageEntry: { x: 39.5, width: 3, height: 8 },
+    garageEntry: { x: 38, width: 3, height: 8 },
     garageFloorAreas: [{ x: 44.9 - 2 / 12, z: 15, w: 10.6 + 2 / 12, d: 11.9 }, { x: 29, z: 26.9, w: 26.5, d: 7.7 }, { x: 31.2, z: 34.6, w: 24.3, d: 14.4 }],
     scene: {}, shell: {},
     floor: (x, z, w, d) => floors.push([x, z, w, d]),

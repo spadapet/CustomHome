@@ -43,7 +43,8 @@ function buildLighting() {
     }
   };
   vm.createContext(context);
-  vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const porchCanopyHeight ='), exteriorSource.indexOf('  const porchRoof =')), context);
+  vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const canopyDepth ='), exteriorSource.indexOf('  function canopySection(')), context);
+  vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const porchCanopyHeight ='), exteriorSource.indexOf('  const porchMetal =')), context);
   vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const lighting ='), exteriorSource.indexOf('  const cameras =')), context);
   return { group, context, lighting: group.children[0] };
 }
@@ -85,13 +86,16 @@ test('wall lights have correctly oriented mounting plates and porch housings mee
     if (fixture.name.startsWith('West')) close(wallX, -0.225);
     else if (fixture.name.startsWith('East')) close(wallX, 55.725);
     else if (fixture.name.startsWith('Dining patio')) close(wallX, 12.975);
-    else if (fixture.name.startsWith('Front door')) close(wallZ, 54.425);
+    else if (fixture.name.startsWith('Front door')) close(wallZ, 54.625);
     else if (fixture.name.startsWith('Driveway')) close(wallZ, 49.225);
     else if (fixture.name.startsWith('Rear dining')) close(wallZ, -0.325);
     else close(wallZ, 6.775);
   }
   for (const fixture of fixtures.filter((part) => part.name === 'Front porch approach ceiling light')) {
     close(fixture.position.y + 0.075, context.porchCanopyUndersideAt(fixture.position.z));
+  }
+  for (const fixture of fixtures.filter((part) => /patio ceiling light|Open-patio approach ceiling/.test(part.name))) {
+    close(fixture.position.y + 0.075, context.patioRoofUndersideAt(fixture.position.z) - 0.75 - 0.04);
   }
 });
 

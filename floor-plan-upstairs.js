@@ -75,7 +75,7 @@ function getUpstairsDefaultPlan(stairOpening) {
     ['East bath entry', 21.5, 36.2, 21.5, 41.2, [door(1.2, 2.5)]],
     ['Bedroom 3 north', 0, 41.2, 13, 41.2, [door(9.3)]],
     ['Bedroom 3 west', 0, 41.2, 0, 53.2, [win(4)], [-1]],
-    ['Bedrooms south', 0, 53.2, 31, 53.2, [win(4.5), win(22.5)], [-1]],
+    ['Bedrooms south', 0, 53.2, 31, 53.2, [[3.6, 6, 3, 8], [7.4, 9.8, 3, 8], [10.85, 12.35, 3, 8], [19, 21.4, 3, 8], [22.8, 25.2, 3, 8], [27.2, 29, 3, 8]], [-1]],
     ['Bedroom 3 closet', 13, 41.2, 13, 53.2, [door(1.1, 2.5)]],
     ['Closet divider', 13, 47, 18, 47],
     ['Bedroom 4 closet', 18, 41.2, 18, 53.2, [door(7.2, 2.5)]],
@@ -97,8 +97,12 @@ function getUpstairsDefaultPlan(stairOpening) {
     ['Loft 2', 51.9, 33, 4, -Math.PI / 2, 1],
     ['Stairwell', 0.1, 31.1, 3, -Math.PI / 2, -1],
     ['Bedroom 3 west', 0.1, 47.2, 4, -Math.PI / 2, -1],
-    ['Bedroom 3 south', 6.5, 53.1, 4, 0, -1],
-    ['Bedroom 4 south', 24.5, 53.1, 4, 0, -1]
+    ['Bedroom 3 south left', 4.8, 53.1, 2.4, 0, -1],
+    ['Bedroom 3 south right', 8.6, 53.1, 2.4, 0, -1],
+    ['Bedroom 3 south narrow', 11.6, 53.1, 1.5, 0, -1],
+    ['Bedroom 4 south left', 20.2, 53.1, 2.4, 0, -1],
+    ['Bedroom 4 south right', 24, 53.1, 2.4, 0, -1],
+    ['Bedroom 4 south narrow', 28.1, 53.1, 1.8, 0, -1]
   ];
   return { rooms, floors, walls, windows, arrival, stairs: { ...stairOpening } };
 }
@@ -271,7 +275,7 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   desk('Primary', 13, 13.5, -Math.PI / 2);
   desk('Bedroom 2', 33.4, 11.2);
   desk('Bedroom 3', 1.2, 50.8, Math.PI / 2);
-  desk('Bedroom 4', 20.7, 52, Math.PI);
+  desk('Bedroom 4', 22.1, 52, Math.PI);
   chair('Primary sitting chair 1', 3, 12.8, Math.PI);
   chair('Primary sitting chair 2', 7, 12.8, Math.PI);
   const sittingTable = furniture('Primary sitting side table', 5, 12.8);

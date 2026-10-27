@@ -18,6 +18,113 @@
     return { wallStartZ, wallEndZ, centerZ, windowCenters: [centerZ - 5.8, centerZ + 5.8], sideWindowBank, patioDoor };
   }
 
+  function getFrontEntryLayout() {
+    const width = 5, height = 8, spring = 7.1;
+    const radius = ((width / 2) ** 2 + (height - spring) ** 2) / (2 * (height - spring));
+    return { x: 15.6, z: 54.2, width, height, spring, radius, centerY: height - radius, surroundWidth: 0.65, hingeZ: -0.34 };
+  }
+
+  function buildArchedFrontEntry(THREE, { box, wood, trim, hardware, field, oakMaps }, parent) {
+    const layout = getFrontEntryLayout();
+    const half = layout.width / 2;
+    const topAt = (x, radius = layout.radius) => layout.centerY + Math.sqrt(Math.max(0, radius * radius - x * x));
+    const leafWood = oakMaps ? new THREE.MeshStandardMaterial({ ...oakMaps, color: '#fff2d8', roughness: 0.72, normalScale: new THREE.Vector2(0.15, 0.15) }) : wood;
+    const leafField = oakMaps ? leafWood.clone() : field;
+    if (oakMaps) leafField.color.set('#eee0c8');
+    function mesh(shape, depth, material, name, target = parent, z = 0) {
+      const geometry = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 40 });
+      if (oakMaps && (material === leafWood || material === leafField)) {
+        const positions = geometry.attributes.position, uv = geometry.attributes.uv;
+        for (let index = 0; index < positions.count; index++) uv.setXY(index, (positions.getX(index) + target.position.x) / 2.43, positions.getY(index) / 8);
+        uv.needsUpdate = true;
+      }
+      const part = new THREE.Mesh(geometry, material);
+      part.name = name;
+      part.position.z = z;
+      part.castShadow = part.receiveShadow = true;
+      part.userData = { archedEntryPart: true, tourObstacle: true };
+      target.add(part);
+      return part;
+    }
+    function archBand(innerHalf, outerHalf, innerRadius, outerRadius, bottom) {
+      const shape = new THREE.Shape();
+      shape.moveTo(-outerHalf, bottom);
+      for (let index = 0; index <= 40; index++) {
+        const x = -outerHalf + outerHalf * 2 * index / 40;
+        shape.lineTo(x, topAt(x, outerRadius));
+      }
+      shape.lineTo(outerHalf, bottom);
+      shape.lineTo(innerHalf, bottom);
+      for (let index = 0; index <= 40; index++) {
+        const x = innerHalf - innerHalf * 2 * index / 40;
+        shape.lineTo(x, topAt(x, innerRadius));
+      }
+      shape.lineTo(-innerHalf, bottom);
+      shape.closePath();
+      return shape;
+    }
+    const surround = archBand(half, half + layout.surroundWidth, layout.radius, layout.radius + layout.surroundWidth, 0);
+    mesh(surround, 0.28, trim, 'Deep white arched entry surround', parent, 0.19);
+    mesh(surround, 0.12, trim, 'Interior arched entry casing', parent, -0.31);
+    mesh(archBand(half + 0.48, half + 0.72, layout.radius + 0.48, layout.radius + 0.72, 0.1), 0.1, trim, 'Projecting outer arch molding', parent, 0.47);
+    for (const side of [-1, 1]) {
+      const spandrel = new THREE.Shape();
+      const outerX = side * half;
+      spandrel.moveTo(outerX, layout.height);
+      spandrel.lineTo(0, layout.height);
+      for (let index = 0; index <= 30; index++) {
+        const x = side * half * index / 30;
+        spandrel.lineTo(x, topAt(x));
+      }
+      spandrel.closePath();
+      mesh(spandrel, 0.35, trim, 'Arch-shaped wall closure above door', parent, -0.175);
+    }
+    const leaves = [];
+    for (const side of [-1, 1]) {
+      const leaf = new THREE.Group();
+      leaf.name = `Front entry ${side < 0 ? 'left' : 'right'} arched oak door leaf`;
+      leaf.position.x = side * 2.47;
+      leaf.position.z = layout.hingeZ;
+      leaf.userData = { arched: true, crownHeightFeet: 8, springHeightFeet: 7.1, interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 110, openRotationSign: -side } };
+      parent.add(leaf);
+      const min = side < 0 ? -2.45 : 0.02, max = side < 0 ? -0.02 : 2.45;
+      const localX = (x) => x - leaf.position.x;
+      const shape = new THREE.Shape();
+      shape.moveTo(localX(min), 0.04);
+      shape.lineTo(localX(max), 0.04);
+      for (let index = 0; index <= 40; index++) {
+        const x = max - (max - min) * index / 40;
+        shape.lineTo(localX(x), topAt(x) - 0.015);
+      }
+      shape.closePath();
+      mesh(shape, 0.18, leafWood, 'Curved oak entry leaf body', leaf, -0.09);
+      const center = localX((min + max) / 2), panelWidth = max - min - 0.56;
+      for (const face of [-1, 1]) {
+        box(leaf, center, 1.15, face * 0.11, panelWidth, 1.25, 0.04, leafField).name = 'Recessed lower oak entry panel';
+        for (const edge of [-1, 1]) box(leaf, center + edge * (panelWidth / 2 + 0.04), 1.15, face * 0.14, 0.08, 1.4, 0.06, leafWood).name = 'Lower entry panel molding';
+        for (const y of [0.45, 1.85]) box(leaf, center, y, face * 0.14, panelWidth, 0.08, 0.06, leafWood).name = 'Lower entry panel rail';
+        const upper = new THREE.Shape();
+        upper.moveTo(localX(min + 0.28), 2.15);
+        upper.lineTo(localX(max - 0.28), 2.15);
+        for (let index = 0; index <= 24; index++) {
+          const x = max - 0.28 - (max - min - 0.56) * index / 24;
+          upper.lineTo(localX(x), topAt(x) - 0.4);
+        }
+        upper.closePath();
+        mesh(upper, 0.025, leafField, 'Arched recessed upper oak panel', leaf, face > 0 ? 0.1 : -0.125);
+        for (let x = min + 0.5; x < max - 0.4; x += 0.36) {
+          const top = topAt(x) - 0.43;
+          box(leaf, localX(x), (top + 2.18) / 2, face * 0.14, 0.012, top - 2.18, 0.012, leafWood).name = 'Fine vertical oak panel joint';
+        }
+        box(leaf, -side * 2.24, 3.55, face * 0.2, 0.07, 0.9, 0.1, hardware).name = 'Arched entry dark pull';
+      }
+      leaves.push(leaf);
+    }
+    box(parent, 0, 0.015, 0, 5, 0.03, 0.5, hardware).name = 'Arched entry threshold';
+    parent.userData = { ...parent.userData, arched: true, heightInches: 96, springHeightInches: 85.2, widthInches: 60, productSelected: false, clearanceVerified: false };
+    return leaves;
+  }
+
   function getGarageClerestoryLayout(floorY = -1.25) {
     return [19.5, 29.5, 39.5].map((z, index) => ({
       name: `Garage high window ${index + 1}`, x: 55.5, z, width: 6, height: 1.5,
@@ -193,12 +300,14 @@
       ['Kitchen east', kitchenPassages.wallX, kitchenPassages.wallZ, kitchenPassages.wallX, 25.3, kitchenPassages.openings],
       ['Kitchen east return', 37.5, 25.3, 37.5, 26.9], ['Mudroom north', 37.5, 15, 44.9 - 2 / 12, 15],
       ['Garage north', 44.9 - 2 / 12, 15, 55.5, 15], ['Mudroom east', 44.9 - 2 / 12, 15, 44.9 - 2 / 12, 26.9],
-      ['Mudroom south', 37.5, 26.9, 44.9 - 2 / 12, 26.9, [[2, 5, 0, 8]]]
+      ['Mudroom south', 37.5, 26.9, 44.9 - 2 / 12, 26.9, [[0.5, 3.5, 0, 8]]]
     ];
     return { rooms, floors, walls: segments, windows: [], stairs, floorName: 'first-floor' };
   }
 
   root.getLivingRoomFeatureLayout = getLivingRoomFeatureLayout;
+  root.getFrontEntryLayout = getFrontEntryLayout;
+  root.buildArchedFrontEntry = buildArchedFrontEntry;
   root.getGarageClerestoryLayout = getGarageClerestoryLayout;
   root.getGuestEntryLayout = getGuestEntryLayout;
   root.getGuestSuiteLayout = getGuestSuiteLayout;
@@ -251,5 +360,5 @@
       }
     };
   };
-  if (typeof module !== 'undefined' && module.exports) module.exports = { getGroundFloorDefaultPlan, getKitchenPassageLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { getGroundFloorDefaultPlan, getKitchenPassageLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getFrontEntryLayout, buildArchedFrontEntry };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

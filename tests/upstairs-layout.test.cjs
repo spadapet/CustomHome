@@ -39,7 +39,7 @@ test('empty overrides preserve every baseline room, wall opening, floor and wind
   const plan = layout.resolve(baseline, layout.empty());
   assert.deepEqual(plan.rooms, baseline.rooms);
   assert.equal(plan.walls.length, baseline.walls.length);
-  assert.equal(plan.windows.length, 11);
+  assert.equal(plan.windows.length, 15);
   baseline.walls.forEach((original) => {
     const resolved = wall(plan, original[0]);
     assert.deepEqual(resolved.openings, original[5] ?? []);
