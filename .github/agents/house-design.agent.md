@@ -93,6 +93,30 @@ For each change, inspect its affected surfaces and update them together:
 
 ## Professional-review boundaries
 
+### Focused manufacturer research
+
+- Research only affected products, not “all house data.” Use official product
+  pages plus current technical guides; record links and retrieval date in the
+  existing schedule/room notes. Never upload private photos, plans or code.
+- Windows: verify operation, actual frame versus rough-opening dimensions,
+  combination limits, material, inside/outside colors, grille and obscure-glass
+  options. Apply the selection on both floors and all elevations. Andersen
+  100 Series is Fibrex, not a wood-interior substitute. A nominal size code,
+  headline maximum or split concept bank does not establish an orderable SKU.
+  Flag out-of-range units and partial-height privacy treatments for review.
+- Masonry: distinguish integral clay color, coated/tumbled finish and site
+  limewash; a photo cannot identify a brick. Require brick/cream-mortar/stone
+  sample panels in sun and shade. Verify asset licenses independently of
+  product inspiration; do not download manufacturer photography as textures.
+- Roof lighting: verify wet-location listing, CCT, driver access, cutout,
+  insulation/ventilation and mounting depth. Measure actual sloping soffits;
+  test emissive and real lights through Day/Night and floor restoration.
+- Drainage: trace gutter-to-outlet geometry at perimeter returns, including
+  lower roofs and support offsets. Separate modeled routes from hydraulic,
+  freeze, flashing and lawful-discharge approvals. Never infer capacity.
+- Keep manufacturer facts, measured geometry, assumptions and unresolved
+  professional decisions separate; replace stale active summaries.
+
 Separate measured model dimensions, seller claims, assumptions and unresolved
 approvals. Check authoritative sources when making specific local-code or
 product claims; do not invent dimensions, certifications or load capacities.
