@@ -1,6 +1,6 @@
 function buildExteriorModel(THREE, { box, mat, masonryMaps }, floorToFloor, garageFloorY) {
   const group = new THREE.Group();
-  group.name = 'English-country exterior concept';
+  group.name = 'Hipped cream-brick transitional exterior concept';
   group.visible = false;
   group.userData = { provisional: true, style: 'Restrained transitional cream-brick house with quiet hipped roofs, white eaves and natural oak doors', floorToFloorFeet: floorToFloor, coordinatedConstructionDrawings: false, frontElevationStudy: true, frontOpeningsCoordinatedWithInteriors: false, garageUpperVolume: 'Unoccupied roof void only; no room, storage or access approval', wallCladding: 'Cream queen brick veneer; support and wall assembly require design' };
   const wallThickness = 0.45;
@@ -1242,7 +1242,9 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps }, floorToFloor, gara
   const mulch = mat('#65452f', 0.98);
   const foliage = mat('#4c6240');
   const frontShrubRadius = 0.9;
-  const frontShrubCount = 6;
+  const frontShrubCount = 5;
+  const frontBedEdge = mat('#b8b09e', 0.9);
+  const lowFoliage = mat('#839277', 0.95);
   for (const [name, left, right] of [['West front porch mulch bed', 0, 10.7], ['East front porch mulch bed', 20.5, drivewayLeft]]) {
     const bed = box(group, (left + right) / 2, -1.65, (61.2 + 64.5) / 2, right - left, 0.1, 64.5 - 61.2, mulch);
     bed.name = name;
@@ -1251,9 +1253,28 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps }, floorToFloor, gara
     for (let index = 0; index < frontShrubCount; index++) {
       const shrub = new THREE.Mesh(new THREE.SphereGeometry(frontShrubRadius, 10, 8), foliage);
       shrub.name = 'Front mulch-bed shrub';
-      shrub.position.set(left + edgeInset + index * (right - left - 2 * edgeInset) / (frontShrubCount - 1), bed.userData.topFeet + frontShrubRadius, bed.position.z);
+      shrub.position.set(left + edgeInset + index * (right - left - 2 * edgeInset) / (frontShrubCount - 1), bed.userData.topFeet + frontShrubRadius, 62.35);
       shrub.userData = { plantingBed: name, baseFeet: bed.userData.topFeet, provisional: true };
       group.add(shrub);
+    }
+    // Keep every constituent inside the existing beds, not in the step approach,
+    // front walk or driveway. Low foreground masses soften the rigid ball row.
+    for (let index = 0; index < 7; index++) {
+      const plant = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), lowFoliage);
+      plant.name = 'Low front-bed planting mound';
+      plant.scale.set(0.42, 0.34, 0.42);
+      plant.position.set(left + 0.7 + index * (right - left - 1.4) / 6, bed.userData.topFeet + 0.34, 63.85);
+      plant.userData = { plantingBed: name, provisional: true, speciesAndMatureSpreadUnselected: true };
+      group.add(plant);
+    }
+    // Two-inch coping stays within the soil footprint; no raised walk obstruction.
+    const edge = box(group, (left + right) / 2, -1.6, 64.5 - 1 / 12,
+      right - left, 0.16, 1 / 6, frontBedEdge);
+    edge.name = 'Front planting-bed stone edge';
+    edge.userData = { plantingBed: name, drainageAndFrostDetailRequired: true };
+    for (const x of [left + 1 / 12, right - 1 / 12]) {
+      box(group, x, -1.6, (61.2 + 64.5 - 1 / 6) / 2,
+        1 / 6, 0.16, 3.3 - 1 / 6, frontBedEdge).name = 'Front planting-bed stone edge return';
     }
   }
   for (const [start, end, z] of [[32, 54, 8]]) {

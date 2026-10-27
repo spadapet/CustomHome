@@ -88,6 +88,15 @@ occupied operation and fire separation require professional review; no code appr
 
 ## Current roof/elevation — articulated hipped transitional, October 26
 
+Front beds remain x=0–10.7 and 20.5–30.9 ft, z=61.2–64.5 ft.
+Each contains five radius-0.9 ft evergreen mounds centered at z=62.35,
+with at least 0.25 ft between crowns, plus seven low 0.84 × 0.68 × 0.84 ft
+foreground mounds at z=63.85. Two-inch stone front/side edging stays within
+the bed bounds; top y=-1.52 ft remains below the -1.35 ft walk.
+The 9.8 ft gap between beds and all circulation geometry remain unchanged.
+Plants are provisional size envelopes; verify mature spread, maintenance,
+soil, drainage and frost-resistant edge construction before installation.
+
 Replace the rejected paired 12:12 projecting-gable formula with a main
 4:12 hip and matching east-wing hip, plus a subordinate one-story 6:12
 garage hip. Model crowns are 24.6167, 23.8083 and 12.475 ft respectively.

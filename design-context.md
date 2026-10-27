@@ -92,6 +92,15 @@ professional review. This is a reversible design study, not code approval.
 
 ## Current exterior — articulated hipped transitional, October 26
 
+Local curb-appeal pass: retain both existing front bed footprints, but replace
+six overlapping balls per bed with five 21.6-inch evergreen mounds (3-inch
+minimum crown gap), backed by the unchanged porch. Add seven low sage-green
+mounds per bed and 2-inch stone edging contained within soil, below the walk.
+Keep the 9.8 ft central bed gap, steps, driveway, roofs, openings, patio and
+rear garden fixed. Species/mature spread, frost, soil, drainage and maintenance
+remain unverified. Viewer accessibility labels now describe the accepted
+hipped cream-brick design, not the rejected siding/farmhouse study.
+
 The owner rejected the paired projecting-gable architecture. Rendered trials
 compared a four-sided hip with a single longitudinal gable; select the hip
 to avoid a blank front triangle and competing peaks. Remove all three
@@ -134,17 +143,19 @@ the post-free patio. That canopy remains approval-required; firepit stays
 cold storage only. These are local design-study changes, not construction
 drawings or owner approval of a completed building.
 
-Verification after articulation: 273 tests pass in 45 suites, including the
-new constituent-geometry checks and the existing base-trim suite; JavaScript
+Verification after curb-appeal refinement: 279 tests pass in 47 suites, including
+front planting constituent checks and the existing base-trim suite; JavaScript
 syntax and whitespace checks pass. Browser Three.js world-space bounds
 confirm the portal dimensions above. Ground/upstairs/exterior cycling
-restores all 1,531 exterior mesh visibility/matrix tuples. Front, rear,
+restores all 1,549 exterior mesh visibility/matrix tuples. Front, rear,
 west, east, street-eye and three-quarter screenshots were inspected, with
 Day/Night lighting checks. Temporary browser instrumentation was removed;
 production reload reports no page errors and one visible render canvas.
-Final images: `artifacts/architecture-final-{front,rear,west,east,street-eye,threequarter}.png`.
-The shared worktree includes other pending work; nothing was staged,
-committed or pushed by this refinement.
+Earlier articulation images: `artifacts/architecture-final-{front,rear,west,east,street-eye,threequarter}.png`.
+The accepted baseline was published first to main at `58457c0` (model commit
+`ea65d4f`, followed by the separate workflow commit). New curb-appeal changes
+remain local and unpublished. Browser world-space bounds confirm a minimum
+0.25000005 ft evergreen crown gap and stone-edge top -1.52000000 ft.
 
 ## Historical rejected paired-gable study — superseded
 
