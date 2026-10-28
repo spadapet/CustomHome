@@ -2,7 +2,8 @@ const viewport = document.getElementById('model-viewport');
 const message = viewport.querySelector('.model-message');
 let viewButtons = document.querySelectorAll('[data-view]');
 const islandLightsInput = document.getElementById('show-island-lights');
-const nightLightingButton = document.getElementById('toggle-night-lighting');
+const nightLightingInput = document.getElementById('toggle-night-lighting');
+const furnitureInput = document.getElementById('show-furniture');
 const floorGridInput = document.getElementById('show-floor-grid');
 const resetButton = document.getElementById('reset-view');
 const refreshButton = document.getElementById('refresh-model');
@@ -251,6 +252,8 @@ function showModelError(text) {
   message.hidden = false;
   viewButtons.forEach((button) => { button.disabled = true; });
   islandLightsInput.disabled = true;
+  nightLightingInput.disabled = true;
+  furnitureInput.disabled = true;
   floorGridInput.disabled = true;
   resetButton.disabled = true;
   navigationButtons.forEach((button) => { button.disabled = true; });
@@ -261,8 +264,9 @@ function showModelError(text) {
 }
 
 function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLayout, savedGroundLayout, bicycleGeometry, armchairGeometry, garageAssets, sofaGeometry, sideTableGeometry, mudroomAssets, { EffectComposer, RenderPass, SSAOPass, OutputPass, RoomEnvironment, masonryMaps, outdoorSky }) {
-  let nightLighting = true;
+  let nightLighting = nightLightingInput.checked;
   let daytimeIslandLights = islandLightsInput.checked;
+  const nestedFurniture = [];
   if (nightLighting) islandLightsInput.checked = true;
   // Model coordinates are feet; the supplied raster is a concept trace, not CAD.
   const ceilingHeight = 9;
@@ -1483,6 +1487,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const sofa = new THREE.Group();
   sofa.name = 'Crate & Barrel Lounge Deep 105-inch Leather Grande Sofa reference';
   sofa.userData = { familySeatTarget: 4, seatCushions: 3, widthInches: 105, depthInches: 46, heightInches: 37, sectional: false, productURL: 'https://www.crateandbarrel.com/lounge-deep-105-leather-grande-sofa/s336140', purchaseSelected: false };
+  sofa.userData.viewerFurniture = true;
   sofa.position.set(11.6, 0, livingCenterZ);
   sofa.rotation.y = -Math.PI / 2;
   scene.add(sofa);
@@ -1507,6 +1512,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     widthInches: 132, depthInches: 68, baseDepthInches: 42, heightInches: 36, armWidthInches: 4,
     modules: ['chaise', 'seat', 'seat', 'chaise'], sectional: true, purchaseSelected: false, provisional: true
   };
+  sectional.userData.viewerFurniture = true;
   sectional.position.set(11.25, 0, livingCenterZ);
   sectional.rotation.y = -Math.PI / 2;
   scene.add(sectional);
@@ -1538,6 +1544,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const chair = new THREE.Group();
     chair.name = `Poly Haven textured armchair ${index + 1}`;
     chair.userData = { ...armchairGeometry.userData, seats: 1, provisional: true };
+    chair.userData.viewerFurniture = true;
     const model = armchairGeometry.clone(true);
     model.traverse((part) => {
       if (part.isMesh) part.userData.tourObstacle = true;
@@ -1550,7 +1557,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   function loungeChair(x, z, rotation) {
     const chair = new THREE.Group();
     chair.name = 'Upholstered lounge chair';
-    chair.userData = { seats: 1 };
+    chair.userData = { seats: 1, viewerFurniture: true };
     chair.position.set(x, 0, z);
     chair.rotation.y = rotation;
     scene.add(chair);
@@ -1562,8 +1569,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     return chair;
   }
   const loungeChairs = [loungeChair(3.6, 10.9, Math.PI / 3), loungeChair(2.9, livingFeatureWall.wallEndZ - 2.175, 2 * Math.PI / 3)];
-  loungeChairs[0].userData = { seats: 1, use: 'Window-corner lounge chair with matching ottoman', provisional: true };
-  loungeChairs[1].userData = { seats: 1, use: 'Corner reading chair beside painted stair enclosure', provisional: true };
+  loungeChairs[0].userData = { seats: 1, use: 'Window-corner lounge chair with matching ottoman', provisional: true, viewerFurniture: true };
+  loungeChairs[1].userData = { seats: 1, use: 'Corner reading chair beside painted stair enclosure', provisional: true, viewerFurniture: true };
   function loungeOttoman(chair) {
     const ottoman = new THREE.Group();
     ottoman.name = 'Matching lounge chair ottoman';
@@ -1631,6 +1638,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const downloadedSofa = new THREE.Group();
   downloadedSofa.name = 'Wayfair Glam velvet sofa - licensed product visualization';
   downloadedSofa.userData = { ...sofaGeometry.userData, provisional: true };
+  downloadedSofa.userData.viewerFurniture = true;
   downloadedSofa.add(sofaGeometry.clone(true));
   downloadedSofa.traverse((part) => { if (part.isMesh) part.userData.tourObstacle = true; });
   scene.add(downloadedSofa);
@@ -1644,6 +1652,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     sideTables: [{ x: 10.8, z: livingCenterZ - 5 }, { x: 10.8, z: livingCenterZ + 5 }],
     sideTableDimensions: sideTableGeometry.userData
   };
+  familyLiving.userData.viewerFurniture = true;
   scene.add(familyLiving);
   function livingWeaveTexture(color, border = false) {
     const canvas = document.createElement('canvas');
@@ -1719,6 +1728,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     planningSeats: 6, seatsPerRun: { main: 2, eachReturn: 2 }, cornerSeatsCounted: false, guestChairs: 0,
     comfortVerified: false, productSelected: false, centerOffset: [0, 0, 0]
   };
+  referenceLounge.userData.viewerFurniture = true;
   scene.add(referenceLounge);
   const sofaFabric = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#9e8a76'), roughness: 0.97 });
   const sofaCushion = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#b49f88'), roughness: 0.98 });
@@ -1812,6 +1822,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     seats: [[10.2, livingCenterZ - 1], [10.2, livingCenterZ + 1.6], [10.2, livingCenterZ + 4.3],
       [5.3, livingCenterZ - 4.2], [7.6, livingCenterZ - 4.2]]
   };
+  familySectional.userData.viewerFurniture = true;
   scene.add(familySectional);
   const familyFabric = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#947453'), roughness: 0.96 });
   const familyCushion = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#aa8864'), roughness: 0.98 });
@@ -1900,6 +1911,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   diningSet.position.set(tableX, 0, tableZ);
   diningSet.rotation.y = 0;
   diningSet.userData = { rotationDegrees: 0, longAxis: 'x', seats: 6, endChairs: 0, centeredInDiningRoom: true, patioEndChairMustBeTuckedForDoor: false, patioEndChairMustBeMovedForDoor: false, provisional: true };
+  diningSet.userData.viewerFurniture = true;
   scene.add(diningSet);
   const diningWalnut = mat('#60412e', 0.6);
   diningWalnut.name = 'Dining walnut finish - screen approximation';
@@ -2518,10 +2530,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   for (const offset of [-1.5, -0.5, 0.5, 1.5]) {
     const stool = new THREE.Group();
     stool.name = 'Kitchen stool';
-    stool.userData = { widthInches: 18, centerSpacingInches: stoolSpacingInches, reference: 'Dark-frame stool with brown seat and wood back' };
+    stool.userData = { widthInches: 18, centerSpacingInches: stoolSpacingInches, reference: 'Dark-frame stool with brown seat and wood back', viewerFurniture: true };
     stool.position.set(29.28, 0, 18.5 + offset * stoolSpacingInches / 12);
     stool.rotation.y = Math.PI / 2;
     island.add(stool);
+    nestedFurniture.push(stool);
     box(stool, 0, 2.12, 0, 1.5, 0.12, 1.5, black, true).name = 'Stool dark seat frame';
     box(stool, 0, 2.225, 0, 1.46, 0.09, 1.46, stoolFabric, true).name = 'Stool brown upholstered seat';
     for (const x of [-0.62, 0.62]) {
@@ -2545,6 +2558,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   scene.add(piano);
   // Keep 1/4 inch beyond the 3/4-inch baseboard; product ventilation is not verified.
   piano.userData.wallRun = { minX: stairOpening.x, maxX: stairOpening.x + stairOpening.width, faceZ: stairOpening.z, rearGapInches: 1, windowShiftInches: 16 };
+  piano.userData.viewerFurniture = true;
   piano.position.set((piano.userData.wallRun.minX + piano.userData.wallRun.maxX) / 2 - piano.userData.wallRun.windowShiftInches / 12, 0, stairOpening.z - 1 / 12 - pianoDepth / 2);
   piano.rotation.y = Math.PI;
   piano.userData.location = 'Living side of stair enclosure, 16 inches west toward fireplace windows, keyboard facing north; fireplace built-ins removed, west end 15.68 in to continuous window-wall baseboard (16.43 in to paint); verify occupied bench access, ventilation and power routing';
@@ -2556,11 +2570,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   mudTileFinish.map = quartzTexture('#ded8cd', 'rgba(151, 143, 129, 0.16)');
   const mudGroutFinish = mat('#d8d1c5', 0.95);
   mudGroutFinish.name = 'Matching warm stone grout';
-  function furnishing(name, x, z, rotation = 0, elevation = 0) {
+  function furnishing(name, x, z, rotation = 0, elevation = 0, viewerFurniture = false) {
     const group = new THREE.Group();
     group.name = name;
     group.position.set(x, elevation, z);
     group.rotation.y = rotation;
+    if (viewerFurniture) group.userData.viewerFurniture = true;
     rest.add(group);
     return group;
   }
@@ -3952,7 +3967,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const trofastWire = mat('#7c8582');
   for (let index = 0; index < 1; index++) {
     const x = kidsRoom.x + kidsRoom.width - 0.35 - trofastWidth / 2;
-    const storage = furnishing(`IKEA TROFAST toy storage ${index + 1}`, x, kidsRoom.z + 0.35 + trofastDepth / 2);
+    const storage = furnishing(`IKEA TROFAST toy storage ${index + 1}`, x, kidsRoom.z + 0.35 + trofastDepth / 2, 0, 0, true);
     storage.userData = { manufacturer: 'IKEA', model: 'TROFAST', articleNumber: '796.131.29', productURL: 'https://www.ikea.com/us/en/p/trofast-storage-combination-with-boxes-room-divider-white-dark-gray-s79613129/', widthInches: 39, depthInches: 17.375, heightInches: 37, finish: 'White frame / dark gray mesh boxes', removableBoxes: 9, wallAnchorageRequired: true, looseLegoRequiresLiddedInserts: true, binPullAllowanceInches: 17.375, manufacturerCAD: false, provisional: true };
     for (const y of [trofastPanel / 2, trofastHeight - trofastPanel / 2]) box(storage, 0, y, 0, trofastWidth, trofastPanel, trofastDepth, porcelain).name = 'TROFAST white horizontal frame';
     for (let panel = 0; panel < 4; panel++) {
@@ -3992,7 +4007,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const rotation = Math.PI;
     const x = kidsRoom.x + kidsRoom.southWidth - 0.175 - 1 / 12 - kidsDeskWidth / 2 - (1 - index) * (kidsDeskWidth + 1 / 12);
     const z = kidsDeskZ;
-    const desk = furnishing(`IKEA MITTZON kids desk ${index + 1}`, x, z, rotation);
+    const desk = furnishing(`IKEA MITTZON kids desk ${index + 1}`, x, z, rotation, 0, true);
     desk.userData = { manufacturer: 'IKEA', model: 'MITTZON', widthInches: 47.25, depthInches: 31.5, heightInches: 29.5, minHeightInches: 24.375, maxHeightInches: 49.625, productURL: 'https://www.ikea.com/us/en/p/mittzon-desk-sit-stand-electric-birch-veneer-white-s09527743/', finish: 'Birch veneer / white', manufacturerCAD: false, chairAllowanceInches: 30, purpose: index === 0 ? 'All-in-one PC' : 'Homework and crafts', childUseRequiresReview: true };
     box(desk, 0, kidsDeskHeight - 0.05, 0, kidsDeskWidth, 0.1, kidsDeskDepth, oak).name = 'MITTZON desktop';
     for (const side of [-1, 1]) {
@@ -4015,7 +4030,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       box(desk, 1.3, 2.65, -0.75, 0.55, 0.4, 0.45, kidsClay).name = 'Removable art supply caddy';
     }
     const chairOffset = kidsDeskDepth / 2 + 0.025;
-    const chair = furnishing(`Kids desk chair ${index + 1}`, x + Math.sin(rotation) * chairOffset, z + Math.cos(rotation) * chairOffset, rotation + Math.PI);
+    const chair = furnishing(`Kids desk chair ${index + 1}`, x + Math.sin(rotation) * chairOffset, z + Math.cos(rotation) * chairOffset, rotation + Math.PI, 0, true);
     chair.userData = { widthInches: 18, depthInches: 18, seatHeightInches: 18, productSelected: false, provisional: true };
     box(chair, 0, 1.425, 0, 1.5, 0.15, 1.5, index === 1 ? kidsBlue : linen, true).name = 'Kids desk chair seat';
     box(chair, 0, 2.05, -0.67, 1.5, 1.2, 0.1, index === 1 ? kidsBlue : linen, true).name = 'Kids desk chair back';
@@ -4023,7 +4038,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   for (const [index, [deskX, deskZ, rotation]] of [[3.8, officeNorthZ + 1.35, 0], [6, 52.8, Math.PI]].entries()) {
-    const officeDesk = furnishing(`60-inch office desk ${index + 1}`, deskX, deskZ, rotation);
+    const officeDesk = furnishing(`60-inch office desk ${index + 1}`, deskX, deskZ, rotation, 0, true);
     officeDesk.userData = { widthInches: 60, depthInches: 24, provisional: true };
     box(officeDesk, 0, 2.4, 0, 5, 0.2, 2, oak).name = '60-inch desktop';
     for (const x of [-2.2, 2.2]) for (const z of [-0.8, 0.8]) box(officeDesk, x, 1.2, z, 0.12, 2.4, 0.12, oak);
@@ -4033,7 +4048,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       box(officeDesk, monitorX, 2.8, -0.25, 0.08, 0.55, 0.08, steel);
     }
     box(officeDesk, 0, 2.53, 0.45, 1.2, 0.06, 0.4, black);
-    const deskChair = furnishing('Office task chair', deskX, deskZ + (index === 0 ? 2.35 : -2.35), rotation + Math.PI);
+    const deskChair = furnishing('Office task chair', deskX, deskZ + (index === 0 ? 2.35 : -2.35), rotation + Math.PI, 0, true);
     box(deskChair, 0, 1.6, 0, 1.8, 0.3, 1.7, black, true);
     box(deskChair, 0, 2.5, -0.7, 1.8, 1.6, 0.2, black, true);
     cylinder(deskChair, 0, 0.8, 0, 0.12, 1.5, steel);
@@ -4042,7 +4057,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       foot.rotation.y = angle;
     }
   }
-  const officeLounge = furnishing('Office loveseat', 10.45, 50.4, -Math.PI / 2);
+  const officeLounge = furnishing('Office loveseat', 10.45, 50.4, -Math.PI / 2, 0, true);
   officeLounge.userData = { widthInches: 60, depthInches: 33.6, provisional: true };
   box(officeLounge, 0, 1, 0, 5, 0.8, 2.8, cream, true);
   box(officeLounge, 0, 2, -1.15, 5, 1.4, 0.35, cushion, true);
@@ -4136,7 +4151,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const bedroomBedDepth = 82.75 / 12;
   const bedroomFurnitureBack = 31.2 - 0.175 - 0.15;
   const bedroomBedZ = 54.2 - 0.175 - 0.15 - 3.7 - 0.78;
-  const bed = furnishing('Article Lenia queen bed', bedroomFurnitureBack - bedroomBedDepth / 2, bedroomBedZ, -Math.PI / 2);
+  const bed = furnishing('Article Lenia queen bed', bedroomFurnitureBack - bedroomBedDepth / 2, bedroomBedZ, -Math.PI / 2, 0, true);
   bed.userData = { widthInches: 63.5, depthInches: 82.75 };
   box(bed, 0, 1, 0, bedroomBedWidth, 0.5, bedroomBedDepth, oak);
   for (const x of [-2.25, 2.25]) for (const z of [-3, 3]) box(bed, x, 0.4, z, 0.18, 0.8, 0.18, oak);
@@ -4145,7 +4160,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(bed, 0, 2.02, 1.1, 5.03, 0.08, 3.8, linen, true);
   for (const x of [-1.25, 1.25]) box(bed, x, 2.12, -2.2, 2.1, 0.35, 1.35, porcelain, true);
   for (const side of [-1, 1]) {
-    const nightstand = furnishing('Bedroom nightstand', bedroomFurnitureBack - 0.675, bedroomBedZ + side * 3.7, -Math.PI / 2);
+    const nightstand = furnishing('Bedroom nightstand', bedroomFurnitureBack - 0.675, bedroomBedZ + side * 3.7, -Math.PI / 2, 0, true);
     cabinet(nightstand, 0, 0, 1.5, 1.3, 1.6);
     cylinder(nightstand, 0, 2.4, 0, 0.05, 1.2, brass);
     cylinder(nightstand, 0, 3, 0, 0.4, 0.45, cream, 0.25);
@@ -4590,7 +4605,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const porchPillow = mat('#74745b', 0.96);
   const frontPorchChairs = [];
   for (const x of [3.2, 8]) {
-    const chair = furnishing('Front porch cushioned lounge chair', x, 56.15, 0, 0.035);
+    const chair = furnishing('Front porch cushioned lounge chair', x, 56.15, 0, 0.035, true);
     frontPorchChairs.push(chair);
     chair.userData = { widthFeet: 2.6, depthFeet: 2.65, seatHeightFeet: 1.5, backHeightFeet: 2.75, outdoorProductSelected: false };
     for (const side of [-1, 1]) {
@@ -4607,7 +4622,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     back.rotation.x = -0.08;
     box(chair, 0, 1.83, -0.64, 1.3, 0.55, 0.26, porchPillow, true).name = 'Porch chair olive lumbar pillow';
   }
-  const frontPorchTable = furnishing('Front porch small table between chairs', 5.6, 56.15, 0, 0.035);
+  const frontPorchTable = furnishing('Front porch small table between chairs', 5.6, 56.15, 0, 0.035, true);
   box(frontPorchTable, 0, 1.65, 0, 1.5, 0.12, 1.5, oak, true).name = 'Porch side-table top';
   for (const x of [-0.57, 0.57]) for (const z of [-0.57, 0.57])
     box(frontPorchTable, x, 0.795, z, 0.12, 1.59, 0.12, oak).name = 'Porch side-table leg';
@@ -4662,6 +4677,23 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     part.name = 'Provisional lower garage approach';
     part.castShadow = false;
   }
+  function groupViewerFurniture(parent, name) {
+    const root = new THREE.Group();
+    root.name = name;
+    const contents = new THREE.Group();
+    contents.name = `${name} items`;
+    root.add(contents);
+    parent.add(root);
+    for (const object of [...parent.children]) {
+      if (object !== root && object.userData.viewerFurniture) {
+        parent.remove(object);
+        contents.add(object);
+      }
+    }
+    return { root, contents };
+  }
+  const groundFurnitureLayer = groupViewerFurniture(scene, 'Ground-floor furniture visibility group');
+  const roomFurnitureLayer = groupViewerFurniture(rest, 'Room furniture visibility group');
   const groundModelRoots = scene.children.filter((object) => !object.isLight);
   const originalGroundRoots = [...groundModelRoots];
   const originalGroundDimensions = [...document.querySelectorAll('#room-dimension-summary li')].map((item) => item.cloneNode(true));
@@ -4686,6 +4718,21 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const planDimensionLabels = document.getElementById('plan-dimension-labels');
   const planDimensionsPanel = document.getElementById('plan-dimensions');
   let dimensionRooms = [];
+  function planRoomName(name) {
+    const shortNames = {
+      'Primary bedroom': 'Primary', 'Primary bath': 'P. bath',
+      'Primary toilet': 'P. WC', 'Primary closet': 'P. closet',
+      'Shared bath west': 'Bath W', 'Shared bath east': 'Bath E',
+      'Living room': 'Living', 'Dining room': 'Dining', 'Prep kitchen': 'Prep',
+      'Mudroom': 'Mud', 'Kids room': 'Kids', 'Kids room extension': 'Kids ext.',
+      'Powder room': 'Powder', 'Guest coat closet': 'Coats',
+      'Guest entry alcove': 'Guest entry', 'Entry hall': 'Entry',
+      'Guest room': 'Guest', 'Front porch': 'Porch', 'Mechanical': 'Mech.'
+    };
+    const clean = name.replace(' (relocated)', '');
+    return shortNames[clean] ?? clean.replace(/^Bedroom (\d+) bath$/, 'Bath $1')
+      .replace(/^Bedroom (\d+) closet$/, 'Closet $1').replace(/^Bedroom /, 'Bed ');
+  }
   function updatePlanDimensions() {
     const planView = currentView === 'top' || currentView === 'upstairs-top';
     const visible = planView && roomDimensionsInput.checked;
@@ -4701,13 +4748,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const room of rooms) {
       const kidsShape = activeFloor === 'ground' && room.name === 'Kids room';
       const kidsArea = kidsShape ? groundBaseline.floors.filter(({ room }) => /^Kids room/.test(room ?? '')).reduce((sum, { w, d }) => sum + w * d, 0) : 0;
-      const dimensions = kidsShape ? `${kidsArea.toFixed(2)} sq ft, stepped plan; west edge to z37.2, east edge to z33.6` : `${feet(room.w)} x ${feet(room.d)}`;
+      const clear = activeFloor === 'upstairs' ? getUpstairsRoomClearDimensions(room, upstairs.plan.walls) : room;
+      const dimensions = kidsShape ? `${kidsArea.toFixed(2)} sq ft, stepped plan; west edge to z37.2, east edge to z33.6` : `${feet(clear.w)} x ${feet(clear.d)}${activeFloor === 'upstairs' ? ' paint-face' : ''}`;
       const label = document.createElement('div');
       label.className = 'plan-dimension-label';
+      label.title = `${room.name}: ${dimensions}`;
       const name = document.createElement('strong');
-      name.textContent = room.name;
+      name.textContent = planRoomName(room.name);
       const size = document.createElement('span');
-      size.textContent = dimensions;
+      size.textContent = kidsShape ? `${kidsArea.toFixed(2)} sq ft`
+        : `${feet(clear.w)} x ${feet(clear.d)}`.replace(/' /g, "'").replace(/'0"/g, "'");
       label.append(name, size);
       planDimensionLabels.append(label);
       const item = document.createElement('li');
@@ -4726,7 +4776,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       const label = planDimensionLabels.children[index];
       label.style.left = `${(center.x + 1) * width / 2}px`;
       label.style.top = `${(1 - center.y) * height / 2}px`;
-      label.style.fontSize = `${Math.min(13, roomWidth / (Math.max(room.name.length, 18) * 0.65), roomDepth / 3.5)}px`;
+      const characters = Math.max(...Array.from(label.children, (part) => part.textContent.length));
+      label.style.fontSize = `${Math.max(1, Math.min(10, (roomWidth - 4) / (characters * 0.65), (roomDepth - 2) / 2.3))}px`;
     });
   }
   roomDimensionsInput.addEventListener('change', () => {
@@ -5142,7 +5193,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const room of upstairs.rooms) {
       fixture(upstairs.group, room.name, room.x + room.w / 2, upstairs.group.userData.ceilingHeightFeet, room.z + room.d / 2, 2 / 12, /closet|toilet|Linen/.test(room.name) ? 9 : 22, 'upstairs');
     }
-    for (const [x, z] of [[19, 24.8], [31, 24.8], [15.5, 38.5]]) fixture(upstairs.group, 'Upstairs hall', x, upstairs.group.userData.ceilingHeightFeet, z, 2 / 12, 14, 'upstairs');
+    const upperDimensions = getUpstairsMeasuredGeometry();
+    for (const [x, z] of [
+      [19, (upperDimensions.loftNorth + upperDimensions.laundryNorth) / 2],
+      [31, (upperDimensions.loftNorth + upperDimensions.laundryNorth) / 2],
+      [17, 33], [15.5, (upperDimensions.serviceSouth + upperDimensions.bedNorth) / 2]
+    ]) fixture(upstairs.group, 'Upstairs hall', x, upstairs.group.userData.ceilingHeightFeet, z, 2 / 12, 14, 'upstairs');
     fixture(piano, 'Piano music', 0, 3.6, 0.25, 0.24, 3, 'ground', true);
     box(piano, 0, 3.27, -0.45, 0.04, 0.66, 0.04, rosewood).name = 'Piano lamp support';
     return rigs;
@@ -5181,12 +5237,20 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const upstairsHelpers = { box, mat, wood, wallMaterial, windowTrim, oak, cream, black, steel, linen, windowFrame, openingCasing, singlePanelDoor };
   let upstairs = buildUpstairsModel(THREE, upstairsHelpers, stairOpening, stairFloorToFloor, savedUpstairsLayout);
+  const upstairsFurniture = [];
+  upstairs.group.traverse((object) => {
+    if (object.userData.viewerFurniture) upstairsFurniture.push(object);
+  });
   scene.add(upstairs.group);
   prepareCabinetInteractions(scene);
   furnishKitchenStorage();
   const kitchenPracticalLights = buildKitchenLighting();
   const homeLighting = buildHomeLighting();
   const exterior = buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations }, stairFloorToFloor, garageFloorY);
+  const exteriorFurniture = [];
+  exterior.traverse((object) => {
+    if (object.userData.viewerFurniture) exteriorFurniture.push(object);
+  });
   scene.add(exterior);
   const exteriorSun = new THREE.DirectionalLight('#fff7eb', 2.5);
   exteriorSun.name = 'Exterior afternoon sun with architectural shadows';
@@ -5301,7 +5365,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   function refreshUpstairsDimensions() {
     document.querySelectorAll('#room-dimension-summary [data-floor="upstairs"]').forEach((item) => item.remove());
     for (const room of upstairs.rooms) {
-      roomDimensions(`Upstairs ${room.name}`, room.w, room.d);
+      const clear = getUpstairsRoomClearDimensions(room, upstairs.plan.walls);
+      roomDimensions(`Upstairs ${room.name} (paint-face main rectangle)`, clear.w, clear.d);
       const item = document.getElementById('room-dimension-summary').lastElementChild;
       item.dataset.floor = 'upstairs';
       item.hidden = activeFloor !== 'upstairs';
@@ -6322,13 +6387,21 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (initialView && Object.hasOwn(presets, initialView)) setView(initialView);
   }
   islandLightsInput.disabled = false;
-  nightLightingButton.disabled = false;
-  nightLightingButton.addEventListener('click', () => {
-    if (!nightLighting) daytimeIslandLights = islandLightsInput.checked;
-    nightLighting = !nightLighting;
+  nightLightingInput.disabled = false;
+  nightLightingInput.addEventListener('change', () => {
+    if (nightLightingInput.checked && !nightLighting) daytimeIslandLights = islandLightsInput.checked;
+    nightLighting = nightLightingInput.checked;
     islandLightsInput.checked = nightLighting ? true : daytimeIslandLights;
-    nightLightingButton.setAttribute('aria-pressed', String(nightLighting));
-    nightLightingButton.textContent = nightLighting ? 'Night lighting' : 'Day lighting';
+    render();
+  });
+  furnitureInput.disabled = false;
+  furnitureInput.addEventListener('change', () => {
+    const show = furnitureInput.checked;
+    groundFurnitureLayer.contents.visible = show;
+    roomFurnitureLayer.contents.visible = show;
+    nestedFurniture.forEach((object) => { object.visible = show; });
+    upstairsFurniture.forEach((object) => { object.visible = show; });
+    exteriorFurniture.forEach((object) => { object.visible = show; });
     render();
   });
   navigationButtons.forEach((button) => { button.disabled = button.dataset.navigation === 'walk' && (activeFloor === 'exterior' || (activeFloor === 'ground' && Boolean(groundLayoutPreview))); });

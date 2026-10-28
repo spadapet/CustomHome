@@ -1,12 +1,13 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { getUpstairsDefaultPlan, getUpstairsExteriorOpenings } = require('../floor-plan-upstairs.js');
+const { getUpstairsDefaultPlan, getUpstairsExteriorOpenings, getUpstairsExteriorSegments, getUpstairsMeasuredGeometry } = require('../floor-plan-upstairs.js');
+const g = getUpstairsMeasuredGeometry();
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 
 test('every side/rear exterior upper opening projects from the furnished frame and cut wall', () => {
   const plan = getUpstairsDefaultPlan({ x: 4, z: 28, width: 4, depth: 8 });
-  const segments = [[0, 7.6, 0, 53.2], [25.7, 2.1, 10.2, 2.1], [54, 10, 25.7, 10], [52, 36.2, 52, 15.4], [36.5, 36.2, 52, 36.2]];
+  const segments = getUpstairsExteriorSegments().filter(([name]) => name !== 'front bedrooms').map(([, ...s]) => s);
   let count = 0;
   for (const [x1, z1, x2, z2] of segments) {
     const length = Math.hypot(x2 - x1, z2 - z1);
@@ -35,16 +36,16 @@ test('every side/rear exterior upper opening projects from the furnished frame a
 });
 
 test('loft south has two paired-casement openings centered in the masonry bays', () => {
-  const openings = getUpstairsExteriorOpenings(36.5, 36.2, 52, 36.2);
-  assert.deepEqual(openings.map(o => o.center), [4.25, 11.25]);
+  const openings = getUpstairsExteriorOpenings(g.laundryEast, g.serviceSouth, g.east, g.serviceSouth);
+  openings.forEach((o, i) => close(o.center, i ? g.east - g.laundryEast - 4.25 : 4.25));
   assert.ok(openings.every(o => o.width === 4 && o.height === 5 && o.sill === 13));
   const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'floor-plan-exterior.js'), 'utf8');
-  assert.ok(source.includes("wall('upper loft south', 36.5, 36.2, 52, 36.2, 9, eaves, getUpstairsExteriorOpenings(36.5, 36.2, 52, 36.2, upper))"));
+  assert.ok(source.includes('getUpstairsExteriorSegments()'), 'Exterior uses the same measured perimeter');
 });
 
 test('previous closet-facing loft window and displaced west windows are eliminated', () => {
-  const east = getUpstairsExteriorOpenings(52, 36.2, 52, 15.4);
-  assert.deepEqual(east.map(o => +(36.2 - o.center).toFixed(4)), [33, 27]);
-  const west = getUpstairsExteriorOpenings(0, 7.6, 0, 53.2);
-  assert.deepEqual(west.map(o => +(7.6 + o.center).toFixed(4)), [12.6, 21.6, 31.1, 47.2]);
+  const east = getUpstairsExteriorOpenings(g.east, g.loftNorth, g.east, g.serviceSouth);
+  east.forEach((o, i) => close(o.center, i ? 11 : 5));
+  const west = getUpstairsExteriorOpenings(0, g.north, 0, g.south);
+  west.forEach((o, i) => close(g.north + o.center, [g.north + 5, g.north + 14, 31.1, g.bedNorth + 6][i]));
 });

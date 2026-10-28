@@ -37,6 +37,7 @@ function build() {
     powderGlow: { emissiveIntensity: 0.45 },
     upstairs: { group: Object.assign(new Group(), { userData: { ceilingHeightFeet: 9 } }), rooms: [{ name: 'Bedroom 2', x: 31, z: 10, w: 13, d: 12 }] },
     getGroundFloorDefaultPlan: require('../floor-plan-ground.js').getGroundFloorDefaultPlan,
+    getUpstairsMeasuredGeometry: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry,
     cream: {}, brass: {}, rosewood: {}, windowTrim: {}, black: { clone() { return {}; } }, ceilingHeight: 9, garageFloorY: -1.25,
     nightLighting: true, activeFloor: 'ground', currentView: 'living', groundLayoutPreview: null,
     cylinder(parent, x, y, z, radius, height, material) {

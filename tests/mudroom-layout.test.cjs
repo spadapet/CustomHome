@@ -72,27 +72,25 @@ test('mudroom and kitchen lighting stay scoped and restore other floor/view sett
   }
 });
 
-test('menu lighting toggle defaults to Night and changes only lighting state', () => {
+test('Night checkbox defaults to Night and changes only lighting state', () => {
   const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
-  assert.match(html, /id="toggle-night-lighting" aria-pressed="true"[^>]*disabled>Night lighting<\/button>/);
-  assert.match(source, /let nightLighting = true;/);
-  let click;
+  assert.match(html, /id="toggle-night-lighting" checked disabled title="Checked uses Night lighting; unchecked uses Day lighting"> Night lighting<\/label>/);
+  assert.match(source, /let nightLighting = nightLightingInput\.checked;/);
+  let change;
   let renders = 0;
-  const button = { disabled: true, addEventListener(event, callback) { assert.equal(event, 'click'); click = callback; }, setAttribute(name, value) { this[name] = value; } };
+  const nightInput = { checked: true, disabled: true, addEventListener(event, callback) { assert.equal(event, 'change'); change = callback; } };
   const input = { checked: true };
-  const context = { nightLightingButton: button, islandLightsInput: input, render() { renders++; } };
-  const start = source.indexOf('  nightLightingButton.disabled = false;');
+  const context = { nightLightingInput: nightInput, islandLightsInput: input, render() { renders++; } };
+  const start = source.indexOf('  nightLightingInput.disabled = false;');
   const end = source.indexOf('\n  });', start) + '\n  });'.length;
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext('let nightLighting = true;\nlet daytimeIslandLights = false;\n' + source.slice(start, end), context);
-  assert.equal(button.disabled, false);
-  click();
-  assert.equal(button['aria-pressed'], 'false');
-  assert.equal(button.textContent, 'Day lighting');
+  assert.equal(nightInput.disabled, false);
+  nightInput.checked = false;
+  change();
   assert.equal(input.checked, false);
-  click();
-  assert.equal(button['aria-pressed'], 'true');
-  assert.equal(button.textContent, 'Night lighting');
+  nightInput.checked = true;
+  change();
   assert.equal(input.checked, true);
   assert.equal(renders, 2);
 });

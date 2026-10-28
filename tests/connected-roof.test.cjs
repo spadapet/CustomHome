@@ -4,6 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { getConnectedRoofDefinitions, getPorchRoofDefinitions, buildRoofEnvelope, heightAt, signedArea, wallHeadSegments } = require('../floor-plan-roof.js');
+const upper = require('../floor-plan-upstairs.js');
+const g = upper.getUpstairsMeasuredGeometry();
 const close = (actual, expected, tolerance = 1e-6) => assert.ok(Math.abs(actual - expected) < tolerance, `${actual} should equal ${expected}`);
 
 function rectangleUnionArea(definitions) {
@@ -76,23 +78,24 @@ test('hipped composition removes all applied front gables and keeps the garage s
   assert.ok(garage.every((face) => face.polygon.every((point) => point[1] >= 35.55 - 1e-7)),
     'No garage eave across the east loft windows north of the actual garage wall');
   const wingAtAbutment = roof.faces.filter((face) => face.roof === 'East rear wing');
-  assert.ok(wingAtAbutment.some((face) => face.polygon.some((point) => Math.abs(point[1] - 37) < 1e-6)),
-    'Upper wing keeps its own eave over the fixed south loft wall at z=36.2');
+  assert.ok(wingAtAbutment.some((face) => face.polygon.some((point) => Math.abs(point[1] - (g.serviceSouth + .75)) < 1e-6)),
+    'Upper wing keeps its own eave over the measured south loft wall');
 });
 
 test('main and wing have equal 4:12 hips and garage has a low 6:12 hip', () => {
   const definitions = getConnectedRoofDefinitions();
   const main = definitions.find((definition) => definition.id === 'Main house');
   for (const plane of main.planes) close(Math.hypot(plane[0], plane[1]), 1 / 3);
-  for (const point of [[15.5, 17.6], [15.5, 38.7]]) {
-    close(Math.min(...main.planes.map((plane) => heightAt(plane, point))), 19.2 + 16.25 / 3);
+  const center = g.southEast / 2, halfWidth = (g.southEast + 1.5) / 2;
+  for (const point of [[center, 17.6], [center, 37]]) {
+    close(Math.min(...main.planes.map((plane) => heightAt(plane, point))), 19.2 + halfWidth / 3);
   }
   const plan = buildRoofEnvelope(definitions);
   const ridge = plan.joins.filter((join) => join.type === 'ridge' && join.roofs.every((roof) => roof === 'Main house'));
-  close(ridge.reduce((length, join) => length + Math.abs(join.end[2] - join.start[2]), 0), 21.1);
+  close(ridge.reduce((length, join) => length + Math.abs(join.end[2] - join.start[2]), 0), g.south - g.bathNorth - g.southEast);
   for (const join of ridge) for (const point of [join.start, join.end]) {
-    close(point[0], 15.5);
-    close(point[1], 19.2 + 16.25 / 3);
+    close(point[0], center);
+    close(point[1], 19.2 + halfWidth / 3);
   }
   const wing = definitions.find((definition) => definition.id === 'East rear wing');
   for (const plane of wing.planes) close(Math.hypot(plane[0], plane[1]), 1 / 3);
@@ -110,7 +113,8 @@ test('main and wing have equal 4:12 hips and garage has a low 6:12 hip', () => {
 
 test('wall-head constituents close the actual gap to the roof, with no change to 19 ft room walls', () => {
   const plan = buildRoofEnvelope(getConnectedRoofDefinitions());
-  for (const [a, b] of [[[0, 7.6], [0, 53.2]], [[52, 15.4], [52, 36.2]], [[36.5, 36.2], [52, 36.2]]]) {
+  for (const [, x1, z1, x2, z2] of upper.getUpstairsExteriorSegments()) {
+    const a = [x1, z1], b = [x2, z2];
     const segments = wallHeadSegments(plan, a, b, 19);
     close(segments.reduce((sum, segment) => sum + Math.hypot(segment.end[0] - segment.start[0], segment.end[2] - segment.start[2]), 0),
       Math.hypot(b[0] - a[0], b[1] - a[1]));
@@ -124,7 +128,7 @@ test('wall-head constituents close the actual gap to the roof, with no change to
 
 test('hip roof undersides cover the upper wall heads instead of exposing white wall strips through roofing', () => {
   const definitions = getConnectedRoofDefinitions();
-  const walls = [[10.2, 2.1, 25.7, 2.1], [25.7, 10, 54, 10], [52, 15.4, 52, 36.2], [36.5, 36.2, 52, 36.2]];
+  const walls = upper.getUpstairsExteriorSegments().map(([, ...s]) => s);
   for (const [x1, z1, x2, z2] of walls) for (let step = 0; step <= 100; step++) {
     const point = [x1 + (x2 - x1) * step / 100, z1 + (z2 - z1) * step / 100];
     const heights = definitions.filter(({ bounds: [left, right, rear, front] }) => point[0] >= left && point[0] <= right && point[1] >= rear && point[1] <= front)

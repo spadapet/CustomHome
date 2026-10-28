@@ -394,8 +394,13 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     if (pairedFront || blindLoft) {
       // Thickened veneer, not moved rooms: the original masonry is the
       // recessed field. Piers and bridging heads make real shadow pockets.
-      const bays = pairedFront ? [[1.5, 11.5], [19.5, 29.5]] : [[1.5, 7], [8.5, 14]];
-      const piers = pairedFront ? [0.75, 12.25, 18.75, 30.25] : [0.75, 7.75, 14.75];
+      const sets = pairedFront ? [openings.slice(0, 2), openings.slice(2, 4)] : openings.map(o => [o]);
+      const bays = sets.filter(set => set.length).map(set => [
+        Math.min(...set.map(o => o.center - o.width / 2)) - (pairedFront ? 1.5 : .75),
+        Math.max(...set.map(o => o.center + o.width / 2)) + (pairedFront ? 1.5 : .75)
+      ]);
+      const piers = bays.flatMap(([left, right]) => [left - .75, right + .75])
+        .filter((x, i, all) => all.slice(0, i).every(other => Math.abs(x - other) > .1));
       for (const x of piers) {
         brickBox(parent, x, 14.25, 0.30, 1, 8.1, 0.25).name = 'Upper bay projecting masonry pier';
       }
@@ -479,21 +484,13 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   ]);
   wall('garage porch return', 31.2, 54.2, 31.2, 49, -0.4, 9);
   const upper = floorToFloor;
-  wall('upper front bedrooms', 0, 53.2, 31, 53.2, 9, eaves, getUpstairsFrontWindows().map(w => win(w.center, w.width, upper + w.sill, w.height)));
-  wall('upper west', 0, 7.6, 0, 53.2, 9, eaves, getUpstairsExteriorOpenings(0, 7.6, 0, 53.2, upper));
-  wall('upper primary rear', 10.2, 7.6, 0, 7.6, 9, eaves);
-  wall('upper bath west return', 10.2, 2.1, 10.2, 7.6, 9, eaves);
-  wall('upper bath rear', 25.7, 2.1, 10.2, 2.1, 9, eaves, getUpstairsExteriorOpenings(25.7, 2.1, 10.2, 2.1, upper));
-  wall('upper bath east', 25.7, 10, 25.7, 2.1, 9, eaves);
-  wall('upper bedroom rear', 54, 10, 25.7, 10, 9, eaves, getUpstairsExteriorOpenings(54, 10, 25.7, 10, upper));
-  wall('upper east bath', 54, 15.4, 54, 10, 9, eaves);
-  wall('upper closet return', 52, 15.4, 54, 15.4, 9, eaves);
-  wall('upper east loft', 52, 36.2, 52, 15.4, 9, eaves, getUpstairsExteriorOpenings(52, 36.2, 52, 15.4, upper));
-  wall('upper loft south', 36.5, 36.2, 52, 36.2, 9, eaves, getUpstairsExteriorOpenings(36.5, 36.2, 52, 36.2, upper));
-  // The resolved Storage south wall continues to the bedroom return.
-  // Do not leave a facade slit when the lower garage roof exposes this wall.
-  wall('upper storage south', 31, 36.2, 36.5, 36.2, 9, eaves);
-  wall('upper bedroom east return', 31, 53.2, 31, 36.2, 9, eaves);
+  const measuredUpper = getUpstairsMeasuredGeometry();
+  for (const [name, x1, z1, x2, z2] of getUpstairsExteriorSegments()) {
+    const openings = name === 'front bedrooms'
+      ? getUpstairsFrontWindows().map(w => win(w.center, w.width, upper + w.sill, w.height))
+      : getUpstairsExteriorOpenings(x1, z1, x2, z2, upper);
+    wall(`upper ${name}`, x1, z1, x2, z2, 9, eaves, openings);
+  }
   // The resolved upstairs stops at z=36.2 east of x=31.
   // This is a garage roof void, not a second-floor facade or bonus room.
   const garageFacadeEaves = 9;
@@ -652,49 +649,52 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       setbackSection('Setback roof closed perimeter fascia', edge.start, edge.end, 0.12, () => 8.88, y, trim);
     }
   }
-  // Close the entire wall-head band at the actual lower exterior wall faces.
-  // Eaves fascia alone did not seal the gap behind its overhang.
-  for (const [a, b] of [[[26.875, 7], [55.5, 7]], [[55.5, 7], [55.5, 36.2]]]) {
+  // Only the southern loft/garage transition remains a lower setback.
+  for (const [a, b] of [[[55.5, measuredUpper.serviceSouth + .225], [55.5, 36.2]]]) {
     for (const segment of HomeRoof.wallHeadSegments(setbackPlan, a, b, 9)) {
       setbackSection('Lower setback fitted wall-head closure', segment.start, segment.end, wallThickness,
         () => 9, t => segment.start[1] + (segment.end[1] - segment.start[1]) * t + 0.01, white);
     }
   }
-  const collectorStart = [55.96, 0, 6.7], collectorEnd = [55.96, 0, 35.55];
-  const collectorBase = t => 8.8 + (35.55 - 6.7) * t / 192;
+  const collectorRear = measuredUpper.serviceSouth + .225;
+  const collectorStart = [55.96, 0, collectorRear], collectorEnd = [55.96, 0, 36.2];
+  const collectorBase = t => 8.8 + (36.2 - collectorRear) * (1 - t) / 192;
   setbackSection('Setback east collector trough base - outlet sizing unverified',
     collectorStart, collectorEnd, 0.32, t => collectorBase(t) - 0.04, collectorBase, trim);
   for (const x of [55.8, 56.12]) {
-    setbackSection('Setback east collector upstand', [x, 0, 6.7], [x, 0, 35.55], 0.04,
+    setbackSection('Setback east collector upstand', [x, 0, collectorRear], [x, 0, 36.2], 0.04,
       collectorBase, t => collectorBase(t) + 0.22, trim);
   }
-  for (const [z, y] of [[6.7, 8.8], [35.55, collectorBase(1)]]) {
+  for (const [z, y] of [[collectorRear, collectorBase(0)], [36.2, collectorBase(1)]]) {
     box(setbackRoofs, 55.96, y + 0.11, z, 0.32, 0.22, 0.04, trim).name = 'Setback collector end closure';
   }
-  box(setbackRoofs, 55.96, 8.76, 6.975, 0.14, 0.14, 0.55, trim).name = 'Setback collector outlet offset';
-  box(setbackRoofs, 55.96, (8.76 - 1.65) / 2, 7.25, 0.14, 8.76 + 1.65, 0.14, trim).name = 'Setback east leader - below-grade drainage unverified';
+  box(setbackRoofs, 55.96, 8.76, 36.2, 0.14, 0.14, 0.32, trim).name = 'Setback collector outlet offset';
+  box(setbackRoofs, 55.96, (8.76 - 1.65) / 2, 36.2, 0.14, 8.76 + 1.65, 0.14, trim).name = 'Setback east leader - below-grade drainage unverified';
   for (const y of [0.5, 4.5, 8.5]) {
-    box(setbackRoofs, 55.83, y, 7.25, 0.26, 0.08, 0.2, dark).name = 'Setback leader masonry bracket';
+    box(setbackRoofs, 55.83, y, 36.2, 0.26, 0.08, 0.2, dark).name = 'Setback leader masonry bracket';
   }
-  setbackRoofs.userData.drainageIntent = 'East collector falls 1/16:12 toward rear corner leader, separate from patio; capacity, freeze protection, connection and lawful underground discharge require design.';
+  setbackRoofs.userData.drainageIntent = 'Short transition roof falls east to collector and south to garage-side leader; capacity, freeze protection, flashing and lawful discharge require design.';
   // The upper bathroom projects beyond the lower living wall. A closed
   // finish underside is not a designed floor/cantilever or a load path.
-  const projectionSoffit = box(group, (9.975 + 25.925) / 2, 9.03, (1.875 + 8.225) / 2,
-    25.925 - 9.975, 0.06, 8.225 - 1.875, white);
+  const projectionWest = measuredUpper.primaryEast - 3.35 - 0.225;
+  const projectionEast = measuredUpper.bathEast + 0.225;
+  const projectionRear = measuredUpper.bathNorth - 0.225;
+  const projectionSoffit = box(group, (projectionWest + projectionEast) / 2, 9.03, (projectionRear + 8.225) / 2,
+    projectionEast - projectionWest, 0.06, 8.225 - projectionRear, white);
   projectionSoffit.name = 'Rear upper projection opaque underside - support unverified';
   projectionSoffit.userData = { finishOnly: true, structuralApproval: false };
+  for (const [name, x1, x2, z1, z2] of [
+    ['east', 55.275, measuredUpper.east + .225, measuredUpper.north - .225, measuredUpper.serviceSouth + .225],
+    ['kitchen north', projectionEast, 55.275, measuredUpper.north - .225, 7.225]
+  ]) {
+    const soffit = box(group, (x1 + x2) / 2, 9.03, (z1 + z2) / 2, x2 - x1, .06, z2 - z1, white);
+    soffit.name = `Measured upper ${name} projection finish underside - support unverified`;
+    soffit.userData = { finishOnly: true, structuralApproval: false };
+  }
   const houseRoofPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getConnectedRoofDefinitions(floorToFloor));
   // Fixed room walls/windows stay put; close the attic-wall band up to the
   // real roof underside, including the stepped loft/garage abutment.
-  const upperWallHeads = [
-    [0, 53.2, 31, 53.2],
-    [0, 7.6, 0, 53.2], [10.2, 7.6, 0, 7.6],
-    [10.2, 2.1, 10.2, 7.6], [25.7, 2.1, 10.2, 2.1],
-    [25.7, 10, 25.7, 2.1], [54, 10, 25.7, 10],
-    [54, 15.4, 54, 10], [52, 15.4, 54, 15.4],
-    [52, 36.2, 52, 15.4], [36.5, 36.2, 52, 36.2],
-    [31, 53.2, 31, 36.2], [31, 36.2, 36.5, 36.2]
-  ];
+  const upperWallHeads = getUpstairsExteriorSegments().map(([, ...segment]) => segment);
   for (const [x1, z1, x2, z2] of upperWallHeads) {
     for (const { start: a, end: b, bottom } of HomeRoof.wallHeadSegments(houseRoofPlan, [x1, z1], [x2, z2], eaves)) {
       const geometry = new THREE.BufferGeometry();
@@ -737,17 +737,19 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   // Follow the REAL stepped walls. Only the short canopy bypass is stood off;
   // the upper/lower vertical runs are corner-mounted, not 20-foot free drops.
   for (const east of [false, true]) {
-    const upperX = east ? 31.4 : -0.4, bypassX = east ? 32.1 : -0.95;
+    const upperX = east ? measuredUpper.southEast + .4 : -0.4;
+    const upperZ = measuredUpper.south - .15;
+    const bypassX = east ? Math.max(32.1, upperX + .7) : -0.95;
     // East lower return faces WEST, not east into the garage volume.
     // Wrap its front end and mount on the FRONT face instead.
     const lowerX = east ? 30.9 : -0.4, lowerZ = east ? 54.65 : 54.05;
     drainageRoute(group, `Upper ${east ? 'east' : 'west'} corner rainwater route`, [
-      [east ? 31.65 : -0.65, 19.1, 54.95],
-      [upperX, 17.6, 53.05], [upperX, 12.2, 53.05],
+      [east ? measuredUpper.southEast + .65 : -.65, 19.1, measuredUpper.south + .75],
+      [upperX, 17.6, upperZ], [upperX, 12.2, upperZ],
       [bypassX, 11.2, 54.65], [bypassX, 9.15, 54.65],
       [lowerX, 8.3, lowerZ], [lowerX, -1.35, lowerZ],
       [lowerX, -1.6, lowerZ + 0.35]
-    ], [16, 13].map(y => [[east ? 31.225 : -0.225, y, 53.05], [upperX, y, 53.05]])
+    ], [16, 13].map(y => [[east ? measuredUpper.southEast + .225 : -.225, y, upperZ], [upperX, y, upperZ]])
       .concat([1, 4, 7].map(y => [
         east ? [lowerX, y, 54.425] : [-0.225, y, lowerZ],
         [lowerX, y, lowerZ]
@@ -963,7 +965,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   // fascia and headwall previously continued through its floor/walls.
   // Keep the accepted canopy outside that volume; its coverage here is
   // supplied by the existing upper projection, not a second crossing roof.
-  const projectionBounds = [9.975, 25.925, 1.875, 8.225];
+  const projectionBounds = [projectionWest, projectionEast, projectionRear, 8.225];
   const canopyParts = [];
   livingPatio.traverse(part => {
     if (part.isMesh && (part === patioRoof || /soffit|fascia|abutment|tapered closure/i.test(part.name))) canopyParts.push(part);
@@ -994,15 +996,15 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     part.geometry.dispose();
     part.geometry = geometry;
   }
-  canopySection('Canopy upper-projection west wall counterflashing', 9.94, 10.01, 1.875, 8.08,
+  canopySection('Canopy upper-projection west wall counterflashing', projectionWest - 0.035, projectionWest + 0.035, projectionRear, 8.08,
     z => patioRoofUndersideAt(z) + 0.16, z => patioRoofUndersideAt(z) + 0.5, dark);
-  canopySection('Canopy upper-projection north wall counterflashing', 9.975, 13.2, 1.84, 1.91,
-    z => patioRoofUndersideAt(z) + 0.16, z => patioRoofUndersideAt(z) + 0.5, dark);
+  // The new north projection edge is beyond the canopy, so no fictitious
+  // north-edge flashing strip crosses its underside.
   const patioTableX = 3.5;
   const patioTableZ = 6.65;
   const patioFurniture = new THREE.Group();
   patioFurniture.name = 'Two patio chairs and small side table';
-  patioFurniture.userData = { seats: 2, tableWidthInches: 18, tableDepthInches: 18, tableHeightInches: 20, productSelected: false, occupiedAccessVerified: false };
+  patioFurniture.userData = { seats: 2, tableWidthInches: 18, tableDepthInches: 18, tableHeightInches: 20, productSelected: false, occupiedAccessVerified: false, viewerFurniture: true };
   patioFurniture.position.y = patioGrade;
   livingPatio.add(patioFurniture);
   const patioTableHeight = 20 / 12;

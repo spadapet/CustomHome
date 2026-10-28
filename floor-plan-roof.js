@@ -1,6 +1,8 @@
 (function (root) {
   'use strict';
   const epsilon = 1e-7;
+  const upperGeometry = () => typeof getUpstairsMeasuredGeometry === 'function'
+    ? getUpstairsMeasuredGeometry() : require('./floor-plan-upstairs.js').getUpstairsMeasuredGeometry();
   const signedArea = (polygon) => polygon.reduce((sum, point, index) => {
     const next = polygon[(index + 1) % polygon.length];
     return sum + point[0] * next[1] - next[0] * point[1];
@@ -83,6 +85,8 @@
 
   function getConnectedRoofDefinitions(floorToFloor = 10) {
     const eaves = floorToFloor + 9;
+    const g = upperGeometry();
+    const mainRear = g.bathNorth - 0.75, mainFront = g.south + 0.75, mainRight = g.southEast + 0.75;
     const garage = { id: 'Garage hip', bounds: [30.3, 56.2, 35.55, 49.85],
       planes: [[0.5, 0, 8.9 - 0.5 * 30.3], [-0.5, 0, 8.9 + 0.5 * 56.2],
         [0, 0.5, 8.9 - 0.5 * 35.55], [0, -0.5, 8.9 + 0.5 * 49.85]] };
@@ -91,10 +95,12 @@
     return [
       // Equal 4:12 hips over the actual full-height upper rooms. Eaves stay
       // above the existing nine-foot ceilings; roof space is not living area.
-      { id: 'Main house', bounds: [-0.75, 31.75, 1.35, 54.95],
-        planes: [[0, 1 / 3, eaves + 0.2 - 1.35 / 3], [0, -1 / 3, eaves + 0.2 + 54.95 / 3],
-          [1 / 3, 0, eaves + 0.2 + 0.75 / 3], [-1 / 3, 0, eaves + 0.2 + 31.75 / 3]] },
-      hipRoof('East rear wing', 25.05, 54.65, 9.35, 37, eaves + 0.2, eaves + 0.2 + 13.825 / 3, 23.175, 38.875, 40.825),
+      { id: 'Main house', bounds: [-0.75, mainRight, mainRear, mainFront],
+        planes: [[0, 1 / 3, eaves + 0.2 - mainRear / 3], [0, -1 / 3, eaves + 0.2 + mainFront / 3],
+          [1 / 3, 0, eaves + 0.2 + 0.75 / 3], [-1 / 3, 0, eaves + 0.2 + mainRight / 3]] },
+      hipRoof('East rear wing', g.bathEast - 0.75, g.east + 0.75, g.north - 0.75, g.serviceSouth + 0.75,
+        eaves + 0.2, eaves + 0.2 + (g.serviceSouth - g.north + 1.5) / 6,
+        (g.north + g.serviceSouth) / 2, g.bathEast + (g.serviceSouth - g.north) / 2, g.east - (g.serviceSouth - g.north) / 2),
       // Stop at the actual garage/loft junction. The old z=23 rear reach
       // put a low garage eave across the east upstairs window elevation.
       garage,
@@ -106,13 +112,12 @@
   }
 
   function getSetbackRoofDefinitions() {
-    const eastFall = [-1 / 48, 0, 9.2 + 55.8 / 48];
-    return [
-      // Stop at the exterior masonry faces, not the room-side wall faces.
-      { id: 'Rear kitchen setback roof', finish: 'metal', bounds: [25.925, 55.8, 6.7, 9.775], planes: [eastFall] },
-      { id: 'East bath setback roof', finish: 'metal', bounds: [54.225, 55.8, 9.775, 15.625], planes: [eastFall] },
-      { id: 'East loft setback roof', finish: 'metal', bounds: [52.225, 55.8, 15.625, 36.2], planes: [eastFall] }
-    ];
+    const g = upperGeometry();
+    // The old rear/east strips are now upper floor. Only the narrow southern
+    // loft-to-garage transition remains lower roof; clip it into the garage hip.
+    return [{ id: 'Loft garage transition setback roof', finish: 'metal',
+      bounds: [g.southEast + .225, 55.8, g.serviceSouth + .225, 36.2],
+      planes: [[-1 / 48, -1 / 192, 9.2 + 55.8 / 48 + 36.2 / 192]] }];
   }
 
   function getLowerRoofDefinitions() {
@@ -120,10 +125,9 @@
   }
 
   function getSetbackAbutments() {
-    // Outside faces of the actual upper walls, in perimeter order.
-    return [[25.925, 6.7, 25.925, 9.775], [25.925, 9.775, 54.225, 9.775],
-      [54.225, 9.775, 54.225, 15.625], [54.225, 15.625, 52.225, 15.625],
-      [52.225, 15.625, 52.225, 36.2]];
+    const g = upperGeometry();
+    return [[g.southEast + .225, g.serviceSouth + .225, 55.8, g.serviceSouth + .225],
+      [g.southEast + .225, g.serviceSouth + .225, g.southEast + .225, 36.2]];
   }
 
   function getPorchRoofDefinitions() {

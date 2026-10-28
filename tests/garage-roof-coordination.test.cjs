@@ -8,31 +8,30 @@ const layout = require('../upstairs-layout.js');
 const baseline = require('../floor-plan-upstairs.js').getUpstairsDefaultPlan(layout.stairOpening());
 const saved = JSON.parse(fs.readFileSync(require.resolve('../upstairs-layout.json'), 'utf8'));
 const resolved = layout.resolve(baseline, saved);
+const g = require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry();
 
-test('resolved upstairs has no room or slab over the front garage', () => {
+test('no bonus room is added over the garage; only the measured bedroom edge projects 4.45 inches', () => {
   for (const rect of [...resolved.rooms, ...resolved.floors]) {
-    const overlapX = Math.min(rect.x + rect.w, 55.5) - Math.max(rect.x, 31.2);
+    const overlapX = Math.min(rect.x + rect.w, 55.5) - Math.max(rect.x, g.southEast);
     const overlapZ = Math.min(rect.z + rect.d, 49) - Math.max(rect.z, 36.2);
     assert.ok(overlapX <= 1e-7 || overlapZ <= 1e-7, rect.name);
   }
   const south = resolved.walls.find((wall) => wall.name === 'Loft south exterior');
-  assert.equal(south.z1, 36.2);
-  assert.equal(south.z2, 36.2);
+  assert.equal(south.z1, g.serviceSouth);
+  assert.equal(south.z2, g.serviceSouth);
+  assert.ok(Math.abs((g.southEast - 31.2) * 12 - 4.45) < 1e-7);
 });
 
-test('exposed storage south facade closes the actual resolved solid wall to the bedroom return', () => {
+test('exposed laundry/loft facade closes to the measured bedroom return', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-  const line = source.split('\n').find((line) => line.includes("wall('upper storage south'"));
-  let actual;
-  vm.runInNewContext(line, { eaves: 19, wall(...args) { actual = args; } });
-  const host = resolved.walls.find((wall) => wall.name === 'Storage south');
-  assert.equal(actual[1], 31);
-  assert.equal(actual[2], host.z1);
-  assert.equal(actual[3], host.x2);
-  assert.equal(actual[4], host.z2);
-  assert.equal(actual[5], 9);
-  assert.equal(actual[6], 19);
-  assert.deepEqual(host.openings, []);
+  const upper = require('../floor-plan-upstairs.js');
+  const segment = upper.getUpstairsExteriorSegments().find(([name]) => name === 'loft south');
+  assert.deepEqual(segment.slice(1), [g.southEast, g.serviceSouth, g.east, g.serviceSouth]);
+  const host = resolved.walls.find(w => w.name === 'Laundry south');
+  assert.equal(host.x1, segment[1]);
+  assert.equal(host.x2, g.laundryEast);
+  assert.equal(host.z1, segment[2]);
+  assert.match(source, /getUpstairsExteriorSegments\(\)/);
 });
 
 test('actual clipped garage hip has a subordinate 12.475 ft crown without raising walls or screening upstairs windows', () => {

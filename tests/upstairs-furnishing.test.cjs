@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
 const layout = require('../upstairs-layout.js');
+const g = require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry();
 
 class Group {
   constructor() {
@@ -52,6 +53,32 @@ function build(edits = layout.empty()) {
   return context.buildUpstairsModel({ Group, Mesh, CylinderGeometry }, helpers, layout.stairOpening(), 10, edits);
 }
 const model = build();
+test('owner image dimensions are physical paint-face gaps, not just room labels', () => {
+  const face = (name, axis, side) => {
+    const parts = model.group.getObjectByName
+      ? model.group.getObjectByName(`Upstairs wall: ${name}`).children
+      : model.group.children.find(o => o.name === `Upstairs wall: ${name}`).children;
+    const panels = parts.filter(m => m.name === 'Upstairs partition');
+    assert.ok(panels.length);
+    return Math[side === 'min' ? 'min' : 'max'](...panels.map(p => bounds(p)[`${side}${axis}`]));
+  };
+  const gap = (a, b, axis) => face(b, axis, 'min') - face(a, axis, 'max');
+  const closeInches = (feet, expectedFeet) => assert.ok(Math.abs((feet - expectedFeet) * 12) < .001, `${feet * 12} in != ${expectedFeet * 12} in`);
+  closeInches(gap('Primary west', 'Primary suite entry', 'X'), 14 + 8 / 12);
+  closeInches(gap('Primary north', 'Primary south', 'Z'), 19 + 8 / 12 + 5 / 192);
+  closeInches(gap('Primary suite entry', 'Primary closet east', 'X'), 17 + 6 / 12 + 7 / 96);
+  closeInches(gap('Bath south', 'Primary closet south', 'Z'), 8 + 1 / 12 + 9 / 192);
+  closeInches(gap('Primary closet east', 'Bedroom 2 east', 'X'), 13);
+  closeInches(gap('Bedroom 2 north', 'Bedroom 2 south', 'Z'), 12.5);
+  closeInches(gap('Laundry west', 'Loft west storage', 'X'), 8.5);
+  closeInches(gap('Laundry entry', 'Laundry south', 'Z'), 9.5);
+  closeInches(gap('Loft west storage', 'Loft east', 'X'), 15 + 2 / 12 + 1 / 48);
+  closeInches(gap('Closet 2 south', 'Loft south exterior', 'Z'), 15 + 2 / 12 + 5 / 192);
+  closeInches(gap('Bedroom 3 west', 'Bedroom 3 closet', 'X'), 12.5);
+  closeInches(gap('Bedroom 4 closet', 'Bedroom 4 east', 'X'), 12.5);
+  closeInches(gap('Bedroom 3 north', 'Bedrooms south', 'Z'), 13);
+  closeInches(gap('Bedroom 3 closet', 'Bedroom 4 closet', 'X'), 5.5 + 1 / 48);
+});
 test('upper arrival is one flush hardwood floor constituent with continuous gallery access', () => {
   const parts = [];
   model.group.traverse(part => { if (part.name === 'Upstairs floor: Stair arrival') parts.push(part); });
@@ -158,17 +185,22 @@ test('all bedrooms have bedside furniture, lighting and separate dressers', () =
     item(`${name} desk chair`);
     item(`${name} writing desk`);
     assert.equal(item(`${name} desk wall lamp`).userData.wallMounted, true);
-    assert.equal(item(`${name} bed bedside wall lamp left`).userData.wallMounted, true);
+    const bedside = name === 'Bedroom 3' ? 'right' : 'left';
+    assert.equal(item(`${name} bed bedside wall lamp ${bedside}`).userData.wallMounted, true);
     item(`${name} dresser`);
   }
-  for (const name of ['Loft reading chair', 'Loft media console', 'Loft coffee table and rug', 'Loft desk chair', 'Laundry wall cupboards']) item(name);
+  for (const name of ['Bedroom 2 reading chair', 'Bedroom 3 reading chair', 'Bedroom 4 reading chair',
+    'Primary media console', 'Loft reading chair', 'Loft media console', 'Loft coffee table and rug',
+    'Loft desk chair', 'Laundry wall cupboards']) item(name);
 });
 
 test('bedroom furnishings clear finished room edges and each other above rugs', () => {
   for (const name of ['Primary', 'Bedroom 2', 'Bedroom 3', 'Bedroom 4']) {
     const room = model.rooms.find((room) => room.name === (name === 'Primary' ? 'Primary bedroom' : name));
     const furnishings = ['bed', 'dresser', 'writing desk', 'desk chair'].map((suffix) => item(`${name} ${suffix}`));
-    if (name === 'Primary') furnishings.push(item('Primary sitting chair 1'), item('Primary sitting chair 2'), item('Primary sitting side table'));
+    if (name === 'Primary') furnishings.push(item('Primary sitting chair 1'), item('Primary sitting chair 2'),
+      item('Primary sitting side table'), item('Primary media console'));
+    else furnishings.push(item(`${name} reading chair`));
     const solids = furnishings.map((furnishing) => {
       const proxy = new Group();
       proxy.position = furnishing.position;
@@ -190,6 +222,80 @@ test('bedroom furnishings clear finished room edges and each other above rugs', 
   item('Primary wall TV');
 });
 
+test('upstairs furniture follows the supplied staged-plan composition within measured room bounds', () => {
+  const primary = model.rooms.find(room => room.name === 'Primary bedroom');
+  const primaryCenterX = primary.x + primary.w / 2;
+  const primaryBed = item('Primary bed');
+  assert.ok(Math.abs(primaryBed.position.x - g.primaryEast * 0.39) < 1e-8);
+  assert.ok(Math.abs(primaryBed.position.z - (g.north + 6.7)) < 1e-8);
+  assert.equal(primaryBed.rotation.y, 0, 'Primary headboard faces north');
+  const primaryTV = item('Primary wall TV');
+  const primaryMedia = item('Primary media console');
+  assert.equal(primaryTV.rotation.y, -Math.PI / 2, 'Primary screen faces into the room from the east wall');
+  assert.ok(Math.abs(primaryTV.position.x + 0.06 - (primary.x + primary.w - 0.175)) < 1e-8);
+  assert.ok(Math.abs(primaryTV.position.z - (g.north + 11)) < 1e-8);
+  assert.ok(Math.abs(primaryMedia.position.z - primaryTV.position.z) < 1e-8);
+  const sittingChairs = [item('Primary sitting chair 1'), item('Primary sitting chair 2')];
+  const sittingAxis = (sittingChairs[0].position.x + sittingChairs[1].position.x) / 2;
+  assert.ok(Math.abs(sittingAxis - primaryCenterX) < 1e-8);
+  assert.ok(Math.abs(item('Primary sitting side table').position.x - sittingAxis) < 1e-8);
+  assert.ok(sittingChairs.every(chair => Math.abs(chair.position.z - (g.north + 14)) < 1e-8));
+
+  const bedroom2Bed = item('Bedroom 2 bed');
+  assert.ok(Math.abs(bedroom2Bed.position.x - (g.bedEast - 4.85)) < 1e-8);
+  assert.ok(Math.abs(bedroom2Bed.position.z - (g.north + 4.1)) < 1e-8);
+  assert.equal(bedroom2Bed.rotation.y, 0, 'Bedroom 2 headboard faces north');
+  const bedroom2Chair = item('Bedroom 2 reading chair');
+  assert.ok(Math.abs(bedroom2Chair.position.x - (g.bedEast - 5.2)) < 1e-8);
+  assert.ok(Math.abs(bedroom2Chair.position.z - (g.loftNorth - 2.4)) < 1e-8);
+  const bedroom3Bed = item('Bedroom 3 bed');
+  const bedroom4Bed = item('Bedroom 4 bed');
+  assert.ok(Math.abs(bedroom3Bed.position.x - 3.3) < 1e-8, 'Bedroom 3 bed shifts to the west-side zone');
+  assert.ok(Math.abs(bedroom4Bed.position.x - (g.southEast - 3.3)) < 1e-8, 'Bedroom 4 bed shifts to the east-side zone');
+  assert.ok([bedroom3Bed, bedroom4Bed].every(bed => bed.rotation.y === 0), 'Both southern headboards face north');
+  const bedroom3Chair = item('Bedroom 3 reading chair');
+  const bedroom4Chair = item('Bedroom 4 reading chair');
+  assert.ok(Math.abs(bedroom3Chair.position.x - 2.5) < 1e-8);
+  assert.ok(Math.abs(bedroom3Chair.position.z - (g.south - 2.6)) < 1e-8);
+  assert.ok(Math.abs(bedroom4Chair.position.x - (g.southEast - 2.1)) < 1e-8);
+  assert.ok(Math.abs(bedroom4Chair.position.z - (g.south - 1.9)) < 1e-8);
+  const loungeChairs = [...sittingChairs, bedroom2Chair, bedroom3Chair, bedroom4Chair, item('Loft reading chair')];
+  assert.ok(loungeChairs.every(chair => chair.children.some(mesh => mesh.geometry.w >= 2.3 && mesh.geometry.h >= 1.2 && mesh.geometry.d <= 0.55)),
+    'Reference seating uses upholstered armchair-scale backs, not desk chairs');
+
+  const loftSofa = item('Loft sofa');
+  const loftMedia = item('Loft media console');
+  const loftTable = item('Loft coffee table and rug');
+  const loftCenterX = (g.laundryEast + g.east) / 2;
+  assert.equal(loftSofa.rotation.y, 0, 'Loft sofa faces the north-wall media console');
+  assert.ok(Math.abs(loftSofa.position.x - loftCenterX) < 1e-8);
+  assert.ok(Math.abs(loftSofa.position.z - (g.serviceSouth - 1.9)) < 1e-8);
+  assert.ok(Math.abs(loftTable.position.x - loftCenterX) < 1e-8);
+  assert.ok(Math.abs(loftTable.position.z - (g.loftNorth + 10.05)) < 1e-8);
+  assert.ok(loftMedia.position.z < loftTable.position.z, 'Media console remains north of the seating group');
+  const loftRoomWidth = g.east - g.laundryEast;
+  assert.ok((loftRoomWidth - 0.35 - 6) / 2 * 12 > 54, 'Centered sofa leaves over 54 in to both painted side walls');
+  const sofaRearClearanceInches = (g.serviceSouth - (loftSofa.position.z + 2.8 / 2) - 0.175) * 12;
+  assert.ok(Math.abs(sofaRearClearanceInches - 3.9) < 1e-8, 'Sofa clears the south finished wall by 3.9 in');
+  const sofaFrontZ = loftSofa.position.z - 2.8 / 2;
+  const tableSouthZ = loftTable.position.z + 2 / 2;
+  assert.ok(Math.abs((sofaFrontZ - tableSouthZ) * 12 - 14.3125) < 1e-8,
+    'Sofa front to coffee-table edge is about 14.3 in');
+  const loftChair = item('Loft reading chair');
+  assert.equal(loftChair.rotation.y, Math.PI / 4, 'Reading chair faces diagonally into the sofa group');
+  assert.ok(Math.abs(loftChair.position.x - (loftCenterX + 4.8)) < 1e-8);
+  assert.ok(Math.abs(loftChair.position.z - (g.loftNorth + 8.5)) < 1e-8);
+  const readingTable = item('Loft reading side table');
+  assert.ok(Math.abs(readingTable.position.x - (loftCenterX + 2.7)) < 1e-8);
+  assert.ok(Math.abs(readingTable.position.z - (g.loftNorth + 6.4)) < 1e-8);
+  const readingTableChairGap = (Math.hypot(loftChair.position.x - readingTable.position.x,
+    loftChair.position.z - readingTable.position.z) - 2.25 / 2 - 1.5 / Math.SQRT2) * 12;
+  assert.ok(readingTableChairGap >= 9 && readingTableChairGap <= 10,
+    `Reading table is 9-10 in from chair footprint along its front axis, found ${readingTableChairGap}`);
+  assert.ok(item('Loft sofa').userData.viewerFurniture);
+  assert.ok(item('Loft coffee table and rug').userData.viewerFurniture);
+});
+
 test('closets have continuous rods and clothing rather than shelves called rails', () => {
   for (const name of ['Primary closet long hanging', 'Primary closet double hanging', 'Primary closet return hanging', 'Bedroom 2 closet hanging', 'Bedroom 3 closet hanging', 'Bedroom 4 closet hanging']) {
     const bay = item(name);
@@ -203,7 +309,7 @@ test('closets have continuous rods and clothing rather than shelves called rails
 
 test('front redesign leaves window approaches and occupied desk-to-bed route clear', () => {
   const dresser = bounds(item('Bedroom 3 dresser'));
-  assert.ok(dresser.minX >= 10.84 && dresser.maxZ < 49.3, 'East-wall dresser including handles clears both front windows and entry');
+  assert.ok(dresser.minX >= g.southClosetWest - 2.2 && dresser.maxZ < g.south - 1.5, 'East-wall dresser including handles clears both front windows and entry');
   const desk = bounds(item('Bedroom 4 writing desk'));
   const chair = bounds(item('Bedroom 4 desk chair'));
   const bed = item('Bedroom 4 bed').children.find(m => m.name === 'Bed mattress');
@@ -215,7 +321,7 @@ test('front redesign leaves window approaches and occupied desk-to-bed route cle
     for (const suffix of ['bed', 'dresser', 'writing desk', 'desk chair']) {
       const object = item(`${name} ${suffix}`);
       for (const mesh of object.children.filter(m => m.position.y > 0.1)) {
-        assert.ok(bounds(mesh).maxZ < 52.9, `${name} front wall has no furnishings against window cranks`);
+        assert.ok(bounds(mesh).maxZ < g.south - .3, `${name} front wall has no furnishings against window cranks`);
       }
     }
   }
@@ -224,7 +330,7 @@ test('front redesign leaves window approaches and occupied desk-to-bed route cle
 test('all child and shared loft desks back onto actual wall faces with trim-clear legs and coherent accessories', () => {
   for (const [name, wallName, rotation] of [
     ['Bedroom 2', 'Bedroom 2 north', 0],
-    ['Bedroom 3', 'Bedroom 3 west', Math.PI / 2],
+    ['Bedroom 3', 'Bedroom 3 closet', -Math.PI / 2],
     ['Bedroom 4', 'Bedroom 4 closet', Math.PI / 2],
     ['Loft', 'Loft east', -Math.PI / 2]
   ]) {
@@ -261,9 +367,9 @@ test('desk wall backing follows resolved saved wall thickness without modifying 
   const before = JSON.stringify(edits);
   const changed = build(edits);
   const get = name => changed.group.children.find(o => o.name === `Upstairs Bedroom 4 ${name}`);
-  assert.ok(Math.abs(bounds(get('writing desk').children[0]).minX - 18.25) < 1e-8);
+  assert.ok(Math.abs(bounds(get('writing desk').children[0]).minX - (g.southClosetEast + .25)) < 1e-8);
   assert.ok(Math.abs(get('desk chair').position.x - get('writing desk').position.x - 1.9) < 1e-8);
-  assert.ok(Math.abs(bounds(get('desk wall lamp').children[0]).minX - 18.25) < 1e-8);
+  assert.ok(Math.abs(bounds(get('desk wall lamp').children[0]).minX - (g.southClosetEast + .25)) < 1e-8);
   assert.equal(JSON.stringify(edits), before);
 });
 
@@ -281,17 +387,17 @@ test('wall lamps mount on solid wall rather than across windows or door openings
   }
 });
 
-test('primary closet includes hardware in its 38.4-inch aisle and clears both entries', () => {
+test('measured primary closet includes hardware in its aisle and clears the bedroom entry', () => {
   const dresser = bounds(item('Primary closet drawers'));
   const hanging = bounds(item('Primary closet long hanging'));
-  assert.ok(Math.abs((hanging.minZ - dresser.maxZ) * 12 - 38.4) < 0.001);
+  assert.ok(Math.abs((hanging.minZ - dresser.maxZ) * 12 - 52.5625) < 0.001);
   for (const name of ['Primary closet long hanging', 'Primary closet double hanging', 'Primary closet folded clothes']) {
     const b = bounds(item(name));
-    assert.ok(b.minZ >= 19.6, `${name} clears west entry ending at z=19.2`);
-    assert.ok(b.maxZ <= 21.75, `${name} clears south wall trim`);
-    assert.ok(b.maxX <= 28.5, `${name} leaves east connecting approach open`);
+    assert.ok(b.minZ >= g.closetNorth + 4, `${name} clears west entry`);
+    assert.ok(b.maxZ <= g.loftNorth - .2375, `${name} clears south wall trim`);
+    assert.ok(b.maxX <= g.closetEast - .2375, `${name} clears east wall`);
   }
-  assert.ok(bounds(item('Primary closet return hanging')).maxZ < 17.8);
+  assert.ok(bounds(item('Primary closet return hanging')).minZ > g.north + .2375);
 });
 
 test('bedroom 2 toilet no longer overlaps the vanity', () => {
@@ -376,15 +482,15 @@ test('closed leaves and full 90-degree sweeps clear fixtures/walls with tucked a
   chairs.forEach((c,i)=>Object.assign(c.position,poses[i]));
 });
 
-test('service core recovers a broad finished gallery and a usable laundry aisle', () => {
+test('image service core has west linen/furnace and a usable laundry aisle', () => {
   const wall=(name)=>model.plan.walls.find(w=>w.name===name);
-  assert.equal(wall('Laundry entry').x1,24);
+  assert.equal(wall('Laundry entry').x1,g.southEast);
   const trimProjection=.175+.0625;
-  assert.ok((24-trimProjection-(layout.stairOpening().x+layout.stairOpening().width+.04))*12>164);
-  assert.ok((27.6-22-2*trimProjection)*12>61);
+  assert.ok(wall('Storage west').x1 < wall('Laundry west').x1);
+  assert.ok((g.laundryNorth-g.loftNorth-2*trimProjection)*12>62);
   const washer=bounds(item('Washer')), counter=bounds(item('Laundry folding counter'));
-  assert.ok((counter.minZ-washer.maxZ)*12>=36-1e-8,'Hardware included in folding aisle');
-  assert.ok((washer.minZ-27.8375)*12>=4.3,'Reserve rear hookup depth beyond finished baseboard');
+  assert.ok((washer.minZ-counter.maxZ)*12>=45,'Hardware included in folding aisle');
+  assert.ok((g.serviceSouth-trimProjection-washer.maxZ)*12>=4.3,'Reserve rear hookup depth beyond finished baseboard');
   assert.equal(wall('Primary closet east').openings.length,0,'No access through another child bedroom');
   assert.deepEqual(Array.from(model.start),[16.5,33]);
 });
@@ -405,7 +511,7 @@ test('front-entry projecting casing caps clear perpendicular bathroom and closet
   for(const name of ['Bedroom 3 north','Bedroom 4 north']) {
     const host=item(`wall: ${name}`);
     const casings=host.children.filter(o=>o.name==='Craftsman opening casing');
-    assert.equal(casings.length,2);
+    assert.equal(casings.length,4, 'Bedroom and ensuite bathroom cuts are both trimmed');
     for(const casing of casings) {
       assert.equal(casing.userData.sideWidthInches,2.5);
       for(const m of meshes(casing)) for(const wall of model.group.children.filter(o=>o.name?.startsWith('Upstairs wall:')&&o!==host)) {
@@ -435,17 +541,17 @@ test('open-door tour routes reach every private room and service without crossin
     const [x,z]=queue[n];
     for(const [dx,dz] of [[.25,0],[-.25,0],[0,.25],[0,-.25]]){
       const a=x+dx,b=z+dz,key=`${a*4},${b*4}`;
-      if(a<0||a>54||b<2||b>54||visited.has(key)||!can(a,b)) continue;
+      if(a<0||a>57||b< -2||b>55||visited.has(key)||!can(a,b)) continue;
       visited.add(key);queue.push([a,b]);
     }
   }
   const destinations={
-    'primary bedroom':[11,24], 'primary bath':[18,10], 'primary toilet':[11.5,6],
-    'primary closet':[20,18], 'bedroom 2':[33,18], 'bedroom 2 bath':[45.5,12.5],
-    'bedroom 2 closet':[47,18.5], 'bedroom 3':[10.75,44.5], 'bedroom 3 closet':[14.5,43],
-    'bedroom 4':[22.75,46.5], 'bedroom 4 closet':[16,49], 'west toilet approach':[5,40],
-    'east toilet approach':[26.5,40], laundry:[27.5,32.5], linen:[34,28.5],
-    mechanical:[35,32], loft:[39,25], 'loft seating':[43,29]
+    'primary bedroom':[11,24], 'primary bath':[20,8], 'primary toilet':[13.25,2.25],
+    'primary closet':[21,15.75], 'bedroom 2':[35,17], 'bedroom 2 bath':[48,9.5],
+    'bedroom 2 closet':[49,16],     'bedroom 3':[7,47], 'bedroom 3 closet':[14.5,43],
+    'bedroom 4':[22.75,48.5], 'bedroom 4 closet':[16,49], 'west toilet approach':[4.75,39],
+    'east toilet approach':[26.75,39], laundry:[36,30], linen:[23.5,32],
+    mechanical:[27,32], loft:[41,23], 'loft seating':[45,29]
   };
   const missing=Object.entries(destinations).filter(([, [x,z]])=>!visited.has(`${x*4},${z*4}`)).map(([name,[x,z]])=>`${name} (${can(x,z)?'disconnected':'destination blocked'})`);
   assert.deepEqual(missing,[],'Every destination has a continuous route for the 12-inch-diameter model tour avatar');
@@ -470,7 +576,7 @@ test('real upstairs door/cabinet click handler invalidates tour collisions after
   vm.runInNewContext(source.slice(source.indexOf('  function pickHouseDoor('),source.indexOf('  const charger = furnishing(')),context);
   assert.equal(context.pickHouseDoor({clientX:400,clientY:300}),true);
   assert.equal(hinge.userData.interactiveHouseDoor.openAngleDegrees,90);
-  assert.equal(hinge.rotation.y,-Math.PI/2);
+  assert.equal(hinge.rotation.y,Math.PI/2, 'The first cut is the image ensuite, swinging into the bath');
   assert.equal(context.pickHouseDoor({clientX:400,clientY:300}),true);
   assert.equal(hinge.rotation.y,0);
   selected={visible:true,userData:{interactiveCabinet:{}}};

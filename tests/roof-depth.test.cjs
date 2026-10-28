@@ -110,7 +110,7 @@ test('real soffit vertices stay below the visible roof instead of projecting whi
   const { model, definitions } = render();
   const plan = HomeRoof.buildRoofEnvelope(definitions);
   const soffits = model.children.filter((part) => part.name === 'Connected roof closed edge soffit');
-  assert.ok(soffits.length > 10);
+  assert.ok(soffits.length >= 8, 'The simplified measured perimeter still has actual soffit constituents');
   for (const soffit of soffits) {
     const positions = soffit.geometry.attributes.position.array;
     for (let i = 0; i < positions.length; i += 3) {

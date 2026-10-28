@@ -3,37 +3,36 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const roof = require('../floor-plan-roof.js');
 
-test('lower east and rear wall setbacks have continuous roof coverage instead of open slots to the lawn', () => {
-  const plan = roof.buildRoofEnvelope(roof.getSetbackRoofDefinitions());
-  for (const [left, right, rear, front] of [[26.875, 55.5, 7, 9.775], [54.225, 55.5, 9.775, 15.625], [52.225, 55.5, 15.625, 36.2]]) {
+test('former rear and east setback strips are actual measured upper floors, not low roofs through rooms', () => {
+  const upper = require('../floor-plan-upstairs.js');
+  const plan = upper.getUpstairsDefaultPlan(require('../upstairs-layout.js').stairOpening());
+  for (const [left, right, rear, front] of [[26.875, 55.5, 7, 9.775], [54.225, 55.5, 9.775, 15.625], [52.225, 55.5, 15.625, 35.1]]) {
     for (let ix = 1; ix < 20; ix++) for (let iz = 1; iz < 20; iz++) {
       const point = [left + (right - left) * ix / 20, rear + (front - rear) * iz / 20];
-      const faces = plan.faces.filter(face => roof.contains(face.polygon, point));
-      assert.equal(faces.length, 1, `Unique roof coverage at ${point}`);
-      const top = roof.heightAt(faces[0].plane, point);
-      assert.ok(top - 0.16 > 9, 'Roof underside stays above the lower wall and its window heads');
-      assert.ok(top < 10, 'Closure stays within the floor band below upstairs windows');
-      assert.equal(faces[0].plane[0], -1 / 48);
+      const floors = plan.floors.filter(f => point[0] > f.x && point[0] < f.x + f.w && point[1] > f.z && point[1] < f.z + f.d);
+      assert.equal(floors.length, 1, `Unique upper floor at ${point}`);
+      for (const { bounds: [l, r, b, t] } of roof.getSetbackRoofDefinitions()) {
+        assert.ok(point[0] <= l || point[0] >= r || point[1] <= b || point[1] >= t, 'No lower skin passes through the measured upper rooms');
+      }
     }
   }
 });
 
-test('setback roofs are continuous across step boundaries and actually rendered with closed perimeter edges', () => {
+test('only the narrow loft-to-garage setback remains, bounded by actual masonry faces', () => {
   const definitions = roof.getSetbackRoofDefinitions();
-  for (let i = 1; i < definitions.length; i++) {
-    const previous = definitions[i - 1], current = definitions[i];
-    assert.equal(previous.bounds[3], current.bounds[2]);
-    const point = [55, current.bounds[2]];
-    assert.equal(roof.heightAt(previous.planes[0], point), roof.heightAt(current.planes[0], point));
+  const g = require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry();
+  assert.equal(definitions.length, 1);
+  assert.deepEqual(definitions[0].bounds, [g.southEast + .225, 55.8, g.serviceSouth + .225, 36.2]);
+  assert.ok(definitions[0].planes[0][0] < 0 && definitions[0].planes[0][1] < 0, 'Falls east and toward southern leader, not the removed rear collector');
+  for (const [x, z] of [[g.southEast + .225, 35.325], [55.8, 36.2]]) {
+    const top = roof.heightAt(definitions[0].planes[0], [x, z]);
+    assert.ok(top - .16 > 9 && top < 10, 'Allowance above lower wall, below upper floor datum');
   }
-  assert.deepEqual(definitions.map(d => d.bounds[0]), [25.925, 54.225, 52.225],
-    'Roofing stops at outside masonry, not 5.4 inches inside the walls');
-  assert.equal(definitions[0].bounds[3], 10 - 0.225, 'Rear abutment meets the north wall face');
 });
 
 test('dining and garage roof intersections are clipped to a single lower envelope', () => {
   const plan = roof.buildRoofEnvelope(roof.getLowerRoofDefinitions());
-  for (const [left, right, rear, front] of [[25.925, 27.525, 6.7, 7.5], [52.225, 55.8, 35.55, 36.2]]) {
+  for (const [left, right, rear, front] of [[52.225, 55.8, 35.55, 36.2]]) {
     for (let ix = 1; ix < 30; ix++) for (let iz = 1; iz < 30; iz++) {
       const p = [left + (right - left) * ix / 30, rear + (front - rear) * iz / 30];
       const candidates = plan.patches.filter(f => roof.contains(f.polygon, p));
@@ -43,15 +42,14 @@ test('dining and garage roof intersections are clipped to a single lower envelop
         Math.max(...candidates.map(f => roof.heightAt(f.plane, p)))) < 1e-6);
     }
   }
-  assert.ok(plan.joins.some(j => j.roofs.includes('Dining rear projection') && j.roofs.some(r => r.includes('setback'))));
   assert.ok(plan.joins.some(j => j.roofs.includes('Garage hip') && j.roofs.some(r => r.includes('setback'))));
 });
 
-test('lower wall closures follow roof underside across both slate/metal transitions', () => {
+test('remaining lower east wall closure follows the actual transition underside', () => {
   const plan = roof.buildRoofEnvelope(roof.getLowerRoofDefinitions());
-  for (const [a, b] of [[[26.875, 7], [55.5, 7]], [[55.5, 7], [55.5, 36.2]]]) {
+  for (const [a, b] of [[[55.5, 35.325], [55.5, 36.2]]]) {
     const segments = roof.wallHeadSegments(plan, a, b, 9);
-    assert.ok(segments.length > 1);
+    assert.ok(segments.length >= 1);
     for (const segment of segments) for (const p of [segment.start, segment.end]) {
       const tops = plan.faces.filter(f => roof.contains(f.polygon, [p[0], p[2]]))
         .map(f => roof.heightAt(f.plane, [p[0], p[2]]) - 0.16);

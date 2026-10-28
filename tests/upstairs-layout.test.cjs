@@ -8,6 +8,7 @@ const scope = {};
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'floor-plan-upstairs.js'), 'utf8') + '\nthis.defaults = getUpstairsDefaultPlan;', scope);
 const stairs = layout.stairOpening();
 const baseline = JSON.parse(JSON.stringify(scope.defaults(stairs)));
+const measured = require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry();
 const room = (plan, name) => plan.rooms.find((item) => item.name === name);
 const wall = (plan, name) => plan.walls.find((item) => item.name === name);
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 0.001, `${actual} differs from ${expected}`);
@@ -54,38 +55,41 @@ test('empty overrides preserve every baseline room, wall opening, floor and wind
 });
 
 test('room width moves the shared wall, joins, adjoining floors and window host', () => {
-  const edit = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { w: 14 });
+  const width = room(baseline, 'Bedroom 2').w + 1;
+  const east = measured.bedEast + 1;
+  const edit = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { w: width });
   const plan = layout.resolve(baseline, edit);
-  close(room(plan, 'Bedroom 2').w, 14);
-  close(room(plan, 'Bedroom 2 bath').x, 45);
-  close(room(plan, 'Bedroom 2 bath').w, 9);
-  close(room(plan, 'Bedroom 2 closet').x, 45);
-  close(wall(plan, 'Bedroom 2 east').x1, 45);
-  close(wall(plan, 'Bath 2 north').x1, 45);
-  close(wall(plan, 'Bath 2 south').x1, 45);
+  close(room(plan, 'Bedroom 2').w, width);
+  close(room(plan, 'Bedroom 2 bath').x, east);
+  close(room(plan, 'Bedroom 2 bath').w, measured.east - east);
+  close(room(plan, 'Bedroom 2 closet').x, east);
+  close(wall(plan, 'Bedroom 2 east').x1, east);
+  close(wall(plan, 'Bath 2 north').x1, east);
+  close(wall(plan, 'Bath 2 south').x1, east);
   const floor = plan.floors.find((item) => item.room === 'Bedroom 2');
-  close(floor.w, 14);
+  close(floor.w, width);
   const before = baseline.windows.find((item) => item[0] === 'Bedroom 2');
   const after = plan.windows.find((item) => item[0] === 'Bedroom 2');
-  close(after[1], 38);
+  close(after[1], before[1] + 0.5);
   close(after[3], before[3]);
   assert.equal(layout.serialize(JSON.parse(layout.serialize(edit))), layout.serialize(edit));
 });
 
 test('wall movement updates T-junctions and neighboring room bounds without changing openings', () => {
-  const document = layout.editWall(baseline, layout.empty(), 'Bedroom 2 east', { x1: 45, x2: 45 });
+  const east = measured.bedEast + 1;
+  const document = layout.editWall(baseline, layout.empty(), 'Bedroom 2 east', { x1: east, x2: east });
   const plan = layout.resolve(baseline, document);
-  close(wall(plan, 'Bath 2 south').x1, 45);
-  close(room(plan, 'Bedroom 2').w, 14);
-  close(room(plan, 'Bedroom 2 bath').x, 45);
+  close(wall(plan, 'Bath 2 south').x1, east);
+  close(room(plan, 'Bedroom 2').w, 14.35);
+  close(room(plan, 'Bedroom 2 bath').x, east);
   const original = baseline.walls.find((item) => item[0] === 'Bedroom 2 east')[5];
   wall(plan, 'Bedroom 2 east').openings.forEach((opening, index) => close(opening[1] - opening[0], original[index][1] - original[index][0]));
 });
 
 test('wall thickness and length are real geometry data; window width stays fixed', () => {
-  const document = layout.editWall(baseline, layout.empty(), 'Bedroom 2 north', { x2: 45, thickness: 0.5 });
+  const document = layout.editWall(baseline, layout.empty(), 'Bedroom 2 north', { x2: measured.bedEast + 1, thickness: 0.5 });
   const plan = layout.resolve(baseline, document);
-  close(layout.length(wall(plan, 'Bedroom 2 north')), 14);
+  close(layout.length(wall(plan, 'Bedroom 2 north')), 14.35);
   close(wall(plan, 'Bedroom 2 north').thickness, 0.5);
   close(plan.windows.find((item) => item[0] === 'Bedroom 2')[3], 4);
 });
@@ -122,7 +126,7 @@ test('relocated stairs fit the former kids room with an east-facing upper arriva
   close(baseline.arrival.w, 44 / 12);
   close(baseline.arrival.d, 46.9 / 12);
   const laundry = room(baseline, 'Laundry (relocated)');
-  close(laundry.x, 24);
+  close(laundry.x, measured.southEast);
   assert.ok(laundry.x > baseline.arrival.x + baseline.arrival.w);
   for (const floor of baseline.floors) {
     assert.ok(floor.w > 0 && floor.d > 0, floor.name);
@@ -153,35 +157,37 @@ test('powder-side gap closure translates shared voids without moving rooms or na
   }
   close(baseline.arrival.d * 12, 46.9);
   const south = baseline.floors.find(f => f.name === 'South landing connection');
-  close(south.d * 12, 16.3);
+  close(south.d * 12, 3.1);
   const north = baseline.floors.find(f => f.name === 'North stair edge');
   close(north.z + north.d, stairs.z);
   close(south.z, stairs.z + stairs.depth);
 });
 
 test('walls cannot be shortened through an opening or overlapping openings', () => {
-  assert.throws(() => layout.editWall(baseline, layout.empty(), 'Bedroom 2 north', { x2: 33 }), /too short/);
+  assert.throws(() => layout.editWall(baseline, layout.empty(), 'Bedroom 2 north', { x2: measured.closetEast + 2 }), /too short/);
   assert.throws(() => layout.editWall(baseline, layout.empty(), 'Primary suite entry', { z2: 15 }), /overlap/);
 });
 
 test('furniture anchors move proportionally but do not prescribe furniture scaling', () => {
-  const edit = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { w: 14 });
-  const position = layout.furniturePosition(baseline, layout.resolve(baseline, edit), 37.5, 14.5);
-  close(position.x, 38);
-  close(position.z, 14.5);
+  const edit = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { w: 14.35 });
+  const x = measured.closetEast + 13.35 / 2, z = measured.north + 4.5;
+  const position = layout.furniturePosition(baseline, layout.resolve(baseline, edit), x, z);
+  close(position.x, x + 0.5);
+  close(position.z, z);
 });
 
 test('successive room and wall edits retain joins and round-trip without mutating prior state', () => {
   const original = JSON.stringify(baseline);
-  const first = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { w: 14 });
+  const first = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { w: 14.35 });
   const firstSnapshot = layout.serialize(first);
-  const second = layout.editWall(baseline, first, 'Bedroom 2 east', { x1: 45.5, x2: 45.5, thickness: 0.5 });
+  const east = measured.bedEast + 1.5;
+  const second = layout.editWall(baseline, first, 'Bedroom 2 east', { x1: east, x2: east, thickness: 0.5 });
   const plan = layout.resolve(baseline, second);
-  close(room(plan, 'Bedroom 2').w, 14.5);
-  close(room(plan, 'Bedroom 2 bath').x, 45.5);
-  close(room(plan, 'Bedroom 2 bath').w, 8.5);
-  close(wall(plan, 'Bedroom 2 north').x2, 45.5);
-  close(wall(plan, 'Bath 2 south').x1, 45.5);
+  close(room(plan, 'Bedroom 2').w, 14.85);
+  close(room(plan, 'Bedroom 2 bath').x, east);
+  close(room(plan, 'Bedroom 2 bath').w, measured.east - east);
+  close(wall(plan, 'Bedroom 2 north').x2, east);
+  close(wall(plan, 'Bath 2 south').x1, east);
   close(wall(plan, 'Bedroom 2 east').thickness, 0.5);
   assert.deepEqual(layout.resolve(baseline, JSON.parse(layout.serialize(second))), plan);
   assert.equal(layout.serialize(first), firstSnapshot);
@@ -192,13 +198,14 @@ test('successive room and wall edits retain joins and round-trip without mutatin
 });
 
 test('moving a room preserves its dimensions and keeps connected walls axis-aligned', () => {
-  const document = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { x: 31.5 });
+  const x = measured.closetEast + 0.5;
+  const document = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { x });
   const plan = layout.resolve(baseline, document);
-  close(room(plan, 'Bedroom 2').x, 31.5);
-  close(room(plan, 'Bedroom 2').w, 13);
-  close(wall(plan, 'Bedroom 2 north').x1, 31.5);
-  close(wall(plan, 'Bedroom 2 east').x1, 44.5);
-  close(room(plan, 'Bedroom 2 bath').x, 44.5);
+  close(room(plan, 'Bedroom 2').x, x);
+  close(room(plan, 'Bedroom 2').w, 13.35);
+  close(wall(plan, 'Bedroom 2 north').x1, x);
+  close(wall(plan, 'Bedroom 2 east').x1, measured.bedEast + 0.5);
+  close(room(plan, 'Bedroom 2 bath').x, measured.bedEast + 0.5);
   for (const item of plan.walls) assert.ok(Math.abs(item.x1 - item.x2) < 0.001 || Math.abs(item.z1 - item.z2) < 0.001, item.name);
 });
 

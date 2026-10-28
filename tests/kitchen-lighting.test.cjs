@@ -118,25 +118,31 @@ test('inspection views hide ceiling/pendant hardware without removing task illum
 });
 
 test('returning to Night enables pendants and returning to Day restores the saved daytime visibility', () => {
-  let click;
-  const input = { checked: true };
+  let change;
+  const nightInput = { checked: true, addEventListener(name, callback) { assert.equal(name, 'change'); change = callback; } };
+  const input = { checked: false };
+  let renders = 0;
   const context = {
     islandLightsInput: input,
-    nightLightingButton: { addEventListener(name, callback) { click = callback; }, setAttribute() {} },
-    render() {}
+    nightLightingInput: nightInput,
+    render() { renders++; }
   };
-  const start = source.indexOf('  nightLightingButton.disabled = false;');
+  const start = source.indexOf('  nightLightingInput.disabled = false;');
   const end = source.indexOf('\n  });', start) + '\n  });'.length;
   vm.runInNewContext('let nightLighting = true; let daytimeIslandLights = false;\n' + source.slice(start, end), context);
-  click();
+  nightInput.checked = false;
+  change();
   assert.equal(input.checked, false);
   input.checked = true;
-  click();
+  nightInput.checked = true;
+  change();
   assert.equal(input.checked, true);
   input.checked = false;
-  click();
+  nightInput.checked = false;
+  change();
   assert.equal(input.checked, true, 'Day restores the preference saved before entering Night');
-  input.checked = false;
-  click();
+  nightInput.checked = true;
+  change();
   assert.equal(input.checked, true, 'Night always starts with pendants enabled');
+  assert.equal(renders, 4);
 });

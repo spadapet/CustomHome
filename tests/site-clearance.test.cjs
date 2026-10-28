@@ -59,6 +59,11 @@ test('finished east masonry to innermost fence constituent is six feet with fixe
   const westFence = bounds(fence.children.find(o=>o.name==='West side fence'));
   const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-8, `${a} != ${b}`);
   close(eastWall.maxX,55.725); close(eastFence.minX-eastWall.maxX,6);
+  const upper = require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry();
+  close((upper.east - 55.5) * 12, 5.5);
+  close((eastFence.minX - upper.east - .225) * 12, 66.5);
+  const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
+  assert.match(html, /6 ft at ground level, 5 ft 6\.5 in at the measured upper wall/);
   close(lot.right-eastWall.maxX,6.67); close(westWall.minX-lot.left,12.38);
   close(lot.right-lot.left,75); close(lot.front-lot.rear,130);
   close(lot.rearWallZ-lot.rear,32);

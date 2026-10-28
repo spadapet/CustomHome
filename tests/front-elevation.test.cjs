@@ -5,6 +5,13 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+const upperPlan = require('../floor-plan-upstairs.js');
+function drawMeasuredUpper(context) {
+  const start = source.indexOf('  const measuredUpper =');
+  const end = source.indexOf('  // The resolved upstairs stops', start);
+  assert.ok(start > 0 && end > start);
+  vm.runInNewContext(source.slice(start, end), { ...upperPlan, upper: 10, eaves: 19, ...context });
+}
 
 test('one whole-house window policy distinguishes product intent from orderable sizes', () => {
   const intent = require('../floor-plan-ground.js').getWindowProductIntent;
@@ -26,16 +33,17 @@ test('one whole-house window policy distinguishes product intent from orderable 
 
 test('upper corner leaders follow different upper/lower walls with a short canopy bypass', () => {
   const routes=[];
-  const context={group:{},drainageRoute(parent,name,points,brackets){routes.push({name,points,brackets});}};
+  const measuredUpper = upperPlan.getUpstairsMeasuredGeometry();
+  const context={measuredUpper,group:{},drainageRoute(parent,name,points,brackets){routes.push({name,points,brackets});}};
   const start=source.indexOf('  for (const east of [false, true])');
   vm.runInNewContext(source.slice(start,source.indexOf('  // Dining is hipped',start)),context);
   assert.equal(routes.length,2);
   for(const [index,r] of routes.entries()){
     const p=r.points;
     assert.equal(p.length,8);
-    assert.equal(p[0][2],54.95,'actual front gutter');
-    assert.equal(p[1][0],index?31.4:-0.4,'upper side-wall corner');
-    assert.equal(p[1][2],53.05);
+    assert.equal(p[0][2],measuredUpper.south + .75,'actual front gutter');
+    assert.equal(p[1][0],index?measuredUpper.southEast + .4:-0.4,'upper side-wall corner');
+    assert.equal(p[1][2],measuredUpper.south - .15);
     assert.equal(p[5][0],index?30.9:-0.4,'different lower wall corner');
     assert.equal(p[5][2],index?54.65:54.05);
     assert.ok(p[3][0]+0.07 < -0.65 || p[3][0]-0.07>31.85,'canopy bypass');
@@ -211,16 +219,18 @@ test('slim paired masonry bays create 2.4-inch pockets without occupying fixed a
   };
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  function articulateUpperMasonry('), source.indexOf('  const win =')), context);
-  vm.runInContext("articulateUpperMasonry({name:'Exterior brick wall: upper front bedrooms',userData:{}},31,19,[])", context);
+  context.frontOpenings = upperPlan.getUpstairsFrontWindows();
+  vm.runInContext("articulateUpperMasonry({name:'Exterior brick wall: upper front bedrooms',userData:{}},31.570833333333,19,frontOpenings)", context);
   const piers = meshes.filter(m => m.name === 'Upper bay projecting masonry pier');
-  assert.deepEqual(piers.map(m => m.x), [0.75, 12.25, 18.75, 30.25]);
+  const centers = upperPlan.getUpstairsFrontWindows().map(w => w.center);
+  assert.ok(piers.every((p, i) => Math.abs(p.x - [centers[0]-3.75, centers[1]+3.75, centers[2]-3.75, centers[3]+3.75][i]) < 1e-8));
   for (const pier of piers) {
     assert.equal(pier.w, 1);
     assert.ok(Math.abs((pier.z + pier.d / 2 - 0.225) * 12 - 2.4) < 1e-8);
   }
   const sills = meshes.filter(m => m.name === 'Paired window continuous stone sill');
-  assert.deepEqual(sills.map(m => [m.x, m.w]), [[6.5, 10], [24.5, 10]]);
-  for (const m of meshes) for (const x of [4.5, 8.5, 22.5, 26.5]) {
+  assert.ok(sills.every((m, i) => Math.abs(m.x - (centers[i*2]+centers[i*2+1])/2) < 1e-8 && m.w === 10));
+  for (const m of meshes) for (const x of centers) {
     assert.ok(m.x + m.w / 2 <= x - 1.5 || m.x - m.w / 2 >= x + 1.5 ||
       m.y + m.h / 2 <= 13 || m.y - m.h / 2 >= 18, `${m.name} crosses glazing`);
   }
@@ -277,11 +287,12 @@ test('hipped exterior removes applied front gables and retains fixed openings wi
   context.getGroundFrontWindows = require('../floor-plan-ground.js').getGroundFrontWindows;
   vm.createContext(context);
   const lines = source.split('\n');
-  for (const name of ['front ground floor', 'upper front bedrooms']) {
+  for (const name of ['front ground floor']) {
     const line = lines.find((line) => line.includes(`wall('${name}'`));
     assert.ok(line);
     vm.runInContext(line, context);
   }
+  drawMeasuredUpper(context);
   const start = source.indexOf('  const garageFacadeEaves =');
   const end = source.indexOf('  function renderRoofEnvelope(', start);
   vm.runInContext(source.slice(start, end), context);
@@ -304,24 +315,20 @@ test('four balanced exterior upper-front windows match furnished upstairs wall o
   const wall = plan.walls.find(([name]) => name === 'Bedrooms south');
   const frames = plan.windows.filter(([name]) => /Bedroom [34] south/.test(name));
   let exteriorOpenings;
-  const line = source.split('\n').find((text) => text.includes("wall('upper front bedrooms'"));
-  vm.runInNewContext(line, {
-    getUpstairsFrontWindows: require('../floor-plan-upstairs.js').getUpstairsFrontWindows,
-    upper: 10, eaves: 19,
+  drawMeasuredUpper({
     win: (center, width, sill, height = 5) => ({ center, width, sill, height }),
-    wall(...args) { exteriorOpenings = args[7]; }
+    wall(...args) { if (args[0] === 'upper front bedrooms') exteriorOpenings = args[7]; }
   });
   assert.equal(frames.length, 4);
   assert.equal(wall[5].length, 4);
-  assert.deepEqual(frames.map(f => f[1]), [4.5, 8.5, 22.5, 26.5]);
-  assert.equal((frames[0][1] + frames[1][1]) / 2, 6.5);
-  assert.equal((frames[2][1] + frames[3][1]) / 2, 24.5);
   for (const name of ['Bedroom 3', 'Bedroom 4']) {
     const room = plan.rooms.find(r => r.name === name);
-    assert.equal(room.w, 13);
-    assert.equal(room.d, 12);
+    assert.ok(Math.abs(room.w - .35 - 12.5) < 1e-8);
+    assert.ok(Math.abs(room.d - .35 - 13) < 1e-8);
+    const pair = frames.filter(f => f[0].startsWith(name));
+    assert.ok(Math.abs((pair[0][1] + pair[1][1])/2 - (room.x + room.w/2)) < 1e-8);
   }
-  assert.deepEqual(plan.rooms.filter(r => /Bedroom [34] closet/.test(r.name)).map(r => [r.x, r.z, r.w, r.d]), [[13, 41.2, 5, 5.8], [13, 47, 5, 6.2]]);
+  for (const closet of plan.rooms.filter(r => /Bedroom [34] closet/.test(r.name))) assert.ok(Math.abs(closet.w - .35 - (5.5 + 1/48)) < 1e-8);
   for (const [index, frame] of frames.entries()) {
     const opening = exteriorOpenings[index];
     assert.ok(Math.abs(frame[1] - opening.center) < 1e-8);

@@ -92,6 +92,51 @@ test('viewer removes both editors without removing saved layout loading or viewi
   assert.ok(source.includes("!['exterior-patio', 'exterior-firepit', 'exterior-wood'].includes(name)"));
 });
 
+test('furniture checkbox hides and restores only tagged loose furniture', () => {
+  const html = read('floor-plan-3d.html');
+  const source = read('floor-plan-3d.js');
+  assert.match(html, /id="show-furniture" checked disabled> Show furniture<\/label>/);
+  const input = {
+    checked: false,
+    disabled: true,
+    addEventListener(name, callback) { assert.equal(name, 'change'); this.change = callback; }
+  };
+  const layer = () => ({ contents: { visible: true } });
+  const nested = [{ visible: true }, { visible: true }];
+  const upstairs = [{ visible: true }, { visible: true }];
+  const exterior = [{ visible: true }];
+  let renders = 0;
+  const context = {
+    furnitureInput: input,
+    groundFurnitureLayer: layer(),
+    roomFurnitureLayer: layer(),
+    nestedFurniture: nested,
+    upstairsFurniture: upstairs,
+    exteriorFurniture: exterior,
+    render() { renders++; }
+  };
+  const start = source.indexOf('  furnitureInput.disabled = false;');
+  const end = source.indexOf('\n  });', start) + '\n  });'.length;
+  assert.ok(start >= 0 && end > start);
+  vm.runInNewContext(source.slice(start, end), context);
+  assert.equal(input.disabled, false);
+  input.change();
+  assert.equal(context.groundFurnitureLayer.contents.visible, false);
+  assert.equal(context.roomFurnitureLayer.contents.visible, false);
+  assert.ok(nested.every((object) => !object.visible));
+  assert.ok(upstairs.every((object) => !object.visible));
+  assert.ok(exterior.every((object) => !object.visible));
+  input.checked = true;
+  input.change();
+  assert.equal(context.groundFurnitureLayer.contents.visible, true);
+  assert.equal(context.roomFurnitureLayer.contents.visible, true);
+  assert.ok(nested.every((object) => object.visible));
+  assert.ok(upstairs.every((object) => object.visible));
+  assert.ok(exterior.every((object) => object.visible));
+  assert.equal(renders, 2);
+  assert.match(source, /if \(object !== root && object\.userData\.viewerFurniture\)/);
+});
+
 test('model refresh reloads fresh files into Whole floor and Rotate by default', () => {
   const html = read('floor-plan-3d.html');
   const source = read('floor-plan-3d.js');
@@ -135,10 +180,22 @@ test('dimensioned 2D links show every current room and retain a plain plan optio
   const { getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
   const scope = {};
   vm.runInNewContext(read('floor-plan-upstairs.js'), scope);
+  const upstairsPlan = require('../upstairs-layout.js').resolve(
+    scope.getUpstairsDefaultPlan(require('../upstairs-layout.js').stairOpening()),
+    require('../upstairs-layout.js').empty()
+  );
   const context = {
     document: { getElementById: (id) => elements[id], createElement: element },
     currentView: 'top', activeFloor: 'ground', groundBaseline: getGroundFloorDefaultPlan(),
-    upstairs: { rooms: scope.getUpstairsDefaultPlan(require('../upstairs-layout.js').stairOpening()).rooms }
+    getUpstairsRoomClearDimensions: scope.getUpstairsRoomClearDimensions,
+    upstairs: { rooms: upstairsPlan.rooms, plan: upstairsPlan },
+    viewport: { clientWidth: 960, clientHeight: 720 },
+    camera: { left: -36, right: 36, top: 36, bottom: -36, zoom: 1 },
+    stairFloorToFloor: 10,
+    THREE: { Vector3: class {
+      constructor() { this.x = 0; this.y = 0; }
+      project() { return this; }
+    } }
   };
   const start = source.indexOf('  let groundLayoutPreview = null;');
   vm.runInNewContext(source.slice(source.indexOf('  function feet('), source.indexOf('  function roomDimensions(')) + source.slice(start, source.indexOf('  const upstairsHelpers =', start)), context);
@@ -151,11 +208,40 @@ test('dimensioned 2D links show every current room and retain a plain plan optio
     assert.equal(elements['plan-dimensions'].hidden, false);
     assert.equal(elements['plan-dimension-labels'].children.length, rooms.length);
     assert.equal(elements['plan-dimension-list'].children.length, rooms.length);
+    context.positionPlanDimensions();
     rooms.forEach((room, index) => {
-      assert.equal(elements['plan-dimension-labels'].children[index].children[0].textContent, room.name);
-      const size = floor === 'ground' && room.name === 'Kids room' ? '127.67 sq ft, stepped plan; west edge to z37.2, east edge to z33.6' : `${context.feet(room.w)} x ${context.feet(room.d)}`;
+      const label = elements['plan-dimension-labels'].children[index];
+      const fontSize = Number.parseFloat(label.style.fontSize);
+      assert.ok(fontSize > 0 && fontSize <= 10, 'Plan text remains small on both floors');
+      assert.equal(label.children.length, 2, 'Only a short name and dimension appear on the plan');
+      assert.equal(label.children[0].textContent, context.planRoomName(room.name));
+      const clear = floor === 'upstairs' ? scope.getUpstairsRoomClearDimensions(room, upstairsPlan.walls) : room;
+      const size = floor === 'ground' && room.name === 'Kids room' ? '127.67 sq ft, stepped plan; west edge to z37.2, east edge to z33.6' : `${context.feet(clear.w)} x ${context.feet(clear.d)}${floor === 'upstairs' ? ' paint-face' : ''}`;
       assert.equal(elements['plan-dimension-list'].children[index].textContent, `${room.name}: ~ ${size}`);
+      assert.equal(label.title, `${room.name}: ${size}`, 'Detailed names and qualifications remain available');
+      assert.doesNotMatch(label.children[1].textContent, /paint-face|stepped|edge|to z/);
+      const compact = floor === 'ground' && room.name === 'Kids room' ? '127.67 sq ft'
+        : `${context.feet(clear.w)} x ${context.feet(clear.d)}`.replace(/' /g, "'").replace(/'0"/g, "'");
+      assert.equal(label.children[1].textContent, compact);
+      if (floor === 'upstairs' && room.name === 'Bedroom 2') {
+        assert.equal(label.children[1].textContent, '13\' x 12\'6"', 'Whole feet omit zero inches without losing the dimension separator');
+      }
     });
+  }
+  for (const [full, short] of [
+    ['Primary bedroom', 'Primary'], ['Primary closet', 'P. closet'],
+    ['Bedroom 2', 'Bed 2'], ['Bedroom 2 bath', 'Bath 2'],
+    ['Bedroom 4 closet', 'Closet 4'], ['Shared bath west', 'Bath W'],
+    ['Laundry (relocated)', 'Laundry'], ['Mechanical (relocated)', 'Mech.'],
+    ['Guest coat closet', 'Coats'], ['Saved room', 'Saved room']
+  ]) assert.equal(context.planRoomName(full), short);
+  for (const zoom of [0.01, 8]) {
+    context.camera.zoom = zoom;
+    context.positionPlanDimensions();
+    for (const label of elements['plan-dimension-labels'].children) {
+      const fontSize = Number.parseFloat(label.style.fontSize);
+      assert.ok(fontSize >= 1 && fontSize <= 10, 'Zoom never creates negative or oversized label fonts');
+    }
   }
   context.activeFloor = 'ground';
   context.currentView = 'top';

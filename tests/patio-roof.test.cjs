@@ -30,6 +30,9 @@ function buildRoof() {
     traverse() {}
   }
   const context = {
+    projectionWest: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry().primaryEast - 3.35 - .225,
+    projectionEast: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathEast + .225,
+    projectionRear: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathNorth - .225,
     masonryMaps: null,
     lot: { left: -12.605, right: 62.395, rear: -32.325 }, fenceBoundaryInset: 0.5,
     THREE: { BoxGeometry, SphereGeometry: class extends BoxGeometry { constructor(radius) { super(radius * 2, radius * 2, radius * 2); } }, PointLight: class extends Group { constructor(color, intensity, distance, decay) { super(); Object.assign(this, { color, intensity, distance, decay }); } }, Mesh, Group }, livingFeatureWall: require('../floor-plan-ground.js').getLivingRoomFeatureLayout(), glass: {}, mat: () => ({}), wallThickness: 0.45, frontBrick: {}, brickFaceUVs() {}, wood: {}, dark: {}, white: {}, baseStone: {}, stepStone: {}, stepEdge: {}, glow: {},

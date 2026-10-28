@@ -86,7 +86,7 @@ test('downloadable movie includes an AAC soundtrack spanning the tour', () => {
 });
 
 test('captions span the complete movie without gaps and cover both floors, service rooms and exterior', () => {
-  const captions = read('assets/videos/whole-house-walkthrough.vtt');
+  const captions = read('assets/videos/whole-house-walkthrough.vtt').replace(/\r\n/g, '\n');
   assert.ok(captions.startsWith('WEBVTT\n'));
   const seconds = (value) => {
     const [hours, minutes, remainder] = value.split(':').map(Number);
