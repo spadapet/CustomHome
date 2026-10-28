@@ -109,11 +109,11 @@ test('view changes close an opened door, while same-view resize keeps the chosen
   assert.doesNotMatch(source, /Dining casement windows and inswing patio door|Dining patio-side stacked casements/);
 });
 
-test('only taps pick the door before floor travel, and the dining warning retains the chair conflict', () => {
+test('only taps pick the door before floor travel, and the dining note records the cleared chair sweep', () => {
   assert.match(source, /if \(tap && !pickPatioDoor\(event\) && !pickHouseDoor\(event\) && !pickVehicleDoor\(event\)\) pickTourFloor\(event\)/);
   assert.match(source, /const tap = !walkDrag\.moved && Math\.hypot/);
   const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
   assert.match(html, /id="patio-door-toggle" type="button" aria-pressed="false">Open patio door/);
   assert.match(html, /id="patio-door-state" role="status">Patio door closed/);
-  assert.match(html, /even its tucked position conflicts with the sweep/);
+  assert.match(html, /Both dining end chairs are removed, so the modeled sweep clears all six side chairs/);
 });

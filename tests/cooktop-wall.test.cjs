@@ -38,7 +38,7 @@ function buildCookingWall() {
   }
   const context = {
     THREE: { Group, Mesh, CylinderGeometry }, kitchen: new Group(), ceilingHeight: 9, cookingWallShiftX: -0.5,
-    cooktopRunWidth: 21.175 - 12.725 - 2 * (3.625 / 12), cooktopFrontReveal: 0.125 / 12, cooktopCenterZ: 16.95,
+    cooktopRunWidth: 21.675 - 12.225 - 2 * (3.625 / 12), cooktopFrontReveal: 0.125 / 12, cooktopCenterZ: 16.95,
     ...Object.fromEntries(['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish', 'brass', 'black', 'light', 'kitchenTaskDiffuser'].map((name) => [name, { name }])),
     mat: (color) => ({ color }),
     box(parent, x, y, z, w, h, d, material) {
@@ -106,14 +106,14 @@ test('hood stays 48 inches wide, tapers only in depth and keeps a flush rear pla
   assert.equal(model.find('Cooktop hood task-light strip').length, 1);
 });
 
-test('two standard-width oak stacks have two tiers, four Shaker doors and gold pulls', () => {
+test('two standard-width oak stacks have two tiers, eight Shaker doors and gold pulls', () => {
   const model = buildCookingWall();
   const stacks = model.all.filter((item) => item.name?.endsWith('upper stack'));
   assert.equal(stacks.length, 2);
-  assert.equal(model.find('Full-overlay Shaker cabinet front').length, 4);
-  assert.equal(model.find('Gold cabinet pull').length, 4);
+  assert.equal(model.find('Full-overlay Shaker cabinet front').length, 8);
+  assert.equal(model.find('Gold cabinet pull').length, 8);
   for (const stack of stacks) {
-    close(stack.userData.widthInches, 21);
+    close(stack.userData.widthInches, 27);
     assert.equal(stack.userData.construction, 'Frameless');
     assert.equal(stack.userData.finish, 'Stained white oak');
     const carcasses = stack.children.filter((item) => item.name === 'Cooktop upper cabinet carcass');
@@ -138,8 +138,8 @@ test('upper cabinets touch the hood without overlap and leave the casing-end all
   const mudroom = bounds(model.find('Cooktop mudroom-side upper stack')[0]);
   close(prep.maxZ, hood.minZ);
   close(mudroom.minZ, hood.maxZ);
-  close(prep.minZ, 16.95 - 90 / 24);
-  close(mudroom.maxZ, 16.95 + 90 / 24);
+  close(prep.minZ, 16.95 - 102 / 24);
+  close(mudroom.maxZ, 16.95 + 102 / 24);
   close((prep.minZ + mudroom.maxZ) / 2, 16.95);
   close(bounds(model.find('Cooktop upper ceiling cornice')[0]).minX, bounds(model.find('Plaster hood ceiling cornice')[0]).minX);
 });

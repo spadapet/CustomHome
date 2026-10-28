@@ -27,7 +27,7 @@ class Mesh extends Group {
 class CylinderGeometry {
   constructor(top, bottom, length) { this.length = length; }
 }
-function build() {
+function build(edits = layout.empty()) {
   const context = { UpstairsLayout: layout };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'floor-plan-upstairs.js'), 'utf8'), context);
   const material = {};
@@ -49,7 +49,7 @@ function build() {
   const casingContext={THREE:{Group,Vector3:class{}},box:helpers.box,windowTrim:material,walls:[],casingSideWidth:3.5/12,casingReveal:.125/12};
   vm.runInNewContext(source.slice(source.indexOf('  function openingCasing('),source.indexOf('  const baseTrimSections')),casingContext);
   helpers.openingCasing=casingContext.openingCasing;
-  return context.buildUpstairsModel({ Group, Mesh, CylinderGeometry }, helpers, layout.stairOpening(), 10);
+  return context.buildUpstairsModel({ Group, Mesh, CylinderGeometry }, helpers, layout.stairOpening(), 10, edits);
 }
 const model = build();
 test('upper arrival is one flush hardwood floor constituent with continuous gallery access', () => {
@@ -83,7 +83,7 @@ test('arrival floor hides and restores through the production floor selector wit
   const element = () => ({ setAttribute() {}, closest: () => ({}) });
   const state = {
     upstairs: model, stairs: object(), basementStairs: object(), upstairsStairParts: [],
-    activeFloor: 'ground', groundVisibility: new Map(), groundModelRoots: [],
+    activeFloor: 'ground', groundVisibility: new Map(), groundModelRoots: [], frontPorchChairs: [],
     groundLayoutPreview: null, exterior: object(), tourMapBounds: {}, tourMap: { width: 200, setAttribute() {} },
     viewport: element(), islandLightsInput: element(), navigationMode: 'rotate',
     document: { getElementById: element, querySelector: element, querySelectorAll: () => [] },
@@ -92,12 +92,16 @@ test('arrival floor hides and restores through the production floor selector wit
   vm.runInNewContext(source.slice(source.indexOf('  function selectFloor(floor) {'),
     source.indexOf('  function refreshUpstairsDimensions() {')), state);
   const arrival = model.group.children.find(p => p.name === 'Upstairs floor: Stair arrival');
+  const desksAndAccessories = model.group.children.filter(p => /Bedroom [234] (writing desk|desk chair|desk wall lamp)|Upstairs Loft desk/.test(p.name));
+  const poses = () => desksAndAccessories.map(p => [p.name, p.position.x, p.position.z, p.rotation.y, p.children.length]);
+  const originalPoses = poses();
   for (const floor of ['upstairs', 'ground', 'exterior', 'upstairs', 'ground', 'upstairs']) {
     state.selectFloor(floor);
     assert.equal(model.group.visible, floor === 'upstairs');
     assert.equal(arrival.parent, model.group);
     assert.equal(arrival.userData.walkSurface, true);
     assert.equal(model.group.children.filter(p => p.name === arrival.name).length, 1);
+    assert.deepEqual(poses(), originalPoses, 'Floor/view restoration preserves wall-backed desks and coherent accessories');
   }
 });
 test('upstairs room-width openings receive trim-matched single-panel operable doors', () => {
@@ -174,7 +178,7 @@ test('bedroom furnishings clear finished room edges and each other above rugs', 
     });
     for (let i = 0; i < solids.length; i++) {
       const a = solids[i];
-      assert.ok(a.minX >= room.x + 0.2 && a.maxX <= room.x + room.w - 0.2 && a.minZ >= room.z + 0.2 && a.maxZ <= room.z + room.d - 0.2, furnishings[i].name);
+      assert.ok(a.minX >= room.x + 0.175 - 1e-8 && a.maxX <= room.x + room.w - 0.175 + 1e-8 && a.minZ >= room.z + 0.175 - 1e-8 && a.maxZ <= room.z + room.d - 0.175 + 1e-8, furnishings[i].name);
       for (let j = 0; j < i; j++) {
         const meshes = (furnishing) => furnishing.children.filter((mesh) => mesh.position.y > 0.1).map(bounds);
         for (const first of meshes(furnishings[i])) for (const second of meshes(furnishings[j])) {
@@ -215,6 +219,52 @@ test('front redesign leaves window approaches and occupied desk-to-bed route cle
       }
     }
   }
+});
+
+test('all child and shared loft desks back onto actual wall faces with trim-clear legs and coherent accessories', () => {
+  for (const [name, wallName, rotation] of [
+    ['Bedroom 2', 'Bedroom 2 north', 0],
+    ['Bedroom 3', 'Bedroom 3 west', Math.PI / 2],
+    ['Bedroom 4', 'Bedroom 4 closet', Math.PI / 2],
+    ['Loft', 'Loft east', -Math.PI / 2]
+  ]) {
+    const desk = item(name === 'Loft' ? 'Loft desk' : `${name} writing desk`);
+    const wall = model.plan.walls.find(w => w.name === wallName);
+    const top = desk.children.find(m => /desktop/i.test(m.name));
+    const sine = Math.sin(rotation), cosine = Math.cos(rotation);
+    const normal = b => Math.abs(sine) > 0.5 ? (sine > 0 ? b.minX : -b.maxX) : b.minZ;
+    const face = (Math.abs(sine) > 0.5 ? sine * wall.x1 : wall.z1) + wall.thickness / 2;
+    assert.equal(desk.rotation.y, rotation);
+    assert.ok(Math.abs(normal(bounds(top)) - face) < 1e-8, `${name}: rear desktop meets paint, not its front`);
+    const legs = desk.children.filter(m => m.geometry.h === 2.5);
+    assert.equal(legs.length, 2);
+    for (const leg of legs) assert.ok(Math.abs((normal(bounds(leg)) - face - .0625) * 12 - .45) < 1e-8, `${name}: legs clear 3/4-inch baseboard by .45 inch`);
+    const seat = item(`${name} desk chair`);
+    assert.ok(Math.abs(seat.position.x - desk.position.x - sine * 1.9) < 1e-8);
+    assert.ok(Math.abs(seat.position.z - desk.position.z - cosine * 1.9) < 1e-8);
+    if (name !== 'Loft') {
+      const light = item(`${name} desk wall lamp`);
+      assert.ok(Math.abs(normal(bounds(light.children[0])) - face) < 1e-8, 'Backplate meets paint without penetration');
+    }
+    for (const mesh of meshes(desk)) {
+      for (const wallGroup of model.group.children.filter(o => o.name?.startsWith('Upstairs wall:'))) {
+        for (const part of meshes(wallGroup)) assert.ok(!positiveOverlap(constituent(mesh), constituent(part)), `${name} hits ${wallGroup.name}/${part.name}`);
+      }
+    }
+  }
+});
+
+test('desk wall backing follows resolved saved wall thickness without modifying the saved document', () => {
+  const edits = layout.empty();
+  const wall = model.plan.walls.find(w => w.name === 'Bedroom 4 closet');
+  edits.walls.push({ name: wall.name, x1: wall.x1, z1: wall.z1, x2: wall.x2, z2: wall.z2, thickness: .5 });
+  const before = JSON.stringify(edits);
+  const changed = build(edits);
+  const get = name => changed.group.children.find(o => o.name === `Upstairs Bedroom 4 ${name}`);
+  assert.ok(Math.abs(bounds(get('writing desk').children[0]).minX - 18.25) < 1e-8);
+  assert.ok(Math.abs(get('desk chair').position.x - get('writing desk').position.x - 1.9) < 1e-8);
+  assert.ok(Math.abs(bounds(get('desk wall lamp').children[0]).minX - 18.25) < 1e-8);
+  assert.equal(JSON.stringify(edits), before);
 });
 
 test('wall lamps mount on solid wall rather than across windows or door openings', () => {

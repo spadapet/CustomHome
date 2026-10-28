@@ -32,7 +32,7 @@ function build() {
         }
       }
     },
-    scene: new Group(), piano: new Group(), referenceEndTable: new Group(),
+    scene: new Group(), piano: new Group(),
     guestVanity: { children: [{ name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }, { name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }] },
     powderGlow: { emissiveIntensity: 0.45 },
     upstairs: { group: Object.assign(new Group(), { userData: { ceilingHeightFeet: 9 } }), rooms: [{ name: 'Bedroom 2', x: 31, z: 10, w: 13, d: 12 }] },
@@ -78,7 +78,7 @@ test('warm deep-regressed cans cover both floors with separate unchanged low-out
   const model = build();
   const rigs = model.homeLighting;
   assert.ok(rigs.length > 20);
-  assert.equal(rigs.filter((rig) => rig.task).length, 2);
+  assert.equal(rigs.filter((rig) => rig.task).length, 1, 'Piano task lamp only; the living end-table lamp is removed');
   assert.ok(rigs.some((rig) => rig.floor === 'upstairs'));
   assert.equal(rigs.filter((rig) => rig.group.name.startsWith('Garage')).length, 3);
   for (const rig of rigs) {

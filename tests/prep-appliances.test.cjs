@@ -72,7 +72,8 @@ test('prep cooktop is removed while the continuous left quartz counter and main 
   for (const name of ['Prep 12 inch induction cooktop', 'Prep induction glass surface', 'Prep induction cooking zone', 'Prep induction touch control']) assert.equal(model.find(name).length, 0);
   const slabs = model.parts.filter(part => part.parent.name === 'Prep kitchen cabinetry' && part.material.name === 'countertop' && part.position.y === 2.97 && part.position.x < 45.9);
   assert.equal(slabs.length, 1, 'Keep one uninterrupted left prep worktop');
-  const b = bounds(slabs[0]);
+  const mainSlab = model.find('Prep continuous left quartz counter')[0];
+  const b = bounds(mainSlab);
   for (const [actual, expected] of [[b.minX, 40.82], [b.maxX, 45.93], [b.minZ, 7.225], [b.maxZ, 9.275], [b.maxY, 3.04]]) assert.ok(Math.abs(actual - expected) < 1e-9);
   assert.doesNotMatch(source, /\bprepInduction\b/);
   assert.match(source, /cooktop\.name = '36 inch induction cooktop'/, 'Keep the separate main-kitchen cooktop');
@@ -92,9 +93,35 @@ test('prep backsplash matches the countertop quartz and is notched behind the fl
   const trimBottom = bank.sill - 1 / 12 - 3.5 / 12;
   const halfWidth = bank.width / 2 + (3.5 + 0.125) / 12;
   for (const piece of pieces) assert.ok(piece.maxY <= trimBottom + 1e-9 || piece.maxX < bank.x - halfWidth || piece.minX > bank.x + halfWidth);
-  for (const [actual, expected] of [[b.minX, 40.85], [b.maxX, 55.2], [b.minY, 3.04], [b.maxY, 3.04 + 4 / 12], [b.minZ, 7.18], [b.maxZ, 7.26]]) assert.ok(Math.abs(actual - expected) < 1e-9);
+  for (const [actual, expected] of [[b.minX, 40.85], [b.maxX, 55.2], [b.minY, 3.04], [b.maxY, 3.04 + 4 / 12], [b.minZ, 7.175], [b.maxZ, 7.26]]) assert.ok(Math.abs(actual - expected) < 1e-9);
   assert.equal(model.find('Prep sage running-bond backsplash tile').length, 0);
   assert.equal(model.find('Prep backsplash warm-gray grout backing').length, 0);
+});
+
+test('prep fitted closures meet walls and adjacent units without changing standard cabinet sizes', () => {
+  const model = buildPrepCounter();
+  const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} should meet ${expected}`);
+  const rear = bounds(model.find('Prep quartz rear wall closure')[0]);
+  close(rear.minZ, 7.175);
+  close(rear.maxZ, bounds(model.find('Prep continuous left quartz counter')[0]).minZ);
+  const east = bounds(model.find('Prep quartz east wall closure')[0]);
+  close(east.minX, 55.2);
+  close(east.maxX, 55.325);
+  const west = bounds(model.find('Prep tower west wall filler')[0]);
+  close(west.minX, 37.675);
+  close(west.maxX, 38);
+  const towerRear = bounds(model.find('Prep tower rear wall scribe')[0]);
+  close(towerRear.minZ, 7.175);
+  close(towerRear.maxZ, 7.25);
+  const landing = bounds(model.find('Prep tower landing quartz closure')[0]);
+  close(landing.minX, 40.75);
+  close(landing.maxX, bounds(model.find('Prep continuous left quartz counter')[0]).minX);
+  for (const packer of model.find('Prep cabinet counter support packer')) {
+    close(bounds(packer).minY, 34.5 / 12);
+    close(bounds(packer).maxY, 2.9);
+  }
+  close(bounds(model.find('Prep extension counter support packer')[0]).maxY, 2.9);
+  for (const packer of model.find('Prep sink counter support packer')) close(bounds(packer).maxY, 2.9);
 });
 
 test('18-inch dishwasher replaces cabinet volume beside the sink under a continuous counter', () => {
@@ -189,6 +216,7 @@ test('prep adds two standard tall casements and uses the tallest fitting standar
   const casings = [];
   const context = {
     casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12, rest: { add() {} }, garageClerestories: [], ...require('../floor-plan-ground.js'),
+    windowTrim: {}, box() { return {}; },
     THREE: { Group: class { constructor() { this.userData = {}; this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } }; } } },
     windowFrame(...args) { frames.push(args); return { userData: {} }; },
     openingCasing(...args) { casings.push(args); }, windowFaceDepth: () => 0.075

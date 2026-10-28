@@ -125,7 +125,7 @@ test('brick texture uses contrasting warm taupe variations and mortar relief wit
   assert.ok(fills.slice(1).every((fill) => fill.bounds[2] === 60 && fill.bounds[3] === 28));
 });
 
-test('farmhouse windows restore white trim on every elevation and inside', () => {
+test('front windows have six-light white grilles; side and rear stay clear', () => {
   const meshes = [];
   class Group {
     constructor() { this.userData = {}; this.position = { set() {} }; }
@@ -135,10 +135,18 @@ test('farmhouse windows restore white trim on every elevation and inside', () =>
   }
   const context = { windowInstallations: [], wallThickness: 0.45, getWindowProductIntent: require('../floor-plan-ground.js').getWindowProductIntent, THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, dark: {}, trim: {}, windowBlack: {}, glass: {}, privacyGlass: {}, box(parent, x, y, z, w, h, d, material) { const mesh = { x, y, z, w, h, d, material }; parent.add(mesh); return mesh; } };
   vm.createContext(context);
+  const groundSource = fs.readFileSync(require.resolve('../floor-plan-ground.js'), 'utf8');
+  context.addWindowShadeDivisions = require('../floor-plan-ground.js').addWindowShadeDivisions;
+  vm.runInContext(groundSource.slice(groundSource.indexOf('function addFrontWindowGrilles('), groundSource.indexOf("if (typeof module !== 'undefined' && module.exports) module.exports.getWindowProductIntent")), context);
   vm.runInContext(source.slice(source.indexOf('  function windowUnit('), source.indexOf('  function wall(')), context);
   vm.runInContext('windowUnit(new THREE.Group(), 6, 3, 6, 5, false, false, true, true)', context);
-  assert.equal(meshes.filter((mesh) => /grille/.test(mesh.name ?? '')).length, 0);
-  assert.equal(meshes.filter((mesh) => mesh.name === 'Casement combination mullion').length, 1);
+  assert.equal(meshes.filter((mesh) => /grille/.test(mesh.name ?? '')).length, 12);
+  const grilles = meshes.filter((mesh) => /grille/.test(mesh.name ?? ''));
+  assert.ok(grilles.every(mesh => Math.abs(mesh.z) - mesh.d / 2 > 0.06), 'bars stand clear of glazing faces');
+  const count = meshes.length;
+  vm.runInContext('windowUnit(new THREE.Group(), 6, 3, 6, 5, false, false, true, false)', context);
+  assert.equal(meshes.slice(count).filter(mesh => /grille/.test(mesh.name ?? '')).length, 0);
+  assert.equal(meshes.slice(0, count).filter((mesh) => mesh.name === 'Full-depth white shade-bay division' && mesh.d === 0.5 && mesh.w === 3.5 / 12).length, 1);
   assert.ok(meshes.filter((mesh) => mesh.material && mesh.material !== context.glass).every((mesh) => mesh.material === context.trim));
   meshes.length = 0;
   vm.runInContext('windowUnit(new THREE.Group(), 6, 3, 6, 5)', context);

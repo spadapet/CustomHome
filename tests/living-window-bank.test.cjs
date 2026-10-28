@@ -8,6 +8,29 @@ const { getLivingRoomFeatureLayout, getGroundFloorDefaultPlan } = require('../fl
 const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-6, `${actual} should equal ${expected}`);
 
+test('single-hung sashes have equal clear lower and four-light fixed upper apertures', () => {
+  const { addSingleHungSashes } = require('../floor-plan-ground.js');
+  for (const glassDepth of [0.04, 0.12]) {
+    const parts = [];
+    addSingleHungSashes({}, (parent, x, y, z, w, h, d) => {
+      const part = { x, y, z, w, h, d }; parts.push(part); return part;
+    }, {}, {}, 2.5, 5, glassDepth);
+    const upper = parts.find(p => p.name === 'Single-hung fixed upper glazing');
+    const lower = parts.find(p => p.name === 'Single-hung clear sliding lower glazing');
+    close(upper.w, lower.w); close(upper.h, lower.h);
+    close((upper.y + lower.y) / 2, 2.5);
+    const grilles = parts.filter(p => /upper grille/.test(p.name));
+    assert.equal(grilles.length, 4, 'one cross on each glazing face, never lower sash');
+    for (const part of grilles) {
+      assert.ok(part.y - part.h / 2 >= 2.5);
+      assert.ok(part.y + part.h / 2 <= 5 - 0.12);
+    }
+    const rail = parts.find(p => p.name === 'Single-hung midheight meeting rail');
+    close(rail.y - rail.h / 2, 2.5);
+    assert.ok(!parts.some(p => /casement|crank/i.test(p.name)));
+  }
+});
+
 test('living return restores three joined windows with the patio door on the perpendicular dining wall', () => {
   const bank = getLivingRoomFeatureLayout().sideWindowBank;
   close(bank.width * 12, 90);
@@ -15,6 +38,7 @@ test('living return restores three joined windows with the patio door on the per
   close(bank.sill * 12, 36);
   assert.deepEqual(bank.units.map((unit) => unit.x), [4.1, 6.6, 9.1]);
   assert.deepEqual(bank.units.map((unit) => unit.picture), [false, true, false]);
+  assert.ok(bank.units.every(unit => !unit.singleHung));
   for (let index = 1; index < bank.units.length; index++) {
     const previous = bank.units[index - 1], unit = bank.units[index];
     close(previous.x + previous.width / 2, unit.x - unit.width / 2);
@@ -73,6 +97,7 @@ test('three living frames share one flush sill and drywall returns with the reta
   const bank = getLivingRoomFeatureLayout().sideWindowBank;
   const frames = [];
   const context = {
+    addWindowShadeDivisions: require('../floor-plan-ground.js').addWindowShadeDivisions,
     THREE: { Group, Vector3: class {} }, scene: new Group(), walls: [],
     windowTrim: {}, wallMaterial: {}, livingSideWindowBank: bank, livingSideWindows: bank.units,
     windowFrame(...args) {
@@ -99,10 +124,20 @@ test('three living frames share one flush sill and drywall returns with the reta
     close(args[1] + bank.x, bank.units[index].x);
     assert.equal(args[9].casing, false);
     assert.equal(args[9].picture, index === 1);
+    assert.equal(args[9].singleHung, false);
   });
   const casings = context.scene.children[0].children.filter((part) => part.name === 'Flush white window returns');
   assert.equal(casings.length, 1);
   const parts = casings[0].children;
+  const divisions = context.scene.children[0].children.filter(part => part.name === 'Living full-depth white shade-bay division');
+  assert.equal(divisions.length, 2);
+  divisions.forEach((part, index) => {
+    close(part.w * 12, 3.5); close(part.d * 12, 6); close(part.h * 12, 60);
+    close(part.position.x, index ? 1.25 : -1.25);
+    close(part.position.z + part.d / 2, 0.075);
+    close(part.position.y - part.h / 2, 3);
+    assert.equal(part.userData.structuralPier, false);
+  });
   assert.equal(parts.filter((part) => part.name === 'White drywall jamb return').length, 2);
   for (const name of ['White drywall head return', 'White inset window sill']) {
     assert.equal(parts.filter((part) => part.name === name).length, 1, name);

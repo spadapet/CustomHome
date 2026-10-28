@@ -110,7 +110,9 @@ test('guest suite retains a walk-in closet alongside the comfortable shower', ()
   assert.equal(suite.toilet.rotation, -Math.PI / 2);
   close(suite.closet.d, 6);
   close(suite.closet.w, 6.75);
-  assert.equal(suite.closetDoor.doorless, true);
+  assert.equal(suite.closetDoor.pocket.retract, 'left');
+  close(suite.closetDoor.x + 3 + 2.5 / 12 + 0.125 / 12 + 0.0625, 25.75 - 0.175);
+  assert.ok(suite.closetDoor.pocket.w >= suite.closetDoor.pocket.leafWidth);
   assert.deepEqual(baseline.rooms.find((room) => room.name === 'Entry hall'), { name: 'Entry hall', x: 12.2, z: 34.6, w: 6.8, d: 19.6 });
   assert.ok(!baseline.rooms.some((room) => room.name === 'Closet hall'), 'No narrowed north hall remains');
   for (const zone of [...suite.closetStorage.hanging, suite.closetStorage.shelves]) assert.ok(zone.x >= 0.2375 && zone.x + zone.w <= 6.7625 && zone.z + zone.d <= 5.7625, 'Storage clears finished walls and base trim');
@@ -119,7 +121,7 @@ test('guest suite retains a walk-in closet alongside the comfortable shower', ()
   assert.deepEqual(baseline.walls.find(([name]) => name === 'Garage west').slice(1), [31.2, 34.6, 31.2, 49]);
 });
 
-test('furnished guest suite uses walk-in fittings and sliding doors without a bathroom swing', () => {
+test('furnished guest suite centers basin, retains basket and uses left closet pocket with inward bathroom swing', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
   class Group {
     constructor() {
@@ -129,11 +131,14 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
       this.userData = {};
     }
     add(child) { this.children.push(child); }
+    traverse(fn) { fn(this); for (const child of this.children) child.traverse ? child.traverse(fn) : fn(child); }
   }
   const items = [];
   const context = {
-    THREE: { Group, PointLight: class { constructor() { this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } }; } } }, guestSuite: getGuestSuiteLayout(),
-    windowTrim: {}, cream: {}, brass: {}, porcelain: {}, countertop: {}, guestVanityStone: {}, cabinetRailFinish: {}, cabinetPanelFinish: {}, glass: {}, steel: {}, oak: {}, linen: {}, powderGlow: {}, cabinetFinish: {},
+    THREE: { Group, Shape: class { moveTo() {} lineTo() {} closePath() {} },
+      ExtrudeGeometry: class {}, Mesh: class extends Group {},
+      PointLight: class { constructor() { this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } }; } } }, guestSuite: getGuestSuiteLayout(),
+    windowTrim: {}, cream: {}, brass: {}, black: {}, porcelain: {}, countertop: {}, guestVanityStone: {}, cabinetRailFinish: {}, cabinetPanelFinish: {}, glass: {}, steel: {}, oak: {}, linen: {}, powderGlow: {}, cabinetFinish: {},
     furnishing(name, x, z, rotation = 0) {
       const group = new Group();
       Object.assign(group, { name, x, z });
@@ -164,14 +169,16 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
   const suite = context.guestSuite;
   const find = (name) => items.find((item) => item.name === name);
   const wardrobe = find('Guest walk-in closet fittings');
-  assert.equal(wardrobe.children.filter((part) => part.name === 'Guest closet continuous long-hang rail').length, 0);
+  assert.equal(wardrobe.children.filter((part) => part.name === 'Guest closet continuous long-hang rail').length, 1);
   assert.equal(wardrobe.children.filter((part) => part.name === 'Guest closet continuous short-hang rail').length, 2);
-  assert.equal(wardrobe.children.filter((part) => part.name === 'Guest wardrobe folded-clothes shelf').length, 5);
-  const hangingShelves = wardrobe.children.filter((part) => part.name === 'Guest closet hanging-zone upper shelf');
-  assert.equal(hangingShelves.length, 1);
+  const closetParts = [];
+  wardrobe.traverse((part) => closetParts.push(part));
+  assert.equal(closetParts.filter((part) => part.name === 'Guest wardrobe adjustable folded-clothes shelf').length, 5);
+  const hangingShelves = closetParts.filter((part) => part.name === 'Guest closet hanging-zone upper shelf');
+  assert.equal(hangingShelves.length, 2);
   assert.equal(wardrobe.rotation.y, 0);
   assert.equal(wardrobe.children.filter((part) => part.name === 'Guest wardrobe sliding Shaker front').length, 0);
-  assert.equal(wardrobe.userData.hangingRunInches, 51);
+  assert.equal(wardrobe.userData.hangingRunInches, 48);
   assert.deepEqual(find('Guest bathroom tile'), { name: 'Guest bathroom tile', ...suite.bathroom });
   assert.equal(find('Guest bathroom vanity').x, suite.vanity.x);
   assert.equal(find('Guest bathroom vanity').z, suite.vanity.z);
@@ -183,7 +190,8 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
   assert.equal(find('Guest bathroom vanity').userData.basinCenterSpacingInches, 0);
   const basin = find('Guest bathroom vanity').children.find((part) => part.name === 'Guest bathroom vanity basin 1');
   const mirror = find('Guest bathroom vanity').children.find((part) => part.name === 'Guest bathroom vanity mirror 1');
-  assert.ok(basin.position.x < 0, 'Sink is offset over the enclosed wastebasket bay');
+  assert.equal(basin.position.x, 0, 'Basin is centered on whole counter');
+  assert.equal(find('Guest bathroom vanity').children.find(p => p.name === 'Guest bathroom vanity faucet spout 1').x, 0);
   assert.equal(basin.children.find(p => p.name === 'Guest undermount basin bottom').w * 12, 14);
   assert.equal(basin.children.length, 5, 'Undermount basin has no solid fill');
   assert.equal(mirror.x, 0);
@@ -270,7 +278,14 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
     assert.ok(drawer.position.x + bottom.w / 2 < suite.vanity.width / 2 - 0.75 / 12, 'Drawer box clears cabinet side');
     assert.ok(suite.vanity.z + drawer.position.x + front.userData.width / 2 < suite.bathroomDoor.z - 0.2375, 'Right drawers clear bathroom south baseboard');
   }
-  assert.ok(Math.max(...basin.children.map(p => basin.position.x + p.x + p.w / 2)) < suite.vanity.width / 2 - 1, 'Actual basin solids do not sit over drawer bank');
+  const bowlBottom = Math.min(...basin.children.map(p => p.y - p.h / 2));
+  const upperDrawer = drawers[2];
+  for (const p of upperDrawer.children.filter(p => /drawer (side|end|bottom)$/.test(p.name))) {
+    assert.ok(upperDrawer.position.y + p.y + p.h / 2 < bowlBottom, 'Shallow top box clears centered bowl throughout travel');
+  }
+  const soap = vanity.children.find(p => p.name === 'Guest vanity soap bottle');
+  assert.ok(soap.y - soap.height / 2 >= 2.84 - 1e-8, 'Soap rests on counter, not inside it');
+  assert.ok(soap.x - soap.radius > 14 / 24 + 0.04, 'Soap clears actual basin rim');
   assert.equal(find('Guest bathroom toilet').x, suite.toilet.x);
   assert.equal(find('Guest bathroom toilet').z, suite.toilet.z);
   assert.equal(find('Guest bathroom toilet').rotation, -Math.PI / 2);
@@ -292,8 +307,7 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
   const endCurbs = shower.children.filter((part) => part.name === 'Guest shower end curb').sort((a, b) => a.z - b.z);
   assert.ok(Math.abs((sideCurbs[1].x - sideCurbs[1].w / 2 - sideCurbs[0].x - sideCurbs[0].w / 2) * 12 - 58.2) < 1e-8);
   assert.ok(Math.abs((endCurbs[1].z - endCurbs[1].d / 2 - endCurbs[0].z - endCurbs[0].d / 2) * 12 - 36) < 1e-8);
-  const westShelves = wardrobe.children.filter((part) => part.name === 'Guest wardrobe folded-clothes shelf');
-  const westStorageEdge = wardrobe.x + Math.max(...westShelves.map((part) => part.x + part.w / 2));
+  const westStorageEdge = wardrobe.x + suite.closetStorage.shelves.x + suite.closetStorage.shelves.w;
   const knobFront = suite.vanity.x - 0.99;
   assert.ok((knobFront - (suite.bathroom.x + 0.2375)) * 12 > 38);
   assert.ok((knobFront - 1.25 - (suite.bathroom.x + 0.2375)) * 12 > 23, 'Close drawers before through-access');
@@ -340,23 +354,25 @@ test('furnished guest suite uses walk-in fittings and sliding doors without a ba
   assert.ok(27.4 - 26 / 24 >= entranceWest && 27.4 + 26 / 24 <= entranceEast, 'Route passes through actual south-facing shower entry');
   assert.equal(find('Guest walk-in closet inward-opening door'), undefined);
   const opening = suite.bathroomDoor;
-  const door = find('Guest bathroom pocket door proposal - framing approval required');
+  const door = find('Guest bathroom inward-opening door');
   assert.equal(door.rotation.y, 0);
   assert.equal(door.z, opening.z);
-  assert.equal(door.userData.approvalRequired, true);
+  assert.equal(door.userData.hinge, 'West jamb');
+  assert.equal(door.userData.interactiveHouseDoor.maxAngleDegrees, 90);
+  assert.equal(door.userData.interactiveHouseDoor.openRotationSign, 1);
   assert.equal(door.userData.nominalWidthInches, 28);
-  assert.equal(door.userData.targetClearWidthInches, 26);
   assert.equal(door.userData.heightInches, 96);
-  const panelLeaf = door.children.find((part) => part.name === 'Guest bathroom painted-white pocket leaf');
+  const panelLeaf = door.children.find((part) => part.name === 'Guest bathroom painted-white Shaker leaf');
   const leaf = { h: panelLeaf.userData.height, w: panelLeaf.userData.width, y: panelLeaf.position.y };
   assert.equal(leaf.h, opening.height - 0.04);
   assert.equal(leaf.y, opening.height / 2);
-  assert.ok(door.userData.openCenterX - leaf.w / 2 - opening.x >= 26 / 12, 'Partially retained leaf leaves target passage; no full-retraction claim');
-  assert.ok(door.userData.openCenterX + leaf.w / 2 <= opening.pocket.x + opening.pocket.w);
-  assert.ok(opening.pocket.x + opening.pocket.w < suite.bathroom.x + suite.bathroom.w - 0.175, 'Pocket stays within partition, outside closet and garage');
-  for (const pull of door.children.filter((part) => part.name === 'Guest bathroom flush privacy pull concept')) {
-    assert.ok(door.userData.openCenterX + pull.x + pull.w / 2 <= opening.x + opening.width + 1e-8, 'Leading-stile pull remains exposed at the partially retained open stop');
-  }
+  assert.equal(opening.pocket, undefined);
+  const pocket = find('Guest walk-in closet left pocket door');
+  const operation = pocket.userData.interactiveHouseDoor;
+  assert.equal(operation.open, false);
+  assert.ok(operation.openCenterX - 3.08 / 2 >= suite.closetDoor.pocket.x);
+  assert.ok(operation.openCenterX + 3.08 / 2 <= suite.closetDoor.x + 1e-8);
+  assert.equal(find('Guest bathroom pocket door proposal - framing approval required'), undefined);
   assert.ok(!items.some((item) => item.name === 'Guest bathroom outward-opening door'));
 });
 
@@ -628,7 +644,7 @@ test('powder vanity centers its sink and lighting between matching drawer banks 
   assert.ok(!source.includes('Powder folded hand towel'), 'The counter towel is replaced by the wall-hung towel');
 });
 
-test('powder-wall-backed upper flight and landing omit guards without removing stringers or exposed-edge rails', () => {
+test('original wall-backed rail omissions preserve stringers and unrelated exposed-edge rails', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
   const parts = [];
   class Group {
@@ -652,7 +668,7 @@ test('powder-wall-backed upper flight and landing omit guards without removing s
     }
   };
   const flights = source.slice(source.indexOf('  for (const upper of [false, true])'), source.indexOf('  box(stairs, (stairRun + landingEndX) / 2, landingHeight - 0.1'));
-  const landing = source.slice(source.indexOf('  // Owner concept: omit only the short landing-side assembly'), source.indexOf('  const upstairsStairParts ='));
+  const landing = source.slice(source.indexOf('  const landingGuardZ ='), source.indexOf('  const upstairsStairParts ='));
   vm.runInNewContext(`${flights}\n${landing}`, context);
   const count = (name) => parts.filter((part) => part.name === name).length;
   assert.equal(count('Stair stringer'), 4);
@@ -661,14 +677,15 @@ test('powder-wall-backed upper flight and landing omit guards without removing s
   assert.equal(count('Sloped stair handrail'), 3);
   assert.equal(count('Horizontal stair guard rail'), 24);
   assert.equal(count('Stair guard post'), 9);
-  assert.equal(count('Turning landing side handrail'), 0);
-  assert.equal(count('Horizontal landing guard rail'), 0);
-  assert.equal(count('Landing guard post'), 0);
+  assert.equal(count('Turning landing side handrail'), 1);
+  assert.equal(count('Horizontal landing guard rail'), 8);
+  assert.equal(count('Landing guard post'), 2);
+  assert.equal(count('Landing guard nosing transition'), 0);
+  assert.equal(count('Landing guard transition rail'), 0);
   for (const part of parts.filter((part) => /handrail|guard/.test(part.name))) {
     const z = part.start ? part.start[2] : part.z;
     assert.ok(Math.abs(z - stairDepth - 0.08) > 1e-9, 'No rail or post remains against the powder-room wall');
   }
-  assert.doesNotMatch(source, /(?:stairBeam|name =)\s*\(?['"](?:Turning landing side handrail|Horizontal landing guard rail|Landing guard post)['"]/);
 });
 
 test('kitchen-facing kids-room wall is flush with the tall cabinet fronts without moving the doorway', () => {
@@ -705,11 +722,41 @@ test('kids-room garage partition stays aligned while the whole bathroom shifts n
   }
 });
 
-test('paired fireplace built-ins remain independent of removed stair casework', () => {
+test('fireplace built-ins are removed entirely and baseboard runs continuously from each wall end to the stone return', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
-  assert.match(source, /fireplaceBuiltIns\.name = 'Paired low white-oak fireplace built-ins'/);
-  assert.match(source, /cabinetWidthInches: 36, cabinetsPerSide: 2/);
+  // Both remaining halved boxes and every constituent part are deleted from the source, not hidden.
+  assert.doesNotMatch(source, /fireplaceBuiltIns|fireplaceBuiltInLayout|Paired low white-oak fireplace built-ins|halved fireplace built-in'|Fireplace cabinet recessed plinth|Standard 36 inch cabinet side|Fireplace cabinet media shelf|Closed Shaker media door|Stone-side cabinet scribe filler|Finished exposed cabinet end panel|Continuous low oak built-in top/);
+  assert.doesNotMatch(source, /builtInRunWidth|restored fireplace built-in|Restored cabinet recessed plinth|Separate fireplace cabinet end filler|builtInsHalved|builtInFrontX/);
   assert.doesNotMatch(source, /stairBookcases|bookcaseBays|Built-in shelf book/);
+  assert.doesNotMatch(source, /door conflicts when open|wall-length cabinet/);
+  for (const name of ['Floor-to-ceiling stone fireplace', 'White oak fireplace mantel', 'Fireplace television', 'Fireplace stone side return']) assert.ok(source.includes(`'${name}'`), name);
+  // Baseboard: the only window-wall suppression is the stone itself, ending exactly at each stone side return.
+  const covers = [];
+  class Vector2 { constructor(x, y) { Object.assign(this, { x, y }); } }
+  const start = source.indexOf('      for (const run of edges) cover(run.a, run.b, run.normal);');
+  const end = source.indexOf('      for (const wall of baseTrimSections)', start);
+  assert.ok(start > 0 && end > start);
+  const halfSource = source.match(/  const fireplaceStoneHalfWidth = [\d.]+;/);
+  assert.ok(halfSource, 'Stone half-width is a shared named constant');
+  const feature = getLivingRoomFeatureLayout();
+  vm.runInNewContext(`${halfSource[0]}\n${source.slice(source.indexOf('\n', start), end)}`, {
+    THREE: { Vector2 }, livingFeatureWall: feature, guestEntry: { stairGuard: { x: 99, z: 99 } },
+    guestSuite: { shower: { x: 99, z: 99, w: 1, d: 1 }, bathroom: { x: 99 }, toilet: { z: 99 }, vanity: { z: 99 } },
+    cover(a, b, normal) { covers.push({ a, b, normal }); }
+  });
+  const onWindowWall = covers.filter(({ a, b, normal }) => Math.abs(a.x - 0.175) < 0.01 && Math.abs(b.x - 0.175) < 0.01 && normal.x === 1 &&
+    Math.max(a.y, b.y) > feature.wallStartZ && Math.min(a.y, b.y) < feature.wallEndZ);
+  assert.equal(onWindowWall.length, 1, 'One suppression span: the stone only');
+  const [{ a, b }] = onWindowWall;
+  // Stone side returns are 0.06 ft boxes centered at centerZ -/+ 3.03, so their outer faces are at -/+ 3.06.
+  assert.ok(Math.abs(Math.min(a.y, b.y) - (feature.centerZ - 3.06)) < 1e-9, 'Dining-side baseboard runs to the stone return');
+  assert.ok(Math.abs(Math.max(a.y, b.y) - (feature.centerZ + 3.06)) < 1e-9, 'Stair-side baseboard runs to the stone return');
+  assert.match(source, /for \(const z of \[livingCenterZ - 3\.03, livingCenterZ \+ 3\.03\]\)/, 'Stone return positions match the baseboard stop');
+  // Continuous run per side from the wall end to the stone: 74.88 in.
+  assert.ok(Math.abs((feature.centerZ - 3.06 - feature.wallStartZ) * 12 - 74.88) < 0.01, 'Dining-side continuous baseboard length');
+  assert.ok(Math.abs((feature.wallEndZ - feature.centerZ - 3.06) * 12 - 74.88) < 0.01, 'Stair-side continuous baseboard length');
+  const livingWall = source.match(/\[0, livingFeatureWall\.wallEndZ, 0, 8, true, \[\.\.\.livingWindowCenters\]\.reverse\(\)\.map\(\(z\) => \[[^\]]*livingWindowSill, livingWindowHead\]\)\]/);
+  assert.ok(livingWall, 'Living window wall keeps only sill-height openings, so base trim is not split by them');
 });
 
 test('double-chaise sectional has exactly chaise-seat-seat-chaise modules and fits the living area', () => {
@@ -850,14 +897,13 @@ test('earlier corner-chair comparison preserves centered fireplace and sofa', ()
   assert.equal(context.layouts.length, 10);
   const readingChair = layout.chairs[1];
   const halfDepth = (Math.abs(Math.sin(readingChair[2])) * 34 / 12 + Math.abs(Math.cos(readingChair[2])) * 34.5 / 12) / 2;
-  const cabinetEndZ = feature.wallEndZ;
-  assert.ok(readingChair[1] - halfDepth < cabinetEndZ, 'Earlier reading-chair pose now shares the extended cabinet zone');
-  assert.match(layout.note, /conflicts with the new wall-length cabinet/);
+  assert.match(layout.note, /predating removal of the fireplace built-ins/);
+  assert.doesNotMatch(layout.note, /wall-length cabinet/);
   assert.ok(readingChair[1] + halfDepth < feature.wallEndZ - 0.08, 'Reading-chair envelope clears the stair guard centerline');
   const cornerChair = layout.chairs[0];
   const halfWidth = (Math.abs(Math.cos(cornerChair[2])) * 34 / 12 + Math.abs(Math.sin(cornerChair[2])) * 34.5 / 12) / 2;
   const cornerHalfDepth = (Math.abs(Math.sin(cornerChair[2])) * 34 / 12 + Math.abs(Math.cos(cornerChair[2])) * 34.5 / 12) / 2;
-  assert.ok(cornerChair[0] - halfWidth > 1.38, 'Corner chair clears the closed cabinet front');
+  assert.ok(cornerChair[0] - halfWidth > 1.38, 'Corner chair clears the stone face plane');
   assert.ok(cornerChair[1] - cornerHalfDepth > feature.wallStartZ + 0.1, 'Corner chair clears the return-wall trim');
   const ottomanFrontX = cornerChair[0] + Math.sin(cornerChair[2]) * 2.7 + Math.abs(Math.cos(cornerChair[2])) + Math.abs(Math.sin(cornerChair[2])) * 20 / 24;
   assert.ok(ottomanFrontX < layout.sofa[0] - 46 / 24, 'New ottoman stays clear of the sofa');

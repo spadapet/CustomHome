@@ -57,6 +57,7 @@ test('orbit interaction restores full-quality rendering after release', () => {
   const states = [];
   const context = {
     controls: { addEventListener(name, callback) { handlers[name] = callback; } },
+    window: { addEventListener() {} },
     requestAnimationFrame(callback) { frames.push(callback); return frames.length; },
     render() { states.push(context.interacting()); }
   };
@@ -72,6 +73,53 @@ test('orbit interaction restores full-quality rendering after release', () => {
   assert.deepEqual(states, [true, false]);
   const renderBody = source.slice(source.indexOf('  function render() {'), source.indexOf('  function applyLivingLayout('));
   assert.match(renderBody, /!orbitInteracting\) renderInterior\(\)/);
+});
+
+test('high-DPI dragging reduces render pixels and restores native sharpness without repeated reallocations', () => {
+  const start = source.indexOf('  function updateRenderResolution() {');
+  const end = source.indexOf('  function requestRender()', start);
+  for (const fullPixelRatio of [1, 1.25, 2]) {
+    let ratio = fullPixelRatio;
+    const changes = [];
+    const context = {
+      fullPixelRatio, orbitInteracting: false,
+      renderer: { getPixelRatio() { return ratio; }, setPixelRatio(value) { changes.push(value); ratio = value; } }
+    };
+    vm.runInNewContext(source.slice(start, end), context);
+    context.updateRenderResolution();
+    assert.equal(changes.length, 0);
+    context.orbitInteracting = true;
+    for (let frame = 0; frame < 10; frame++) context.updateRenderResolution();
+    assert.equal(ratio, 1);
+    assert.equal(changes.length, fullPixelRatio === 1 ? 0 : 1);
+    context.orbitInteracting = false;
+    context.updateRenderResolution();
+    context.updateRenderResolution();
+    assert.equal(ratio, fullPixelRatio);
+    assert.equal(changes.length, fullPixelRatio === 1 ? 0 : 2);
+  }
+});
+
+test('saved layouts load concurrently, preserve floor association and expose each failing file', async () => {
+  const start = source.indexOf('      [savedUpstairsLayout, savedGroundLayout] = await Promise.all(');
+  const end = source.lastIndexOf('    }', source.indexOf('    const loader =', start));
+  const code = `(async () => { let savedUpstairsLayout, savedGroundLayout; ${source.slice(start, end)} return [savedUpstairsLayout, savedGroundLayout]; })()`;
+  const pending = new Map();
+  const loaded = vm.runInNewContext(code, {
+    fetch(file, options) {
+      assert.equal(options.cache, 'no-store');
+      return new Promise(resolve => pending.set(file, resolve));
+    }
+  });
+  assert.equal(pending.size, 2);
+  pending.get('ground-layout.json')({ ok: true, json: async () => ({ floor: 'ground' }) });
+  pending.get('upstairs-layout.json')({ ok: true, json: async () => ({ floor: 'upstairs' }) });
+  assert.deepEqual(JSON.parse(JSON.stringify(await loaded)), [{ floor: 'upstairs' }, { floor: 'ground' }]);
+  for (const failed of ['ground-layout.json', 'upstairs-layout.json']) {
+    await assert.rejects(vm.runInNewContext(code, {
+      fetch: async file => ({ ok: file !== failed, status: 503, json: async () => ({}) })
+    }), error => error.message.includes(`${failed} (503)`));
+  }
 });
 
 test('picking traverses only visible meshes and reuses the list until the next render', () => {

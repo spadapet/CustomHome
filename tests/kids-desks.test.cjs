@@ -102,18 +102,45 @@ test('two electric IKEA MITTZON desks use the referenced product dimensions', ()
   }
   for (const desk of desks) {
     assert.equal(desk.rotation.y, Math.PI);
-    assert.equal(desk.position.z, 31.9375);
-    assert.ok(Math.abs((33.425 - bounds(desk).maxZ) * 12 - 2.1) < 1e-9, 'Desks back onto shifted south wall with trim clearance');
+    assert.ok(Math.abs(desk.position.z - 32.1125) < 1e-9);
+    const top = desk.children.find(part => part.name === 'MITTZON desktop');
+    assert.ok(Math.abs(33.425 - bounds(top).maxZ) < 1e-9, 'Actual rear tabletop meets the finished south wall above trim');
+    for (const foot of desk.children.filter(part => part.name === 'MITTZON T foot')) {
+      assert.ok(Math.abs((33.425 - 0.0625 - bounds(foot).maxZ) * 12 - 1.2) < 1e-9, 'Low T feet clear projecting baseboard');
+    }
   }
   const rightWallFace = model.kidsRoom.x + model.kidsRoom.southWidth - 0.175;
   assert.ok(Math.abs((rightWallFace - bounds(desks[1]).maxX) * 12 - 1) < 1e-9, 'Right desk is one inch off the finished east wall');
-  assert.ok(Math.abs(desks[0].position.x - 24.8729166667) < 1e-9, 'PC shifts east 26.4 inches and stays left of homework desk');
+  assert.ok(Math.abs(desks[0].position.x - 24.952083333333334) < 1e-9, 'PC sits beside the homework desk in a compact wall-backed row');
   const craftChair = model.find('Kids desk chair 2')[0];
   assert.equal(craftChair.rotation.y, 2 * Math.PI);
   assert.equal(craftChair.position.x, desks[1].position.x);
   assert.ok(craftChair.position.z < desks[1].position.z, 'Chair sits north of south-facing desk');
   assert.ok(bounds(desks[0]).maxX < bounds(desks[1]).minX, 'Desks do not overlap');
-  assert.ok(Math.abs((bounds(desks[1]).minX - bounds(desks[0]).maxX) * 12 - 1.95) < 1e-9);
+  assert.ok(Math.abs((bounds(desks[1]).minX - bounds(desks[0]).maxX) * 12 - 1) < 1e-9);
+});
+
+test('desks, attached contents and chairs restore after upstairs/exterior/view round trips', () => {
+  const model = buildKidsRoom();
+  const roots = model.roots.filter(o => /IKEA MITTZON kids desk|Kids desk chair/.test(o.name));
+  roots.forEach(o => { o.visible = true; });
+  const element = () => ({ setAttribute() {}, closest: () => ({}) });
+  const state = {
+    upstairs: { group: {} }, stairs: {}, basementStairs: {}, upstairsStairParts: [],
+    activeFloor: 'ground', groundVisibility: new Map(), groundModelRoots: roots, frontPorchChairs: [],
+    groundLayoutPreview: null, exterior: {}, tourMapBounds: {}, tourMap: { width: 200, setAttribute() {} },
+    viewport: element(), islandLightsInput: element(), navigationMode: 'rotate',
+    document: { getElementById: element, querySelector: element, querySelectorAll: () => [] },
+    floorAreas: () => [{ x: 0, z: 0, w: 54, d: 60 }]
+  };
+  vm.runInNewContext(source.slice(source.indexOf('  function selectFloor(floor) {'), source.indexOf('  function refreshUpstairsDimensions() {')), state);
+  const snapshot = () => roots.map(o => [o.name, o.position.x, o.position.z, o.rotation.y, o.children.length]);
+  const poses = snapshot();
+  for (const floor of ['upstairs', 'exterior', 'upstairs', 'ground', 'exterior', 'ground']) {
+    state.selectFloor(floor);
+    roots.forEach(o => assert.equal(o.visible, floor === 'ground'));
+    assert.deepEqual(snapshot(), poses);
+  }
 });
 
 test('bench, floor books and upper artwork are removed while TROFAST bins remain', () => {
@@ -124,7 +151,7 @@ test('bench, floor books and upper artwork are removed while TROFAST bins remain
   assert.equal(model.find('Rotating child artwork').length, 0);
   assert.equal(model.find('Kids low toy storage').length, 0);
   assert.equal(model.find('IKEA TROFAST toy storage 1').length, 1);
-  assert.equal(model.find('IKEA TROFAST toy storage 2').length, 1);
+  assert.equal(model.find('IKEA TROFAST toy storage 2').length, 0);
   assert.equal(model.find('Kids art display board').length, 0);
   assert.equal(model.find('Kids activity table').length, 0);
   assert.equal(model.find('Kids activity stool').length, 0);
@@ -157,11 +184,11 @@ test('desks, chairs and relocated storage clear room edges and preserve a passag
   }
 });
 
-test('two TROFAST combinations match the linked size and contain removable boxes, not drawers', () => {
+test('one retained TROFAST matches the linked size and has nine removable boxes, not drawers', () => {
   const model = buildKidsRoom();
   const storage = model.roots.filter((item) => item.name.startsWith('IKEA TROFAST toy storage '));
-  assert.equal(storage.length, 2);
-  assert.equal(model.find('TROFAST removable mesh box').length, 18);
+  assert.equal(storage.length, 1);
+  assert.equal(model.find('TROFAST removable mesh box').length, 9);
   assert.equal(model.find('Separate LEGO organizer insert').length, 9);
   assert.equal(model.find('LEGO organizer removable lid').length, 9);
   for (const unit of storage) {
@@ -182,8 +209,8 @@ test('two TROFAST combinations match the linked size and contain removable boxes
       assert.ok(bb.minX > b.minX && bb.maxX < b.maxX && bb.minZ > b.minZ && bb.maxZ < b.maxZ, 'Bins fit inside each frame');
     }
   }
-  assert.ok(Math.abs((bounds(storage[1]).minX - bounds(storage[0]).maxX) * 12 - 2) < 1e-9);
-  assert.ok(Math.abs((28.825 - bounds(storage[1]).maxX) * 12 - 2.1) < 1e-9, 'Storage aligns east with trim clearance');
+  assert.ok(Math.abs((28.825 - bounds(storage[0]).maxX) * 12 - 2.1) < 1e-9, 'Retained storage aligns east with trim clearance');
+  assert.ok(Math.abs(bounds(storage[0]).minX - 25.4) < 1e-9, 'The former west storage footprint is open play floor');
   for (const unit of storage) {
     assert.equal(unit.rotation.y, 0);
     assert.ok(Math.abs((bounds(unit).minZ - model.kidsRoom.z - 0.175) * 12 - 2.1) < 1e-9, 'Storage backs onto north wall');

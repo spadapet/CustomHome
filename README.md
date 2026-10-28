@@ -28,6 +28,9 @@ removed; existing layout JSON still loads read-only in the page.
 Preview performance: drawing is event-driven and orbit/tour camera updates
 coalesce into animation frames. Kitchen/mudroom contact shading pauses while
 orbiting and returns on release; stationary detail and lighting are unchanged.
+On high-DPI screens, orbit frames also use one render pixel per CSS pixel;
+full sharpness returns on release, blur or view change. This does not lower
+stationary screenshot resolution. Both saved layouts load concurrently.
 Post-processing buffers resize only when the viewport changes. The local
 server revalidates assets with ETags instead of downloading unchanged models
 and textures again; code and saved layouts remain uncached. Restart an older
@@ -51,8 +54,8 @@ Night is the softer default (pressed); click for Day, then again for Night.
 Warm 2700 K-intent deep-regressed recessed fixtures now cover both modeled
 floors: 4 in apertures, dark baffles and lenses recessed 2 in above the
 ceiling plane, replacing the surface-mounted disks. They provide broad
-ambient illumination only, with separate local
-living-room reading and piano lamps. The rosewood Yamaha CLP-825 replaces
+ambient illumination only, with a separate local
+piano task lamp (the living end-table reading lamp is removed). The rosewood Yamaha CLP-825 replaces
 the dark living-room loveseat; its bench is provisional. Recessed kitchen
 cans provide broad ambient light only. Product glare/output and occupied
 piano access still require verification.

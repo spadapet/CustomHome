@@ -208,7 +208,7 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     }
     section(cursor, length, 0, wallHeight);
   }
-  for (const [name, x, z, width, rotation, side] of plan.windows) windowFrame(`Upstairs ${name} window`, x, z, width, 5, 3, rotation, group, side, { installationWalls: plan.walls });
+  for (const [name, x, z, width, rotation, side] of plan.windows) windowFrame(`Upstairs ${name} window`, x, z, width, 5, 3, rotation, group, side, { installationWalls: plan.walls, frontGrid: rotation === 0 && side === -1 });
   const furnitureAnchors = [];
   function furniture(name, x, z, rotation = 0) {
     const item = new THREE.Group();
@@ -248,14 +248,28 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     box(item, 0, 5.2, 0, 0.28, 0.65, 0.08, black).name = 'Wall lamp backplate';
     box(item, 0, 5.2, 0.25, 0.08, 0.08, 0.5, steel);
     box(item, 0, 5.15, 0.5, 0.55, 0.45, 0.45, cream, true).name = 'Wall lamp shade';
+    return item;
   }
-  function desk(name, x, z, rotation = 0) {
+  function backDeskToWall(item, wallName, depth) {
+    const wall = plan.walls.find((wall) => wall.name === wallName);
+    const sine = Math.sin(item.rotation.y), cosine = Math.cos(item.rotation.y);
+    const distance = wall.thickness / 2 + depth / 2;
+    if (Math.abs(sine) > 0.5) item.position.x = wall.x1 + sine * distance;
+    else item.position.z = wall.z1 + cosine * distance;
+  }
+  function desk(name, x, z, rotation = 0, wallName = null) {
     const item = furniture(`${name} writing desk`, x, z, rotation);
-    box(item, 0, 2.5, 0, 4, 0.14, 1.8, oak);
+    if (wallName) backDeskToWall(item, wallName, 1.8);
+    box(item, 0, 2.5, 0, 4, 0.14, 1.8, oak).name = 'Writing desktop';
     for (const dx of [-1.8, 1.8]) box(item, dx, 1.25, 0, 0.12, 2.5, 1.6, black);
     const sine = Math.sin(rotation), cosine = Math.cos(rotation);
-    chair(`${name} desk chair`, x + sine * 1.9, z + cosine * 1.9, rotation);
-    wallLamp(`${name} desk wall lamp`, x - sine * 1.05, z - cosine * 1.05, rotation);
+    const seat = chair(`${name} desk chair`, x + sine * 1.9, z + cosine * 1.9, rotation);
+    const light = wallLamp(`${name} desk wall lamp`, x - sine * 1.05, z - cosine * 1.05, rotation);
+    if (wallName) {
+      seat.position.set(item.position.x + sine * 1.9, 0, item.position.z + cosine * 1.9);
+      // Backplate rear meets paint; the arm/shade project into the room.
+      light.position.set(item.position.x - sine * 0.86, 0, item.position.z - cosine * 0.86);
+    }
   }
   function hangingBay(name, x, z, width, rotation = 0, double = false) {
     const item = furniture(name, x, z, rotation);
@@ -316,9 +330,9 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     ['Bedroom 4 dresser', 25, 42.4, 3.5, 0]
   ]) cabinet(furniture(name, x, z, rotation), 0, 0, width, 2.8, 1.6);
   desk('Primary', 13, 13.5, -Math.PI / 2);
-  desk('Bedroom 2', 33.4, 11.2);
-  desk('Bedroom 3', 1.2, 50.8, Math.PI / 2);
-  desk('Bedroom 4', 19.2, 46.35, Math.PI / 2);
+  desk('Bedroom 2', 33.4, 11.2, 0, 'Bedroom 2 north');
+  desk('Bedroom 3', 1.2, 50.8, Math.PI / 2, 'Bedroom 3 west');
+  desk('Bedroom 4', 19.2, 46.35, Math.PI / 2, 'Bedroom 4 closet');
   chair('Primary sitting chair 1', 3, 12.8, Math.PI);
   chair('Primary sitting chair 2', 7, 12.8, Math.PI);
   const sittingTable = furniture('Primary sitting side table', 5, 12.8);
@@ -423,11 +437,13 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   cabinet(sideTable, 0, 0, 1.5, 1.8, 1.5, 1);
   lamp(sideTable, 0, 1.8, 0);
   const loftDesk = furniture('Loft desk', 50.8, 24.8, -Math.PI / 2);
-  box(loftDesk, 0, 2.5, 0, 4.5, 0.15, 1.8, oak);
+  backDeskToWall(loftDesk, 'Loft east', 1.8);
+  box(loftDesk, 0, 2.5, 0, 4.5, 0.15, 1.8, oak).name = 'Loft desktop';
   for (const x of [-2, 2]) box(loftDesk, x, 1.25, 0, 0.12, 2.5, 1.6, black);
   box(loftDesk, 0, 3.25, -0.5, 1.8, 1.1, 0.1, black);
   box(loftDesk, 0, 2.6, 0.2, 1.3, 0.06, 0.45, steel);
-  chair('Loft desk chair', 48.9, 24.8, -Math.PI / 2);
+  const loftDeskChair = chair('Loft desk chair', 48.9, 24.8, -Math.PI / 2);
+  loftDeskChair.position.set(loftDesk.position.x - 1.9, 0, loftDesk.position.z);
   // Leave the east-side upper arrival open to the hall; guard the remaining void edges.
   const guardY = 1.5;
   const left = stairOpening.x;

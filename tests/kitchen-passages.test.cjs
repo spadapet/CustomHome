@@ -8,22 +8,22 @@ const { getKitchenPassageLayout, getGroundFloorDefaultPlan } = require('../floor
 const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} should equal ${b}`);
 
-test('shared floor plan provides two doorless 36-inch finished openings with unchanged outer edges', () => {
+test('shared floor plan provides two owner-selected doorless 30-inch clear openings with unchanged outer edges', () => {
   const layout = getKitchenPassageLayout();
   assert.equal(layout.doorless, true);
-  assert.equal(layout.clearWidth * 12, 36);
+  assert.equal(layout.clearWidth * 12, 30);
   assert.equal(layout.clearHeight * 12, 96);
-  assert.deepEqual(layout.passages.map(({ startZ, endZ }) => [startZ, endZ]), [[9.725, 12.725], [21.175, 24.175]]);
+  assert.deepEqual(layout.passages.map(({ startZ, endZ }) => [startZ, endZ]), [[9.725, 12.225], [21.675, 24.175]]);
   const wall = getGroundFloorDefaultPlan().walls.find(([name]) => name === 'Kitchen east');
   assert.deepEqual(wall.slice(1, 5), [37.5, 7, 37.5, 25.3]);
   assert.deepEqual(wall[5], layout.openings);
   for (const [start, end, low, high] of wall[5]) {
-    close((end - start) * 12, 36);
+    close((end - start) * 12, 30);
     assert.equal(low, 0);
     assert.equal(high, 8);
   }
   close((layout.passages[0].endZ + layout.passages[1].startZ) / 2, 16.95);
-  close((layout.passages[1].startZ - layout.passages[0].endZ - 2 * 3.625 / 12) * 12, 94.15);
+  close((layout.passages[1].startZ - layout.passages[0].endZ - 2 * 3.625 / 12) * 12, 106.15);
   assert.match(source, /const kitchenPassages = getKitchenPassageLayout\(\)/);
   assert.match(source, /const kitchenSideOpenings = kitchenPassages\.openings/);
 });
@@ -59,11 +59,11 @@ test('applied casing stays outside each finished width and above its eight-foot 
   vm.runInContext(source.slice(source.indexOf('  const casingSideWidth ='), source.indexOf('  const baseTrimSections =')), context);
   for (const side of [-1, 1]) {
     const root = new Group();
-    context.openingCasing(root, 0, 0, 3, 8, 0.175, side);
+    context.openingCasing(root, 0, 0, 2.5, 8, 0.175, side);
   }
   for (const part of parts) {
     const { x, y } = part.position;
-    const intrudesWidth = x + part.width / 2 > -1.5 && x - part.width / 2 < 1.5;
+    const intrudesWidth = x + part.width / 2 > -1.25 && x - part.width / 2 < 1.25;
     const intrudesHeight = y - part.height / 2 < 8 && y + part.height / 2 > 0;
     assert.ok(!(intrudesWidth && intrudesHeight), `${part.name} cannot reduce the 36 x 96-inch clear rectangle`);
   }

@@ -86,14 +86,38 @@ test('treads, platforms, guards and flat trim remain with no projecting casework
   assert.equal(beams.filter(b => b.name === 'Stair stringer').length, 4);
   assert.equal(beams.filter(b => b.name === 'Sloped stair handrail').length, 3);
   assert.equal(beams.filter(b => b.name === 'Horizontal stair guard rail').length, 24);
-  assert.equal(beams.filter(b => b.name === 'Turning landing side handrail').length, 0);
-  assert.equal(beams.filter(b => b.name === 'Horizontal landing guard rail').length, 0);
-  assert.equal(meshes.filter(m => m.name === 'Landing guard post').length, 0);
+  assert.equal(beams.filter(b => b.name === 'Turning landing side handrail').length, 1);
+  assert.equal(beams.filter(b => b.name === 'Horizontal landing guard rail').length, 8);
+  assert.equal(meshes.filter(m => m.name === 'Landing guard post').length, 2);
   assert.equal(meshes.filter(m => m.name === 'Stair guard post').length, 9);
   const trim = meshes.filter(m => /baseboard|trim return/.test(m.name));
   assert.equal(trim.length, 4);
   assert.ok(trim.every(m => m.z - m.d / 2 >= -0.75 / 12 - 1e-8));
   assert.ok(trim.every(m => m.z + m.d / 2 <= 44 / 12 + 1e-8));
+});
+
+test('raised landing guard retains its full run and posts with the owner-requested junction break', () => {
+  const { meshes, beams, opening } = build();
+  const cap = beams.find(b => b.name === 'Turning landing side handrail');
+  close(cap.start[0], 70 / 12);
+  close(cap.end[0], opening.width);
+  close(cap.end[0] - cap.start[0], 4);
+  for (const point of [cap.start, cap.end]) {
+    close(point[1], 8);
+    close(point[2], -0.08);
+  }
+  const transitions = beams.filter(b => b.name === 'Landing guard nosing transition' || b.name === 'Landing guard transition rail');
+  assert.equal(transitions.length, 0);
+  const sloped = beams.find(b => b.name === 'Sloped stair handrail' && Math.abs(b.end[2] - cap.start[2]) < 1e-8);
+  close((cap.start[0] - sloped.end[0]) * 12, 5);
+  close((cap.start[1] - sloped.end[1]) * 12, 7.5);
+  assert.equal(beams.filter(b => b.name === 'Horizontal landing guard rail').length, 8);
+  assert.equal(meshes.filter(m => m.name === 'Landing guard post').length, 2);
+  for (const post of meshes.filter(m => m.name === 'Landing guard post')) {
+    close(post.y - post.h / 2, 5);
+    close(post.y + post.h / 2, 8);
+    close(post.z, -0.08);
+  }
 });
 
 test('basement access/enclosure survives and floor cutaway restores every enclosure part', () => {
@@ -126,6 +150,7 @@ test('basement access/enclosure survives and floor cutaway restores every enclos
     updatePendantVisibility() {}
   };
   state.groundModelRoots = [state.shell, stairs];
+  state.frontPorchChairs = [];
   for (const [view, floor] of [['basement', 'ground'], ['upstairs', 'upstairs'], ['whole', 'ground'], ['fridge', 'ground']]) {
     Object.assign(state, { name: view, activeFloor: floor, basementCutaway: view === 'basement' });
     vm.runInNewContext(branch, state);

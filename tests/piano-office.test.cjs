@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-test('piano leaves office as a complete group and backs onto living-side stair enclosure', () => {
+test('piano shifts six more inches toward west windows while preserving its rear gap', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
   let parent;
   const piano = { position: { set(x, y, z) { Object.assign(this, { x, y, z }); } }, rotation: {}, userData: {} };
@@ -16,10 +16,15 @@ test('piano leaves office as a complete group and backs onto living-side stair e
   assert.equal(parent, piano);
   assert.equal(piano.rotation.y, Math.PI);
   const halfWidth = 1350 / 304.8 / 2;
-  assert.equal(piano.position.x, 3.1);
+  const wall = require('../floor-plan-ground.js').getGroundFloorDefaultPlan().stairs;
+  assert.deepEqual([piano.userData.wallRun.minX, piano.userData.wallRun.maxX], [wall.x, wall.x + wall.width]);
+  const previousX = (wall.x + wall.x + wall.width) / 2 - 10 / 12;
+  assert.ok(Math.abs((previousX - piano.position.x) * 12 - 6) < 1e-9, 'Actual cabinet midpoint shifts another six inches west');
   assert.ok(piano.position.x - halfWidth > 0.2375, 'Console clears west wall and base trim');
-  assert.ok(Math.abs(stairOpening.z - piano.position.z - 411 / 304.8 / 2 - 0.4) < 1e-9, 'Rear service gap is 4.8 inches to stair wall');
+  assert.ok(Math.abs(stairOpening.z - piano.position.z - 411 / 304.8 / 2 - 1 / 12) < 1e-9, 'Rear gap is one inch to stair wall');
   assert.ok(piano.position.z + 411 / 304.8 / 2 < 35.1, 'Whole piano is outside office and powder room');
-  assert.ok(piano.position.x + 1 < 5.5, 'Bench remains on the west side of sectional return');
-  assert.match(piano.userData.location, /Living side of stair enclosure/);
+  assert.equal(piano.userData.wallRun.windowShiftInches, 16);
+  assert.doesNotMatch(piano.userData.location, /door conflicts|halved|cabinet end/, 'No stale cabinet references; the fireplace built-ins are removed');
+  assert.match(piano.userData.location, /fireplace built-ins removed/);
+  assert.ok(Math.abs((piano.position.x - halfWidth - 0.2375) * 12 - 15.68) < 0.01, 'West end to window-wall baseboard face');
 });

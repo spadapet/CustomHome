@@ -55,7 +55,7 @@ test('sink/window bank stays centered and actual side counters fit the relocated
   context.getKitchenWindowBankLayout = require('../floor-plan-ground.js').getKitchenWindowBankLayout;
   const end = source.indexOf('  const kidsRoomNorthZ =', start);
   assert.ok(start >= 0 && end > start);
-  vm.runInNewContext(`${source.slice(start, end)}\nglobalThis.geometry = { kitchenWallLeft, kitchenWallRight, kitchenSinkX, kitchenSinkWindows, kitchenWindowTrimExtension, kitchenEndSconceCenters };`, context);
+  vm.runInNewContext(`${source.slice(start, end)}\nglobalThis.geometry = { kitchenWallLeft, kitchenWallRight, kitchenSinkX, kitchenSinkWindows };`, context);
   const geometry = context.geometry;
   assert.equal(geometry.kitchenWallRight, 37.5);
   assert.equal(geometry.kitchenSinkX, 32);
@@ -63,8 +63,8 @@ test('sink/window bank stays centered and actual side counters fit the relocated
   assert.deepEqual(Array.from(geometry.kitchenSinkWindows, (window) => window.x), [29, 32, 35]);
   const [left, center, right] = geometry.kitchenSinkWindows;
   assert.ok(Math.abs(left.x + left.width / 2 - (center.x - center.width / 2)) < 1e-9, 'Joined frames have no wall pier or duplicate casing between them');
-  assert.ok(geometry.kitchenEndSconceCenters[0] > geometry.kitchenWallLeft + 0.175);
-  assert.ok(geometry.kitchenEndSconceCenters[1] < geometry.kitchenWallRight - 0.175);
+  assert.ok(left.x - left.width / 2 > geometry.kitchenWallLeft + 0.175);
+  assert.ok(right.x + right.width / 2 < geometry.kitchenWallRight - 0.175);
   assert.ok(Math.abs((left.x + right.x) / 2 - geometry.kitchenSinkX) < 1e-9);
   const boxes = [];
   const cabinets = {
@@ -108,7 +108,7 @@ test('kids-room expansion preserves kitchen return and all opening widths', () =
   assert.equal(north[3], 29);
   const shared = plan.walls.find(([name]) => name === 'Kitchen east');
   assert.deepEqual(shared.slice(1, 5), [37.5, 7, 37.5, 25.3]);
-  assert.deepEqual(shared[5], [[2.725, 5.725, 0, 8], [14.175, 17.175, 0, 8]]);
+  assert.deepEqual(shared[5], [[2.725, 5.225, 0, 8], [14.675, 17.175, 0, 8]]);
   assert.equal(plan.rooms.find((room) => room.name === 'Kitchen').w, 11);
   assert.equal(plan.rooms.find((room) => room.name === 'Prep kitchen').w, 18);
   assert.equal(plan.rooms.find((room) => room.name === 'Mudroom').w, 7.4 - 8 / 12);
@@ -199,7 +199,7 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
 test('modeled room doors and exterior overhead leaves carry click-operation metadata', () => {
   assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 115/);
   assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90/);
-  assert.match(source, /bathroomPocketDoor\.userData\.interactiveHouseDoor = \{ operation: 'sliding', open: false, closedCenterX:/);
+  assert.match(source, /interactiveHouseDoor: \{ operation: 'sliding', open: false, closedCenterX: closetOpening\.x/);
   assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 180/);
   assert.match(exteriorSource, /interactiveHouseDoor: \{ operation: 'overhead', open: false, maxAngleDegrees: 90/);
   assert.match(exteriorSource, /buildArchedFrontEntry\(THREE,/);

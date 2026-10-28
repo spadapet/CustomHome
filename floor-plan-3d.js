@@ -58,12 +58,11 @@ async function initializePreview() {
     if (window.location.protocol === 'file:') {
       console.warn('File preview uses the original layouts. Serve the repository over HTTP to load saved layout data.');
     } else {
-      const response = await fetch('upstairs-layout.json', { cache: 'no-store' });
-      if (!response.ok) throw new Error(`Could not load upstairs-layout.json (${response.status}). Restore that file before loading the viewer.`);
-      savedUpstairsLayout = await response.json();
-      const groundResponse = await fetch('ground-layout.json', { cache: 'no-store' });
-      if (!groundResponse.ok) throw new Error(`Could not load ground-layout.json (${groundResponse.status}). Restore that file before loading the viewer.`);
-      savedGroundLayout = await groundResponse.json();
+      [savedUpstairsLayout, savedGroundLayout] = await Promise.all(['upstairs-layout.json', 'ground-layout.json'].map(async file => {
+        const response = await fetch(file, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`Could not load ${file} (${response.status}). Restore that file before loading the viewer.`);
+        return response.json();
+      }));
     }
     const loader = new GLTFLoader();
     const garageAssetDefinitions = [
@@ -286,7 +285,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   let camera = perspectiveCamera;
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   let interiorPost = null;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  const fullPixelRatio = Math.min(window.devicePixelRatio, 2);
+  renderer.setPixelRatio(fullPixelRatio);
   renderer.shadowMap.enabled = false;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -306,6 +306,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   controls.target.set(14, 0, 12);
   let renderFrame = null;
   let orbitInteracting = false;
+  function updateRenderResolution() {
+    const ratio = orbitInteracting ? Math.min(fullPixelRatio, 1) : fullPixelRatio;
+    if (renderer.getPixelRatio() !== ratio) renderer.setPixelRatio(ratio);
+  }
   function requestRender() {
     if (renderFrame !== null) return;
     renderFrame = requestAnimationFrame(() => {
@@ -316,6 +320,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   controls.addEventListener('change', requestRender);
   controls.addEventListener('start', () => { orbitInteracting = true; });
   controls.addEventListener('end', () => {
+    orbitInteracting = false;
+    requestRender();
+  });
+  window.addEventListener('blur', () => {
+    if (!orbitInteracting) return;
     orbitInteracting = false;
     requestRender();
   });
@@ -738,7 +747,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       for (const edge of [-1, 1])
         part('White casing side board', edge * (width / 2 + reveal + sideWidth / 2),
           (height + reveal - thickness) / 2, 0.03125, sideWidth, height + reveal + thickness, 0.0625, windowTrim);
-      part('White casing flat bottom board', 0, -thickness - sideWidth / 2, 0.03125, outerWidth, sideWidth, 0.0625, windowTrim);
+      if (sillOptions.bottomBoard !== false) part('White casing flat bottom board', 0, -thickness - sideWidth / 2, 0.03125, outerWidth, sideWidth, 0.0625, windowTrim);
       part('White casing header', 0, height + reveal + 5.5 / 24, 0.03125, outerWidth, 5.5 / 12, 0.0625, windowTrim);
       part('White casing header bead', 0, height + reveal + 0.03125, 0.05, outerWidth + 0.0625, 0.0625, 0.1, windowTrim);
       part('White casing projecting cap', 0, height + reveal + 5.5 / 12 + 0.0416667, 0.0625, outerWidth + 0.125, 1 / 12, 0.125, windowTrim);
@@ -787,6 +796,26 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     function part(start, end, bottom, top) {
       if (end <= start || top <= bottom) return;
+      // Real void between thin skins: the closed pocket leaf must not pass
+      // through a solid wall. Keep the existing wall/trim visibility registry.
+      const pocket = casingOptions.pocket;
+      if (pocket && bottom === 0 && start < pocket.x + pocket.w && end > pocket.x) {
+        const a = Math.max(start, pocket.x), b = Math.min(end, pocket.x + pocket.w);
+        const saved = casingOptions.pocket;
+        delete casingOptions.pocket;
+        part(start, a, bottom, top);
+        part(b, end, bottom, top);
+        part(a, b, 8.3, top);
+        casingOptions.pocket = saved;
+        for (const side of [-1, 1]) {
+          const skin = box(group, (a + b) / 2, 4.15, side * 0.15, b - a, 8.3, 0.05, wallMaterial);
+          skin.name = 'Guest closet pocket nonpenetrating wall skin';
+          skin.userData = { bottom: 0, top: 8.3, quartzSide };
+          walls.push(skin);
+          if (side === -1) baseTrim(a, b, skin);
+        }
+        return;
+      }
       const mesh = box(group, (start + end) / 2, (bottom + top) / 2, 0, end - start, top - bottom, 0.35, wallMaterial);
       mesh.name = 'House wall';
       mesh.userData = { bottom, top, quartzSide };
@@ -897,12 +926,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
         if (to - from > tolerance) covered.push([from, to]);
       }
       for (const run of edges) cover(run.a, run.b, run.normal);
+      // The guard abuts this painted wall end; a projecting trim return would cross its post and bars.
+      cover(new THREE.Vector2(guestEntry.stairGuard.x, guestEntry.stairGuard.z - 0.175), new THREE.Vector2(guestEntry.stairGuard.x, guestEntry.stairGuard.z + 0.175), new THREE.Vector2(1, 0));
       // Keep timber trim out of the guest shower and behind fitted bathroom fixtures.
       cover(new THREE.Vector2(guestSuite.shower.x, guestSuite.shower.z - 0.025), new THREE.Vector2(guestSuite.shower.x + guestSuite.shower.w, guestSuite.shower.z - 0.025), new THREE.Vector2(0, 1));
       cover(new THREE.Vector2(guestSuite.bathroom.x + 0.175, guestSuite.shower.z), new THREE.Vector2(guestSuite.bathroom.x + 0.175, guestSuite.shower.z + guestSuite.shower.d), new THREE.Vector2(1, 0));
       cover(new THREE.Vector2(31.025, guestSuite.shower.z), new THREE.Vector2(31.025, guestSuite.shower.z + guestSuite.shower.d), new THREE.Vector2(-1, 0));
       cover(new THREE.Vector2(31.025, guestSuite.toilet.z - 0.9), new THREE.Vector2(31.025, guestSuite.toilet.z + 0.9), new THREE.Vector2(-1, 0));
       cover(new THREE.Vector2(31.025, guestSuite.vanity.z - 1.6), new THREE.Vector2(31.025, guestSuite.vanity.z + 1.6), new THREE.Vector2(-1, 0));
+      // Fireplace stone only (built-ins removed): base trim runs continuously from each wall end to the stone side return.
+      cover(new THREE.Vector2(0.175, livingFeatureWall.centerZ - fireplaceStoneHalfWidth), new THREE.Vector2(0.175, livingFeatureWall.centerZ + fireplaceStoneHalfWidth), new THREE.Vector2(1, 0));
       // Fitted mudroom joinery meets these wall faces without baseboards behind it.
       cover(new THREE.Vector2(37.675, 15.175), new THREE.Vector2(44.9 - 8 / 12 - 0.175, 15.175), new THREE.Vector2(0, 1));
       cover(new THREE.Vector2(37.675, 15.175), new THREE.Vector2(37.675, 17.54), new THREE.Vector2(1, 0));
@@ -1002,7 +1035,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const kitchenSinkRunZ = kitchenWindowWallZ + 1.2;
   const prepCounterZ = kitchenWindowWallZ + 1.25;
   const kitchenSinkX = (kitchenWallLeft + kitchenWallRight) / 2;
-  const kitchenSinkWindowWidth = 4.5;
+  const kitchenSinkWindowWidth = 7.5;
   const kitchenPassages = getKitchenPassageLayout();
   const kitchenSideOpenings = kitchenPassages.openings;
   const cooktopRunStartZ = kitchenWindowWallZ + kitchenSideOpenings[0][1];
@@ -1012,11 +1045,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const kitchenSinkWindowHeight = kitchenCounterWindowBank.height;
   const kitchenSinkWindowSill = kitchenCounterWindowBank.sill;
   const kitchenSinkWindows = kitchenCounterWindowBank.units;
-  const kitchenWindowTrimExtension = (3.5 + 0.125) / 12;
-  const kitchenEndSconceCenters = [
-    (kitchenWallLeft + 0.175 + kitchenSinkWindows[0].x - kitchenSinkWindows[0].width / 2 - kitchenWindowTrimExtension) / 2,
-    (kitchenWallRight - 0.175 + kitchenSinkWindows[2].x + kitchenSinkWindows[2].width / 2 + kitchenWindowTrimExtension) / 2
-  ];
   const prepSinkX = 47.4;
   const prepWindows = getPrepWindowLayout();
   const prepCounterWindows = prepWindows.filter((window) => window.z === kitchenWindowWallZ);
@@ -1029,14 +1057,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const livingFeatureWall = getLivingRoomFeatureLayout();
   const livingWindowCenters = livingFeatureWall.windowCenters;
   const livingCenterZ = livingFeatureWall.centerZ;
-  const livingWindowWidth = 4;
-  const livingWindowSill = 2.6;
-  const livingWindowHead = 8;
+  const livingWindowWidth = livingFeatureWall.fireplaceWindows.width;
+  const livingWindowSill = livingFeatureWall.fireplaceWindows.sill;
+  const livingWindowHead = livingFeatureWall.fireplaceWindows.head;
   const livingSideWindowBank = livingFeatureWall.sideWindowBank;
   const livingSideWindowSill = livingSideWindowBank.sill;
   const livingSideWindows = livingSideWindowBank.units;
   const livingSideSconceCenters = [0.95, 13.2 - 0.95];
   const fireplaceFaceX = 1.38;
+  // Outer face of each stone side return (October 27 owner decision: no fireplace-side built-ins).
+  const fireplaceStoneHalfWidth = 3.06;
   const fireplaceBackingFrontX = fireplaceFaceX - 0.08;
   const fireplaceBackingDepth = fireplaceBackingFrontX - 0.02;
 
@@ -1107,14 +1137,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [0, livingFeatureWall.wallEndZ, 0, 8, true, [...livingWindowCenters].reverse().map((z) => [livingFeatureWall.wallEndZ - z - livingWindowWidth / 2, livingFeatureWall.wallEndZ - z + livingWindowWidth / 2, livingWindowSill, livingWindowHead])],
     [kidsRoom.x, kidsRoom.z, kidsRoom.x + kidsRoom.width, kidsRoom.z, true],
     [kidsDoorway.x, kidsRoom.z, kidsDoorway.x, 34.6, true, [[kidsDoorway.z - kidsRoom.z, kidsDoorway.z - kidsRoom.z + kidsDoorway.width, 0, kidsDoorway.height]]],
-    [29, kidsRoom.z, 29, 26.9, true, [], ceilingHeight, [1]], [0, powderNorthZ, 12.2, powderNorthZ],
+    [29, kidsRoom.z, 29, 26.9, true, [], ceilingHeight, [1]], [0, powderNorthZ, guestEntry.stairGuard.x, powderNorthZ],
     [7.1, powderNorthZ, 7.1, officeNorthZ, false, [[guestEntry.powderDoor.z - powderNorthZ, guestEntry.powderDoor.z - powderNorthZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
     [7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, false, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
     [12.2, guestEntry.coatCloset.z, 12.2, officeNorthZ],
     [officeEntry.x, officeNorthZ, officeEntry.x, 54.2, false, [[officeEntry.z - officeEntry.width / 2 - officeNorthZ, officeEntry.z + officeEntry.width / 2 - officeNorthZ, 0, officeEntry.height]]],
     [0, officeNorthZ, 12.2, officeNorthZ], [0, 54.2, 31.2, 54.2, false, [[3, 9, 3, 8], [13.1, 18.1, 0, 8], [21.2, 28.8, 3, 8]], ceilingHeight, [-1]],
     [19, 34.6, 19, 54.2, false, [[guestSuite.bedroomDoor.z - 34.6, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - 34.6, 0, 8]]],
-    ...getGroundFloorDefaultPlan().walls.filter(([name]) => ['Closet north', 'Closet east', 'Closet south', 'Bathroom south', 'Bathroom north'].includes(name)).map(([, x1, z1, x2, z2, openings = []]) => [x1, z1, x2, z2, false, openings, ceilingHeight, [-1, 1], 0, 0, { sideWidth: 2.5 / 12 }]),
+    ...getGroundFloorDefaultPlan().walls.filter(([name]) => ['Closet north', 'Closet east', 'Closet south', 'Bathroom south', 'Bathroom north'].includes(name)).map(([name, x1, z1, x2, z2, openings = []]) => [x1, z1, x2, z2, false, openings, ceilingHeight, [-1, 1], 0, 0, { sideWidth: 2.5 / 12, ...(name === 'Closet south' ? { pocket: { x: guestSuite.closetDoor.pocket.x - x1, w: guestSuite.closetDoor.pocket.w } } : {}) }]),
     [31.2, 34.6, 31.2, 49, false, [], ceilingHeight, [-1, 1], 0, garageFloorY], [31.2, 26.9, 31.2, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
     [29, 26.9, 29.1875, 26.9, true],
     [29.1875, 26.9, 31.2, 26.9, true],
@@ -1218,32 +1248,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   mantel.name = 'White oak fireplace mantel';
   mantel.userData = { widthInches: 74.4, thicknessInches: 3.6, bottomInches: 48, clearanceVerified: false, provisional: true };
   box(scene, fireplaceFaceX + 0.06, 5.8, livingCenterZ, 0.15, 2.7, 4.6, black, true).name = 'Fireplace television';
-  const fireplaceBuiltIns = new THREE.Group();
-  fireplaceBuiltIns.name = 'Paired low white-oak fireplace built-ins';
-  fireplaceBuiltIns.userData = { cabinetWidthInches: 36, cabinetsPerSide: 2, heightInches: 26, clearanceVerified: false, ventilationVerified: false };
-  scene.add(fireplaceBuiltIns);
-  const builtInRunWidth = (livingFeatureWall.wallEndZ - livingFeatureWall.wallStartZ) / 2 - 3.06;
-  for (const side of [-1, 1]) {
-    const run = new THREE.Group();
-    run.name = `${side < 0 ? 'Dining' : 'Stair'}-side restored fireplace built-in`;
-    run.position.set(0.89, 0, livingCenterZ + side * (3.06 + builtInRunWidth / 2));
-    run.rotation.y = Math.PI / 2;
-    run.userData = { widthInches: builtInRunWidth * 12, depthInches: 11.76, rearServiceGapInches: 3, fillerInches: builtInRunWidth * 12 - 72, provisional: true };
-    fireplaceBuiltIns.add(run);
-    for (const center of [-1.5, 1.5]) {
-      box(run, center, 0.2, 0, 2.8, 0.4, 0.73, cabinetFinish).name = 'Restored cabinet recessed plinth';
-      for (const edge of [-1, 1]) box(run, center + edge * (1.5 - 1 / 32), 13 / 12, -0.04, 1 / 16, 26 / 12, 0.9, cabinetFinish).name = 'Standard 36 inch cabinet side';
-      for (const y of [0.45, 1.1]) box(run, center, y, -0.04, 2.875, 1 / 16, 0.9, cabinetRailFinish).name = 'Restored media storage shelf';
-      for (const doorSide of [-1, 1]) {
-        const door = shakerFront(run, center + doorSide * 0.75, 1.25, 0.45, 1.46, 1.6);
-        door.name = 'Restored closed Shaker media door';
-        door.userData.hardware = 'Concealed push latch';
-      }
-    }
-    const fillerWidth = (builtInRunWidth - 6) / 2;
-    for (const edge of [-1, 1]) box(run, edge * (3 + fillerWidth / 2), 13 / 12, 0, fillerWidth, 26 / 12, 0.98, cabinetFinish).name = 'Separate fireplace cabinet end filler';
-    box(run, 0, 26 / 12 - 1 / 24, 0, builtInRunWidth, 1 / 12, 0.98, cabinetRailFinish).name = 'Continuous low oak built-in top';
-  }
+  // Fireplace-side built-ins removed entirely (October 27 owner decision); equipment/charging storage location is undecided.
   const livingSconces = new THREE.Group();
   livingSconces.name = 'Living-room wall sconces';
   livingSconces.userData = { fixtures: 2, placement: 'Outer ends of the grouped living-room side windows', finish: 'Ivory wall-backed half-oval fabric shades and rounded brass backplates', productVerified: false, provisional: true };
@@ -1291,11 +1296,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   diningSconces.userData = { fixtures: 2, placement: 'Flanking the rear dining window', finish: 'Ivory wall-backed fabric shades and rounded brass backplates', chandelier: false, provisional: true };
   scene.add(diningSconces);
   for (const x of [15.4875, 24.5875]) wallSconce(diningSconces, x, 0.105, -Math.PI / 2);
-  const kitchenSconces = new THREE.Group();
-  kitchenSconces.name = 'Kitchen sink-wall end sconces';
-  kitchenSconces.userData = { fixtures: 2, placement: 'Outside the kitchen window-bank ends', finish: 'Ivory wall-backed fabric shades and rounded brass backplates', provisional: true };
-  scene.add(kitchenSconces);
-  for (const x of kitchenEndSconceCenters) wallSconce(kitchenSconces, x, kitchenWindowWallZ + 0.205, -Math.PI / 2);
   const glass = new THREE.MeshStandardMaterial({ color: '#b3cad0', roughness: 0.15, metalness: 0.15, transparent: true, opacity: 0.52 });
   const privacyGlass = new THREE.MeshStandardMaterial({ color: '#e0e8e4', roughness: 1, metalness: 0 });
   privacyGlass.name = 'Obscured lower-half bathroom glazing - privacy concept';
@@ -1316,6 +1316,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     frame.userData = { manufacturer: !fixed || picture ? 'Andersen' : null, series: !fixed || picture ? '100 Series' : null, operation: picture ? 'fixed picture window' : fixed ? 'fixed door sidelight' : 'casement', geometry: 'simplified concept, not manufacturer CAD', standardSizeVerified: false, exteriorFinish, interiorFinish: 'White', interiorTrim: 'white', interiorSide, columns, rows, widthFeet: width, heightFeet: height, sillDepthInches: (options.depth ?? 0.25) * 12, sillMaterial: options.material ? 'quartz' : 'white trim', faucetNotchWidthInches: (options.notchWidth ?? 0) * 12 };
     frame.userData.casingMaterial = (options.casingMaterial ?? windowTrim).name;
     if (!options.fixed || picture) Object.assign(frame.userData, intent);
+    if (options.singleHung) Object.assign(frame.userData, { operation: 'single-hung', grilles: 'upper sash only: four lights; clear lower sash', upperSash: 'fixed', lowerSash: 'slides vertically', productSelected: false, assemblyApproved: false, sizeReview: 'Dealer standard single-hung size, rough opening, grille and factory combination review required; nominal envelope only' });
+    frame.userData.frontGrid = options.frontGrid === true;
+    if (options.frontGrid) frame.userData.grilles = 'colonial 2 wide by 3 high per unit; conceptual';
     if (options.standardSizeCode) Object.assign(frame.userData, { nominalStudyCode: options.standardSizeCode, standardSizeCode: options.standardSizeCode, standardSizeVerified: false, productSelected: false });
     if (options.privacyLowerHalf) Object.assign(frame.userData, { privacyLowerHalf: true, privacyGlassTopFeet: sill + height / 2, privacyVerified: false });
     parent.add(frame);
@@ -1326,7 +1329,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       frame.updateWorldMatrix(true, false);
       const center = frame.localToWorld(new THREE.Vector3(0, 0, normalOffset));
       windowInstallations.push({ name, x: center.x, y: center.y, z: center.z, width, height,
-        openingId: options.casing === false ? parent.uuid : frame.uuid, units: columns * rows, picture });
+        openingId: options.casing === false ? parent.uuid : frame.uuid, units: columns * rows, picture, pictureUnits: intent.pictureColumns.length * rows, singleHung: options.singleHung === true });
       Object.assign(frame.userData, { sillDepthInches: 6, sillMaterial: 'white', sillThicknessInches: 1, sillInset: true, sillRoomProjectionInches: 0, installationConcept: true });
     }
     function ring(parent, w, h, border, depth, offset, material, name) {
@@ -1337,17 +1340,24 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     for (let row = 0; row < rows; row++) {
       for (let column = 0; column < columns; column++) {
+        const unitFixed = fixed || intent.pictureColumns.includes(column);
         const unit = new THREE.Group();
-        unit.name = picture ? 'Fixed picture window unit' : fixed ? 'Fixed sidelight unit' : 'Andersen 100 Series casement concept';
+        unit.name = picture || (!fixed && unitFixed) ? 'Fixed picture window unit' : fixed ? 'Fixed sidelight unit' : 'Andersen 100 Series casement concept';
         const unitWidth = width / columns;
         const unitHeight = height / rows;
         unit.position.set(-width / 2 + (column + 0.5) * unitWidth, row * unitHeight, normalOffset);
-        unit.userData = { operation: fixed ? 'fixed' : 'outward casement', shownClosed: true, widthFeet: unitWidth, heightFeet: unitHeight, provisional: true };
+        unit.userData = { operation: unitFixed ? 'fixed' : 'outward casement', shownClosed: true, widthFeet: unitWidth, heightFeet: unitHeight, provisional: true };
         frame.add(unit);
         ring(unit, unitWidth, unitHeight, 0.12, 0.12, -interiorSide * 0.06, exteriorMaterial, `${exteriorFinish} exterior window frame`);
         ring(unit, unitWidth, unitHeight, 0.12, 0.12, interiorSide * 0.06, windowTrim, 'White interior window frame');
+        if (options.singleHung) {
+          unit.name = 'Andersen 100 Series single-hung concept';
+          Object.assign(unit.userData, { operation: 'single-hung', upperSash: 'fixed', lowerSash: 'slides vertically' });
+          addSingleHungSashes(unit, box, windowTrim, glass, unitWidth, unitHeight);
+          continue;
+        }
         const sash = new THREE.Group();
-        sash.name = fixed ? 'Fixed glazing surround' : 'Closed side-hinged casement sash';
+        sash.name = unitFixed ? 'Fixed glazing surround' : 'Closed side-hinged casement sash';
         sash.position.y = 0.135;
         unit.add(sash);
         const sashWidth = unitWidth - 0.27;
@@ -1359,15 +1369,23 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
           box(sash, 0, 0.1 + halfPaneHeight / 2, 0, sashWidth - 0.2, halfPaneHeight, 0.04, privacyGlass).name = 'Frosted lower-half privacy pane';
           box(sash, 0, 0.1 + halfPaneHeight * 1.5, 0, sashWidth - 0.2, halfPaneHeight, 0.04, glass).name = 'Clear upper-half daylight pane';
         } else {
-          box(sash, 0, sashHeight / 2, 0, sashWidth - 0.2, sashHeight - 0.2, 0.04, glass).name = fixed ? 'Fixed glazing pane' : 'Single casement glazing pane';
+          box(sash, 0, sashHeight / 2, 0, sashWidth - 0.2, sashHeight - 0.2, 0.04, glass).name = unitFixed ? 'Fixed glazing pane' : 'Single casement glazing pane';
         }
-        if (!fixed) {
+        if (!unitFixed) {
           box(unit, 0, 0.2, interiorSide * 0.16, 0.28, 0.07, 0.08, windowTrim).name = 'White casement crank housing';
           box(unit, 0.08, 0.2, interiorSide * 0.23, 0.16, 0.045, 0.06, windowTrim).name = 'Casement crank handle';
           box(unit, unitWidth / 2 - 0.18, unitHeight * 0.4, interiorSide * 0.15, 0.05, 0.22, 0.06, windowTrim).name = 'Casement sash lock';
         }
       }
     }
+    if (isWindow && options.frontGrid) {
+      const grille = new THREE.Group();
+      grille.position.z = normalOffset;
+      frame.add(grille);
+      addFrontWindowGrilles(grille, box, windowTrim, width, height, columns, rows);
+    }
+    if (isWindow && columns > 1) addWindowShadeDivisions(frame, box, windowTrim,
+      Array.from({ length: columns - 1 }, (_, index) => -width / 2 + width * (index + 1) / columns), 0, height, faceDepth, interiorSide);
     if (options.casing !== false) openingCasing(frame, 0, 0, width, height, faceDepth, interiorSide, isWindow, options);
     return frame;
   }
@@ -1376,17 +1394,20 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   livingWindowBank.position.set(livingSideWindowBank.x, 0, livingSideWindowBank.z + 0.1);
   livingWindowBank.userData = { windowOpening: true, unitCount: 3, assemblyApproved: false, structuralHeaderVerified: false, provisional: true };
   scene.add(livingWindowBank);
-  for (const { name, x, width, height, sill, picture } of livingSideWindows) {
-    const frame = windowFrame(name, x - livingSideWindowBank.x, 0, width, height, sill, 0, livingWindowBank, 1, { picture, casing: false });
+  for (const { name, x, width, height, sill, picture, singleHung } of livingSideWindows) {
+    const frame = windowFrame(name, x - livingSideWindowBank.x, 0, width, height, sill, 0, livingWindowBank, 1, { picture, singleHung, casing: false });
     frame.userData.openingGroup = livingSideWindowBank.name;
   }
   openingCasing(livingWindowBank, 0, livingSideWindowBank.sill, livingSideWindowBank.width, livingSideWindowBank.height, windowFaceDepth(livingWindowBank, 0, livingSideWindowBank.sill, 0, 1), 1, true);
+  const livingRevealFace = windowFaceDepth(livingWindowBank, 0, livingSideWindowBank.sill, 0, 1);
+  addWindowShadeDivisions(livingWindowBank, box, windowTrim, [-1.25, 1.25], livingSideWindowBank.sill,
+    livingSideWindowBank.height, livingRevealFace, 1, 'Living full-depth white shade-bay division');
   windowFrame('Dining rear window', 20.0375, 0, 6, 5, 3);
   const livingPatioDoor = new THREE.Group();
   livingPatioDoor.name = 'Dining west glazed patio door, 36 by 96 inches';
   livingPatioDoor.position.set(livingFeatureWall.patioDoor.x, 0, livingFeatureWall.patioDoor.z);
   livingPatioDoor.rotation.y = -Math.PI / 2;
-  livingPatioDoor.userData = { widthFeet: 3, heightFeet: 8, westDiningChairMustBeMovedForDoor: true, provisional: true };
+  livingPatioDoor.userData = { widthFeet: 3, heightFeet: 8, westDiningChairMustBeMovedForDoor: false, provisional: true };
   scene.add(livingPatioDoor);
   for (const x of [-1.44, 1.44]) box(livingPatioDoor, x, 4, 0, 0.12, 8, 0.2, windowTrim).name = 'Living patio door stile';
   for (const y of [0.08, 7.92]) box(livingPatioDoor, 0, y, 0, 3, 0.16, 0.2, windowTrim).name = 'Living patio door rail';
@@ -1408,6 +1429,55 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   doorLeaf.rotation.y = 0;
   for (const [index, z] of livingWindowCenters.entries()) {
     windowFrame(`Living fireplace-side casement ${index + 1}`, 0.1, z, livingWindowWidth, livingWindowHead - livingWindowSill, livingWindowSill, -Math.PI / 2, scene, -1);
+  }
+
+  const wovenShadeCanvas = document.createElement('canvas');
+  wovenShadeCanvas.width = 256;
+  wovenShadeCanvas.height = 512;
+  const wovenShadeContext = wovenShadeCanvas.getContext('2d');
+  wovenShadeContext.fillStyle = '#c4a16d';
+  wovenShadeContext.fillRect(0, 0, 256, 512);
+  for (let y = 0; y < 512; y += 4) {
+    wovenShadeContext.fillStyle = ['#d7bb8c', '#af8959', '#dfc69c', '#bc9967'][(y / 4) % 4];
+    wovenShadeContext.fillRect(0, y, 256, 3);
+    wovenShadeContext.fillStyle = '#8f714c';
+    wovenShadeContext.fillRect(0, y + 3, 256, 1);
+  }
+  for (let x = 7; x < 256; x += 17) {
+    wovenShadeContext.fillStyle = '#e2c99e';
+    wovenShadeContext.fillRect(x, 0, 1, 512);
+    wovenShadeContext.fillStyle = '#957950';
+    wovenShadeContext.fillRect(x + 1, 0, 1, 512);
+  }
+  const wovenShadeTexture = new THREE.CanvasTexture(wovenShadeCanvas);
+  wovenShadeTexture.colorSpace = THREE.SRGBColorSpace;
+  const wovenShadeMaterial = new THREE.MeshStandardMaterial({ map: wovenShadeTexture, roughness: 1 });
+  const wovenShadeEdge = new THREE.MeshStandardMaterial({ color: '#b28c59', roughness: 1 });
+  function addLivingWovenShades(parent, width, height, sill, columns, face, side) {
+    const shades = new THREE.Group();
+    shades.name = 'Living natural woven wood Roman shades';
+    shades.userData = { style: 'Warm flax and bamboo weave, owner photo reference', cordless: true, productSelected: false, mountingVerified: false, operatingClearanceVerified: false, privacyVerified: false, provisional: true };
+    parent.add(shades);
+    const drop = height * 0.62;
+    for (let column = 0; column < columns; column++) {
+      const left = -width / 2 + width * column / columns + (column === 0 ? 0.12 : 3.5 / 24) + 0.04;
+      const right = -width / 2 + width * (column + 1) / columns - (column === columns - 1 ? 0.12 : 3.5 / 24) - 0.04;
+      const shade = new THREE.Group();
+      shade.name = `Woven Roman shade bay ${column + 1}`;
+      shade.position.set((left + right) / 2, sill + height - 0.08, side * (face - 0.16));
+      shade.userData = { widthFeet: right - left, dropFeet: drop, lowerGlassExposedFeet: height - drop - 0.08 };
+      shades.add(shade);
+      box(shade, 0, -drop / 2, 0, right - left, drop, 0.025, wovenShadeMaterial).name = 'Natural woven reed shade panel';
+      box(shade, 0, -0.09, side * 0.025, right - left, 0.18, 0.09, wovenShadeMaterial).name = 'Woven shade head valance';
+      box(shade, 0, -drop + 0.04, side * 0.025, right - left, 0.08, 0.08, wovenShadeEdge).name = 'Woven shade weighted bottom fold';
+    }
+    return shades;
+  }
+  addLivingWovenShades(livingWindowBank, livingSideWindowBank.width, livingSideWindowBank.height, livingSideWindowBank.sill, 3, livingRevealFace, 1);
+  for (const frame of scene.children.filter((child) => /^Living fireplace-side casement /.test(child.name))) {
+    const { widthFeet, heightFeet, columns, interiorSide } = frame.userData;
+    const face = windowFaceDepth(scene, frame.position.x, frame.position.y, frame.rotation.y, interiorSide, windowWallDatums, frame.position.z);
+    addLivingWovenShades(frame, widthFeet, heightFeet, 0, columns, face, interiorSide);
   }
 
   const sofa = new THREE.Group();
@@ -1519,10 +1589,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   readingBook.traverse((part) => { part.userData.tourDecoration = true; });
 
   const christmasTree = new THREE.Group();
-  const treeHall = getGroundFloorDefaultPlan().rooms.find((room) => room.name === 'Hall');
-  christmasTree.name = 'Hall-center Christmas tree';
-  christmasTree.position.set(treeHall.x + treeHall.w / 2, 0, treeHall.z + treeHall.d / 2);
-  christmasTree.userData = { heightInches: 84, diameterInches: 36, location: 'Middle of the open hallway between the living room and kitchen island', seasonal: true, provisional: true };
+  // Northwest living corner: two feet from each finished wall face.
+  // Shared feature-wall datum includes the north wall's finished face.
+  christmasTree.name = 'Living northwest-corner Christmas tree';
+  christmasTree.position.set(0.175 + 2, 0, livingFeatureWall.wallStartZ + 2);
+  christmasTree.userData = { heightInches: 84, diameterInches: 36, location: 'Northwest living-room corner between the fireplace-window wall and joined-window wall', seasonal: true, provisional: true };
   scene.add(christmasTree);
   const evergreen = mat('#344f3a');
   const treeGold = mat('#ba914b', 0.45);
@@ -1639,75 +1710,72 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   familyLiving.add(readingLamp);
 
   const referenceLounge = new THREE.Group();
-  referenceLounge.name = 'Warm photo-inspired U seating - fit study';
+  referenceLounge.name = 'Fireplace-facing U sectional - fit study';
+  // Authored at its final world pose: the main run backs onto the 6 in strip
+  // before the 36 in main hall and both backed returns reach toward the fireplace.
   referenceLounge.userData = {
-    planningSeats: 7, sofaPlanningSeats: 5, guestChairs: 2, comfortVerified: false, productSelected: false,
-    sofas: [{ x: 10.8, z: livingCenterZ, w: 9.5, d: 3.25, seats: 4, rotation: -Math.PI / 2 }],
-    chairs: [{ x: 4.25, z: 10.2, rotation: 0 }, { x: 8.45, z: 10.2, rotation: 0 }],
-    endTable: { w: 16 / 12, d: 16 / 12, h: 22 / 12 }
+    shape: 'U', widthInches: 132, returnInches: 99, depthInches: 39, armInches: 6,
+    backX: 12.75, centerZ: livingCenterZ, hallStripX: 13.25, stoneFaceX: 1.38, fireplaceSideCabinets: 0,
+    planningSeats: 6, seatsPerRun: { main: 2, eachReturn: 2 }, cornerSeatsCounted: false, guestChairs: 0,
+    comfortVerified: false, productSelected: false, centerOffset: [0, 0, 0]
   };
-  referenceLounge.userData.chairSize = { widthInches: 27, depthInches: 32, heightInches: 39.5 };
-  referenceLounge.userData.builtInSetbackFeet = 1.5;
   scene.add(referenceLounge);
-  const livingSeatingRoom = getGroundFloorDefaultPlan().rooms.find((room) => room.name === 'Living room');
-  const seatingMinX = Math.min(...referenceLounge.userData.chairs.map((chair) => chair.x - referenceLounge.userData.chairSize.widthInches / 24));
-  const seatingMaxX = referenceLounge.userData.sofas[0].x + referenceLounge.userData.sofas[0].d / 2;
-  const seatingMinZ = Math.min(...referenceLounge.userData.chairs.map((chair) => chair.z - referenceLounge.userData.chairSize.depthInches / 24));
-  const seatingMaxZ = referenceLounge.userData.sofas[0].z + referenceLounge.userData.sofas[0].w / 2;
-  referenceLounge.userData.centerOffset = [
-    livingSeatingRoom.x + livingSeatingRoom.w / 2 - (seatingMinX + seatingMaxX) / 2 + referenceLounge.userData.builtInSetbackFeet,
-    livingSeatingRoom.z + livingSeatingRoom.d / 2 - (seatingMinZ + seatingMaxZ) / 2,
-    0
-  ];
-  const sofaFabrics = ['#9e8a76', '#514840'].map((color) => new THREE.MeshStandardMaterial({ map: livingWeaveTexture(color), roughness: 0.97 }));
-  const sofaCushions = ['#b49f88', '#62584e'].map((color) => new THREE.MeshStandardMaterial({ map: livingWeaveTexture(color), roughness: 0.98 }));
+  const sofaFabric = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#9e8a76'), roughness: 0.97 });
+  const sofaCushion = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#b49f88'), roughness: 0.98 });
   const accentFabrics = ['#705443', '#b29b7f', '#92745b'].map((color) => new THREE.MeshStandardMaterial({ map: livingWeaveTexture(color), roughness: 0.98 }));
-  const referenceChairFabric = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#b5a087'), roughness: 0.98 });
-  for (const [index, details] of referenceLounge.userData.sofas.entries()) {
-    const sofa = new THREE.Group();
-    sofa.name = index === 0 ? 'Reference mushroom sofa facing fireplace' : 'Reference deep brown-gray perpendicular loveseat';
-    const fabric = sofaFabrics[index];
-    const cushion = sofaCushions[index];
-    sofa.position.set(details.x, 0, details.z);
-    sofa.rotation.y = details.rotation;
-    sofa.userData = { ...details, planningSeats: 5, productSelected: false, comfortVerified: false, sectional: true, returnDepthInches: 99 };
-    referenceLounge.add(sofa);
-    box(sofa, 0, 0.12, 0, details.w - 0.4, 0.24, 2.85, walnut, true).name = 'Reference sofa recessed plinth';
-    box(sofa, 0, 0.8, 0, details.w, 1.2, details.d, fabric, true).name = 'Reference sofa upholstered base';
-    box(sofa, 0, 1.95, -1.375, details.w, 2.1, 0.5, fabric, true).name = 'Reference sofa back';
-    box(sofa, -details.w / 2 + 0.25, 1.5, 0, 0.5, 1.8, details.d, fabric, true).name = 'Reference sofa track arm';
-    const seatWidth = (details.w - 1) / details.seats;
-    box(sofa, 3.425, 0.8, 4.125, 2.65, 1.2, 5, fabric, true).name = 'L sectional return base';
-    box(sofa, 4.5, 1.95, 4.125, 0.5, 2.1, 5, fabric, true).name = 'L sectional return back';
-    box(sofa, 4.5, 1.95, 0.25, 0.5, 2.1, 2.75, fabric, true).name = 'L sectional continuous corner back';
-    box(sofa, 3.425, 1.5, 6.375, 2.65, 1.8, 0.5, fabric, true).name = 'L sectional return end arm';
-    for (const z of [2.8, 5.05]) {
-      box(sofa, 3.2, 1.45, z, 2.1, 0.4, 2.2, cushion, true).name = 'L sectional return seat cushion';
-      box(sofa, 4.1, 2.25, z, 0.55, 1.3, 2.2, cushion, true).name = 'L sectional return loose back cushion';
-    }
-    for (let seat = 0; seat < details.seats; seat++) {
-      const x = (seat - (details.seats - 1) / 2) * seatWidth;
-      box(sofa, x, 1.45, 0.2, seatWidth - 0.04, 0.4, 2.5, cushion, true).name = 'Reference sofa seat cushion';
-      box(sofa, x, 2.25, -0.83, seatWidth - 0.04, 1.3, 0.55, cushion, true).name = 'Reference sofa loose back cushion';
-    }
-    const outerPillowX = details.w / 2 - 1.1;
-    for (const [pillowIndex, x] of [-outerPillowX, -outerPillowX + 1.05, outerPillowX].entries()) {
-      const pillow = box(sofa, x, 2.15, -0.4, 1, 1, 0.35, accentFabrics[pillowIndex], true);
-      pillow.name = 'Reference sofa accent pillow';
-      pillow.rotation.z = pillowIndex === 0 ? 0.15 : -0.12;
-    }
+  const uSectional = new THREE.Group();
+  uSectional.name = 'Reference mushroom U sectional facing fireplace';
+  const uDetails = referenceLounge.userData;
+  const uWidth = uDetails.widthInches / 12, uDepth = uDetails.depthInches / 12, uArm = uDetails.armInches / 12;
+  const uReturnRun = uDetails.returnInches / 12 - uDepth;
+  // Local +z faces the fireplace (world -x); local x runs north-south along the main back.
+  uSectional.position.set(uDetails.backX - uDepth / 2, 0, uDetails.centerZ);
+  uSectional.rotation.y = -Math.PI / 2;
+  uSectional.userData = { shape: 'U', widthInches: 132, returnInches: 99, depthInches: 39, planningSeats: 6, cornerSeatsCounted: false, sectional: true, productSelected: false, comfortVerified: false };
+  referenceLounge.add(uSectional);
+  const back = -uDepth / 2, front = uDepth / 2, returnEnd = front + uReturnRun;
+  box(uSectional, 0, 0.12, 0, uWidth - 0.4, 0.24, uDepth - 0.4, walnut, true).name = 'U sectional main recessed plinth';
+  box(uSectional, 0, 0.8, 0, uWidth, 1.2, uDepth, sofaFabric, true).name = 'U sectional main base';
+  box(uSectional, 0, 1.95, back + 0.25, uWidth, 2.1, 0.5, sofaFabric, true).name = 'U sectional continuous main back';
+  const innerSeatRun = uWidth - 2 * uDepth;
+  for (let seat = 0; seat < 2; seat++) {
+    const x = (seat - 0.5) * innerSeatRun / 2;
+    box(uSectional, x, 1.45, 0.2, innerSeatRun / 2 - 0.04, 0.4, 2.5, sofaCushion, true).name = 'U sectional main seat cushion';
+    box(uSectional, x, 2.25, -0.83, innerSeatRun / 2 - 0.04, 1.3, 0.55, sofaCushion, true).name = 'U sectional main loose back cushion';
   }
-
-  const piano = new THREE.Group();
-  const referenceFloorRug = box(referenceLounge, (seatingMinX + seatingMaxX) / 2, 0.015, (seatingMinZ + seatingMaxZ) / 2, 9, 0.02, 12,
+  // Mirror constituent coordinates with side = -1/+1; never use a negative object scale.
+  for (const side of [-1, 1]) {
+    const outer = side * uWidth / 2;
+    const backFace = outer - side * 0.25;
+    const seatCenter = outer - side * (0.5 + 0.075 + 2.5 / 2);
+    box(uSectional, outer - side * uDepth / 2, 0.12, (front + returnEnd) / 2, uDepth - 0.4, 0.24, uReturnRun, walnut, true).name = 'U sectional return recessed plinth';
+    box(uSectional, outer - side * uDepth / 2, 0.8, (front + returnEnd) / 2, uDepth, 1.2, uReturnRun, sofaFabric, true).name = 'U sectional return base';
+    box(uSectional, backFace, 1.95, (back + 0.5 + front) / 2, 0.5, 2.1, front - back - 0.5, sofaFabric, true).name = 'U sectional continuous corner back';
+    box(uSectional, backFace, 1.95, (front + returnEnd - uArm) / 2, 0.5, 2.1, uReturnRun - uArm, sofaFabric, true).name = 'U sectional return back';
+    box(uSectional, outer - side * uDepth / 2, 1.5, returnEnd - uArm / 2, uDepth, 1.8, uArm, sofaFabric, true).name = 'U sectional return end arm';
+    box(uSectional, side * 3.6, 1.45, 0.25, 2.6, 0.4, 2.6, sofaCushion, true).name = 'U sectional uncounted corner cushion';
+    box(uSectional, side * (innerSeatRun / 2 + 0.02 + 2.16 / 2), 2.25, -0.83, 2.16, 1.3, 0.55, sofaCushion, true).name = 'U sectional corner loose back cushion';
+    const returnSeatRun = uReturnRun - uArm;
+    for (let seat = 0; seat < 2; seat++) {
+      const z = front + (seat + 0.5) * returnSeatRun / 2;
+      box(uSectional, seatCenter, 1.45, z, 2.5, 0.4, returnSeatRun / 2 - 0.04, sofaCushion, true).name = 'U sectional return seat cushion';
+      box(uSectional, outer - side * (0.5 + 0.275), 2.25, z, 0.55, 1.3, returnSeatRun / 2 - 0.04, sofaCushion, true).name = 'U sectional return loose back cushion';
+    }
+    const cornerPillow = box(uSectional, side * 3.95, 2.15, -0.35, 1, 1, 0.35, accentFabrics[side < 0 ? 0 : 2], true);
+    cornerPillow.name = 'U sectional accent pillow';
+    cornerPillow.rotation.z = side * 0.14;
+    const returnPillow = box(uSectional, outer - side * 1.23, 2.15, returnEnd - uArm - 0.75, 0.35, 1, 1, accentFabrics[1], true);
+    returnPillow.name = 'U sectional accent pillow';
+    returnPillow.rotation.x = side * 0.12;
+  }
+  const referenceFloorRug = box(referenceLounge, uDetails.backX - uDetails.returnInches / 24, 0.015, uDetails.centerZ, 9, 0.02, 12,
     new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#817b71', true), roughness: 1 }));
   referenceFloorRug.name = 'Reference 9 x 12 ft charcoal taupe low-pile rug';
   referenceFloorRug.userData = { tourDecoration: true, walkSurface: true, nonSlipPadRequired: true, productSelected: false };
+
+  const piano = new THREE.Group();
   piano.name = 'Yamaha CLP-825 Rosewood digital piano';
-  piano.position.set(0.4 + 411 / 304.8 / 2, 0, livingFeatureWall.wallEndZ - (livingFeatureWall.wallEndZ - livingFeatureWall.centerZ - 3.06) / 2);
-  piano.rotation.y = Math.PI / 2;
   piano.userData = { widthMm: 1350, depthMm: 411, heightMm: 849, musicRestHeightMm: 1003, planningSeats: 0, productURL: 'https://solichmusic.com/pianos/yamaha-digital-pianos/yamaha-clp-825-rosewood/', manufacturerCAD: false };
-  referenceLounge.add(piano);
   const pianoWidth = 1350 / 304.8, pianoDepth = 411 / 304.8, pianoHeight = 849 / 304.8;
   const rosewood = new THREE.MeshStandardMaterial({ map: livingWeaveTexture('#482c29'), roughness: 0.55 });
   const keyWhite = new THREE.MeshStandardMaterial({ color: '#f5f0e6', roughness: 0.45 });
@@ -1728,44 +1796,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(piano, 0, (pianoHeight + 1003 / 304.8) / 2, -0.25, 1.8, 1003 / 304.8 - pianoHeight, 0.06, rosewood).name = 'Piano raised music rest';
   const pianoBench = new THREE.Group();
   pianoBench.name = 'Piano bench - provisional 24 x 12 inch';
-  pianoBench.position.set(0, 0, 1.3);
+  pianoBench.position.set(0, 0, 0.75);
   piano.add(pianoBench);
   box(pianoBench, 0, 1.5, 0, 2, 0.18, 1, rosewood).name = 'Piano bench seat';
   for (const x of [-0.85, 0.85]) for (const z of [-0.35, 0.35]) box(pianoBench, x, 0.7, z, 0.12, 1.4, 0.12, rosewood).name = 'Piano bench leg';
 
-  for (const [index, details] of referenceLounge.userData.chairs.entries()) {
-    const chair = new THREE.Group();
-    chair.name = `Reference oak POANG-style reading chair ${index + 1}`;
-    chair.position.set(details.x, 0, details.z);
-    chair.rotation.y = details.rotation;
-    chair.userData = { ...referenceLounge.userData.chairSize, style: 'IKEA POANG-inspired open oak frame', manufacturerCAD: false, productSelected: false };
-    for (const x of [-1.065, 1.065]) {
-      box(chair, x, 0.09, 0, 0.12, 0.18, 32 / 12, oak, true).name = 'Reading chair oak floor runner';
-      const support = box(chair, x, 0.85, 0.6, 0.12, 1.55, 0.15, oak, true);
-      support.name = 'Reading chair swept oak support';
-      support.rotation.x = -0.25;
-      box(chair, x, 1.8, 0.05, 0.12, 0.12, 1.95, oak, true).name = 'Reading chair open oak arm';
-      const rail = box(chair, x, 2.25, -0.72, 0.12, 2, 0.14, oak, true);
-      rail.name = 'Reading chair reclined oak back rail';
-      rail.rotation.x = -0.22;
-    }
-    box(chair, 0, 1.23, 0.1, 1.98, 0.15, 1.9, oak, true).name = 'Reading chair seat support';
-    box(chair, 0, 1.38, 0.1, 1.95, 0.22, 1.9, referenceChairFabric, true).name = 'Reading chair taupe seat cushion';
-    const back = box(chair, 0, 2.25, -0.72, 1.95, 2, 0.2, referenceChairFabric, true);
-    back.name = 'Reading chair taupe back cushion';
-    back.rotation.x = -0.22;
-    referenceLounge.add(chair);
-  }
-  const referenceEndTable = new THREE.Group();
-  referenceEndTable.name = 'Reference small oak end table between chairs';
-  const endTableDetails = referenceLounge.userData.endTable;
-  referenceEndTable.position.set(6.35, 0, 10.2);
-  referenceEndTable.userData = { ...endTableDetails, productSelected: false, stabilityVerified: false };
-  box(referenceEndTable, 0, endTableDetails.h - 0.05, 0, endTableDetails.w, 0.1, endTableDetails.d, oak, true).name = 'Reference end table eased oak top';
-  for (const x of [-0.48, 0.48]) for (const z of [-0.48, 0.48]) {
-    box(referenceEndTable, x, (endTableDetails.h - 0.1) / 2, z, 0.12, endTableDetails.h - 0.1, 0.12, oak, true).name = 'Reference end table oak leg';
-  }
-  referenceLounge.add(referenceEndTable);
+  piano.traverse((part) => { if (part.isMesh) part.userData.tourObstacle = true; });
   referenceLounge.traverse((part) => { if (part.isMesh && !part.userData.tourDecoration) part.userData.tourObstacle = true; });
 
   const familySectional = new THREE.Group();
@@ -1801,13 +1837,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const livingLayouts = [
     {
-      id: 'reference-lounge', title: 'J / Warm photo U seating', recommended: true, referenceLounge: true,
-      note: 'A 114 x 99 in mushroom L sectional, two oak POANG-style reading chairs, end table/lamp and 9 x 12 ft rug form the living group. Center north/south and pull 18 in east from room-centered placement; midpoint (8.1,16.85). Restored paired low oak built-ins each use two standard 36 in cabinets and separate end fillers. Nearest chair clears cabinet fronts by 24.84 in, not approved occupied retrieval space; main hall remains clear. Piano, bench and attached lamp now move out of the office to the living side of the painted stair wall, keyboard north, 4.8 in rear service gap. Occupied bench pullout, playing access and power routing require review; keep cords off circulation routes. Seven provisional lounge positions exclude the sectional corner. No coffee table, cart or footstools. Joined living window bank remains. All four stair bookcases are removed; the former recess zone is closed with painted enclosure to the current flight/landing soffits and flat base trim. No new doors/storage. Only the short 48 in side rail assembly at the +5 ft turning landing is removed as a concept: one handrail, eight bars, two posts. Its exposed edge is not protected by the enclosure below or the ground-floor living guard. Before construction, builder must confirm continuous wall/guard protection with designer/code reviewer and provide required protection; removal is not approval for an unguarded landing. Preserve flight rails/stringers, living stairwell guard, upstairs guards, basement rails/access, steps and enclosure. Enclosure framing, structural support, underside protection, fire separation and headroom require professional review. Verify products, cabinet operation/ventilation, power, window access and fireplace heat clearances. Dining west patio door stays closed by default; move the end chair before opening. Patio landing, stair, roof, guards and foundations remain approval-required.',
+      id: 'reference-lounge', title: 'J / U sectional facing fireplace', recommended: true, referenceLounge: true,
+      note: 'A 132 in main run faces the fireplace with two backed 99 in returns reaching toward it: continuous main, corner and return backs, end arms, mirrored cushions and pillows. Overall x 4.5-12.75, z 11.975-22.975 ft, centered on the fireplace axis so the 54 x 60 in open well frames the firebox; the tucked piano bench keeps 24.4 in. Six provisional seats (two main, two per return) exclude both corners. The reading chair, end table and its lamp are removed. 9 x 12 ft rug centered under the U at (8.625,17.475). Both fireplace-side built-ins are removed; equipment/charging storage location is undecided. Flat 8 in base trim runs continuously along the fireplace wall from each wall end (z 8.175 and 26.775 ft) to the stone side return (z 14.415 and 20.535 ft), 74.88 in per side. Return ends sit 51.15 in from that baseboard (51.9 in to paint) and 37.44 in from the stone face; the back stops 6 in before the 36 in main hall; 45.6 in remains to the north window wall. Piano, bench and attached lamp move another 6 in west toward fireplace windows, 16 in total from the stair-wall midpoint, center (3.7583,26.2592), keyboard north. Rear gap stays 1 in to paint, 0.25 in beyond baseboard; ventilation and cord fit are unverified. Bench keeps its tucked pose and unchanged size/height. Piano west end faces the fireplace wall: 15.68 in to baseboard (16.43 in to paint), not an aisle; no cabinet or door sweep remains beside it. With no built-in media storage, equipment, charging and ventilation location is undecided. Occupied bench pullout, playing access and power routing require review; keep cords off circulation routes. No coffee table, cart or footstools. Joined living window bank remains. All four stair bookcases are removed; the former recess zone is closed with painted enclosure to the current flight/landing soffits and flat base trim. No new doors/storage. Keep the full 48 in living-side landing guard: oak top 36 in above the +5 ft landing, eight black bars and both posts. Owner follow-up removes only the short cap/bar connecting pieces to the lower-flight rails, retaining a junction break. Endpoint centerlines differ by 5 in horizontally and 7.5 in vertically, not verified clear-opening dimensions. Guard openings and graspable handrail continuity require professional review; this gap is not safety approval. The enclosure below is not edge protection. Actual anchorage, openings/climbability, graspability and remaining wall-backed/basement handrail omissions require professional review; restored geometry is not safety certification. Preserve flight rails/stringers, living stairwell guard, upstairs guards, basement rails/access, steps and enclosure. Enclosure framing, structural support, underside protection, fire separation and headroom require professional review. Verify products, equipment storage/ventilation, power, window access and fireplace heat clearances. Dining west patio door stays closed by default; verify its sweep and occupied access before use. Patio landing, stair, roof, guards and foundations remain approval-required.',
       sofa: null, chairs: [null, null]
     },
     {
       id: 'family-sectional', title: 'I / Earlier deep family sectional', familyZone: true, familySectional: true,
-      note: 'Deep 144 x 104 in L-shaped sectional concept: five full seating positions plus an uncounted corner, 44 in overall depth and a 30 in seat-depth target. Warm brown upholstery, movable soft ottoman and no separate chairs. Main sofa-to-ottoman gap 16 in; 39.6 in around both ends and about 28.2 in at the return-to-cabinet pinch. These are static model gaps, not occupied access or fireplace approval. No product selected; family sit-test, cushion support and upholstery care remain essential.',
+      note: 'Deep 144 x 104 in L-shaped sectional concept: five full seating positions plus an uncounted corner, 44 in overall depth and a 30 in seat-depth target. Warm brown upholstery, movable soft ottoman and no separate chairs. Main sofa-to-ottoman gap 16 in; 39.6 in around both ends and about 28.2 in from the return end to the stone face and 41.95 in to the fireplace-wall baseboard (built-ins removed). These are static model gaps, not occupied access or fireplace approval. No product selected; family sit-test, cushion support and upholstery care remain essential.',
       sofa: null, chairs: [null, null]
     },
     {
@@ -1818,19 +1854,19 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     },
     {
       id: 'real-sofa', title: 'G / Earlier textured product sofa',
-      note: 'Downloaded Wayfair Glam velvet sofa, 86 in display width, with two textured armchairs. Earlier corner-chair poses conflict with the new wall-length cabinets; comparison only, not a usable layout. Licensed product visualization, not a comfort-tested selection or manufacturer CAD. No sofa-bed opening is modeled.',
+      note: 'Downloaded Wayfair Glam velvet sofa, 86 in display width, with two textured armchairs. Earlier corner-chair poses predate removal of the fireplace built-ins (halved/paired versions are historical); comparison only, not a usable layout. Licensed product visualization, not a comfort-tested selection or manufacturer CAD. No sofa-bed opening is modeled.',
       downloadedSofa: [11.25, livingCenterZ, -Math.PI / 2], sofa: null, chairs: [null, null],
       armchairs: [[2.7, 10.45, Math.PI / 3], [2.7, 2 * livingCenterZ - 10.45, 2 * Math.PI / 3]]
     },
     {
       id: 'double-chaise', title: 'F / Earlier double-chaise sectional',
-      note: 'Double-chaise sectional plus two textured Poly Haven armchairs in the window corners, angled inward. Earlier corner-chair poses conflict with the new wall-length cabinets; comparison only, not a usable layout. Uniformly scaled to 32.25 in wide; generic visual assets, not verified product sizes. Occupied access and heat clearances remain unverified.',
+      note: 'Double-chaise sectional plus two textured Poly Haven armchairs in the window corners, angled inward. Earlier corner-chair poses predate removal of the fireplace built-ins (halved/paired versions are historical); comparison only, not a usable layout. Uniformly scaled to 32.25 in wide; generic visual assets, not verified product sizes. Occupied access and heat clearances remain unverified.',
       sectional: [11.25, livingCenterZ, -Math.PI / 2], sofa: null, chairs: [null, null],
       armchairs: [[2.7, 10.45, Math.PI / 3], [2.7, 2 * livingCenterZ - 10.45, 2 * Math.PI / 3]]
     },
     {
       id: 'centered', title: 'E / Earlier corner-chair layout',
-      note: 'Earlier corner-chair comparison: the stair-side reading chair conflicts with the new wall-length cabinet. Original furniture poses are preserved for comparison only, not a usable layout.',
+      note: 'Earlier corner-chair comparison predating removal of the fireplace built-ins (halved/paired versions are historical). Original furniture poses are preserved for comparison only, not a usable layout.',
       sofa: [11.6, livingCenterZ, -Math.PI / 2], chairs: [[3.6, 10.9, Math.PI / 3], [2.9, livingFeatureWall.wallEndZ - 2.175, 2 * Math.PI / 3]],
     },
     {
@@ -1860,10 +1896,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const tableLength = 84 / 12;
   const tableDepth = 38 / 12;
   const diningSet = new THREE.Group();
-  diningSet.name = 'Dining table and eight chairs';
+  diningSet.name = 'Dining table and six side chairs';
   diningSet.position.set(tableX, 0, tableZ);
   diningSet.rotation.y = 0;
-  diningSet.userData = { rotationDegrees: 0, longAxis: 'x', seats: 8, centeredInDiningRoom: true, patioEndChairMustBeTuckedForDoor: false, patioEndChairMustBeMovedForDoor: true, provisional: true };
+  diningSet.userData = { rotationDegrees: 0, longAxis: 'x', seats: 6, endChairs: 0, centeredInDiningRoom: true, patioEndChairMustBeTuckedForDoor: false, patioEndChairMustBeMovedForDoor: false, provisional: true };
   scene.add(diningSet);
   const diningWalnut = mat('#60412e', 0.6);
   diningWalnut.name = 'Dining walnut finish - screen approximation';
@@ -1871,7 +1907,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   diningLeather.name = 'Black dining leather - screen approximation';
   const diningTable = box(diningSet, 0, 29 / 12 - 0.09, 0, tableLength, 0.18, tableDepth, diningWalnut, true);
   diningTable.name = 'Dining table';
-  diningTable.userData = { reference: 'Provisional eight-person walnut table; not the 71-inch Seno product', lengthInches: 84, depthInches: 38, heightInches: 29, seats: 8, productSelected: false, provisional: true };
+  diningTable.userData = { reference: 'Provisional 84-inch walnut table, six side chairs; not the 71-inch Seno product', lengthInches: 84, depthInches: 38, heightInches: 29, seats: 6, productSelected: false, provisional: true };
   for (const x of [-tableLength / 2 + 0.55, tableLength / 2 - 0.55]) for (const z of [-1.1, 1.1]) box(diningSet, x, 1.15, z, 0.16, 2.3, 0.16, diningWalnut, true).name = 'Dining table leg';
   function diningChair(x, z, rotation) {
     const chair = new THREE.Group();
@@ -1893,9 +1929,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     diningChair(tableX + x, tableZ - tableDepth / 2 + diningChairInset, 0);
     diningChair(tableX + x, tableZ + tableDepth / 2 - diningChairInset, Math.PI);
   }
-  const diningEndChairOffset = tableLength / 2 + 3 / 12;
-  diningChair(tableX - diningEndChairOffset, tableZ, Math.PI / 2);
-  diningChair(tableX + diningEndChairOffset, tableZ, -Math.PI / 2);
+
 
   const kitchen = new THREE.Group();
   kitchen.name = 'Kitchen furnishings';
@@ -2115,7 +2149,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   cylinder(dishRack, 0.43, 0.22, 0.28, 0.11, 0.3, catchPanFinish).name = 'Dish rack utensil cup';
   for (const x of [0.38, 0.43, 0.48]) cylinder(dishRack, x, 0.4, 0.28, 0.012, 0.45, steel);
   const kitchenWindowTrim = new THREE.Group();
-  kitchenWindowTrim.name = 'Joined kitchen window-bank flush white returns';
+  kitchenWindowTrim.name = 'Kitchen joined window bank flush white returns';
   kitchenWindowTrim.position.set(kitchenSinkX, kitchenSinkWindowSill, kitchenWindowWallZ + 0.1);
   kitchenWindowTrim.userData = { windowOpening: true, unitCount: 3, continuousDrywallHeadReturn: true, continuousSill: true, assemblyApproved: false, structuralHeaderVerified: false, provisional: true };
   scene.add(kitchenWindowTrim);
@@ -2125,9 +2159,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     });
     frame.userData.openingGroup = kitchenCounterWindowBank.name;
   }
-  const kitchenWindowBankWidth = kitchenSinkWindows[2].x + kitchenSinkWindows[2].width / 2 - (kitchenSinkWindows[0].x - kitchenSinkWindows[0].width / 2);
+  const kitchenWindowBankWidth = kitchenCounterWindowBank.width;
+  addWindowShadeDivisions(kitchenWindowTrim, box, windowTrim,
+    kitchenSinkWindows.slice(0, -1).map(unit => unit.x + unit.width / 2 - kitchenSinkX),
+    0, kitchenSinkWindowHeight, windowFaceDepth(kitchenWindowTrim, 0, 0, 0, 1));
   openingCasing(kitchenWindowTrim, 0, 0, kitchenWindowBankWidth, kitchenSinkWindowHeight,
-    windowFaceDepth(kitchenWindowTrim, 0, 0, 0, 1), 1, true);
+    windowFaceDepth(kitchenWindowTrim, 0, 0, 0, 1), 1, true, { bottomBoard: false });
   const sillFlowers = new THREE.Group();
   sillFlowers.name = 'Three small kitchen windowsill flower pots';
   kitchen.add(sillFlowers);
@@ -2138,7 +2175,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const flowerIvory = mat('#f1e8d4');
   const flowerPink = mat('#d4afa5');
   const flowerCenter = mat('#b69a54');
-  for (const [index, x] of [kitchenSinkWindows[0].x - 0.42, kitchenSinkX + 1.75, kitchenSinkWindows[2].x + 0.42].entries()) {
+  for (const [index, x] of [kitchenSinkX - 1.75, kitchenSinkX, kitchenSinkX + 1.75].entries()) {
     const pot = new THREE.Group();
     pot.name = `Kitchen sill flower pot ${index + 1}`;
     pot.position.set(x, kitchenSinkWindowSill, kitchenWindowWallZ + 0.175 - 0.25);
@@ -2174,7 +2211,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   const kitchenCenterZ = cooktopCenterZ;
   const cooktopRunWidth = cooktopRunEndZ - cooktopRunStartZ - 2 * (casingSideWidth + casingReveal);
-  const cooktopBaseWidths = [6, 21, 36, 21, 6].map((inches) => inches / 12);
+  const cooktopBaseWidths = [6, 27, 36, 27, 6].map((inches) => inches / 12);
   const cooktopBaseTotalWidth = cooktopBaseWidths.reduce((sum, width) => sum + width, 0);
   const cooktopBaseFillerWidth = (cooktopRunWidth - cooktopBaseTotalWidth) / 2;
   const cooktopFrontReveal = 0.125 / 12;
@@ -2186,7 +2223,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const cooktopCabinetry = new THREE.Group();
   cooktopCabinetry.name = 'Extended cooktop base cabinetry';
   cooktopCabinetry.position.x = cookingWallShiftX;
-  cooktopCabinetry.userData = { widthInches: cooktopRunWidth * 12, nominalBaseWidthsInches: [6, 21, 36, 21, 6], endFillerWidthInches: cooktopBaseFillerWidth * 12, depthInches: 24, heightInches: 34.5, frontRevealInches: 0.125, manufacturerSelected: false, provisional: true };
+  cooktopCabinetry.userData = { widthInches: cooktopRunWidth * 12, nominalBaseWidthsInches: [6, 27, 36, 27, 6], endFillerWidthInches: cooktopBaseFillerWidth * 12, depthInches: 24, heightInches: 34.5, frontRevealInches: 0.125, manufacturerSelected: false, provisional: true };
   kitchen.add(cooktopCabinetry);
   let cooktopModuleZ = cooktopCenterZ - cooktopBaseTotalWidth / 2;
   for (const [index, width] of cooktopBaseWidths.entries()) {
@@ -2263,7 +2300,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   cooktopUppers.name = 'Hood-flanking white-oak upper cabinets';
   cooktopUppers.position.x = cookingWallShiftX;
   kitchen.add(cooktopUppers);
-  const cooktopUpperWidth = 21 / 12;
+  const cooktopUpperWidth = 27 / 12;
   const cooktopUpperDepth = 1;
   const cooktopUpperBottom = 4.55;
   for (const side of [-1, 1]) {
@@ -2280,8 +2317,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       upperBody.userData = { cabinetBody: 'z+', nominalWidthInches: cooktopUpperWidth * 12, nominalHeightInches: (top - bottom) * 12, nominalDepthInches: 12 };
       const centerY = (bottom + top) / 2;
       const mainDoors = bottom === cooktopUpperBottom;
-      const front = shakerFront(upper, 0, centerY, cooktopUpperDepth / 2 + 0.04, cooktopUpperWidth - cooktopFrontReveal, top - bottom - cooktopFrontReveal);
-      cabinetPull(front, -side * (cooktopUpperWidth / 2 - (mainDoors ? 0.12 : 0.2)), bottom + 0.45 - centerY, 0.09, mainDoors ? 0.55 : 0.32, mainDoors);
+      for (const door of [-1, 1]) {
+        const front = shakerFront(upper, door * cooktopUpperWidth / 4, centerY, cooktopUpperDepth / 2 + 0.04, cooktopUpperWidth / 2 - cooktopFrontReveal, top - bottom - cooktopFrontReveal);
+        cabinetPull(front, -door * (cooktopUpperWidth / 4 - 0.2), bottom + 0.45 - centerY, 0.09, mainDoors ? 0.55 : 0.32, mainDoors);
+      }
     }
     box(upper, 0, (cooktopUpperBottom + 4.25 + cooktopCorniceBottom) / 2, 0, cooktopUpperWidth, cooktopCorniceBottom - cooktopUpperBottom - 4.25, cooktopUpperDepth, cabinetFinish).name = 'Cooking upper ceiling scribe';
     box(upper, 0, ceilingHeight - 0.075, 1 / 12, cooktopUpperWidth, 0.15, 14 / 12, cabinetRailFinish).name = 'Cooktop upper ceiling cornice';
@@ -2504,9 +2543,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const rest = new THREE.Group();
   scene.add(piano);
-  piano.position.set(3.1, 0, stairOpening.z - 0.4 - pianoDepth / 2);
+  // Keep 1/4 inch beyond the 3/4-inch baseboard; product ventilation is not verified.
+  piano.userData.wallRun = { minX: stairOpening.x, maxX: stairOpening.x + stairOpening.width, faceZ: stairOpening.z, rearGapInches: 1, windowShiftInches: 16 };
+  piano.position.set((piano.userData.wallRun.minX + piano.userData.wallRun.maxX) / 2 - piano.userData.wallRun.windowShiftInches / 12, 0, stairOpening.z - 1 / 12 - pianoDepth / 2);
   piano.rotation.y = Math.PI;
-  piano.userData.location = 'Living side of stair enclosure, keyboard facing north; verify occupied bench access, stair enclosure and power routing';
+  piano.userData.location = 'Living side of stair enclosure, 16 inches west toward fireplace windows, keyboard facing north; fireplace built-ins removed, west end 15.68 in to continuous window-wall baseboard (16.43 in to paint); verify occupied bench access, ventilation and power routing';
   rest.name = 'Remaining ground-floor furnishings';
   shell.add(rest);
   const tile = mat('#c5c2b6');
@@ -2558,6 +2599,36 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   const stairStepGlow = new THREE.MeshStandardMaterial({ color: '#fff0d7', emissive: '#ffd5a0', emissiveIntensity: 0, roughness: 0.6 });
+  const alcoveGuard = furnishing('Guest entry stair-side guard', 0, 0, 0, 0.005);
+  alcoveGuard.userData = { provisional: true, approvalRequired: true, note: '42-inch horizontal guard concept; engineer review of wall removal, jamb support, anchorage, openings and climbability required. Existing stair handrail omissions remain unresolved.' };
+  const guard = guestEntry.stairGuard;
+  for (const x of [guard.x + guard.postWidth / 2, guard.endX - guard.postWidth / 2]) {
+    box(alcoveGuard, x, guard.height / 2, guard.z, guard.postWidth, guard.height, guard.postWidth, black).name = 'Alcove stair guard post';
+  }
+  box(alcoveGuard, (guard.x + guard.endX) / 2, guard.height - 0.06, guard.z, guard.endX - guard.x, 0.12, 0.12, black).name = 'Alcove stair guard top rail';
+  for (let rail = 1; rail <= guard.barCount; rail++) {
+    box(alcoveGuard, (guard.x + guard.endX) / 2, rail * guard.barSpacing, guard.z, guard.endX - guard.x, 0.045, 0.045, black).name = 'Alcove stair horizontal guard rail';
+  }
+  // The removed wall also backed part of the upper flight: a ground guard alone cannot protect it.
+  const exposedUpperGuard = new THREE.Group();
+  exposedUpperGuard.name = 'Newly exposed upper-flight outer guard';
+  exposedUpperGuard.userData = { provisional: true, approvalRequired: true, note: 'Partial outer guard replaces removed wall backing only; remaining wall-backed handrail continuity still requires review.' };
+  stairs.add(exposedUpperGuard);
+  const exposedRun = stairOpening.x + stairOpening.width - guard.x;
+  const exposedPitch = [
+    [exposedRun, stairFloorToFloor - stairRise / 2 - exposedRun * stairRise / stairGoing],
+    [stairGoing / 2, stairFloorToFloor - stairRise],
+    [0, stairFloorToFloor]
+  ];
+  for (let segment = 1; segment < exposedPitch.length; segment++) {
+    const [x1, y1] = exposedPitch[segment - 1], [x2, y2] = exposedPitch[segment];
+    stairBeam('Exposed upper-flight handrail', [x1, y1 + 3, stairDepth], [x2, y2 + 3, stairDepth], 0.12, 0.12, oak, exposedUpperGuard);
+    for (let rail = 1; rail <= 8; rail++) stairBeam('Exposed upper-flight horizontal rail', [x1, y1 + rail / 3, stairDepth], [x2, y2 + rail / 3, stairDepth], 0.045, 0.045, black, exposedUpperGuard);
+  }
+  for (const [x, y] of exposedPitch) {
+    const treadY = x === 0 ? stairFloorToFloor : landingHeight + Math.floor((stairRun - x) / stairGoing + 1e-8 + 1) * stairRise;
+    box(exposedUpperGuard, x, (treadY + y + 3) / 2, stairDepth, 0.09, y + 3 - treadY, 0.09, black).name = 'Exposed upper-flight guard post';
+  }
   for (const upper of [false, true]) {
     const flight = new THREE.Group();
     flight.name = upper ? 'Upper stair flight' : 'Lower stair flight';
@@ -2598,7 +2669,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const side of [-1, 1]) {
       const stringerZ = centerZ + side * (flightWidth / 2 - 0.12);
       stairBeam('Stair stringer', [startX, baseHeight - 0.2, stringerZ], [endX, endHeight - stairRise - 0.2, stringerZ], 0.12, 0.3, oak);
-      // The powder-room wall replaces the upper flight's outer freestanding guard, not its stringer.
+      // Retained powder wall backs the rest; the newly exposed outer segment is guarded above.
       if (upper && side === 1) continue;
       const railZ = centerZ + side * (flightWidth / 2 + 0.08);
       const firstX = startX + direction * stairGoing / 2;
@@ -2631,9 +2702,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(stairBaseTrim, stairGoing / 2, 0.005 + firstStepTrimHeight / 2, -0.75 / 24, stairGoing, firstStepTrimHeight, 0.75 / 12, windowTrim).name = 'Bottom-step baseboard extension';
   box(stairBaseTrim, -0.75 / 24, 0.005 + firstStepTrimHeight / 2, (stairWidth - 0.75 / 12) / 2, 0.75 / 12, firstStepTrimHeight, stairWidth + 0.75 / 12, windowTrim).name = 'Bottom-step front trim return';
   box(stairBaseTrim, landingEndX + 0.75 / 24, 0.005 + 4 / 12, (stairEnclosureDepth - 0.75 / 12) / 2, 0.75 / 12, 8 / 12, stairEnclosureDepth + 0.75 / 12, windowTrim).name = 'Enclosure end baseboard return';
-  // Owner concept: omit only the short landing-side assembly at local z = -0.08.
-  // The enclosure below the +5 ft landing is not protection above its exposed edge.
-  // Builder must confirm wall/guard protection before construction; see optional notes.
+  const landingGuardZ = -0.08;
+  stairBeam('Turning landing side handrail', [stairRun, landingHeight + 3, landingGuardZ], [landingEndX, landingHeight + 3, landingGuardZ], 0.12, 0.12, oak);
+  for (let rail = 1; rail <= 8; rail++) {
+    stairBeam('Horizontal landing guard rail', [stairRun, landingHeight + rail / 3, landingGuardZ], [landingEndX, landingHeight + rail / 3, landingGuardZ], 0.045, 0.045, black);
+  }
+  for (const x of [stairRun, landingEndX - 0.045]) {
+    box(stairs, x, landingHeight + 1.5, landingGuardZ, 0.09, 3, 0.09, black).name = 'Landing guard post';
+  }
 
   const upstairsStairParts = stairs.children.slice();
   const basementStairs = new THREE.Group();
@@ -2696,6 +2772,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   const prep = furnishing('Prep kitchen cabinetry', 0, 0);
+  box(prep, 48.025, 2.97, kitchenWindowWallZ + 0.2, 14.35, 0.14, 0.05, countertop).name = 'Prep quartz rear wall closure';
+  box(prep, 55.2625, 1.4375, prepCounterZ, 0.125, 2.875, 2, cabinetFinish).name = 'Prep east wall scribe';
+  box(prep, 55.2625, 2.97, prepCounterZ - 0.025, 0.125, 0.14, 2.1, countertop).name = 'Prep quartz east wall closure';
+  for (const [x, width] of [[43.4, 5], [51.4, 2]]) {
+    box(prep, x, 2.8875, prepCounterZ, width, 0.025, 2, cabinetRailFinish).name = 'Prep cabinet counter support packer';
+    box(prep, x, 1.4375, kitchenWindowWallZ + 0.2125, width, 2.875, 0.075, cabinetFinish).name = 'Prep cabinet rear wall scribe';
+  }
   for (const x of [42.15, 44.65]) cabinet(prep, x, prepCounterZ, 2.5, 2, 2.85, false);
   box(prep, 40.875, 1.475, prepCounterZ, 0.05, 2.85, 2, cabinetFinish).name = 'Prep left 0.6 inch scribe filler';
   box(prep, 43.375, 2.97, prepCounterZ, 5.11, 0.14, 2.05, countertop).name = 'Prep continuous left quartz counter';
@@ -2715,6 +2798,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const prepExtensionBody = box(prepExtension, 0, 34.5 / 24, 0, 2.75, 34.5 / 12, 2, cabinetFinish);
   prepExtensionBody.name = 'Prep extension cabinet carcass';
   prepExtensionBody.userData.cabinetBody = 'z+';
+  box(prepExtension, 0, 2.8875, 0, 2.75, 0.025, 2, cabinetRailFinish).name = 'Prep extension counter support packer';
+  box(prepExtension, 0, 1.4375, -1.0375, 2.75, 2.875, 0.075, cabinetFinish).name = 'Prep extension rear wall scribe';
   box(prepExtension, 0.04, 2.97, 0, 2.83, 0.14, 2.05, countertop).name = 'Prep extension quartz counter';
   box(prepExtension, 1.4, 1.475, 0, 0.05, 2.85, 2, cabinetFinish).name = 'Prep right 0.6 inch scribe filler';
   for (const x of [-0.6875, 0.6875]) drawerFront(x, 1.04, 1.335, 0, prepExtension);
@@ -2728,6 +2813,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   prepSinkBody.userData.cabinetBody = 'z+';
   for (const side of [-1, 1]) {
     box(prepSink, side * (1.5 - 0.03125), 2.5, 0, 0.0625, 0.7, 2, cabinetFinish).name = 'Prep sink cabinet side';
+    box(prepSink, side * (1.5 - 0.03125), 2.875, 0, 0.0625, 0.05, 2, cabinetRailFinish).name = 'Prep sink counter support packer';
     const front = shakerFront(prepSink, side * 0.75, 1.475, 1.04, 1.46, 2.81);
     cabinetPull(front, -side * 0.55, 0.9, 0.09, 0.6, true);
     box(prepSink, side * 1.375, 2.97, 0, 0.25, 0.14, 2.05, countertop).name = 'Prep sink side counter';
@@ -2742,10 +2828,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   cylinder(prepSink, 0, 3.98, -0.28, 0.045, 0.2, steel).name = 'Prep sink faucet outlet';
   const prepTrimBottom = prepCounterWindowBank.sill - 1 / 12 - casingSideWidth;
   const prepTrimHalfWidth = prepCounterWindowBank.width / 2 + casingSideWidth + casingReveal;
-  box(prep, 48.025, (3.04 + prepTrimBottom) / 2, kitchenWindowWallZ + 0.22, 14.35, prepTrimBottom - 3.04, 0.08, countertop).name = 'Prep quartz backsplash';
+  box(prep, 48.025, (3.04 + prepTrimBottom) / 2, kitchenWindowWallZ + 0.2175, 14.35, prepTrimBottom - 3.04, 0.085, countertop).name = 'Prep quartz backsplash';
   for (const [left, right] of [[40.85, prepCounterWindowBank.x - prepTrimHalfWidth - 1 / 192], [prepCounterWindowBank.x + prepTrimHalfWidth + 1 / 192, 55.2]]) {
-    box(prep, (left + right) / 2, (prepTrimBottom + 3.04 + 4 / 12) / 2, kitchenWindowWallZ + 0.22,
-      right - left, 3.04 + 4 / 12 - prepTrimBottom, 0.08, countertop).name = 'Prep quartz backsplash';
+    box(prep, (left + right) / 2, (prepTrimBottom + 3.04 + 4 / 12) / 2, kitchenWindowWallZ + 0.2175,
+      right - left, 3.04 + 4 / 12 - prepTrimBottom, 0.085, countertop).name = 'Prep quartz backsplash';
   }
   const prepWindowBank = new THREE.Group();
   prepWindowBank.name = prepCounterWindowBank.name;
@@ -2757,6 +2843,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     frame.userData.openingGroup = prepCounterWindowBank.name;
   }
   openingCasing(prepWindowBank, 0, prepCounterWindowBank.sill, prepCounterWindowBank.width, prepCounterWindowBank.height, windowFaceDepth(prepWindowBank, 0, prepCounterWindowBank.sill, 0, 1), 1, true);
+  addWindowShadeDivisions(prepWindowBank, box, windowTrim,
+    prepCounterWindows.slice(0, -1).map(unit => unit.x + unit.width / 2 - prepCounterWindowBank.x),
+    prepCounterWindowBank.sill, prepCounterWindowBank.height, windowFaceDepth(prepWindowBank, 0, prepCounterWindowBank.sill, 0, 1));
   windowFrame(prepEndWindow.name, prepEndWindow.x, prepEndWindow.z, prepEndWindow.width, prepEndWindow.height, prepEndWindow.sill, -Math.PI / 2, rest, 1, { standardSizeCode: prepEndWindow.standardSizeCode });
   for (const { name, x, z, width, height, sill, sillAboveFloor } of garageClerestories) {
     const frame = windowFrame(name, x, z, width, height, sill, -Math.PI / 2, rest, 1, { picture: true });
@@ -2770,6 +2859,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const prepApplianceTop = 5;
   const prepTowerFront = prepTowerDepth / 2 + 0.04;
   prepTower.userData = { widthInches: 33, depthInches: 24, heightInches: 96, nominalApplianceWidthInches: 30, allowanceHeightInches: 48, modelSelected: false, provisional: true };
+  box(prepTower, -prepTowerWidth / 2 - 0.325 / 2, 4, 0, 0.325, 8, prepTowerDepth, cabinetFinish).name = 'Prep tower west wall filler';
+  box(prepTower, prepTowerWidth / 2 + 0.05, 1.4375, 0, 0.1, 2.875, prepTowerDepth, cabinetFinish).name = 'Prep tower to base filler';
+  box(prepTower, prepTowerWidth / 2 + 0.035, 2.97, -0.025, 0.07, 0.14, 2.1, countertop).name = 'Prep tower landing quartz closure';
+  box(prepTower, -0.1625, 4, -prepTowerDepth / 2 - 0.0375, prepTowerWidth + 0.325, 8, 0.075, cabinetFinish).name = 'Prep tower rear wall scribe';
   for (const side of [-1, 1]) {
     box(prepTower, side * (prepTowerWidth - prepTowerSide) / 2, 4.075, 0, prepTowerSide, 7.55, prepTowerDepth, cabinetFinish).name = 'Prep appliance tower side';
   }
@@ -2867,16 +2960,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const prepShelfStart = 37.5 + 0.175;
   const prepShelfEnd = 55.5 - 0.175;
-  const prepShelves = furnishing('Prep open pantry shelves', (prepShelfStart + prepShelfEnd) / 2, 14.325);
+  const prepShelves = furnishing('Prep open pantry shelves', (prepShelfStart + prepShelfEnd) / 2, 14.825 - 8 / 12);
   const prepShelfWidth = prepShelfEnd - prepShelfStart;
-  const prepShelfDepth = 1;
+  const prepShelfDepth = 16 / 12;
   const prepShelfThickness = 0.75 / 12;
   const prepShelfBottom = 0.75;
   const prepShelfLevels = [1, 2.3, 3.6, 4.9, 6.2, 7.5, ceilingHeight - prepShelfThickness / 2];
   const prepShelfBays = 5;
   const prepCleaningBay = 0;
   const prepRobotBay = prepShelfBays - 1;
-  prepShelves.userData = { widthInches: prepShelfWidth * 12, depthInches: 12, bays: prepShelfBays, foodBays: 4, cleaningBays: 1, cleaningBayDepthInches: 12, robotDockBay: 5, shelfLevels: prepShelfLevels.length, ceilingHeight, provisional: true };
+  prepShelves.userData = { widthInches: prepShelfWidth * 12, depthInches: 16, bays: prepShelfBays, foodBays: 4, cleaningBays: 1, cleaningBayDepthInches: 16, robotDockBay: 5, shelfLevels: prepShelfLevels.length, ceilingHeight, provisional: true };
   for (let support = 0; support <= prepShelfBays; support++) {
     const x = -prepShelfWidth / 2 + prepShelfThickness / 2 + support * (prepShelfWidth - prepShelfThickness) / prepShelfBays;
     box(prepShelves, x, (prepShelfBottom + ceilingHeight) / 2, 0, prepShelfThickness, ceilingHeight - prepShelfBottom, prepShelfDepth, cabinetFinish).name = 'Pantry shelf upright';
@@ -2896,13 +2989,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const prepCleaningDepth = prepShelfDepth;
   const prepCleaningRearZ = 14.825;
   const cleaningStation = furnishing('Prep cleaning station', (prepCleaningLeft + prepCleaningRight) / 2, prepCleaningRearZ - prepCleaningDepth / 2);
-  cleaningStation.userData = { convertedPantryBay: 1, widthInches: prepCleaningWidth * 12, clearWidthInches: (prepCleaningWidth - 2 * prepShelfThickness) * 12, depthInches: 12, tallOpeningHeightInches: (6.2 - prepShelfThickness / 2) * 12, upperShelfLevels: 2, doors: false, equipmentSelected: false, provisional: true };
+  cleaningStation.userData = { convertedPantryBay: 1, widthInches: prepCleaningWidth * 12, clearWidthInches: (prepCleaningWidth - 2 * prepShelfThickness) * 12, depthInches: 16, tallOpeningHeightInches: (6.2 - prepShelfThickness / 2) * 12, upperShelfLevels: 2, doors: false, equipmentSelected: false, provisional: true };
+  box(cleaningStation, -prepCleaningWidth / 2 - (0.175 - prepShelfThickness) / 2, (prepShelfBottom + ceilingHeight) / 2, 0, 0.175 - prepShelfThickness, ceilingHeight - prepShelfBottom, prepCleaningDepth, cabinetFinish).name = 'Prep cleaning bay end scribe';
   for (const side of [-1, 1]) {
     box(cleaningStation, side * (prepCleaningWidth - prepShelfThickness) / 2, ceilingHeight / 2, 0, prepShelfThickness, ceilingHeight, prepCleaningDepth, cabinetFinish).name = 'Cleaning station full-height side panel';
   }
   box(cleaningStation, 0, ceilingHeight / 2, prepCleaningDepth / 2 - 0.03, prepCleaningWidth - 2 * prepShelfThickness, ceilingHeight, 0.06, cabinetFinish).name = 'Cleaning station backing';
   for (const y of [6.2, 7.5, ceilingHeight - prepShelfThickness / 2]) {
-    box(cleaningStation, 0, y, 0, prepCleaningWidth - 2 * prepShelfThickness, prepShelfThickness, prepCleaningDepth - 0.12, cabinetRailFinish).name = y > 8 ? 'Cleaning station ceiling cap' : 'Cleaning station upper shelf';
+    box(cleaningStation, 0, y, -0.03, prepCleaningWidth - 2 * prepShelfThickness, prepShelfThickness, prepCleaningDepth - 0.06, cabinetRailFinish).name = y > 8 ? 'Cleaning station ceiling cap' : 'Cleaning station upper shelf';
   }
   const cleaningVacuum = new THREE.Group();
   cleaningVacuum.name = 'Prep stored stick vacuum';
@@ -2913,8 +3007,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   cylinder(cleaningVacuum, 0, 1.9, 0, 0.045, 3.4, steel).name = 'Stored vacuum wand';
   box(cleaningVacuum, 0, 3.45, 0, 0.4, 0.75, 0.45, black, true).name = 'Stored vacuum motor and battery';
   box(cleaningVacuum, 0, 3.85, 0.1, 0.3, 0.3, 0.12, steel).name = 'Stored vacuum grip';
-  box(cleaningStation, -1.05, 3.25, 0.35, 0.38, 0.65, 0.16, black).name = 'Vacuum wall charging mount allowance';
-  box(cleaningStation, -1.05, 3.25, 0.22, 0.12, 0.12, 0.42, black).name = 'Vacuum mount support';
+  box(cleaningStation, -1.05, 3.25, 0.35 + 2 / 12, 0.38, 0.65, 0.16, black).name = 'Vacuum wall charging mount allowance';
+  box(cleaningStation, -1.05, 3.25, 0.22 + 1 / 12, 0.12, 0.12, 0.42 + 2 / 12, black).name = 'Vacuum mount support';
   const cleaningBroom = new THREE.Group();
   cleaningBroom.name = 'Prep stored broom';
   cleaningBroom.position.set(-0.25, 0, 0.1);
@@ -2922,8 +3016,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   cylinder(cleaningBroom, 0, 2.35, 0, 0.035, 4.1, oak).name = 'Stored broom handle';
   box(cleaningBroom, 0, 0.35, 0, 0.5, 0.2, 0.2, black).name = 'Stored broom head';
   for (let bristle = 0; bristle < 6; bristle++) box(cleaningBroom, (bristle - 2.5) * 0.08, 0.15, 0, 0.065, 0.3, 0.18, linen).name = 'Broom bristles';
-  box(cleaningStation, -0.25, 4.25, 0.28, 0.12, 0.14, 0.32, brass).name = 'Broom retaining clip allowance';
-  box(cleaningStation, 0.2, 1.3, 0.42, 0.25, 0.4, 0.03, cream).name = 'Cleaning station power outlet allowance';
+  box(cleaningStation, -0.25, 4.25, 0.28 + 1 / 12, 0.12, 0.14, 0.32 + 2 / 12, brass).name = 'Broom retaining clip allowance';
+  box(cleaningStation, 0.2, 1.3, prepCleaningDepth / 2 - 0.08, 0.25, 0.4, 0.03, cream).name = 'Cleaning station power outlet allowance';
   for (const x of [-0.75, 0.75]) {
     box(cleaningStation, x, 6.55, 0, 1.15, 0.63, 0.75, linen, true).name = 'Cleaning accessory storage bin';
   }
@@ -2941,7 +3035,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   cylinder(cleaningRobot, 0, 4 / 12 - 0.005, 0, 0.14, 0.01, steel).name = 'Robot vacuum top control';
   box(robotDock, 0, 1 / 3, 0.64, 14 / 12, 2 / 3, 0.25, black, true).name = 'Compact robot charging base allowance';
   box(robotDock, 0, 0.12, 0.48, 0.8, 0.12, 0.08, steel).name = 'Robot charging contacts allowance';
-  box(prepShelves, prepRobotX - prepShelves.position.x + 0.9, 0.75, 0.46, 0.25, 0.4, 0.03, cream).name = 'Robot dock power outlet allowance';
+  box(prepShelves, prepRobotX - prepShelves.position.x + 0.9, 0.75, prepShelfDepth / 2 - 0.04, 0.25, 0.4, 0.03, cream).name = 'Robot dock power outlet allowance';
 
   const pantryContents = new THREE.Group();
   pantryContents.name = 'Prep pantry contents';
@@ -3856,8 +3950,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const trofastBay = (trofastWidth - 4 * trofastPanel) / 3;
   const trofastMesh = mat('#555e5c');
   const trofastWire = mat('#7c8582');
-  for (let index = 0; index < 2; index++) {
-    const x = kidsRoom.x + kidsRoom.width - 0.35 - trofastWidth / 2 - (1 - index) * (trofastWidth + 2 / 12);
+  for (let index = 0; index < 1; index++) {
+    const x = kidsRoom.x + kidsRoom.width - 0.35 - trofastWidth / 2;
     const storage = furnishing(`IKEA TROFAST toy storage ${index + 1}`, x, kidsRoom.z + 0.35 + trofastDepth / 2);
     storage.userData = { manufacturer: 'IKEA', model: 'TROFAST', articleNumber: '796.131.29', productURL: 'https://www.ikea.com/us/en/p/trofast-storage-combination-with-boxes-room-divider-white-dark-gray-s79613129/', widthInches: 39, depthInches: 17.375, heightInches: 37, finish: 'White frame / dark gray mesh boxes', removableBoxes: 9, wallAnchorageRequired: true, looseLegoRequiresLiddedInserts: true, binPullAllowanceInches: 17.375, manufacturerCAD: false, provisional: true };
     for (const y of [trofastPanel / 2, trofastHeight - trofastPanel / 2]) box(storage, 0, y, 0, trofastWidth, trofastPanel, trofastDepth, porcelain).name = 'TROFAST white horizontal frame';
@@ -3893,10 +3987,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const kidsDeskWidth = 47.25 / 12;
   const kidsDeskDepth = 31.5 / 12;
   const kidsDeskHeight = 29.5 / 12;
-  const kidsDeskZ = guestSuite.bathroom.z - 0.35 - kidsDeskDepth / 2;
+  const kidsDeskZ = guestSuite.bathroom.z - 0.175 - kidsDeskDepth / 2;
   for (let index = 0; index < 2; index++) {
     const rotation = Math.PI;
-    const x = kidsRoom.x + kidsRoom.southWidth - 0.175 - 1 / 12 - kidsDeskWidth / 2 - (1 - index) * 4.1;
+    const x = kidsRoom.x + kidsRoom.southWidth - 0.175 - 1 / 12 - kidsDeskWidth / 2 - (1 - index) * (kidsDeskWidth + 1 / 12);
     const z = kidsDeskZ;
     const desk = furnishing(`IKEA MITTZON kids desk ${index + 1}`, x, z, rotation);
     desk.userData = { manufacturer: 'IKEA', model: 'MITTZON', widthInches: 47.25, depthInches: 31.5, heightInches: 29.5, minHeightInches: 24.375, maxHeightInches: 49.625, productURL: 'https://www.ikea.com/us/en/p/mittzon-desk-sit-stand-electric-birch-veneer-white-s09527743/', finish: 'Birch veneer / white', manufacturerCAD: false, chairAllowanceInches: 30, purpose: index === 0 ? 'All-in-one PC' : 'Homework and crafts', childUseRequiresReview: true };
@@ -4066,38 +4160,151 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   for (const side of [-1, 1]) cylinder(guestBedroomLeaf, side * 0.13, 3.2, -2.72, 0.07, 0.14, brass).name = 'Guest bedroom gold door knob';
 
   const wardrobe = furnishing('Guest walk-in closet fittings', guestSuite.closet.x, guestSuite.closet.z);
-  wardrobe.userData = { hangingRunInches: 51, clothingDepthAllowanceInches: 24, doorless: true, provisional: true };
+  wardrobe.userData = { hangingRunInches: 48, clothingDepthAllowanceInches: 24, doorless: true, provisional: true,
+    finish: 'Proposed light natural oak-look; California Closets design direction, not selected product',
+    review: 'Confirm finish, reach, adjustable fittings, loads, anchorage and drawer hardware with supplier' };
+  const closetPanel = 0.0625;
+  // Standard 24-inch envelopes; the dedicated clipped corner is open to the
+  // aisle, not a blind square behind two perpendicular hanging reservations.
+  function closetCarcass(parent, width, depth, cornerSide = 0) {
+    // Corner-facing partitions stop at the diagonal opening, rather than
+    // sealing the corner behind two full-depth panels that meet at a point.
+    for (const side of [-1, 1]) box(parent, side * (width - closetPanel) / 2, 3.75,
+      side === cornerSide ? -0.625 : 0,
+      closetPanel, 7, side === cornerSide ? 0.75 : depth, oak).name =
+        side === cornerSide ? 'Guest closet full-height corner return panel' : 'Guest closet full-height side panel';
+    for (const y of [0.28125, 7.21875]) box(parent, 0, y, 0,
+      width - 2 * closetPanel, closetPanel, depth, oak).name = 'Guest closet carcass floor or cap';
+    box(parent, 0, 3.75, -depth / 2 + closetPanel / 2,
+      width - 2 * closetPanel, 6.875, closetPanel, oak).name = 'Guest closet back panel';
+    box(parent, 0, 0.125, -0.05, width, 0.25, depth - 0.1, oak).name = 'Guest closet recessed plinth';
+  }
   for (const run of guestSuite.closetStorage.hanging) {
     const centerX = run.x + run.w / 2, centerZ = run.z + run.d / 2;
-    const shelf = box(wardrobe, centerX, 7.4, centerZ, run.w, 0.08, run.d, oak);
+    const bay = new THREE.Group();
+    bay.name = run.double ? 'Guest closet 24-inch double-hang module' : 'Guest closet 24-inch long-hang module';
+    bay.position.set(centerX, 0, centerZ);
+    wardrobe.add(bay);
+    closetCarcass(bay, run.w, run.d, run.double ? 0 : -1);
+    const shelf = box(bay, 0, 7, 0.03125, run.w - 2 * closetPanel, closetPanel, run.d - closetPanel, oak);
     shelf.name = 'Guest closet hanging-zone upper shelf';
     shelf.userData.hangingDepthInches = run.d * 12;
-    for (const y of run.double ? [3.1, 5.8] : [5.8]) {
-      const rail = cylinder(wardrobe, centerX, y, centerZ, 0.045, run.w - 0.2, brass);
+    for (const y of run.double ? [3.45, 6.7] : [5.8]) {
+      const rail = cylinder(wardrobe, centerX, y, centerZ + 0.05, 0.035, run.w - 2 * closetPanel, brass);
       rail.rotation.z = Math.PI / 2;
       rail.name = run.double ? 'Guest closet continuous short-hang rail' : 'Guest closet continuous long-hang rail';
     }
-    const count = run.double ? 4 : 8;
+    const count = 4;
     for (let i = 0; i < count; i++) {
       const x = run.x + (i + 0.5) * run.w / count;
-      box(wardrobe, x, run.double ? 4.6 : 3.2, centerZ, 0.12, run.double ? 2 : 4.8, 1.6, i % 2 ? cream : linen).name = 'Guest closet hanging garment';
-      if (run.double) box(wardrobe, x, 1.9, centerZ, 0.12, 2, 1.6, cream).name = 'Guest closet hanging garment';
+      for (const railY of run.double ? [3.45, 6.7] : [5.8]) {
+        const hanger = cylinder(wardrobe, x, railY - 0.14, centerZ + 0.05, 0.018, 1.5, brass);
+        hanger.rotation.x = Math.PI / 2;
+        hanger.name = 'Guest closet garment hanger';
+        const length = run.double ? 2.8 : 5.05;
+        box(wardrobe, x, railY - 0.25 - length / 2, centerZ + 0.05, 0.12, length, 1.7, i % 2 ? cream : linen).name = 'Guest closet hanging garment';
+      }
     }
   }
   const closetShelves = guestSuite.closetStorage.shelves;
-  for (const y of [1, 2.5, 4, 5.5, 7]) box(wardrobe, closetShelves.x + closetShelves.w / 2, y, closetShelves.z + closetShelves.d / 2, closetShelves.w, 0.08, closetShelves.d, oak).name = 'Guest wardrobe folded-clothes shelf';
+  const corner = guestSuite.closetStorage.corner;
+  // Five-sided shelves join both runs along 9-inch edges, leaving a 21.2-inch
+  // diagonal opening. Back boards stop at contact; no double-occupied corner.
+  function cornerDeck(y, name) {
+    const p = closetPanel;
+    const shape = new THREE.Shape();
+    shape.moveTo(p, p); shape.lineTo(2, p); shape.lineTo(2, 2 - corner.clip);
+    shape.lineTo(2 - corner.clip, 2); shape.lineTo(p, 2); shape.closePath();
+    const deck = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: p, bevelEnabled: false }), oak);
+    deck.rotation.x = Math.PI / 2;
+    // Shape y becomes world z; extrusion points downward.
+    deck.position.set(corner.x, y + p / 2, corner.z);
+    deck.name = name;
+    wardrobe.add(deck);
+  }
+  box(wardrobe, corner.x + 1, 3.75, corner.z + closetPanel / 2, 2, 7, closetPanel, oak).name = 'Guest closet corner north back';
+  box(wardrobe, corner.x + closetPanel / 2, 3.75, corner.z + 1 + closetPanel / 2, closetPanel, 7, 2 - closetPanel, oak).name = 'Guest closet corner west back';
+  for (const y of [0.28125, 2.65, 3.8, 5, 6.2, 7, 7.21875])
+    cornerDeck(y, 'Guest closet connected diagonal corner shelf');
+  for (const [x, z, w, d] of [[1, 0.15, 2, 0.2], [0.15, 1.125, 0.2, 1.75]])
+    box(wardrobe, corner.x + x, 0.125, corner.z + z, w, 0.25, d, oak).name = 'Guest closet corner recessed plinth';
+  const endBay = new THREE.Group();
+  const end = guestSuite.closetStorage.westShelving;
+  endBay.name = 'Guest closet west 18-inch shelf module';
+  endBay.position.set(end.x + end.w / 2, 0, end.z + end.d / 2);
+  endBay.rotation.y = Math.PI / 2;
+  wardrobe.add(endBay);
+  closetCarcass(endBay, 1.5, 2);
+  for (const y of [1.45, 2.65, 3.8, 5, 6.2, 7])
+    box(endBay, 0, y, 0.03125, 1.375, closetPanel, 1.9375, oak).name = 'Guest closet west end adjustable shelf';
+  const filler = guestSuite.closetStorage.northFiller;
+  box(wardrobe, filler.x + filler.w / 2, 3.75, filler.z + filler.d - 0.03125, filler.w, 7, closetPanel, oak).name = 'Guest closet separate 3-inch east filler';
+  for (const y of [0.28125, 7.21875])
+    box(wardrobe, filler.x + filler.w / 2, y, filler.z + (filler.d - closetPanel) / 2,
+      filler.w, closetPanel, filler.d - closetPanel, oak).name = 'Guest closet east filler floor or cap';
+  box(wardrobe, filler.x + filler.w / 2, 3.75, filler.z + closetPanel / 2,
+    filler.w, 6.875, closetPanel, oak).name = 'Guest closet east filler back panel';
+  box(wardrobe, filler.x + filler.w / 2, 0.125, filler.z + 0.95,
+    filler.w, 0.25, 1.9, oak).name = 'Guest closet east filler recessed plinth';
+  const westTower = new THREE.Group();
+  westTower.name = 'Guest closet west 24-inch drawer and shelf tower';
+  westTower.position.set(closetShelves.x + closetShelves.w / 2, 0, closetShelves.z + closetShelves.d / 2);
+  westTower.rotation.y = Math.PI / 2;
+  wardrobe.add(westTower);
+  closetCarcass(westTower, 2, 2, 1);
+  for (const y of [2.65, 3.8, 5, 6.2, 7]) {
+    box(westTower, 0, y, 0.03125, 1.875, closetPanel, 1.9375, oak).name = 'Guest wardrobe adjustable folded-clothes shelf';
+    for (const side of [-1, 1]) for (const z of [-0.5, 0.5])
+      box(westTower, side * 0.92, y - 0.045, z, 0.035, 0.035, 0.06, brass).name = 'Guest closet schematic shelf pin';
+  }
+  // Schematic 32 mm adjustment pattern, limited to a useful upper adjustment
+  // band rather than thousands of individual holes throughout the house.
+  for (const [bay, width] of [[westTower, 2], [endBay, 1.5]]) {
+    for (const side of [-1, 1]) for (const z of [-0.75, 0.75]) for (let i = 0; i < 12; i++)
+      box(bay, side * (width / 2 - closetPanel - 0.001), 4.1 + i * 32 / 304.8, z,
+        0.002, 0.012, 0.012, black).name = 'Guest closet schematic 32mm shelf-pin hole';
+  }
+  for (let row = 0; row < 3; row++) {
+    const drawer = new THREE.Group();
+    drawer.name = `Guest closet pull-out drawer ${row + 1}`;
+    drawer.position.y = 0.7 + row * 0.65;
+    drawer.userData = { travelFeet: 1.25, shownClosed: true, hardwareSelected: false };
+    westTower.add(drawer);
+    const front = new THREE.Group();
+    front.position.set(0, 0, 1.04);
+    front.userData = { cabinetFront: true, width: 1.94, height: 0.59 };
+    drawer.add(front);
+    box(front, 0, 0, 0, 1.94, 0.59, 0.0625, oak).name = 'Guest closet flat drawer slab';
+    front.name = 'Guest closet flat drawer front';
+    front.userData.finish = 'Proposed light oak-look, not solid wood or selected vendor finish';
+    front.traverse((part) => { if (part.isMesh) part.material = oak; });
+    cabinetPull(front, 0, 0, 0.09, 0.5);
+    box(drawer, 0, -0.22, 0.3, 1.75, 0.04, 1.3, oak).name = 'Guest closet drawer floor';
+    for (const side of [-1, 1]) {
+      box(drawer, side * 0.855, 0, 0.3, 0.04, 0.4, 1.3, oak).name = 'Guest closet drawer side';
+      box(drawer, 0, 0, 0.3 + side * 0.63, 1.67, 0.4, 0.04, oak).name = 'Guest closet drawer end';
+    }
+  }
+  wardrobe.traverse((part) => {
+    if (part.isMesh && part.material === oak)
+      part.material = /shelf|floor|cap|plinth/.test(part.name) ? cabinetRailFinish : cabinetFinish;
+  });
   const bathroomOpening = guestSuite.bathroomDoor;
-  const bathroomPocketDoor = furnishing('Guest bathroom pocket door proposal - framing approval required', bathroomOpening.x + bathroomOpening.width / 2, bathroomOpening.z);
-  bathroomPocketDoor.userData = {
-    nominalWidthInches: bathroomOpening.width * 12, heightInches: bathroomOpening.height * 12,
-    operation: 'Slides east into partition; shown closed', targetClearWidthInches: bathroomOpening.pocket.targetClearWidth * 12,
-    closedCenterX: bathroomOpening.x + bathroomOpening.width / 2, openCenterX: bathroomOpening.pocket.x + bathroomOpening.width / 2 - 0.1,
-    approvalRequired: true, review: 'Pocket framing, wall thickness, nonpenetrating fixings, services and privacy hardware; cavity is schematic', provisional: true
-  };
-  bathroomPocketDoor.userData.interactiveHouseDoor = { operation: 'sliding', open: false, closedCenterX: bathroomPocketDoor.userData.closedCenterX, openCenterX: bathroomPocketDoor.userData.openCenterX };
-  singlePanelDoor(bathroomPocketDoor, 0, bathroomOpening.height / 2, 0, bathroomOpening.width + 0.08, bathroomOpening.height - 0.04, 0.13, windowTrim).name = 'Guest bathroom painted-white pocket leaf';
-  // Keep the pull on the retained west/leading stile, reachable at the open stop.
-  for (const face of [-1, 1]) box(bathroomPocketDoor, -bathroomOpening.width / 2 + 0.04, 3, face * 0.066, 0.12, 0.5, 0.012, brass).name = 'Guest bathroom flush privacy pull concept';
+  const bathroomDoor = furnishing('Guest bathroom inward-opening door', bathroomOpening.x, bathroomOpening.z);
+  bathroomDoor.userData = { hinge: 'West jamb', heightInches: 96, nominalWidthInches: 28, provisional: true,
+    interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: 1 } };
+  singlePanelDoor(bathroomDoor, bathroomOpening.width / 2, 4, 0, bathroomOpening.width - 0.04, 7.96, 0.13, windowTrim).name = 'Guest bathroom painted-white Shaker leaf';
+  for (const side of [-1, 1]) box(bathroomDoor, bathroomOpening.width - 0.2, 3, side * 0.14, 0.16, 0.15, 0.15, brass, true).name = 'Guest bathroom satin-gold knob';
+  const closetOpening = guestSuite.closetDoor;
+  const closetPocket = furnishing('Guest walk-in closet left pocket door', closetOpening.x + 1.5, closetOpening.z);
+  closetPocket.userData = { nominalWidthInches: 36, heightInches: 96, provisional: true,
+    interactiveHouseDoor: { operation: 'sliding', open: false, closedCenterX: closetOpening.x + 1.5, openCenterX: closetOpening.x + 1.5 - closetOpening.pocket.travel } };
+  singlePanelDoor(closetPocket, 0, 4, 0, closetOpening.pocket.leafWidth, 7.96, 0.13, windowTrim).name = 'Guest closet painted-white pocket leaf';
+  for (const side of [-1, 1]) box(closetPocket, 1.46, 3, side * 0.066, 0.12, 0.5, 0.012, brass).name = 'Guest closet flush pocket pull';
+  // Edge pull remains exposed on the trailing edge when both face pulls tuck away.
+  box(closetPocket, 1.535, 3, 0, 0.01, 0.3, 0.08, brass).name = 'Guest closet flush retractable edge pull concept';
+  const closetTrack = furnishing('Guest closet pocket track framing concept', closetOpening.pocket.x, closetOpening.z);
+  box(closetTrack, (closetOpening.x + 3 - closetOpening.pocket.x) / 2, 8.15, 0, closetOpening.x + 3 - closetOpening.pocket.x, 0.1, 0.12, steel).name = 'Guest closet pocket overhead track';
   const guestCoats = furnishing('Guest coat closet', 9.65, guestEntry.coatCloset.z + guestEntry.coatCloset.d / 2);
   guestCoats.scale.z = -1;
   guestCoats.userData = { purpose: 'Guest coats, separate from powder room', nominalWidthInches: 61.2, nominalDepthInches: 28.8, clearDepthInches: 24.6, doorWidthInches: 48, doorHeightInches: guestEntry.closetDoor.height * 12, provisional: true };
@@ -4150,7 +4357,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const panel = 0.75 / 12;
     unit.userData = { widthInches: width * 12, depthInches: 18, basinCount, basinCenterSpacingInches: 0, cabinetDoors: 2, openBayWidthInches: (doorWidth - 1.5 * panel) * 12, finish: 'Natural white oak Shaker with satin-gold bar pulls', drawers: 3, drawerBankSide: 'Right facing sink', drawerBankWidthInches: drawerWidth * 12, drawerTravelInches: 15, provisional: true, productFitVerified: false, plumbingVerified: false };
     for (const center of [-width / 2 + panel / 2, dividerX, width / 2 - panel / 2]) {
-      box(unit, center, 1.5, 0, panel, 2.4, 1.5, cabinetFinish).name = 'Guest vanity side or divider';
+      const divider = center === dividerX;
+      box(unit, center, divider ? 1.35 : 1.5, 0, panel, divider ? 2.1 : 2.4, 1.5, cabinetFinish).name = 'Guest vanity side or divider';
     }
     box(unit, 0, 1.5, -0.75 + panel / 2, width - 2 * panel, 2.4, panel, cabinetFinish).name = 'Guest vanity back';
     // Continuous floor and recessed toe kick; removable bin rests above the floor.
@@ -4161,9 +4369,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const bowlWidth = 14 / 12, bowlDepth = 10 / 12;
     for (const side of [-1, 1]) {
       const edge = side * (width + 0.06) / 2;
-      const bowlEdge = bayCenter + side * bowlWidth / 2;
+      const bowlEdge = side * bowlWidth / 2;
       box(unit, (edge + bowlEdge) / 2, 2.77, 0, Math.abs(edge - bowlEdge), 0.14, 1.55, guestVanityStone).name = 'Guest vanity countertop side';
-      box(unit, bayCenter, 2.77, side * (1.55 + bowlDepth) / 4, bowlWidth, 0.14, (1.55 - bowlDepth) / 2, guestVanityStone).name = 'Guest vanity countertop edge';
+      box(unit, 0, 2.77, side * (1.55 + bowlDepth) / 4, bowlWidth, 0.14, (1.55 - bowlDepth) / 2, guestVanityStone).name = 'Guest vanity countertop edge';
     }
     box(unit, 0, 2.6475, 0.75, width - 0.04, 0.105, 0.08, cabinetRailFinish).name = 'Guest vanity upper apron';
     for (const side of [-1, 1]) {
@@ -4185,9 +4393,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       box(basket, 0, binHeight / 2, side * (binWidth - binWall) / 2, binWidth - 2 * binWall, binHeight, binWall, oak).name = 'Guest wastebasket end';
     }
     // Schematic rear/high trap and supplies; no plumbing through the removable bin.
-    cylinder(unit, bayCenter, 2.4, -0.25, 0.045, 0.5, steel).name = 'Guest vanity waste tailpiece';
-    box(unit, bayCenter, 2.14, -0.43, 0.09, 0.09, 0.45, steel).name = 'Guest vanity rear trap allowance';
-    for (const side of [-1, 1]) cylinder(unit, bayCenter + side * 0.3, 2.32, -0.6, 0.025, 0.45, brass).name = 'Guest vanity rear supply';
+    cylinder(unit, 0, 2.4, -0.25, 0.045, 0.5, steel).name = 'Guest vanity waste tailpiece';
+    box(unit, 0, 2.14, -0.43, 0.09, 0.09, 0.45, steel).name = 'Guest vanity rear trap allowance';
+    for (const side of [-1, 1]) cylinder(unit, side * 0.15, 2.32, -0.6, 0.025, 0.45, brass).name = 'Guest vanity rear supply';
     const drawerBoxWidth = drawerWidth - 0.25;
     for (let row = 0; row < 3; row++) {
       const drawer = new THREE.Group();
@@ -4199,12 +4407,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       front.name = 'Guest vanity drawer Shaker front';
       cabinetPull(front, 0, 0.04, 0.09, 0.4);
       box(drawer, 0, -0.255, 0.075, drawerBoxWidth, 0.04, 1.25, oak).name = 'Guest vanity drawer bottom';
+      // The top box is shallow below the centered bowl; front and full travel remain.
+      const boxHeight = row === 2 ? 0.16 : 0.55;
+      const boxY = row === 2 ? -0.155 : 0;
       for (const edge of [-1, 1]) {
-        box(drawer, edge * (drawerBoxWidth - 0.04) / 2, 0, 0.075, 0.04, 0.55, 1.25, oak).name = 'Guest vanity drawer side';
-        box(drawer, 0, 0, 0.075 + edge * 0.605, drawerBoxWidth - 0.08, 0.55, 0.04, oak).name = 'Guest vanity drawer end';
+        box(drawer, edge * (drawerBoxWidth - 0.04) / 2, boxY, 0.075, 0.04, boxHeight, 1.25, oak).name = 'Guest vanity drawer side';
+        box(drawer, 0, boxY, 0.075 + edge * 0.605, drawerBoxWidth - 0.08, boxHeight, 0.04, oak).name = 'Guest vanity drawer end';
       }
     }
-    const centers = [bayCenter];
+    const centers = [0];
     for (const [index, center] of centers.entries()) {
       const bowl = new THREE.Group();
       bowl.name = `${name} basin ${index + 1}`;
@@ -4219,6 +4430,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       box(unit, center, 3.4, -0.4, 0.08, 0.08, 0.35, brass).name = `${name} faucet spout ${index + 1}`;
       box(unit, 0, 5.1, -0.72, mirrorWidth, 2.3, 0.06, steel, true).name = `${name} mirror ${index + 1}`;
     }
+    cylinder(unit, 0.92, 3.04, 0.06, 0.1041667, 0.4, porcelain).name = 'Guest vanity soap bottle';
+    cylinder(unit, 0.92, 3.28, 0.06, 0.035, 0.08, brass).name = 'Guest vanity soap pump neck';
+    box(unit, 0.92, 3.32, 0.13, 0.06, 0.04, 0.2, brass).name = 'Guest vanity soap pump';
     return unit;
   }
   const powderStone = mat('#d8cdbb', 0.9);
@@ -4372,17 +4586,36 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(entrySmartLock, 0, 0, -0.06, 0.28, 0.55, 0.12, black, true).name = 'Schematic smart-lock interior housing';
   box(entrySmartLock, 0, -0.12, -0.14, 0.16, 0.045, 0.05, steel, true).name = 'Schematic smart-lock thumbturn';
   tiledFloor('Porch paving', 0, 54.2, 31.2, 7, mat('#c9c7bc'));
-  for (const x of [5, 26.2]) {
-    const porchBench = furnishing('Porch bench', x, 55.4);
-    box(porchBench, 0, 1.4, 0, 5, 0.2, 1.7, oak);
-    box(porchBench, 0, 2.1, -0.7, 5, 1.3, 0.15, oak);
-    for (const side of [-2.1, 2.1]) box(porchBench, side, 0.7, 0, 0.15, 1.4, 1.5, black);
+  const porchCushion = mat('#a49780', 0.95);
+  const porchPillow = mat('#74745b', 0.96);
+  const frontPorchChairs = [];
+  for (const x of [3.2, 8]) {
+    const chair = furnishing('Front porch cushioned lounge chair', x, 56.15, 0, 0.035);
+    frontPorchChairs.push(chair);
+    chair.userData = { widthFeet: 2.6, depthFeet: 2.65, seatHeightFeet: 1.5, backHeightFeet: 2.75, outdoorProductSelected: false };
+    for (const side of [-1, 1]) {
+      for (const z of [-1.05, 1.05])
+        box(chair, side * 1.14, 0.66, z, 0.16, 1.32, 0.16, oak, true).name = 'Porch chair timber leg';
+      box(chair, side * 1.2, 1.98, 0, 0.2, 0.16, 2.65, oak, true).name = 'Porch chair timber arm';
+      box(chair, side * 1.14, 1.1, 0, 0.14, 0.2, 2.35, oak).name = 'Porch chair side rail';
+    }
+    box(chair, 0, 1.18, 0, 2.3, 0.16, 2.4, oak).name = 'Porch chair seat support';
+    box(chair, 0, 1.39, 0.04, 2.18, 0.22, 2.35, porchCushion, true).name = 'Porch chair outdoor seat cushion';
+    box(chair, 0, 2, -1.12, 2.3, 1.5, 0.15, oak, true).name = 'Porch chair timber back';
+    const back = box(chair, 0, 2.12, -0.93, 2.15, 1.22, 0.32, porchCushion, true);
+    back.name = 'Porch chair outdoor back cushion';
+    back.rotation.x = -0.08;
+    box(chair, 0, 1.83, -0.64, 1.3, 0.55, 0.26, porchPillow, true).name = 'Porch chair olive lumbar pillow';
   }
+  const frontPorchTable = furnishing('Front porch small table between chairs', 5.6, 56.15, 0, 0.035);
+  box(frontPorchTable, 0, 1.65, 0, 1.5, 0.12, 1.5, oak, true).name = 'Porch side-table top';
+  for (const x of [-0.57, 0.57]) for (const z of [-0.57, 0.57])
+    box(frontPorchTable, x, 0.795, z, 0.12, 1.59, 0.12, oak).name = 'Porch side-table leg';
   windowFrame('Office side window', 0.1, 49, 4, 5, 3, -Math.PI / 2, rest, -1);
   const officeFront = getGroundFrontWindows()[0];
-  windowFrame(officeFront.name, officeFront.center, 54.2, officeFront.width, officeFront.height, officeFront.sill, 0, rest, -1);
+  windowFrame(officeFront.name, officeFront.center, 54.2, officeFront.width, officeFront.height, officeFront.sill, 0, rest, -1, { frontGrid: true });
   const guestFront = getGroundFrontWindows()[1];
-  windowFrame(guestFront.name, guestFront.center, 54.1, guestFront.width, guestFront.height, guestFront.sill, 0, rest, -1);
+  windowFrame(guestFront.name, guestFront.center, 54.1, guestFront.width, guestFront.height, guestFront.sill, 0, rest, -1, { frontGrid: true });
 
   const ground = new THREE.Group();
   ground.name = 'Site ground around lowered garage and basement stairwell';
@@ -4443,10 +4676,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. Combined modeled interior floor surfaces; overlaps counted once. Includes closets, halls, bathrooms and laundry. Excludes garage, porch, mechanical space and open stair voids. Not certified living area; wall thickness and headroom eligibility are not verified.`;
     const openings = new Set(windowInstallations.map(window => window.openingId)).size;
     const units = windowInstallations.reduce((total, window) => total + window.units, 0);
-    const pictures = windowInstallations.filter(window => window.picture).reduce((total, window) => total + window.units, 0);
+    const pictures = windowInstallations.reduce((total, window) => total + (window.pictureUnits ?? (window.picture ? window.units : 0)), 0);
+    const singleHung = windowInstallations.filter(window => window.singleHung).reduce((total, window) => total + window.units, 0);
     const windowOutput = document.getElementById('window-count');
     windowOutput.textContent = `Windows: ${openings} openings / ${units} units`;
-    windowOutput.title = `Whole house, both floors including garage: ${openings} window openings containing ${units} individual units (${units - pictures} casements, ${pictures} fixed pictures). A joined bank counts as one opening and each section as one unit. Includes hidden windows; excludes door glazing and duplicate exterior representations. Modeled count, not an approved order schedule.`;
+    windowOutput.title = `Whole house, both floors including garage: ${openings} window openings containing ${units} individual units (${units - pictures - singleHung} casements, ${singleHung} single-hung, ${pictures} fixed pictures). A joined bank counts as one opening and each section as one unit. Includes hidden windows; excludes door glazing and duplicate exterior representations. Modeled count, not an approved order schedule.`;
   }
   const roomDimensionsInput = document.getElementById('show-room-dimensions');
   const planDimensionLabels = document.getElementById('plan-dimension-labels');
@@ -4506,6 +4740,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   });
   function furnishKitchenStorage() {
     const ceramic = porcelain;
+    const bowlCeramic = porcelain.clone();
+    bowlCeramic.side = THREE.DoubleSide;
     const binGray = mat('#555f60', 0.8);
     const recycleBlue = mat('#547c83', 0.8);
     const cookingMetal = steel.clone();
@@ -4527,10 +4763,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       mesh.name = 'Storage item rolled rim';
       parent.add(mesh);
     }
-    function vessel(parent, name, x, y, z, radius, height, material) {
+    function vessel(parent, name, x, y, z, radius, height, material, bottomRadius = radius) {
       const item = contents(parent, name, x, y, z);
-      cylinder(item, 0, 0.015, 0, radius, 0.03, material).name = 'Storage vessel bottom';
-      const sides = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, height, 32, 1, true), material);
+      cylinder(item, 0, 0.015, 0, bottomRadius, 0.03, material).name = 'Storage vessel bottom';
+      const sides = new THREE.Mesh(new THREE.CylinderGeometry(radius, bottomRadius, height, 32, 1, true), material);
       sides.position.y = height / 2;
       sides.name = 'Open storage vessel sides';
       item.add(sides);
@@ -4600,12 +4836,21 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       }
       const islandBankIndex = inIsland ? Math.round((front.parent.position.z - 18.5) / (islandCabinetLength / 3)) + 1 : -1;
       const dishSize = inIsland ? islandDishSizes[islandBankIndex] : null;
-      const role = row === 2 ? (inCooktop ? 'Cooking utensils' : 'Cutlery and serving utensils')
+      const cuttingBoardDrawer = inCooktop && row === 2 && front.parent.position.z < cooktopCenterZ - 1.5;
+      const role = cuttingBoardDrawer ? 'Removable cutting-board pull-out' : row === 2 ? (inCooktop ? 'Cooking utensils' : 'Cutlery and serving utensils')
         : inCooktop ? (row === 1 ? 'Frying pans' : 'Saucepans')
           : inIsland ? `${dishSize.size} ${row === 1 ? 'plates' : 'bowls'}: 10` : row === 1 ? 'Prep bowls' : 'Food containers';
       front.userData.storageRole = role;
       item.userData.storageRole = role;
-      if (row === 2) utensils(item, width, inCooktop);
+      if (cuttingBoardDrawer) {
+        front.name = 'Cooking-area cutting-board pull-out drawer';
+        const board = contents(item, 'Removable horizontal cutting board', 0, 0.75 / 24, 0);
+        board.userData = { ...board.userData, widthInches: 22, depthInches: 14, thicknessInches: 0.75, removable: true, foodSafeFinishRequired: true, useOnCountertop: true, loadedSlideApprovalRequired: true };
+        box(board, 0, 0, 0, 22 / 12, 0.75 / 12, 14 / 12, cabinetRailFinish, true).name = 'Cutting-board solid wood slab';
+        for (const x of [-10.2 / 12, 10.2 / 12]) {
+          box(board, x, 0.75 / 24 + 0.001, 0, 0.045, 0.004, 3 / 12, black, true).name = 'Cutting-board recessed finger-grip indication';
+        }
+      } else if (row === 2) utensils(item, width, inCooktop);
       else if (inCooktop) cookware(item, width, row === 1);
       else if (inIsland && row === 1) {
         item.userData.dishCategory = `${dishSize.size.toLowerCase()} plates`;
@@ -4677,16 +4922,65 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     for (const upper of cooktopUppers.children) {
       const width = upper.userData.widthInches / 12 - 0.16;
-      for (const [y, tierFloor] of [[5.55, false], [6.6, false], [7.6125, true]]) {
+      const seasoningBay = upper.name === 'Cooktop mudroom-side upper stack';
+      for (const [y, tierFloor, category] of [[4.6125, true, 'mugs'], [5.55, false, 'drinking cups'], [6.6, false, null], [7.6125, true, null]]) {
         if (!tierFloor) box(upper, 0, y, 0, width, 0.0625, 0.84, cabinetRailFinish).name = 'Kitchen upper adjustable shelf';
         const shelf = contents(upper, 'Kitchen upper shelf inventory', 0, y + (tierFloor ? 0 : 0.03125), 0);
-        if (tierFloor) continue;
-        shelf.userData.dishCategory = y < 6 ? 'drinking cups' : 'mugs';
+        if (!category) {
+          shelf.userData.spare = true;
+          continue;
+        }
+        if (seasoningBay) {
+          const daily = tierFloor;
+          shelf.userData.storageRole = daily ? 'Daily seasoning turntables' : 'Rarely used spices';
+          shelf.userData.quantity = daily ? 14 : 8;
+          const spiceNames = daily
+            ? ['Salt', 'Pepper', 'Paprika', 'Cumin', 'Oregano', 'Garlic', 'Chilli']
+            : ['Allspice', 'Cloves', 'Cardamom', 'Nutmeg', 'Fennel', 'Anise', 'Sumac', 'Fenugreek'];
+          const spiceJar = (parent, name, x, z, baseY, index) => {
+            const jar = vessel(parent, 'Stored seasoning jar', x, baseY, z, 0.085, 0.25, drinkingGlass);
+            jar.userData = { ...jar.userData, label: name, frequency: daily ? 'Daily' : 'Rare', heightInches: 3.33 };
+            cylinder(jar, 0, 0.26, 0, 0.09, 0.035, black).name = 'Spice jar lid';
+            cylinder(jar, 0, 0.11, 0, 0.07, 0.18, mat(['#a35c35', '#8e8248', '#c69962', '#67553b'][index % 4])).name = 'Spice contents';
+            box(jar, 0, 0.14, 0.085, 0.11, 0.09, 0.008, cream).name = `${name} spice label`;
+          };
+          if (daily) {
+            const diameter = 26 / 30.48;
+            const height = 4 / 30.48;
+            const trayFinish = mat('#eeeae1', 0.4);
+            trayFinish.metalness = 0.65;
+            trayFinish.side = THREE.DoubleSide;
+            for (const side of [-1, 1]) {
+              const tray = contents(shelf, 'IKEA VARIERA metal seasoning turntable', side * 0.49, 0, 0.025);
+              tray.userData = { ...tray.userData, removable: true, productSelected: true, articleNumber: '105.361.57', diameterCm: 26, heightCm: 4, rotationEnvelopeRadiusFeet: diameter / 2, material: 'Powder-coated galvanized steel tray; plastic base', maxLoadKg: 5 };
+              cylinder(tray, 0, 0.0175, 0, diameter / 2 - 0.04, 0.035, black).name = 'Turntable rotating base';
+              const deckY = 0.045;
+              cylinder(tray, 0, deckY - 0.005, 0, diameter / 2, 0.01, trayFinish).name = 'Metal turntable deck';
+              const wall = new THREE.Mesh(new THREE.CylinderGeometry(diameter / 2 - 0.006, diameter / 2 - 0.006, height - deckY - 0.006, 64, 1, true), trayFinish);
+              wall.position.y = (height + deckY) / 2 - 0.003;
+              wall.name = 'Metal turntable raised edge';
+              tray.add(wall);
+              rim(tray, 0, height - 0.006, 0, diameter / 2 - 0.006, trayFinish, 0.006);
+              spiceJar(tray, spiceNames[0], 0, 0, deckY, 0);
+              for (let index = 0; index < 6; index++) {
+                const angle = index * Math.PI / 3;
+                spiceJar(tray, spiceNames[index + 1], Math.cos(angle) * 0.27, Math.sin(angle) * 0.27, deckY, index + 1);
+              }
+            }
+          } else {
+            for (let index = 0; index < spiceNames.length; index++) {
+              spiceJar(shelf, spiceNames[index], (index % 4 - 1.5) * 0.4, index < 4 ? -0.2 : 0.2, 0, index);
+            }
+          }
+          continue;
+        }
+        const mugs = category === 'mugs';
+        shelf.userData.dishCategory = category;
         shelf.userData.quantity = 5;
         const spacing = Math.min(width / 3, width / 2 - 0.31);
         for (const [x, z] of [[-spacing, -0.21], [0, -0.21], [spacing, -0.21], [-spacing / 2, 0.21], [spacing / 2, 0.21]]) {
-          const cup = vessel(shelf, y < 6 ? 'Stored drinking glass' : 'Stored mug', x, 0, z, 0.13, y < 6 ? 0.45 : 0.32, y < 6 ? drinkingGlass : ceramic);
-          if (y >= 6) {
+          const cup = vessel(shelf, mugs ? 'Stored mug' : 'Stored drinking glass', x, 0, z, 0.13, mugs ? 0.32 : 0.45, mugs ? ceramic : drinkingGlass);
+          if (mugs) {
             const handle = new THREE.Mesh(new THREE.TorusGeometry(0.09, 0.025, 8, 24), ceramic);
             handle.position.set(0.17, 0.18, 0);
             handle.name = 'Mug handle';
@@ -4851,9 +5145,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const [x, z] of [[19, 24.8], [31, 24.8], [15.5, 38.5]]) fixture(upstairs.group, 'Upstairs hall', x, upstairs.group.userData.ceilingHeightFeet, z, 2 / 12, 14, 'upstairs');
     fixture(piano, 'Piano music', 0, 3.6, 0.25, 0.24, 3, 'ground', true);
     box(piano, 0, 3.27, -0.45, 0.04, 0.66, 0.04, rosewood).name = 'Piano lamp support';
-    fixture(referenceEndTable, 'Living reading', 0, 3.25, 0, 0.38, 4, 'ground', true);
-    cylinder(referenceEndTable, 0, 1.88, 0, 0.25, 0.05, brass).name = 'Reading lamp base';
-    cylinder(referenceEndTable, 0, 2.55, 0, 0.035, 1.3, brass).name = 'Reading lamp stem';
     return rigs;
   }
 
@@ -4965,10 +5256,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   function selectFloor(floor) {
     if (floor === activeFloor) return;
     if (floor !== 'ground') {
-      groundVisibility.clear();
-      for (const object of groundModelRoots) {
-        groundVisibility.set(object, object.visible);
-        object.visible = false;
+      if (activeFloor === 'ground') {
+        groundVisibility.clear();
+        for (const object of groundModelRoots) {
+          groundVisibility.set(object, object.visible);
+          object.visible = false;
+        }
       }
       stairs.visible = floor === 'upstairs';
       for (const part of upstairsStairParts) part.visible = true;
@@ -4985,6 +5278,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (groundStatus) groundStatus.hidden = floor !== 'ground' || !groundLayoutPreview;
     upstairs.group.visible = floor === 'upstairs';
     exterior.visible = floor === 'exterior';
+    for (const chair of frontPorchChairs) {
+      (floor === 'exterior' ? exterior : rest).add(chair);
+      chair.position.y = floor === 'exterior' ? 0 : 0.035;
+    }
     tourGrid = null;
     tourMapCursor = null;
     const areas = floorAreas();
@@ -5034,7 +5331,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     kids: { target: [24, 1, 30.15], offset: [-12, 30, 18], span: 17 },
     dining: { target: [20.0375, 1, 3.95], offset: [16, 19, 23], span: 20 },
     kitchen: { target: [32.2, 2, kitchenCenterZ], offset: [-22, 35, 27], span: 26 },
-    'sink-storage': { target: [32, 1.65, 8.3], offset: [-1, 10, 9], span: 10 },
+    'sink-storage': { target: [32, 4.65, 7.8], offset: [0, 1.2, 12], span: 9.8 },
     cooktop: { target: [36.5, 5.3, cooktopCenterZ], offset: [-18, 0, 0], span: 11 },
     fridge: { target: [bottomRunCenterX, 5, 26.9], offset: [0, 0, -18], span: 12 },
     island: { target: [30.65 + island.position.x, 1.5, kitchenCenterZ], offset: [-12, 9, 10], span: 15 },
@@ -5050,6 +5347,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     'prep-counter': { target: [46.6, 4.5, prepCounterZ], offset: [0, 1.2, 2.6], span: 14 },
     powder: { target: [3.7, 1, powderNorthZ + 2.95], offset: [4, 34, 4], span: 12 },
     'guest-bathroom': { target: [28.45, 1.5, 39.4], offset: [0.2, 14, 1], span: 11 },
+    'guest-closet': { target: [21, 3.7, 39], offset: [3.9, 1.9, 3.5], span: 9 },
     'guest-suite': { target: [25.1, 0, 42.8], offset: [0, 40, 0.01], span: 25 },
     private: { target: [15.6, 1, 43], offset: [32, 49, 37], span: 40 },
     basement: { target: [stairOpening.x + stairOpening.width / 2, -3, stairOpening.z + stairOpening.depth / 2], offset: [4, 30, 5], span: 21 },
@@ -5684,6 +5982,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   function setView(name) {
+    orbitInteracting = false;
     if (navigationMode === 'walk') setNavigationMode('rotate');
     if (name !== currentView) setPatioDoorOpen(false);
     const outside = name === 'exterior' || name.startsWith('exterior-');
@@ -5699,25 +5998,25 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     document.getElementById('firepit-storage-note').hidden = !['exterior-patio', 'exterior-firepit', 'exterior-wood'].includes(name);
     const prepElevationView = name === 'pantry' || name === 'prep-counter';
     const mudroomInspectionView = name === 'mudroom-cubbies' || name === 'mudroom-storage';
-    const mudroomInteriorView = name === 'mudroom-storage';
+    const mudroomInteriorView = name === 'mudroom-storage' || name === 'guest-closet';
     const sinkStorageView = name === 'sink-storage';
     const exteriorElevation = outside && !['exterior', 'exterior-street', 'exterior-threequarter', 'exterior-patio', 'exterior-firepit', 'exterior-wood'].includes(name);
     const elevationView = name === 'fridge' || name === 'cooktop' || sinkStorageView || prepElevationView || mudroomInspectionView || exteriorElevation;
-    controls.minDistance = prepElevationView || mudroomInspectionView ? 1 : 12;
+    controls.minDistance = prepElevationView || mudroomInspectionView || name === 'guest-closet' ? 1 : 12;
     const streetEyeView = name === 'exterior-street' || name === 'exterior-threequarter';
     controls.maxPolarAngle = streetEyeView ? Math.PI * 0.55 : elevationView ? Math.PI / 2 : Math.PI / 2.12;
     const preset = presets[name];
     const aspect = viewport.clientWidth / viewport.clientHeight;
     const offset = new THREE.Vector3(...preset.offset);
     const portraitPadding = aspect < 1 ? 1.25 : 1;
-    // Orthographic suite inspection keeps north/west closet storage readable
-    // behind full-height walls, without shortening or hiding real partitions.
-    camera = mudroomInteriorView ? mudroomInteriorCamera : planView || name === 'cooktop' || name === 'guest-suite' || sinkStorageView || prepElevationView || mudroomInspectionView || exteriorElevation ? cooktopElevationCamera : perspectiveCamera;
+    // Inside-room perspective shows the connected closet corner without
+    // looking through or hiding its real full-height partitions.
+    camera = mudroomInteriorView ? mudroomInteriorCamera : planView || name === 'cooktop' || name === 'guest-suite' || name === 'guest-closet' || sinkStorageView || prepElevationView || mudroomInspectionView || exteriorElevation ? cooktopElevationCamera : perspectiveCamera;
     controls.object = camera;
     camera.zoom = 1;
     if (camera.isOrthographicCamera) {
       const exteriorWidth = name === 'exterior-entry' ? 20 : name === 'exterior-site' || name === 'exterior-security' ? 128 : name === 'exterior-west' || name === 'exterior-east' ? 74 : 66;
-      const halfHeight = exteriorElevation ? Math.max(preset.span / 2, exteriorWidth / (2 * aspect)) : preset.span * portraitPadding / (2 * Math.min(aspect, 1));
+      const halfHeight = sinkStorageView ? Math.max(preset.span / 2, 11.4 / (2 * aspect)) : exteriorElevation ? Math.max(preset.span / 2, exteriorWidth / (2 * aspect)) : preset.span * portraitPadding / (2 * Math.min(aspect, 1));
       camera.left = -halfHeight * aspect;
       camera.right = halfHeight * aspect;
       camera.top = halfHeight;
@@ -5932,6 +6231,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     scene.updateMatrixWorld();
     updateVehicleDoorControls();
     positionPlanDimensions();
+    updateRenderResolution();
     if ((mudroomLighting || kitchenLighting) && !orbitInteracting) renderInterior();
     else renderer.render(scene, camera);
   }

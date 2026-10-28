@@ -267,11 +267,13 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     material.map.repeat.set((roof ? w : Math.max(w, d)) / 8, (roof ? d : h) / 8);
     return box(parent, x, y, z, w, h, d, material);
   }
-  function windowUnit(parent, center, sill, width, height, privacyLowerHalf = false, picture = false, perimeterTrim = true, front = false) {
+  function windowUnit(parent, center, sill, width, height, privacyLowerHalf = false, picture = false, perimeterTrim = true, front = false, singleHung = false) {
     const frame = new THREE.Group();
     frame.name = 'Andersen 100 Series exterior concept window';
     const intent = getWindowProductIntent(width, height, picture, privacyLowerHalf);
-    frame.userData = { ...intent, exteriorTrim: 'White', interiorTrimUnchanged: true, frontGrid: false };
+    frame.userData = { ...intent, exteriorTrim: 'White', interiorTrimUnchanged: true, frontGrid: front };
+    if (singleHung) Object.assign(frame.userData, { operation: 'single-hung', upperSash: 'fixed', lowerSash: 'slides vertically', grilles: 'upper sash only: four lights; clear lower sash', sizeReview: 'Dealer standard single-hung size, rough opening, grille and factory combination review required; nominal envelope only' });
+    if (front) frame.userData.grilles = 'colonial 2 wide by 3 high per unit; conceptual';
     const windowFinish = trim;
     if (picture) frame.userData.operation = 'fixed picture window';
     if (privacyLowerHalf) Object.assign(frame.userData, { room: 'Powder room', privacyLowerHalf: true, privacyVerified: false });
@@ -301,23 +303,39 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     if (privacyLowerHalf) {
       box(frame, 0, height / 4, 0, width, height / 2, 0.12, privacyGlass).name = 'Exterior powder frosted lower-half pane';
       box(frame, 0, height * 3 / 4, 0, width, height / 2, 0.12, glass).name = 'Exterior powder clear upper-half pane';
-    } else {
+    } else if (!singleHung) {
       box(frame, 0, height / 2, 0, width, height, 0.12, glass);
     }
     for (const x of [-(width - 0.12) / 2, (width - 0.12) / 2]) box(frame, x, height / 2, 0, 0.12, height, 0.24, windowFinish);
     for (const y of [0.06, height - 0.06]) box(frame, 0, y, 0, width - 0.24, 0.12, 0.24, windowFinish);
+    if (singleHung) addSingleHungSashes(frame, box, windowFinish, glass, width, height, 0.12);
     // Structural unit divisions, never decorative grilles; match furnished units.
-    for (let column = 1; column < intent.columns; column++)
-      box(frame, -width / 2 + width * column / intent.columns, height / 2, 0.1, 0.12, height, 0.08, windowFinish).name = 'Casement combination mullion';
+    if (intent.columns > 1) addWindowShadeDivisions(frame, box, windowFinish,
+      Array.from({ length: intent.columns - 1 }, (_, index) => -width / 2 + width * (index + 1) / intent.columns),
+      0, height, 0.12);
     for (let row = 1; row < intent.rows; row++)
       box(frame, 0, height * row / intent.rows, 0.1, width, 0.12, 0.08, windowFinish).name = 'Casement combination horizontal mullion';
+    if (front) {
+      // Match the furnished sash aperture so grille ends meet the sash,
+      // rather than floating short of the exterior's simplified frame.
+      for (let row = 0; row < intent.rows; row++) for (let column = 0; column < intent.columns; column++) {
+        const w = width / intent.columns - 0.27, h = height / intent.rows - 0.27;
+        const x = -width / 2 + (column + 0.5) * width / intent.columns;
+        const bottom = row * height / intent.rows + 0.135;
+        for (const side of [-1, 1]) {
+          box(frame, x + side * (w - 0.1) / 2, bottom + h / 2, 0, 0.1, h, 0.16, trim).name = 'Front matching white sash';
+          box(frame, x, bottom + (side < 0 ? 0.05 : h - 0.05), 0, w - 0.2, 0.1, 0.16, trim).name = 'Front matching white sash';
+        }
+      }
+      addFrontWindowGrilles(frame, box, windowFinish, width, height, intent.columns, intent.rows, 0.12);
+    }
     if (perimeterTrim) {
       box(parent, center, sill - 0.13, 0.3, width + 0.65, 0.22, 0.45, windowFinish);
       box(parent, center, sill + height + 0.2, 0.28, width + 0.65, 0.3, 0.3, windowFinish);
     }
   }
   function wall(name, x1, z1, x2, z2, bottom, top, openings = []) {
-    const front = ['front ground floor', 'upper front bedrooms', 'upper loft south', 'garage front', 'garage porch return'].includes(name);
+    const front = ['front ground floor', 'upper front bedrooms', 'upper loft south'].includes(name);
     const wallGroup = new THREE.Group();
     wallGroup.name = `Exterior brick wall: ${name}`;
     wallGroup.position.set(x1, 0, z1);
@@ -344,7 +362,11 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       fill(center - width / 2, center + width / 2, bottom, sill);
       fill(center - width / 2, center + width / 2, sill + height, top);
       if (opening.units) {
-        for (const unit of opening.units) windowUnit(wallGroup, center + opening.bankX - unit.x, unit.sill, unit.width, unit.height, false, unit.picture, false);
+        for (const unit of opening.units) windowUnit(wallGroup, center + opening.bankX - unit.x, unit.sill, unit.width, unit.height, false, unit.picture, false, false, unit.singleHung);
+        const bankFrame = wallGroup.children.findLast(child => child.name === 'Andersen 100 Series exterior concept window');
+        addWindowShadeDivisions(wallGroup, box, trim,
+          opening.units.slice(0, -1).map(unit => center + opening.bankX - unit.x - unit.width / 2),
+          opening.frameSill, opening.frameHeight, bankFrame.position.z + 0.12);
         box(wallGroup, center, opening.frameSill - 0.13, 0.3, opening.frameWidth + 0.65, 0.22, 0.45, trim).name = `${opening.trimLabel ?? 'Prep'} bank continuous exterior sill`;
         box(wallGroup, center, opening.frameSill + opening.frameHeight + 0.2, 0.28, opening.frameWidth + 0.65, 0.3, 0.3, trim).name = `${opening.trimLabel ?? 'Prep'} bank continuous exterior header trim`;
       } else if (!door) windowUnit(wallGroup, center, opening.frameSill ?? sill, opening.frameWidth ?? width, opening.frameHeight ?? height, opening.privacyLowerHalf, opening.picture, true, front);
@@ -417,7 +439,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const livingFeatureWall = getLivingRoomFeatureLayout();
   const guestEntry = getGuestEntryLayout();
   wall('west ground floor', 0, 8, 0, 54.2, -0.4, 9, [
-    ...livingFeatureWall.windowCenters.map((z) => win(z - 8, 4, 2.6, 5.4)),
+    ...livingFeatureWall.windowCenters.map((z) => win(z - 8, livingFeatureWall.fireplaceWindows.width, livingFeatureWall.fireplaceWindows.sill, livingFeatureWall.fireplaceWindows.height)),
     ...guestEntry.windows.map(({ z, width, height, sill, openingWidth, openingHeight, openingSill, privacyLowerHalf }) => ({ center: z - 8, width: openingWidth, height: openingHeight, sill: openingSill, frameWidth: width, frameHeight: height, frameSill: sill, privacyLowerHalf })),
     win(westFrontWindowCenterZ - 8, westFrontWindowWidth)
   ]);

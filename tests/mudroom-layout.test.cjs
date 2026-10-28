@@ -669,7 +669,7 @@ test('kitchen opening stays fixed while garage entry shifts eighteen inches west
   const plan = require('../floor-plan-ground.js').getGroundFloorDefaultPlan();
   const kitchen = plan.walls.find((wall) => wall[0] === 'Kitchen east');
   const garage = plan.walls.find((wall) => wall[0] === 'Mudroom south');
-  assert.deepEqual(kitchen[5][1], [14.175, 17.175, 0, 8]);
+  assert.deepEqual(kitchen[5][1], [14.675, 17.175, 0, 8]);
   assert.equal(kitchen[1], 37.5);
   assert.equal(kitchen[3], 37.5);
   assert.deepEqual(garage[5], [[0.5, 3.5, 0, 8]]);
@@ -708,7 +708,7 @@ test('prep/mudroom divider aligns with the garage wall while kitchen openings an
   assert.ok(Math.abs(prepFloors.reduce((area, floor) => area + floor.w * floor.d, 0) - 18 * 8) < 1e-9);
   assert.equal(plan.walls.find(([name]) => name === 'Mudroom south')[2], 26.9);
   assert.equal(plan.walls.find(([name]) => name === 'Kitchen north')[2], 7);
-  assert.deepEqual(plan.walls.find(([name]) => name === 'Kitchen east')[5], [[2.725, 5.725, 0, 8], [14.175, 17.175, 0, 8]]);
+  assert.deepEqual(plan.walls.find(([name]) => name === 'Kitchen east')[5], [[2.725, 5.225, 0, 8], [14.675, 17.175, 0, 8]]);
   const model = buildMudroom();
   assert.equal(model.find('Mudroom hanging coat closet')[0].position.z, 16.4);
   assert.equal(model.find('Five-cubby mudroom bench')[0].position.z, 21.29);

@@ -40,7 +40,7 @@ test('under-stair flat boards retain their bottom-step and enclosure-end returns
       return part;
     }
   };
-  vm.runInNewContext(source.slice(source.indexOf('  const stairBaseTrim ='), source.indexOf('  const upstairsStairParts =')), context);
+  vm.runInNewContext(source.slice(source.indexOf('  const stairBaseTrim ='), source.indexOf('  const landingGuardZ =')), context);
   const trim = stairs.children[0];
   assert.deepEqual(Object.keys(trim.userData).sort(), ['heightInches', 'thicknessInches']);
   assert.deepEqual(trim.children.map((part) => part.name), [

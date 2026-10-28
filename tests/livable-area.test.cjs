@@ -28,9 +28,9 @@ test('both floors use resolved floor geometry and changes recalculate the displa
   const output = {};
   const windowOutput = {};
   const windowInstallations = [
-    { openingId: 'joined-bank', units: 1, picture: false },
-    { openingId: 'joined-bank', units: 1, picture: true },
-    { openingId: 'joined-bank', units: 1, picture: false },
+    { openingId: 'joined-bank', units: 1, picture: false, singleHung: true },
+    { openingId: 'joined-bank', units: 1, picture: false, singleHung: true },
+    { openingId: 'joined-bank', units: 1, picture: false, singleHung: true },
     { openingId: 'upstairs-pair', units: 2, picture: false },
     { openingId: 'garage', units: 1, picture: true }
   ];
@@ -49,7 +49,7 @@ test('both floors use resolved floor geometry and changes recalculate the displa
   context.updateLivableArea();
   assert.equal(output.textContent, expectedText(groundArea, upstairsArea));
   assert.equal(windowOutput.textContent, 'Windows: 3 openings / 6 units');
-  assert.match(windowOutput.title, /4 casements, 2 fixed pictures/);
+  assert.match(windowOutput.title, /2 casements, 3 single-hung, 1 fixed pictures/);
   assert.match(windowOutput.title, /Includes hidden windows; excludes door glazing and duplicate exterior representations/);
   assert.match(output.title, /Excludes garage, porch, mechanical space and open stair voids/);
   assert.ok(expected > 3500 && expected < 5000);

@@ -7,7 +7,8 @@ function getWindowProductIntent(width, height, picture = false, privacy = false)
   return {
     manufacturer: 'Andersen', series: '100 Series', material: 'Fibrex composite',
     exteriorFinish: 'White', interiorFinish: 'White', grilles: 'none',
-    operation: picture ? 'fixed picture window' : 'casement',
+    operation: picture ? 'fixed picture window' : columns === 3 ? 'casement / fixed picture / casement' : 'casement',
+    pictureColumns: picture ? [0] : columns === 3 ? [1] : [],
     columns, rows, widthFeet: width, heightFeet: height,
     unitWidthFeet: unitWidth, unitHeightFeet: unitHeight,
     standardSizeVerified: false, productSelected: false, assemblyApproved: false,
@@ -19,13 +20,52 @@ function getWindowProductIntent(width, height, picture = false, privacy = false)
     privacyReview: privacy ? 'Partial-height obscure treatment is a concept, not a verified factory option' : null
   };
 }
+// Trim covers the unit joint from recessed frame to room reveal; not a wall pier.
+function addWindowShadeDivisions(parent, box, material, joints, sill, height, faceDepth, interiorSide = 1, name = 'Full-depth white shade-bay division') {
+  for (const x of joints) {
+    const division = box(parent, x, sill + height / 2, interiorSide * (faceDepth - 0.25), 3.5 / 12, height, 0.5, material);
+    division.name = name;
+    division.userData = { trimStudy: true, structuralPier: false, shadeMountingVerified: false, assemblyApproved: false };
+  }
+}
 function getGroundFrontWindows() {
   return [
     {name: 'Office porch window', center: 6, width: 6, sill: 3, height: 5},
     {name: 'Bedroom porch window', center: 25, width: 7.6, sill: 3, height: 5}
   ];
 }
-if (typeof module !== 'undefined' && module.exports) module.exports.getWindowProductIntent = getWindowProductIntent;
+// Six-light colonial concept per unit. Bars sit off the glazing faces;
+// this is not a selected Andersen grille option or approved order.
+function addFrontWindowGrilles(parent, box, material, width, height, columns = 1, rows = 1, glassDepth = 0.04, inset = 0.235) {
+  for (let row = 0; row < rows; row++) for (let column = 0; column < columns; column++) {
+    const w = width / columns - inset * 2, h = height / rows - inset * 2;
+    const x = -width / 2 + (column + 0.5) * width / columns;
+    const bottom = row * height / rows + inset;
+    for (const side of [-1, 1]) {
+      const z = side * (glassDepth / 2 + 0.022);
+      box(parent, x, bottom + h / 2, z, 0.0625, h, 0.035, material).name = 'Front colonial grille vertical';
+      for (const fraction of [1 / 3, 2 / 3])
+        box(parent, x, bottom + h * fraction, z, w, 0.0625, 0.035, material).name = 'Front colonial grille horizontal';
+    }
+  }
+}
+function addSingleHungSashes(parent, box, material, glass, width, height, glassDepth = 0.04) {
+  const apertureWidth = width - 0.24, half = (height - 0.24) / 2;
+  for (const upper of [false, true]) {
+    const bottom = 0.12 + (upper ? half : 0), offset = upper ? -0.035 : 0.035;
+    for (const edge of [-1, 1]) {
+      box(parent, edge * (apertureWidth - 0.1) / 2, bottom + half / 2, offset, 0.1, half, 0.1, material).name = 'Single-hung sash stile';
+      box(parent, 0, bottom + (edge < 0 ? 0.05 : half - 0.05), offset, apertureWidth - 0.2, 0.1, 0.1, material).name = edge < 0 && upper ? 'Single-hung midheight meeting rail' : 'Single-hung sash rail';
+    }
+    box(parent, 0, bottom + half / 2, offset, apertureWidth - 0.2, half - 0.2, glassDepth, glass).name = upper ? 'Single-hung fixed upper glazing' : 'Single-hung clear sliding lower glazing';
+    if (upper) for (const side of [-1, 1]) {
+      const z = offset + side * (glassDepth / 2 + 0.022);
+      box(parent, 0, bottom + half / 2, z, 0.0625, half - 0.2, 0.035, material).name = 'Single-hung upper grille vertical';
+      box(parent, 0, bottom + half / 2, z, apertureWidth - 0.2, 0.0625, 0.035, material).name = 'Single-hung upper grille horizontal';
+    }
+  }
+}
+if (typeof module !== 'undefined' && module.exports) Object.assign(module.exports, { getWindowProductIntent, addSingleHungSashes });
 (function (root) {
   'use strict';
   const UpstairsLayout = typeof module !== 'undefined' && module.exports ? require('./upstairs-layout.js') : root.UpstairsLayout;
@@ -39,13 +79,15 @@ if (typeof module !== 'undefined' && module.exports) module.exports.getWindowPro
     const sideWindowBank = {
       name: 'Living joined return window bank', x: 6.6, z: 8, width: 7.5, height: 5, sill: 3,
       openingWidth: 7.5, openingHeight: 5, openingSill: 3, trimLabel: 'Living',
+      divisionWidth: 3.5 / 12, divisionDepth: 6 / 12, shadeMountingVerified: false,
       units: [-1, 0, 1].map((side) => ({
         name: side < 0 ? 'Living left side window' : side > 0 ? 'Living right side window' : 'Living side window',
-        x: 6.6 + side * 2.5, z: 8, width: 2.5, height: 5, sill: 3, picture: side === 0
+        x: 6.6 + side * 2.5, z: 8, width: 2.5, height: 5, sill: 3, picture: side === 0, singleHung: false
       }))
     };
     const patioDoor = { x: 13.2, z: 3.95, width: 3, height: 8 };
-    return { wallStartZ, wallEndZ, centerZ, windowCenters: [centerZ - 5.8, centerZ + 5.8], sideWindowBank, patioDoor };
+    const fireplaceWindows = { width: 4, sill: 2.6, height: 5.4, head: 8 };
+    return { wallStartZ, wallEndZ, centerZ, windowCenters: [centerZ - 5.8, centerZ + 5.8], fireplaceWindows, sideWindowBank, patioDoor };
   }
 
   function getFrontEntryLayout() {
@@ -164,9 +206,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports.getWindowPro
 
   function getKitchenPassageLayout() {
     const wallZ = 7;
-    const openings = [2.725, 14.175].map((start) => [start, start + 3, 0, 8]);
+    const openings = [2.725, 14.675].map((start) => [start, start + 2.5, 0, 8]);
     const passages = ['Kitchen to prep', 'Kitchen to mudroom'].map((name, index) => ({ name, startZ: wallZ + openings[index][0], endZ: wallZ + openings[index][1] }));
-    return { wallX: 37.5, wallZ, clearWidth: 3, clearHeight: 8, doorless: true, passages, openings };
+    return { wallX: 37.5, wallZ, clearWidth: 2.5, clearHeight: 8, doorless: true, passages, openings };
   }
 
   function getPrepWindowLayout() {
@@ -185,13 +227,14 @@ if (typeof module !== 'undefined' && module.exports) module.exports.getWindowPro
   }
 
   function getKitchenWindowBankLayout() {
-    const x = 32, z = 7, height = 3.5, sill = 53 / 12;
+    // Nominal joined bank; factory SKUs and mulling remain unapproved.
+    const x = 32, z = 7, height = 4.5, sill = 3.5;
     const units = [
-      { name: 'Kitchen left counter window', x: x - 3, z, width: 1.5, height, sill, picture: false },
+      { name: 'Kitchen sink left casement', x: 29, z, width: 1.5, height, sill, picture: false },
       { name: 'Kitchen sink window', x, z, width: 4.5, height, sill, picture: true },
-      { name: 'Kitchen right counter window', x: x + 3, z, width: 1.5, height, sill, picture: false }
+      { name: 'Kitchen sink right casement', x: 35, z, width: 1.5, height, sill, picture: false }
     ];
-    return { name: 'Kitchen joined sink window bank', x, z, width: 7.5, height, sill, openingWidth: 7.5, openingHeight: height, openingSill: sill, units, trimLabel: 'Kitchen', assemblyApproved: false };
+    return { name: 'Kitchen sink joined window bank', x, z, width: 7.5, height, sill, openingWidth: 7.5, openingHeight: height, openingSill: sill, units, trimLabel: 'Kitchen', assemblyApproved: false };
   }
 
   function getGuestEntryLayout(stairs = UpstairsLayout.stairOpening()) {
@@ -201,6 +244,7 @@ if (typeof module !== 'undefined' && module.exports) module.exports.getWindowPro
       powder: { x: 0, z: northZ, w: 7.1, d: 5.9 },
       coatCloset: { x: 7.1, z: northZ + 3.5, w: 5.1, d: 2.4 },
       alcove: { x: 7.1, z: northZ, w: 5.1, d: 3.5 },
+      stairGuard: { x: 7.45, z: northZ, endX: stairs.x + stairs.width, height: 42 / 12, postWidth: 0.09, barCount: 11, barSpacing: 3.5 / 12 },
       officeNorthZ: northZ + 5.9,
       powderDoor: { x: 7.1, z: northZ + 0.5, width: 2.5, height: 8 },
       closetDoor: { x: 7.65, z: northZ + 3.5, width: 4, height: 8 },
@@ -211,19 +255,26 @@ if (typeof module !== 'undefined' && module.exports) module.exports.getWindowPro
   }
 
   function getGuestSuiteLayout() {
+    // Include the projecting header cap, not just the 2.5-inch casing legs.
+    const closetRight = 25.75 - 0.175 - (2.5 / 12 + 0.125 / 12 + 0.125 / 2);
     return {
       closet: { x: 19, z: 37.2, w: 6.75, d: 6 },
       kidsExtension: { x: 19, z: 34.6, w: 6.75, d: 2.6 },
       bedroomDoor: { x: 19, z: 43.8, width: 3, height: 8 },
-      closetDoor: { x: 21.65, z: 43.2, width: 3, height: 8, doorless: true },
+      closetDoor: { x: closetRight - 3, z: 43.2, width: 3, height: 8,
+        pocket: { x: 19.175, w: closetRight - 3 - 19.175, retract: 'left', leafWidth: 3.08, travel: 3.04, approvalRequired: true } },
       bathroom: { x: 25.75, z: 33.6, w: 5.45, d: 9.6 },
       closetStorage: {
         hanging: [
-          { x: 2.25, z: 0.25, w: 4.25, d: 2, double: true }
+          { x: 2.25, z: 0.25, w: 2, d: 2, double: false },
+          { x: 4.25, z: 0.25, w: 2, d: 2, double: true }
         ],
-        shelves: { x: 0.25, z: 0.25, w: 2, d: 5.4 }
+        corner: { x: 0.25, z: 0.25, w: 2, d: 2, clip: 1.25 },
+        shelves: { x: 0.25, z: 2.25, w: 2, d: 2 },
+        westShelving: { x: 0.25, z: 4.25, w: 2, d: 1.5 },
+        northFiller: { x: 6.25, z: 0.25, w: 0.25, d: 2 }
       },
-      bathroomDoor: { x: 26.2, z: 43.2, width: 28 / 12, height: 8, pocket: { x: 26.2 + 28 / 12, w: 2.45, targetClearWidth: 26 / 12, approvalRequired: true } },
+      bathroomDoor: { x: 26.2, z: 43.2, width: 28 / 12, height: 8, hinge: 'west', inward: true, maxAngleDegrees: 90 },
       shower: { x: 25.95, z: 33.8, w: 5.05, d: 3.2, rotation: 0, clearWidth: 4.85, clearDepth: 3, entryOffset: 0.2, doorWidth: 2.5, height: 8 },
       toilet: { x: 29.9, z: 38.5, rotation: -Math.PI / 2 },
       vanity: { x: 30.15, z: 41.4, width: 2.5, mirrorWidth: 2, rotation: -Math.PI / 2, basinCount: 1 }
@@ -307,9 +358,9 @@ if (typeof module !== 'undefined' && module.exports) module.exports.getWindowPro
         ...guestEntry.windows.map(({ z, openingWidth, openingSill, openingHeight }) => [z - openingWidth / 2 - livingFeatureWall.wallEndZ, z + openingWidth / 2 - livingFeatureWall.wallEndZ, openingSill, openingSill + openingHeight]),
         [21.3 - (livingFeatureWall.wallEndZ - 25.7), 25.3 - (livingFeatureWall.wallEndZ - 25.7), 3, 8]
       ]],
-      ['Living west', 0, 8, 0, livingFeatureWall.wallEndZ, livingFeatureWall.windowCenters.map((z) => [z - 8 - 2, z - 8 + 2, 2.6, 8])],
+      ['Living west', 0, 8, 0, livingFeatureWall.wallEndZ, livingFeatureWall.windowCenters.map((z) => [z - 8 - livingFeatureWall.fireplaceWindows.width / 2, z - 8 + livingFeatureWall.fireplaceWindows.width / 2, livingFeatureWall.fireplaceWindows.sill, livingFeatureWall.fireplaceWindows.head])],
       ['Kids north', 19, kidsNorthZ, 29, kidsNorthZ], ['Kids west', 19, kidsNorthZ, 19, 34.6, [[27 - kidsNorthZ, 31.5 - kidsNorthZ, 0, 8]]],
-      ['Kids east return', 29, kidsNorthZ, 29, 26.9], ['Powder north', 0, powderZ, 12.2, powderZ],
+      ['Kids east return', 29, kidsNorthZ, 29, 26.9], ['Powder north', 0, powderZ, guestEntry.stairGuard.x, powderZ],
       ['Powder east', 7.1, powderZ, 7.1, officeZ, [[guestEntry.powderDoor.z - powderZ, guestEntry.powderDoor.z - powderZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
       ['Guest coat closet front', 7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
       ['Guest coat closet east', 12.2, guestEntry.coatCloset.z, 12.2, officeZ],
@@ -388,5 +439,5 @@ if (typeof module !== 'undefined' && module.exports) module.exports.getWindowPro
       }
     };
   };
-  if (typeof module !== 'undefined' && module.exports) module.exports = { getGroundFrontWindows, getWindowProductIntent, getGroundFloorDefaultPlan, getKitchenPassageLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getFrontEntryLayout, buildArchedFrontEntry };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { addWindowShadeDivisions, addSingleHungSashes, getGroundFrontWindows, getWindowProductIntent, getGroundFloorDefaultPlan, getKitchenPassageLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getFrontEntryLayout, buildArchedFrontEntry };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

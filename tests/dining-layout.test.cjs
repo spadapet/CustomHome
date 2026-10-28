@@ -80,10 +80,12 @@ function rectangle(root, part, travel = 0) {
   };
 }
 
-test('eight-person walnut study has three chairs on each side and one on each end', () => {
+test('walnut study keeps three chairs on each long side and no end chairs', () => {
   const { root, table, chairs } = buildDining();
-  assert.equal(root.name, 'Dining table and eight chairs');
-  assert.equal(chairs.length, 8);
+  assert.equal(root.name, 'Dining table and six side chairs');
+  assert.equal(chairs.length, 6);
+  assert.equal(root.userData.seats, 6);
+  assert.equal(root.userData.endChairs, 0);
   assert.equal(table.w * 12, 84);
   assert.equal(table.d * 12, 38);
   assert.equal((table.position.y + table.h / 2) * 12, 29);
@@ -94,7 +96,8 @@ test('eight-person walnut study has three chairs on each side and one on each en
     assert.equal(side.length, 3);
     assert.ok(side.slice(1).every((chair, i) => Math.abs((chair.position.x - side[i].position.x) * 12 - 24) < 1e-9));
   }
-  assert.equal(chairs.filter((chair) => Math.abs(chair.rotation.y) === Math.PI / 2).length, 2);
+  assert.equal(chairs.filter((chair) => Math.abs(chair.rotation.y) === Math.PI / 2).length, 0, 'Owner removed both end chairs');
+  for (const chair of chairs) assert.ok(Math.abs(chair.position.x) * 12 + 10 <= 42, 'Side chairs stay within the tabletop length');
   assert.equal(root.children.filter((part) => part.name === 'Dining table leg').length, 4);
 });
 
@@ -114,7 +117,7 @@ test('centered table and stowed chairs stay inside the room with equal opposite 
   }
 });
 
-test('full chair envelopes clear each other and walls through 18-inch end-chair pull-out', () => {
+test('full side-chair envelopes clear each other and walls through 18-inch pull-out', () => {
   const { root, chairs } = buildDining();
   for (const travel of [0, 18 / 12]) {
     const boxes = chairs.map((chair) => rectangle(root, chair, travel));
@@ -127,40 +130,25 @@ test('full chair envelopes clear each other and walls through 18-inch end-chair 
       assert.ok(Math.abs(a.x - b.x) >= a.halfX + b.halfX || Math.abs(a.z - b.z) >= a.halfZ + b.halfZ, 'Adjacent chair envelopes do not overlap');
     }
   }
-  const endChairs = chairs.filter((chair) => Math.abs(chair.rotation.y) === Math.PI / 2);
-  assert.ok(endChairs.some((chair) => {
-    const r = rectangle(root, chair, 2);
-    return r.x - r.halfX < 13.5 || r.x + r.halfX > 26.575;
-  }), 'Do not claim the former 24-inch end pull-outs still fit after centering');
 });
 
-test('side chairs clear the patio sweep but the end chair must be moved clear even when tucked', () => {
+test('with end chairs removed the full patio sweep clears every chair, tucked or pulled out', () => {
   const { root, chairs, patio, door } = buildDining();
   for (const travel of [0, 1.5, 2]) {
-    const boxes = chairs.filter((chair) => chair.rotation.y !== Math.PI / 2).map((chair) => rectangle(root, chair, Math.abs(chair.rotation.y) === Math.PI / 2 ? 0 : travel));
+    const boxes = chairs.map((chair) => rectangle(root, chair, travel));
     for (let degree = 0; degree <= door.userData.maxAngleDegrees; degree++) {
       door.rotation.y = -degree * Math.PI / 180;
-      for (const box of boxes) for (const part of door.children) assert.equal(intersectsDoor(box, patio, door, part), false, 'Actual door leaf and hardware clear the full chair envelope when end chairs are tucked');
+      for (const box of boxes) for (const part of door.children) assert.equal(intersectsDoor(box, patio, door, part), false, 'Actual door leaf and hardware clear the full chair envelope');
     }
   }
-  const pulledEnd = rectangle(root, chairs.find((chair) => chair.rotation.y === Math.PI / 2), 1.5);
-  const tuckedEnd = rectangle(root, chairs.find((chair) => chair.rotation.y === Math.PI / 2));
-  let hits = 0, tuckedHits = 0;
-  for (let degree = 0; degree <= door.userData.maxAngleDegrees; degree++) {
-    door.rotation.y = -degree * Math.PI / 180;
-    if (door.children.some((part) => intersectsDoor(pulledEnd, patio, door, part))) hits++;
-    if (door.children.some((part) => intersectsDoor(tuckedEnd, patio, door, part))) tuckedHits++;
-  }
-  assert.ok(hits > 0, 'Keep the actual pulled-end-chair conflict documented');
-  assert.ok(tuckedHits > 0, 'Do not claim tucking the end chair is sufficient in the shorter room');
   assert.equal(root.userData.patioEndChairMustBeTuckedForDoor, false);
-  assert.equal(root.userData.patioEndChairMustBeMovedForDoor, true);
+  assert.equal(root.userData.patioEndChairMustBeMovedForDoor, false);
   door.rotation.y = 0;
   const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
   assert.match(html, /id="dining-clearance-note"[^>]*hidden/);
-  assert.match(html, /24-inch end-chair pull-out reaches side-wall trim/i);
+  assert.doesNotMatch(html, /end chair clear|end-chair pull-out reaches/i);
+  assert.match(html, /Both dining end chairs are removed/);
 });
-
 test('patio door starts closed and leaves the centered table and tucked chairs untouched', () => {
   const { root, chairs, patio, door } = buildDining();
   assert.equal(door.rotation.y, 0);

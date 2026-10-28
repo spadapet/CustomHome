@@ -24,7 +24,7 @@ function build() {
   const context = {
     THREE: { Group, Mesh, TorusGeometry: class {} }, kitchen: new Group(),
     kitchenWallRight: 37.5, cookingWallShiftX: -0.5, cooktopCenterZ: 16.95,
-    cooktopRunStartZ: 12.725, cooktopRunEndZ: 21.175, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
+    cooktopRunStartZ: 12.225, cooktopRunEndZ: 21.675, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
     ...Object.fromEntries(['cabinetFinish', 'countertop', 'black', 'steel'].map((name) => [name, {}])),
     box(parent, x, y, z, w, h, d, material) {
       const part = new Mesh({ w, h, d }, material);
@@ -64,10 +64,10 @@ const find = (root, predicate) => {
 test('five common-size boxes and equal end fillers exactly fill the fixed cooking run', () => {
   const { run } = build();
   const bodies = find(run, (part) => part.name === 'Standard cooking base cabinet carcass');
-  assert.deepEqual(bodies.map((part) => part.userData.nominalWidthInches), [6, 21, 36, 21, 6]);
-  close(run.userData.widthInches, 94.15);
+  assert.deepEqual(bodies.map((part) => part.userData.nominalWidthInches), [6, 27, 36, 27, 6]);
+  close(run.userData.widthInches, 106.15);
   close(run.userData.endFillerWidthInches, 2.075);
-  close(90 + 2 * run.userData.endFillerWidthInches, run.userData.widthInches);
+  close(102 + 2 * run.userData.endFillerWidthInches, run.userData.widthInches);
   bodies.forEach((body, index) => {
     close(body.geometry.w * 12, 24);
     close(body.userData.nominalHeightInches, 34.5);
@@ -86,7 +86,7 @@ test('stock-size fronts close the former gaps with one-eighth-inch reveals and u
   for (const bank of banks) {
     const rows = bank.children.filter((part) => part.userData.kitchenDrawerRow !== undefined);
     rows.forEach((row, index) => {
-      const nominal = Math.abs(bank.position.z - 16.95) < 0.001 ? 36 : 21;
+      const nominal = Math.abs(bank.position.z - 16.95) < 0.001 ? 36 : 27;
       close(row.userData.width * 12, nominal - 0.125);
       close(row.userData.height * 12, index === 2 ? 5.5 : 12.25);
       if (index) close((row.position.y - row.userData.height / 2 - (rows[index - 1].position.y + rows[index - 1].userData.height / 2)) * 12, 0.125);
@@ -112,5 +112,5 @@ test('true 24-inch boxes meet the finished wall and keep the countertop top and 
   close(run.position.x + counter.position.x - counter.geometry.w / 2, 35.2);
   close(counter.position.y + counter.geometry.h / 2, 3.05);
   close(counter.position.y - counter.geometry.h / 2, 34.5 / 12);
-  close(counter.geometry.d * 12, 94.15);
+  close(counter.geometry.d * 12, 106.15);
 });
