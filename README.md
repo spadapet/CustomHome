@@ -81,9 +81,12 @@ and [upstairs plan](http://127.0.0.1:4173/floor-plan-3d.html?view=upstairs-top).
 For every room's approximate modeled width and depth, open the
 [dimensioned ground floor](http://127.0.0.1:4173/floor-plan-3d.html?view=top&dimensions=1)
 or [dimensioned upstairs](http://127.0.0.1:4173/floor-plan-3d.html?view=upstairs-top&dimensions=1).
-The **Room dimensions (2D)** checkbox toggles labels and a readable list below
-the plan. Small labels enlarge with zoom. Values use current saved room bounds,
-rounded to inches, not finished clearances; irregular rooms show envelope extents.
+The **Room dimensions (2D)** checkbox toggles compact labels with a short room
+name and dimensions only (for example, **Bed 2 / 13' x 12'6"**). Labels fit
+their room and enlarge with zoom up to 10 px. Full names and qualifications
+remain in the list below the plan and label tooltips. Values round to inches;
+upstairs uses paint-face main rectangles, while ground rooms use nominal
+envelopes. The stepped kids' room shows its area instead of a misleading rectangle.
 
 In **Garage**, **Bikes** or **2D floor plan**, click or tap the yellow car-door
 panels to toggle estimated swings (0 / 60 degrees), or Tab to a door control
@@ -147,12 +150,14 @@ For a focused check, append suite names:
 node .\.github\skills\home-model-editing\scripts\check-model.cjs mudroom-layout floor-grid
 ```
 
-The runner checks JavaScript syntax and reports explicit test counts. Also
+The runner checks JavaScript syntax, explicitly selects TAP across supported
+Node versions and reports test counts. Also
 inspect the relevant browser views and measured clearances; tests alone do
 not establish actual product fit, structural capacity or safe occupied use.
 
 ## Design and maintenance
 
+- [Cabinet, window and related product inventory: sizes, sources and selection status](docs/product-inventory.md)
 - [Downloaded 3D asset library, sources and licenses](assets/models/README.md)
 - [Current plan, dimensions and constraints](floor-plan-reference.md)
 - [Design context and owner decisions](design-context.md)
@@ -160,6 +165,43 @@ not establish actual product fit, structural capacity or safe occupied use.
 - [Project instructions](.github/copilot-instructions.md)
 - [Model-editing skill](.github/skills/home-model-editing/SKILL.md)
 - [Publishing skill](.github/skills/home-model-publishing/SKILL.md)
+
+### Copilot workflows
+
+Repository-local customizations live under `.github`; they do not install
+packages or run automatically in the background.
+
+| Customization | Use |
+|---|---|
+| [House Design](.github/agents/house-design.agent.md) | Implement coordinated architecture and interior design studies |
+| [Home Design Review](.github/agents/home-design-review.agent.md) | Read-only review of owner constraints, coordination and evidence gaps |
+| [Home Product Research](.github/agents/home-product-research.agent.md) | Read-only research using current manufacturer and authority sources |
+| [Space planning](.github/skills/home-space-planning/SKILL.md) | Adopted Roomsmith workflow for dimensioned furniture layouts, circulation and design critique |
+| [Model verification](.github/skills/home-model-verification/SKILL.md) | Browser checks, world-space measurements and state restoration |
+| [Product research](.github/skills/home-product-research/SKILL.md) | Product fit, installation limits, source dates and asset provenance |
+
+Select an agent from the agent picker for its role. Skills can be selected with
+`/` in supporting clients or loaded when their descriptions match the task.
+File-specific instructions apply to
+[geometry](.github/instructions/model-geometry.instructions.md),
+[viewer behavior](.github/instructions/viewer-behavior.instructions.md),
+[tests](.github/instructions/model-tests.instructions.md) and
+[design documentation](.github/instructions/design-documentation.instructions.md).
+Research and review roles do not authorize design changes or publication.
+
+The space-planning skill adapts the MIT-licensed
+[Roomsmith](https://github.com/Rumeasiyan/roomsmith) workflow, with a pinned
+source revision and the upstream license included in the skill folder.
+House Design and model editing use it for floor plans and furnishing; it does
+not install Roomsmith's CLI, paid rendering services or a replacement viewer.
+Adopting instructions does not itself correct existing model placements.
+
+After changing customizations:
+
+```powershell
+node .\.github\skills\home-model-editing\scripts\check-model.cjs agent-customization
+git diff --check
+```
 
 Update affected room pages and the two design references with model changes.
 Publish only when requested, preserving unrelated local files and the remote

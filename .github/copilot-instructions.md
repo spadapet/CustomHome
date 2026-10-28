@@ -48,3 +48,28 @@ The [README](../README.md) has preview and validation commands.
 For coordinated architecture, elevation and interior design work, select the
 [House Design agent](agents/house-design.agent.md). It turns broad owner goals
 into complete design studies while preserving the recorded constraints.
+
+## Focused workflows
+
+- Use [space planning](skills/home-space-planning/SKILL.md), adopted from
+  Roomsmith, for floor plans, room furnishing and awkward placements: measured
+  inventory, dimensioned layouts, occupied routes and source-level critique.
+- Use [model verification](skills/home-model-verification/SKILL.md) for browser
+  inspection, geometry measurements and floor/view/lighting restoration.
+- Use [product research](skills/home-product-research/SKILL.md) for authoritative
+  manufacturer dimensions, installation requirements, local rules and licenses.
+- Select [Home Design Review](agents/home-design-review.agent.md) for a bounded,
+  read-only consistency audit, or
+  [Home Product Research](agents/home-product-research.agent.md) for sourced
+  research without design edits. Do not delegate a simple lookup merely because
+  an agent exists.
+- File-scoped guidance covers [geometry](instructions/model-geometry.instructions.md),
+  [viewer behavior](instructions/viewer-behavior.instructions.md),
+  [tests](instructions/model-tests.instructions.md) and
+  [design notes](instructions/design-documentation.instructions.md).
+  Keep detailed procedures there rather than expanding always-on guidance.
+
+Use Node.js 20 or newer and the existing dependency-free validation runner.
+For customization-only changes, run the `agent-customization` suite and
+`git diff --check`; a model preview is unnecessary unless viewer/model behavior
+also changed. Commit or push only when requested.

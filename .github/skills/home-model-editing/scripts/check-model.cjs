@@ -32,7 +32,7 @@ for (const file of [...scripts, __filename]) run(['--check', file], file);
 let total = 0;
 const results = [];
 for (const file of selected) {
-  const output = run([path.join(testDirectory, file)], file);
+  const output = run(['--test-reporter=tap', path.join(testDirectory, file)], file);
   const count = output.match(/^# tests (\d+)\r?$/m);
   const failures = output.match(/^# fail (\d+)\r?$/m);
   if (!count || !failures || Number(failures[1]) !== 0) {

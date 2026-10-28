@@ -11,6 +11,11 @@ Use the [plan reference](../../../floor-plan-reference.md),
 [design context](../../../design-context.md) and affected room page. These
 describe the current direction; earlier alternatives may be superseded.
 
+For floor plans, furniture layouts or awkward placements, first use
+[space planning](../home-space-planning/SKILL.md), adopted from Roomsmith.
+Establish dimensioned footprints and occupied routes before placing geometry;
+static non-overlap alone does not establish a usable room.
+
 Identify the relevant surfaces:
 
 | Surface | Source |
@@ -18,7 +23,8 @@ Identify the relevant surfaces:
 | Ground rooms, floors and openings | `floor-plan-ground.js` |
 | Furniture, cabinetry, trim, cameras, tours and grid | `floor-plan-3d.js` |
 | Upstairs geometry and saved overrides | `floor-plan-upstairs.js`, `upstairs-layout.js`, layout JSON |
-| Exterior walls, roofs, paths, fence and outdoor storage | `floor-plan-exterior.js` |
+| Exterior walls, paths, fence and outdoor storage | `floor-plan-exterior.js` |
+| Shared roof envelopes and exterior roof assemblies | `floor-plan-roof.js`, `floor-plan-exterior.js` |
 | Controls and room notes | `floor-plan-3d.html`, `floor-plan-3d.css` |
 
 ## Make the change
@@ -61,7 +67,8 @@ node .\.github\skills\home-model-editing\scripts\check-model.cjs mudroom-layout 
 ```
 
 Omit selectors to run every suite and check the root JavaScript syntax.
-The runner uses the existing Node tests; it needs no installed packages.
+The runner uses the existing Node tests with an explicit TAP reporter across
+supported Node versions; it needs no installed packages.
 An unknown suite, missing TAP summary, failed child process or syntax error
 must fail validation.
 
@@ -93,3 +100,9 @@ Preview the HTTP-served model in the shared local browser:
 Update the affected HTML room notes, plan reference and design context.
 Report measured dimensions, remaining approval limits, validation results and
 whether the work is still local.
+
+For detailed browser checks, use
+[model verification](../home-model-verification/SKILL.md). For selected-product
+dimensions, installation limits, local rules or asset provenance, use
+[product research](../home-product-research/SKILL.md); do not infer approval
+from a visual fit.

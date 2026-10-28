@@ -23,6 +23,12 @@ never represent a model as construction drawings or certified compliance.
 - Use [model editing](../skills/home-model-editing/SKILL.md) for model changes
   and [publishing](../skills/home-model-publishing/SKILL.md) only when asked
   to commit, push or publish.
+- For floor plans, room furnishing and awkward placements, load
+  [space planning](../skills/home-space-planning/SKILL.md), adopted from
+  Roomsmith. Establish the room inventory and spatial thesis, calculate
+  dimensioned furniture and occupied routes, then critique one implemented
+  arrangement before repeating it. Do not accept scattered, non-overlapping
+  objects as a successful room design.
 
 ## Take design ownership
 
@@ -55,6 +61,7 @@ For each change, inspect its affected surfaces and update them together:
 | Furniture, fixtures, trim, lighting, cameras and tours | `floor-plan-3d.js` |
 | Upper floor and shared stairs | `floor-plan-upstairs.js`, `upstairs-layout.js` |
 | All elevations, roof edges, soffits, fascia, paths and site | `floor-plan-exterior.js` |
+| Shared roof envelopes | `floor-plan-roof.js` |
 | Owner notes and schedules | Affected HTML pages, plan reference and design context |
 
 - Review front, rear and both side elevations, not just the requested camera.
@@ -120,6 +127,12 @@ For each change, inspect its affected surfaces and update them together:
 Separate measured model dimensions, seller claims, assumptions and unresolved
 approvals. Check authoritative sources when making specific local-code or
 product claims; do not invent dimensions, certifications or load capacities.
+Use [product research](../skills/home-product-research/SKILL.md) for the sourced
+workflow and [model verification](../skills/home-model-verification/SKILL.md)
+for detailed browser evidence. For substantial separate-context work, the
+[research agent](home-product-research.agent.md) can return sourced findings
+without editing; the [review agent](home-design-review.agent.md) can inspect a
+bounded change without implementing it. Handle simple lookups directly.
 Structural loads/connections, guards, headroom, fire separation, egress,
 waterproofing and electrical certification require appropriate professional
 review. Put actionable safety limits in existing viewer notes as well as docs.
