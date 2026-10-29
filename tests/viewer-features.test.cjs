@@ -13,6 +13,16 @@ test('footer keeps area totals and controls without the furnished-concept legend
   assert.doesNotMatch(read('floor-plan-3d.js'), /querySelector\('\.model-footer span'\)/);
 });
 
+test('whole-house window count separates fixed roof windows from wall casements and pictures', () => {
+  const source = read('floor-plan-3d.js');
+  assert.match(source, /filter\(window => window\.roofWindow\)/);
+  assert.match(source, /units - pictures - singleHung - roofWindows/);
+  assert.match(source, /\$\{roofWindows\} fixed roof windows/);
+  const exterior = read('floor-plan-exterior.js');
+  assert.match(exterior, /roofWindow: true/);
+  assert.match(exterior, /windowInstallations\.push\(\{[\s\S]*?roofWindow: true/);
+});
+
 test('room navigation gives every room its own floor-aware camera and keeps inspection shortcuts out of the toolbar', () => {
   const { getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
   const UpstairsLayout = require('../upstairs-layout.js');
@@ -163,12 +173,14 @@ test('reference sections below the viewer live in markdown, not on the page', ()
   for (const heading of ['## Living-room layout alternatives', '## Furniture references', '## Model assumptions, dimensions and vehicle references']) assert.ok(notes.includes(heading), heading);
 });
 
-test('dimensioned 2D links show every current room and retain a plain plan option', () => {
+test('floor-plan archive preserves both revisions and marks the shower option as not adopted', () => {
   const source = read('floor-plan-3d.js');
-  for (const file of ['floor-plan-design.html']) {
-    const html = read(file);
-    for (const href of ['?view=top"', '?view=top&amp;dimensions=1"', '?view=upstairs-top&amp;dimensions=1"']) assert.ok(html.includes(href));
+  const archive = read('floor-plan-design.html');
+  for (const image of ['revision-1-ground.png', 'revision-1-upstairs.png', 'revision-2-ground.png', 'revision-2-upstairs.png']) {
+    assert.ok(archive.includes(`assets/${image}`), `${image} is archived`);
   }
+  assert.ok(archive.includes('Revision 2 — not adopted'));
+  assert.ok(archive.includes('href="floor-plan-3d.html">Open the current 3D model</a>'));
   const element = () => ({
     children: [], style: {}, hidden: true,
     append(...items) { this.children.push(...items); },

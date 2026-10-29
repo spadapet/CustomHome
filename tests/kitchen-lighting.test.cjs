@@ -31,7 +31,7 @@ function build() {
   const material = { clone() { return { ...this }; } };
   const context = {
     THREE: { Group, Mesh, SpotLight, CylinderGeometry: class {}, TorusGeometry: class {}, DoubleSide: 2 },
-    ...Object.fromEntries(['scene', 'cooktopUppers', 'cooktopHood', 'islandPendants', 'familyBoard'].map((name) => [name, new Group()])),
+    ...Object.fromEntries(['scene', 'cooktopUppers', 'cooktopHood', 'islandPendants', 'familyBoard', 'kitchenSconces'].map((name) => [name, new Group()])),
     kitchenTaskDiffuser: { emissiveIntensity: 0 }, black: material, windowTrim: material, brass: material,
     cooktopUpperBottom: 4.55, hoodBottom: 6.3, cooktopCenterZ: 16.95, kitchenCenterZ: 16.95, ceilingHeight: 9,
     activeFloor: 'ground', groundLayoutPreview: null, nightLighting: true, currentView: 'kitchen', islandLightsInput: { checked: true },
@@ -44,6 +44,15 @@ function build() {
     cylinder(parent, x, y, z, radius, height, material) { return context.box(parent, x, y, z, radius * 2, height, radius * 2, material); }
   };
   context.cooktopUppers.add(new Group(), new Group());
+  for (let index = 0; index < 2; index++) {
+    const light = new Group();
+    light.name = 'Warm wall accent light';
+    light.isLight = true;
+    context.kitchenSconces.add(light);
+    const shade = new Mesh({}, { emissiveIntensity: 0 });
+    shade.name = 'Aleena ivory wall-backed half-oval fabric shade';
+    context.kitchenSconces.add(shade);
+  }
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  function buildKitchenLighting()'), source.indexOf('  const upstairsHelpers =')), context);
   vm.runInContext(source.slice(source.indexOf('  function updatePendantVisibility()'), source.indexOf('  function setView(')), context);
@@ -93,6 +102,11 @@ test('Night energizes the layers; Day switches them off; other floors and plans 
       assert.equal(lamp.intensity, expected ? lamp.userData.nightIntensity : 0);
     }
     assert.equal(model.kitchenTaskDiffuser.emissiveIntensity > 0, expected);
+    for (const lamp of find(model.kitchenSconces, /Warm wall accent light/)) {
+      assert.equal(lamp.visible, expected);
+      assert.equal(lamp.intensity, expected ? 12 : 0);
+    }
+    for (const shade of find(model.kitchenSconces, /Aleena ivory/)) assert.equal(shade.material.emissiveIntensity > 0, expected);
   }
   model.groundLayoutPreview = {};
   model.currentView = 'whole';

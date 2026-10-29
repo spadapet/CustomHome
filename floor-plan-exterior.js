@@ -64,6 +64,8 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const garageSurround = mat('#f5f2ea');
   garageSurround.name = 'Pale limestone garage opening surround - screen approximation';
   const dark = mat('#393b38', 0.65);
+  const shutterFinish = mat('#292d2b', 0.85);
+  shutterFinish.name = 'Charcoal-black louvered shutters - screen approximation';
   const windowBlack = mat('#202321');
   const wood = mat('#956c3e');
   const entryWood = mat('#c99f6b');
@@ -267,6 +269,50 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     material.map.repeat.set((roof ? w : Math.max(w, d)) / 8, (roof ? d : h) / 8);
     return box(parent, x, y, z, w, h, d, material);
   }
+  function addFrontShutters(parent, openings) {
+    const banks = [];
+    for (const opening of openings.filter(o => !o.door).slice().sort((a, b) => a.center - b.center)) {
+      const left = opening.center - opening.width / 2;
+      const right = opening.center + opening.width / 2;
+      const previous = banks.at(-1);
+      // Tight bedroom pairs share outer shutters; do not squeeze panels into
+      // the one-foot masonry gap between their individual openings.
+      if (previous && left - previous.right <= 1.01 &&
+          Math.abs(previous.sill - opening.sill) < 0.01 && Math.abs(previous.height - opening.height) < 0.01) {
+        previous.right = right;
+      } else {
+        banks.push({ left, right, sill: opening.sill, height: opening.height });
+      }
+    }
+    for (const bank of banks) {
+      const width = bank.sill < floorToFloor ? 1.5 : bank.right - bank.left < 5 ? 1 : 1.25;
+      const height = bank.height, stile = 0.125, rail = 0.25, middleRail = 0.16;
+      for (const side of [-1, 1]) {
+        const shutter = new THREE.Group();
+        shutter.name = 'Front charcoal-black louvered shutter';
+        shutter.position.set((side < 0 ? bank.left : bank.right) + side * (0.4 + width / 2), bank.sill, 0.6);
+        shutter.userData = { decorativeOnly: true, operable: false, productSelected: false,
+          widthFeet: width, heightFeet: height, bankLeftFeet: bank.left, bankRightFeet: bank.right,
+          mountingReview: 'Fixed-open decorative study; masonry anchors, flashing, wind loads and casement operation require review' };
+        parent.add(shutter);
+        for (const edge of [-1, 1]) {
+          box(shutter, edge * (width - stile) / 2, height / 2, 0, stile, height, 0.2, shutterFinish).name = 'Shutter frame stile';
+          box(shutter, 0, edge < 0 ? rail / 2 : height - rail / 2, 0,
+            width - 2 * stile, rail, 0.2, shutterFinish).name = 'Shutter frame end rail';
+        }
+        box(shutter, 0, height / 2, 0, width - 2 * stile, middleRail, 0.2, shutterFinish).name = 'Shutter center rail';
+        for (const [bottom, top] of [[rail, (height - middleRail) / 2], [(height + middleRail) / 2, height - rail]]) {
+          const count = Math.floor((top - bottom) / 0.14);
+          for (let index = 0; index < count; index++) {
+            const louver = box(shutter, 0, bottom + (index + 0.5) * (top - bottom) / count, 0,
+              width - 2 * stile, 0.14, 0.04, shutterFinish);
+            louver.name = 'Angled shutter louver';
+            louver.rotation.x = Math.PI / 6;
+          }
+        }
+      }
+    }
+  }
   function windowUnit(parent, center, sill, width, height, privacyLowerHalf = false, picture = false, perimeterTrim = true, front = false, singleHung = false) {
     const frame = new THREE.Group();
     frame.name = 'Andersen 100 Series exterior concept window';
@@ -374,6 +420,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     }
     fill(cursor, length, bottom, top);
     if (name.startsWith('upper ')) articulateUpperMasonry(wallGroup, length, top, openings);
+    if (front) addFrontShutters(wallGroup, openings);
     return wallGroup;
   }
   // Applied stone is a supported veneer concept, never a substitute for headers.
@@ -504,19 +551,25 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     group.add(model);
     const soffitFinish = white.clone();
     soffitFinish.side = THREE.DoubleSide;
-    function surface(polygon, plane, finish, label, offset = 0) {
-      const positions = [], uv = [];
+    function surface(polygon, plane, finish, label, offset = 0, cutouts = []) {
+      const triangles = [];
       const gradient = Math.hypot(plane[0], plane[1]);
       const tileFeet = 3 / 0.3048;
       const vertex = (point) => {
-        positions.push(point[0], HomeRoof.heightAt(plane, point) + offset, point[1]);
-        uv.push(
+        return [
+          point[0], HomeRoof.heightAt(plane, point) + offset, point[1],
           gradient ? (plane[1] * point[0] - plane[0] * point[1]) / gradient / tileFeet : point[0] / tileFeet,
           gradient ? (plane[0] * point[0] + plane[1] * point[1]) / gradient * Math.sqrt(1 + gradient * gradient) / tileFeet : point[1] / tileFeet
-        );
+        ];
       };
       for (let index = 1; index < polygon.length - 1; index++) {
-        vertex(polygon[0]); vertex(polygon[index + 1]); vertex(polygon[index]);
+        triangles.push([vertex(polygon[0]), vertex(polygon[index + 1]), vertex(polygon[index])]);
+      }
+      const clipped = cutouts.reduce((remaining, bounds) => HomeRoof.trianglesOutsideRectangle(remaining, bounds), triangles);
+      const positions = [], uv = [];
+      for (const triangle of clipped) for (const point of triangle) {
+        positions.push(...point.slice(0, 3));
+        uv.push(...point.slice(3));
       }
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -526,7 +579,44 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       mesh.name = label;
       mesh.castShadow = mesh.receiveShadow = true;
       model.add(mesh);
+      mesh.userData.openings = cutouts.map((bounds) => [...bounds]);
       return mesh;
+    }
+    const laundryRoofWindows = name === 'Connected main-house roof system'
+      ? HomeRoof.getLaundryRoofWindows(floorToFloor) : [];
+    function addRoofWindow(window) {
+      const frame = new THREE.Group();
+      frame.name = window.name;
+      frame.position.set(window.x, window.roofElevation, window.z);
+      frame.rotation.x = -Math.atan(3);
+      frame.userData = {
+        roofWindow: true, roof: 'East rear wing', operation: window.operation,
+        roughOpeningWidthInches: window.roughOpeningWidthInches,
+        roughOpeningLengthInches: window.roughOpeningLengthInches,
+        pitchRise: window.pitchRise, pitchRun: window.pitchRun,
+        candidateProduct: window.candidateProduct, productSelected: false,
+        framingFlashingAndDrainageVerified: false
+      };
+      model.add(frame);
+      const width = window.frameWidthInches / 12;
+      const length = window.frameLengthInches / 12;
+      const rail = 0.055;
+      for (const x of [-1, 1]) {
+        const side = box(frame, x * (width - rail) / 2, 0, 0.055, rail, length, 0.11, trim);
+        side.name = `${window.name} white frame`;
+      }
+      for (const y of [-1, 1]) {
+        const end = box(frame, 0, y * (length - rail) / 2, 0.055, width, rail, 0.11, trim);
+        end.name = `${window.name} white frame`;
+      }
+      const pane = box(frame, 0, 0, 0.045, window.width - 0.16, window.length - 0.16, 0.035, glass);
+      pane.name = `${window.name} fixed glazing`;
+      pane.userData = { roofWindowGlazing: true, productSelected: false };
+      windowInstallations.push({
+        name: window.name, x: window.x, y: window.roofElevation, z: window.z,
+        width: window.width, height: window.length, openingId: frame.uuid,
+        units: 1, pictureUnits: 0, picture: false, singleHung: false, roofWindow: true
+      });
     }
     function linePart(start, end, width, height, finish, label, lift = 0) {
       const a = new THREE.Vector3(start[0], start[1] + lift, start[2]);
@@ -540,9 +630,10 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     }
     for (const face of plan.faces) {
       const faceMaterial = face.finish === 'metal' && metalFinish ? metalFinish : material;
-      const mesh = surface(face.polygon, face.plane, faceMaterial, `${face.roof} connected roof surface`);
-      mesh.userData = { roofSurface: true, roof: face.roof, patch: face.id, plane: face.plane, polygon: face.polygon };
-      const underside = surface(face.polygon, face.plane, soffitFinish, 'Closed connected roof underside', -0.16);
+      const cutouts = face.roof === 'East rear wing' ? laundryRoofWindows.map((window) => window.bounds) : [];
+      const mesh = surface(face.polygon, face.plane, faceMaterial, `${face.roof} connected roof surface`, 0, cutouts);
+      mesh.userData = { ...mesh.userData, roofSurface: true, roof: face.roof, patch: face.id, plane: face.plane, polygon: face.polygon };
+      const underside = surface(face.polygon, face.plane, soffitFinish, 'Closed connected roof underside', -0.16, cutouts);
       underside.userData.noExteriorShadow = true;
       if (metal || face.finish === 'metal') {
         const [gx, gz] = face.plane, gradient = Math.hypot(gx, gz);
@@ -602,6 +693,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       }
       if (!rake) linePart(edge.start, edge.end, 0.24, 0.2, trim, 'Connected roof perimeter gutter', -0.1);
     }
+    laundryRoofWindows.forEach(addRoofWindow);
     return model;
   }
   const slateFinish = new THREE.MeshStandardMaterial({ ...(masonryMaps?.roof ?? {}), map: roofTexture, roughness: 0.95, side: THREE.DoubleSide });

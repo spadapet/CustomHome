@@ -1,5 +1,176 @@
 # Ground-floor plan reference
 
+## Guest closet door width corrected - October 28
+
+Owner's pictured walk-in entry is 30 x 96 in, not 36 in wide. Keep the
+east jamb at x25.29375 and projecting trim at finished corner x25.575;
+move only the west jamb 6 in east to x22.79375, z43.2 ft. The closed white
+pocket door still retracts left. Modeled overlapping leaf is 30.96 in wide
+and travels 30.48 in; the larger available cavity x19.175-22.79375 is
+43.425 in long. Fully open leaf spans x20.21375-22.79375. The 30 in
+nominal opening now limits entry, not the 31.2 in interior route.
+Keep closet storage, room boundaries and other doors unchanged.
+Track, split jamb/header, skins, end framing, fixings, occupied access and
+selected kit remain approval-required; do not fasten through the pocket.
+
+## Open sink wall and sconces restored - October 28
+
+Owner rejects the raised 21 in cabinet trial as well as the earlier
+counter-mounted trial. Remove both stacks, doors, shelves, fillers,
+ceiling trim and the temporary sample dishes. Existing island/prep goods
+and all other kitchen storage remain unchanged.
+
+Restore the 90 x 54 in main bank: 18 / 54 / 18 in casement / picture /
+casement at centers x29/32/35, z7, sill/head 42/96 in. Opening is
+x28.25-35.75. Shared plan, furnished model, exterior opening and 90 in
+flush sill agree. Retain white side/top trim, three plants and no applied
+bottom board. Restore two matching ivory fabric-shade/brass wall sconces
+at x27.311458/36.688542, z7.205 ft, mounting datum 75.6 in above floor.
+Existing Night/Day controls switch their actual lights and shade glow;
+floor/view changes restore them. Sink-storage inspection is straight-on.
+Keep sink, fixtures, rack, bases, cooking/prep storage, appliances, island,
+passages and saved layouts fixed. No sink under-cabinet strips remain.
+Actual window SKUs/mulling, structure, wet installation, crank reach,
+listed sconce selection, electrical layout and task illumination remain
+unapproved; the rendering is not a daylight or photometric calculation.
+
+## Revised office layout trial - October 28
+
+Latest owner image supersedes the north-wall desk/compact-loveseat pair.
+Center north-facing 60 x 24 in desk at (6.1,42.175) ft between finished
+side walls x=0.175/12.025; rear top meets north paint. Retain east-facing
+60 x 24 in desk (10.941667,50.85), two monitors and one chair per desk.
+Move 65 x 22 x 64 in provisional E20 to (1.65,44.029167), console north.
+Restore the original 60 x 33.6 in cream loveseat concept below the front
+window at (2.820833,52.479167), facing north/rotation pi. The former
+48 in compact trial is superseded; no selected product is rescaled.
+
+Keep room, openings, windows, finishes, saved layouts, French-door
+60 x 96 in opening, 90-degree defaults and 0-90 study stops. Equipment
+north end and sofa west/south edges clear 3/4 in baseboards by 1 in.
+North desk/equipment side gap 12.4 in is not a path; approach equipment
+from south through the 52.1 in equipment-to-sofa gap. Sofa top is 2.6 in
+below sill underside, not proof of window/lock/shade/cleaning access.
+
+Sample actual leaf/knob constituents each degree and chair positions
+default / 18 in pull. A continuous 30 in diameter planning route reaches
+work, seating and equipment approaches with doors at 90; it is not a
+generous passing aisle, simultaneous-use, code or accessibility approval.
+Selected furniture/seat comfort, stops, occupied access, moving equipment,
+user headroom, window reach, services and cables remain unverified.
+
+## Circled kids PC desk moved to southwest alcove - October 28
+
+Owner's marked plan moves only the left/PC MITTZON desk to the X in the
+southwest extension, centered between finished side walls x=19.175/25.575 ft.
+Desk center (22.375,35.7125) ft, still facing south; its rear tabletop
+meets the closet partition's north paint face z=37.025 ft. Retain the
+47.25 x 31.5 in top, 29.5 in display height, PC, keyboard, mouse and cable tray.
+Chair follows to (22.375,34.375) ft, with unchanged size and tucked pose.
+Side tabletop gaps are 14.775 in each; low feet remain 1.20 in clear of
+baseboard. These side strips are not passing aisles. A sampled 9 in chair
+pull clears the desktop front and leaves the west entry approach open.
+Homework desk/chair, TROFAST, board, walls, openings and saved layouts stay.
+The homework desk still opposes the bins: 51.19 in front-to-front and only
+3.81 in beyond a 30 in chair allowance plus full bin withdrawal, not a
+passing route. Use sequentially. Verify actual occupied access, child seating,
+cables and sit-stand lift/pinch clearances; wall-backed contact is not approval.
+
+## Matching porch window banks - October 28
+
+Owner's annotated photo: replace the X-marked office porch pair with the
+same bank as the circled guest-bedroom porch window. Both are nominal
+91.2 x 60 in, three equal 30.4 in bays, casement / fixed picture / casement,
+white with six-light colonial grilles per unit. Keep centers x=6 / 25 ft,
+z=54.2 ft wall datum, sill/head 36/96 in. Office widens 9.6 in per side;
+shared geometry coordinates wall cuts, frames, divisions, header/sill and
+decorative shutter positions. No room, furniture, door-pose or saved-layout
+change. Adds one fixed picture, not an opening or casement: current totals
+32 openings / 55 units, 45 casements, 8 vertical pictures, 2 roof windows.
+Concept envelopes are not approved products or rough openings; header,
+mulling, flashing, shade support and casement operation remain unverified.
+
+## Kitchen household inventory - October 28
+
+Allocate the owner's requested goods within existing cabinetry; no box,
+counter, opening, appliance, island, seating or saved-layout changes.
+Assumed quantity/sizes, pending measurement of actual possessions:
+
+- Main sink left drawer bank: retained cutlery above two nested 12/10 in
+  drain baskets in the middle; twelve containers plus twelve matching lids
+  below, four each of three sizes. Largest container 9 x 7 x 3.5 in;
+  nesting pitch 0.65 in. Store dry, not as an enclosed drying rack.
+- Prep 30 in cupboard immediately left of sink, x=44.65 ft: six mixing
+  bowls, two nested 12/10/8 in sets. Three platters remain in x=42.15 ft
+  cupboard; its lower space is spare.
+- Prep 24 in cupboard right of dishwasher, x=51.4 ft: ten reusable bottles,
+  3.25 in diameter x 10.5 in high, five across/two deep on a removable
+  21 x 11 in rack. Added support shelf top 14.4 in above floor; bottle tops
+  25.38 in. Move front bottles to reach back row; store dry.
+- Two ten-piece cookware sets, each two 8/10 in frying pans, two 6.5/8 in
+  saucepans, one 10 in saute pan, one 11 in stockpot and four lids.
+  Facing cooktop: prep-side 27 in middle/bottom = set 1 frying/saucepans;
+  center 36 in middle/bottom = both saute pans/set 2 saucepans; mudroom-side
+  27 in middle/bottom = set 2 frying pans/all eight lids. Top board/tool
+  drawers and narrow pull-outs stay. Two stockpots below low steam oven
+  are 9.5 in high, 13.88 in wide including handles, with 0.76 in between.
+
+All eight reassigned drawers travel 18 in. Measured constituent geometry:
+minimum front/back allowances 0.30/0.34 in; container-set rear/front
+0.85/0.92 in; sink drawer contents have at least 3.48 in head clearance
+to next drawer underside. Open cooking drawer-to-island gap 39.14 in;
+open sink drawer-to-island gap 25.16 in. These are empty geometry gaps,
+not occupied passing/accessible-route approval. Use one drawer at a time;
+close sink drawers before passing. Lift upper nested goods to reach lower
+ones. Generic envelopes, not selected products or certified loads: actual
+handles, nesting, lids, hinges, hand access, racks, shelf/slide loads and
+cooktop service space need review. Retain all island dishes, cups/mugs,
+seasonings, platters, tools, services and spare high storage.
+
+## Laundry roof windows - October 28
+
+Add two fixed roof-window concepts above the unchanged interior laundry in the
+south-facing East rear wing roof. The 4:12 roof plane is modeled at centers
+(34.2708, 31.4) and (37.6708, 31.4) ft, with 21 x 45.75 in rough openings
+and 21.5 x 46.25 in candidate frame envelopes. The official VELUX size chart
+lists these dimensions for a fixed deck-mounted FS C06; it is an unselected
+dimensional candidate, not product or roof-compatibility approval. Fixed units
+add daylight but not ventilation. Structure, pitch compatibility, shaft/fire
+detailing, flashing, drainage, insulation and installation remain unverified.
+Whole-house modeled total: **32 openings / 55 units (45 casements, 8 vertical
+fixed pictures, 2 fixed roof windows)**; the roof windows are excluded from
+casement/picture counts.
+
+## Wall-backed upstairs stair guards removed - October 28
+
+Owner's red-marked stair photo identifies redundant opening guards beside
+the existing north, west and south walls. Remove those three upstairs
+perimeter rail/post runs; do not restore them when revising the stairs.
+The Primary south, Stairwell west and West bath north walls remain.
+Retain only the exposed east hall-edge opening guard, from the north edge
+to the upper arrival; keep the arrival accessible. Flight/center-gap
+guards, the exposed upper-flight extension, turning-landing protection,
+basement rails, treads, walls and saved layouts stay unchanged.
+Wall-backed guard removal is not removal of a required graspable handrail.
+Wall-end coverage, the south/east junction, handrail continuity, guards,
+anchorage and headroom still require professional review; the model is
+not construction or safety approval. Regression coverage checks the absent
+wall-backed runs and the retained east run.
+
+## Front louvered shutters - October 28
+
+Add charcoal-black fixed-open decorative louvered shutters to the eight
+front-facing house openings, including loft south: six pairs / twelve panels.
+The four tightly spaced upper bedroom windows form two banks with outer
+shutters only; no panels occupy their one-foot intermediate masonry gaps.
+Ground panels are 18 x 60 in; upper bedroom panels are 15 x 60 in and loft
+panels 12 x 60 in, leaving 2.85 in between adjacent loft panels. Panel edges sit
+4.8 in beyond the opening edges, with backs 0.9 in ahead of the projecting
+upper masonry piers. White frames, front-only grilles, openings, roof,
+porch and saved layouts stay unchanged. These are decorative, not closing
+or storm-protection shutters; product sizes, masonry anchorage, flashing,
+wind resistance and outward-casement operation require supplier/design review.
+
 ## Living woven Roman shades - October 27
 
 Add warm natural woven wood/flax-look shades matching the owner's photo to
@@ -14,17 +185,18 @@ remain unverified. No shades added to other rooms.
 ## Whole-house shade-bay trim — October 27
 
 Apply the living return's full-depth white divisions to all 18 multi-section
-openings (22 divisions): ground living return/fireplace pair, dining rear/garden,
+openings (23 divisions): ground living return/fireplace pair, dining rear/garden,
 main/prep joined counter banks, office side/front and guest front; upstairs
 primary west pair, bedroom 2, four loft pairs and bedroom 3 west.
 Each joint has 3.5-inch-wide, six-inch-deep trim, full frame height, ending
 flush at the room reveal; one shared header and continuous sill remain.
-Guest front now has a fixed center picture between two casements; all other
-operations remain. Single pictures, single casements, garage clerestories,
+Guest and office front now have a fixed center picture between two casements;
+other operations remain. The office widens per the October 28 matching-bank correction. Single pictures, single casements, garage clerestories,
 door glass and front grille patterns remain unchanged. No opening, room,
 sill/head or saved-layout changes.
-Current count supersedes operation breakdowns below: **30 openings / 52 units,
-45 casements / 7 pictures** (ground 22/7; upstairs 23/0).
+Current count supersedes operation breakdowns below: **32 openings / 55 units,
+45 casements / 8 vertical pictures / 2 fixed roof windows** (ground 22/8;
+upstairs 23 vertical units plus 2 roof windows).
 Trim is not a structural pier or approved shade mount. Factory joining,
 header/framing, flashing, crank clearance, shade support and egress need review.
 
@@ -42,7 +214,8 @@ These are mull covers, not structural wall piers; shade support, load paths,
 header, flashing, standard-unit selection, grille/product availability and
 factory combination all require review. Fireplace windows, wall cuts and room
 geometry stay fixed. Supersedes the single-hung interpretation only.
-Count: 30 openings / 52 units = 46 casements + 6 pictures.
+Current whole-house count: 32 openings / 55 units = 45 casements + 8 vertical
+fixed pictures + 2 fixed roof windows.
 
 ## Kitchen sink-window bottom trim removed - October 27
 
@@ -114,9 +287,9 @@ They were already equal in geometry; shared data now prevents independent
 wall/frame/exterior drift. Return-bank dimensions remain unchanged.
 
 Front house windows only: six-light white colonial concept per unit
-(2 columns × 3 rows), eight openings / thirteen units, including loft south.
+(2 columns × 3 rows), eight openings / fourteen units, including loft south.
 No side/rear grids, door grids or garage-door lite grids.
-Whole-house count is 30 openings / 52 units, 46 casements / 6 pictures after restoring both sink-side casements.
+Whole-house modeled count is 32 openings / 55 units: 45 casements, 8 vertical fixed pictures and 2 fixed roof windows.
 Prior no-grille notes apply only to non-front windows. Andersen 100 Series
 White Fibrex intent retained; selected grille system, sizes, mullions,
 rough openings, egress and installation require dealer/architect review.
@@ -135,7 +308,7 @@ inset supports clear the 3/4 in baseboards vertically and horizontally.
 
 | Desk | Backing wall / seating faces | Center x,z (ft) | Rear paint gap | Low support to trim |
 |---|---|---|---|---|
-| Ground PC | South / south | 24.952083,32.1125 | 0 in | 1.20 in |
+| Ground PC (moved October 28) | Alcove south / south | 22.375,35.7125 | 0 in | 1.20 in |
 | Ground homework | South / south | 28.972917,32.1125 | 0 in | 1.20 in |
 | Bedroom 2 | North / north | 33.4,11.075 | 0 in | 0.45 in |
 | Bedroom 3 | West / west | 1.075,50.8 | 0 in | 0.45 in |
@@ -196,9 +369,10 @@ the mudroom-side approach beyond the wall face; this is not an approved
 30 in continuous accessible route. Preserve its default pose and coordinate
 real door/hardware operation separately.
 
-## Compact kids-room revision - October 27
+## Historical compact kids-room revision - October 27
 
-Both existing 47.25 x 31.5 in desks sit against the south wall, PC left
+Superseded for the PC desk by the October 28 alcove move above. Both
+existing 47.25 x 31.5 in desks previously sat against the south wall, PC left
 at (24.952083,32.1125), homework right at (28.972917,32.1125), facing south.
 The row is 95.5 in wide including the 1 in desk gap. Rear tops meet paint;
 retain 1 in east wall allowance; chair centers follow to
@@ -213,6 +387,10 @@ Verify anchorage, child reach/seating, cable slack, desk lift/pinch space,
 bin withdrawal and occupied use. Planning gaps are not product/code approval.
 
 ## Photo-matched guest-entry stair wall — October 27
+
+This records the restored powder-room, entry-alcove and guest coat-closet
+arrangement. The Revision 2 shower option was not adopted; see the
+[floor-plan archive](floor-plan-design.html#revision-2) for the historical study.
 
 The circled wall is ground-floor **Powder north's alcove extension**,
 z=35.1 ft, not an upstairs partition or the under-stair infill.
@@ -352,7 +530,9 @@ and no-grille White Andersen 100 intent. Ground front now follows shared
 furnished banks: office center6,width6; guest center25,width7.6 ft,
 sill/head3/8. Remove four narrow facade-only substitutes, not room openings.
 Living west facade sills2.6/head8 now match furnished frames.
-Pending real loft-south openings remain; current total30 openings/52 units.
+The loft-south openings are part of the current wall-window schedule; current
+whole-house total is 32 openings / 55 units (45 casements, 8 vertical pictures,
+2 fixed roof windows).
 The owner's white-brick collage supersedes the rejected pinkish/red-base
 study, not the accepted hip roof architecture. The latest close-up request restores
 red-brown ONLY on the raised base, not the main brick. Base tops at house
@@ -1370,9 +1550,10 @@ output/spacing, circuit/driver loads, ceiling/insulation fit and service
 access. Mock up the board light on the existing glass and check fixing,
 projection and headroom before construction.
 
-## Joined kitchen window positions - October 25; finish updated October 27
+## Joined kitchen window positions - restored October 28
 
-- October 27 owner reversal: restore the joined 18 / 54 / 18 in
+- Restore the October 27 open-window selection after rejecting both cabinet
+  trials: joined 18 / 54 / 18 in
   casement / fixed picture / casement bank at x = 29 / 32 / 35, z = 7 ft.
   All units are 54 in tall, sill/head 42/96 in; one 90 in opening
   spans x = 28.25-35.75 ft, without wall gaps between units.
@@ -1380,7 +1561,7 @@ projection and headroom before construction.
   crown and their strip/task lighting. Keep hood-flanking cooking cabinets,
   spice-right/cups-left storage, base cabinetry, fixtures and prep unchanged.
   White header/cap top stays 102.625 in, leaving 5.375 in of wall above.
-  No sink sconces are reinstated; existing ceiling lighting remains.
+  Restore the two ivory/brass end sconces; existing ceiling lighting remains.
   Nominal Andersen 100 intent is not an approved SKU or mulled assembly.
   Confirm structural header, framing, ventilation, crank/faucet operation,
   safety glazing, reach and waterproof installation before ordering.
@@ -1390,12 +1571,13 @@ projection and headroom before construction.
   quartz ledge is superseded by the October 27 installation concept.
   Exterior header trim tops at 8.35 ft; interior cap tops at 8.552083 ft.
   Both fit below the unchanged 9 ft wall head/lower-roof arrangement.
-- No sink sconces. Three pots remain at x = 30.25 / 32 / 33.75 ft;
+- Sconce accent light and shade glow follow Night/Day. Three pots remain at x = 30.25 / 32 / 33.75 ft;
   verify selected crank/sash clearance with plants and fixtures in place.
 - Ground-floor plan, furnished opening/trim and exterior cutout/trim share
   the same bank. Restoring the flankers adds two operable units.
 - House shape, room sizes, counters, sink, base/cooking storage, prep bank
-  and saved layouts are unchanged. Window takeoff is 30 openings / 52 units.
+and saved layouts are unchanged. Current whole-house window takeoff is
+32 openings / 55 units, including two fixed laundry roof windows.
 
 This is a conceptual mulled assembly, not approved manufacturer CAD.
 Verify factory joining, actual frame/rough-opening dimensions, header and
@@ -2259,8 +2441,8 @@ Dimensions include nominal room envelopes, not guaranteed usable clear rectangle
 | Powder room | 0-7.1 / 35.1-41 | 7 ft 1 in x 5 ft 11 in | Hall-facing east-wall entry; centered vanity sink with matching side drawers, east-wall towel hook, one centered west-wall half-frosted window |
 | Guest coat closet | 7.1-12.2 / 38.6-41 | 5 ft 1 in x 2 ft 5 in | Mirrored against office-shared wall; 24.6 in clear depth, upper shelf/hanging rail, closed 48 x 96 in oak doors facing north into alcove |
 | Guest entry alcove | 7.1-12.2 / 35.1-38.6 | 5 ft 1 in x 3 ft 6 in | Open east to entry hall; 37.8 in between finished north/south wall faces, not occupied/accessibility approval |
-| Office | 0-12.2 / 41-54.2 | 12 ft 2 in x 13 ft 2 in | 161.04 sq ft nominal; return prior 12.2 sq ft expansion to guest-entry band; north desk/chair move 1 ft south, other furniture and French doors retained |
-| Guest walk-in closet | 19-25.75 / 37.2-43.2 | 6.75 x 6 ft | Connected north/west L remains 24 in deep, 87 in top; entry moves east to x22.29375-25.29375, 36 x 96 in left pocket |
+| Office | 0-12.2 / 41-54.2 | 12 ft 2 in x 13 ft 2 in | 161.04 sq ft nominal; centered north desk, northwest elliptical, southwest loveseat facing north and lower-right east-facing desk. Room shell, windows and French doors retained |
+| Guest walk-in closet | 19-25.75 / 37.2-43.2 | 6.75 x 6 ft | Connected north/west L remains 24 in deep, 87 in top; entry x22.79375-25.29375, 30 x 96 in left pocket |
 | Entry hall | 12.2-19 / 34.6-54.2 | 6 ft 10 in x 19 ft 7 in | Full width restored, approximately 77.4 in between finished wall faces; no borrowed closet strip |
 | Guest shower bathroom | 25.75-31.2 / 33.6-43.2 | 5.45 x 9.6 ft | Footprint/fixtures fixed; shower 58.2 x 36 in curb-interior; 28 x 96 in west-hinged inward entry, 90-degree stop, closed default |
 | Ground-floor bedroom | 19-31.2 / 43.2-54.2 | 12.2 x 11 ft; 134.2 sq ft | One rectangle, no nook/entry slabs. Hall entry z43.8-46.8; bed/nightstands, shell and hall width fixed. North nightstand gap 17.73 in, not an aisle |
@@ -2460,7 +2642,7 @@ The four-foot platforms and existing rise/run geometry are retained during the s
 
 Oak treads/stringers, light closed risers and hollow soffits remain. The continuous lower-flight/landing painted enclosure replaces all four recessed bookcases, superseding all earlier keep-bookcase requirements in this document. No passage is cut through it. The model's filled finish envelope is not a specified structural or fire-rated assembly; framing, underside protection, fire separation and headroom require professional review. Fireplace-side built-ins are removed (October 27); continuous base trim runs to the stone.
 
-**Current guard layout:** retain the full 48-inch living-side turning-landing assembly at local z = -0.08: oak top 36 inches above the +5 ft landing, eight black bars and both posts. Owner follow-up removes only the short cap/bar transition pieces to the lower-flight rails. Their endpoint centerlines differ by 5 in horizontally and 7.5 in vertically, not verified clear-opening dimensions. The junction break requires guard-opening and graspable handrail-continuity review; it is not safety approval. The enclosure below is not landing protection. Preserve the newly exposed upper-flight outer guard, lower-flight and center-gap guards, stringers, treads, landings and upstairs opening guards. Separate wall-backed and basement entry handrail omissions remain unresolved. Builder/designer must verify anchorage, openings/climbability, required handrails and code compliance before construction.
+**Current guard layout:** retain the full 48-inch living-side turning-landing assembly at local z = -0.08: oak top 36 inches above the +5 ft landing, eight black bars and both posts. Owner follow-up removes only the short cap/bar transition pieces to the lower-flight rails. Their endpoint centerlines differ by 5 in horizontally and 7.5 in vertically, not verified clear-opening dimensions. The junction break requires guard-opening and graspable handrail-continuity review; it is not safety approval. The enclosure below is not landing protection. Preserve the newly exposed upper-flight outer guard, lower-flight and center-gap guards, stringers, treads and landings. Upstairs retain the exposed east opening guard only; the October 28 owner correction removes the redundant north/west/south wall-backed runs. Separate wall-backed and basement entry handrail omissions remain unresolved. Builder/designer must verify anchorage, openings/climbability, required handrails and code compliance before construction.
 
 The living-facing full-height wall at z = 25.7 is removed, not the under-stair enclosure. A separate 42-inch-high oak-capped guard follows x = 0.175-10.008333, center z = 26.675, just outside the north opening edge. Dark vertical balusters have clear gaps at most 3.75 inches; bottom clearance is 1.38 inches. Keep the east hall access open. Wall-removal support, guard anchorage/loads and code compliance remain unverified.
 
@@ -2468,36 +2650,37 @@ Basement retaining walls follow the opening, stop beneath the ground-floor slab 
 
 ## Kids' room, office, bedroom and bathrooms
 
-**Selected kids layout:** compact south-wall desk row, one northeast TROFAST frame; second frame removed.
+**Selected kids layout:** PC in southwest alcove, homework against main south wall,
+one northeast TROFAST frame; second frame removed.
 The [comparison](kids-room-options.html) remains available for alternatives; its sampled
-offsets differ from the selected east-aligned placement. Layout choice is not installation approval.
+offsets differ from the current marked-X placement. Layout choice is not installation approval.
 
 | Room | Furniture / fittings | Layout and constraints |
 |---|---|---|
 | Kids / kitchen hall edges | Warm-white painted front strips and corner returns matching the main panelling; natural-oak edges superseded | Each front strip 4.2 in wide, 1/2 in thick, flush with white panels; inner edges x = 19.175 / 28.825, outer edges x = 18.825 / 29.175. Outside corner returns cover the 4.2 in wall ends and front-panel thickness. Bottom 8 in, top 108 in; keep white baseboard and main panels. Board frame stays oak; verify scribing and adjoining cabinet/trim junctions |
 | Hall / foyer east wall | Continue matching white grooved panelling along the hall face of the kids/guest west wall | Join existing corner at z = 24.9117, stop at south-wall face z = 54.025; finished x = 18.7833-18.825. Nominal 1/2 in thick, bottom 8 in, top 108 in. Preserve kids opening z = 27-31.5 and guest opening z = 42-45, both 96 in high, plus side casing, header bead and projecting cap. Panels continue over headers. Room interiors and door sizes unchanged; verify occupied circulation and finish junctions |
 | Kids / kitchen hall | 84 x 48 in oak-framed charcoal tempered dry-erase glass/cork board centered x = 24 on the north partition's kitchen-facing side; bottom 30 in, top 78 in | Opaque light-coloured dry-erase markers approved for black glass, no chalk/liquid chalk; captive paper clips and shallow marker/eraser tray. Warm-white painted vertical grooved panelling covers the 115.8 in wall face above the 8 in white baseboard to 108 in, nominal 1/2 in thick, superseding sage. Board remounted outside panels; total modeled projection 3.08 in from original finished wall. Opposite face from desks; no lift-zone encroachment. Verify safety glazing, weight-rated anchorage into blocking, marker compatibility/cleaning, child reach/material safety, rounded edges and occupied hall clearance; no loose magnets/sharp pins. No product selected |
-| Kids | Two 47.25 x 31.5 in MITTZON desks: PC left (24.952083,31.9875), homework right (28.972917,31.9875), rotation 180 degrees | Backs south, chairs north at z = 30.65. East gap 1 in, desk gap 1 in, rear gap 1.5 in; 29.5 in display height. Verify actual lift/pinch space and cable slack |
+| Kids | Two 47.25 x 31.5 in MITTZON desks: PC southwest alcove (22.375,35.7125), homework unchanged (28.972917,32.1125), rotation 180 degrees | Chairs north at (22.375,34.375)/(28.972917,30.775). Rear tops meet paint; low feet clear baseboard 1.20 in. PC side gaps 14.775 in, homework east gap 1 in; 29.5 in display height. Verify occupied access, lift/pinch space and cable slack |
 | Kids | Bench, floor books and upper artwork remain removed | Kitchen-facing family message board remains |
 | Kids | One [TROFAST 796.131.29](https://www.ikea.com/us/en/p/trofast-storage-combination-with-boxes-room-divider-white-dark-gray-s79613129/), 39 x 17.375 x 37 in, center (27.025,25.810625), rotation 0 | Back north, bins south; 2.1 in east/north gaps. Nine removable boxes with separate LEGO inserts; other frame removed. Anchor retained unit; no climbing/seating |
-| Kids | Continuous oak floor exposed, two tucked chairs, freed storage footprint 4.71 sq ft | Front gap 49.7 in; full-depth bin pull leaves 23 in to tucked chairs. Occupied chair/bin use is not a simultaneous passing aisle. Keep 30 x 43.5 in west-entry approach clear; verify reach, loads and occupied use |
-| Office | Two 60 x 24 in desks at (3.8, 42.35) / (6, 52.8), latter rotated 180 degrees | North desk/chair move 1 ft south with returned wall; two monitors and task chair each; face opposite walls, no bookcase |
-| Office | Loveseat 60 x 33.6 in at (10.45, 50.4); SOLE E20 reference 65 x 22 x 64 in L/W/H at (1.65, 50.3) | Verify chair pull-back, window reach, pedal/user movement and headroom; no operating envelope certified |
+| Kids | Continuous oak floor exposed, two tucked chairs, freed storage footprint 4.71 sq ft | Homework/storage fronts 51.19 in apart; 30 in chair allowance plus full bin pull leaves 3.81 in, not a passing aisle. PC chair clears tabletop front after 9 in pull. Keep 30 x 43.5 in west-entry approach clear; verify reach, loads and occupied use |
+| Office | Two 60 x 24 in desks at (6.1, 42.175) / (10.9417, 50.85), latter rotated -90 degrees/facing east; two monitors and one chair each | North desk centered between finished side walls, rear top on north paint; low legs clear baseboard. East desk retains 1 in to paint and knob-clearance position. Door study sweep 0-90; selected stops and occupied use need review |
+| Office | Restored 60 x 33.6 in loveseat concept at (2.8208, 52.4792), rotation pi/facing north; E20 reference 65 x 22 x 64 in L/W/H at (1.65, 44.0292) | Southwest sofa and northwest equipment clear adjacent baseboards by 1 in. Equipment-to-sofa gap 52.1 in; 12.4 in desk/equipment side gap is not a route. Sofa top 2.6 in below sill underside; window reach unverified. Compact 48 in trial superseded, no selected product rescaled. Verify seats, moving equipment/headroom and occupied access |
 | Bedroom | Article Lenia queen reference 63.5 x 82.75 in W/D; center approximately (27.427083, 49.395), rotated -90 degrees | Headboard/rear edge x = 30.875 on east wall opposite west entry; faces decreasing x, not the porch |
 | Bedroom | Two nightstands, approximately 18 x 15.6 in, at (30.2, 45.695) / (30.2, 53.095) | Shifted toward porch with bed; porch-end stand limits further movement; keep trim/window clear |
 | Guest walk-in | Connected oak-look/gold L: both runs 24 in deep, 84 in carcasses above 3 in bases, aligned 87 in tops. North 24 in long + 24 in double hang, separate 3 in filler; west 24 in drawer tower + 18 in shelf bay. Corner clipped 15 in, giving 21.21 in diagonal shelf access and 9 in contact edges | 22.5 in rail per bay; rods 69.6 / 41.4 / 80.4 in, upper reach unverified. Drawers travel 15 in, closed default. Aisle 48.72 in closed / 33.72 in open; 24 in user leaves 9.72 in, not passing. Relocated 31.2 in route x22.4-25, z39.55-43.2. Shelf centers 31.8/45.6/60/74.4/84 in. Supplier must review pocket-compatible fasteners, finish, reach, hardware, loads and anchorage; not selected stock or construction approval. [Sources retrieved October 27, 2026](bedrooms.html#guest-suite) |
 | Powder | Southwest toilet (1.65, 39.65); 42 x 21 in vanity (4.75, 39.875), both facing north from office-shared wall. Centered basin/mirror, symmetrical sconces, 22 in double-door cupboard and two 10 in three-drawer banks retained. East-wall towel hook z38.85 at 48 in; hall hardwood retained | Mirrored 30 x 96 in entry z35.6-38.1, north-jamb hinge, 90-degree inward default. Close drawers before entry or door movement; 15 in extension retained. Verify plumbing, usable interiors, occupied use and flooring moisture/warranty requirements |
-| Guest bathroom vanity and fixtures | East-wall 30 x 18 in white-oak Shaker concept (30.15,41.4): actual 14 in basin, cutout, tailpiece and faucet centered at local x0; 24 in mirror, pale stone, gold pulls and white/gold soap bottle on right strip. Paired left doors, three right drawers. Divider top 28.8 in; shallow upper box 1.92 in high, top 26.1 in below bowl underside 29.4 in. Left bay 16.875 x 17.25 in; hollow 10 x 10 x 14 in basket at 4.215 in, 12 x 12 x 18 in reservation. Other fixtures fixed | Open both cabinet doors 90 degrees for basket extraction. Close drawers before bathroom door swing; extended fronts conflict. Close fronts for through-access: 38.7 in to west trim closed / 23.7 in at 15 in extension. Closed-front 26 in route; not simultaneous-use approval. Verify selected cabinet adaptation, basin/trap/supports, sanitary clearance, curb, glazing and splash control |
 | Guest coats | Reach-in closet centered (9.65, 39.8), upper shelf, continuous hanging rail, four illustrative coats | Closed oak door pair faces north into the mirrored hall alcove; office unchanged |
+| Guest bathroom vanity and fixtures | East-wall 30 x 18 in white-oak Shaker concept (30.15,41.4): actual 14 in basin, cutout, tailpiece and faucet centered at local x0; 24 in mirror, pale stone, gold pulls and white/gold soap bottle on right strip. Paired left doors, three right drawers. Divider top 28.8 in; shallow upper box 1.92 in high, top 26.1 in below bowl underside 29.4 in. Left bay 16.875 x 17.25 in; hollow 10 x 10 x 14 in basket at 4.215 in, 12 x 12 x 18 in reservation. Other fixtures fixed | Open both cabinet doors 90 degrees for basket extraction. Close drawers before bathroom door swing; extended fronts conflict. Close fronts for through-access: 38.7 in to west trim closed / 23.7 in at 15 in extension. Closed-front 26 in route; not simultaneous-use approval. Verify selected cabinet adaptation, basin/trap/supports, sanitary clearance, curb, glazing and splash control |
 | Porch | Two 60 x 20.4 in benches at (5, 55.4) / (26.2, 55.4) | No entry runner indoors; no sidelights/transom around the front doors |
 
 Room requirements: [kids/living](foyer/living-room.html#connected-kids-room), [office](office.html), [bedroom/closet](bedrooms.html), [bathrooms](bathrooms.html), [front entry](front-entry.html). Check furniture anchorage, cordless shades, window fall protection/egress, rug grip, safety glazing, electrical services, door swings and sanitary clearances. Accessible fixture shutoffs and timed bathroom fans are requirements, not demonstrated by the simplified model.
 
 ## Window schedule
 
-**Whole-house count, October 27, 2026:** 30 openings / 52 units: 46 casements and 6 pictures. Ground floor: 15 openings / 29 units (23 casements + 6 pictures). Upstairs: 15 openings / 23 casements. Main kitchen and prep each have three units in one joined opening. Exterior duplicates and door glazing are excluded. See the [counting rules](docs/window-count.md); not an approved procurement schedule.
+**Current whole-house count, October 28, 2026:** 32 openings / 55 units: 45 wall casements, 8 vertical fixed pictures and 2 fixed roof windows. Ground floor: 15 openings / 30 units (22 casements + 8 pictures). Upstairs: 15 vertical openings / 23 casements plus 2 roof windows, for 17 openings / 25 units. Main kitchen and prep each have three units in one joined opening. Exterior duplicates and door glazing are excluded. See the [counting rules](docs/window-count.md); not an approved procurement schedule.
 
-All sizes below are **provisional opening/group envelopes**, not confirmed catalog units, rough openings or clear glass, except where a verified standard frame is identified. Sill/head heights are inches above house datum unless explicitly labeled otherwise; the powder-window row uses feet and garage-relative heights are labeled separately. Coordinates identify the opening wall, not small frame insets.
+The detailed wall-window rows below are an October 27 snapshot, superseded where they conflict with the current measured upstairs plan. The two fixed laundry roof windows are separate from that legacy wall-opening schedule. All sizes are **provisional opening/group envelopes**, not confirmed catalog units, rough openings or clear glass, except where a verified standard frame is identified. Sill/head heights are inches above house datum unless explicitly labeled otherwise; the powder-window row uses feet and garage-relative heights are labeled separately. Coordinates identify the opening wall, not small frame insets.
 
 | Location / quantity | Opening W x H (in) | Sill / head (in) | Opening centers (x, z), ft | Concept grouping |
 |---|---|---|---|---|
@@ -2506,17 +2689,17 @@ All sizes below are **provisional opening/group envelopes**, not confirmed catal
 | Dining rear, 1 | 72 x 60 | 36 / 96 | (19.85, -2.1) | Two bays |
 | Dining west, 1 | 72 x 60 | 36 / 96 | (13.2, 2.95) | Two bays |
 | Dining patio-side window bay, 1 | 33.84 x 93.12 frame envelope within 72 x 96 assembly | 1.44 / 94.56 | (26.5, 1.53) | Two stacked casements; not a fixed picture pane |
-| Kitchen sink bank, 1 opening / 3 units | 18 / 54 / 18 x 54 | 42 / 96 | (29 / 32 / 35, 7) | Joined casement / picture / casement; nominal envelope, not approved factory assembly |
-| Kitchen former side units | Removed | Wall filled | Both sides of (32, 7) | Standard 30 in oak uppers replace side windows; ventilation/header/waterproofing approval pending |
+| Kitchen sink bank, 1 opening / 3 units | Restored 18 / 54 / 18 x 54; 90 total | 42 / 96 | (29 / 32 / 35, 7) | Joined casement / picture / casement; no sink-wall uppers; standard-product reconciliation and assembly approval required |
 | Prep joined counter bank, 1 opening / 3 units | Standard 2050 / 5050 / 2050 frames total 106.5 x 59.5; provisional combined opening 107 x 60 | Frame 41.25 / 100.75; opening 41 / 101 | Bank (47.4, 7); unit x = 43.941667 / 47.4 / 50.858333 | One outer trim/sill, no wall piers; factory mull/header approval required |
 | Prep end wall, 1 | Standard 2060: 23.5 x 71.5 frame; 24 x 72 minimum opening | Frame 29.25 / 100.75; opening 29 / 101 | (55.5, 11.55) | Tallest standard single casement; no counter below |
 | Garage east wall, 3 | 72 x 18 each | 75 / 93 house datum; 90 / 108 above garage slab | (55.5, 19.5), (55.5, 29.5), (55.5, 39.5) | One fixed picture each; clear lower wall for storage; side door retained; headers, property-line/fire limits and daylight unverified |
 | Powder west, 1 | Standard 2640: approximately 2.4583 x 3.9583 ft frame; minimum 2.5 x 4 ft rough opening | Frame approximately 4.0208 / 7.9792 ft; rough 4 / 8 ft | (0, 38.05) | One taller casement, lower half frosted to 6 ft / upper clear; standard dimensions verified in [manufacturer chart](https://www.arlcoal.com/m/AndersenWindowsLearnMore/pdfs/Sizing/sizing-windows--100series-casement.pdf); product, installation and privacy unapproved |
 | Office side, 1 | 48 x 60 | 36 / 96 | (0, 49) | Two bays |
-| Office porch, 1 | 72 x 60 | 36 / 96 | (6, 54.2) | Two bays |
+| Office porch, 1 | 91.2 x 60 | 36 / 96 | (6, 54.2) | Three equal bays, casement / fixed picture / casement; matches bedroom porch per October 28 owner correction |
 | Bedroom porch, 1 | 91.2 x 60 | 36 / 96 | (25, 54.2) | Three bays |
+| Upstairs laundry roof windows, 2 | 21 x 45.75 rough opening each | Roof-mounted; no sill/head | (34.2708, 31.4), (37.6708, 31.4) | Fixed, south-facing 4:12 East rear wing roof; VELUX FS C06 dimensional candidate only; product and roof compatibility not approved |
 
-The table above totals **20 ground-floor groups / 31 units**, not the whole house: 25 operable casements plus six fixed pictures, including the stacked patio-side pair among the casements. Add the upstairs schedule below for the 31-opening whole-house total. Default direction is Andersen 100 Series, Black exterior / White interior, white crank/lock hardware where operable and no decorative grilles. Fixed pictures have no center mullion or crank/lock. Patio-adjacent frames/sashes are White inside and out. All operable windows are shown closed; divisions do not establish manufacturer combination approval. The powder and prep units use verified standard-size frames, but the joined prep assembly is not approved; privacy treatment, safety glazing, installation allowances, outward sash clearance and weatherproofing remain provisional. Prep counter-window cap tops are about 107.375 in below the 108 in ceiling; actual structural headers and installation space require architectural review.
+The October 27 wall-window table above totals **20 ground-floor groups / 31 units** and is retained as a historical schedule, not the current furnished-model takeoff. The current whole-house count is stated above; the added roof windows are two additional openings/units. Andersen 100 Series applies to the vertical wall-window intent only. Fixed pictures have no center mullion or crank/lock. All operable windows are shown closed; divisions do not establish manufacturer combination approval. Product combinations, safety glazing, installation allowances, outward sash clearance and weatherproofing remain provisional.
 
 ### Powder-room window options in feet
 
@@ -2542,9 +2725,9 @@ interior and exterior models; the single-window count stays unchanged.
 Standard sizes are from the [Andersen 100 Series manufacturer chart,
 dealer-hosted copy](https://www.arlcoal.com/m/AndersenWindowsLearnMore/pdfs/Sizing/sizing-windows--100series-casement.pdf).
 
-### Upstairs window schedule
+### Historical upstairs wall-window schedule - October 27
 
-All upstairs openings are 60 in high, sill 36 in / head 96 in **above the upstairs finished floor** (156 / 216 in above house datum, with the provisional 10 ft floor-to-floor height). Coordinates below follow the frame centers, including 0.1 ft wall insets; openings are not confirmed unit or rough-opening dimensions.
+The current measured upstairs plan supersedes these coordinates and dimensions. The current whole-house opening/unit totals are listed above; the added laundry roof windows are described separately. The table is retained for historical reference only.
 
 | Room / group | Quantity | Opening W x H (in) | Frame centers (x, z), ft | Units per opening |
 |---|---|---|---|---|
@@ -2570,10 +2753,10 @@ All house doors and doorless cased passages have nominal **8 ft / 96 in heads** 
 | Kitchen to prep | 36 in finished clear, nominal 96 in head; x = 37.5, z = 9.725-12.725 | Doorless, casing outside clear width on both faces; framing allowance separate |
 | Kitchen to mudroom | 36 in finished clear, nominal 96 in head; x = 37.5, z = 21.175-24.175 | Doorless; openings mirror about z = 16.95; framing allowance separate |
 | Hall to kids | 54 x 96 in, x = 19, z = 27-31.5 | Doorless west entry into relocated room; no direct living-side opening or sofa supervision |
-| Hall to office | Nominal 60 x 96 in envelope, x = 12.2, z = 42.75-47.75 | Two nominal 30 in white French leaves, each 2 columns x 5 rows of clear lites, white muntins, gold round knobs and dark hinges; white casing. Both start fully open inward at 90 degrees into the office, perpendicular to the opening. Click/tap a leaf to toggle closed or to the modeled 180-degree endpoint. Unit/jamb/rough opening, true/simulated divisions, safety glazing, handing and hardware unselected; see [office doors](office.html#doors) |
+| Hall to office | Nominal 60 x 96 in envelope, x = 12.2, z = 42.75-47.75 | Two nominal 30 in white French leaves, each 2 columns x 5 rows of clear lites, white muntins, gold round knobs and dark hinges; white casing. Both start fully open inward at 90 degrees into the office, perpendicular to the opening. Click/tap toggles closed or to the 90-degree study stop, superseding 180 degrees to clear the east desk. Unit/jamb/rough opening, true/simulated divisions, safety glazing, handing, stop hardware and occupied use unapproved; see [office doors](office.html#doors) |
 | Hall to bedroom | 36 x 96 in, x = 19, z = 42-45 | Opening only; final door leaf/swing not detailed |
 | Hall to guest bedroom | Nominal 36 x 96 in, x19, z43.8-46.8 | White single-panel leaf, closed default, south-jamb inward 90-degree swing; sampled furniture sweep clear, not occupied approval |
-| Bedroom to walk-in | Nominal 36 x 96 in, z43.2, x22.29375-25.29375 | Closed white left pocket. Casing/reveal/cap reaches finished corner x25.575 exactly. Cavity x19.175-22.29375 (37.425 in); 36.96 in leaf travels 36.48 in, open bounds x19.21375-22.29375. Track/end framing, split jamb/header, skins, services and nonpenetrating storage/trim fixings require product/architect review |
+| Bedroom to walk-in | Nominal 30 x 96 in, z43.2, x22.79375-25.29375 | Closed white left pocket. Casing/reveal/cap reaches finished corner x25.575 exactly. Cavity x19.175-22.79375 (43.425 in); 30.96 in overlapping leaf travels 30.48 in, open bounds x20.21375-22.79375. Track/end framing, split jamb/header, skins, services and nonpenetrating storage/trim fixings require product/architect review |
 | Bedroom to shower bathroom | Nominal 28 x 96 in, z43.2, x26.2-28.5333 | Closed white Shaker/gold knobs, west hinge, inward 90-degree stop. Old pocket removed. Close vanity drawers before swing; verify hardware, occupied and sanitary clearances |
 | Guest shower | South-facing opening x26.15-28.65 at z37.95; modeled width 30 in | Fixed glass, 58.2 x 36 in curb-interior; sampled 26 in route from separate bedroom door past toilet. Step-over curb, not accessible; splash control, glazing/support and products unverified |
 | Front entry | 60 x 96 in, z = 54.2, x = 13.1-18.1 | Two oak/glass leaves shown closed; click/tap either leaf to the modeled 180-degree endpoint; no sidelights/transom; final door unit unselected |
@@ -2582,8 +2765,8 @@ All house doors and doorless cased passages have nominal **8 ft / 96 in heads** 
 | Mudroom to garage | 36 x 96 in, z = 26.9, x = 39.5-42.5 | Solid leaf, west hinge, 90-degree inward open default; click/tap 0/90. Sampled sweep clears storage; rated/self-closing/latching assembly, landing and occupied operation unverified |
 | Garage side pedestrian opening | 36 x 96 in, x = 55.5, z = 44-47 | Click/tap the modeled pedestrian leaf to toggle its conceptual 180-degree swing; opening rises from garage datum, not house datum |
 | Garage overhead doors, 2 | Each 108 x 96 in, z = 49, x = 32.5-41.5 / 44-53 | Exterior view click/tap rotates each simplified panel to a conceptual overhead pose; tracks, ceiling storage, spring balance, stops and actual travel are not modeled or approved |
-| Powder entry | Nominal 30 x 96 in, x = 7.1, z = 38-40.5 | Opening centered between finished alcove walls with casing room at both jambs; painted-white leaf, south-jamb hinge, displayed 90 degrees open inward; click/tap toggles closed or to the modeled 180-degree endpoint |
-| Guest coat closet | Nominal 48 x 96 in, z = 37.5, x = 7.65-11.65 | Paired solid white-oak Shaker French doors, nominal 24 in per leaf, outer-jamb hinges and center meeting; closed by default, satin-gold pulls; click/tap each leaf to swing 90 degrees outward independently into alcove, never slide; actual stops/occupied circulation unverified |
+| Powder entry | Nominal 30 x 96 in, x = 7.1, z = 35.6-38.1 | Opening centered between finished alcove walls with casing room at both jambs; painted-white leaf, north-jamb hinge, displayed 90 degrees open inward; click/tap toggles closed or to the modeled 180-degree endpoint |
+| Guest coat closet | Nominal 48 x 96 in, z = 38.6, x = 7.65-11.65 | Paired solid white-oak Shaker French doors, nominal 24 in per leaf, outer-jamb hinges and center meeting; closed by default, satin-gold pulls; click/tap each leaf to swing 90 degrees outward independently into alcove, never slide; actual stops/occupied circulation unverified |
 | Mudroom coat closet | Nominal 48 x 96 in solid French pair, centered x = 40.3875, z = 16.4 | Two nominal 24-inch single recessed panel leaves, cabinet off-white #E6DECE, brass knobs; independently clickable 0/90, closed default; conceptual 50 x 98 assembly reserve within 61.5-inch enclosure; no bifold or basket bay; selected assembly and occupied access need review |
 
 Doorless openings do not provide acoustic separation. Simplified trim does not establish finished clear width or egress/accessibility compliance. See [door requirements](doors.html).
@@ -2815,7 +2998,7 @@ is offset from the wall trim. Mechanical equipment remains a reservation.
 Product selection, occupied retrieval, door operation, sanitary clearances,
 supports and code approval remain unresolved. See [upstairs notes](upstairs.html#model-study).
 
-1. **Guest-entry verification:** hall access, powder door, relocated vanity and separate coat closet are now modeled; the former blocked entry is resolved geometrically. Confirm actual finished door/frame clear widths, occupied alcove circulation, sanitary clearances, plumbing/exhaust, structure, closet operation, and accessibility. The remaining 6-inch stair-edge-to-wall-centerline buffer is not a walking passage.
+1. **Guest-entry plan:** the powder-room hall opening, relocated vanity and separate guest coat closet are modeled; final circulation, sanitary clearances and installation still need professional review.
 2. **Patio circulation:** inward handing and closed display remain current. The rotated dining set moves 6 in west for swing clearance; actual occupied passage and manufacturer door/chair envelopes still need confirmation.
 3. **Stair enclosure:** relocated flight guards and the new living-side opening guard replace the earlier wall-backed omissions. Confirm required handrails, guards, clear widths, headroom, fire protection, anchorage and structural support after removing the living partition.
 4. **Garage safety/access:** actual levels, rated door, required landings/rails, door tracks, vehicle/equipment movement and charger reach remain unverified; the two-step/no-rail concept is not approval.
@@ -2837,8 +3020,9 @@ Two nominal 48 x 60-inch paired casements occupy the formerly blank loft
 south wall, z = 36.2 ft, centers x = 40.75 / 47.75 ft, sill/head 36/96 in
 above upstairs floor. Shared furnished/exterior data replaces the blind
 masonry fields without changing rooms or furniture. Loft total: four openings,
-eight casement units. Whole house: 30 openings / 52 units (46 casements,
-6 pictures). Headers, veneer support, roof clearance, flashing and operation
+eight casement units. Current whole-house count: 32 openings / 55 units
+(45 casements, 8 vertical pictures, 2 fixed roof windows). Headers, veneer
+support, roof clearance, flashing and operation
 remain unapproved; see [window count](docs/window-count.md).
 # Prep shelf depth update - October 27
 

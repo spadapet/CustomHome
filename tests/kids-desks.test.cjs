@@ -49,7 +49,7 @@ function buildKidsRoom() {
   };
   vm.runInNewContext(source.slice(source.indexOf('  function shakerFront('), source.indexOf('  function cabinetCupPull(')), context);
   const start = source.indexOf('  const kidsClay =');
-  const end = source.indexOf('  for (const [index, [deskX, deskZ, rotation]]', start);
+  const end = source.indexOf('  const officeDeskWidth =', start);
   assert.ok(start >= 0 && end > start, 'Locate the complete kids-room furnishings');
   vm.runInNewContext(source.slice(start, end), context);
   const descendants = (node) => [node, ...node.children.flatMap(descendants)];
@@ -100,24 +100,37 @@ test('two electric IKEA MITTZON desks use the referenced product dimensions', ()
     assert.ok(Math.abs(top.d * 12 - 31.5) < 1e-9);
     assert.ok(Math.abs((top.position.y + top.h / 2) * 12 - 29.5) < 1e-9);
   }
-  for (const desk of desks) {
+  for (const [index, desk] of desks.entries()) {
     assert.equal(desk.rotation.y, Math.PI);
-    assert.ok(Math.abs(desk.position.z - 32.1125) < 1e-9);
+    const southFace = index === 0 ? 37.025 : 33.425;
+    assert.ok(Math.abs(desk.position.z - (index === 0 ? 35.7125 : 32.1125)) < 1e-9);
     const top = desk.children.find(part => part.name === 'MITTZON desktop');
-    assert.ok(Math.abs(33.425 - bounds(top).maxZ) < 1e-9, 'Actual rear tabletop meets the finished south wall above trim');
+    assert.ok(Math.abs(southFace - bounds(top).maxZ) < 1e-9, 'Actual rear tabletop meets its finished south wall above trim');
     for (const foot of desk.children.filter(part => part.name === 'MITTZON T foot')) {
-      assert.ok(Math.abs((33.425 - 0.0625 - bounds(foot).maxZ) * 12 - 1.2) < 1e-9, 'Low T feet clear projecting baseboard');
+      assert.ok(Math.abs((southFace - 0.0625 - bounds(foot).maxZ) * 12 - 1.2) < 1e-9, 'Low T feet clear projecting baseboard');
     }
   }
   const rightWallFace = model.kidsRoom.x + model.kidsRoom.southWidth - 0.175;
   assert.ok(Math.abs((rightWallFace - bounds(desks[1]).maxX) * 12 - 1) < 1e-9, 'Right desk is one inch off the finished east wall');
-  assert.ok(Math.abs(desks[0].position.x - 24.952083333333334) < 1e-9, 'PC sits beside the homework desk in a compact wall-backed row');
+  const extension = require('../floor-plan-ground.js').getGuestSuiteLayout().kidsExtension;
+  assert.ok(Math.abs(desks[0].position.x - (extension.x + extension.w / 2)) < 1e-9, 'Circled PC desk is centered in the marked southwest alcove');
+  assert.ok(Math.abs(desks[1].position.x - 28.972916666666666) < 1e-9, 'Homework desk stays in its accepted position');
   const craftChair = model.find('Kids desk chair 2')[0];
   assert.equal(craftChair.rotation.y, 2 * Math.PI);
   assert.equal(craftChair.position.x, desks[1].position.x);
   assert.ok(craftChair.position.z < desks[1].position.z, 'Chair sits north of south-facing desk');
   assert.ok(bounds(desks[0]).maxX < bounds(desks[1]).minX, 'Desks do not overlap');
-  assert.ok(Math.abs((bounds(desks[1]).minX - bounds(desks[0]).maxX) * 12 - 1) < 1e-9);
+  const pcChair = model.find('Kids desk chair 1')[0];
+  assert.ok(Math.abs(pcChair.position.x - 22.375) < 1e-9);
+  assert.ok(Math.abs(pcChair.position.z - 34.375) < 1e-9, 'PC chair follows the desk, north of its front');
+  const pc = bounds(desks[0]);
+  assert.ok(Math.abs((pc.minX - 19.175) * 12 - 14.775) < 1e-9);
+  assert.ok(Math.abs((25.575 - pc.maxX) * 12 - 14.775) < 1e-9);
+  assert.ok(Math.abs((pc.minZ - bounds(desks[1]).maxZ) * 12 - 11.7) < 1e-9, 'PC desk starts south of the bathroom step');
+  pcChair.position.z -= 9 / 12;
+  const pulledChair = bounds(pcChair);
+  assert.ok(pulledChair.minZ > 31.5 && pulledChair.maxZ < pc.minZ, 'Nine-inch chair pull clears the desktop front and west opening');
+  pcChair.position.z += 9 / 12;
 });
 
 test('desks, attached contents and chairs restore after upstairs/exterior/view round trips', () => {
@@ -168,11 +181,12 @@ test('desks, chairs and relocated storage clear room edges and preserve a passag
   for (const root of model.roots) {
     if (['Family glass dry-erase and cork board', 'Family message wall panelling', 'Family message wall white edge trim', 'Hall-facing white wall panelling'].includes(root.name)) continue;
     const b = bounds(root);
-    const eastFace = b.minZ < 26.9 + 0.175 ? 28.825 : 31.025;
+    const eastFace = b.maxZ > 33.425 + 1e-9 ? 25.575 : b.minZ < 26.9 + 0.175 ? 28.825 : 31.025;
+    const southFace = b.maxX <= 25.575 ? 37.025 : 33.425;
     assert.ok(b.minX >= 19.3 && b.maxX <= eastFace + 1e-9, root.name);
-    assert.ok(b.minZ >= model.kidsRoom.z + 0.3 && b.maxZ <= 33.425 + 1e-9, root.name);
+    assert.ok(b.minZ >= model.kidsRoom.z + 0.3 && b.maxZ <= southFace + 1e-9, root.name);
   }
-  const deskFront = desks[0].minZ;
+  const deskFront = desks[1].minZ;
   const pulledFront = toyFront + storage[0].userData.binPullAllowanceInches / 12;
   assert.ok((deskFront - toyFront) * 12 > 49, 'Shifted opposing furniture fronts have over 49 inches');
   assert.ok((deskFront - 30 / 12 - pulledFront) * 12 > 1, 'Chair and full bin-pull allowances remain separate but do not leave a passing aisle');

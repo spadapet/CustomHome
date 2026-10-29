@@ -69,20 +69,30 @@ test('applied casing stays outside each finished width and above its eight-foot 
   }
 });
 
-test('narrower stock drawer bases retain realistic cookware rather than shrinking pans to miniature sizes', () => {
+test('narrower stock drawer bases retain nested realistic frying pans with separate handles', () => {
   const pots = [];
+  const parts = [];
   const context = {
     cookingMetal: {}, black: {},
-    vessel(parent, name, x, y, z, radius, height) {
-      const pot = { name, x, y, z, radius, height };
+    vessel(parent, name, x, y, z, radius, height, material, handleLength) {
+      const pot = { name, x, y, z, radius, height, material, handleLength, userData: {} };
       pots.push(pot);
       return pot;
     },
-    box() { return {}; }
+    box(parent, x, y, z, width, height, depth) {
+      const part = { x, y, z, width, height, depth, name: '' };
+      parts.push(part);
+      return part;
+    }
   };
-  vm.runInNewContext(source.slice(source.indexOf('    function cookware('), source.indexOf('    const drawers =', source.indexOf('    function cookware('))), context);
-  context.cookware({}, 20.875 / 12 - 0.28, true);
-  assert.equal(pots.length, 1);
-  close(pots[0].radius * 24, 10.56);
-  assert.equal(pots[0].x, 0);
+  const start = source.indexOf('    function storedCookware(');
+  const end = source.indexOf('    function drainBaskets(', start);
+  assert.ok(start >= 0 && end > start, 'Locate cookware builders');
+  vm.runInNewContext(source.slice(start, end), context);
+  const drawer = {};
+  context.cookware(drawer, 20.875 / 12 - 0.28, 1, 1);
+  assert.equal(pots.length, 2);
+  assert.deepEqual(pots.map(({ radius, height }) => [radius * 24, height * 12]), [[10, 2], [8, 1.75]]);
+  assert.ok(pots.every(({ x, handleLength }) => x === 0 && handleLength > 0));
+  assert.equal(parts.filter(({ name }) => name === 'Cookware long handle').length, 2);
 });

@@ -80,7 +80,7 @@ before ordering. Do not treat visible fronts as independently selected boxes.
 | Sink-wall countertop span | 1 | 127.2 overall; finished top about 36.6 | Two 45.6-wide side slabs flank the nominal 36-inch sink. |
 | Island storage body | 1 | 92 long x 24 deep; body height 29.52, body top 33.84 above floor | Three equal drawer-bank pitches of approximately 30.667; not three approved stock boxes. Individual modeled fronts are approximately 29.707 wide. |
 | Island countertop | 1 | 96 long x 42 deep; top 36.6 above floor | Quartz waterfall ends; 15 knee-overhang intent, four seats. Standard box/filler takeoff TBD. |
-| Sink-wall uppers | 0 | Removed | Do not order the former 30-inch upper stacks: the joined three-unit window bank is restored. |
+| Sink-wall uppers | 0 | Removed | Owner rejects both cabinet trials; remove trial sample dishes, fillers and ceiling trim. Existing island/prep dishes stay. Restore 90-inch bank and two wall sconces. |
 
 Sources: [sink-run geometry](../floor-plan-3d.js#L2009),
 [tray-divider study](../kitchen.html#tray-divider-pullout),
@@ -148,7 +148,6 @@ Sources: [prep schedule and depth update](../kitchen.html),
 | Mudroom shoe tower | 1 | 18.72 x 18 x 105 | Builder-fitted seven-cell shoe tower; not a stock 18.72-inch box. |
 | Mudroom blind north/east junction | 1 | About 11.5 W x 25.68 D x 105 H | Fitted closed return; **not accessible storage**. |
 | Mudroom ceiling infills | As fitted | Case tops 105; ceiling 108 | Separate fitted closures. |
-| Guest entry coat closet | 1 | Room envelope 61.2 x 28.8; clear depth 24.6 | Built-in shelf/rail in architectural closet, not a cabinet SKU; 48 x 96 French opening. |
 | Guest walk-in long-hang module | 1 | 24 x 24; top 87 | 84-high carcass on 3-inch base; 22.5 clear between sides. |
 | Guest walk-in double-hang module | 1 | 24 x 24; top 87 | Same construction; upper rail reach unverified. |
 | Guest walk-in drawer/shelf tower | 1 | 24 x 24; top 87 | Three drawers, 15 travel; flat oak-look fronts. |
@@ -234,11 +233,13 @@ Sources: [ground storage geometry](../floor-plan-3d.js#L3946),
 
 ## 2. Windows: whole-house schedule
 
-**30 openings / 52 individual units = 45 casements + 7 fixed pictures.**
-Ground floor: **15 / 29 = 22 casements + 7 pictures**.
-Upstairs: **15 / 23 = 23 casements**.
+**32 openings / 55 individual units = 45 casements + 8 vertical fixed pictures + 2 fixed roof windows.**
+Ground floor: **15 / 30 = 22 casements + 8 pictures**.
+Upstairs: **17 / 25 = 23 casements + 2 fixed roof windows**.
 
-All rooms use **Andersen 100 Series intent, White Fibrex inside/outside**.
+Vertical windows use **Andersen 100 Series intent, White Fibrex inside/outside**.
+The two fixed laundry roof windows are a separate VELUX FS C06 dimensional
+candidate, not a selected product; see the [roof-window study](../windows.html).
 No exact SKU, dealer, approved factory-mulled assembly or order has been
 selected. A pair/triple is one architectural opening containing two/three
 units, not necessarily one orderable factory combination.
@@ -255,15 +256,15 @@ garage values are explicitly slab-relative.
 | Living return bank | 1 | Casement / picture / casement | 90 x 60 group; nominal 30 x 60 each | 36 / 96 |
 | Dining rear | 1 | 2 casements | 72 x 60 group | 36 / 96 |
 | Dining garden-facing replacement | 1 | 2 casements | 72 x 60 group | 36 / 96 |
-| Main kitchen sink bank | 1 | Casement / picture / casement | 90 x 54 group; widths 18 / 54 / 18 | 42 / 96 |
+| Main kitchen sink bank | 1 | Restored casement / picture / casement | 90 x 54 group; widths 18 / 54 / 18, nominal only; standard SKU/assembly review required | 42 / 96 |
 | Prep counter bank | 1 | Casement / picture / casement | Actual individual frames 23.5 / 59.5 / 23.5 W x 59.5 H; total 106.5 W | Frame 41.25 / 100.75 |
 | Prep aisle end | 1 | 1 casement | 23.5 x 71.5 frame; study opening 24 x 72 | Frame 29.25 / 100.75 |
 | Powder west | 1 | 1 casement | 29.5 x 47.5 frame; study opening 30 x 48 | Frame 48.25 / 95.75; opening 48 / 96 |
 | Office side | 1 | 2 casements | 48 x 60 group | 36 / 96 |
-| Office front | 1 | 2 casements | 72 x 60 group | 36 / 96 |
+| Office front | 1 | Casement / picture / casement, matching guest front | 91.2 x 60 group; nominal 30.4 W each | 36 / 96 |
 | Guest bedroom front | 1 | Casement / picture / casement | 91.2 x 60 group; nominal 30.4 W each | 36 / 96 |
 | Garage east clerestories | 3 | 1 fixed picture each | 72 x 18 each | 90 / 108 above garage slab; 75 / 93 above house datum |
-| **Ground total** | **15** | **29 units: 22 casements, 7 pictures** | | |
+| **Ground total** | **15** | **30 units: 22 casements, 8 pictures** | | |
 
 The old dining-west window is now a **36 x 96 patio door** and is not counted
 as a window. The old garden-side combined door/stacked-window assembly is
@@ -287,7 +288,8 @@ measured rooms without changing these sizes/counts.
 | Bedroom 3 west | 1 | 2 casements | 48 x 60 |
 | Bedroom 3 front | 2 | 1 casement | 36 x 60 |
 | Bedroom 4 front | 2 | 1 casement | 36 x 60 |
-| **Upper total** | **15** | **23 casements** | |
+| Laundry roof | 2 | 1 fixed roof window | 21 x 45.75 rough opening; 21.5 x 46.25 candidate frame |
+| **Upper total** | **17** | **23 casements + 2 fixed roof windows** | |
 
 ### Window sources, trim and ordering holds
 
@@ -305,7 +307,7 @@ measured rooms without changing these sizes/counts.
   They are not approved joined-assembly SKUs. Prep's 107 x 60 combined opening
   is provisional; individual frame sizes do not approve factory mulling.
 - **Grilles:** the furnished model currently applies front-only conceptual
-  six-light grilles (2 columns x 3 rows per unit), eight openings/thirteen
+  six-light grilles (2 columns x 3 rows per unit), eight openings/fourteen
   units. Some general selection paragraphs still say no grilles throughout.
   Treat final order grille specification as **unresolved documentation
   coordination**, not blanket manufacturer approval. Side/rear glass is clear.
@@ -332,7 +334,7 @@ Internal sources: [window requirements/sources](../windows.html),
 [current ground model](../floor-plan-3d.js),
 [upper window definitions](../floor-plan-upstairs.js#L53).
 Some older consolidated-plan rows retain removed windows/old totals; the
-current furnished definitions and the 30/52 count govern this inventory.
+current furnished definitions and the 32/55 count govern this inventory.
 
 ## 3. Doors and opening-related products
 
@@ -393,6 +395,20 @@ See [appliance comparisons](../appliances.html) and
 Do not carry historical LG/ILVE/KitchenAid packages into this inventory as
 additional installed appliances.
 
+### Office furniture envelopes - October 28
+
+The owner's top-view arrangement retains two generic 60 x 24 in desks,
+four monitors, two task chairs and the provisional SOLE E20 65 x 22 x
+64 in equipment envelope. Latest trial restores the original
+**60 x 33.6 in cream loveseat concept**, below the front window and facing
+north; the compact 48 in north-wall trial is superseded. No selected or
+owner-owned product is rescaled. No seating brand/SKU is selected; verify
+actual dimensions, usable seats, comfort, support and delivery access.
+North desk is centered, elliptical moves northwest and loveseat southwest.
+The east desk retains its knob-clearance position, and office doors
+retain a 90-degree study stop requiring selected hardware. Geometry and
+occupied-use limits are in the [office notes](../office.html#layout).
+
 ## 5. Finishes, lighting and visual provenance
 
 | Category | Current size / direction | Physical source versus visual source |
@@ -405,7 +421,7 @@ additional installed appliances.
 | Main roofing / porch metal | Slate-style main-roof appearance; standing-seam porch/entry direction | Physical manufacturers/assemblies TBD. Poly Haven **Roof Slates 03** texture does not select slate or asphalt shingles. |
 | Oak entry/door appearance | Warm oak visual direction | Physical door maker/finish TBD. Poly Haven **Oak Veneer 01** supplies the entry texture, not the door product. |
 | Whole-home recessed lights | 4 aperture, 2 recessed baffle/lens depth, warm 2700 K intent | Fixture manufacturer/SKU TBD; older 3000 K kitchen notes are not a finalized purchase schedule. |
-| Kitchen decorative/task lights | 2 island pendants; 2 hood-side under-cabinet strips; hood task light; 4 ambient cans | Product SKUs TBD; RAB/Cooper links in room notes explain fixture type/layering, not selected products. Sink-upper strips/sconces are removed. |
+| Kitchen decorative/task lights | 2 restored ivory/brass sink-wall sconces; 2 island pendants; 2 hood-side under-cabinet strips; hood task light; 4 ambient cans | Product SKUs TBD; RAB/Cooper links explain fixture type/layering, not selected products. No sink-upper strips remain. Sconce listing, wet-area suitability, electrical layout and illumination need review. |
 | Exterior upper-soffit lights | 12 warm 2700 K recessed fixtures | SKU TBD. HALO HLB4 is a documented precedent only; project source records it discontinued October 19, 2026. |
 | Message-board picture light | 45-wide concept | Supplier TBD; no selected photometry or glare certification. |
 | Living/dining decorative sconces | 4 total; approximately 7.9 W x 10.2 H x 4 projection | Owner Aleena photo/style reference; manufacturer dimensions/listing not verified. |

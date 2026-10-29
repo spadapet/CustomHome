@@ -11,7 +11,8 @@ class Group {
     this.children = [];
     this.userData = {};
     this.position = { x: 0, y: 0, z: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } };
-    this.rotation = { x: 0, y: 0, z: 0 };
+    this.rotation = { x: 0, y: 0, z: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } };
+    this.scale = { x: 1, y: 1, z: 1, set(x, y, z) { Object.assign(this, { x, y, z }); } };
   }
   add(child) { this.children.push(child); child.parent = this; }
   traverse(callback) { callback(this); this.children.forEach((child) => child.traverse(callback)); }
@@ -19,10 +20,14 @@ class Group {
 class Mesh extends Group {
   constructor(geometry, material) { super(); this.geometry = geometry; this.material = material; }
 }
-class CylinderGeometry { constructor(radius, bottom, height) { Object.assign(this, { radius, height }); } }
+class CylinderGeometry {
+  constructor(radius, bottom, height, segments = 32, rows = 1, open = false, start = 0) {
+    Object.assign(this, { radius, bottom, height, segments, start });
+  }
+}
 class TorusGeometry { constructor(radius, tube) { Object.assign(this, { radius, tube }); } }
 
-function build() {
+function build(cookingCenterOffset = 0) {
   const material = { clone() { return { ...this }; } };
   const context = {
     THREE: { Group, Mesh, CylinderGeometry, TorusGeometry, DoubleSide: 2 },
@@ -53,29 +58,31 @@ function build() {
   };
   context.kitchen.add(context.island);
   context.kitchen.add(context.cooktopCabinetry);
-  context.cooktopCabinetry.position.z = context.cooktopCenterZ;
+  context.cooktopCabinetry.position.z = context.cooktopCenterZ + cookingCenterOffset;
   const islandBanks = [-1, 0, 1].map((offset) => {
     const bank = new Group();
     bank.position.z = 18.5 + offset * context.islandCabinetLength / 3;
     context.island.add(bank);
     return bank;
   });
-  for (const root of [context.kitchen, ...islandBanks, context.cooktopCabinetry, context.prepExtension]) {
+  function drawers(root, width, cooking = false) {
     for (let row = 0; row < 3; row++) {
       const front = new Group();
-      front.userData = { kitchenDrawerRow: row, width: 2.5 };
+      const bottom = cooking ? [4.125, 16.5, 28.875][row] / 12 : 0.28 + row * 0.79;
+      const height = cooking ? (row === 2 ? 5.5 : 12.25) / 12 : 0.74;
+      front.position.y = bottom + height / 2;
+      front.userData = { kitchenDrawerRow: row, width, height, drawerTravelFeet: 1.5,
+        ...(cooking ? { drawerFloorY: -height / 2 + 0.09 } : {}) };
       root.add(front);
     }
   }
+  for (const root of [context.kitchen, ...islandBanks, context.cooktopCabinetry, context.prepExtension])
+    drawers(root, root === context.kitchen ? 2.2 : root === context.cooktopCabinetry ? 35.875 / 12 : 2.5, root === context.cooktopCabinetry);
   for (let index = 0; index < 2; index++) {
     const bank = new Group();
     bank.position.z = 16.95 + (index === 0 ? -2.625 : 2.625);
     context.cooktopCabinetry.add(bank);
-    for (let row = 0; row < 3; row++) {
-      const front = new Group();
-      front.userData = { kitchenDrawerRow: row, width: 26.875 / 12 };
-      bank.add(front);
-    }
+    drawers(bank, 26.875 / 12, true);
     const upper = new Group();
     upper.name = `Cooktop ${index === 0 ? 'prep-side' : 'mudroom-side'} upper stack`;
     upper.userData.widthInches = 27;
@@ -95,8 +102,123 @@ const find = (root, name) => {
   return result;
 };
 
-test('sink uppers, their stored goods, scribes, crown and task lights stay removed', () => {
-  assert.doesNotMatch(source, /sinkWallUppers|sinkWallUpper|Sink upper|sink upper/);
+function boundsIn(root, ancestor) {
+  const bounds = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] };
+  root.traverse((mesh) => {
+    if (!mesh.geometry) return;
+    const g = mesh.geometry;
+    const radius = g.radius + (g.tube ?? 0);
+    const squareRadius = g.segments === 4 ? g.radius / Math.SQRT2 : g.radius;
+    const extent = g.w !== undefined ? [g.w / 2, g.h / 2, g.d / 2]
+      : g.tube !== undefined ? [radius, radius, g.tube] : [squareRadius, g.height / 2, squareRadius];
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) {
+      let [x, y, z] = [sx * extent[0], sy * extent[1], sz * extent[2]];
+      for (let part = mesh; part !== ancestor; part = part.parent) {
+        assert.ok(part, 'Measured object belongs to the reference frame');
+        x *= part.scale.x; y *= part.scale.y; z *= part.scale.z;
+        const r = part.rotation;
+        [x, y] = [x * Math.cos(r.z) - y * Math.sin(r.z), x * Math.sin(r.z) + y * Math.cos(r.z)];
+        [x, z] = [x * Math.cos(r.y) + z * Math.sin(r.y), -x * Math.sin(r.y) + z * Math.cos(r.y)];
+        [y, z] = [y * Math.cos(r.x) - z * Math.sin(r.x), y * Math.sin(r.x) + z * Math.cos(r.x)];
+        x += part.position.x; y += part.position.y; z += part.position.z;
+      }
+      [x, y, z].forEach((value, axis) => {
+        bounds.min[axis] = Math.min(bounds.min[axis], value);
+        bounds.max[axis] = Math.max(bounds.max[axis], value);
+      });
+    }
+  });
+  return bounds;
+}
+
+test('requested inventory is complete: two baskets, six mixing bowls, ten bottles and a twelve-container set with lids', () => {
+  const model = build();
+  assert.equal(find(model.kitchen, 'Nested drain basket').length, 2);
+  assert.equal(find(model.kitchen, 'Nested food storage container').length, 12);
+  assert.equal(find(model.kitchen, 'Matching food container lid').length, 12);
+  const bowls = find(model.prep, 'Nested mixing bowl');
+  assert.equal(bowls.length, 6);
+  for (const diameter of [8, 10, 12]) assert.equal(bowls.filter(b => b.userData.diameterInches === diameter).length, 2);
+  const bottles = find(model.prep, 'Stored reusable water bottle');
+  assert.equal(bottles.length, 10);
+  assert.ok(bottles.every(b => b.userData.heightInches === 10.5 && b.userData.diameterInches === 3.25));
+  assert.ok(bowls.every(b => b.parent.position.x === 44.65));
+  assert.ok(bottles.every(b => b.parent.parent.position.x === 51.4));
+  for (const size of ['small', 'medium', 'large']) {
+    assert.equal(find(model.kitchen, 'Nested food storage container').filter(b => b.userData.size === size).length, 4);
+    assert.equal(find(model.kitchen, 'Matching food container lid').filter(b => b.userData.size === size).length, 4);
+  }
+});
+
+test('two ten-piece cookware sets each contain two frying pans, two saucepans, a saute pan, a stockpot and four lids', () => {
+  const model = build();
+  for (const setNumber of [1, 2]) {
+    const items = [];
+    for (const root of [model.kitchen, model.refrigerationPantry]) root.traverse(part => {
+      if (part.userData.setNumber === setNumber) items.push(part);
+    });
+    assert.equal(items.length, 10);
+    for (const [name, count] of [['Stored frying pan', 2], ['Stored saucepan', 2], ['Stored saute pan', 1], ['Large stockpot', 1], ['Stored cookware lid', 4]])
+      assert.equal(items.filter(item => item.name === name).length, count, `Set ${setNumber}: ${name}`);
+    assert.deepEqual(items.filter(i => i.name === 'Stored frying pan').map(i => i.userData.diameterInches).sort((a,b) => a-b), [8, 10]);
+    assert.deepEqual(items.filter(i => i.name === 'Stored saucepan').map(i => i.userData.diameterInches).sort((a,b) => a-b), [6.5, 8]);
+  }
+  assert.equal(find(model.cooktopCabinetry, 'Stored cookware lid').length, 8);
+  assert.equal(find(model.refrigerationPantry, 'Stored cookware lid').length, 0);
+});
+
+test('new sink and cooking drawer contents fit their actual usable width, depth and next-drawer underside', () => {
+  const model = build();
+  const inventories = find(model.kitchen, 'Kitchen drawer inventory').filter(item =>
+    /^(Two nested|Twelve food|Two saute|Set [12]|Eight cookware)/.test(item.userData.storageRole));
+  assert.equal(inventories.length, 8);
+  for (const item of inventories) {
+    const front = item.parent;
+    const b = boundsIn(item, front);
+    const halfWidth = (front.userData.width - 0.23) / 2;
+    assert.ok(b.min[0] >= -halfWidth - 1e-8 && b.max[0] <= halfWidth + 1e-8, `${item.userData.storageRole}: side walls`);
+    assert.ok(b.min[2] >= -1.41 + 0.25 / 12 && b.max[2] <= -0.05 - 0.25 / 12, `${item.userData.storageRole}: at least quarter-inch back/front allowance`);
+    assert.ok(b.min[1] >= (front.userData.drawerFloorY ?? -0.2) + 0.02 - 1e-8, `${item.userData.storageRole}: floor support`);
+    const next = front.parent.children.find(p => p.userData.kitchenDrawerRow === front.userData.kitchenDrawerRow + 1);
+    assert.ok(next);
+    const ceiling = next.position.y + (next.userData.drawerFloorY ?? -0.2) - 0.02 - front.position.y;
+    assert.ok(b.max[1] < ceiling, `${item.userData.storageRole}: next drawer underside`);
+  }
+});
+
+test('floating-point centerline noise does not turn the center saute drawer into a side-bank assignment', () => {
+  const model = build(1e-12);
+  assert.equal(find(model.cooktopCabinetry, 'Stored saute pan').length, 2);
+  assert.equal(find(model.cooktopCabinetry, 'Stored frying pan').length, 4);
+  assert.equal(find(model.cooktopCabinetry, 'Stored cookware lid').length, 8);
+});
+
+test('cupboard contents fit existing shelf supports and stockpots fit below the unchanged oven', () => {
+  const model = build();
+  const mixing = find(model.prep, 'Prep cupboard mixing and serving storage').find(p => p.position.x === 44.65);
+  const bottles = find(model.prep, 'Removable ten-bottle rack')[0];
+  for (const [root, width, depth] of [[mixing, 28.5, 21.6], [bottles, 22.5, 21.6]]) {
+    const reference = root === mixing ? mixing : bottles.parent;
+    const b = boundsIn(root, reference);
+    assert.ok(b.min[0] >= -width / 24 && b.max[0] <= width / 24);
+    assert.ok(b.min[2] >= -depth / 24 && b.max[2] <= depth / 24);
+    assert.ok(b.max[1] + reference.position.y < 34.5 / 12 - 0.0625);
+  }
+  const pots = find(model.refrigerationPantry, 'Large stockpot');
+  const b = boundsIn(find(model.refrigerationPantry, 'Large cookware below steam oven')[0], model.refrigerationPantry);
+  assert.ok(b.min[0] > -(model.pantryWidth - 0.15) / 2 && b.max[0] < (model.pantryWidth - 0.15) / 2);
+  assert.ok(b.max[1] < 2.5 - 0.0625);
+  const left = boundsIn(pots[0], model.refrigerationPantry), right = boundsIn(pots[1], model.refrigerationPantry);
+  assert.ok(Math.abs((right.min[0] - left.max[0]) * 12 - 0.76) < 1e-8);
+  assert.equal(find(model.prep, 'Stored serving platter').length, 3);
+  assert.equal(find(model.prep, 'Prep cupboard adjustable shelf').length, 1);
+});
+
+test('open sink wall has no former upper cabinets, trial dishes or under-cabinet strips', () => {
+  assert.equal(source.includes('Sink wall plate and bowl upper cabinets'), false);
+  assert.equal(source.includes('Sink under-cabinet task-light strip'), false);
+  assert.equal(source.includes('Trial 21-inch sink wall cabinets'), false);
+  assert.equal(source.includes('Trial sink upper dish inventory'), false);
   const model = build();
   assert.equal(find(model.kitchen, 'Sink wall plate and bowl upper cabinets').length, 0);
 });
@@ -120,14 +242,15 @@ test('one prep-side cooking drawer carries a removable full-size board without c
 
 test('storage includes cutlery, cooking tools, plates, bowls, containers, pots and pans in moving drawers', () => {
   const model = build();
-  for (const name of ['Fork', 'Spoon', 'Table knife', 'Wooden cooking spoon', 'Spatula', 'Stored dinner plate', 'Stacked prep or cereal bowl', 'Stored frying pan', 'Stored saucepan']) {
+  for (const name of ['Fork', 'Spoon', 'Table knife', 'Wooden cooking spoon', 'Spatula', 'Stored dinner plate', 'Nested drain basket', 'Stored frying pan', 'Stored saucepan']) {
     assert.ok(find(model.kitchen, name).length > 0, name);
   }
+  assert.ok(find(model.prepExtension, 'Stacked prep or cereal bowl').length > 0, 'Existing prep drawer bowls remain');
   for (const root of [model.kitchen, model.prepExtension]) {
     root.traverse((part) => {
       if (part.name !== 'Kitchen drawer inventory') return;
       assert.equal(part.parent.userData.kitchenDrawerRow !== undefined, true, 'Contents are attached to the moving front, not the carcass');
-      assert.equal(part.position.y, -0.18);
+      assert.equal(part.position.y, part.parent.userData.drawerFloorY !== undefined ? part.parent.userData.drawerFloorY + 0.02 : -0.18);
       assert.ok(part.userData.representativeInventory);
       assert.ok(part.parent.userData.storageRole);
     });
@@ -167,9 +290,9 @@ test('upper cups and glasses have real support shelves and large cookware stays 
     assert.deepEqual(inventory.filter((item) => item.userData.spare).map((item) => item.position.y), [6.63125, 7.6125]);
     for (const mug of find(mugs, 'Stored mug')) assert.ok(mugs.position.y + mug.position.y + 0.32 < 5.55, 'mugs fit below the first shelf');
   }
-  assert.equal(find(model.refrigerationPantry, 'Large stockpot').length, 1);
-  assert.equal(find(model.refrigerationPantry, 'Stored saucepan lid').length, 3);
-  assert.equal(find(model.prep, 'Large mixing bowl').length, 6);
+  assert.equal(find(model.refrigerationPantry, 'Large stockpot').length, 2);
+  assert.equal(find(model.cooktopCabinetry, 'Stored cookware lid').length, 8);
+  assert.equal(find(model.prep, 'Nested mixing bowl').length, 6);
   assert.equal(find(model.prep, 'Stored serving platter').length, 3);
 });
 
@@ -241,8 +364,8 @@ test('two narrow pull-outs carry a single spice rack and single board/tray organ
   assert.equal(find(model.cooktopCabinetry, 'Narrow stored baking tray').length, 1);
 });
 
-test('sink storage inspection is opt-in and does not force cabinet poses open', () => {
-  assert.match(source, /'sink-storage': \{ target: \[32, 4\.65, 7\.8\], offset: \[0, 1\.2, 12\], span: 9\.8/);
+test('sink storage inspection is opt-in, straight-on and does not force cabinet poses open', () => {
+  assert.match(source, /'sink-storage': \{ target: \[32, 4\.65, 7\.8\], offset: \[0, 0, 12\], span: 9\.8/);
   assert.match(source, /sinkStorageView \? Math\.max\(preset\.span \/ 2, 11\.4 \/ \(2 \* aspect\)\)/);
   assert.match(source, /const sinkStorageView = name === 'sink-storage'/);
   assert.match(source, /island\.visible = !elevationView/);

@@ -1039,7 +1039,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const kitchenSinkRunZ = kitchenWindowWallZ + 1.2;
   const prepCounterZ = kitchenWindowWallZ + 1.25;
   const kitchenSinkX = (kitchenWallLeft + kitchenWallRight) / 2;
-  const kitchenSinkWindowWidth = 7.5;
   const kitchenPassages = getKitchenPassageLayout();
   const kitchenSideOpenings = kitchenPassages.openings;
   const cooktopRunStartZ = kitchenWindowWallZ + kitchenSideOpenings[0][1];
@@ -1146,7 +1145,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, false, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
     [12.2, guestEntry.coatCloset.z, 12.2, officeNorthZ],
     [officeEntry.x, officeNorthZ, officeEntry.x, 54.2, false, [[officeEntry.z - officeEntry.width / 2 - officeNorthZ, officeEntry.z + officeEntry.width / 2 - officeNorthZ, 0, officeEntry.height]]],
-    [0, officeNorthZ, 12.2, officeNorthZ], [0, 54.2, 31.2, 54.2, false, [[3, 9, 3, 8], [13.1, 18.1, 0, 8], [21.2, 28.8, 3, 8]], ceilingHeight, [-1]],
+    [0, officeNorthZ, 12.2, officeNorthZ], [0, 54.2, 31.2, 54.2, false, [...getGroundFrontWindows().map(w => [w.center - w.width / 2, w.center + w.width / 2, w.sill, w.sill + w.height]), [13.1, 18.1, 0, 8]].sort((a, b) => a[0] - b[0]), ceilingHeight, [-1]],
     [19, 34.6, 19, 54.2, false, [[guestSuite.bedroomDoor.z - 34.6, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - 34.6, 0, 8]]],
     ...getGroundFloorDefaultPlan().walls.filter(([name]) => ['Closet north', 'Closet east', 'Closet south', 'Bathroom south', 'Bathroom north'].includes(name)).map(([name, x1, z1, x2, z2, openings = []]) => [x1, z1, x2, z2, false, openings, ceilingHeight, [-1, 1], 0, 0, { sideWidth: 2.5 / 12, ...(name === 'Closet south' ? { pocket: { x: guestSuite.closetDoor.pocket.x - x1, w: guestSuite.closetDoor.pocket.w } } : {}) }]),
     [31.2, 34.6, 31.2, 49, false, [], ceilingHeight, [-1, 1], 0, garageFloorY], [31.2, 26.9, 31.2, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
@@ -1300,6 +1299,16 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   diningSconces.userData = { fixtures: 2, placement: 'Flanking the rear dining window', finish: 'Ivory wall-backed fabric shades and rounded brass backplates', chandelier: false, provisional: true };
   scene.add(diningSconces);
   for (const x of [15.4875, 24.5875]) wallSconce(diningSconces, x, 0.105, -Math.PI / 2);
+  const kitchenSconces = new THREE.Group();
+  kitchenSconces.name = 'Kitchen sink-wall end sconces';
+  kitchenSconces.userData = { fixtures: 2, placement: 'Outside the kitchen window-bank ends', finish: 'Ivory wall-backed fabric shades and rounded brass backplates', provisional: true, productSelected: false };
+  scene.add(kitchenSconces);
+  const kitchenWindowTrimExtension = (3.5 + 0.125) / 12;
+  const kitchenEndSconceCenters = [
+    (kitchenWallLeft + 0.175 + kitchenSinkWindows[0].x - kitchenSinkWindows[0].width / 2 - kitchenWindowTrimExtension) / 2,
+    (kitchenWallRight - 0.175 + kitchenSinkWindows[2].x + kitchenSinkWindows[2].width / 2 + kitchenWindowTrimExtension) / 2
+  ];
+  for (const x of kitchenEndSconceCenters) wallSconce(kitchenSconces, x, kitchenWindowWallZ + 0.205, -Math.PI / 2);
   const glass = new THREE.MeshStandardMaterial({ color: '#b3cad0', roughness: 0.15, metalness: 0.15, transparent: true, opacity: 0.52 });
   const privacyGlass = new THREE.MeshStandardMaterial({ color: '#e0e8e4', roughness: 1, metalness: 0 });
   privacyGlass.name = 'Obscured lower-half bathroom glazing - privacy concept';
@@ -4005,8 +4014,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const kidsDeskZ = guestSuite.bathroom.z - 0.175 - kidsDeskDepth / 2;
   for (let index = 0; index < 2; index++) {
     const rotation = Math.PI;
-    const x = kidsRoom.x + kidsRoom.southWidth - 0.175 - 1 / 12 - kidsDeskWidth / 2 - (1 - index) * (kidsDeskWidth + 1 / 12);
-    const z = kidsDeskZ;
+    const x = index === 0 ? guestSuite.kidsExtension.x + guestSuite.kidsExtension.w / 2
+      : kidsRoom.x + kidsRoom.southWidth - 0.175 - 1 / 12 - kidsDeskWidth / 2;
+    const z = index === 0 ? guestSuite.closet.z - 0.175 - kidsDeskDepth / 2 : kidsDeskZ;
     const desk = furnishing(`IKEA MITTZON kids desk ${index + 1}`, x, z, rotation, 0, true);
     desk.userData = { manufacturer: 'IKEA', model: 'MITTZON', widthInches: 47.25, depthInches: 31.5, heightInches: 29.5, minHeightInches: 24.375, maxHeightInches: 49.625, productURL: 'https://www.ikea.com/us/en/p/mittzon-desk-sit-stand-electric-birch-veneer-white-s09527743/', finish: 'Birch veneer / white', manufacturerCAD: false, chairAllowanceInches: 30, purpose: index === 0 ? 'All-in-one PC' : 'Homework and crafts', childUseRequiresReview: true };
     box(desk, 0, kidsDeskHeight - 0.05, 0, kidsDeskWidth, 0.1, kidsDeskDepth, oak).name = 'MITTZON desktop';
@@ -4037,10 +4047,17 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const dx of [-0.55, 0.55]) for (const z of [-0.5, 0.5]) box(chair, dx, 0.7, z, 0.1, 1.4, 0.1, oak).name = 'Kids desk chair leg';
   }
 
-  for (const [index, [deskX, deskZ, rotation]] of [[3.8, officeNorthZ + 1.35, 0], [6, 52.8, Math.PI]].entries()) {
+  const officeDeskWidth = 5;
+  const officeDeskDepth = 2;
+  const officeFurnitureInset = 0.175 + 0.75 / 12 + 1 / 12;
+  const officeDeskPositions = [
+    [officeEntry.x / 2, officeNorthZ + 0.175 + officeDeskDepth / 2, 0],
+    [officeEntry.x - 0.175 - 1 / 12 - officeDeskDepth / 2, 50.85, -Math.PI / 2]
+  ];
+  for (const [index, [deskX, deskZ, rotation]] of officeDeskPositions.entries()) {
     const officeDesk = furnishing(`60-inch office desk ${index + 1}`, deskX, deskZ, rotation, 0, true);
-    officeDesk.userData = { widthInches: 60, depthInches: 24, provisional: true };
-    box(officeDesk, 0, 2.4, 0, 5, 0.2, 2, oak).name = '60-inch desktop';
+    officeDesk.userData = { widthInches: officeDeskWidth * 12, depthInches: officeDeskDepth * 12, provisional: true };
+    box(officeDesk, 0, 2.4, 0, officeDeskWidth, 0.2, officeDeskDepth, oak).name = '60-inch desktop';
     for (const x of [-2.2, 2.2]) for (const z of [-0.8, 0.8]) box(officeDesk, x, 1.2, z, 0.12, 2.4, 0.12, oak);
     for (const monitorX of [-1.05, 1.05]) {
       box(officeDesk, monitorX, 3.5, -0.25, 1.9, 1.1, 0.1, black, true).name = 'Office monitor';
@@ -4048,7 +4065,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       box(officeDesk, monitorX, 2.8, -0.25, 0.08, 0.55, 0.08, steel);
     }
     box(officeDesk, 0, 2.53, 0.45, 1.2, 0.06, 0.4, black);
-    const deskChair = furnishing('Office task chair', deskX, deskZ + (index === 0 ? 2.35 : -2.35), rotation + Math.PI, 0, true);
+    const chairOffset = 2.35;
+    const deskChair = furnishing('Office task chair', deskX + Math.sin(rotation) * chairOffset, deskZ + Math.cos(rotation) * chairOffset, rotation + Math.PI, 0, true);
     box(deskChair, 0, 1.6, 0, 1.8, 0.3, 1.7, black, true);
     box(deskChair, 0, 2.5, -0.7, 1.8, 1.6, 0.2, black, true);
     cylinder(deskChair, 0, 0.8, 0, 0.12, 1.5, steel);
@@ -4057,11 +4075,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       foot.rotation.y = angle;
     }
   }
-  const officeLounge = furnishing('Office loveseat', 10.45, 50.4, -Math.PI / 2, 0, true);
-  officeLounge.userData = { widthInches: 60, depthInches: 33.6, provisional: true };
-  box(officeLounge, 0, 1, 0, 5, 0.8, 2.8, cream, true);
-  box(officeLounge, 0, 2, -1.15, 5, 1.4, 0.35, cushion, true);
-  for (const side of [-2.35, 2.35]) box(officeLounge, side, 1.5, 0, 0.3, 0.8, 2.8, cream, true);
+  const officeLoveseatWidth = 5;
+  const officeLounge = furnishing('Office loveseat', officeFurnitureInset + officeLoveseatWidth / 2, 54.2 - officeFurnitureInset - 1.4, Math.PI, 0, true);
+  officeLounge.userData = { widthInches: 60, depthInches: 33.6, provisional: true, productSelected: false, layoutIntent: 'Restored full-size two-seat concept below the front window, facing north; compact north-wall trial superseded' };
+  box(officeLounge, 0, 1, 0, officeLoveseatWidth, 0.8, 2.8, cream, true);
+  box(officeLounge, 0, 2, -1.15, officeLoveseatWidth, 1.4, 0.35, cushion, true);
+  for (const side of [-1, 1]) box(officeLounge, side * (officeLoveseatWidth / 2 - 0.15), 1.5, 0, 0.3, 0.8, 2.8, cream, true);
 
   const officeDoors = furnishing('Office white ten-lite French doors', officeEntry.x, officeEntry.z, Math.PI / 2);
   officeDoors.userData = { widthInches: officeEntry.width * 12, heightInches: officeEntry.height * 12, leaves: 2, nominalLeafWidthInches: 30, finish: 'Painted white', style: 'Reference-photo French doors, two columns by five rows per leaf', litesPerLeaf: 10, inwardSwing: true, openAngleDegrees: 90, productSelected: false, provisional: true };
@@ -4085,7 +4104,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     leaf.userData = {
       nominalWidthInches: 30, nominalHeightInches: 96, thicknessInches: 1.75, columns: 2, rows: 5, lites: 10,
       inwardOpenRotation: -side * Math.PI / 2,
-      interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 180, openRotationSign: -side },
+      interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 90, openRotationSign: -side },
       provisional: true
     };
     leaf.rotation.y = leaf.userData.inwardOpenRotation * officeDoors.userData.openAngleDegrees / 90;
@@ -4126,10 +4145,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const y of [9, 34, 63, 87]) cylinder(leaf, 0, y / 12, 0, 0.03, 0.25, black).name = 'Office dark door hinge';
   }
 
-  const elliptical = furnishing('SOLE E20 elliptical concept', 1.65, 50.3);
-  elliptical.userData = { lengthInches: 65, widthInches: 22, heightInches: 64, provisional: true, operatingClearancesVerified: false, source: 'https://www.soletreadmills.com/products/sole-e20' };
   const ellipticalLength = 65 / 12;
   const ellipticalWidth = 22 / 12;
+  const elliptical = furnishing('SOLE E20 elliptical concept', 1.65, officeNorthZ + officeFurnitureInset + ellipticalLength / 2);
+  elliptical.userData = { lengthInches: 65, widthInches: 22, heightInches: 64, provisional: true, operatingClearancesVerified: false, source: 'https://www.soletreadmills.com/products/sole-e20' };
   for (const z of [-ellipticalLength / 2 + 0.08, ellipticalLength / 2 - 0.08]) {
     box(elliptical, 0, 0.14, z, ellipticalWidth, 0.2, 0.16, black).name = 'Elliptical floor stabilizer';
   }
@@ -4311,15 +4330,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   singlePanelDoor(bathroomDoor, bathroomOpening.width / 2, 4, 0, bathroomOpening.width - 0.04, 7.96, 0.13, windowTrim).name = 'Guest bathroom painted-white Shaker leaf';
   for (const side of [-1, 1]) box(bathroomDoor, bathroomOpening.width - 0.2, 3, side * 0.14, 0.16, 0.15, 0.15, brass, true).name = 'Guest bathroom satin-gold knob';
   const closetOpening = guestSuite.closetDoor;
-  const closetPocket = furnishing('Guest walk-in closet left pocket door', closetOpening.x + 1.5, closetOpening.z);
-  closetPocket.userData = { nominalWidthInches: 36, heightInches: 96, provisional: true,
-    interactiveHouseDoor: { operation: 'sliding', open: false, closedCenterX: closetOpening.x + 1.5, openCenterX: closetOpening.x + 1.5 - closetOpening.pocket.travel } };
+  const closetPocket = furnishing('Guest walk-in closet left pocket door', closetOpening.x + closetOpening.width / 2, closetOpening.z);
+  closetPocket.userData = { nominalWidthInches: closetOpening.width * 12, heightInches: closetOpening.height * 12, provisional: true,
+    interactiveHouseDoor: { operation: 'sliding', open: false, closedCenterX: closetOpening.x + closetOpening.width / 2, openCenterX: closetOpening.x + closetOpening.width / 2 - closetOpening.pocket.travel } };
   singlePanelDoor(closetPocket, 0, 4, 0, closetOpening.pocket.leafWidth, 7.96, 0.13, windowTrim).name = 'Guest closet painted-white pocket leaf';
-  for (const side of [-1, 1]) box(closetPocket, 1.46, 3, side * 0.066, 0.12, 0.5, 0.012, brass).name = 'Guest closet flush pocket pull';
+  for (const side of [-1, 1]) box(closetPocket, closetOpening.pocket.leafWidth / 2 - 0.08, 3, side * 0.066, 0.12, 0.5, 0.012, brass).name = 'Guest closet flush pocket pull';
   // Edge pull remains exposed on the trailing edge when both face pulls tuck away.
-  box(closetPocket, 1.535, 3, 0, 0.01, 0.3, 0.08, brass).name = 'Guest closet flush retractable edge pull concept';
+  box(closetPocket, closetOpening.pocket.leafWidth / 2 - 0.005, 3, 0, 0.01, 0.3, 0.08, brass).name = 'Guest closet flush retractable edge pull concept';
   const closetTrack = furnishing('Guest closet pocket track framing concept', closetOpening.pocket.x, closetOpening.z);
-  box(closetTrack, (closetOpening.x + 3 - closetOpening.pocket.x) / 2, 8.15, 0, closetOpening.x + 3 - closetOpening.pocket.x, 0.1, 0.12, steel).name = 'Guest closet pocket overhead track';
+  box(closetTrack, (closetOpening.x + closetOpening.width - closetOpening.pocket.x) / 2, 8.15, 0, closetOpening.x + closetOpening.width - closetOpening.pocket.x, 0.1, 0.12, steel).name = 'Guest closet pocket overhead track';
   const guestCoats = furnishing('Guest coat closet', 9.65, guestEntry.coatCloset.z + guestEntry.coatCloset.d / 2);
   guestCoats.scale.z = -1;
   guestCoats.userData = { purpose: 'Guest coats, separate from powder room', nominalWidthInches: 61.2, nominalDepthInches: 28.8, clearDepthInches: 24.6, doorWidthInches: 48, doorHeightInches: guestEntry.closetDoor.height * 12, provisional: true };
@@ -4710,9 +4729,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const units = windowInstallations.reduce((total, window) => total + window.units, 0);
     const pictures = windowInstallations.reduce((total, window) => total + (window.pictureUnits ?? (window.picture ? window.units : 0)), 0);
     const singleHung = windowInstallations.filter(window => window.singleHung).reduce((total, window) => total + window.units, 0);
+    const roofWindows = windowInstallations.filter(window => window.roofWindow).reduce((total, window) => total + window.units, 0);
     const windowOutput = document.getElementById('window-count');
     windowOutput.textContent = `Windows: ${openings} openings / ${units} units`;
-    windowOutput.title = `Whole house, both floors including garage: ${openings} window openings containing ${units} individual units (${units - pictures - singleHung} casements, ${singleHung} single-hung, ${pictures} fixed pictures). A joined bank counts as one opening and each section as one unit. Includes hidden windows; excludes door glazing and duplicate exterior representations. Modeled count, not an approved order schedule.`;
+    windowOutput.title = `Whole house, both floors including garage: ${openings} openings containing ${units} individual units (${units - pictures - singleHung - roofWindows} casements, ${singleHung} single-hung, ${pictures} fixed pictures, ${roofWindows} fixed roof windows). A joined bank counts as one opening and each section as one unit. Includes hidden windows; excludes door glazing and duplicate exterior representations. Modeled count, not an approved order schedule.`;
   }
   const roomDimensionsInput = document.getElementById('show-room-dimensions');
   const planDimensionLabels = document.getElementById('plan-dimension-labels');
@@ -4854,15 +4874,83 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
         }
       }
     }
-    function cookware(parent, width, pans) {
-      const single = width < 2;
-      const radius = single ? 0.44 : Math.min(0.4, (width / 2 - 0.24) / 2);
-      for (const side of single ? [0] : [-1, 1]) {
-        const item = vessel(parent, pans ? 'Stored frying pan' : 'Stored saucepan', side * width / 4, 0, -0.12, radius, pans ? 0.14 : 0.42, cookingMetal);
-        if (pans) {
-          box(item, 0, 0.12, radius + 0.2, 0.07, 0.055, 0.4, black, true).name = 'Pan handle';
-        } else {
-          for (const edge of [-1, 1]) box(item, edge * (radius + 0.055), 0.32, 0, 0.11, 0.05, 0.16, black).name = 'Pot side handle';
+    function storedCookware(parent, name, setNumber, diameter, height, x = 0, y = 0, z = -0.15, longHandle = true) {
+      const radius = diameter / 24;
+      const item = vessel(parent, name, x, y, z, radius, height / 12, cookingMetal, radius * (longHandle ? 0.7 : 0.98));
+      Object.assign(item.userData, { inventoryCategory: 'Cookware vessel', setNumber, quantity: 1,
+        diameterInches: diameter, heightInches: height, handleLengthInches: longHandle ? 5.5 : 1.44 });
+      if (longHandle) {
+        box(item, 0, height / 12 - 0.04, radius + 5.5 / 24, 0.07, 0.05, 5.5 / 12, black, true).name = 'Cookware long handle';
+      } else {
+        for (const side of [-1, 1]) box(item, side * (radius + 0.06), height / 12 - 0.14, 0,
+          0.12, 0.06, 0.2, black).name = 'Cookware side handle';
+      }
+      return item;
+    }
+    function cookware(parent, width, bank, row) {
+      if (row === 1 && bank !== 0) {
+        const setNumber = bank < 0 ? 1 : 2;
+        storedCookware(parent, 'Stored frying pan', setNumber, 10, 2);
+        storedCookware(parent, 'Stored frying pan', setNumber, 8, 1.75, 0, 1.25 / 12);
+      } else if (row === 1) {
+        for (const setNumber of [1, 2])
+          storedCookware(parent, 'Stored saute pan', setNumber, 10, 3, 0, (setNumber - 1) * 2 / 12);
+      } else if (bank !== 1) {
+        const setNumber = bank < 0 ? 1 : 2;
+        storedCookware(parent, 'Stored saucepan', setNumber, 8, 5.5);
+        storedCookware(parent, 'Stored saucepan', setNumber, 6.5, 4, 0, 2.5 / 12);
+      } else {
+        for (const setNumber of [1, 2]) for (const [level, diameter] of [11, 10, 8, 6.5].entries()) {
+          const lid = contents(parent, 'Stored cookware lid', (setNumber === 1 ? -1 : 1) * width / 4, level * 0.1, 0);
+          Object.assign(lid.userData, { inventoryCategory: 'Cookware lid', setNumber, quantity: 1, diameterInches: diameter });
+          cylinder(lid, 0, 0.03, 0, diameter / 24, 0.035, cookingMetal).name = 'Cookware lid disk';
+          box(lid, 0, 0.08, 0, 0.2, 0.04, 0.045, black).name = 'Cookware lid grip';
+        }
+      }
+    }
+    function drainBaskets(parent) {
+      for (const [index, diameter] of [12, 10].entries()) {
+        const radius = diameter / 24, bottomRadius = radius * 0.6;
+        const height = (index ? 4 : 4.5) / 12;
+        const basket = contents(parent, 'Nested drain basket', 0, index * 1.3 / 12 + 0.01, 0);
+        Object.assign(basket.userData, { inventoryCategory: 'Drain basket', quantity: 1,
+          diameterInches: diameter, heightInches: height * 12, dryBeforeStorage: true });
+        for (let ring = 0; ring <= 6; ring++)
+          rim(basket, 0, height * ring / 6, 0, bottomRadius + (radius - bottomRadius) * ring / 6, steel, 0.008);
+        for (let spoke = 0; spoke < 12; spoke++) {
+          const angle = spoke * Math.PI / 6;
+          const rib = box(basket, Math.cos(angle) * (radius + bottomRadius) / 2, height / 2,
+            Math.sin(angle) * (radius + bottomRadius) / 2, 0.012, Math.hypot(height, radius - bottomRadius), 0.012, steel);
+          rib.name = 'Drain basket wire rib';
+          rib.rotation.set(0, -angle, -Math.atan((radius - bottomRadius) / height));
+        }
+        for (const side of [-1, 1])
+          box(basket, side * (radius + 0.05), height - 0.03, 0, 0.1, 0.04, 0.16, steel).name = 'Drain basket lifting handle';
+        for (const offset of [-0.16, 0, 0.16]) {
+          const span = 2 * Math.sqrt(bottomRadius ** 2 - offset ** 2);
+          box(basket, offset, 0, 0, 0.012, 0.012, span, steel).name = 'Drain basket base wire';
+          box(basket, 0, 0, offset, span, 0.012, 0.012, steel).name = 'Drain basket base wire';
+        }
+      }
+    }
+    function foodContainerSet(parent) {
+      const set = contents(parent, 'Twelve-container food storage set', 0, 0, 0.065);
+      for (const [index, [width, depth, height]] of [[9, 7, 3.5], [7.5, 5.5, 3], [6, 4.5, 2.5]].entries()) {
+        const x = (index === 1 ? 5.5 : -5.5) / 12;
+        const z = (index === 2 ? 3.75 : -3.75) / 12;
+        for (let level = 0; level < 4; level++) {
+          const container = contents(set, 'Nested food storage container', x, level * 0.65 / 12 + 0.003, z);
+          Object.assign(container.userData, { inventoryCategory: 'Food container', quantity: 1,
+            size: ['large', 'medium', 'small'][index], envelopeInches: [width, height, depth] });
+          const shell = new THREE.Mesh(new THREE.CylinderGeometry(1, 0.75, height / 12, 4, 1, true, Math.PI / 4), drinkingGlass);
+          shell.scale.set(width / (12 * Math.SQRT2), 1, depth / (12 * Math.SQRT2));
+          shell.position.y = height / 24;
+          shell.name = 'Tapered food container shell';
+          container.add(shell);
+          box(container, 0, 0.002, 0, width * 0.75 / 12, 0.004, depth * 0.75 / 12, drinkingGlass).name = 'Food container base';
+          const lid = contents(set, 'Matching food container lid', 5.5 / 12, (index * 4 + level) * 0.12 / 12 + 0.004, 3.75 / 12);
+          Object.assign(lid.userData, { inventoryCategory: 'Food container lid', quantity: 1, size: container.userData.size });
+          box(lid, 0, 0, 0, (width + 0.1) / 12, 0.08 / 12, (depth + 0.1) / 12, recycleBlue, true).name = 'Separate matching container lid';
         }
       }
     }
@@ -4881,15 +4969,22 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       const item = contents(front, 'Kitchen drawer inventory', 0, front.userData.drawerFloorY !== undefined ? front.userData.drawerFloorY + 0.02 : -0.18, -0.8);
       let inCooktop = false;
       let inIsland = false;
+      let inPrep = false;
       for (let parent = front.parent; parent; parent = parent.parent) {
         inCooktop ||= parent === cooktopCabinetry;
         inIsland ||= parent === island;
+        inPrep ||= parent === prep || parent === prepExtension;
       }
+      const inMainSink = !inCooktop && !inIsland && !inPrep;
+      const cookingOffset = inCooktop ? front.parent.position.z - cooktopCenterZ : 0;
+      const cookingBank = Math.abs(cookingOffset) < 0.01 ? 0 : Math.sign(cookingOffset);
       const islandBankIndex = inIsland ? Math.round((front.parent.position.z - 18.5) / (islandCabinetLength / 3)) + 1 : -1;
       const dishSize = inIsland ? islandDishSizes[islandBankIndex] : null;
       const cuttingBoardDrawer = inCooktop && row === 2 && front.parent.position.z < cooktopCenterZ - 1.5;
       const role = cuttingBoardDrawer ? 'Removable cutting-board pull-out' : row === 2 ? (inCooktop ? 'Cooking utensils' : 'Cutlery and serving utensils')
-        : inCooktop ? (row === 1 ? 'Frying pans' : 'Saucepans')
+        : inCooktop ? (row === 1 ? (cookingBank === 0 ? 'Two saute pans' : `Set ${cookingBank < 0 ? 1 : 2} frying pans`)
+          : cookingBank === 1 ? 'Eight cookware lids' : `Set ${cookingBank < 0 ? 1 : 2} saucepans`)
+          : inMainSink ? (row === 1 ? 'Two nested drain baskets' : 'Twelve food containers and twelve matching lids')
           : inIsland ? `${dishSize.size} ${row === 1 ? 'plates' : 'bowls'}: 10` : row === 1 ? 'Prep bowls' : 'Food containers';
       front.userData.storageRole = role;
       item.userData.storageRole = role;
@@ -4902,7 +4997,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
           box(board, x, 0.75 / 24 + 0.001, 0, 0.045, 0.004, 3 / 12, black, true).name = 'Cutting-board recessed finger-grip indication';
         }
       } else if (row === 2) utensils(item, width, inCooktop);
-      else if (inCooktop) cookware(item, width, row === 1);
+      else if (inCooktop) cookware(item, width, cookingBank, row);
+      else if (inMainSink && row === 1) drainBaskets(item);
+      else if (inMainSink && row === 0) foodContainerSet(item);
       else if (inIsland && row === 1) {
         item.userData.dishCategory = `${dishSize.size.toLowerCase()} plates`;
         item.userData.quantity = 10;
@@ -5043,19 +5140,37 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const towerFloor = 0.4;
     box(refrigerationPantry, 0, towerFloor - 0.03125, 25.65, pantryWidth - 0.15, 0.0625, 1.85, cabinetRailFinish).name = 'Oven tower lower storage floor';
     const towerGoods = contents(refrigerationPantry, 'Large cookware below steam oven', 0, towerFloor, 25.65);
-    const stockpot = vessel(towerGoods, 'Large stockpot', -0.55, 0, 0, 0.48, 0.9, cookingMetal);
-    for (const side of [-1, 1]) box(stockpot, side * 0.54, 0.7, 0, 0.12, 0.06, 0.2, black).name = 'Stockpot side handle';
-    for (let level = 0; level < 3; level++) {
-      cylinder(towerGoods, 0.65, 0.08 + level * 0.08, 0, 0.39, 0.035, cookingMetal).name = 'Stored saucepan lid';
-      box(towerGoods, 0.65, 0.13 + level * 0.08, 0, 0.2, 0.045, 0.045, black).name = 'Lid grip';
-    }
+    towerGoods.userData.storageRole = 'Two stockpots below steam oven';
+    for (const setNumber of [1, 2])
+      storedCookware(towerGoods, 'Large stockpot', setNumber, 11, 9.5, (setNumber === 1 ? -1 : 1) * 0.61, 0, 0, false);
     for (const [x, width] of [[42.15, 2.5], [44.65, 2.5], [51.4, 2]]) {
       const shelf = contents(prep, 'Prep cupboard mixing and serving storage', x, 0.42, prepCounterZ);
       box(shelf, 0, -0.03125, 0, width - 0.15, 0.0625, 1.8, cabinetRailFinish).name = 'Prep cupboard storage shelf';
-      for (const side of [-1, 1]) {
-        vessel(shelf, 'Large mixing bowl', side * width / 4, 0, 0, Math.min(0.45, width / 4 - 0.08), 0.4, cookingMetal);
-      }
-      if (x === 42.15) {
+      if (x === 44.65) {
+        shelf.userData.storageRole = 'Six nested mixing bowls beside prep sink';
+        for (const side of [-1, 1]) for (const [level, diameter] of [12, 10, 8].entries()) {
+          const bowl = vessel(shelf, 'Nested mixing bowl', side * 0.58, level / 12 + 0.01, 0,
+            diameter / 24, (6 - level) / 12, cookingMetal, diameter / 48);
+          Object.assign(bowl.userData, { inventoryCategory: 'Mixing bowl', quantity: 1, diameterInches: diameter });
+        }
+      } else if (x === 51.4) {
+        shelf.userData.storageRole = 'Ten water bottles beside prep sink';
+        box(shelf, 0, 0.78 - 0.03125, 0, width - 0.15, 0.0625, 1.8, cabinetRailFinish).name = 'Water bottle rack support shelf';
+        const rack = contents(shelf, 'Removable ten-bottle rack', 0, 0.78, 0.2);
+        rack.userData.capacity = 10;
+        box(rack, 0, 0.02, 0, 21 / 12, 0.04, 11 / 12, cabinetRailFinish).name = 'Bottle rack removable base';
+        for (const side of [-1, 1])
+          box(rack, side * 10.375 / 12, 0.12, 0, 0.25 / 12, 0.2, 11 / 12, cabinetRailFinish).name = 'Bottle rack side rail';
+        for (let row = 0; row < 2; row++) for (let column = 0; column < 5; column++) {
+          const bottle = contents(rack, 'Stored reusable water bottle', (column - 2) * 4 / 12, 0.04, (row - 0.5) * 5 / 12);
+          Object.assign(bottle.userData, { inventoryCategory: 'Water bottle', quantity: 1,
+            diameterInches: 3.25, heightInches: 10.5, dryBeforeStorage: true });
+          cylinder(bottle, 0, 8.5 / 24, 0, 3.25 / 24, 8.5 / 12, column % 2 ? cookingMetal : recycleBlue).name = 'Water bottle body';
+          cylinder(bottle, 0, 9 / 12, 0, 1.7 / 24, 1 / 12, cookingMetal).name = 'Water bottle neck';
+          cylinder(bottle, 0, 10 / 12, 0, 2 / 24, 1 / 12, black).name = 'Water bottle cap';
+        }
+      } else {
+        shelf.userData.storageRole = 'Serving platters with spare lower space';
         box(shelf, 0, 1.1, 0, width - 0.15, 0.0625, 1.8, cabinetRailFinish).name = 'Prep cupboard adjustable shelf';
         const dish = contents(shelf, 'Serving platter stack', 0, 1.14, 0);
         for (let level = 0; level < 3; level++) box(dish, 0, 0.03 + level * 0.05, 0, 1.3, 0.04, 0.85, ceramic, true).name = 'Stored serving platter';
@@ -5144,6 +5259,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       lamp.intensity = enabled ? lamp.userData.nightIntensity : 0;
     }
     kitchenTaskDiffuser.emissiveIntensity = enabled ? 1.5 : 0;
+    kitchenSconces.traverse((part) => {
+      if (part.isLight) {
+        part.visible = enabled;
+        part.intensity = enabled ? 12 : 0;
+      }
+      if (part.name === 'Aleena ivory wall-backed half-oval fabric shade') part.material.emissiveIntensity = enabled ? 0.15 : 0;
+    });
   }
 
   function buildHomeLighting() {
@@ -5396,7 +5518,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     kids: { target: [24, 1, 30.15], offset: [-12, 30, 18], span: 17 },
     dining: { target: [20.0375, 1, 3.95], offset: [16, 19, 23], span: 20 },
     kitchen: { target: [32.2, 2, kitchenCenterZ], offset: [-22, 35, 27], span: 26 },
-    'sink-storage': { target: [32, 4.65, 7.8], offset: [0, 1.2, 12], span: 9.8 },
+    'sink-storage': { target: [32, 4.65, 7.8], offset: [0, 0, 12], span: 9.8 },
     cooktop: { target: [36.5, 5.3, cooktopCenterZ], offset: [-18, 0, 0], span: 11 },
     fridge: { target: [bottomRunCenterX, 5, 26.9], offset: [0, 0, -18], span: 12 },
     island: { target: [30.65 + island.position.x, 1.5, kitchenCenterZ], offset: [-12, 9, 10], span: 15 },

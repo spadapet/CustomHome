@@ -190,7 +190,7 @@ test('cream brick constituents respect every fixed opening without applied sidin
     constructor() { this.userData = {}; this.position = { set() {} }; this.rotation = {}; }
     add(mesh) { meshes.push(mesh); }
   }
-  const context = { accentStone: { clone: () => ({}) }, stoneTexture: { clone: () => ({repeat:{set(){}}}) }, THREE: { Group }, white: {}, trim: {}, garageFloorY: -1.25, group: { add(wall) { walls.push(wall); } }, wallThickness: 0.45, box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'siding' }; parent.add(mesh); return mesh; }, brickBox(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'brick' }; parent.add(mesh); return mesh; }, windowUnit() {} };
+  const context = { accentStone: { clone: () => ({}) }, stoneTexture: { clone: () => ({repeat:{set(){}}}) }, THREE: { Group }, white: {}, trim: {}, garageFloorY: -1.25, group: { add(wall) { walls.push(wall); } }, wallThickness: 0.45, box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'siding' }; parent.add(mesh); return mesh; }, brickBox(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'brick' }; parent.add(mesh); return mesh; }, windowUnit() {}, addFrontShutters() {} };
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  function wall('), source.indexOf('  const win =')), context);
   for (const name of ['front ground floor', 'west ground floor', 'kitchen and prep rear', 'east ground floor', 'upper west', 'upper bath rear', 'garage front']) {

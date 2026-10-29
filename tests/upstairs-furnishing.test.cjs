@@ -28,10 +28,19 @@ class Mesh extends Group {
 class CylinderGeometry {
   constructor(top, bottom, length) { this.length = length; }
 }
+class BufferGeometry {
+  constructor() { this.attributes = {}; }
+  setAttribute(name, attribute) { this.attributes[name] = attribute; }
+  setIndex(index) { this.index = index; }
+  computeVertexNormals() {}
+}
+class Float32BufferAttribute {
+  constructor(array, itemSize) { this.array = array; this.itemSize = itemSize; }
+}
 function build(edits = layout.empty()) {
-  const context = { UpstairsLayout: layout };
+  const context = { UpstairsLayout: layout, HomeRoof: require('../floor-plan-roof.js') };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'floor-plan-upstairs.js'), 'utf8'), context);
-  const material = {};
+  const material = { clone() { return { ...this }; } };
   const helpers = {
     box(parent, x, y, z, w, h, d) {
       const mesh = new Mesh({ w, h, d }, material);
@@ -50,9 +59,58 @@ function build(edits = layout.empty()) {
   const casingContext={THREE:{Group,Vector3:class{}},box:helpers.box,windowTrim:material,walls:[],casingSideWidth:3.5/12,casingReveal:.125/12};
   vm.runInNewContext(source.slice(source.indexOf('  function openingCasing('),source.indexOf('  const baseTrimSections')),casingContext);
   helpers.openingCasing=casingContext.openingCasing;
-  return context.buildUpstairsModel({ Group, Mesh, CylinderGeometry }, helpers, layout.stairOpening(), 10, edits);
+  return context.buildUpstairsModel({ Group, Mesh, CylinderGeometry, BufferGeometry, Float32BufferAttribute, DoubleSide: 2 }, helpers, layout.stairOpening(), 10, edits);
 }
 const model = build();
+test('wall-backed stair edges have no redundant guards; exposed east hall edge stays guarded', () => {
+  const opening = layout.stairOpening();
+  const right = opening.x + opening.width;
+  const back = opening.z + opening.depth;
+  const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-8, `${actual} != ${expected}`);
+  const guards = model.group.children.filter(child => child.name === 'Upstairs Stair opening guard');
+  assert.equal(guards.length, 1, 'Never restore north/west/south perimeter rails where the owner retained walls');
+  const guard = guards[0];
+  const rails = guard.children.filter(child => child.geometry.h === 0.07);
+  const posts = guard.children.filter(child => child.geometry.h === 3);
+  assert.equal(rails.length, 4);
+  assert.equal(posts.length, 3);
+  close(guard.rotation.y, -Math.PI / 2);
+  close(guard.position.x, right);
+  close(guard.position.z, (opening.z + model.baseline.arrival.z) / 2);
+  const railBounds = bounds(guard);
+  close(railBounds.minZ, opening.z - 0.04);
+  close(railBounds.maxZ, model.baseline.arrival.z + 0.04);
+  close(railBounds.minX, right - 0.04);
+  close(railBounds.maxX, right + 0.04);
+  for (const part of rails) close(part.geometry.w, model.baseline.arrival.z - opening.z);
+  const panels = name => {
+    const wall = model.group.children.find(child => child.name === `Upstairs wall: ${name}`);
+    assert.ok(wall, `${name} wall must remain instead of a redundant guard`);
+    return wall.children.filter(child => child.name === 'Upstairs partition');
+  };
+  const north = panels('Primary south');
+  assert.ok(north.some(panel => {
+    const b = bounds(panel);
+    return b.minX <= opening.x && b.maxX >= right && b.maxZ <= opening.z && opening.z - b.maxZ < 0.1;
+  }), 'North wall spans the opening with less than 1.2 in between paint and the opening');
+  const west = panels('Stairwell west');
+  const westSpans = west.filter(panel => panel.position.y - panel.geometry.h / 2 <= 1e-8 &&
+    panel.position.y + panel.geometry.h / 2 >= 3).map(panel => {
+    const b = bounds(panel);
+    close(b.maxX, opening.x);
+    return [b.minZ, b.maxZ];
+  }).sort((a, b) => a[0] - b[0]);
+  let westEnd = opening.z;
+  for (const [start, end] of westSpans) {
+    assert.ok(start <= westEnd + 1e-8, 'No gap in wall backing below the high west window');
+    westEnd = Math.max(westEnd, end);
+  }
+  assert.ok(westEnd >= back, 'West wall constituents back the full opening at guard height');
+  const south = panels('West bath north');
+  assert.ok(south.every(panel => bounds(panel).minZ > back));
+  assert.ok(south.some(panel => bounds(panel).minX < opening.x && bounds(panel).maxX >= 9.35));
+  assert.ok(model.baseline.arrival.z < back, 'Upper arrival remains unblocked beyond the retained east guard');
+});
 test('owner image dimensions are physical paint-face gaps, not just room labels', () => {
   const face = (name, axis, side) => {
     const parts = model.group.getObjectByName

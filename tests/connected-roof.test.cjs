@@ -3,7 +3,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const { getConnectedRoofDefinitions, getPorchRoofDefinitions, buildRoofEnvelope, heightAt, signedArea, wallHeadSegments } = require('../floor-plan-roof.js');
+const { getConnectedRoofDefinitions, getPorchRoofDefinitions, getLaundryRoofWindows, buildRoofEnvelope, contains, heightAt, signedArea, trianglesOutsideRectangle, wallHeadSegments } = require('../floor-plan-roof.js');
 const upper = require('../floor-plan-upstairs.js');
 const g = upper.getUpstairsMeasuredGeometry();
 const close = (actual, expected, tolerance = 1e-6) => assert.ok(Math.abs(actual - expected) < tolerance, `${actual} should equal ${expected}`);
@@ -109,6 +109,56 @@ test('main and wing have equal 4:12 hips and garage has a low 6:12 hip', () => {
         'Rear hip must join the actual long main ridge, not expose detached front tips');
     }
   }
+});
+
+test('two fixed laundry roof windows fit the measured room and one east-wing roof face', () => {
+  const windows = getLaundryRoofWindows();
+  assert.equal(windows.length, 2);
+  const wing = buildRoofEnvelope(getConnectedRoofDefinitions()).faces.filter((face) => face.roof === 'East rear wing');
+  for (const [index, window] of windows.entries()) {
+    close(window.x, g.southEast + (index === 0 ? 2.7 : 6.1));
+    close(window.z, g.serviceSouth - 3.7);
+    close(window.roughOpeningWidthInches, 21);
+    close(window.roughOpeningLengthInches, 45.75);
+    close(window.frameWidthInches, 21.5);
+    close(window.frameLengthInches, 46.25);
+    close(Math.hypot(window.plane[0], window.plane[1]), 1 / 3);
+    assert.ok(window.bounds[0] > g.southEast && window.bounds[1] < g.laundryEast);
+    assert.ok(window.bounds[2] > g.laundryNorth && window.bounds[3] < g.serviceSouth);
+    const corners = [[window.bounds[0], window.bounds[2]], [window.bounds[0], window.bounds[3]],
+      [window.bounds[1], window.bounds[2]], [window.bounds[1], window.bounds[3]]];
+    const host = wing.find((face) => corners.every((point) => contains(face.polygon, point)));
+    assert.ok(host, 'Each rough opening must be bounded by a single east-wing roof face');
+    close(window.roofElevation, heightAt(window.plane, [window.x, window.z]));
+    const faceTriangles = host.polygon.slice(1, -1).map((_, index) => {
+      const points = [host.polygon[0], host.polygon[index + 2], host.polygon[index + 1]];
+      return points.map((point) => [point[0], heightAt(host.plane, point), point[1], point[0], point[1]]);
+    });
+    const remaining = trianglesOutsideRectangle(faceTriangles, window.bounds);
+    const planArea = (triangles) => triangles.reduce((sum, triangle) => sum + Math.abs(triangle.reduce((cross, point, vertex) => {
+      const next = triangle[(vertex + 1) % triangle.length];
+      return cross + point[0] * next[2] - next[0] * point[2];
+    }, 0)) / 2, 0);
+    close(planArea(faceTriangles) - planArea(remaining), window.width * window.zProjection);
+  }
+  assert.ok(windows[1].bounds[0] > windows[0].bounds[1], 'Keep a positive roof-web gap between openings');
+});
+
+test('roof-window rectangle clipping removes only its opening area and preserves UV interpolation', () => {
+  const source = [[[0, 0, 0, 0, 0], [4, 0, 0, 1, 0], [0, 0, 4, 0, 1]]];
+  const clipped = trianglesOutsideRectangle(source, [0.5, 1.5, 0.5, 1.5]);
+  const area = clipped.reduce((sum, triangle) => sum + Math.abs(triangle.reduce((cross, point, index) => {
+    const next = triangle[(index + 1) % triangle.length];
+    return cross + point[0] * next[2] - next[0] * point[2];
+  }, 0)) / 2, 0);
+  close(area, 7);
+  assert.ok(clipped.length > 1);
+  assert.ok(clipped.flat().every((vertex) => vertex.length === 5 && vertex.every(Number.isFinite)));
+  const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const upstairs = fs.readFileSync(require.resolve('../floor-plan-upstairs.js'), 'utf8');
+  assert.match(exterior, /trianglesOutsideRectangle\(remaining, bounds\)/);
+  assert.match(exterior, /East rear wing.*?map\(\(window\) => window\.bounds\)/s);
+  assert.match(upstairs, /roofWindowShaft/);
 });
 
 test('wall-head constituents close the actual gap to the roof, with no change to 19 ft room walls', () => {

@@ -146,12 +146,14 @@ test('three real drawers sweep 15 inches, preserve occupied approach and restore
     context.toggleCabinet(front);
     assert.ok(Math.abs(bounds(front).max.x - closed.max.x) < 1e-7);
   }
-  // A continuous 31.2-inch strip from the 36-inch south opening to both
-  // hanging fronts and the east-facing tower; north end stops at clothing zone.
-  const route = { min: { x: 22.4, y: 0.4, z: 39.55 }, max: { x: 25, y: 6, z: 43.2 } };
   const entry = getGuestSuiteLayout().closetDoor;
-  assert.ok(route.min.x > entry.x && route.max.x < entry.x + entry.width, 'Route stays between the relocated entry jambs');
-  for (const p of meshes(w)) assert.ok(!overlap(bounds(p), route), `Closed route clears ${p.name}`);
+  const routes = [
+    { min: { x: 22.4, y: 0.4, z: 39.55 }, max: { x: 25, y: 6, z: 42.5 } },
+    { min: { x: entry.x + 0.025, y: 0.4, z: 42 }, max: { x: entry.x + entry.width - 0.025, y: 6, z: 43.2 } }
+  ];
+  assert.ok(routes[1].min.x > entry.x && routes[1].max.x < entry.x + entry.width, 'Entry approach stays between the 30-inch jambs');
+  assert.ok(overlap(routes[0], routes[1]), 'Entry approach connects to the wider interior strip');
+  for (const route of routes) for (const p of meshes(w)) assert.ok(!overlap(bounds(p), route), `Closed route clears ${p.name}`);
 });
 
 test('rightmost trimmed pocket retracts left; centered bowl clears adapted drawers, plumbing and basket reserve', () => {
@@ -164,6 +166,10 @@ test('rightmost trimmed pocket retracts left; centered bowl clears adapted drawe
   vm.runInNewContext(source.slice(source.indexOf('  const bathroomOpening ='), source.indexOf('  const guestCoats =')), context);
   const pocket = items.find(p => p.name === 'Guest walk-in closet left pocket door');
   const opening = context.guestSuite.closetDoor, operation = pocket.userData.interactiveHouseDoor;
+  assert.equal(opening.width * 12, 30);
+  assert.equal(pocket.userData.nominalWidthInches, 30);
+  assert.equal(pocket.userData.heightInches, 96);
+  assert.ok(Math.abs((bounds(pocket).max.x - bounds(pocket).min.x) * 12 - 30.96) < 1e-8);
   assert.ok(Math.abs(opening.x + opening.width + (2.5 + 0.125 + 0.75) / 12 - 25.575) < 1e-8, 'Cap, not just leg, limits eastward position');
   for (let step = 0; step <= 100; step++) {
     pocket.position.x = operation.closedCenterX - opening.pocket.travel * step / 100;

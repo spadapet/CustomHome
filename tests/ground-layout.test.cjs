@@ -87,7 +87,7 @@ test('guest suite retains a walk-in closet alongside the comfortable shower', ()
     close(wall[1] + wall[5][0][0], door.x);
     close(wall[1] + wall[5][0][1], door.x + door.width);
     close(wall[2], door.z);
-    close(door.width * 12, name === 'Closet south' ? 36 : 28);
+    close(door.width * 12, name === 'Closet south' ? 30 : 28);
     const casing = (2.5 + 0.125) / 12;
     assert.ok(door.x - west - 0.175 >= casing);
     assert.ok(east - 0.175 - door.x - door.width >= casing);
@@ -111,7 +111,9 @@ test('guest suite retains a walk-in closet alongside the comfortable shower', ()
   close(suite.closet.d, 6);
   close(suite.closet.w, 6.75);
   assert.equal(suite.closetDoor.pocket.retract, 'left');
-  close(suite.closetDoor.x + 3 + 2.5 / 12 + 0.125 / 12 + 0.0625, 25.75 - 0.175);
+  close(suite.closetDoor.width * 12, 30);
+  close(suite.closetDoor.height * 12, 96);
+  close(suite.closetDoor.x + suite.closetDoor.width + 2.5 / 12 + 0.125 / 12 + 0.0625, 25.75 - 0.175);
   assert.ok(suite.closetDoor.pocket.w >= suite.closetDoor.pocket.leafWidth);
   assert.deepEqual(baseline.rooms.find((room) => room.name === 'Entry hall'), { name: 'Entry hall', x: 12.2, z: 34.6, w: 6.8, d: 19.6 });
   assert.ok(!baseline.rooms.some((room) => room.name === 'Closet hall'), 'No narrowed north hall remains');
@@ -370,8 +372,8 @@ test('furnished guest suite centers basin, retains basket and uses left closet p
   const pocket = find('Guest walk-in closet left pocket door');
   const operation = pocket.userData.interactiveHouseDoor;
   assert.equal(operation.open, false);
-  assert.ok(operation.openCenterX - 3.08 / 2 >= suite.closetDoor.pocket.x);
-  assert.ok(operation.openCenterX + 3.08 / 2 <= suite.closetDoor.x + 1e-8);
+  assert.ok(operation.openCenterX - suite.closetDoor.pocket.leafWidth / 2 >= suite.closetDoor.pocket.x);
+  assert.ok(operation.openCenterX + suite.closetDoor.pocket.leafWidth / 2 <= suite.closetDoor.x + 1e-8);
   assert.equal(find('Guest bathroom pocket door proposal - framing approval required'), undefined);
   assert.ok(!items.some((item) => item.name === 'Guest bathroom outward-opening door'));
 });
@@ -949,6 +951,7 @@ test('first-floor baseline matches the furnished model floors and canonical wall
     wall: (x1, z1, x2, z2, furnished, openings = []) => walls.push([x1, z1, x2, z2, openings])
   };
   context.getKitchenWindowBankLayout = require('../floor-plan-ground.js').getKitchenWindowBankLayout;
+  context.getGroundFrontWindows = require('../floor-plan-ground.js').getGroundFrontWindows;
   vm.runInNewContext(source.slice(source.indexOf('  const kitchenWallLeft ='), source.indexOf('  joinWallCorners();')), context);
   const round = (value) => JSON.parse(JSON.stringify(value, (key, number) => typeof number === 'number' ? Math.round(number * 1000000) / 1000000 : number));
   assert.deepEqual(round(baseline.floors.map(({ x, z, w, d }) => [x, z, w, d]).sort()), round(floors.sort()));

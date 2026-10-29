@@ -111,6 +111,36 @@
     ];
   }
 
+  function getLaundryRoofWindows(floorToFloor = 10) {
+    const g = upperGeometry();
+    const width = 21 / 12;
+    const length = 45.75 / 12;
+    const zProjection = length * 3 / Math.sqrt(10);
+    const z = g.serviceSouth - 3.7;
+    const centers = [g.southEast + 2.7, g.southEast + 6.1];
+    const plan = buildRoofEnvelope(getConnectedRoofDefinitions(floorToFloor));
+    return centers.map((x, index) => {
+      const bounds = [x - width / 2, x + width / 2, z - zProjection / 2, z + zProjection / 2];
+      const corners = [[bounds[0], bounds[2]], [bounds[0], bounds[3]], [bounds[1], bounds[2]], [bounds[1], bounds[3]]];
+      const face = plan.faces.find(candidate => candidate.roof === 'East rear wing'
+        && corners.every(point => contains(candidate.polygon, point)));
+      if (!face) throw new Error(`Laundry roof window ${index + 1} does not fit on the east rear wing.`);
+      return {
+        name: `Laundry roof window ${index + 1}`,
+        x, z, width, length, zProjection, bounds, plane: face.plane,
+        roofElevation: heightAt(face.plane, [x, z]),
+        roughOpeningWidthInches: 21,
+        roughOpeningLengthInches: 45.75,
+        frameWidthInches: 21.5,
+        frameLengthInches: 46.25,
+        pitchRise: 4, pitchRun: 12,
+        candidateProduct: 'VELUX FS C06 fixed deck-mounted skylight',
+        productSelected: false,
+        operation: 'fixed'
+      };
+    });
+  }
+
   function getSetbackRoofDefinitions() {
     const g = upperGeometry();
     // The old rear/east strips are now upper floor. Only the narrow southern
@@ -317,7 +347,7 @@
     }
     return segments;
   }
-  const api = { getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, getGarageCanopyDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, wallHeadSegments };
+  const api = { getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, getGarageCanopyDefinitions, getLaundryRoofWindows, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, wallHeadSegments };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.HomeRoof = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

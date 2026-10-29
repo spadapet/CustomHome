@@ -110,7 +110,7 @@ test('two flat drywall returns surround the bank and joined unit frames have no 
   close(potZ, sillZ);
 });
 
-test('floor plan and exterior cut one shared opening around the same 90-inch bank', () => {
+test('floor plan and exterior restore one shared opening around the 90-inch bank', () => {
   const shared = require('../floor-plan-ground.js');
   const bank = shared.getKitchenWindowBankLayout();
   close(bank.width * 12, 90);
@@ -142,11 +142,12 @@ test('floor plan and exterior cut one shared opening around the same 90-inch ban
   assert.ok(cut.frameSill + cut.frameHeight + 0.35 < rear[6]);
 });
 
-test('approved height retains section widths, fixed center and prep datums', () => {
+test('restored bank has a 54-inch fixed center and unchanged height and prep datums', () => {
   const shared = require('../floor-plan-ground.js');
   const bank = shared.getKitchenWindowBankLayout();
   assert.deepEqual(bank.units.map(u => [u.width * 12, u.height * 12, u.sill * 12, (u.sill + u.height) * 12, u.picture]),
     [[18, 54, 42, 96, false], [54, 54, 42, 96, true], [18, 54, 42, 96, false]]);
+  assert.equal(bank.designTrial, undefined);
   assert.equal(bank.assemblyApproved, false);
   const prep = shared.getPrepWindowBankLayout();
   close(prep.openingHeight * 12, 60);

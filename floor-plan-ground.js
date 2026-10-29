@@ -30,7 +30,7 @@ function addWindowShadeDivisions(parent, box, material, joints, sill, height, fa
 }
 function getGroundFrontWindows() {
   return [
-    {name: 'Office porch window', center: 6, width: 6, sill: 3, height: 5},
+    {name: 'Office porch window', center: 6, width: 7.6, sill: 3, height: 5},
     {name: 'Bedroom porch window', center: 25, width: 7.6, sill: 3, height: 5}
   ];
 }
@@ -229,12 +229,15 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
   function getKitchenWindowBankLayout() {
     // Nominal joined bank; factory SKUs and mulling remain unapproved.
     const x = 32, z = 7, height = 4.5, sill = 3.5;
+    const sideWidth = 18 / 12, pictureWidth = 54 / 12;
+    const sideOffset = (pictureWidth + sideWidth) / 2;
     const units = [
-      { name: 'Kitchen sink left casement', x: 29, z, width: 1.5, height, sill, picture: false },
-      { name: 'Kitchen sink window', x, z, width: 4.5, height, sill, picture: true },
-      { name: 'Kitchen sink right casement', x: 35, z, width: 1.5, height, sill, picture: false }
+      { name: 'Kitchen sink left casement', x: x - sideOffset, z, width: sideWidth, height, sill, picture: false },
+      { name: 'Kitchen sink window', x, z, width: pictureWidth, height, sill, picture: true },
+      { name: 'Kitchen sink right casement', x: x + sideOffset, z, width: sideWidth, height, sill, picture: false }
     ];
-    return { name: 'Kitchen sink joined window bank', x, z, width: 7.5, height, sill, openingWidth: 7.5, openingHeight: height, openingSill: sill, units, trimLabel: 'Kitchen', assemblyApproved: false };
+    const width = units.reduce((sum, unit) => sum + unit.width, 0);
+    return { name: 'Kitchen sink joined window bank', x, z, width, height, sill, openingWidth: width, openingHeight: height, openingSill: sill, units, trimLabel: 'Kitchen', assemblyApproved: false };
   }
 
   function getGuestEntryLayout(stairs = UpstairsLayout.stairOpening()) {
@@ -257,12 +260,13 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
   function getGuestSuiteLayout() {
     // Include the projecting header cap, not just the 2.5-inch casing legs.
     const closetRight = 25.75 - 0.175 - (2.5 / 12 + 0.125 / 12 + 0.125 / 2);
+    const closetDoorWidth = 2.5;
     return {
       closet: { x: 19, z: 37.2, w: 6.75, d: 6 },
       kidsExtension: { x: 19, z: 34.6, w: 6.75, d: 2.6 },
       bedroomDoor: { x: 19, z: 43.8, width: 3, height: 8 },
-      closetDoor: { x: closetRight - 3, z: 43.2, width: 3, height: 8,
-        pocket: { x: 19.175, w: closetRight - 3 - 19.175, retract: 'left', leafWidth: 3.08, travel: 3.04, approvalRequired: true } },
+      closetDoor: { x: closetRight - closetDoorWidth, z: 43.2, width: closetDoorWidth, height: 8,
+        pocket: { x: 19.175, w: closetRight - closetDoorWidth - 19.175, retract: 'left', leafWidth: closetDoorWidth + 0.08, travel: closetDoorWidth + 0.04, approvalRequired: true } },
       bathroom: { x: 25.75, z: 33.6, w: 5.45, d: 9.6 },
       closetStorage: {
         hanging: [

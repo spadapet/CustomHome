@@ -1,9 +1,34 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { addWindowShadeDivisions, getWindowProductIntent, getKitchenWindowBankLayout, getPrepWindowBankLayout, getGroundFrontWindows } = require('../floor-plan-ground.js');
+const { addWindowShadeDivisions, getWindowProductIntent, getKitchenWindowBankLayout, getPrepWindowBankLayout, getGroundFrontWindows, getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
 const { getUpstairsSideWindows } = require('../floor-plan-upstairs.js');
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
+
+test('owner X-marked office porch bank matches the circled guest bank without moving either center', () => {
+  const [office, guest] = getGroundFrontWindows();
+  assert.equal(office.center, 6);
+  assert.equal(guest.center, 25);
+  for (const window of [office, guest]) {
+    close(window.width * 12, 91.2);
+    close(window.height * 12, 60);
+    close(window.sill * 12, 36);
+    const intent = getWindowProductIntent(window.width, window.height);
+    assert.equal(intent.columns, 3);
+    assert.equal(intent.rows, 1);
+    assert.deepEqual(intent.pictureColumns, [1]);
+    assert.equal(intent.operation, 'casement / fixed picture / casement');
+    close(intent.unitWidthFeet * 12, 30.4);
+  }
+  const wall = getGroundFloorDefaultPlan().walls.find(([name]) => name === 'House south');
+  for (const window of [office, guest]) {
+    const cut = wall[5].find(([left, right]) => Math.abs((left + right) / 2 - window.center) < 1e-8);
+    assert.ok(cut, `${window.name} has a coordinated structural wall opening`);
+    close(cut[1] - cut[0], window.width);
+    close(cut[2], window.sill);
+    close(cut[3], window.sill + window.height);
+  }
+});
 
 test('all paired/triple column joints have full six-inch reveal depth on either interior side', () => {
   for (const width of [4, 6, 7.6]) for (const side of [-1, 1]) {
