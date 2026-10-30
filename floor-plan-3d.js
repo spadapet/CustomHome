@@ -4746,7 +4746,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const roomDimensionsInput = document.getElementById('show-room-dimensions');
   const planDimensionLabels = document.getElementById('plan-dimension-labels');
   const planDimensionsPanel = document.getElementById('plan-dimensions');
-  const planGarageOutline = document.getElementById('plan-garage-outline');
   let dimensionRooms = [];
   function planRoomName(name) {
     const shortNames = {
@@ -4799,33 +4798,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   function positionPlanDimensions() {
     const width = viewport.clientWidth;
     const height = viewport.clientHeight;
-    const showGarageOutline = currentView === 'top' && activeFloor === 'ground';
-    planGarageOutline.hidden = !showGarageOutline;
-    if (showGarageOutline) {
-      const garageFloors = (groundLayoutPreview?.plan ?? groundBaseline).floors.filter(floor => floor.room === 'Garage');
-      const xEdges = [...new Set(garageFloors.flatMap(floor => [floor.x, floor.x + floor.w]))].sort((a, b) => a - b);
-      const zEdges = [...new Set(garageFloors.flatMap(floor => [floor.z, floor.z + floor.d]))].sort((a, b) => a - b);
-      const occupied = (x, z) => garageFloors.some(floor => x > floor.x && x < floor.x + floor.w && z > floor.z && z < floor.z + floor.d);
-      const segments = [];
-      for (let ix = 0; ix < xEdges.length - 1; ix++) {
-        for (let iz = 0; iz < zEdges.length - 1; iz++) {
-          const x1 = xEdges[ix], x2 = xEdges[ix + 1], z1 = zEdges[iz], z2 = zEdges[iz + 1];
-          const x = (x1 + x2) / 2, z = (z1 + z2) / 2;
-          if (!occupied(x, z)) continue;
-          if (!occupied(x, z1 - 0.001)) segments.push([[x1, z1], [x2, z1]]);
-          if (!occupied(x2 + 0.001, z)) segments.push([[x2, z1], [x2, z2]]);
-          if (!occupied(x, z2 + 0.001)) segments.push([[x2, z2], [x1, z2]]);
-          if (!occupied(x1 - 0.001, z)) segments.push([[x1, z2], [x1, z1]]);
-        }
-      }
-      const project = ([x, z]) => {
-        const point = new THREE.Vector3(x, -1.25, z).project(camera);
-        return `${(point.x + 1) * width / 2},${(1 - point.y) * height / 2}`;
-      };
-      const path = segments.map(([a, b]) => `M${project(a)}L${project(b)}`).join('');
-      planGarageOutline.setAttribute('viewBox', `0 0 ${width} ${height}`);
-      for (const outline of planGarageOutline.children) outline.setAttribute('d', path);
-    }
     if (planDimensionLabels.hidden) return;
     dimensionRooms.forEach((room, index) => {
       const center = new THREE.Vector3(room.x + room.w / 2, activeFloor === 'upstairs' ? stairFloorToFloor : 0, room.z + room.d / 2).project(camera);

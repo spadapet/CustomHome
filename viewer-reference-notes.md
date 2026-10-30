@@ -93,10 +93,19 @@ existing wood/firepit storage restrictions remain.
 Paired true front cross-gables over the fixed bedroom pairs: 14.35-ft width,
 6.2-ft rise, 25.4-ft ridge, approximately10.37:12 pitch. Keep the main/east
 hip envelope underneath, rear solar provisions and subordinate garage roof.
-Charcoal metal porch with9.15-ft segmental entry barrel/19.2-in rise, real
+Muted warm-charcoal metal porch with9.15-ft segmental entry barrel/19.2-in rise, real
 clipped seams, rear return and open8.4-in curved trim band7.8 in deep.
-Stone covers the complete lower story to y9 ft on all elevations/returns;
-warm-gray modern brick above replaces the earlier warm-white/red-plinth study.
+The owner's later revision replaces full9-ft stone: continuous pale stone to
+y2 ft (24 in), separate warm off-white coping to y2.125 ft (25.5 in), light
+Linen beige queen brick above across every elevation/return,
+raised patio headwall and fitted gable closure. Lowest actual sill-trim underside
+is26.37 in (east prep), leaving0.87 in clear; front stone sill underside32.28 in.
+Datums are above house floor, not grade or garage floor. Keep all53 units,
+openings and door poses. Owner selected palette 2 Linen, superseding Oatmeal:
+putty mortar, trim #f3eee4, muted warm-charcoal metal/roof #595953 and natural
+oak avoid yellow/orange, pink and dark brown. At scan luminance 128, diffuse
+targets match the palette sheet: brick #d8cdbb, stone #d5d0c5, roof #595953.
+These are display grading assumptions, not product colors.
 Existing local CC0 scans are appearance references, not selected products.
 Require stone/brick/mortar panels in sun/shade and separate slip/frost-rated paving.
 Keep four support centers,12-in shafts,14-in stone bases/15-in caps,79.8-in

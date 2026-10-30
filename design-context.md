@@ -5,7 +5,7 @@
 The new owner reference supersedes the quiet all-hip silhouette and low
 red-brick plinth studies. Use two true front cross-gables centered on the
 unchanged paired bedroom windows (x=6.425/25.145833 ft), a subordinate
-one-story garage hip, and a charcoal standing-seam porch canopy with a
+one-story garage hip, and a muted warm-charcoal standing-seam porch canopy with a
 segmental barrel entry accent. No decorative dormers or new rooms/openings.
 Each cross-gable is 14.35 ft wide, eave y=19.2 ft, rise 6.2 ft, ridge
 y=25.4 ft, pitch approximately 10.37:12; rear hip returns start at z=40.5.
@@ -15,12 +15,30 @@ the union cannot reduce their headroom envelope. Rear surfaces north of
 z=40.5 and solar provisions are unchanged; this study does not select or
 approve photovoltaic layout, attachment, setbacks, shading or capacity.
 
-Interpret “stone lower half” as the complete ground-story walls through
-y=9 ft, with warm-gray modern queen brick above, including the gable ends.
-Stone wraps every elevation/return and is cut around existing openings.
-Keep the existing finished wall faces (no footprint/side-yard encroachment).
-Use light neutral warm-gray stone with restrained natural variation, gray
-brick with cream-gray mortar, pale trim, charcoal metal and retained oak doors.
+The owner's later October 30 request supersedes the full 9-ft stone story:
+use a continuous LOW stone wainscot to y=2 ft (24 in), separate warm off-white
+coping y=2–2.125 ft (24–25.5 in), and light Linen beige queen
+brick above, including every elevation, return, raised patio headwall and
+gable closure. These are house-floor datums, not heights above sloping grade
+or the lower garage floor. Actual lowest sill-trim underside is y=2.1975 ft
+(26.37 in, east prep); coping clears it by 0.87 in. West living trim starts
+at 28.32 in and front cut-stone sills at 32.28 in. Do not lift the continuous
+band to the front glass sill and bury lower side trim.
+Keep existing finished faces, openings, 53 window units, roof forms, seven-foot
+porch, door poses, furniture, saved JSON and no shutters.
+Owner selected palette 2, Linen, from the [palette sheet](assets/exterior-palette-options.svg),
+superseding the earlier Oatmeal color study. Pale warm limestone, quiet putty
+mortar, warm off-white trim #f3eee4 and muted warm-charcoal metal #595953
+accompany retained natural oak. At scan luminance 128, graded brick is #d8cdbb,
+stone #d5d0c5 and roof #595953, matching the selected concept swatches.
+These are texture calibration targets, not flat paint/product colors;
+photographed variation, lighting and physical samples change perceived color.
+
+Linen verification: 36 tests across five exterior suites and 11 JavaScript
+syntax checks passed. Browser checks covered front, three-quarter, rear,
+both sides and street-eye Night lighting, then floor changes and Reset.
+Day/front was restored with 53 window units and one render canvas.
+Avoid yellow/orange, pink, dark brown and an overly warm/dark overall result.
 The existing local CC0 stone/brick scans are display inspiration, not selected
 or approved products; require stone/brick/mortar/coping panels in sun and shade.
 Stone scan tile is a provisional 8 ft, brick nominal face module 8 x 3.125 in.
@@ -46,18 +64,39 @@ valley snow/ice/runoff concentration onto the porch, gutters/outlets and lawful
 discharge. Rear canopy remains support-unapproved; firepit stays cold storage.
 No product, structural, waterproofing, electrical or permitting approval.
 
-Verification of this bounded study: editing-skill runner passes406 tests in
-63 suites plus11 JavaScript syntax checks. HTTP viewer inspected in front,
-street-eye, west/east oblique, rear, both side elevations and entry Day/Night.
-Updated Three.js world matrices:70 lower-story stone constituents top at9 ft,
-no positive-volume overlap with45 exterior glazing constituents; gable peak
-25.3999996 ft;87 closure-top vertices meet roof undersides within0.000001 ft.
-Actual arch envelope is9.1499996 ft wide/0.64999998 ft deep; minimum trim
-soffit9.08114 ft, center10.68114 ft. Portal foot passage79.8 in.
-All38 exterior lights restore exactly when returning to the same entry Night
-view after floor changes; Day also restores, with no active exterior sources.
-No observed page errors or failed HTTP requests; one model render canvas.
-Temporary browser-route instrumentation removed; local only, no publication.
+Historical verification before the latest upstairs perimeter integration:
+editing-skill runner passes
+90 tests in13 relevant combined suites plus11 JavaScript syntax checks.
+Production HTTP viewer inspected in front, street-eye, three-quarter, rear,
+west/east and patio Day views plus street-eye Night. Updated Three.js matrices:
+21 wall groups,50 wall-stone constituents ending at or below y2.00000005 ft,
+45 coping constituents ending at y2.125 ft, and132 brick wall constituents
+starting no lower than y2.125 ft. All33 fitted attic/setback/tapered wall
+closures use brick; actual lowest sill underside y2.1975000006 leaves
+0.870000007 in clear. No positive-volume overlap of the low wall stone/coping
+with460 checked window/glazing/sill/trim constituents. Porch post bases,
+foundations and risers are separate retained stone pieces, not the wall datum.
+Rear/side fences occlude the base in normal elevations; temporarily hiding the
+fence confirmed its continuous return, then it was restored. The front/west
+read light oatmeal; rear shade reads cooler, with pale larger-scale stone
+distinct from brick. Screens are not calibrated product sample approval.
+Cladding world matrices/visibility and all38 exterior Night lights restore
+exactly through ground/upstairs/2D changes; Day restores with zero active
+exterior sources, including after Reset. Both 2D floors retain dimensions on.
+No observed page errors or failed requests. Temporary route instrumentation
+removed and actual production script reloaded: no debug global, one model
+render canvas, Notes closed, Day default,53 units and all compact metrics.
+Roof forms, openings, furniture, door poses and saved JSON remain unchanged.
+Independent concurrent garage-outline viewer edits are not part of this study.
+Publication integration, October 30: apply the saved Linen/wainscot and
+garage-outline-removal edits over main's measured upstairs revision, not
+over the former upstairs perimeter. Cladding regression now covers all
+18 shared upper wall segments, ten ground perimeter walls and the patio
+headwall (29 groups); earlier constituent counts above describe the prior
+geometry only. Full validation passes 411 tests in 64 suites and 11 JavaScript
+syntax checks. The uninstrumented HTTP three-quarter viewer loads without
+page errors, with one render canvas, no orange garage overlay and 53 units.
+The updated main area calculation remains intact; no layout JSON is changed.
 
 ## Viewer defaults - October 30
 

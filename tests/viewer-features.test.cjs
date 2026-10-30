@@ -43,15 +43,16 @@ test('viewer uses concise controls and collapses dimension explanations without 
   assert.match(read('floor-plan-3d.js'), /notesButton.textContent = 'Notes'/);
 });
 
-test('2D room dimensions identify garage maximum extents and explain adjacent room widths', () => {
+test('2D room dimensions identify garage maximum extents without a garage border', () => {
   const html = read('floor-plan-3d.html');
-  assert.match(html, /garage label gives maximum extents of its outlined L-shaped floor/i);
+  assert.match(html, /garage label gives maximum extents of its L-shaped floor/i);
   assert.match(html, /porch spans x=0-31\.2 ft at z=54\.679-61\.679 ft/i);
   assert.match(html, /garage floor spans x=31\.2-55\.5 ft at z=15-49 ft/i);
   assert.match(html, /they are separated north-south and do not touch/i);
   assert.match(html, /plan's centerline span is 55 ft 6 in/i);
-  assert.match(html, /narrower north leg shown in orange/i);
-  assert.match(html, /id="plan-garage-outline"/);
+  assert.doesNotMatch(html, /plan-garage-outline|shown in orange/i);
+  assert.doesNotMatch(read('floor-plan-3d.js'), /planGarageOutline|showGarageOutline/);
+  assert.doesNotMatch(read('floor-plan-3d.css'), /garage-outline-/);
   assert.match(html, /footer gives the larger outside-face overall dimensions/i);
   const { getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
   const plan = getGroundFloorDefaultPlan();
@@ -239,13 +240,8 @@ test('floor-plan archive preserves both revisions and marks the shower option as
     replaceChildren() { this.children = []; }
   });
 
-  const elements = Object.fromEntries(['show-room-dimensions', 'plan-dimension-labels', 'plan-garage-outline', 'plan-dimensions', 'plan-dimension-list'].map((id) => [id, element()]));
-  elements['plan-garage-outline'].append(element(), element());
+  const elements = Object.fromEntries(['show-room-dimensions', 'plan-dimension-labels', 'plan-dimensions', 'plan-dimension-list'].map((id) => [id, element()]));
   elements['show-room-dimensions'].addEventListener = () => {};
-  for (const outline of elements['plan-garage-outline'].children) {
-    outline.setAttribute = function (name, value) { this[name] = value; };
-  }
-  elements['plan-garage-outline'].setAttribute = function (name, value) { this[name] = value; };
   const { getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
   const scope = {};
   vm.runInNewContext(read('floor-plan-upstairs.js'), scope);
@@ -278,13 +274,6 @@ test('floor-plan archive preserves both revisions and marks the shower option as
     assert.equal(elements['plan-dimension-labels'].children.length, rooms.length);
     assert.equal(elements['plan-dimension-list'].children.length, rooms.length);
     context.positionPlanDimensions();
-    assert.equal(elements['plan-garage-outline'].hidden, floor !== 'ground');
-    if (floor === 'ground') {
-      const outline = elements['plan-garage-outline'].children[0].d;
-      assert.match(outline, /^M/);
-      assert.ok(outline.length > 100, 'Garage outline traces the actual stepped floor boundary');
-      assert.equal(elements['plan-garage-outline'].children[1].d, outline);
-    }
     rooms.forEach((room, index) => {
       const label = elements['plan-dimension-labels'].children[index];
       const fontSize = Number.parseFloat(label.style.fontSize);

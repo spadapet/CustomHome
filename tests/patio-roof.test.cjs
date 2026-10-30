@@ -73,7 +73,7 @@ function buildRoof() {
 
 test('sloping cover relocates behind living room and leaves both kitchen frontages open', () => {
   const { walls, meshes, underside } = buildRoof();
-  const roof = meshes.find((mesh) => mesh.name === 'Brown-shingle covered patio roof');
+  const roof = meshes.find((mesh) => mesh.name === 'Graphite-gray shingle covered patio roof');
   assert.equal(roof.userData.pitch, 3 / 16);
   assert.equal(roof.userData.limits.rear, -0.325);
   assert.equal(roof.userData.limits.front, 8.225);
@@ -155,10 +155,11 @@ test('canopy gutter is an open falling trough with leader outside the landing an
 });
 
 test('dining-side tapered closure meets the roof slope without adding a wall on the open west side', () => {
-  const { meshes, underside } = buildRoof();
+  const { meshes, underside, context } = buildRoof();
   const closures = meshes.filter((mesh) => /tapered closure/.test(mesh.name));
   assert.equal(closures.length, 1);
   assert.equal(closures[0].name, 'Patio roof east tapered closure');
+  assert.equal(closures[0].material, context.frontBrick, 'Wall return above low stone remains brick, not off-white fill');
   assert.equal(closures[0].position.x, 13.2);
   for (const mesh of closures) {
     const p = mesh.geometry.attributes.position;
@@ -215,7 +216,7 @@ test('post-free canopy has finished soffit and fascia while patio furniture stay
   assert.ok(Math.abs(terrace.userData.widthFeet - 17.805) < 1e-9);
   assert.ok(Math.abs(terrace.userData.depthFeet - 12.1) < 1e-9);
   assert.equal(terrace.userData.z, -4.325);
-  const roof = meshes.find((mesh) => mesh.name === 'Brown-shingle covered patio roof');
+  const roof = meshes.find((mesh) => mesh.name === 'Graphite-gray shingle covered patio roof');
   assert.equal(roof.userData.limits.rear - terrace.userData.z, 4, 'Four-foot yard extension is beyond the unchanged roof');
   assert.equal(roof.userData.limits.left, 0, 'No roof enlargement over the new side extension');
   const transition = meshes.find((mesh) => mesh.name === 'Patio to west fence-path grade transition');

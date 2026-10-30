@@ -30,11 +30,7 @@
 .plan-dimensions p{font-size:13px;line-height:1.6}
 .plan-dimensions .dimension-list{columns:2;column-gap:28px}
 .plan-dimensions li{break-inside:avoid}
-#plan-garage-outline{position:absolute;inset:0;width:100%;height:100%;z-index:1;overflow:hidden;pointer-events:none}
 #plan-dimension-labels{position:absolute;inset:0;z-index:2;overflow:hidden;pointer-events:none}
-.garage-outline-halo,.garage-outline-line{fill:none;stroke-linejoin:round;stroke-linecap:round;vector-effect:non-scaling-stroke}
-.garage-outline-halo{stroke:#fffdf5;stroke-width:8px}
-.garage-outline-line{stroke:#b94f08;stroke-width:3px}
 .plan-dimension-label{position:absolute;transform:translate(-50%,-50%);padding:1px 2px;background:#fffef2ed;color:#172b24;border-radius:2px;text-align:center;line-height:1.15;white-space:nowrap}
 .plan-dimension-label strong,.plan-dimension-label span{display:block}
 @media(max-width:600px){.plan-dimensions .dimension-list{columns:1}}

@@ -11,10 +11,21 @@ closures. The original main/east-wing4:12 planes, lower6:12 garage hip,
 rear solar provisions and accepted headroom envelope are not reduced.
 No new dormers, rooms, windows or floor area.
 
-Complete lower-story stone, not a30-in plinth: top y9 ft, around all four
-elevations and returns, cut at every opening. Original finished wall faces
-and six-foot east ground-side fence clearance stay. Warm-gray modern queen
-brick above; pale trim/coping, charcoal metal and oak doors. The local stone
+The later owner revision replaces full9-ft stone with a continuous low
+wainscot: stone top y2 ft (24 in), separate1.5-in coping to y2.125 ft
+(25.5 in), light Linen beige queen brick above on every elevation/return,
+raised patio headwall and fitted gable closure, cut at every fixed opening.
+All heights reference the house floor, not grade/garage floor. Measured east
+prep sill-trim underside26.37 in leaves0.87 in above coping; west living
+trim underside28.32 in and front cut-stone sill underside32.28 in are higher.
+Original finished wall faces and six-foot east ground-side fence clearance stay.
+Owner selected palette 2 Linen from the [palette sheet](assets/exterior-palette-options.svg),
+replacing Oatmeal. Pale warm limestone, putty mortar, warm off-white
+trim/coping #f3eee4, muted warm-charcoal metal/roof #595953 and retained oak:
+light warm-neutral, not yellow/orange, pink or dark brown. At scan luminance128,
+brick diffuse #d8cdbb, stone #d5d0c5 and roof #595953 match the concept swatches,
+not flat material specifications. Preserve53 actual units and no shutters.
+The local stone
 scan has an assumed8-ft tile; brick face module8 x3.125 in. These are rendering
 scales, not selected products. Support bases remain30 in high, shafts12 in,
 bases14 in and caps15 in; porch foundation/nose/risers now stone, with separate
@@ -35,6 +46,14 @@ cavity/transition flashing/weeps/drips, valley concentration/snow/ice at the
 porch, gutter outlets, lawful discharge, roofing build-up and electrical
 listings. Preserve separate upper-rear drainage and cold-storage-only firepit.
 This is a reversible architectural study, not construction or product approval.
+
+October 30 publication integration retains main's latest measured upstairs
+geometry and area accounting while restoring the saved Linen/low-wainscot
+revision and removing the orange garage outline. Cladding tests cover all
+18 shared upper wall segments, ten ground perimeter walls and the patio
+headwall. Full validation: 411 tests in 64 suites, plus 11 syntax checks.
+Production HTTP three-quarter view loads with 53 units, one render canvas
+and no runtime errors; saved layout JSON is unchanged.
 
 ## Viewer defaults - October 30
 

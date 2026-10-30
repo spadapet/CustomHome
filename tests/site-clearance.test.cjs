@@ -26,6 +26,7 @@ function fixture() {
       constructor() { super(); this.instanceMatrix = {}; } setMatrixAt() {}
     }, Matrix4: class { makeTranslation() {} } } };
   vm.createContext(context);
+  vm.runInContext(source.slice(0, source.indexOf('function buildExteriorModel')) + '\nconst cladding = getExteriorCladdingStudy();', context);
   const run = (start, end) => vm.runInContext(source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start))), context);
   run('  const wallThickness =', '  const eaves =');
   run('  function wall(', '  // Applied stone');

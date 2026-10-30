@@ -11,11 +11,11 @@ function gradeExteriorBrickPixels(data, redBase = false) {
       data[i + 2] = mortar ? 145 + luminance * 0.18 : 26 + luminance * 0.27;
     } else {
       // Remove ALL source chroma, not just its average: red photograph tails
-      // must not survive as peach faces. Small yellow-axis bias, near-zero a*.
-      const value = Math.min(229, 164 + luminance * 0.255);
-      data[i] = value + 4;
-      data[i + 1] = value + 3;
-      data[i + 2] = value - 2;
+      // must not survive as peach faces. Linen swatch at scan luminance 128.
+      const shade = (luminance - 128) * 0.23;
+      data[i] = 216 + shade;
+      data[i + 1] = 205 + shade;
+      data[i + 2] = 187 + shade;
     }
   }
   return data;
@@ -24,12 +24,32 @@ function gradeExteriorBrickPixels(data, redBase = false) {
 function gradeExteriorStonePixels(data) {
   for (let i = 0; i < data.length; i += 4) {
     const luminance = (data[i] + data[i + 1] + data[i + 2]) / 3;
-    const value = 110 + luminance * 0.58;
-    data[i] = value + 8;
-    data[i + 1] = value + 6;
-    data[i + 2] = value;
+    const shade = (luminance - 128) * 0.21;
+    data[i] = 213 + shade;
+    data[i + 1] = 208 + shade;
+    data[i + 2] = 197 + shade;
   }
   return data;
+}
+
+function gradeExteriorRoofPixels(data) {
+  for (let i = 0; i < data.length; i += 4) {
+    const shade = ((data[i] + data[i + 1] + data[i + 2]) / 3 - 128) * 0.4;
+    data[i] = 89 + shade;
+    data[i + 1] = 89 + shade;
+    data[i + 2] = 83 + shade;
+  }
+  return data;
+}
+
+// One continuous house datum, controlled by the LOWEST actual sill trim:
+// east prep sill underside y=2.1975 ft, not the front glass sill y=3 ft.
+// Stone ends at 24 in; a separate 1.5-in coping ends at 25.5 in.
+function getExteriorCladdingStudy() {
+  return { palette: 'Linen', stoneTop: 2, copingTop: 2.125, lowestSillTrimBottom: 2.1975,
+    brick: 'Light Linen beige', stone: 'Pale warm limestone',
+    trim: '#f3eee4', metal: '#595953', roof: 'Muted warm charcoal',
+    productsApproved: false };
 }
 
 // Physical per-face projection: narrow column returns must not stretch a full
@@ -51,7 +71,8 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const frontPorchEdgeZ = frontLayout.porchEdgeZ;
   group.name = 'Paired-gable stone and modern brick exterior study';
   group.visible = false;
-  group.userData = { provisional: true, style: 'Paired front cross-gables, charcoal metal entry canopy, light ashlar lower story and warm-gray modern brick above; retained oak doors and white windows', floorToFloorFeet: floorToFloor, coordinatedConstructionDrawings: false, frontElevationStudy: true, frontOpeningsCoordinatedWithInteriors: true, garageUpperVolume: 'Unoccupied roof void only; no room, storage or access approval', wallCladding: 'Stone lower half to y=9 ft; warm-gray queen brick above. Palette inspiration only, no selected masonry product or approved assembly' };
+  const cladding = getExteriorCladdingStudy();
+  group.userData = { provisional: true, style: 'Paired front cross-gables, muted warm charcoal entry canopy, low pale stone and light Linen beige brick; retained oak doors and warm off-white windows', floorToFloorFeet: floorToFloor, coordinatedConstructionDrawings: false, frontElevationStudy: true, frontOpeningsCoordinatedWithInteriors: true, garageUpperVolume: 'Unoccupied roof void only; no room, storage or access approval', wallCladding: 'Low stone to y=2 ft, coping to y=2.125 ft; Linen beige queen brick above on every elevation/return and gable. Palette inspiration only, no selected masonry product or approved assembly', claddingStudy: cladding };
   const wallThickness = 0.45;
   const fenceBoundaryInset = 0.5, fenceRailOffset = 0.1, fenceRailDepth = 0.14;
   const eastWallFaceX = 55.5 + wallThickness / 2;
@@ -70,13 +91,13 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const pathWidth = 3.5;
   const westPaverEdgeX = fenceLeft + fencePaverGap, eastPaverEdgeX = fenceRight - fencePaverGap;
   const eaves = floorToFloor + 9;
-  const trim = mat('#f5f2ea');
-  const white = mat('#f3eddf');
+  const trim = mat(cladding.trim);
+  const white = mat(cladding.trim);
   const garageDoorFinish = mat('#c6a274');
   garageDoorFinish.name = 'Natural oak carriage garage door - screen approximation';
   const garageDoorDetail = mat('#98784e');
   garageDoorDetail.name = 'Natural wood garage door panel detail - screen approximation';
-  const garageSurround = mat('#f5f2ea');
+  const garageSurround = mat(cladding.trim);
   garageSurround.name = 'Pale limestone garage opening surround - screen approximation';
   const dark = mat('#393b38', 0.65);
   const windowBlack = mat('#202321');
@@ -180,27 +201,40 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       material.color.set('#fff4df');
     }
   }
-  garageSurround.color.set('#f1ecdf');
+  garageSurround.color.set(cladding.trim);
   garageSurround.map = null;
   garageSurround.bumpMap = masonryMaps ? null : stoneTexture;
   garageSurround.bumpScale = 0.025;
-  group.userData.materialStudy = 'October 30 stone lower half / modern brick upper study: light warm-gray ashlar through the ground-story wall head y=9 ft, all elevations and returns; restrained warm-gray brick above. Stone porch bases, foundation and step risers; pale walking surfaces remain separate paving concepts. Require stone/brick/mortar sample panels in sun and shade, engineered veneer support and cavity/transition flashing. No product, structural or paving approval.';
-  const roofTexture = masonryMaps?.roof?.map ?? surfaceTexture(true);
-  const porchColumnFinish = mat('#f4f1e9', 0.95);
+  group.userData.materialStudy = 'October 30 owner selection: palette 2 Linen, light beige brick main body, pale warm stone to 24 in and separate coping to 25.5 in above house floor; all elevations and returns. Lowest sill trim underside 26.37 in leaves 0.87 in clear. Warm off-white trim, muted warm charcoal roof/metal, natural oak retained; avoid yellow/orange, pink and dark brown. Stone porch bases, foundation and risers retained; separate pale paving. Existing CC0 scans are display references, not products. Require brick/stone/mortar/coping panels in sun/shade, engineered veneer support and cavity/transition flashing. No product, structural or paving approval.';
+  const roofCanvas = document.createElement('canvas');
+  roofCanvas.width = roofCanvas.height = 1024;
+  const roofPaint = roofCanvas.getContext('2d');
+  roofPaint.drawImage((masonryMaps?.roof?.map ?? surfaceTexture(true)).image, 0, 0, 1024, 1024);
+  const roofPixels = roofPaint.getImageData(0, 0, 1024, 1024);
+  gradeExteriorRoofPixels(roofPixels.data);
+  roofPaint.putImageData(roofPixels, 0, 0);
+  const roofTexture = new THREE.CanvasTexture(roofCanvas);
+  roofTexture.colorSpace = THREE.SRGBColorSpace;
+  roofTexture.wrapS = roofTexture.wrapT = THREE.RepeatWrapping;
+  roofTexture.anisotropy = 4;
+  const porchColumnFinish = mat(cladding.trim, 0.95);
   const brickTextureWidthFeet = masonryMaps ? 10 / 3 : 8 / 3;
   const brickTextureHeightFeet = masonryMaps ? 175 / 48 : 25 / 12;
-  group.userData.brickFormat = 'Modern warm-gray queen brick concept; nominal 8 x 3.125 inch face module including mortar; smooth low-relief rendering, not a selected product';
+  group.userData.brickFormat = 'Light Linen beige queen brick concept; nominal 8 x 3.125 inch face module including mortar; smooth low-relief rendering, not a selected product';
   const frontBrick = (() => {
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 256;
     const context = canvas.getContext('2d');
     if (!context) throw new Error('Exterior brick texture requires a 2D canvas context.');
-    context.fillStyle = '#d7d6d1';
+    context.fillStyle = '#d3cec4';
     context.fillRect(0, 0, 256, 256);
     for (let row = 0; row < 8; row++) for (let column = -1; column < 4; column++) {
-      context.fillStyle = ['#e5e4df', '#f0efea', '#eae9e4', '#f6f5f0'][(row * 3 + column + 4) % 4];
+      context.fillStyle = ['#ded8cd', '#e9e3d8', '#e3ddd2', '#eee8dd'][(row * 3 + column + 4) % 4];
       context.fillRect(column * 64 + (row % 2) * 32 + 2, row * 32 + 2, 60, 28);
     }
+    const pixels = context.getImageData(0, 0, 256, 256);
+    gradeExteriorBrickPixels(pixels.data);
+    context.putImageData(pixels, 0, 0);
     const map = new THREE.CanvasTexture(canvas);
     map.colorSpace = THREE.SRGBColorSpace;
     map.wrapS = map.wrapT = THREE.RepeatWrapping;
@@ -219,7 +253,8 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     }
     const mesh = box(parent, x, y, z, w, h, d, brick);
     if (base) mapBrickBoxUVs(mesh.geometry, 8, 8);
-    mesh.name = base ? 'Light ashlar stone masonry' : 'Warm-gray modern brick masonry';
+    mesh.name = base ? 'Pale complementary ashlar stone masonry' : 'Light Linen beige brick masonry';
+    mesh.userData = { ...mesh.userData, cladding: base ? 'stone' : 'brick' };
     return mesh;
   }
   if (masonryMaps) {
@@ -230,7 +265,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     paint.filter = 'none';
     paint.drawImage(masonryMaps.brick.map.image, 0, 0, 1024, 1024);
     // Retain the photographed queen-brick joints and variation, but grade the
-    // albedo to the owner's cream brick, not the source photograph's red/brown.
+    // albedo to the owner's Linen brick, not the source photograph's red/brown.
     const pixels = paint.getImageData(0, 0, 1024, 1024);
     gradeExteriorBrickPixels(pixels.data);
     paint.putImageData(pixels, 0, 0);
@@ -259,7 +294,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   baseBrick = new THREE.MeshStandardMaterial({ ...(stoneMaps ?? {}), color: '#ffffff',
     map: stoneColor, bumpMap: null, roughness: 0.97 });
   baseBrick.normalScale = new THREE.Vector2(0.3, 0.3);
-  baseBrick.name = 'Light warm-gray ashlar stone concept - product and support unverified';
+  baseBrick.name = 'Pale complementary ashlar stone concept - product and support unverified';
   function brickFaceUVs(geometry, axis = 'x') {
     const positions = geometry.attributes.position;
     const uv = [];
@@ -363,13 +398,20 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     function fill(start, end, low, high) {
       if (end <= start || high <= low) return;
       const baseLow = low === bottom && bottom < 0 ? Math.min(low, -1.65) : low;
-      const plinthTop = 9;
-      if (baseLow < plinthTop) {
-        const base = brickBox(wallGroup, (start + end) / 2, (baseLow + Math.min(high, plinthTop)) / 2, 0, end - start, Math.min(high, plinthTop) - baseLow, wallThickness, true);
-        base.name = 'Continuous lower-half stone wall - 9 foot house datum';
-        if (high >= plinthTop) box(wallGroup, (start + end) / 2, plinthTop - 0.05, 0, end - start, 0.1, wallThickness, trim).name = 'Pale base transition coping course';
+      if (baseLow < cladding.stoneTop) {
+        const stoneTop = Math.min(high, cladding.stoneTop);
+        const base = brickBox(wallGroup, (start + end) / 2, (baseLow + stoneTop) / 2, 0, end - start, stoneTop - baseLow, wallThickness, true);
+        base.name = 'Continuous low stone wainscot - 24 inch house datum';
       }
-      const panelLow = Math.max(baseLow, plinthTop);
+      const copingLow = Math.max(baseLow, cladding.stoneTop);
+      const copingHigh = Math.min(high, cladding.copingTop);
+      if (copingHigh > copingLow) {
+        const coping = box(wallGroup, (start + end) / 2, (copingLow + copingHigh) / 2, 0,
+          end - start, copingHigh - copingLow, wallThickness, trim);
+        coping.name = 'Pale base transition coping course';
+        coping.userData = { ...coping.userData, cladding: 'coping' };
+      }
+      const panelLow = Math.max(baseLow, cladding.copingTop);
       if (high <= panelLow) return;
       brickBox(wallGroup, (start + end) / 2, (panelLow + high) / 2, 0, end - start, high - panelLow, wallThickness);
     }
@@ -596,7 +638,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
         }
       }
     }
-    const valleyFinish = metal ? material : mat('#655f53', 0.8);
+    const valleyFinish = metal ? material : mat('#656762', 0.8);
     for (const join of plan.joins) {
       // Facets approximate one curved metal skin, not sixteen hip roofs.
       // Internal facet boundaries need no raised ridge/hip battens.
@@ -638,7 +680,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   slateFinish.normalScale.set(0.35, 0.35);
   const houseRoof = renderRoofEnvelope('Connected main-house roof system', HomeRoof.getConnectedRoofDefinitions(floorToFloor)
     .filter(({ id }) => !['Garage hip', 'Dining rear projection'].includes(id)), slateFinish);
-  const setbackFinish = mat('#716c60', 0.85);
+  const setbackFinish = mat('#656863', 0.85);
   const setbackRoofs = renderRoofEnvelope('Closed ground-floor setback roofs', HomeRoof.getLowerRoofDefinitions(), slateFinish, false, setbackFinish);
   setbackRoofs.userData.designReview = 'Illustrative low-slope metal roof closure; selected roofing minimum slope, tapered build-up, wall flashing, support and east-side drainage require design. No terrace or added room.';
   const setbackPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getLowerRoofDefinitions());
@@ -682,8 +724,10 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   // Only the southern loft/garage transition remains a lower setback.
   for (const [a, b] of [[[55.5, measuredUpper.serviceSouth + .225], [55.5, 36.2]]]) {
     for (const segment of HomeRoof.wallHeadSegments(setbackPlan, a, b, 9)) {
-      setbackSection('Lower setback fitted wall-head closure', segment.start, segment.end, wallThickness,
-        () => 9, t => segment.start[1] + (segment.end[1] - segment.start[1]) * t + 0.01, white);
+      const closure = setbackSection('Lower setback fitted wall-head closure', segment.start, segment.end, wallThickness,
+        () => 9, t => segment.start[1] + (segment.end[1] - segment.start[1]) * t + 0.01, frontBrick);
+      mapBrickBoxUVs(closure.geometry, brickTextureWidthFeet, brickTextureHeightFeet);
+      closure.userData.cladding = 'brick';
     }
   }
   const collectorRear = measuredUpper.serviceSouth + .225;
@@ -739,6 +783,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       const closure = new THREE.Mesh(geometry, finish);
       closure.name = 'Fitted upper attic wall-head closure';
       closure.userData = { finishOnly: true, structuralSupportDesigned: false };
+      closure.userData.cladding = 'brick';
       closure.castShadow = closure.receiveShadow = true;
       houseRoof.add(closure);
     }
@@ -895,7 +940,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const patioRoofY = 9.5;
   const patioRoofLength = patioRoofFront - livingPatioBounds.rear;
   const patioRoof = texturedBox(livingPatio, patioRoofCenterX, patioRoofY, patioRoofCenterZ, patioRoofWidth, patioRoofThickness, patioRoofLength, true);
-  patioRoof.name = 'Brown-shingle covered patio roof';
+  patioRoof.name = 'Graphite-gray shingle covered patio roof';
   patioRoof.userData = { location: 'Behind living room', limits: { ...livingPatioBounds, front: patioRoofFront }, centerHeightFeet: patioRoofY, pitch: patioRoofPitch, kitchenAndPrepFrontageOpen: true, coversDiningLanding: false, livingRoomDaylightReduced: true, attachmentVerified: false, daylightPerformanceVerified: false };
   const patioRoofVertices = patioRoof.geometry.attributes.position;
   for (let i = 0; i < patioRoofVertices.count; i++) {
@@ -919,8 +964,9 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     }
     geometry.computeVertexNormals();
     brickFaceUVs(geometry, 'z');
-    const closure = new THREE.Mesh(geometry, white);
+    const closure = new THREE.Mesh(geometry, frontBrick);
     closure.name = name;
+    closure.userData.cladding = 'brick';
     closure.position.set(x, 9, centerZ);
     livingPatio.add(closure);
   }
@@ -1153,7 +1199,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     part.userData.topFollowsPorchUnderside = true;
     return part;
   }
-  const porchMetal = mat('#363b3c', 0.65);
+  const porchMetal = mat(cladding.metal, 0.65);
   const porchRoof = renderRoofEnvelope('Connected standing-seam porch and entry roof', HomeRoof.getPorchRoofDefinitions(), porchMetal, true);
   const garageCanopy = renderRoofEnvelope('Stepped garage metal canopy and porch return', HomeRoof.getGarageCanopyDefinitions(), porchMetal, true);
   const garageCanopyPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getGarageCanopyDefinitions());

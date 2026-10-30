@@ -37,7 +37,7 @@ test('all eight front openings retain their windows and front grilles without sh
   const start = source.indexOf('  function wall(');
   const end = source.indexOf('  // Applied stone', start);
   assert.ok(start >= 0 && end > start);
-  vm.runInNewContext(source.slice(start, end), context);
+  vm.runInNewContext(source.slice(0, source.indexOf('function buildExteriorModel')) + '\nconst cladding = getExteriorCladdingStudy();\n' + source.slice(start, end), context);
   const g = getUpstairsMeasuredGeometry();
   const fronts = [
     ['front ground floor', getGroundFrontWindows()],

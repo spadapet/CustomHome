@@ -7,7 +7,7 @@ const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'ut
 const context = {};
 vm.runInNewContext(source.slice(0, source.indexOf('function buildExteriorModel')), context);
 
-test('actual diffuse conversion produces restrained warm-gray brick without source chroma', () => {
+test('actual diffuse conversion produces light Linen brick without source chroma', () => {
   const normal = new Uint8ClampedArray([128, 132, 254, 255]);
   const roughness = new Uint8ClampedArray([190, 190, 190, 255]);
   const before = [...normal, ...roughness];
@@ -16,15 +16,15 @@ test('actual diffuse conversion produces restrained warm-gray brick without sour
     const data = new Uint8ClampedArray([l, l, l, 237]);
     context.gradeExteriorBrickPixels(data);
     const [r, g, b, a] = data;
-    assert.ok(r >= 168 && r <= 233);
-    assert.ok(g >= 167 && g <= 232);
-    assert.ok(b >= 162 && b <= 227);
+    assert.ok(r >= 187 && r <= 245);
+    assert.ok(g >= 176 && g <= 234);
+    assert.ok(b >= 158 && b <= 216);
     assert.ok(r > g && g > b);
-    assert.ok(r - g <= 1 && g - b <= 5, 'no red/pink or yellow chroma tails');
+    assert.ok(r - g === 11 && g - b === 18, 'selected Linen beige, no source red/pink chroma tails');
     assert.equal(a, 237);
     outputs.push(b);
   }
-  assert.ok(outputs[5] - outputs[0] >= 50, 'face/joint detail retained');
+  assert.ok(outputs[5] - outputs[0] >= 45, 'light Linen grading retains face/joint detail');
   assert.deepEqual([...normal, ...roughness], before);
 });
 
@@ -94,17 +94,49 @@ test('actual brickBox selects independent base diffuse and clones matching relie
 test('stone grading neutralizes brown source faces, preserves joint contrast and never changes alpha', () => {
   const data = new Uint8ClampedArray([60,30,0,237,210,180,150,255]);
   context.gradeExteriorStonePixels(data);
-  assert.deepEqual([...data], [135,133,127,237,222,220,214,255]);
-  assert.ok(data[4]-data[0] > 80);
+  assert.deepEqual([...data], [192,187,176,237,224,219,208,255]);
+  assert.ok(data[4]-data[0] > 30, 'pale stone still retains joint/face separation');
   assert.match(source, /normalScale = new THREE\.Vector2\(0\.3, 0\.3\)/);
 });
 
-test('all source hue tails become the same low-chroma warm white', () => {
+test('all source hue tails become the same Linen beige, not source pink or ochre', () => {
   for (const rgb of [[255, 0, 0], [255, 150, 140], [0, 255, 255], [70, 60, 200], [255,255,255]]) {
     const data = new Uint8ClampedArray([...rgb, 255]);
     context.gradeExteriorBrickPixels(data);
-    assert.ok(data[0] - data[1] <= 1);
-    assert.ok(data[1] - data[2] <= 5);
+    assert.equal(data[0] - data[1], 11);
+    assert.equal(data[1] - data[2], 18);
     assert.ok(data[1] > data[2], 'warm, not neutral grey');
   }
+});
+
+test('actual grading and trim match palette 2 Linen swatches at scan luminance 128', () => {
+  const brick = new Uint8ClampedArray([128,128,128,237]);
+  const stone = new Uint8ClampedArray(brick), roof = new Uint8ClampedArray(brick);
+  context.gradeExteriorBrickPixels(brick);
+  context.gradeExteriorStonePixels(stone);
+  context.gradeExteriorRoofPixels(roof);
+  assert.deepEqual([...brick], [216,205,187,237]);
+  assert.deepEqual([...stone], [213,208,197,237]);
+  assert.deepEqual([...roof], [89,89,83,237]);
+  for (const rgb of [[200,80,20],[20,80,200],[255,0,45]]) {
+    const bytes = new Uint8ClampedArray([...rgb,255]);
+    context.gradeExteriorRoofPixels(bytes);
+    assert.equal(bytes[0],bytes[1]);
+    assert.equal(bytes[1]-bytes[2],6);
+    assert.equal(bytes[3],255);
+  }
+  const study = context.getExteriorCladdingStudy();
+  const board = fs.readFileSync(require.resolve('../assets/exterior-palette-options.svg'), 'utf8');
+  const start = board.indexOf('>2 Linen<'), end = board.indexOf('>3 Pebble<');
+  assert.ok(start >= 0 && end > start);
+  const swatches = [...board.slice(start, end).matchAll(/<rect[^>]+fill="(#[0-9a-f]{6})"/g)].map(match => match[1]);
+  assert.equal(swatches.length, 5);
+  const hex = bytes => '#' + [...bytes].slice(0, 3).map(byte => byte.toString(16).padStart(2, '0')).join('');
+  assert.equal(hex(brick), swatches[0]);
+  assert.equal(hex(stone), swatches[1]);
+  assert.equal(study.trim, swatches[2]);
+  assert.equal(study.metal, swatches[3]);
+  assert.equal(hex(roof), swatches[3]);
+  assert.equal(study.palette, 'Linen');
+  assert.equal(study.productsApproved, false);
 });

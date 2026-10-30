@@ -117,9 +117,14 @@ test('slim column lantern constituents mount at the face without positive embedd
   assert.ok(Math.abs(parts.find(p=>p.name==='Exterior lantern wall backplate').parent.position.z-0.72)<1e-8);
 });
 
-test('brick texture uses contrasting warm taupe variations and mortar relief with the original bond', () => {
+test('procedural brick retains the original bond and applies Linen grading', () => {
   const fills = [];
-  const paint = { fillStyle: '', fillRect(...bounds) { fills.push({ color: this.fillStyle, bounds }); } };
+  let written;
+  const paint = {
+    fillStyle: '', fillRect(...bounds) { fills.push({ color: this.fillStyle, bounds }); },
+    getImageData() { return { data: new Uint8ClampedArray([128,128,128,255]) }; },
+    putImageData(image) { written = [...image.data]; }
+  };
   const context = {
     document: { createElement() { return { getContext() { return paint; } }; } },
     THREE: { CanvasTexture: class { constructor(canvas) { this.image = canvas; } }, MeshStandardMaterial: class { constructor(options) { Object.assign(this, options); } }, SRGBColorSpace: 'srgb', RepeatWrapping: 'repeat' }
@@ -127,11 +132,12 @@ test('brick texture uses contrasting warm taupe variations and mortar relief wit
   vm.createContext(context);
   const start = source.indexOf('  const frontBrick =');
   const end = source.indexOf('  function brickBox(', start);
-  vm.runInContext(source.slice(start, end), context);
-  assert.equal(fills[0].color, '#d7d6d1');
-  assert.deepEqual([...new Set(fills.slice(1).map((fill) => fill.color))].sort(), ['#e5e4df', '#eae9e4', '#f0efea', '#f6f5f0']);
+  vm.runInContext(source.slice(0, source.indexOf('function buildExteriorModel')) + '\n' + source.slice(start, end), context);
+  assert.equal(fills[0].color, '#d3cec4');
+  assert.deepEqual([...new Set(fills.slice(1).map((fill) => fill.color))].sort(), ['#ded8cd', '#e3ddd2', '#e9e3d8', '#eee8dd']);
   assert.equal(fills.length, 41);
   assert.ok(fills.slice(1).every((fill) => fill.bounds[2] === 60 && fill.bounds[3] === 28));
+  assert.deepEqual(written, [216,205,187,255]);
 });
 
 test('front windows have six-light white grilles; side and rear stay clear', () => {
@@ -177,7 +183,7 @@ test('reference elevation uses fixed brick without an optional finish control', 
   const end = source.indexOf('  if (masonryMaps) {', start);
   vm.runInContext(source.slice(start, end), context);
   const base = vm.runInContext('brickBox({}, 0, 0, 0, 6, 1, 0.45)', context);
-  assert.equal(base.name, 'Warm-gray modern brick masonry');
+  assert.equal(base.name, 'Light Linen beige brick masonry');
   assert.ok(base.material.map);
   assert.equal(base.material.bumpMap, base.material.map);
   assert.deepEqual(repeats, [[2.25, 12 / 25]]);
@@ -185,7 +191,7 @@ test('reference elevation uses fixed brick without an optional finish control', 
   assert.doesNotMatch(fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8'), /front-brick-toggle/);
 });
 
-test('lower-half stone constituents respect every fixed opening without applied siding or battens', () => {
+test('low stone and brick constituents respect every fixed opening without applied siding or battens', () => {
   const meshes = [], walls = [];
   class Group {
     constructor() { this.userData = {}; this.position = { set() {} }; this.rotation = {}; }
@@ -193,6 +199,7 @@ test('lower-half stone constituents respect every fixed opening without applied 
   }
   const context = { accentStone: { clone: () => ({}) }, stoneTexture: { clone: () => ({repeat:{set(){}}}) }, THREE: { Group }, white: {}, trim: {}, garageFloorY: -1.25, group: { add(wall) { walls.push(wall); } }, wallThickness: 0.45, box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'siding' }; parent.add(mesh); return mesh; }, brickBox(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'brick' }; parent.add(mesh); return mesh; }, windowUnit() {} };
   vm.createContext(context);
+  vm.runInContext(source.slice(0, source.indexOf('function buildExteriorModel')) + '\nconst cladding = getExteriorCladdingStudy();', context);
   vm.runInContext(source.slice(source.indexOf('  function wall('), source.indexOf('  const win =')), context);
   for (const name of ['front ground floor', 'west ground floor', 'kitchen and prep rear', 'east ground floor', 'upper west', 'upper bath rear', 'garage front']) {
     vm.runInContext(`wall('${name}', 0, 0, 10, 0, -0.4, 9, [{center:5,width:2,sill:3,height:5}])`, context);
@@ -204,10 +211,14 @@ test('lower-half stone constituents respect every fixed opening without applied 
   for (const mesh of meshes.filter((mesh) => mesh.finish === 'brick')) {
     assert.ok(mesh.x + mesh.w / 2 <= 4 + 1e-9 || mesh.x - mesh.w / 2 >= 6 - 1e-9 || mesh.y + mesh.h / 2 <= 3 + 1e-9 || mesh.y - mesh.h / 2 >= 8 - 1e-9, 'Panels and battens do not fill the window opening');
   }
-  const stone = meshes.filter(m => m.name === 'Continuous lower-half stone wall - 9 foot house datum');
-  assert.equal(stone.length, 28);
-  assert.ok(stone.every(m => m.y+m.h/2 <= 9+1e-8), 'Stone terminates at the ground-story head, cut around every window');
-  assert.ok(stone.some(m => Math.abs(m.y+m.h/2-9)<1e-8));
+  const stone = meshes.filter(m => m.name === 'Continuous low stone wainscot - 24 inch house datum');
+  assert.equal(stone.length, 21);
+  assert.ok(stone.every(m => Math.abs(m.y+m.h/2-2)<1e-8), 'Stone ends at 24 inches, not at the story head');
+  const coping = meshes.filter(m => m.name === 'Pale base transition coping course');
+  assert.equal(coping.length,21);
+  assert.ok(coping.every(m => Math.abs(m.y+m.h/2-2.125)<1e-8 && m.h === .125));
+  const brick = meshes.filter(m => m.finish === 'brick' && !stone.includes(m));
+  assert.ok(brick.length > 21 && brick.every(m => m.y-m.h/2 >= 2.125-1e-8));
   assert.doesNotMatch(source, /board-and-batten siding|siding vertical batten|gable vertical batten|Coursed cream limestone|Limestone gable end|White front gable end/);
 });
 
@@ -237,7 +248,7 @@ test('slim paired masonry bays create 2.4-inch pockets without occupying fixed a
   }
 });
 
-test('modern gray brick and light stone have independent diffuse sources and relief', () => {
+test('Linen brick and pale stone have independent diffuse sources and relief', () => {
   const pixels = { data: new Uint8ClampedArray([40,40,40,255,200,200,200,255]) };
   let ivoryBytes;
   const paint = { drawImage() {}, getImageData() { return pixels; }, putImageData() { if (!ivoryBytes) ivoryBytes = [...pixels.data]; } };
@@ -256,7 +267,7 @@ test('modern gray brick and light stone have independent diffuse sources and rel
   const start = source.indexOf('  if (masonryMaps) {', source.indexOf('  function brickBox('));
   vm.runInNewContext(source.slice(0, source.indexOf('function buildExteriorModel')) + '\nlet baseBrick;\n' + source.slice(start, source.indexOf('  function brickFaceUVs(', start)) + '\nglobalThis.testBaseBrick = baseBrick;', context);
   assert.equal(paint.filter, 'none');
-  assert.deepEqual(ivoryBytes, [178,177,172,255,219,218,213,255], 'Warm-gray brick retains joint separation without red cast');
+  assert.deepEqual(ivoryBytes, [196,185,167,255,233,222,204,255], 'Linen brick retains joint separation without source red cast');
   assert.equal(context.frontBrick.normalMap, normalMap);
   assert.equal(context.frontBrick.roughnessMap, roughnessMap);
   assert.equal(context.frontBrick.bumpMap, null);
