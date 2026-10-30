@@ -679,7 +679,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const slateFinish = new THREE.MeshStandardMaterial({ ...(masonryMaps?.roof ?? {}), map: roofTexture, roughness: 0.95, side: THREE.DoubleSide });
   slateFinish.normalScale.set(0.35, 0.35);
   const houseRoof = renderRoofEnvelope('Connected main-house roof system', HomeRoof.getConnectedRoofDefinitions(floorToFloor)
-    .filter(({ id }) => !['Garage hip', 'Dining rear projection'].includes(id)), slateFinish);
+    .filter(({ id }) => !['Garage hip', 'Garage cross-gable', 'Dining rear projection'].includes(id)), slateFinish);
   const setbackFinish = mat('#656863', 0.85);
   const setbackRoofs = renderRoofEnvelope('Closed ground-floor setback roofs', HomeRoof.getLowerRoofDefinitions(), slateFinish, false, setbackFinish);
   setbackRoofs.userData.designReview = 'Illustrative low-slope metal roof closure; selected roofing minimum slope, tapered build-up, wall flashing, support and east-side drainage require design. No terrace or added room.';
@@ -711,6 +711,36 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     mesh.castShadow = mesh.receiveShadow = true;
     setbackRoofs.add(mesh);
     return mesh;
+  }
+  // The new garage gable closes at the EXISTING wall, behind the retained
+  // brow. Vertex-defined depth, not a floating front triangle or bonus room.
+  for (const face of setbackPlan.faces) {
+    const polygon = HomeRoof.intersectPolygons(
+      [[31.2, 49 - wallThickness / 2], [55.5, 49 - wallThickness / 2],
+        [55.5, 49 + wallThickness / 2], [31.2, 49 + wallThickness / 2]], face.polygon);
+    if (!polygon.length) continue;
+    const positions = [];
+    const bottom = p => [p[0], garageFacadeEaves, p[1]];
+    const top = p => [p[0], HomeRoof.heightAt(face.plane, p) - .16, p[1]];
+    const triangle = (a, b, c) => positions.push(...a, ...b, ...c);
+    for (let i = 1; i < polygon.length - 1; i++) {
+      triangle(top(polygon[0]), top(polygon[i + 1]), top(polygon[i]));
+      triangle(bottom(polygon[0]), bottom(polygon[i]), bottom(polygon[i + 1]));
+    }
+    polygon.forEach((a, i) => {
+      const b = polygon[(i + 1) % polygon.length];
+      triangle(bottom(a), top(a), top(b));
+      triangle(bottom(a), top(b), bottom(b));
+    });
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.computeVertexNormals();
+    brickFaceUVs(geometry, 'x');
+    const closure = new THREE.Mesh(geometry, frontBrick);
+    closure.name = 'Garage cross-gable fitted brick wall-head closure';
+    closure.castShadow = closure.receiveShadow = true;
+    closure.userData = { cladding: 'brick', finishOnly: true, structuralSupportDesigned: false };
+    setbackRoofs.add(closure);
   }
   for (const edge of setbackPlan.boundaries) {
     if (!edge.roof.includes('setback roof')) continue;
@@ -788,7 +818,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       houseRoof.add(closure);
     }
   }
-  houseRoof.userData.drainageIntent = 'Paired front cross-gables intersect the retained hip through derived valleys, draining to the front eave and porch collectors; review valley concentration and snow/ice at the lower canopy. Main/rear wing hips and rear solar provisions retained. Garage hip uses stepped wall flashing. Upper rear water must be piped separately, not onto the post-free canopy. Size all gutters, outlets and lawful discharge professionally.';
+  houseRoof.userData.drainageIntent = 'Paired front gables remain primary. The loft clipped cross-gable joins the retained east hip through derived valleys; its rakes have no gutters, side eaves collect runoff. Garage cross-gable joins the retained lower hip, with closed brick wall heads and hipped shoulders. Engineer new valleys, jerkinhead framing, garage header/bearing and step/counterflashing; veneer carries no roof loads. Check valley snow/ice and runoff onto lower roofs/brow. Roof surfaces north of z22.5 and rear solar provisions remain unchanged. Upper rear water must be piped separately, not onto the post-free canopy. Size gutters, outlets and lawful discharge professionally.';
   houseRoof.userData.framingAllowanceInches = 18;
   houseRoof.userData.framingAllowanceVerified = false;
 
@@ -809,6 +839,31 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     for (const [a, b] of brackets) segment(a, b, 0.055, 'Wall-fixed rainwater bracket', dark);
     return route;
   }
+  // New loft side-eave collector bypasses the lower garage roof OUTSIDE its
+  // x56.2 edge. Do not discharge the new valley directly onto that roof.
+  drainageRoute(group, 'Right loft eave to east wall leader - capacity unverified', [
+    [measuredUpper.east + .75, 19.1, measuredUpper.serviceSouth + .75],
+    [56.5, 18.5, 35.5], [56.5, 9.4, 35.5],
+    [56.5, -1.35, 35.5], [56.5, -1.6, 35.85]
+  ], [3, 7, 12, 16].map(y => [[y > 9 ? 55.975 : 55.725, y, y > 9 ? 35.05 : 35.5], [56.5, y, 35.5]]));
+  // The jerkinhead's short high eave needs an outlet too. Its east-end
+  // conductor follows the rake inside the trim allowance to the same leader;
+  // it is a separate, access/flashing/freeze-unapproved drainage concept.
+  const clippedEave = houseRoofPlan.boundaries.find(edge => edge.roof === 'Loft clipped cross-gable'
+    && Math.abs(edge.start[2] - (measuredUpper.serviceSouth + .75)) < 1e-6
+    && Math.abs(edge.end[2] - edge.start[2]) < 1e-6
+    && Math.abs(edge.end[1] - edge.start[1]) < 1e-6 && edge.start[1] > 20);
+  if (clippedEave) {
+    const outlet = clippedEave.start[0] > clippedEave.end[0] ? clippedEave.start : clippedEave.end;
+    drainageRoute(group, 'Clipped loft high-eave rake conductor - access and freeze review required', [
+      [outlet[0], outlet[1] - .1, outlet[2]], [outlet[0], outlet[1] - .3, outlet[2]],
+      [measuredUpper.east + .75, 18.9, outlet[2]], [56.5, 18.5, 35.5]
+    ]);
+  }
+  drainageRoute(group, 'Garage east shoulder gutter outlet - capacity unverified', [
+    [56.2, 8.8, 49.85], [55.85, 8.1, 49.35],
+    [55.85, -1.35, 49.35], [55.85, -1.6, 49.7]
+  ], [1, 4, 7].map(y => [[55.725, y, 49.225], [55.85, y, 49.35]]));
   // Follow the REAL stepped walls. Only the short canopy bypass is stood off;
   // the upper/lower vertical runs are corner-mounted, not 20-foot free drops.
   for (const east of [false, true]) {
@@ -1622,13 +1677,17 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   // Mount in the actual closed upper-roof underside, not at a guessed eave Y.
   const upperSoffitPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getConnectedRoofDefinitions(floorToFloor)
     .filter(({ id }) => ['Main house', 'East rear wing'].includes(id)));
+  const rightSoffitPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getConnectedRoofDefinitions(floorToFloor)
+    .filter(({ id }) => !['Garage hip', 'Garage cross-gable', 'Dining rear projection'].includes(id)));
   const upperSoffitPositions = [
     ...[3.5, 10, 21, 27.5].map(x => [x, 54.3]),
     ...[12, 25, 40, 49].map(z => [-0.5, z]),
-    [15, 1.65], [22, 1.65], [52.4, 22], [52.4, 32]
+    [15, 1.65], [22, 1.65], [measuredUpper.east + .45, 22], [measuredUpper.east + .45, 32]
   ];
   for (const [index, [x, z]] of upperSoffitPositions.entries()) {
-    const face = upperSoffitPlan.faces.find(face => HomeRoof.contains(face.polygon, [x, z]));
+    // Keep existing front/west poses; only the affected east pair moves out
+    // of the attic footprint onto the real, newly coordinated eave underside.
+    const face = (index >= 10 ? rightSoffitPlan : upperSoffitPlan).faces.find(face => HomeRoof.contains(face.polygon, [x, z]));
     if (!face) throw new Error('Upper soffit fixture is outside the roof');
     const underside = HomeRoof.heightAt(face.plane, [x, z]) - 0.16;
     const fixture = downlight(`Upper soffit recessed light ${index + 1}`, x, underside, z, x, z, 10, underside - 6);

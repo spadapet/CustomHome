@@ -29,13 +29,13 @@ test('paired cross-gables center on fixed bedroom banks with measured rise and s
 });
 
 test('cross-gable union never reduces the accepted headroom envelope and leaves rear solar surfaces unchanged', () => {
-  const defs = roof.getConnectedRoofDefinitions(), base = defs.filter(d => !/front gable/.test(d.id));
+  const defs = roof.getConnectedRoofDefinitions(), base = defs.filter(d => !/front gable|cross-gable/.test(d.id));
   let samples = 0;
   for (let x = -0.5; x < 56; x += .5) for (let z = -1; z < 54.5; z += .5) {
     const before = height(base,x,z), after = height(defs,x,z);
     if (!Number.isFinite(before)) continue;
     assert.ok(after >= before-1e-7, `Envelope reduced at ${x},${z}`);
-    if (z < 40.5) close(after,before);
+    if (z < 22.5) close(after,before);
     samples++;
   }
   assert.ok(samples > 8000);

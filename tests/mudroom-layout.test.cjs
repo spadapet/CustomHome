@@ -58,9 +58,9 @@ test('mudroom and kitchen lighting stay scoped and restore other floor/view sett
     const kitchenLighting = floor === 'ground' && ['kitchen', 'prep-counter', 'prep-kitchen', 'pantry', 'sink-storage', 'cooktop', 'island', 'fridge'].includes(view);
     assert.equal(kitchenKeyLight.visible, kitchenLighting, view);
     assert.equal(context.renderer.shadowMap.enabled, enabled || floor === 'exterior' && !night, view);
-    assert.equal(ambientLight.intensity, floor === 'exterior' && !night ? 0.55 : night ? 0.5 : 2.5, view);
-    assert.equal(studioFill.intensity, floor === 'exterior' && !night ? 0 : night ? 250 : 650, view);
-    assert.equal(context.renderer.toneMappingExposure, floor === 'exterior' && !night ? 0.95 : night ? 0.75 : 1.25, view);
+    assert.equal(ambientLight.intensity, floor === 'exterior' && !night ? 0.55 : night ? 0.8 : 2.5, view);
+    assert.equal(studioFill.intensity, floor === 'exterior' && !night ? 0 : night ? 325 : 650, view);
+    assert.equal(context.renderer.toneMappingExposure, floor === 'exterior' && !night ? 0.95 : night ? 0.9 : 1.25, view);
     assert.equal(context.renderer.shadowMap.type, enabled ? 'VSM' : 'PCFSoft', view);
     if (kitchenLighting) {
       const prep = ['prep-counter', 'prep-kitchen', 'pantry'].includes(view);

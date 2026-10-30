@@ -34,7 +34,7 @@ function build() {
     ...Object.fromEntries(['scene', 'cooktopUppers', 'cooktopHood', 'islandPendants', 'familyBoard', 'kitchenSconces'].map((name) => [name, new Group()])),
     kitchenTaskDiffuser: { emissiveIntensity: 0 }, black: material, windowTrim: material, brass: material,
     cooktopUpperBottom: 4.55, hoodBottom: 6.3, cooktopCenterZ: 16.95, kitchenCenterZ: 16.95, ceilingHeight: 9,
-    activeFloor: 'ground', groundLayoutPreview: null, nightLighting: true, currentView: 'kitchen', islandLightsInput: { checked: true },
+    activeFloor: 'ground', groundLayoutPreview: null, nightLighting: true, currentView: 'kitchen', islandLightsInput: { checked: true }, canLightsInput: { checked: true },
     box(parent, x, y, z, width, height, depth, material) {
       const part = new Mesh({ width, height, depth }, material);
       part.position.set(x, y, z);
@@ -129,6 +129,25 @@ test('inspection views hide ceiling/pendant hardware without removing task illum
   assert.equal(model.islandPendants.visible, true);
   assert.match(source, /if \(nightLighting\) islandLightsInput\.checked = true/);
   assert.match(source, /islandLightsInput\.checked = nightLighting \? true : daytimeIslandLights/);
+});
+
+test('kitchen can display restores independently of Night, plans and inspection views', () => {
+  const model = build();
+  for (const checked of [false, true, false]) {
+    model.canLightsInput.checked = checked;
+    for (const view of ['kitchen', 'whole', 'cooktop', 'fridge', 'sink-storage', 'top']) {
+      for (const night of [false, true]) {
+        Object.assign(model, { currentView: view, nightLighting: night });
+        model.updateKitchenLighting();
+        assert.equal(model.kitchenPracticalLights.ceilingFixtures.visible,
+          checked && !['fridge', 'cooktop', 'sink-storage'].includes(view));
+        for (const lamp of model.kitchenPracticalLights.lights) {
+          assert.equal(lamp.visible, night && view !== 'top');
+          assert.equal(lamp.intensity, night && view !== 'top' ? lamp.userData.nightIntensity : 0);
+        }
+      }
+    }
+  }
 });
 
 test('returning to Night enables pendants and returning to Day restores the saved daytime visibility', () => {

@@ -36,5 +36,5 @@ test('exterior daylight has one bounded directional shadow pass without changing
   assert.match(source, /const exteriorDaylight = activeFloor === 'exterior' && !nightLighting/);
   assert.match(source, /exteriorSun\.visible = exteriorDaylight/);
   assert.match(source, /renderer\.shadowMap\.enabled = mudroomLighting \|\| exteriorDaylight/);
-  assert.match(source, /studioFill\.intensity = exteriorDaylight \? 0 : nightLighting \? 250 : 650/);
+  assert.match(source, /studioFill\.intensity = exteriorDaylight \? 0 : nightLighting \? 325 : 650/);
 });

@@ -292,28 +292,87 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
   }
 
   function getLivableFloorArea(plan, { includeStairs = false } = {}) {
-    const floors = plan.floors.filter((floor) => !/^(Garage|Front porch|Mechanical(?:\b|$))/.test(floor.room ?? floor.name ?? ''));
+    const floors = plan.floors.filter((floor) => !/^(Garage|Front porch)/.test(floor.room ?? floor.name ?? ''));
+    const garage = plan.floors.filter((floor) => /^Garage/.test(floor.room ?? floor.name ?? ''));
+    const voids = [];
     if (includeStairs) {
       if (!plan.stairs) throw new Error('Cannot calculate livable area without the stair footprint.');
       const { x, z, width: w, depth: d } = plan.stairs;
       floors.push({ x, z, w, d });
+      voids.push(...(plan.stairs.voids ?? []));
     }
-    for (const floor of floors) {
+    for (const floor of [...floors, ...garage, ...voids]) {
       if (![floor.x, floor.z, floor.w, floor.d].every(Number.isFinite) || floor.w < 0 || floor.d < 0) throw new Error('Cannot calculate livable area from invalid floor geometry.');
     }
-    const edges = [...new Set(floors.flatMap(({ x, w }) => [x, x + w]))].sort((a, b) => a - b);
-    let area = 0;
-    for (let index = 1; index < edges.length; index++) {
-      const left = edges[index - 1], right = edges[index];
-      const spans = floors.filter(({ x, w }) => x < right && x + w > left).map(({ z, d }) => [z, z + d]).sort((a, b) => a[0] - b[0]);
-      let end = -Infinity, depth = 0;
-      for (const [start, stop] of spans) {
-        depth += Math.max(0, stop - Math.max(start, end));
-        end = Math.max(end, stop);
-      }
-      area += (right - left) * depth;
+    for (const cut of voids) {
+      const { x, z, width, depth } = plan.stairs;
+      if (cut.x < x || cut.z < z || cut.x + cut.w > x + width + 1e-8 || cut.z + cut.d > z + depth + 1e-8) throw new Error('Stair void must stay inside its stair footprint.');
     }
-    return area;
+    const walls = (plan.walls ?? []).map(wall => Array.isArray(wall)
+      ? { x1: wall[1], z1: wall[2], x2: wall[3], z2: wall[4], thickness: 0.35 } : wall);
+    for (const wall of walls) {
+      if (!wall || ![wall.x1, wall.z1, wall.x2, wall.z2, wall.thickness].every(Number.isFinite) || wall.thickness <= 0) throw new Error('Cannot calculate livable area from invalid wall geometry.');
+      if ((wall.x1 === wall.x2 && wall.z1 === wall.z2) || (Math.abs(wall.x2 - wall.x1) > 1e-8 && Math.abs(wall.z2 - wall.z1) > 1e-8)) throw new Error('Livable area requires nonzero axis-aligned walls.');
+    }
+    function unionArea(rectangles) {
+      const edges = [...new Set(rectangles.flatMap(({ x, w }) => [x, x + w]))].sort((a, b) => a - b);
+      let area = 0;
+      for (let index = 1; index < edges.length; index++) {
+        const left = edges[index - 1], right = edges[index];
+        const spans = rectangles.filter(({ x, w }) => x < right && x + w > left).map(({ z, d }) => [z, z + d]).sort((a, b) => a[0] - b[0]);
+        let end = -Infinity;
+        for (const [start, stop] of spans) {
+          area += (right - left) * Math.max(0, stop - Math.max(start, end));
+          end = Math.max(end, stop);
+        }
+      }
+      return area;
+    }
+    const occupied = floors.filter(({ w, d }) => w > 0 && d > 0);
+    if (!occupied.length) return 0;
+    const xEdges = [...occupied, ...garage].flatMap(({ x, w }) => [x, x + w]).concat(walls.flatMap(({ x1, x2 }) => [x1, x2]));
+    const zEdges = [...occupied, ...garage].flatMap(({ z, d }) => [z, z + d]).concat(walls.flatMap(({ z1, z2 }) => [z1, z2]));
+    const xs = [...new Set([Math.min(...xEdges) - 1, ...xEdges, Math.max(...xEdges) + 1])].sort((a, b) => a - b);
+    const zs = [...new Set([Math.min(...zEdges) - 1, ...zEdges, Math.max(...zEdges) + 1])].sort((a, b) => a - b);
+    const contains = (rect, x, z) => x > rect.x && x < rect.x + rect.w && z > rect.z && z < rect.z + rect.d;
+    const cells = xs.slice(1).map((right, i) => zs.slice(1).map((front, j) => occupied.some(rect => contains(rect, (xs[i] + right) / 2, (zs[j] + front) / 2))));
+    const outside = cells.map(column => column.map(() => false));
+    const pending = [[0, 0]];
+    outside[0][0] = true;
+    for (let index = 0; index < pending.length; index++) {
+      const [i, j] = pending[index];
+      for (const [a, b] of [[i - 1, j], [i + 1, j], [i, j - 1], [i, j + 1]]) {
+        if (a < 0 || b < 0 || a >= cells.length || b >= cells[0].length || cells[a][b] || outside[a][b]) continue;
+        outside[a][b] = true;
+        pending.push([a, b]);
+      }
+    }
+    function wallAllowance(x, z, dx, dz) {
+      if (!garage.some(rect => contains(rect, x + dx * 0.001, z + dz * 0.001))) return 0.45 / 2;
+      const wall = walls.find(wall => Math.abs(dx ? wall.x1 - x : wall.z1 - z) < 1e-8 &&
+        Math.abs(dx ? wall.x2 - x : wall.z2 - z) < 1e-8 &&
+        (dx ? z >= Math.min(wall.z1, wall.z2) && z <= Math.max(wall.z1, wall.z2) : x >= Math.min(wall.x1, wall.x2) && x <= Math.max(wall.x1, wall.x2)));
+      return (wall?.thickness ?? 0.35) / 2;
+    }
+    const gross = [...occupied];
+    // Add only outward wall bands and square corner joins. Flood-filling
+    // outside keeps true internal floor openings unchanged, not shrunk.
+    for (let i = 1; i < cells.length - 1; i++) for (let j = 1; j < cells[0].length - 1; j++) {
+      if (!cells[i][j]) continue;
+      const x = xs[i], z = zs[j], w = xs[i + 1] - x, d = zs[j + 1] - z;
+      const west = outside[i - 1][j] ? wallAllowance(x, z + d / 2, -1, 0) : 0;
+      const east = outside[i + 1][j] ? wallAllowance(x + w, z + d / 2, 1, 0) : 0;
+      const north = outside[i][j - 1] ? wallAllowance(x + w / 2, z, 0, -1) : 0;
+      const south = outside[i][j + 1] ? wallAllowance(x + w / 2, z + d, 0, 1) : 0;
+      if (west) gross.push({ x: x - west, z, w: west, d });
+      if (east) gross.push({ x: x + w, z, w: east, d });
+      if (north) gross.push({ x, z: z - north, w, d: north });
+      if (south) gross.push({ x, z: z + d, w, d: south });
+      for (const [width, depth, cornerX, cornerZ] of [[west, north, x - west, z - north], [east, north, x + w, z - north], [west, south, x - west, z + d], [east, south, x + w, z + d]]) {
+        if (width && depth) gross.push({ x: cornerX, z: cornerZ, w: width, d: depth });
+      }
+    }
+    return unionArea(gross) - unionArea(voids);
   }
 
   function getGroundFloorDefaultPlan() {

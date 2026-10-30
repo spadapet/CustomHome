@@ -3,8 +3,17 @@
 ## Compact viewer
 
 Windows shows the live whole-house unit count; its tooltip explains openings
-and unit types. Area gives the combined interior total; 1st and 2nd display
-the respective floor areas in sq ft. Tooltips retain measurement qualifications.
+and unit types. Area gives the combined ANSI-style exterior-measured gross
+finished-area estimate; 1st and 2nd show each story in sq ft. Include wall
+footprints, measuring exterior masonry to its outer face and shared garage
+walls to their garage-side finish. Count basement stairs on 1st and upstairs
+stairs on 2nd; exclude each actual open inter-flight gap. Include the mechanical
+closet provisionally as finished/conditioned; exclude garage, open porch and
+basement rooms. Current default: 1st 1,966 / 2nd 2,313 / Area 4,279 sq ft.
+The owner's latest standard-measurement preference supersedes the earlier
+inside-wall and once-only stair rules; the layout is unchanged.
+Tooltips retain assumptions: this is not certified appraisal GLA, and actual
+finishes, conditioning, grade and ceiling heights still require verification.
 Size gives maximum modeled plan bounds, not zoning/buildable
 limits. Controls use short labels; the detailed Sizes list is closed by
 default while 2D room labels remain on. Preserve essential warnings.
@@ -22,6 +31,18 @@ viewer-wide through view/floor changes, tours and Reset. Both 2D plans show
 room dimensions by default; 3D hides/disables the labels without discarding
 the choice. Manual toggles persist through views and explicit dimensions=0/1
 links preserve off/on on reload. No geometry or saved layout changes.
+
+October 30: Night preview is brighter for room and finish readability:
+ambient 0.8, studio fill 325 and exposure 0.9, up from 0.5/250/0.75.
+Warm practical lights and their existing controls remain unchanged; Day and
+exterior daylight settings are unchanged. This is display illumination,
+not verified fixture output or photometric approval.
+
+The Display menu's Can lights checkbox starts unchecked and hides recessed
+ceiling trim, baffles and lenses on both floors, including the kitchen.
+It changes fixture display only, not Night illumination, pendants, sconces
+or task lamps. Selection survives view/floor changes and Reset; reload
+starts hidden. Existing plan and inspection-view hiding still applies.
 
 ## Primary bathroom rebuild
 
@@ -92,7 +113,18 @@ existing wood/firepit storage restrictions remain.
 
 Paired true front cross-gables over the fixed bedroom pairs: 14.35-ft width,
 6.2-ft rise, 25.4-ft ridge, approximately10.37:12 pitch. Keep the main/east
-hip envelope underneath, rear solar provisions and subordinate garage roof.
+hip envelopes underneath and rear solar provisions. The right-hand loft has
+a16.85-ft clipped cross-gable, center x48.075, eave19.2/ridge24.4 ft,
+7.41:12 side pitch and15:12 forward hip clipping1.1 ft of crown.
+One16.5-ft garage cross-gable, center x43.25, eave8.9/ridge13.9 ft,
+7.27:12 pitch, retains6:12 hip shoulders. True clipped valleys, fitted
+brick wall heads, closed undersides, fascia and eave gutters; no new openings,
+rooms, footprint or reduced headroom. New rear returns have1:16 transverse cross-fall;
+roofs north of z22.5 stay unchanged. Garage closure is5.4 in deep at z49.
+Loft east leader bypasses the lower roof with2.76-in pipe clearance; separate
+garage east shoulder outlet. Engineer jerkinhead/garage framing and headers,
+valleys, west collection/tie-ins, flashing, ventilation, snow/ice/runoff,
+outlets/freeze protection and lawful discharge. Geometry is not approval.
 Muted warm-charcoal metal porch with9.15-ft segmental entry barrel/19.2-in rise, real
 clipped seams, rear return and open8.4-in curved trim band7.8 in deep.
 The owner's later revision replaces full9-ft stone: continuous pale stone to

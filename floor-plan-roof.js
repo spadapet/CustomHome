@@ -90,8 +90,22 @@
     const garage = { id: 'Garage hip', bounds: [30.3, 56.2, 35.55, 49.85],
       planes: [[0.5, 0, 8.9 - 0.5 * 30.3], [-0.5, 0, 8.9 + 0.5 * 56.2],
         [0, 0.5, 8.9 - 0.5 * 35.55], [0, -0.5, 8.9 + 0.5 * 49.85]] };
-    // A genuinely one-story, four-sided roof: no applied front triangle and
-    // no invented upper garage volume. Rear abutments remain flashed steps.
+    // Retain both accepted hips as minimum envelopes. Local cross-roofs add
+    // character without cutting into full-height rooms or the rear solar field.
+    const loftCenter = (g.laundryEast + g.east) / 2;
+    const loftGable = gableRoof('Loft clipped cross-gable', loftCenter - 8.425, loftCenter + 8.425,
+      22.5, g.serviceSouth + .75, eaves + .2, 5.2, true);
+    // A short, steep forward hip clips only the crown (a real jerkinhead),
+    // leaving a brick gable below it; not an applied triangle on a hip.
+    loftGable.planes.push([0, -1.25, eaves + 4.3 + 1.25 * (g.serviceSouth + .75)]);
+    const garageGable = gableRoof('Garage cross-gable', 35, 51.5, 37.5, 49.85, 8.9, 5, true);
+    // Cross-fall the hidden rear returns instead of creating level transverse
+    // valleys where two opposing hips meet. Actual derived valley fall is
+    // tested; this geometric intent is not a hydraulic/flashing approval.
+    for (const [roof, center] of [[loftGable, loftCenter], [garageGable, 43.25]]) {
+      roof.planes[2][0] += 1 / 16;
+      roof.planes[2][2] -= center / 16;
+    }
     return [
       // Equal 4:12 hips over the actual full-height upper rooms. Eaves stay
       // above the existing nine-foot ceilings; roof space is not living area.
@@ -107,9 +121,11 @@
       hipRoof('East rear wing', g.bathEast - 0.75, g.east + 0.75, g.north - 0.75, g.serviceSouth + 0.75,
         eaves + 0.2, eaves + 0.2 + (g.serviceSouth - g.north + 1.5) / 6,
         (g.north + g.serviceSouth) / 2, g.bathEast + (g.serviceSouth - g.north) / 2, g.east - (g.serviceSouth - g.north) / 2),
+      loftGable,
       // Stop at the actual garage/loft junction. The old z=23 rear reach
       // put a low garage eave across the east upstairs window elevation.
       garage,
+      garageGable,
       // The west edge abuts the canopy at the wall, not an overlapping eave
       // projecting through its fascia. Keep the dining ridge and east eave.
       { ...gableRoof('Dining rear projection', 12.55, 27.525, -0.75, 7.5, 8.68, 5.82, true),
@@ -127,7 +143,7 @@
   }
 
   function getLowerRoofDefinitions() {
-    return [...getConnectedRoofDefinitions().filter(({ id }) => ['Garage hip', 'Dining rear projection'].includes(id)), ...getSetbackRoofDefinitions()];
+    return [...getConnectedRoofDefinitions().filter(({ id }) => ['Garage hip', 'Garage cross-gable', 'Dining rear projection'].includes(id)), ...getSetbackRoofDefinitions()];
   }
 
   function getSetbackAbutments() {

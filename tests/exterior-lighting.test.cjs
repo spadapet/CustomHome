@@ -14,7 +14,9 @@ test('exterior daylight isolates the raking sun, sky and exposure and restores b
     ambientLight: {}, studioFill: {}, renderer: {}
   };
   const start = viewerSource.indexOf('    const exteriorDaylight =');
-  const code = viewerSource.slice(start, viewerSource.indexOf('    mudroomKeyLight.visible', start));
+  const end = viewerSource.indexOf('    mudroomKeyLight.visible', start);
+  assert.ok(start >= 0 && end > start, 'Shared lighting settings must exist');
+  const code = viewerSource.slice(start, end);
   function apply(floor, night) {
     context.activeFloor = floor; context.nightLighting = night;
     vm.runInNewContext(`{${code}}`, context);
@@ -24,13 +26,17 @@ test('exterior daylight isolates the raking sun, sky and exposure and restores b
   assert.equal(context.scene.environment, context.outdoorReflection.texture);
   assert.equal(context.ambientLight.intensity, 0.55);
   assert.equal(context.renderer.toneMappingExposure, 0.95);
-  for (const floor of ['ground', 'upstairs', 'exterior']) {
+  assert.equal(context.studioFill.intensity, 0);
+  assert.equal(context.studioFill.visible, false);
+  for (const floor of ['ground', 'upstairs', 'exterior', 'ground']) {
     apply(floor, true);
     assert.equal(context.exteriorSun.visible, false);
     assert.equal(context.scene.environment, null);
     assert.equal(context.scene.background, context.indoorBackground);
-    assert.equal(context.renderer.toneMappingExposure, 0.75);
-    assert.equal(context.ambientLight.intensity, 0.5);
+    assert.equal(context.renderer.toneMappingExposure, 0.9);
+    assert.equal(context.ambientLight.intensity, 0.8);
+    assert.equal(context.studioFill.intensity, 325);
+    assert.equal(context.studioFill.visible, true);
   }
   for (const floor of ['ground', 'upstairs']) {
     apply(floor, false);
@@ -38,6 +44,7 @@ test('exterior daylight isolates the raking sun, sky and exposure and restores b
     assert.equal(context.renderer.toneMappingExposure, 1.25);
     assert.equal(context.ambientLight.intensity, 2.5);
     assert.equal(context.studioFill.intensity, 650);
+    assert.equal(context.studioFill.visible, true);
   }
   apply('exterior', false);
   assert.equal(context.exteriorSun.visible, true);
@@ -60,6 +67,7 @@ function buildLighting() {
   const group = new Group();
   const context = {
     HomeRoof: require('../floor-plan-roof.js'), floorToFloor: 10, white: {},
+    measuredUpper: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry(),
     frontShift: require('../floor-plan-ground.js').getGroundFrontLayout().extension,
     frontWallZ: require('../floor-plan-ground.js').getGroundFrontLayout().wallZ,
     THREE: {
@@ -143,6 +151,16 @@ test('wall lights have correctly oriented mounting plates and porch housings mee
     const [housing, lens] = fixture.children;
     assert.ok(housing.position.y + housing.height * housing.scale.y / 2 < 0.16);
     assert.ok(lens.position.y - lens.height / 2 < 0);
+  }
+  const roof = require('../floor-plan-roof.js');
+  const plan = roof.buildRoofEnvelope(roof.getConnectedRoofDefinitions().filter(d =>
+    !['Garage hip', 'Garage cross-gable', 'Dining rear projection'].includes(d.id)));
+  for (const fixture of upper.slice(-2)) {
+    const { x, y, z } = fixture.position;
+    close(x, context.measuredUpper.east + .45);
+    assert.ok(x > context.measuredUpper.east + .225, 'Lens is beyond finished upper wall, not in attic');
+    const face = plan.faces.find(f => roof.contains(f.polygon, [x, z]));
+    close(y, roof.heightAt(face.plane, [x, z]) - .16);
   }
   for (const fixture of fixtures.filter((part) => /patio ceiling light|Open-patio approach ceiling/.test(part.name))) {
     close(fixture.position.y + 0.075, context.patioRoofUndersideAt(fixture.position.z) - 0.75 - 0.04);

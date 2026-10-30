@@ -32,9 +32,11 @@ test('viewer uses concise controls and collapses dimension explanations without 
   const html = read('floor-plan-3d.html');
   const labels = [
     ['show-floor-grid', 'Grid'], ['show-furniture', 'Furniture'],
-    ['toggle-night-lighting', 'Night'], ['show-room-dimensions', 'Dimensions']
+    ['toggle-night-lighting', 'Night'], ['show-can-lights', 'Can lights'], ['show-room-dimensions', 'Dimensions']
   ];
   for (const [id, label] of labels) assert.match(html, new RegExp(`id="${id}"[^>]*> ${label}</label>`));
+  assert.match(html, /id="show-can-lights" disabled>/);
+  assert.doesNotMatch(html, /id="show-can-lights"[^>]*\bchecked\b/);
   const panel = html.split('<section id="plan-dimensions"')[1].split('</section>')[0];
   assert.match(panel, /<details>\s*<summary id="plan-dimensions-title">Sizes<\/summary>/);
   assert.match(panel, /<ul id="plan-dimension-list"/);

@@ -196,15 +196,14 @@ same as finished countertop heights.
 
 Included here so storage furniture and open shelves are not mistaken for
 missing cabinet selections. Dimensions are modeled body W x D x H.
+All four freestanding upstairs bedroom dressers were removed October 30;
+walk-in closet hanging, shelves and built-in drawers remain.
 
 | Item | Qty | Size | Source / status |
 |---|---:|---|---|
 | Kids' IKEA TROFAST 796.131.29 | 1 | 39 x 17.375 x 37 | [Recorded IKEA product](https://www.ikea.com/us/en/p/trofast-storage-combination-with-boxes-room-divider-white-dark-gray-s79613129/); white frame/dark-gray mesh boxes, nine removable boxes. Simplified model; anchorage/occupied retrieval unapproved. |
 | Ground guest nightstand | 2 | 18 x 15.6 x 19.2 body | Generic cabinet geometry; countertop/lamps are separate. No supplier. |
 | Upstairs bedside cabinet | 5 | 18.6 x 18 x 22.8 | Two primary, one per other bedroom; no supplier. |
-| Upstairs primary dresser | 1 | 48 x 19.2 x 33.6 | Generic geometry; no selected product. |
-| Upstairs Bedroom 2 dresser | 1 | 36 x 19.2 x 33.6 | Generic geometry. |
-| Upstairs Bedrooms 3/4 dresser | 2 | 42 x 19.2 x 33.6 | Generic geometry. |
 | Upstairs primary sitting side table | 1 | 16.8 x 16.8 x 21.6 | Generic cabinet-style table. |
 | Upstairs loft media console | 1 | 72 x 14.4 x 19.2 | Generic geometry. |
 | Upstairs loft reading side table | 1 | 18 x 18 x 21.6 | Generic cabinet-style table. |

@@ -3,6 +3,7 @@ const message = viewport.querySelector('.model-message');
 let viewButtons = document.querySelectorAll('[data-view]');
 const islandLightsInput = document.getElementById('show-island-lights');
 const nightLightingInput = document.getElementById('toggle-night-lighting');
+const canLightsInput = document.getElementById('show-can-lights');
 const furnitureInput = document.getElementById('show-furniture');
 const floorGridInput = document.getElementById('show-floor-grid');
 const resetButton = document.getElementById('reset-view');
@@ -253,6 +254,7 @@ function showModelError(text) {
   viewButtons.forEach((button) => { button.disabled = true; });
   islandLightsInput.disabled = true;
   nightLightingInput.disabled = true;
+  canLightsInput.disabled = true;
   furnitureInput.disabled = true;
   floorGridInput.disabled = true;
   resetButton.disabled = true;
@@ -4722,12 +4724,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const groundBaseline = getGroundFloorDefaultPlan();
   let groundLayoutPreview = null;
   function updateLivableArea() {
-    const groundArea = getLivableFloorArea(groundLayoutPreview?.plan ?? groundBaseline, { includeStairs: true });
-    const upstairsArea = getLivableFloorArea({ floors: [...upstairs.plan.floors, upstairs.baseline.arrival] });
+    const groundArea = getLivableFloorArea({ ...groundBaseline, ...groundLayoutPreview?.plan }, { includeStairs: true });
+    const upstairsArea = getLivableFloorArea({ ...upstairs.plan, stairs: upstairs.baseline.stairs, floors: [...upstairs.plan.floors, upstairs.baseline.arrival] }, { includeStairs: true });
     const format = (area) => Math.round(area).toLocaleString('en-US');
     const output = document.getElementById('livable-area');
     output.textContent = `Area: ~${format(groundArea + upstairsArea)} sq ft`;
-    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. Combined modeled interior plan area; overlaps counted once. Includes closets, halls, bathrooms and laundry. Stair footprint counted once on the first floor; upstairs arrival landing included, open stair void excluded. Excludes garage, porch and mechanical space. Not certified living area; wall thickness and headroom eligibility are not verified.`;
+    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs count on the floor from which they descend: first-floor basement stairs and second-floor stairs included; open stair gaps excluded. Assumes modeled indoor rooms, including the mechanical closet, are finished and conditioned. Excludes garage, open porch and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
     const firstFloorOutput = document.getElementById('first-floor-area');
     firstFloorOutput.textContent = `1st: ~${format(groundArea)} sq ft`;
     firstFloorOutput.title = output.title;
@@ -5263,7 +5265,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const plan = currentView === 'top' || currentView === 'basement';
     const enabled = ground && !plan && nightLighting;
     kitchenPracticalLights.group.visible = ground && !plan;
-    kitchenPracticalLights.ceilingFixtures.visible = !['fridge', 'cooktop', 'sink-storage'].includes(currentView);
+    kitchenPracticalLights.ceilingFixtures.visible = canLightsInput.checked && !['fridge', 'cooktop', 'sink-storage'].includes(currentView);
     for (const lamp of kitchenPracticalLights.lights) {
       lamp.visible = enabled;
       lamp.intensity = enabled ? lamp.userData.nightIntensity : 0;
@@ -5349,6 +5351,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const rig of homeLighting) {
       const visible = activeFloor === rig.floor && !plan && !(rig.floor === 'ground' && groundLayoutPreview);
       rig.group.visible = visible && (!inspection || rig.task);
+      if (!rig.task) {
+        for (const part of rig.group.children) {
+          if (part !== rig.lamp && part !== rig.lamp.target) part.visible = canLightsInput.checked;
+        }
+      }
       rig.lamp.visible = visible && nightLighting && (!inspection || rig.task);
       rig.lamp.intensity = visible && nightLighting ? rig.intensity : 0;
       rig.diffuser.emissiveIntensity = visible && nightLighting ? 0.4 : 0;
@@ -6415,10 +6422,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     scene.backgroundIntensity = exteriorDaylight ? 0.25 : 1;
     scene.environment = exteriorDaylight ? outdoorReflection.texture : null;
     scene.environmentIntensity = exteriorDaylight ? 0.15 : 1;
-    ambientLight.intensity = exteriorDaylight ? 0.55 : nightLighting ? 0.5 : 2.5;
-    studioFill.intensity = exteriorDaylight ? 0 : nightLighting ? 250 : 650;
+    ambientLight.intensity = exteriorDaylight ? 0.55 : nightLighting ? 0.8 : 2.5;
+    studioFill.intensity = exteriorDaylight ? 0 : nightLighting ? 325 : 650;
     studioFill.visible = !exteriorDaylight;
-    renderer.toneMappingExposure = exteriorDaylight ? 0.95 : nightLighting ? 0.75 : 1.25;
+    renderer.toneMappingExposure = exteriorDaylight ? 0.95 : nightLighting ? 0.9 : 1.25;
     mudroomKeyLight.visible = mudroomLighting;
     kitchenKeyLight.visible = kitchenLighting;
     kitchenKeyLight.position.set(prepLighting ? 40.5 : 29, 8.6, prepLighting ? 12 : 13);
@@ -6519,6 +6526,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (initialView && Object.hasOwn(presets, initialView)) setView(initialView);
   }
   islandLightsInput.disabled = false;
+  canLightsInput.disabled = false;
+  canLightsInput.addEventListener('change', () => render());
   nightLightingInput.disabled = false;
   nightLightingInput.addEventListener('change', () => {
     if (nightLightingInput.checked && !nightLighting) daytimeIslandLights = islandLightsInput.checked;

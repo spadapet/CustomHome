@@ -39,7 +39,7 @@ function build() {
     getGroundFloorDefaultPlan: require('../floor-plan-ground.js').getGroundFloorDefaultPlan,
     getUpstairsMeasuredGeometry: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry,
     cream: {}, brass: {}, rosewood: {}, windowTrim: {}, black: { clone() { return {}; } }, ceilingHeight: 9, garageFloorY: -1.25,
-    nightLighting: true, activeFloor: 'ground', currentView: 'living', groundLayoutPreview: null,
+    nightLighting: true, canLightsInput: { checked: true }, activeFloor: 'ground', currentView: 'living', groundLayoutPreview: null,
     cylinder(parent, x, y, z, radius, height, material) {
       const mesh = new Group();
       Object.assign(mesh, { radius, height, material });
@@ -135,6 +135,32 @@ test('Night/Day, floor changes, plans and inspection views correctly gate and re
   model.groundLayoutPreview = {};
   model.updateHomeLighting();
   assert.ok(model.homeLighting.every((rig) => !rig.group.visible && rig.lamp.intensity === 0));
+});
+
+test('can fixture display is independent of illumination and task lamps across floors and views', () => {
+  const model = build();
+  for (const checked of [false, true, false]) {
+    model.canLightsInput.checked = checked;
+    for (const floor of ['ground', 'upstairs', 'exterior']) {
+      for (const view of ['whole', 'top', 'upstairs', 'upstairs-top', 'cooktop', 'living']) {
+        for (const night of [false, true]) {
+          Object.assign(model, { activeFloor: floor, currentView: view, nightLighting: night });
+          model.updateHomeLighting();
+          for (const rig of model.homeLighting) {
+            const plan = ['top', 'upstairs-top'].includes(view);
+            const visible = floor === rig.floor && !plan && (view !== 'cooktop' || rig.task);
+            assert.equal(rig.group.visible, visible);
+            assert.equal(rig.lamp.visible, visible && night, 'Display toggle must not switch off the beam');
+            for (const part of rig.group.children) {
+              if (!rig.task && part !== rig.lamp && part !== rig.lamp.target) {
+                assert.equal(part.visible, checked, 'Every trim, baffle and lens follows the display toggle');
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 });
 
 test('stair LED strips and tread washes turn on in Night and restore after floor and plan changes', () => {

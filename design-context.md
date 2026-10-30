@@ -4,16 +4,61 @@
 
 The new owner reference supersedes the quiet all-hip silhouette and low
 red-brick plinth studies. Use two true front cross-gables centered on the
-unchanged paired bedroom windows (x=6.425/25.145833 ft), a subordinate
-one-story garage hip, and a muted warm-charcoal standing-seam porch canopy with a
+unchanged paired bedroom windows (x=6.425/25.145833 ft), subordinate
+right-hand cross-roofs on retained hips, and a muted warm-charcoal standing-seam porch canopy with a
 segmental barrel entry accent. No decorative dormers or new rooms/openings.
 Each cross-gable is 14.35 ft wide, eave y=19.2 ft, rise 6.2 ft, ridge
 y=25.4 ft, pitch approximately 10.37:12; rear hip returns start at z=40.5.
 Shared envelope clipping creates actual valleys and fitted brick wall-head
 closures. The original 4:12 main/east-wing roof definitions remain underneath:
 the union cannot reduce their headroom envelope. Rear surfaces north of
-z=40.5 and solar provisions are unchanged; this study does not select or
+z=22.5 and solar provisions are unchanged; this study does not select or
 approve photovoltaic layout, attachment, setbacks, shading or capacity.
+
+Right-hand refinement, October 30: a true clipped-tip loft cross-gable
+centers on the two fixed south-facing upper windows at x48.075 ft. Its
+16.85-ft span, y19.2-ft eaves and y24.4-ft ridge (about7.41:12 side pitch)
+sit below the primary25.4-ft front gables. A15:12 forward hip clips the last
+1.1 ft of crown over0.88 ft of run to y23.3 at z35.85; no false dormer/window.
+The lower garage retains its6:12 hip and shoulders, with one16.5-ft central
+cross-gable at x43.25, y13.9-ft ridge,5-ft rise/about7.27:12 pitch.
+Both additions have real clipped intersections/valleys, fitted Linen brick
+wall heads, closed undersides, rake fascia and eave-only gutters. Garage
+wall-head solids are5.4 in deep at the existing z49 wall, not a forward facade.
+Rear return planes carry1:16 transverse cross-fall to avoid level valleys;
+derived valley fall exceeds0.02 ft/ft, not approved hydraulic capacity.
+An east loft leader bypasses the lower roof at x56.5; its0.14-ft pipe clears
+the x56.2 garage roof edge by2.76 in. A separate east garage shoulder outlet
+returns to the garage corner. Existing brow/porch, other rainwater routes and
+rear canopy provisions remain. New valley concentration, west-side
+collection/tie-ins, outlets, freeze protection, lawful discharge, roof
+ventilation, jerkinhead framing, garage headers/trusses/bearing and
+step/counterflashing require professional design; veneer supports no roof.
+No roof footprint expansion or accepted headroom reduction. No interior,
+18-segment upper perimeter,53-unit window inventory, area or saved JSON changes.
+The short clipped-tip high gutter has an east-end conductor within the rake
+trim allowance, falling to the same east leader; access, flashing, support
+and freeze protection are unresolved. The two existing east soffit lights
+move to x56.2,z22/32, on the real roof underside outside the finished upper
+wall; no added fixtures or photometric/product approval.
+
+Right-roof verification:416 tests in65 suites and11 JavaScript syntax checks
+pass. Production HTTP views inspected in front, three-quarter, east, west,
+rear and overhead, plus front/east Night. Updated Three.js world matrices
+measure five visible skin meshes per new cross-roof, loft ridge24.3999996 ft
+and garage13.8999996 ft. Garage closure288 constituent vertices span
+z48.775–49.225 ft and top at13.7399998 ft; maximum numerical excursion above
+the roof underside is below0.000001 ft. Minimum new derived valley fall
+0.02187005 ft/ft. The high clipped-eave conductor has three continuously
+falling segments to the east leader elbow. East light housings clear the
+finished upper wall by0.9 in, lenses by1.5 in; installation still unapproved.
+Exterior mesh visibility/world matrices restore exactly through both floors,
+2D and exterior in Day/Night;38 active exterior Night sources and zero Day
+sources. Reset preserves Night and exterior restoration. Temporary browser
+route removed, clean production reload: one model render canvas, no debug
+global/page errors/failed requests, Notes closed, Day default,53 units and
+unchanged approximately4075 sq ft total (1921 ground/2155 upper).
+All changes remain local; no commit/push for this refinement.
 
 The owner's later October 30 request supersedes the full 9-ft stone story:
 use a continuous LOW stone wainscot to y=2 ft (24 in), separate warm off-white
@@ -24,7 +69,7 @@ or the lower garage floor. Actual lowest sill-trim underside is y=2.1975 ft
 (26.37 in, east prep); coping clears it by 0.87 in. West living trim starts
 at 28.32 in and front cut-stone sills at 32.28 in. Do not lift the continuous
 band to the front glass sill and bury lower side trim.
-Keep existing finished faces, openings, 53 window units, roof forms, seven-foot
+Keep existing finished faces, openings, 53 window units, retained roof envelopes, seven-foot
 porch, door poses, furniture, saved JSON and no shutters.
 Owner selected palette 2, Linen, from the [palette sheet](assets/exterior-palette-options.svg),
 superseding the earlier Oatmeal color study. Pale warm limestone, quiet putty
@@ -34,7 +79,7 @@ stone #d5d0c5 and roof #595953, matching the selected concept swatches.
 These are texture calibration targets, not flat paint/product colors;
 photographed variation, lighting and physical samples change perceived color.
 
-Linen verification: 36 tests across five exterior suites and 11 JavaScript
+Historical Linen verification before the right-roof refinement: 36 tests across five exterior suites and 11 JavaScript
 syntax checks passed. Browser checks covered front, three-quarter, rear,
 both sides and street-eye Night lighting, then floor changes and Reset.
 Day/front was restored with 53 window units and one render canvas.
@@ -88,7 +133,7 @@ removed and actual production script reloaded: no debug global, one model
 render canvas, Notes closed, Day default,53 units and all compact metrics.
 Roof forms, openings, furniture, door poses and saved JSON remain unchanged.
 Independent concurrent garage-outline viewer edits are not part of this study.
-Publication integration, October 30: apply the saved Linen/wainscot and
+Historical publication integration before the right-roof refinement, October 30: apply the saved Linen/wainscot and
 garage-outline-removal edits over main's measured upstairs revision, not
 over the former upstairs perimeter. Cladding regression now covers all
 18 shared upper wall segments, ten ground perimeter walls and the patio
@@ -888,7 +933,8 @@ ambient2.5/exposure1.25, Exterior Day restores ambient0.55/exposure0.95
 with all7 new piers visible. Temporary scene routes removed; production
 reload has one render canvas plus the existing hidden tour-map canvas.
 
-Bedroom 3's dresser moves to the east wall; Bedroom 4's desk and wall lamp move
+In this historical furnishing pass, Bedroom 3's dresser moved to the east wall
+(removed by the October 30 storage decision); Bedroom 4's desk and wall lamp move
 to its west wall north of the closet door. Front window approaches remain clear.
 Bedroom/closet sizes, stair/bath/loft/laundry, ground floor, saved layouts and
 96 in doors are unchanged. Nominal opening area is 60 sq ft versus 64.5 before
@@ -2060,7 +2106,12 @@ and actual loads remain unverified; removing the sign is not approval.
 
 Latest owner lighting control supersedes camera-dependent base illumination:
 Menu has a Night lighting / Day lighting toggle, Night unchecked by default.
-Night uses ambient 0.5, fill 250, exposure 0.75; Day uses 2.5/650/1.25.
+October 30 owner revision brightens Night to ambient 0.8, fill 325 and
+exposure 0.9 (previously 0.5/250/0.75); Day stays at 2.5/650/1.25.
+The Can lights display checkbox starts off, hiding recessed ceiling fixture
+trim/baffles/lenses on both floors and in the kitchen without changing their
+Night illumination or other fixture types. Choice survives views and Reset;
+reload starts hidden, and plan/inspection visibility rules still apply.
 One viewer-wide choice applies during Tour, both floors, 2D, room and exterior
 views, and survives Reset/view changes. Reload starts Day. Existing local
 study spotlights and physical fixture controls remain independent; no layouts,
@@ -2202,24 +2253,46 @@ distinguish modeled fit from actual products, loading, reach and occupied use.
 Remove the redundant "Furnished concept" footer label and its decorative dot.
 Keep the area totals and refresh/reset controls; saved-layout warnings remain.
 
-The viewer footer shows a combined two-floor livable-area estimate computed
-from current floor surfaces, including saved layout overrides, with separate
-first-floor and second-floor values visible alongside the total. Count overlapping
-surfaces once per floor, including closets, halls, bathrooms, laundry and the
-upstairs arrival landing. Owner correction October 30: **count the stair
-footprint once downstairs**, unioned with first-floor surfaces; upstairs open
-stair void stays excluded. Previously stairs were omitted from both floors.
-Garage, porch and mechanical space remain excluded; basement rooms are not
-modeled/included. Default first floor 1,920.9792 sq ft (76.9458 sq ft stair
-footprint), upstairs 2,154.5042 sq ft, combined 4,075.4833 sq ft after the
-2.925-sq-ft Closet 4 inset and main's 14.95-sq-ft front extension; display
-1,921 / 2,155 / 4,075 with final rounding in compact 1st / 2nd / Area outputs.
-Recalculate on view/layout changes; source changes update on reload. These are
-nominal modeled plan areas, not certified exterior-face appraisal, net usable
-or code living areas; wall thickness/headroom eligibility remain unverified.
-Historical source/envelope
-estimates below are superseded and use different stair rules. No geometry or
-saved-layout changes are implied.
+Latest owner direction October 30: **count whatever is the standard**.
+This supersedes the earlier inside-wall convention and once-only stair rule.
+Show an **ANSI-style above-grade gross finished-area estimate**, measured to
+exterior finished faces with interior walls included. Keep the compact
+Area / 1st / 2nd outputs and their existing units; put qualifications in
+tooltips rather than adding visible prose.
+
+Union resolved floor surfaces, including closets, halls, bathrooms, laundry
+and the upstairs arrival landing. Extend exterior centerlines by the modeled
+masonry half-thickness, **0.225 ft**. Shared garage walls extend to the
+garage-side finish using half their resolved thickness, default **0.175 ft**.
+Split garage/exterior transitions and union corner joins; retain true internal
+openings. Interior partitions, furniture, cabinetry and trim are not deducted.
+
+Include stairs on the floor from which they descend: basement stairs on the
+first floor, upstairs stairs on the second. Each 76.9458-sq-ft stair footprint
+contains **75.4875 sq ft** of projected stairs/landing; deduct the actual
+**1.4583-sq-ft** open gap on each floor, not the entire upper stair rectangle.
+Union stairs and floor surfaces so overlaps count once. Include the indoor
+mechanical closet **on the provisional assumption it is finished and
+conditioned**. Exclude garage, open porch and below-grade basement rooms.
+
+Default first floor **1,966.4427 sq ft**, second floor **2,312.5167 sq ft**,
+combined **4,278.9594 sq ft**; display **1,966 / 2,313 / 4,279**.
+Independent exterior-face polygon measurements match both floor totals after
+the open stair gaps are deducted. The former 4,075.4833-sq-ft centerline and
+3,881.5871-sq-ft inside-wall totals are superseded measurement conventions,
+not different layouts. No geometry, exterior Size, room dimensions or saved
+layout JSON changes. Resolved first-floor previews retain canonical stairs
+when their resolved plan omits stair metadata.
+
+Recalculate on view/layout changes; source changes update on reload.
+This is not certified appraisal GLA. Actual construction/finish faces,
+conditioning (including the mechanical closet), grade classification and
+ceiling-height eligibility remain unverified.
+Basis: [Fannie Mae Selling Guide B4-1.3-05](https://selling-guide.fanniemae.com/sel/b4-1.3-05/improvements-section-appraisal-report)
+and [ANSI measurement guidance](https://singlefamily.fanniemae.com/media/30266/display),
+accessed October 30, 2026. Fannie Mae specifies ANSI Z765-2021 for applicable
+single-family appraisals; this is a design-study estimate, not an appraisal.
+Historical source/envelope estimates below remain superseded.
 
 ## Whole-house walkthrough video - October 24
 
@@ -2321,15 +2394,19 @@ doors retain closed defaults.
 Owner follow-up: back the unchanged primary 60 × 80-in queen against the
 west wall, facing east at 90 degrees, center (3.8442,16.15) ft. Headboard
 clears west baseboard by 1 in, below window sills. Both nightstands follow;
-paired lamps mount on the solid west-window pier, not glazing. Retain the
-4-ft dresser on north wall at (3.5,7.75) ft facing south, clear of bed/desk.
+paired lamps mount on the solid west-window pier, not glazing.
+Owner storage follow-up: remove all four freestanding bedroom dressers;
+the existing walk-in closets provide clothing storage. Keep closet hanging,
+shelving and built-in drawers, nightstands, desks, seating and media furniture.
+Earlier dresser-placement studies are historical.
 Window reach/operation and occupied use remain unapproved. Bedroom 2 stays
 north-facing at (41.45,10.75) ft. Owner follow-up: unchanged 54 × 75-in beds
 in viewer Bedrooms 3/4 have west/east exterior headboards respectively.
 Centers (3.6358,45.75)/(27.9142,46.95) ft, rotations +90/-90 degrees;
 headboards clear baseboards by 1 in below sills. Nightstands rotate; lamps
-follow on solid wall. Retain rug sizes, shifting 6 in toward feet. Bedroom 4
-dresser moves 3.6 in south to (24,50.3) ft, leaving 2.4 in to bed frame.
+follow on solid wall. October 30 flooring revision removes all four bedroom
+rugs, exposing existing wood floors; earlier bedroom-rug studies are superseded.
+Keep the ground guest bedroom rug-free and retain living-room/loft rugs.
 Preserve east TV. Primary chairs/stand now back south, 1 in clear of baseboard.
 Chair centers (3.5,25.3042)/(9.8,25.3042) ft face north; stand center
 (6.65,25.7292) ft rotates 180 degrees for north-facing front access. Seating
@@ -3419,8 +3496,8 @@ Keep both refrigeration doors closed by default. Clicking or tapping either mode
 ## House square footage - October 18, 2026
 
 Historical source/envelope comparison only: current October 30 geometry and
-once-only stair rule are in [Dynamic livable-area estimate](#dynamic-livable-area-estimate).
-The older per-story stair counting and model values below are superseded.
+standard exterior-face measurement rule are in [Dynamic livable-area estimate](#dynamic-livable-area-estimate).
+The older model values below are superseded.
 
 Source-plan arithmetic was `2,716.5 - 671.1 garage - 216.5 porch = 1,828.9 sq ft`
 downstairs, plus an unverified 1,808.5-sq-ft upstairs label for 3,637.4 sq ft.

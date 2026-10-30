@@ -14,7 +14,9 @@
     // powder-side strip in +Z, leaving 1 in to paint / 1/4 in to baseboard.
     const powderWallFace = 35.1 - 0.175;
     const depth = 34.6 - 0.175 - 26.6;
-    return { x: 0.175, z: powderWallFace - 1 / 12 - depth, width: run + 4, depth, rotation: Math.PI };
+    const x = 0.175, z = powderWallFace - 1 / 12 - depth;
+    return { x, z, width: run + 4, depth, rotation: Math.PI,
+      voids: [{ x: x + 4, z: z + depth - 44 / 12 - 0.25, w: run, d: 0.25 }] };
   }
 
   function validate(baseline, document) {

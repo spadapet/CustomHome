@@ -435,14 +435,7 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
             : { x: g.southEast - 0.215, z: z + dx, rotation: -Math.PI / 2 };
       wallLamp(`${name} bedside wall lamp ${side < 0 ? 'left' : 'right'}`, lampMount.x, lampMount.z, lampMount.rotation);
     }
-    box(bed, 0, 0.025, name === 'Bedroom 3 bed' || name === 'Bedroom 4 bed' ? 1.1 : 0.6, width + 2, 0.04, 8.3, linen);
   }
-  for (const [name, x, z, width, rotation] of [
-    ['Primary dresser', 3.5, g.north + 1.1, 4, 0],
-    ['Bedroom 2 dresser', g.closetEast + 1.4, g.north + 5.5, 3, Math.PI / 2],
-    ['Bedroom 3 dresser', g.southClosetWest - 1.2, g.south - 3.3, 3.5, -Math.PI / 2],
-    ['Bedroom 4 dresser', 24, g.south - 3.5, 3.5, 0]
-  ]) cabinet(furniture(name, x, z, rotation, true), 0, 0, width, 2.8, 1.6);
   const primaryDeskChair = desk('Primary', 9.3, g.north + 1.2, 0, 'Primary north');
   primaryDeskChair.position.x = 11.2;
   desk('Bedroom 2', g.closetEast + 2.2, g.north + 1.2, 0, 'Bedroom 2 north');

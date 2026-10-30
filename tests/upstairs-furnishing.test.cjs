@@ -245,7 +245,7 @@ test('upstairs builds without canvas labels and retains navigation destinations'
   assert.equal(model.mapLabels.length, model.rooms.length);
 });
 
-test('all bedrooms have bedside furniture, lighting and separate dressers', () => {
+test('all bedrooms retain bedside furniture and lighting without separate dressers', () => {
   for (const name of ['Primary', 'Bedroom 2', 'Bedroom 3', 'Bedroom 4']) {
     const bed = item(`${name} bed`);
     assert.equal(bed.children.filter((mesh) => mesh.geometry.w === 1.55 && mesh.geometry.h === 1.9).length, name === 'Primary' ? 2 : 1);
@@ -257,17 +257,35 @@ test('all bedrooms have bedside furniture, lighting and separate dressers', () =
     assert.equal(item(`${name} desk wall lamp`).userData.wallMounted, true);
     const bedside = name === 'Bedroom 3' ? 'right' : 'left';
     assert.equal(item(`${name} bed bedside wall lamp ${bedside}`).userData.wallMounted, true);
-    item(`${name} dresser`);
   }
+  const dressers = [];
+  model.group.traverse(object => {
+    if (/dresser/i.test(object.name || '')) dressers.push(object.name);
+  });
+  assert.deepEqual(dressers, [], 'Walk-in closets replace all four freestanding bedroom dressers');
+  for (const name of ['Primary closet drawers', 'Primary closet folded clothes',
+    'Bedroom 2 closet shelves', 'Bedroom 3 closet hanging', 'Bedroom 4 closet hanging']) item(name);
   for (const name of ['Bedroom 2 reading chair', 'Bedroom 3 reading chair', 'Bedroom 4 reading chair',
     'Primary media console', 'Loft reading chair', 'Loft media console', 'Loft coffee table and rug',
     'Loft desk chair', 'Laundry wall cupboards']) item(name);
 });
 
-test('bedroom furnishings clear finished room edges and each other above rugs', () => {
+test('all four bedrooms expose the wood floor without rugs or carpet overlays', () => {
+  for (const name of ['Primary', 'Bedroom 2', 'Bedroom 3', 'Bedroom 4']) {
+    const bed = item(`${name} bed`);
+    const floorOverlays = bed.children.filter(part =>
+      part.geometry && part.position.y <= 0.1 && part.geometry.h <= 0.1 &&
+      part.geometry.w > 2 && part.geometry.d > 2);
+    assert.equal(floorOverlays.length, 0, `${name} has no low carpet slab beneath its bed`);
+  }
+  const loft = item('Loft coffee table and rug');
+  assert.ok(loft.children.some(part => part.position.y <= 0.1), 'Loft rug remains');
+});
+
+test('bedroom furnishings clear finished room edges and each other', () => {
   for (const name of ['Primary', 'Bedroom 2', 'Bedroom 3', 'Bedroom 4']) {
     const room = model.rooms.find((room) => room.name === (name === 'Primary' ? 'Primary bedroom' : name));
-    const furnishings = ['bed', 'dresser', 'writing desk', 'desk chair'].map((suffix) => item(`${name} ${suffix}`));
+    const furnishings = ['bed', 'writing desk', 'desk chair'].map((suffix) => item(`${name} ${suffix}`));
     if (name === 'Primary') furnishings.push(item('Primary sitting chair 1'), item('Primary sitting chair 2'),
       item('Primary sitting side table'), item('Primary media console'));
     else furnishings.push(item(`${name} reading chair`));
@@ -312,10 +330,8 @@ test('upstairs furniture follows the supplied staged-plan composition within mea
     assert.equal(lamp.rotation.y, Math.PI / 2);
     assert.ok(Math.abs(bounds(lamp.children[0]).minX - west.x1 - west.thickness / 2) < 1e-8);
   }
-  assert.equal(item('Primary dresser').rotation.y, 0);
-  assert.ok(Math.abs(item('Primary dresser').position.z - g.north - 1.1) < 1e-8, 'Retained dresser moves to north wall');
   const walls = model.group.children.filter(o => o.name?.startsWith('Upstairs wall:')).flatMap(meshes);
-  for (const object of [primaryBed, item('Primary dresser')]) {
+  for (const object of [primaryBed]) {
     for (const mesh of meshes(object)) for (const wall of walls) {
       assert.ok(!positiveOverlap(constituent(mesh), constituent(wall), .001), `${object.name} intersects ${wall.parent.name}/${wall.name}`);
     }
@@ -420,8 +436,6 @@ test('closets have continuous rods and clothing rather than shelves called rails
 });
 
 test('front redesign leaves window approaches and occupied desk-to-bed route clear', () => {
-  const dresser = bounds(item('Bedroom 3 dresser'));
-  assert.ok(dresser.minX >= g.southClosetWest - 2.2 && dresser.maxZ < g.south - 1.5, 'East-wall dresser including handles clears both front windows and entry');
   const desk = bounds(item('Bedroom 4 writing desk'));
   const chair = bounds(item('Bedroom 4 desk chair'));
   const bed = item('Bedroom 4 bed').children.find(m => m.name === 'Bed mattress');
@@ -431,7 +445,7 @@ test('front redesign leaves window approaches and occupied desk-to-bed route cle
   assert.ok(Math.abs((mattress.minX - chair.maxX) * 12 - 27.47) < .001, 'Tucked chair-to-mattress gap is 27.47 inches, not a certified passage');
   assert.ok(Math.abs((mattress.minX - chair.maxX - .75) * 12 - 18.47) < .001, 'Nine-inch chair pull leaves 18.47 inches; use the bed-foot route');
   for (const name of ['Bedroom 3', 'Bedroom 4']) {
-    for (const suffix of ['bed', 'dresser', 'writing desk', 'desk chair']) {
+    for (const suffix of ['bed', 'writing desk', 'desk chair']) {
       const object = item(`${name} ${suffix}`);
       for (const mesh of object.children.filter(m => m.position.y > 0.1)) {
         assert.ok(bounds(mesh).maxZ < g.south - .3, `${name} front wall has no furnishings against window cranks`);
