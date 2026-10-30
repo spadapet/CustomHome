@@ -30,7 +30,7 @@ function buildRoof() {
     traverse() {}
   }
   const context = {
-    projectionWest: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry().primaryEast - 3.35 - .225,
+    projectionWest: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathWest - .225,
     projectionEast: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathEast + .225,
     projectionRear: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathNorth - .225,
     masonryMaps: null,

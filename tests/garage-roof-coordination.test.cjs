@@ -10,7 +10,7 @@ const saved = JSON.parse(fs.readFileSync(require.resolve('../upstairs-layout.jso
 const resolved = layout.resolve(baseline, saved);
 const g = require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry();
 
-test('no bonus room is added over the garage; only the measured bedroom edge projects 4.45 inches', () => {
+test('no bonus room is added over the garage; only the measured bedroom edge projects 4.2 inches', () => {
   for (const rect of [...resolved.rooms, ...resolved.floors]) {
     const overlapX = Math.min(rect.x + rect.w, 55.5) - Math.max(rect.x, g.southEast);
     const overlapZ = Math.min(rect.z + rect.d, 49) - Math.max(rect.z, 36.2);
@@ -19,7 +19,7 @@ test('no bonus room is added over the garage; only the measured bedroom edge pro
   const south = resolved.walls.find((wall) => wall.name === 'Loft south exterior');
   assert.equal(south.z1, g.serviceSouth);
   assert.equal(south.z2, g.serviceSouth);
-  assert.ok(Math.abs((g.southEast - 31.2) * 12 - 4.45) < 1e-7);
+  assert.ok(Math.abs((g.southEast - 31.2) * 12 - 4.2) < 1e-7);
 });
 
 test('exposed laundry/loft facade closes to the measured bedroom return', () => {

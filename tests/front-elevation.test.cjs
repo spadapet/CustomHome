@@ -300,7 +300,7 @@ test('hipped exterior removes applied front gables and retains fixed openings wi
   vm.runInContext(source.slice(start, end), context);
   const ground = walls.find((wall) => wall.name === 'front ground floor').args.at(-1);
   assert.deepEqual(JSON.parse(JSON.stringify(ground.filter((opening) => !opening.door))), require('../floor-plan-ground.js').getGroundFrontWindows());
-  const upper = walls.find((wall) => wall.name === 'upper front bedrooms').args.at(-1);
+  const upper = walls.filter(wall => ['upper front bedrooms', 'upper front bedroom 4'].includes(wall.name)).flatMap(wall => wall.args.at(-1));
   assert.equal(upper.length, 4);
   assert.ok(!walls.some((wall) => /Garage.*upper/.test(wall.name)));
   context.gable = (...args) => gables.push(args);
@@ -314,15 +314,20 @@ test('hipped exterior removes applied front gables and retains fixed openings wi
 
 test('four balanced exterior upper-front windows match furnished upstairs wall openings and frames', () => {
   const plan = require('../floor-plan-upstairs.js').getUpstairsDefaultPlan(require('../upstairs-layout.js').stairOpening());
-  const wall = plan.walls.find(([name]) => name === 'Bedrooms south');
+  const walls = plan.walls.filter(([name]) => ['Bedrooms south', 'Bedroom 4 south'].includes(name));
+  const cuts = walls.flatMap(([, x, , , , holes]) => holes.map(([a, b, low, high]) => [x + a, x + b, low, high]));
   const frames = plan.windows.filter(([name]) => /Bedroom [34] south/.test(name));
-  let exteriorOpenings;
+  const exteriorOpenings = [];
   drawMeasuredUpper({
     win: (center, width, sill, height = 5) => ({ center, width, sill, height }),
-    wall(...args) { if (args[0] === 'upper front bedrooms') exteriorOpenings = args[7]; }
+    wall(...args) {
+      if (['upper front bedrooms', 'upper front bedroom 4'].includes(args[0])) {
+        exteriorOpenings.push(...args[7].map(o => ({ ...o, center: args[1] + o.center })));
+      }
+    }
   });
   assert.equal(frames.length, 4);
-  assert.equal(wall[5].length, 4);
+  assert.equal(cuts.length, 4);
   for (const name of ['Bedroom 3', 'Bedroom 4']) {
     const room = plan.rooms.find(r => r.name === name);
     assert.ok(Math.abs(room.w - .35 - 12.5) < 1e-8);
@@ -330,13 +335,13 @@ test('four balanced exterior upper-front windows match furnished upstairs wall o
     const pair = frames.filter(f => f[0].startsWith(name));
     assert.ok(Math.abs((pair[0][1] + pair[1][1])/2 - (room.x + room.w/2)) < 1e-8);
   }
-  for (const closet of plan.rooms.filter(r => /Bedroom [34] closet/.test(r.name))) assert.ok(Math.abs(closet.w - .35 - (5.5 + 1/48)) < 1e-8);
+  for (const closet of plan.rooms.filter(r => /Bedroom [34] closet/.test(r.name))) assert.ok(Math.abs(closet.w - .35 - 5.5) < 1e-8);
   for (const [index, frame] of frames.entries()) {
     const opening = exteriorOpenings[index];
     assert.ok(Math.abs(frame[1] - opening.center) < 1e-8);
     assert.equal(frame[3], opening.width);
-    assert.ok(Math.abs((wall[5][index][0] + wall[5][index][1]) / 2 - opening.center) < 1e-8);
-    assert.deepEqual(wall[5][index].slice(2), [3, 8]);
+    assert.ok(Math.abs((cuts[index][0] + cuts[index][1]) / 2 - opening.center) < 1e-8);
+    assert.deepEqual(cuts[index].slice(2), [3, 8]);
     assert.equal(opening.sill, 13);
     assert.equal(opening.height, 5);
   }

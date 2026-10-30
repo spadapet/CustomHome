@@ -122,20 +122,32 @@ test('owner image dimensions are physical paint-face gaps, not just room labels'
   };
   const gap = (a, b, axis) => face(b, axis, 'min') - face(a, axis, 'max');
   const closeInches = (feet, expectedFeet) => assert.ok(Math.abs((feet - expectedFeet) * 12) < .001, `${feet * 12} in != ${expectedFeet * 12} in`);
-  closeInches(gap('Primary west', 'Primary suite entry', 'X'), 14 + 8 / 12);
-  closeInches(gap('Primary north', 'Primary south', 'Z'), 19 + 8 / 12 + 5 / 192);
-  closeInches(gap('Primary suite entry', 'Primary closet east', 'X'), 17 + 6 / 12 + 7 / 96);
-  closeInches(gap('Bath south', 'Primary closet south', 'Z'), 8 + 1 / 12 + 9 / 192);
+  closeInches(gap('Primary west', 'Primary suite entry', 'X'), 14.75);
+  closeInches(gap('Primary north', 'Primary south', 'Z'), 19.75);
+  closeInches(gap('Primary suite entry', 'Primary closet east', 'X'), 17.5);
+  closeInches(gap('Closet north return', 'Primary closet south', 'Z'), 12.5);
+  closeInches(gap('Bath south', 'Primary closet south', 'Z'), 6.65);
+  closeInches(gap('Toilet west', 'Bath east', 'X'), 13.5);
+  closeInches(gap('Bath north', 'Bath south', 'Z'), 13.5);
+  closeInches(gap('Bedroom 2 east', 'Closet 2 east', 'X'), 6);
+  closeInches(gap('Bedroom 2 east', 'Bath 2 east', 'X'), 9.1);
+  closeInches(gap('Bath 2 north', 'Bath 2 south', 'Z'), 5.5);
+  closeInches(gap('Bath 2 south', 'Closet 2 south', 'Z'), 6.65);
+  closeInches(gap('Linen furnace divider', 'Laundry west', 'X'), 6);
+  closeInches(gap('Storage north', 'Linen south', 'Z'), 4.5);
   closeInches(gap('Primary closet east', 'Bedroom 2 east', 'X'), 13);
   closeInches(gap('Bedroom 2 north', 'Bedroom 2 south', 'Z'), 12.5);
   closeInches(gap('Laundry west', 'Loft west storage', 'X'), 8.5);
   closeInches(gap('Laundry entry', 'Laundry south', 'Z'), 9.5);
-  closeInches(gap('Loft west storage', 'Loft east', 'X'), 15 + 2 / 12 + 1 / 48);
-  closeInches(gap('Closet 2 south', 'Loft south exterior', 'Z'), 15 + 2 / 12 + 5 / 192);
+  closeInches(gap('Loft west storage', 'Loft east', 'X'), 15);
+  closeInches(gap('Closet 2 south', 'Loft south exterior', 'Z'), 15.25);
   closeInches(gap('Bedroom 3 west', 'Bedroom 3 closet', 'X'), 12.5);
   closeInches(gap('Bedroom 4 closet', 'Bedroom 4 east', 'X'), 12.5);
   closeInches(gap('Bedroom 3 north', 'Bedrooms south', 'Z'), 13);
-  closeInches(gap('Bedroom 3 closet', 'Bedroom 4 closet', 'X'), 5.5 + 1 / 48);
+  closeInches(gap('Bedroom 4 north', 'Bedroom 4 south', 'Z'), 13);
+  closeInches(gap('Closet divider', 'Closet 4 south', 'Z'), 6);
+  closeInches(gap('Bedroom 3 closet', 'Bedroom 4 closet', 'X'), 5.5);
+  assert.ok(bounds(item('Bedroom 4 closet hanging')).maxZ <= g.southClosetSouth - .2375, 'Retained hanging storage clears recessed wall and trim');
 });
 test('upper arrival is one flush hardwood floor constituent with continuous gallery access', () => {
   const parts = [];
@@ -192,7 +204,7 @@ test('arrival floor hides and restores through the production floor selector wit
 test('upstairs room-width openings receive trim-matched single-panel operable doors', () => {
   const leaves = [];
   model.group.traverse((part) => { if (part.userData.doorStyle === 'Single recessed panel') leaves.push(part); });
-  assert.equal(leaves.length, 17);
+  assert.equal(leaves.length, 16);
   for (const leaf of leaves) {
     assert.equal(leaf.children.filter((part) => part.name === 'Interior door single recessed field').length, 1);
     assert.equal(leaf.userData.height, 7.96);
@@ -284,9 +296,30 @@ test('upstairs furniture follows the supplied staged-plan composition within mea
   const primary = model.rooms.find(room => room.name === 'Primary bedroom');
   const primaryCenterX = primary.x + primary.w / 2;
   const primaryBed = item('Primary bed');
-  assert.ok(Math.abs(primaryBed.position.x - g.primaryEast * 0.39) < 1e-8);
-  assert.ok(Math.abs(primaryBed.position.z - (g.north + 6.7)) < 1e-8);
-  assert.equal(primaryBed.rotation.y, 0, 'Primary headboard faces north');
+  assert.ok(Math.abs(primaryBed.position.z - (g.north + 9.5)) < 1e-8);
+  assert.equal(primaryBed.rotation.y, Math.PI / 2, 'Primary headboard backs west and faces east');
+  const headboard = primaryBed.children.find(m => m.geometry.h === 2 && m.geometry.d === .18);
+  const west = model.plan.walls.find(w => w.name === 'Primary west');
+  const headboardBounds = bounds(headboard);
+  assert.ok(Math.abs((headboardBounds.minX - west.x1 - west.thickness / 2 - .0625) * 12 - 1) < 1e-8,
+    'Headboard clears west baseboard by exactly one inch');
+  assert.ok(constituent(headboard).high < 13, 'Headboard stays below west-window sill');
+  const bedside = primaryBed.children.filter(m => m.geometry.w === 1.55 && m.geometry.h === 1.9);
+  assert.equal(bedside.length, 2);
+  assert.ok(bedside.every(m => bounds(m).maxX < 2.1), 'Both retained nightstands follow headboard onto west wall');
+  for (const side of ['left', 'right']) {
+    const lamp = item(`Primary bed bedside wall lamp ${side}`);
+    assert.equal(lamp.rotation.y, Math.PI / 2);
+    assert.ok(Math.abs(bounds(lamp.children[0]).minX - west.x1 - west.thickness / 2) < 1e-8);
+  }
+  assert.equal(item('Primary dresser').rotation.y, 0);
+  assert.ok(Math.abs(item('Primary dresser').position.z - g.north - 1.1) < 1e-8, 'Retained dresser moves to north wall');
+  const walls = model.group.children.filter(o => o.name?.startsWith('Upstairs wall:')).flatMap(meshes);
+  for (const object of [primaryBed, item('Primary dresser')]) {
+    for (const mesh of meshes(object)) for (const wall of walls) {
+      assert.ok(!positiveOverlap(constituent(mesh), constituent(wall), .001), `${object.name} intersects ${wall.parent.name}/${wall.name}`);
+    }
+  }
   const primaryTV = item('Primary wall TV');
   const primaryMedia = item('Primary media console');
   assert.equal(primaryTV.rotation.y, -Math.PI / 2, 'Primary screen faces into the room from the east wall');
@@ -295,9 +328,24 @@ test('upstairs furniture follows the supplied staged-plan composition within mea
   assert.ok(Math.abs(primaryMedia.position.z - primaryTV.position.z) < 1e-8);
   const sittingChairs = [item('Primary sitting chair 1'), item('Primary sitting chair 2')];
   const sittingAxis = (sittingChairs[0].position.x + sittingChairs[1].position.x) / 2;
-  assert.ok(Math.abs(sittingAxis - primaryCenterX) < 1e-8);
+  assert.ok(Math.abs(sittingAxis - (primaryCenterX - .9)) < 1e-8, 'South-wall group leaves the east entry route open');
   assert.ok(Math.abs(item('Primary sitting side table').position.x - sittingAxis) < 1e-8);
-  assert.ok(sittingChairs.every(chair => Math.abs(chair.position.z - (g.north + 14)) < 1e-8));
+  const southTrim = item('wall: Primary south').children.find(m => m.name === 'Upstairs white baseboard' && bounds(m).minZ < g.primarySouth);
+  const southFace = bounds(southTrim).minZ;
+  const sittingTable = item('Primary sitting side table');
+  assert.equal(sittingTable.rotation.y, Math.PI, 'Stand front opens north into the room, not into the wall');
+  for (const object of [...sittingChairs, sittingTable]) {
+    assert.ok(Math.abs((southFace - bounds(object).maxZ) * 12 - 1) < .001, `${object.name} rear is one inch clear of south baseboard`);
+    for (const mesh of meshes(object)) for (const wall of walls) {
+      assert.ok(!positiveOverlap(constituent(mesh), constituent(wall), .001), `${object.name} intersects ${wall.parent.name}`);
+    }
+  }
+  for (const chair of sittingChairs) {
+    assert.equal(chair.rotation.y, 0, 'Chairs face north into the room');
+    assert.ok(Math.abs((bounds(chair).maxX - bounds(chair).minX) * 12 - 28.2) < .001);
+    assert.ok(Math.abs((bounds(chair).maxZ - bounds(chair).minZ) * 12 - 27) < .001);
+  }
+  assert.ok(Math.abs((bounds(sittingChairs[0]).minZ - bounds(primaryBed).maxZ) * 12 - 43.85) < .001, 'Chair fronts are 43.85 inches south of the retained bed/nightstand group');
 
   const bedroom2Bed = item('Bedroom 2 bed');
   assert.ok(Math.abs(bedroom2Bed.position.x - (g.bedEast - 4.85)) < 1e-8);
@@ -308,9 +356,15 @@ test('upstairs furniture follows the supplied staged-plan composition within mea
   assert.ok(Math.abs(bedroom2Chair.position.z - (g.loftNorth - 2.4)) < 1e-8);
   const bedroom3Bed = item('Bedroom 3 bed');
   const bedroom4Bed = item('Bedroom 4 bed');
-  assert.ok(Math.abs(bedroom3Bed.position.x - 3.3) < 1e-8, 'Bedroom 3 bed shifts to the west-side zone');
-  assert.ok(Math.abs(bedroom4Bed.position.x - (g.southEast - 3.3)) < 1e-8, 'Bedroom 4 bed shifts to the east-side zone');
-  assert.ok([bedroom3Bed, bedroom4Bed].every(bed => bed.rotation.y === 0), 'Both southern headboards face north');
+  for (const [bed, rotation, wallName, side] of [[bedroom3Bed, Math.PI / 2, 'Bedroom 3 west', 1], [bedroom4Bed, -Math.PI / 2, 'Bedroom 4 east', -1]]) {
+    assert.equal(bed.rotation.y, rotation, `${bed.name} headboard backs onto its exterior wall`);
+    const headboard = bed.children.find(m => m.geometry.h === 2 && m.geometry.d === .18);
+    const host = model.plan.walls.find(w => w.name === wallName);
+    const rear = side > 0 ? bounds(headboard).minX : bounds(headboard).maxX;
+    assert.ok(Math.abs((side * (rear - host.x1) - host.thickness / 2 - .0625) * 12 - 1) < .001, 'Headboard clears exterior baseboard by one inch');
+    assert.ok(constituent(headboard).high < 13);
+    for (const mesh of meshes(bed)) for (const wall of walls) assert.ok(!positiveOverlap(constituent(mesh), constituent(wall), .001), `${bed.name} intersects ${wall.parent.name}`);
+  }
   const bedroom3Chair = item('Bedroom 3 reading chair');
   const bedroom4Chair = item('Bedroom 4 reading chair');
   assert.ok(Math.abs(bedroom3Chair.position.x - 2.5) < 1e-8);
@@ -337,8 +391,8 @@ test('upstairs furniture follows the supplied staged-plan composition within mea
   assert.ok(Math.abs(sofaRearClearanceInches - 3.9) < 1e-8, 'Sofa clears the south finished wall by 3.9 in');
   const sofaFrontZ = loftSofa.position.z - 2.8 / 2;
   const tableSouthZ = loftTable.position.z + 2 / 2;
-  assert.ok(Math.abs((sofaFrontZ - tableSouthZ) * 12 - 14.3125) < 1e-8,
-    'Sofa front to coffee-table edge is about 14.3 in');
+  assert.ok(Math.abs((sofaFrontZ - tableSouthZ) * 12 - 15) < 1e-8,
+    'Sofa front to coffee-table edge is 15 in');
   const loftChair = item('Loft reading chair');
   assert.equal(loftChair.rotation.y, Math.PI / 4, 'Reading chair faces diagonally into the sofa group');
   assert.ok(Math.abs(loftChair.position.x - (loftCenterX + 4.8)) < 1e-8);
@@ -374,7 +428,8 @@ test('front redesign leaves window approaches and occupied desk-to-bed route cle
   const mattress = bounds(bed);
   assert.ok(desk.maxZ <= 48.35 + 1e-8, 'Desk clears the closet door operating through its complete 90-degree sweep');
   assert.ok(chair.maxZ < 49.2, 'Occupied chair stays north of closet approach');
-  assert.ok((mattress.minX - chair.maxX) * 12 >= 24, 'At least 24 inches remain between chair and mattress, not a certified passage');
+  assert.ok(Math.abs((mattress.minX - chair.maxX) * 12 - 27.47) < .001, 'Tucked chair-to-mattress gap is 27.47 inches, not a certified passage');
+  assert.ok(Math.abs((mattress.minX - chair.maxX - .75) * 12 - 18.47) < .001, 'Nine-inch chair pull leaves 18.47 inches; use the bed-foot route');
   for (const name of ['Bedroom 3', 'Bedroom 4']) {
     for (const suffix of ['bed', 'dresser', 'writing desk', 'desk chair']) {
       const object = item(`${name} ${suffix}`);
@@ -448,7 +503,7 @@ test('wall lamps mount on solid wall rather than across windows or door openings
 test('measured primary closet includes hardware in its aisle and clears the bedroom entry', () => {
   const dresser = bounds(item('Primary closet drawers'));
   const hanging = bounds(item('Primary closet long hanging'));
-  assert.ok(Math.abs((hanging.minZ - dresser.maxZ) * 12 - 52.5625) < 0.001);
+  assert.ok(Math.abs((hanging.minZ - dresser.maxZ) * 12 - 34.8) < 0.001);
   for (const name of ['Primary closet long hanging', 'Primary closet double hanging', 'Primary closet folded clothes']) {
     const b = bounds(item(name));
     assert.ok(b.minZ >= g.closetNorth + 4, `${name} clears west entry`);
@@ -462,131 +517,6 @@ test('bedroom 2 toilet no longer overlaps the vanity', () => {
   const toilet = bounds(item('Bedroom 2 toilet'));
   const vanity = bounds(item('Bedroom 2 vanity'));
   assert.ok(toilet.maxZ < vanity.minZ);
-});
-
-test('primary bathroom follows owner marks: east-wall tub, north-window double vanity and west linen door', () => {
-  const tub = item('Primary built-in tub'), shower = item('Primary shower'), vanity = item('Primary double vanity');
-  assert.ok(!model.group.children.some(o => o.name === 'Upstairs Primary freestanding tub'));
-  const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-8, `${actual} != ${expected}`);
-  const t = bounds(tub), s = bounds(shower), v = bounds(vanity);
-  close((t.maxX - t.minX) * 12, 36);
-  close((t.maxZ - t.minZ) * 12, 66);
-  const deck = meshes(tub).filter(o => o.name.startsWith('Primary tub deck ') && !o.name.includes('faucet'));
-  assert.equal(deck.length, 4);
-  close(Math.max(...deck.map(m => constituent(m).high)) - 10, 20 / 12);
-  const window = model.plan.windows.find(w => w[0] === 'Primary bath');
-  assert.ok(window);
-  close(tub.rotation.y, Math.PI / 2);
-  close((g.bathEast - g.t / 2 - t.maxX) * 12, 1.5);
-  close((t.minZ - g.bathNorth - g.t / 2) * 12, 1.5);
-  close((g.closetNorth - g.t / 2 - s.maxZ) * 12, 1.5);
-  close((s.maxX - s.minX) * 12, 48);
-  close((s.maxZ - s.minZ) * 12, 60);
-  close((s.minZ - t.maxZ) * 12, 15.2375);
-  assert.deepEqual(Array.from(vanity.userData.cabinetWidthsInches), [30, 12, 30]);
-  assert.equal(meshes(vanity).filter(m => m.name === 'Primary vanity bowl bottom').length, 2);
-  const mirrors = item('Primary bath mirrors');
-  assert.equal(meshes(mirrors).filter(m => m.name === 'Primary vanity mirror').length, 2);
-  assert.ok(bounds(mirrors).minZ > g.closetNorth - 0.35, 'Mirrors retained on solid south wall, not over window');
-  close(vanity.rotation.y, 0);
-  assert.ok(window[1] > v.minX && window[1] < v.maxX, 'Vanity now sits beneath retained north window');
-  close(v.minZ - (g.bathNorth + g.t / 2), 0.075);
-  close((t.minX - v.maxX) * 12, 17.8875);
-  assert.ok(t.minZ < v.maxZ, 'Tub occupies marked northeast zone beside, not south of, the vanity');
-  close(shower.rotation.y, Math.PI);
-  for (const m of meshes(vanity).filter(o => !o.name?.includes('faucet'))) assert.ok(constituent(m).high < 13, 'Counter and backsplash remain below the 36-inch window sill');
-  for (const [a, b] of [[tub, shower], [tub, vanity], [shower, vanity], [mirrors, shower], [mirrors, tub]]) {
-    for (const m of meshes(a)) for (const n of meshes(b)) assert.ok(!positiveOverlap(constituent(m), constituent(n)), `${a.name}/${b.name}`);
-  }
-});
-
-test('primary fixture approaches and shower entrance have physical clear space, not only labels', () => {
-  const fixtures = ['Primary built-in tub', 'Primary shower', 'Primary double vanity', 'Primary toilet'].map(item);
-  const walls = model.group.children.filter(o => o.name?.startsWith('Upstairs wall:')).flatMap(meshes);
-  const solids = [...walls, ...fixtures.flatMap(meshes)].map(constituent);
-  const clearRectangle = (x, z, width, depth) => {
-    const region = { vertices: [[x-width/2,z-depth/2],[x+width/2,z-depth/2],[x+width/2,z+depth/2],[x-width/2,z+depth/2]], low: 10.25, high: 16 };
-    for (const solid of solids) assert.ok(!positiveOverlap(region, solid), `Blocked approach at ${x}, ${z}`);
-  };
-  const vanity = item('Primary double vanity'), v = bounds(vanity);
-  for (const dx of [-1.75, 1.75]) clearRectangle(vanity.position.x + dx, v.maxZ + 1.25, 2.5, 2.5);
-  const tub = bounds(item('Primary built-in tub'));
-  clearRectangle(tub.minX - 1.25, tub.maxZ - 1.3, 2.5, 2.5);
-  const shower = item('Primary shower');
-  const entryGlass = bounds(meshes(shower).find(m => m.name === 'Primary shower fixed entry glass'));
-  const s = bounds(shower);
-  const northGlass = bounds(meshes(shower).find(m => m.name === 'Primary shower fixed north glass'));
-  assert.ok((entryGlass.minZ - northGlass.maxZ) * 12 >= 35.6, 'West entry retains at least 35.6 inches between actual glass constituents');
-  clearRectangle(s.minX - 1.3, (entryGlass.minZ + northGlass.maxZ) / 2, 2.5, 2.5);
-  const door = item('wall: Toilet partition').children.find(o => o.userData.interactiveHouseDoor);
-  assert.equal(door.userData.interactiveHouseDoor.closedRotationY, Math.PI, 'South-jamb hinge clears the tub without moving the WC opening');
-});
-
-test('mark 3 is an enclosed linen closet with an operable 18 by 96 inch door and four fixed shelves', () => {
-  const host = item('wall: Toilet partition');
-  const doors = host.children.filter(o => o.userData.interactiveHouseDoor);
-  assert.equal(doors.length, 2, 'Private WC entry and a separate linen entry');
-  const door = doors.find(o => o.userData.nominalOpeningFeet === 1.5);
-  assert.ok(door);
-  assert.equal(door.userData.interactiveHouseDoor.openAngleDegrees, 0);
-  const leaf = door.children.find(o => o.userData.doorStyle);
-  assert.equal(leaf.userData.height, 7.96);
-  const shelves = item('Primary bath linen shelves');
-  assert.equal(meshes(shelves).filter(m => m.name === 'Primary linen fixed shelf').length, 4);
-  const b = bounds(shelves);
-  assert.ok(b.minX > g.primaryEast - 3.35 + g.t / 2);
-  assert.ok(b.maxX < g.primaryEast - g.t / 2);
-  assert.ok(b.minZ > g.north - 2.35 + g.t / 2);
-  assert.ok(b.maxZ < g.north - g.t / 2);
-  for (const m of meshes(shelves)) {
-    assert.equal(m.geometry.w * 12, 15);
-    assert.ok(Math.abs(m.geometry.d * 12 - 22.8) < 0.001);
-  }
-});
-
-test('primary vanity cabinet doors and three center drawers operate clear of the shell and adjacent fixtures', () => {
-  const fresh = build(), vanity = fresh.group.children.find(o => o.name === 'Upstairs Primary double vanity');
-  const source = fs.readFileSync(path.join(__dirname, '..', 'floor-plan-3d.js'), 'utf8');
-  const start = source.indexOf('  function toggleCabinet('), end = source.indexOf('  function singlePanelDoor(');
-  assert.ok(start > 0 && end > start);
-  const material = {};
-  const context = {
-    cabinetRailFinish: material, cabinetFinish: material,
-    box(parent, x, y, z, w, h, d) {
-      const mesh = new Mesh({ w, h, d }, material);
-      mesh.position.set(x, y, z); parent.add(mesh); return mesh;
-    }
-  };
-  vm.runInNewContext(source.slice(start, end), context);
-  context.prepareCabinetInteractions(vanity);
-  const fronts = [];
-  vanity.traverse(o => { if (o.userData.interactiveCabinet) fronts.push(o); });
-  assert.equal(fronts.filter(o => o.userData.interactiveCabinet.kind === 'drawer').length, 3);
-  assert.equal(fronts.filter(o => o.userData.interactiveCabinet.kind === 'hinged').length, 4);
-  const external = fresh.group.children.filter(o => o !== vanity && (o.name?.startsWith('Upstairs wall:') || /Upstairs Primary (built-in tub|shower|toilet)/.test(o.name))).flatMap(meshes);
-  const fixedCabinet = meshes(vanity).filter(m => {
-    for (let node = m; node !== vanity; node = node.parent) if (node.userData.cabinetFront) return false;
-    return true;
-  });
-  for (const front of fronts) {
-    const operation = front.userData.interactiveCabinet;
-    const closed = { ...front.position };
-    context.toggleCabinet(front);
-    for (let step = 0; step <= 30; step++) {
-      const fraction = step / 30;
-      const angle = operation.kind === 'hinged' ? operation.hingeSide * fraction * Math.PI / 2 : 0;
-      const hinge = operation.hingeSide * front.userData.width / 2;
-      front.rotation.y = angle;
-      front.position.x = closed.x + (operation.kind === 'hinged' ? hinge * (1 - Math.cos(angle)) : 0);
-      front.position.z = closed.z + (operation.kind === 'hinged' ? hinge * Math.sin(angle) : fraction * operation.travel);
-      for (const m of meshes(front)) for (const obstacle of [...external, ...fixedCabinet]) assert.ok(!positiveOverlap(constituent(m), constituent(obstacle)), `${front.name} clashes at ${fraction} with ${obstacle.name}`);
-    }
-    if (operation.kind === 'drawer') assert.ok(Math.abs((front.position.z - closed.z) * 12 - 15) < 0.001);
-    context.toggleCabinet(front);
-    assert.deepEqual(front.position, closed);
-    assert.equal(front.rotation.y, 0);
-    assert.equal(operation.open, false);
-  }
 });
 
 test('closet inspection reveals hanging contents and other views restore canopy shelves', () => {
@@ -678,9 +608,33 @@ test('image service core has west linen/furnace and a usable laundry aisle', () 
   assert.deepEqual(Array.from(model.start),[16.5,33]);
 });
 
+test('primary bathroom follows the new opposing-sink, northeast-tub and southeast-shower composition', () => {
+  const north = item('Primary north vanity'), south = item('Primary south vanity');
+  assert.equal(model.group.children.some(o => o.name === 'Upstairs Primary double vanity'), false);
+  for (const [vanity, width, rotation] of [[north, 5, 0], [south, 4, Math.PI]]) {
+    assert.equal(vanity.rotation.y, rotation);
+    assert.equal(vanity.children.find(m => m.userData.cabinetBody).geometry.w, width);
+    assert.equal(vanity.children.filter(m => m.geometry?.w === 1.45 && m.geometry?.h === .08).length, 1, 'One basin per standard vanity');
+  }
+  const tub = bounds(item('Primary freestanding tub')), shower = bounds(item('Primary shower'));
+  assert.ok(tub.minX > north.position.x && tub.maxZ < shower.minZ);
+  assert.ok(shower.minX > bounds(south).maxX && shower.maxZ < g.closetNorth - .175);
+  assert.ok(Math.abs((shower.maxX - shower.minX) * 12 - 42) < .001);
+  assert.ok(Math.abs((shower.maxZ - shower.minZ) * 12 - 72) < .001);
+  assert.ok(bounds(item('Primary bath linen shelves')).minZ > g.toiletSouth + .175);
+  const window = model.plan.windows.find(w => w[0] === 'Primary bath');
+  assert.ok(window[1] - window[3] / 2 > bounds(north).maxX, 'North casement is over tub, not behind mirror');
+  const fixtures = [north, south, item('Primary toilet'), item('Primary freestanding tub'), item('Primary shower'), item('Primary bath linen shelves')];
+  for (let i = 0; i < fixtures.length; i++) for (let j = 0; j < i; j++) {
+    for (const a of meshes(fixtures[i])) for (const b of meshes(fixtures[j])) {
+      assert.ok(!positiveOverlap(constituent(a), constituent(b)), `${fixtures[i].name} overlaps ${fixtures[j].name}`);
+    }
+  }
+});
+
 test('changed fixtures clear finished walls and gallery floor pieces do not overlap', () => {
   const walls=model.group.children.filter(o=>o.name?.startsWith('Upstairs wall:')).flatMap(o=>o.children.filter(m=>m.geometry?.w!==undefined));
-  for(const name of ['Primary built-in tub','Primary shower','Primary double vanity','Primary toilet','Primary bath mirrors','Primary bath linen shelves','Washer','Dryer','Laundry folding counter','Laundry wall cupboards','Linen shelves','Mechanical equipment reservation','West bath vanity','East bath vanity','West bath toilet','East bath toilet','West bath shower','East bath shower']) {
+  for(const name of ['Washer','Dryer','Laundry folding counter','Laundry wall cupboards','Linen shelves','Mechanical equipment reservation','West bath vanity','East bath vanity','West bath toilet','East bath toilet','West bath shower','East bath shower','Primary north vanity','Primary south vanity','Primary toilet','Primary freestanding tub','Primary shower','Primary bath linen shelves','Bedroom 2 closet hanging','Bedroom 2 closet shelves']) {
     for(const m of meshes(item(name))) for(const w of walls) assert.ok(!positiveOverlap(constituent(m),constituent(w)),`${name} penetrates ${w.parent.name}/${w.name}`);
   }
   const floors=model.plan.floors;
@@ -690,13 +644,13 @@ test('changed fixtures clear finished walls and gallery floor pieces do not over
   }
 });
 
-test('front-entry projecting casing caps clear perpendicular bathroom and closet returns', () => {
-  for(const name of ['Bedroom 3 north','Bedroom 4 north']) {
+test('entry projecting casing caps clear perpendicular bathroom and closet returns', () => {
+  for(const [name,count,width] of [['Bedroom 3 north',4,2.5],['Bedroom 4 north',4,2.5],['Primary suite entry',6,3.5],['Toilet partition',2,3.5]]) {
     const host=item(`wall: ${name}`);
     const casings=host.children.filter(o=>o.name==='Craftsman opening casing');
-    assert.equal(casings.length,4, 'Bedroom and ensuite bathroom cuts are both trimmed');
+    assert.equal(casings.length,count, 'Every doorway is trimmed on both faces');
     for(const casing of casings) {
-      assert.equal(casing.userData.sideWidthInches,2.5);
+      assert.equal(casing.userData.sideWidthInches,width);
       for(const m of meshes(casing)) for(const wall of model.group.children.filter(o=>o.name?.startsWith('Upstairs wall:')&&o!==host)) {
         for(const n of wall.children.filter(o=>o.geometry?.w!==undefined)) assert.ok(!positiveOverlap(constituent(m),constituent(n)),`${name}: ${m.name} penetrates ${wall.name}`);
       }
@@ -729,15 +683,13 @@ test('open-door tour routes reach every private room and service without crossin
     }
   }
   const destinations={
-    'primary bedroom':[11,24], 'primary bath':[20,8], 'primary toilet':[13.25,2.25],
-    'primary tub approach':[22.5,3.25], 'primary shower approach':[21.5,7.5],
-    'primary vanity west basin':[17.75,3], 'primary vanity east basin':[21.25,3],
-    'primary linen approach':[16.5,5.5], 'primary linen shelf access':[14,5.5],
+    'primary bedroom':[11,22.5], 'primary west chair approach':[3.5,23.5], 'primary east chair approach':[9.75,23.5],
+    'primary bath':[20,8], 'primary toilet':[15,2.25],
     'primary closet':[21,15.75], 'bedroom 2':[35,17], 'bedroom 2 bath':[48,9.5],
-    'bedroom 2 closet':[49,16],     'bedroom 3':[7,47], 'bedroom 3 closet':[14.5,43],
+    'bedroom 2 closet':[49,16],     'bedroom 3':[8,47], 'bedroom 3 closet':[14.5,43],
     'bedroom 4':[22.75,48.5], 'bedroom 4 closet':[16,49], 'west toilet approach':[4.75,39],
     'east toilet approach':[26.75,39], laundry:[36,30], linen:[23.5,32],
-    mechanical:[27,32], loft:[41,23], 'loft seating':[45,29]
+    mechanical:[27.75,32.25], loft:[41,23], 'loft seating':[45,29]
   };
   const missing=Object.entries(destinations).filter(([, [x,z]])=>!visited.has(`${x*4},${z*4}`)).map(([name,[x,z]])=>`${name} (${can(x,z)?'disconnected':'destination blocked'})`);
   assert.deepEqual(missing,[],'Every destination has a continuous route for the 12-inch-diameter model tour avatar');

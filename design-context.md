@@ -82,9 +82,11 @@ roof-window product study is historical, not an active selection.
 The front wall moves 5.75 inches forward to z=54.67917 ft, lengthening the
 office, entry hall and ground-floor guest bedroom while preserving their
 widths, north/side walls and the 7-ft porch depth. The porch edge is
-z=61.67917 ft; from the unchanged stepped rear projection at z=-2.325 ft,
-the maximum modeled span is about 64 ft (64.004 ft, approximately
-64 ft 0.05 in). The office is about 12 ft 2 in x 13 ft 8 in; the guest
+z=61.67917 ft. With the October 30 upstairs bath's revised rear masonry
+face at z=-1.575 ft, the maximum modeled span is now 63.254 ft (about
+63 ft 3.05 in), not the earlier 64-ft estimate. The current outside masonry
+width is 56.2 ft, including the upper east projection; the compact footer
+rounds these bounds to 56 x 63 ft. The office is about 12 ft 2 in x 13 ft 8 in; the guest
 bedroom is about 12 ft 2 in x 11 ft 6 in. The front entry, windows, porch
 furniture, columns, roof, steps and planting move to remain coordinated.
 The entry-hall floor extends with its walls. The front-door light retains
@@ -230,11 +232,11 @@ occupied retrieval and cooktop service space before ordering/fabrication.
 
 ## Historical laundry roof-window study - October 28 (removed)
 
-Add two fixed roof-window concepts above the unchanged interior laundry in the
-south-facing East rear wing roof. The 4:12 plane carries 21 x 45.75 in rough
-openings centered at (34.2708, 31.4) and (37.6708, 31.4) ft, with 21.5 x
-46.25 in candidate frame dimensions. The official
-[VELUX product-size chart](https://pro.veluxusa.com/-/media/marketing/us/img/professional/product-sizes/product%20sizes%20codes.pdf),
+Two fixed roof-window concepts remain above the laundry in the south-facing
+East rear wing roof. October 30 coordination moves their 4:12-plane centers
+to (34.25, 31.4) and (37.65, 31.4) ft, retaining 21 x 45.75 in rough openings
+and 21.5 x 46.25 in candidate frame dimensions. The official
+[VELUX product-size chart]
 retrieved October 28, 2026, matches
 these dimensions to a fixed deck-mounted FS C06; this is a dimensional
 candidate only, not a selected product or approval that this roof/application
@@ -411,7 +413,8 @@ saved JSON. Chairs follow; bedroom lamp backplates now sit on paint.
 Upstairs anchors use resolved wall faces/thickness, not scaled rear offsets.
 
 Sampled full door sweeps clear tucked and 9 in pulled chairs; restore defaults.
-Bedroom 4 has 28.5/19.5 in tucked/pulled chair-to-mattress space, not an
+The earlier Bedroom 4 desk study measured 28.5/19.5 in tucked/pulled;
+October 30 exterior-wall bed rotation changes this to 27.47/18.47 in, not an
 occupied passing aisle. Bedroom 2's narrow north gap is likewise not a
 passing route; retain west-side access. Ground bins and occupied desks
 remain sequential-use. No desk drawers exist in this model. Verify real
@@ -2164,11 +2167,20 @@ The viewer footer shows a combined two-floor livable-area estimate computed
 from current floor surfaces, including saved layout overrides, with separate
 first-floor and second-floor values visible alongside the total. Count overlapping
 surfaces once per floor, including closets, halls, bathrooms, laundry and the
-upstairs arrival landing. Exclude garage, porch, mechanical space and open stair
-voids. Recalculate on view/layout changes; source-plan changes update on reload.
-This is nominal modeled interior floor area, not certified appraisal or code
-living area. Wall thickness, headroom eligibility and stair-area conventions
-remain unverified. No room layout changes are implied.
+upstairs arrival landing. Owner correction October 30: **count the stair
+footprint once downstairs**, unioned with first-floor surfaces; upstairs open
+stair void stays excluded. Previously stairs were omitted from both floors.
+Garage, porch and mechanical space remain excluded; basement rooms are not
+modeled/included. Default first floor 1,920.9792 sq ft (76.9458 sq ft stair
+footprint), upstairs 2,154.5042 sq ft, combined 4,075.4833 sq ft after the
+2.925-sq-ft Closet 4 inset and main's 14.95-sq-ft front extension; display
+1,921 / 2,155 / 4,075 with final rounding in compact 1st / 2nd / Area outputs.
+Recalculate on view/layout changes; source changes update on reload. These are
+nominal modeled plan areas, not certified exterior-face appraisal, net usable
+or code living areas; wall thickness/headroom eligibility remain unverified.
+Historical source/envelope
+estimates below are superseded and use different stair rules. No geometry or
+saved-layout changes are implied.
 
 ## Whole-house walkthrough video - October 24
 
@@ -2220,104 +2232,101 @@ Camera/floor changes preserve cabinet poses; reload closes them. This is
 concept operation only: close fronts for circulation, and verify hinges,
 slides, plumbing, appliance conflicts and occupied clearances separately.
 
-## Measured upstairs rebuild — October 28
+## Reference upstairs rebuild — October 30
 
-Primary bath owner marks, October 29 supersede the first rebuild: 1 = east-wall
-66 x 36 in built-in tub in northeast corner, deck 20 in; latest image 2 =
-southeast shower. North-window 72 x 24 in double vanity stays facing south;
-the previous mark 3 remains the west linen recess with an
-18 x 96 in closed white single-panel door and four 15 in-deep / 22.8 in-wide
-fixed oak shelves. Outer footprint, existing window/WC/bedroom entry and saved
-JSON stay. Retain stock 30 + 12 + 30 in oak Shaker vanity, three 15 in-travel
-drawers, pale stone at 34.5 in, satin gold. Counter/low splash below 36 in sill;
-two mirrors move to solid south wall, not across the window. Generic SE shower
-48 x 60 in now opens west, nominal 36 in / modeled 35.64 in between glass.
-Fixed north splash glass; 15.24 in to tub is not an approach. Tub/vanity side
-gap 17.89 in is not a route; approach tub on the southern part of its west side.
-Separate closed-front 30 x 30 in standing rectangles
-clear basins, west tub side and west shower entry. WC/linen south-jamb hinges
-swing outward into bath, all default closed at 96 in heads. Linen recess is
-storage, not approved walk-in space. Window-by-tub intent is superseded by the
-owner marks; window reach/glazing/privacy, water containment, waterproofing,
-structure, shelf loads/retrieval, plumbing, service and selected products remain
-unapproved. Retain bathroom exhaust/night-light requirements.
+The new owner screenshot supersedes October 28 targets. Spatial intent: keep
+the same bedroom/loft/laundry organization and real ground stair, but narrow
+the primary bathroom to a 13.5 × 13.5-ft overall paint-face envelope including
+northwest toilet/linen return. Enclose toilet northwest, show linen shelves
+immediately south, oppose separate standard 60-inch north and 48-inch south
+single-sink vanities, put the generic 33.6 × 62.4-inch tub northeast and
+conceptual 42 × 72-inch shower southeast, long axes north–south. Shower entry
+is west. Move retained north casement above tub, clear of vanity mirror.
+South-jamb-hinged toilet door opens into bath clear of sinks; shift closet
+entry north enough to avoid retained bedroom media console. Bath main
+rectangle is 11 ft 7.8 in wide; overall width includes its west return.
 
-2D overlays now show only short room names and compact dimensions, with a
-10 px text cap and room-fit sizing. Full names, paint-face qualifications and
-irregular-room explanations remain in the dimension list/tooltips. This is a
-display change only; measured geometry and saved layouts are unchanged.
+Use finished paint-face targets plus 4.2-inch study walls: primary bedroom
+14.75 × 19.75 ft; primary closet 17.5 × 12.5-ft L-shaped envelope with a
+6 ft 7.8 in lower band; NE bedroom 13 × 12.5 ft; southern bedrooms each
+12.5 × 13 ft, closet widths 5.5 ft; loft 15 × 15.25 ft; laundry 8.5 × 9.5 ft;
+furnace reservation 6 × 4.5 ft. Stable viewer Bedroom 2 = image Bed 3,
+Bedroom 3 = image Bed 1, Bedroom 4 = image Bed 2; southern baths retain
+bedroom access and 9 × 5-ft clear dimensions.
 
-The new owner attachment supersedes the approximate upstairs trace and relocated
-laundry gallery. Use finished paint-face dimensions with 4.2-inch centerline
-wall allowances: primary 14 ft 8 in × 19 ft 8 5/16 in; primary closet
-17 ft 6 7/8 in × 8 ft 1 9/16 in plus north return; NE bedroom 13 × 12.5 ft;
-southern bedrooms each 12.5 × 13 ft, closets 5 ft 6 1/4 in wide; loft lower
-width/depth 15 ft 2 1/4 in × 15 ft 2 5/16 in; laundry 8.5 × 9.5 ft.
-Stable viewer Bedroom 2 = image Bed 3, Bedroom 3 = image Bed 1, Bedroom 4 =
-image Bed 2. Bath 1/2 now enter from those southern bedrooms as drawn.
+Rounded-label adaptations: loft gains 3 in depth to retain fixed stair-side
+datum, NE bath 1.2 in width (9 ft 1.2 in × 5.5 ft), NE closet 1.8 in depth
+(6 ft × 6 ft 7.8 in). Closet 3 remains 6 ft 1.8 in deep. Owner follow-up:
+Closet 4 must be inset at the front, not flush with bedroom fronts. Set its
+south wall z=53.3 ft, six inches north of bedrooms z=53.8, x=12.85–18.7 ft,
+for a 5.5 × 6-ft paint-face closet. Recess floor, furnished/brick wall and trim;
+add both six-inch exterior returns and wall-head closures. Move unchanged
+hanging bay six inches north, preserving door/default pose and other furniture.
+Keep four front casements/shutters/masonry bays at existing positions. Shared
+main hip and lower porch roof bridge the recess; no upper slab fills it.
+Roof/veneer support, flashing and drainage remain professional holds.
+Primary closet/bath labels are envelopes, not full unobstructed rectangles.
+Hall/enclosure/MEP offsets are study reservations, not framing dimensions.
 
-Laundry centerlines x=31.570833–40.420833, z=25.25–35.1 ft; linen and furnace
-immediately west. Move furniture/fixtures, lamps and hall lights with the rooms,
-not by scaling their product envelopes. Keep queen/full mattresses, wall-backed
-desks, 96-inch door heads/closed defaults, fixed ground stairs/guards/arrival,
-both saved layout JSON files and unrelated customization work. All 15 upper
-window positions and exterior cuts follow actual wall hosts. Front pairs are
-room-centered; materials, 36/96-inch sill/head datums and shade divisions remain.
-Shared hip roofs, upper wall-head closures, projection finish undersides and
-patio canopy notch follow the new envelope. Only a short south loft/garage
-transition remains a low setback roof, with east/south drainage intent.
+Laundry centerlines x=31.55–40.4,z=25.25–35.1 ft; linen/furnace west. NE closet
+east x=52.65 creates an exterior recess below the wider bath, closed south
+by a new loft north-return wall. No upper floor fills that nook; the shared
+hip spans overhead. All fifteen vertical windows/exterior cuts, wall-head
+closures, finish undersides, patio canopy notch and gutter corners follow
+shared geometry. Both proposed laundry roof windows remain removed per the
+latest roof decision; do not restore openings or shafts. Only a short south
+loft/garage low transition roof remains. These upstairs changes preserve both
+saved JSON files; main's ground front extension remains. The 96-inch-head
+doors retain closed defaults.
 
-Measured constituent allowances: 52.56-inch primary closet hardware-to-hanging
-aisle, 51-inch laundry front-to-counter-handle aisle, 4.35-inch machine rear
-allowance beyond baseboard, 62.61-inch northern connector between baseboards.
-Laundry uses three 24-inch uppers and two 24-inch bases. Occupied use, open
-appliances, service/retrieval, selected products and sanitary clearances remain
-unapproved. Door sweeps and the 12-inch avatar route are not human accessibility.
+Owner follow-up: back the unchanged primary 60 × 80-in queen against the
+west wall, facing east at 90 degrees, center (3.8442,16.15) ft. Headboard
+clears west baseboard by 1 in, below window sills. Both nightstands follow;
+paired lamps mount on the solid west-window pier, not glazing. Retain the
+4-ft dresser on north wall at (3.5,7.75) ft facing south, clear of bed/desk.
+Window reach/operation and occupied use remain unapproved. Bedroom 2 stays
+north-facing at (41.45,10.75) ft. Owner follow-up: unchanged 54 × 75-in beds
+in viewer Bedrooms 3/4 have west/east exterior headboards respectively.
+Centers (3.6358,45.75)/(27.9142,46.95) ft, rotations +90/-90 degrees;
+headboards clear baseboards by 1 in below sills. Nightstands rotate; lamps
+follow on solid wall. Retain rug sizes, shifting 6 in toward feet. Bedroom 4
+dresser moves 3.6 in south to (24,50.3) ft, leaving 2.4 in to bed frame.
+Preserve east TV. Primary chairs/stand now back south, 1 in clear of baseboard.
+Chair centers (3.5,25.3042)/(9.8,25.3042) ft face north; stand center
+(6.65,25.7292) ft rotates 180 degrees for north-facing front access. Seating
+axis shifts 10.8 in west to preserve east entry. Retain 28.2 × 27-in chairs
+and 16.8-in-square stand; chair fronts are 43.85 in south of bed/nightstand
+group. Occupied operation remains unapproved.
+Keep child reading chairs, wall-backed desks and closet storage. Center unchanged
+6 × 2.8-ft loft sofa facing north media, table/rug ahead, east lounge chair
+and east-wall work area. Sofa ends clear paint by 54 in, rear 3.9 in,
+front-to-table 15 in. Desk legs clear trim by 0.45 in. Use bed-foot routes;
+Bedroom 4's 18.47-in pulled chair gap (27.47 in tucked) is not a passage. Keep short 10-px-capped
+2D labels and main-rectangle dimension lists; no new visible UI.
 
-Reference-matched furnishing study — October 28: retain the measured shell and
-use north-facing headboards. The primary queen is at (5.8565,13.4073) ft,
-west of room center; its east-wall TV/media console serves two upholstered
-lounge chairs at x=4.3583 and 10.6583 ft with their table centered at
-x=7.5083 ft near the bed foot. Bedroom 2's full bed is at
-(41.4396,10.8073) ft in the east zone; Bedroom 3's is at (3.3,45.75) ft in
-the west zone, and Bedroom 4's at (28.2708,46.95) ft in the east zone.
-Each secondary bedroom adds a generic upholstered reading chair distinct
-from its desk chair. The loft seating is reorganized around the north-wall
-media: center the 6 × 2.8 ft sofa on the south side, facing north; center the
-8 × 7 ft rug/table group ahead; angle the 2.35 × 2.25 ft lounge-chair proxy
-in from the east and place its 1.5 ft side table north-west of it. Keep the
-work area on the east wall. On the 15 ft 2 1/4 in paint-face width, the
-centered sofa leaves about 55.2 in between its ends and the side walls; its
-rear edge clears the south paint face by 3.9 in. The sofa front to coffee-table
-edge is 14.3 in. These are modeled geometric allowances, not approved
-occupied clearances. Verify selected products before purchase. Beds, desks,
-dressers, room boundaries, openings and saved layout JSON remain unchanged.
-Regression checks cover room-edge/furniture fit, door sweeps and routes for a
-12-in model-tour avatar; this is not occupied-person clearance, accessibility,
-egress or product approval. Bedroom 4's 19.5-in pulled desk-chair gap is not
-a passage; keep the bed-foot route and verify actual occupied use.
+Bathroom intrusion reduces the primary closet's closed hardware-to-hanging
+aisle to 34.8 in from 52.56 in. Preserve storage; close drawers for through-
+access. Occupied/open-front operation remains unapproved. Laundry aisle
+remains 51 in, rear allowance 4.35 in beyond baseboard, north connector now
+63.3 in. Retain three standard 24-in uppers and two 24-in bases. Check physical
+constituents, all sixteen 90-degree sweeps with tucked/pulled chairs, routes,
+floor/view/lighting restoration. A 12-in tour avatar proves only connectivity,
+not human accessibility, egress, sanitary clearance or occupied product use.
 
-Conflicts/assumptions: Bath 3 absorbs a 0.3875-inch width chain residual
-(modeled 9 ft 3.825 in versus image approximately 9 ft 3 7/16 in). Use the
-southern east bedroom's 12 ft 6 in lower label rather than its upper
-12 ft 5 15/16 in. Loft upper width is an open-hall split, not a second enclosing
-wall; crowded bath/closet/linen/hall jog labels are traced reservations.
-The image stair is not the ground stair: preserve x=0.175–10.008333,
-z=27.016667–34.841667 ft and the 44 × 46.9-inch east arrival; adapt the hall.
-The 3.1-inch south edge strip is not a route.
+Preserve actual stair/void x=0.175–10.008333,z=27.016667–34.841667 ft and
+44 × 46.9-in east arrival; do not substitute screenshot stair. Existing
+owner-requested wall-backed guard removals and exposed-edge protection stay.
+The 3.1-in south strip is not a route.
 
-This is a reversible, support-required concept: east upper wall centerline is
-5.5 inches beyond ground east wall, leaving 5 ft 6.5 in between its finished
-masonry face and the fixed inner fence rail (the ground wall still has 6 ft).
-Site/setback review must include this upper projection, trim and eaves.
-Bedroom east edge projects 4.45 inches
-over the garage's west boundary; bath rear centerline z=−1.292708 is
-9.292708 ft beyond the living wall z=8. No bonus room/storage is added over
-the garage. Finish soffits/brick veneer do not establish floor/roof support.
-Architect/engineer must resolve bearing, beams/posts/foundations, stair
-guards/handrails/headroom, roof section/ventilation, garage fire separation,
-MEP/exhaust, egress, waterproofing, flashing and drainage/freeze/outlet approval.
-See [current upstairs notes](upstairs.html#model-study). No construction approval.
+Support-required concept: upper east centerline x=55.75 projects 3 in beyond
+ground east, leaving 5 ft 9 in from finished face x=55.975 to inner fence rail
+x=61.725, before trim/eaves. Bedroom edge projects 4.2 in over garage boundary;
+bath rear z=−1.35 is 9.35 ft beyond lower living wall z=8. No bonus room/storage
+is added. Finish soffits, veneer and roof do not establish load paths. Resolve
+bearing, beams/posts/foundations, roof build-up/ventilation, garage separation,
+guards/handrails/headroom, MEP, egress, waterproofing and drainage/freeze/lawful
+outlet professionally. See [upstairs notes](upstairs.html#model-study). No
+construction, product or code approval.
 
 ## Historical upstairs arrival-gallery redesign — October 27
 
@@ -3370,7 +3379,17 @@ Keep both refrigeration doors closed by default. Clicking or tapping either mode
 
 ## House square footage - October 18, 2026
 
-**Source-plan figures suggest approximately 3,637 sq ft, versus approximately 3,974 sq ft from the adapted default 3D model envelopes. Do not present these as interchangeable measurements.** Source ground floor: `2,716.5 total - 671.1 garage - 216.5 porch = 1,828.9 sq ft`; add the upstairs image's unverified 1,808.5 sq ft label for 3,637.4 sq ft. The upstairs label's treatment of the depicted above-garage area is unknown. Model: `1,926.91 ground + 2,047.13 upstairs = 3,974.04 sq ft`, including partitions, circulation, and stair footprints on each story; excluding garage, porch, covered patio, basement, and browser-saved upstairs edits. Model/source differences are 98.01 sq ft downstairs and 238.63 sq ft upstairs, not fully reconciled; the 29 sq ft kitchen/prep extension explains only part. See the [source comparison and first-floor rectangle takeoff](floor-plan-reference.md#house-square-footage---october-18-2026). Model unions and perimeter rectangles were cross-checked; garage, porch, and covered-patio coordinates were confirmed excluded. Neither total is certified living area.
+Historical source/envelope comparison only: current October 30 geometry and
+once-only stair rule are in [Dynamic livable-area estimate](#dynamic-livable-area-estimate).
+The older per-story stair counting and model values below are superseded.
+
+Source-plan arithmetic was `2,716.5 - 671.1 garage - 216.5 porch = 1,828.9 sq ft`
+downstairs, plus an unverified 1,808.5-sq-ft upstairs label for 3,637.4 sq ft.
+The upstairs label's above-garage treatment is unknown. Historical model-envelope
+takeoffs used different geometry and counted stair footprints on both stories;
+they are not interchangeable with source figures or the current viewer total.
+See the [historical comparison and takeoff](floor-plan-reference.md#house-square-footage---october-18-2026).
+Neither measurement basis is certified living area.
 
 ## Whole-house window inventory - October 18, 2026
 

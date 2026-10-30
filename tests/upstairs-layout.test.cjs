@@ -26,6 +26,33 @@ test('every upstairs doorway is eight feet tall and remains so with saved-layout
   assert.ok(count >= 15, 'Covers bedroom, bathroom, closet and service-room doorways');
 });
 
+test('Closet 4 front exterior wall is recessed six inches with real floor and masonry returns', () => {
+  const plan = layout.resolve(baseline, layout.empty());
+  const closet = room(plan, 'Bedroom 4 closet');
+  const front = wall(plan, 'Closet 4 south');
+  close(closet.w - .35, 5.5);
+  close(closet.d - .35, 6);
+  close(front.z1, measured.south - .5);
+  close(closet.z + closet.d, front.z1);
+  close(front.x1, measured.southClosetWest);
+  close(front.x2, measured.southClosetEast);
+  const recessX = (front.x1 + front.x2) / 2;
+  const recessZ = (front.z1 + measured.south) / 2;
+  assert.ok(!plan.floors.some(f => recessX > f.x && recessX < f.x + f.w && recessZ > f.z && recessZ < f.z + f.d), 'No upstairs slab fills exterior notch');
+  const segments = require('../floor-plan-upstairs.js').getUpstairsExteriorSegments();
+  assert.deepEqual(segments.find(([name]) => name === 'closet 4 front').slice(1), [front.x1, front.z1, front.x2, front.z2]);
+  for (const side of ['west', 'east']) {
+    const furnished = wall(plan, `Closet 4 ${side} return`);
+    const exterior = segments.find(([name]) => name === `closet 4 ${side} return`);
+    close(Math.abs(furnished.z2 - furnished.z1), .5);
+    close(exterior[1], furnished.x1);
+    close(Math.min(exterior[2], exterior[4]), front.z1);
+    close(Math.max(exterior[2], exterior[4]), measured.south);
+  }
+  close(room(plan, 'Bedroom 3').z + room(plan, 'Bedroom 3').d, measured.south);
+  close(room(plan, 'Bedroom 4').z + room(plan, 'Bedroom 4').d, measured.south);
+});
+
 test('upper arrival follows the powder-room-side flight after the stair swap', () => {
   const arrival = baseline.arrival;
   close(arrival.z + arrival.d, stairs.z + stairs.depth);

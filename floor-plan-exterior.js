@@ -353,7 +353,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     }
   }
   function wall(name, x1, z1, x2, z2, bottom, top, openings = []) {
-    const front = ['front ground floor', 'upper front bedrooms', 'upper loft south'].includes(name);
+    const front = ['front ground floor', 'upper front bedrooms', 'upper front bedroom 4', 'upper loft south'].includes(name);
     const wallGroup = new THREE.Group();
     wallGroup.name = `Exterior brick wall: ${name}`;
     wallGroup.position.set(x1, 0, z1);
@@ -398,7 +398,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   // Work in each actual wall's local coordinates so every return is coordinated.
   function articulateUpperMasonry(parent, length, top, openings) {
     const stone = trim;
-    const pairedFront = parent.name === 'Exterior brick wall: upper front bedrooms';
+    const pairedFront = ['Exterior brick wall: upper front bedrooms', 'Exterior brick wall: upper front bedroom 4'].includes(parent.name);
     const blindLoft = parent.name === 'Exterior brick wall: upper loft south';
     for (const [y, height, depth, label] of [
       [10.05, 0.3, 0.36, 'Upper masonry base course'],
@@ -504,8 +504,9 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const upper = floorToFloor;
   const measuredUpper = getUpstairsMeasuredGeometry();
   for (const [name, x1, z1, x2, z2] of getUpstairsExteriorSegments()) {
-    const openings = name === 'front bedrooms'
-      ? getUpstairsFrontWindows().map(w => win(w.center, w.width, upper + w.sill, w.height))
+    const openings = name === 'front bedrooms' || name === 'front bedroom 4'
+      ? getUpstairsFrontWindows().filter(w => w.center - w.width / 2 >= x1 && w.center + w.width / 2 <= x2)
+        .map(w => win(w.center - x1, w.width, upper + w.sill, w.height))
       : getUpstairsExteriorOpenings(x1, z1, x2, z2, upper);
     wall(`upper ${name}`, x1, z1, x2, z2, 9, eaves, openings);
   }
@@ -705,7 +706,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   setbackRoofs.userData.drainageIntent = 'Short transition roof falls east to collector and south to garage-side leader; capacity, freeze protection, flashing and lawful discharge require design.';
   // The upper bathroom projects beyond the lower living wall. A closed
   // finish underside is not a designed floor/cantilever or a load path.
-  const projectionWest = measuredUpper.primaryEast - 3.35 - 0.225;
+  const projectionWest = measuredUpper.bathWest - 0.225;
   const projectionEast = measuredUpper.bathEast + 0.225;
   const projectionRear = measuredUpper.bathNorth - 0.225;
   const projectionSoffit = box(group, (projectionWest + projectionEast) / 2, 9.03, (projectionRear + 8.225) / 2,

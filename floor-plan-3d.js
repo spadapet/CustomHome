@@ -4722,12 +4722,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const groundBaseline = getGroundFloorDefaultPlan();
   let groundLayoutPreview = null;
   function updateLivableArea() {
-    const groundArea = getLivableFloorArea(groundLayoutPreview?.plan ?? groundBaseline);
+    const groundArea = getLivableFloorArea(groundLayoutPreview?.plan ?? groundBaseline, { includeStairs: true });
     const upstairsArea = getLivableFloorArea({ floors: [...upstairs.plan.floors, upstairs.baseline.arrival] });
     const format = (area) => Math.round(area).toLocaleString('en-US');
     const output = document.getElementById('livable-area');
     output.textContent = `Area: ~${format(groundArea + upstairsArea)} sq ft`;
-    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. Combined modeled interior floor surfaces; overlaps counted once. Includes closets, halls, bathrooms and laundry. Excludes garage, porch, mechanical space and open stair voids. Not certified living area; wall thickness and headroom eligibility are not verified.`;
+    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. Combined modeled interior plan area; overlaps counted once. Includes closets, halls, bathrooms and laundry. Stair footprint counted once on the first floor; upstairs arrival landing included, open stair void excluded. Excludes garage, porch and mechanical space. Not certified living area; wall thickness and headroom eligibility are not verified.`;
     const firstFloorOutput = document.getElementById('first-floor-area');
     firstFloorOutput.textContent = `1st: ~${format(groundArea)} sq ft`;
     firstFloorOutput.title = output.title;

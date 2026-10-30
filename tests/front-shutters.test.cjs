@@ -41,7 +41,8 @@ test('all eight front openings retain their windows and front grilles without sh
   const g = getUpstairsMeasuredGeometry();
   const fronts = [
     ['front ground floor', getGroundFrontWindows()],
-    ['upper front bedrooms', getUpstairsFrontWindows().map(o => ({ ...o, sill: o.sill + 10 }))],
+    ['upper front bedrooms', getUpstairsFrontWindows().filter(o => o.center < g.southClosetWest).map(o => ({ ...o, sill: o.sill + 10 }))],
+    ['upper front bedroom 4', getUpstairsFrontWindows().filter(o => o.center > g.southClosetEast).map(o => ({ ...o, center: o.center - g.southClosetEast, sill: o.sill + 10 }))],
     ['upper loft south', getUpstairsExteriorOpenings(g.southEast, g.serviceSouth, g.east, g.serviceSouth)]
   ];
   for (const [name, openings] of fronts) {

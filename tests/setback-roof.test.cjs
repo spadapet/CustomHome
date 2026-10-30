@@ -3,14 +3,16 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const roof = require('../floor-plan-roof.js');
 
-test('former rear and east setback strips are actual measured upper floors, not low roofs through rooms', () => {
+test('former setback strips follow upper floors and the new northeast closet recess without low roofs through rooms', () => {
   const upper = require('../floor-plan-upstairs.js');
+  const g = upper.getUpstairsMeasuredGeometry();
   const plan = upper.getUpstairsDefaultPlan(require('../upstairs-layout.js').stairOpening());
   for (const [left, right, rear, front] of [[26.875, 55.5, 7, 9.775], [54.225, 55.5, 9.775, 15.625], [52.225, 55.5, 15.625, 35.1]]) {
     for (let ix = 1; ix < 20; ix++) for (let iz = 1; iz < 20; iz++) {
       const point = [left + (right - left) * ix / 20, rear + (front - rear) * iz / 20];
       const floors = plan.floors.filter(f => point[0] > f.x && point[0] < f.x + f.w && point[1] > f.z && point[1] < f.z + f.d);
-      assert.equal(floors.length, 1, `Unique upper floor at ${point}`);
+      const recess = point[0] > g.bedroom2ClosetEast && point[1] > g.north + 5.85 && point[1] < g.loftNorth;
+      assert.equal(floors.length, recess ? 0 : 1, `Unique upper floor or exterior closet recess at ${point}`);
       for (const { bounds: [l, r, b, t] } of roof.getSetbackRoofDefinitions()) {
         assert.ok(point[0] <= l || point[0] >= r || point[1] <= b || point[1] >= t, 'No lower skin passes through the measured upper rooms');
       }

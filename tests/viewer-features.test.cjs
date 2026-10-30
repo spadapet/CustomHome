@@ -12,9 +12,14 @@ test('compact footer keeps windows first, area, size and controls without verbos
   for (const id of ['livable-area', 'first-floor-area', 'second-floor-area', 'building-envelope', 'window-count', 'refresh-model', 'reset-view']) assert.ok(footer.includes(`id="${id}"`));
   assert.match(footer, /id="first-floor-area" aria-label="First-floor area"[^>]*>1st: \.\.\.<\/output>/);
   assert.match(footer, /id="second-floor-area" aria-label="Second-floor area"[^>]*>2nd: \.\.\.<\/output>/);
-  assert.match(footer, /Size: ~56 ft &times; 64 ft/);
-  assert.match(footer, /front porch slab edge z=61\.67917 ft, approximately 64 ft 0\.05 in/);
-  assert.match(footer, /exactly 55 ft 11 3\/8 in \(shown rounded to 56 ft\)/);
+  const { getUpstairsMeasuredGeometry } = require('../floor-plan-upstairs.js');
+  const { getGroundFrontLayout } = require('../floor-plan-ground.js');
+  const upper = getUpstairsMeasuredGeometry(), front = getGroundFrontLayout();
+  assert.ok(Math.abs((upper.east + .45) - 56.2) < 1e-8, 'Outside masonry width follows the current upper east wall');
+  assert.ok(Math.abs((front.porchEdgeZ - (upper.bathNorth - .225)) - 63.25416666666667) < 1e-8, 'Depth includes the current upper bath projection and retained front extension');
+  assert.match(footer, /Size: ~56 ft &times; 63 ft/);
+  assert.match(footer, /front porch slab edge z=61\.67917 ft, approximately 63 ft 3\.05 in/);
+  assert.match(footer, /exactly 56 ft 2\.4 in \(shown rounded to 56 ft\)/);
   assert.match(footer, /not a surveyed or Birmingham zoning\/buildable envelope/i);
   assert.ok(footer.indexOf('id="window-count"') < footer.indexOf('id="livable-area"'));
   const visible = footer.replace(/<[^>]*>/g, '');

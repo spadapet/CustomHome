@@ -1,30 +1,34 @@
 // Shared by the furnished plan and masonry elevation; nominal 3060 is NOT
 // implied: these are 36 x 60 inch concept envelopes, pending product selection.
 function getUpstairsMeasuredGeometry() {
-  // Owner's October 28 measured image. Dimensions are BETWEEN PAINT FACES;
-  // wall centerlines include the existing 4.2-inch study partition allowance.
+  // October 30 reference: paint-face targets plus 4.2-inch study partitions.
   const t = 0.35;
-  const primaryEast = 14 + 8 / 12 + t;
-  const closetEast = primaryEast + 17 + 6 / 12 + 7 / 96 + t;
+  const primaryEast = 14.75 + t;
+  const closetEast = primaryEast + 17.5 + t;
   const bedEast = closetEast + 13 + t;
+  const bedroom2ClosetEast = bedEast + 6 + t;
   const southClosetWest = 12.5 + t;
-  const southClosetEast = southClosetWest + 5.5 + 1 / 48 + t;
+  const southClosetEast = southClosetWest + 5.5 + t;
   const southEast = southClosetEast + 12.5 + t;
   const laundryEast = southEast + 8.5 + t;
-  const east = laundryEast + 15 + 2 / 12 + 1 / 48 + t;
+  const east = laundryEast + 15 + t;
   const serviceSouth = 35.1; // Preserve ground stair, not the screenshot stair.
-  const loftNorth = serviceSouth - (15 + 2 / 12 + 5 / 192) - t;
-  const north = loftNorth - 12.5 - t;
-  const primarySouth = north + 19 + 8 / 12 + 5 / 192 + t;
-  const closetNorth = loftNorth - (8 + 1 / 12 + 9 / 192) - t;
-  const bathEast = primaryEast + 11 + 10 / 12 + 11 / 192 + t;
+  const primarySouth = 26.75;
+  const north = primarySouth - 19.75 - t;
+  const loftNorth = north + 12.5 + t;
+  const bathWest = primaryEast - 1.85;
+  const bathEast = bathWest + 13.5 + t;
   const bathNorth = north - 8;
+  const closetNorth = bathNorth + 13.5 + t;
+  const toiletEast = bathWest + 3 + t;
+  const toiletSouth = bathNorth + 5 + t;
   const bedNorth = serviceSouth + 5 + t;
-  return { t, primaryEast, closetEast, bedEast, southClosetWest, southClosetEast,
+  const southClosetSouth = bedNorth + 6.5 + 6 + t;
+  return { t, primaryEast, closetEast, bedEast, bedroom2ClosetEast, southClosetWest, southClosetEast, southClosetSouth,
     southEast, laundryEast, east, serviceSouth, loftNorth, north, primarySouth,
-    closetNorth, bathEast, bathNorth, bedNorth, south: bedNorth + 13 + t,
-    laundryNorth: serviceSouth - 9.5 - t, serviceNorth: serviceSouth - 5.1,
-    linenWest: southEast - 9.35, furnaceWest: southEast - 6.85 };
+    closetNorth, bathWest, bathEast, bathNorth, toiletEast, toiletSouth, bedNorth, south: bedNorth + 13 + t,
+    laundryNorth: serviceSouth - 9.5 - t, serviceNorth: serviceSouth - 4.5 - t,
+    linenWest: southEast - 9.35, furnaceWest: southEast - 6 - t };
 }
 
 function getUpstairsFrontWindows() {
@@ -57,7 +61,7 @@ function getUpstairsSideWindows() {
   return [
     ['Primary west 1', 0.1, g.north + 5, 4, -Math.PI / 2, -1],
     ['Primary west 2', 0.1, g.north + 14, 4, -Math.PI / 2, -1],
-    ['Primary bath', g.primaryEast + 5, g.bathNorth + 0.1, 3, 0, 1],
+    ['Primary bath', g.bathEast - 2.1, g.bathNorth + 0.1, 3, 0, 1],
     ['Bedroom 2', (g.closetEast + g.bedEast) / 2, g.north + 0.1, 4, 0, 1],
     ['Bath 2', (g.bedEast + g.east) / 2, g.north + 0.1, 2, 0, 1],
     ['Loft 1', g.east - 0.1, g.loftNorth + 5, 4, -Math.PI / 2, 1],
@@ -72,14 +76,22 @@ function getUpstairsSideWindows() {
 function getUpstairsExteriorSegments() {
   const g = getUpstairsMeasuredGeometry();
   return [
-    ['front bedrooms', 0, g.south, g.southEast, g.south],
+    ['front bedrooms', 0, g.south, g.southClosetWest, g.south],
+    ['closet 4 west return', g.southClosetWest, g.south, g.southClosetWest, g.southClosetSouth],
+    ['closet 4 front', g.southClosetWest, g.southClosetSouth, g.southClosetEast, g.southClosetSouth],
+    ['closet 4 east return', g.southClosetEast, g.southClosetSouth, g.southClosetEast, g.south],
+    ['front bedroom 4', g.southClosetEast, g.south, g.southEast, g.south],
     ['west', 0, g.north, 0, g.south],
-    ['primary rear', 0, g.north, g.primaryEast - 3.35, g.north],
-    ['bath west return', g.primaryEast - 3.35, g.bathNorth, g.primaryEast - 3.35, g.north],
-    ['bath rear', g.primaryEast - 3.35, g.bathNorth, g.bathEast, g.bathNorth],
+    ['primary rear', 0, g.north, g.bathWest, g.north],
+    ['bath west return', g.bathWest, g.bathNorth, g.bathWest, g.north],
+    ['bath rear', g.bathWest, g.bathNorth, g.bathEast, g.bathNorth],
     ['bath east', g.bathEast, g.bathNorth, g.bathEast, g.north],
     ['bedroom rear', g.bathEast, g.north, g.east, g.north],
-    ['east loft', g.east, g.north, g.east, g.serviceSouth],
+    ['bath 2 east', g.east, g.north, g.east, g.north + 5.85],
+    ['bath 2 setback', g.bedroom2ClosetEast, g.north + 5.85, g.east, g.north + 5.85],
+    ['closet 2 east', g.bedroom2ClosetEast, g.north + 5.85, g.bedroom2ClosetEast, g.loftNorth],
+    ['loft northeast return', g.bedroom2ClosetEast, g.loftNorth, g.east, g.loftNorth],
+    ['east loft', g.east, g.loftNorth, g.east, g.serviceSouth],
     ['loft south', g.southEast, g.serviceSouth, g.east, g.serviceSouth],
     ['bedroom east return', g.southEast, g.serviceSouth, g.southEast, g.south]
   ];
@@ -108,11 +120,11 @@ function getUpstairsDefaultPlan(stairOpening) {
   const rooms = [
     room('Primary bedroom', 0, n, p, ps),
     room('Primary bath', p, bn, be, cn, true),
-    room('Primary toilet', p - 3.35, bn, p, n - 2.35, true),
+    room('Primary toilet', g.bathWest, bn, g.toiletEast, g.toiletSouth, true),
     room('Primary closet', p, cn, c, h),
     room('Bedroom 2', c, n, b, h),
     room('Bedroom 2 bath', b, n, e, n + 5.85, true),
-    room('Bedroom 2 closet', b, n + 5.85, e, h),
+    room('Bedroom 2 closet', b, n + 5.85, g.bedroom2ClosetEast, h),
     room('Loft', le, h, e, ss),
     room('Laundry (relocated)', se, ln, le, ss, true),
     room('Shared bath west', 0, ss, 9.35, sn, true),
@@ -120,7 +132,7 @@ function getUpstairsDefaultPlan(stairOpening) {
     room('Bedroom 3', 0, sn, cw, s),
     room('Bedroom 3 closet', cw, sn, ce, sn + 6.5),
     room('Bedroom 4', ce, sn, se, s),
-    room('Bedroom 4 closet', cw, sn + 6.5, ce, s),
+    room('Bedroom 4 closet', cw, sn + 6.5, ce, g.southClosetSouth),
     room('Linen (relocated)', lw, fs, fw, ss),
     room('Mechanical (relocated)', fw, fs, se, ss)
   ];
@@ -131,8 +143,9 @@ function getUpstairsDefaultPlan(stairOpening) {
   for (const room of rooms) {
     if (room.circulationOnly) continue; // Irregular gallery floor is assembled below.
     if (room.name === 'Primary bath') {
-      slab(room.name, p, bn, be - p, cn - bn, room.name);
-      slab('Primary bath linen closet', p - 3.35, n - 2.35, 3.35, 2.35, room.name);
+      slab('Primary bath north', g.toiletEast, bn, be - g.toiletEast, g.toiletSouth - bn, room.name);
+      slab(room.name, p, g.toiletSouth, be - p, cn - g.toiletSouth, room.name);
+      slab('Primary bath west return', g.bathWest, g.toiletSouth, p - g.bathWest, n - g.toiletSouth, room.name);
     } else slab(room.name, room.x, room.z, room.w, room.d, room.name);
   }
   slab('Primary closet return', be, n, c - be, cn - n, 'Primary closet');
@@ -152,14 +165,14 @@ function getUpstairsDefaultPlan(stairOpening) {
   const win = (start, width = 4) => [start, start + width, 3, 8];
   const walls = [
     ['Primary west', 0, n, 0, ps, [win(3), win(12)], [-1]],
-    ['Primary north', 0, n, p - 3.35, n, [], [1]],
-    ['Primary suite entry', p, n, p, ps, [door(0.8, 2.5), door(cn - n + 0.9, 2.5), door(ps - n - 3.8)]],
+    ['Primary north', 0, n, g.bathWest, n, [], [1]],
+    ['Primary suite entry', p, n, p, ps, [door(0.8, 2.5), door(cn - n + 0.6, 2.5), door(ps - n - 3.8)]],
     ['Primary south', 0, ps, p, ps],
-    ['Toilet west', p - 3.35, bn, p - 3.35, n, [], [-1]],
-    ['Bath north', p - 3.35, bn, be, bn, [win(6.85, 3)], [1]],
-    ['Toilet partition', p, bn, p, n, [door(2.3, 2.5), door(n - bn - 2.35 + 0.425, 1.5)]],
-    ['Toilet south', p - 3.35, n - 2.35, p, n - 2.35],
-    ['Toilet linen south', p - 3.35, n, p, n],
+    ['Toilet west', g.bathWest, bn, g.bathWest, n, [], [-1]],
+    ['Bath north', g.bathWest, bn, be, bn, [win(be - 2.1 - g.bathWest - 1.5, 3)], [1]],
+    ['Toilet partition', g.toiletEast, bn, g.toiletEast, g.toiletSouth, [door(2.3, 2.5)]],
+    ['Toilet south', g.bathWest, g.toiletSouth, g.toiletEast, g.toiletSouth],
+    ['Toilet linen south', g.bathWest, n, p, n],
     ['Bath east', be, bn, be, cn, [], [1]],
     ['Bath south', p, cn, be, cn],
     ['Closet north return', be, n, c, n, [], [1]],
@@ -171,8 +184,9 @@ function getUpstairsDefaultPlan(stairOpening) {
     ['Bath 2 north', b, n, e, n, [win((e - b) / 2 - 1, 2)], [1]],
     ['Bath 2 east', e, n, e, n + 5.85, [], [1]],
     ['Bath 2 south', b, n + 5.85, e, n + 5.85],
-    ['Closet 2 east', e, n + 5.85, e, h, [], [1]],
-    ['Closet 2 south', b, h, e, h],
+    ['Closet 2 east', g.bedroom2ClosetEast, n + 5.85, g.bedroom2ClosetEast, h, [], [1]],
+    ['Closet 2 south', b, h, g.bedroom2ClosetEast, h],
+    ['Loft northeast return', g.bedroom2ClosetEast, h, e, h, [], [1]],
     ['Loft east', e, h, e, ss, [win(3), win(9)], [1]],
     ['Loft west storage', le, ln, le, ss],
     ['Stairwell west', 0, ps, 0, sn, [win(31.1 - ps - 1.5, 3)], [-1]],
@@ -185,10 +199,14 @@ function getUpstairsDefaultPlan(stairOpening) {
     ['East bath entry', lw, ss, lw, sn],
     ['Bedroom 3 north', 0, sn, cw, sn, [door(0.8, 2.5), door(cw - 2.95, 2.5)]],
     ['Bedroom 3 west', 0, sn, 0, s, [win(4)], [-1]],
-    ['Bedrooms south', 0, s, se, s, getUpstairsFrontWindows().map(w => [w.center - w.width / 2, w.center + w.width / 2, w.sill, w.sill + w.height]), [-1]],
-    ['Bedroom 3 closet', cw, sn, cw, s, [door(0.6, 2.5)]],
+    ['Bedrooms south', 0, s, cw, s, getUpstairsFrontWindows().slice(0, 2).map(w => [w.center - w.width / 2, w.center + w.width / 2, w.sill, w.sill + w.height]), [-1]],
+    ['Bedroom 4 south', ce, s, se, s, getUpstairsFrontWindows().slice(2).map(w => [w.center - ce - w.width / 2, w.center - ce + w.width / 2, w.sill, w.sill + w.height]), [-1]],
+    ['Closet 4 south', cw, g.southClosetSouth, ce, g.southClosetSouth, [], [-1]],
+    ['Bedroom 3 closet', cw, sn, cw, g.southClosetSouth, [door(0.6, 2.5)]],
+    ['Closet 4 west return', cw, g.southClosetSouth, cw, s, [], [1]],
     ['Closet divider', cw, sn + 6.5, ce, sn + 6.5],
-    ['Bedroom 4 closet', ce, sn, ce, s, [door(9, 2.5)]],
+    ['Bedroom 4 closet', ce, sn, ce, g.southClosetSouth, [door(9, 2.5)]],
+    ['Closet 4 east return', ce, g.southClosetSouth, ce, s, [], [-1]],
     ['Bedroom 4 north', cw, sn, se, sn, [door(ce - cw + 0.55, 2.5), door(se - cw - 3.3, 2.5)]],
     ['Bedroom 4 east', se, ss, se, s, [], [1]],
     ['Storage north', lw, fs, fw, fs],
@@ -387,11 +405,13 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     return item;
   }
   const primaryCenterX = g.primaryEast / 2;
+  const primaryWestWall = plan.walls.find(wall => wall.name === 'Primary west');
+  const primaryBedX = primaryWestWall.x1 + primaryWestWall.thickness / 2 + 0.0625 + 1 / 12 + 0.09 + (80 / 12 + 0.2) / 2;
   for (const [name, x, z, mattressWidth, mattressLength, rotation, bedsideSide] of [
-    ['Primary bed', g.primaryEast * 0.39, g.north + 6.7, 5, 80 / 12, 0, -1],
+    ['Primary bed', primaryBedX, g.north + 9.5, 5, 80 / 12, Math.PI / 2, -1],
     ['Bedroom 2 bed', g.bedEast - 4.85, g.north + 4.1, 4.5, 6.25, 0, -1],
-    ['Bedroom 3 bed', 3.3, g.bedNorth + 5.3, 4.5, 6.25, 0, 1],
-    ['Bedroom 4 bed', g.southEast - 3.3, g.bedNorth + 6.5, 4.5, 6.25, 0, -1]
+    ['Bedroom 3 bed', 0.175 + 0.0625 + 1 / 12 + 0.09 + (6.25 + 0.2) / 2, g.bedNorth + 5.3, 4.5, 6.25, Math.PI / 2, 1],
+    ['Bedroom 4 bed', g.southEast - 0.175 - 0.0625 - 1 / 12 - 0.09 - (6.25 + 0.2) / 2, g.bedNorth + 6.5, 4.5, 6.25, -Math.PI / 2, -1]
   ]) {
     const bed = furniture(name, x, z, rotation, true);
     const width = mattressWidth + 0.2, length = mattressLength + 0.2;
@@ -407,30 +427,32 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
       const bedsideZ = -length / 2 + 0.85;
       cabinet(bed, dx, bedsideZ, 1.55, 1.9, 1.5, 2);
       const lampMount = name === 'Primary bed'
-        ? { x: x + dx, z: g.north + 0.215, rotation: 0 }
+        ? { x: primaryWestWall.x1 + primaryWestWall.thickness / 2 + 0.04, z: z - side * 2, rotation: Math.PI / 2 }
         : name === 'Bedroom 2 bed'
           ? { x: g.bedEast - 0.215, z: g.north + 5.5, rotation: -Math.PI / 2 }
           : name === 'Bedroom 3 bed'
-            ? { x: 0.215, z: g.bedNorth + 2.5, rotation: Math.PI / 2 }
-            : { x: g.southEast - 0.215, z: g.bedNorth + 4.3, rotation: -Math.PI / 2 };
+            ? { x: 0.215, z: z - dx, rotation: Math.PI / 2 }
+            : { x: g.southEast - 0.215, z: z + dx, rotation: -Math.PI / 2 };
       wallLamp(`${name} bedside wall lamp ${side < 0 ? 'left' : 'right'}`, lampMount.x, lampMount.z, lampMount.rotation);
     }
-    box(bed, 0, 0.025, 0.6, width + 2, 0.04, 8.3, linen);
+    box(bed, 0, 0.025, name === 'Bedroom 3 bed' || name === 'Bedroom 4 bed' ? 1.1 : 0.6, width + 2, 0.04, 8.3, linen);
   }
   for (const [name, x, z, width, rotation] of [
-    ['Primary dresser', 1.1, g.north + 9.5, 4, Math.PI / 2],
+    ['Primary dresser', 3.5, g.north + 1.1, 4, 0],
     ['Bedroom 2 dresser', g.closetEast + 1.4, g.north + 5.5, 3, Math.PI / 2],
     ['Bedroom 3 dresser', g.southClosetWest - 1.2, g.south - 3.3, 3.5, -Math.PI / 2],
-    ['Bedroom 4 dresser', 24, g.south - 3.8, 3.5, 0]
+    ['Bedroom 4 dresser', 24, g.south - 3.5, 3.5, 0]
   ]) cabinet(furniture(name, x, z, rotation, true), 0, 0, width, 2.8, 1.6);
   const primaryDeskChair = desk('Primary', 9.3, g.north + 1.2, 0, 'Primary north');
   primaryDeskChair.position.x = 11.2;
   desk('Bedroom 2', g.closetEast + 2.2, g.north + 1.2, 0, 'Bedroom 2 north');
   desk('Bedroom 3', g.southClosetWest - 1.2, g.bedNorth + 5.5, -Math.PI / 2, 'Bedroom 3 closet');
   desk('Bedroom 4', g.southClosetEast + 1.2, g.bedNorth + 5.15, Math.PI / 2, 'Bedroom 4 closet');
-  loungeChair('Primary sitting chair 1', primaryCenterX - 3.15, g.north + 14);
-  loungeChair('Primary sitting chair 2', primaryCenterX + 3.15, g.north + 14);
-  const sittingTable = furniture('Primary sitting side table', primaryCenterX, g.north + 14, 0, true);
+  const primarySouthWall = plan.walls.find(wall => wall.name === 'Primary south');
+  const primarySeatingRearZ = primarySouthWall.z1 - primarySouthWall.thickness / 2 - 0.0625 - 1 / 12;
+  loungeChair('Primary sitting chair 1', primaryCenterX - 0.9 - 3.15, primarySeatingRearZ - 2.25 / 2);
+  loungeChair('Primary sitting chair 2', primaryCenterX - 0.9 + 3.15, primarySeatingRearZ - 2.25 / 2);
+  const sittingTable = furniture('Primary sitting side table', primaryCenterX - 0.9, primarySeatingRearZ - 1.4 / 2, Math.PI, true);
   cabinet(sittingTable, 0, 0, 1.4, 1.8, 1.4, 1);
   const primaryMedia = furniture('Primary media console', g.primaryEast - 0.175 - 0.6, g.north + 11, -Math.PI / 2, true);
   cabinet(primaryMedia, 0, 0, 4, 1.6, 1.2, 2);
@@ -465,67 +487,17 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     box(item, 0, 0.8, 0.1, 1.4, 1.5, 1.7, windowTrim, true);
     box(item, 0, 1.58, 0.1, 1.2, 0.08, 1.5, cream, true);
   }
-  const primaryBrass = mat('#b59859');
-  const primaryPanel = mat('#b69a72');
-  const primaryGlass = mat('#b8d2cf');
-  Object.assign(primaryGlass, { transparent: true, opacity: 0.22, roughness: 0.12 });
-  const primaryVanity = furniture('Primary double vanity', g.primaryEast + 4.4, g.bathNorth + 1.3);
-  primaryVanity.userData = { cabinetWidthsInches: [30, 12, 30], depthInches: 24, counterHeightInches: 34.5, finish: 'Natural white oak Shaker / satin gold', productSelected: false, plumbingVerified: false };
-  for (const [x, width] of [[-1.75, 2.5], [0, 1], [1.75, 2.5]]) {
-    for (const side of [-1, 1]) box(primaryVanity, x + side * (width / 2 - 0.03125), 1.525, 0, 0.0625, 2.45, 2, oak).name = 'Primary vanity stock cabinet side';
-    box(primaryVanity, x, 1.525, -0.96875, width - 0.125, 2.45, 0.0625, oak).name = 'Primary vanity cabinet back';
-    box(primaryVanity, x, 0.35, 0, width - 0.125, 0.0625, 1.875, oak).name = 'Primary vanity cabinet floor';
-    box(primaryVanity, x, 0.15, -0.1, width - 0.125, 0.3, 1.7, oak).name = 'Primary vanity recessed plinth';
-    const fronts = width > 1 ? 2 : 3;
-    for (let index = 0; index < fronts; index++) {
-      const drawer = width === 1;
-      const frontWidth = (drawer ? width : width / fronts) - 0.04;
-      const frontHeight = drawer ? 2.4 / fronts - 0.04 : 2.36;
-      const front = new THREE.Group();
-      front.position.set(drawer ? x : x - width / 2 + (index + 0.5) * width / fronts, drawer ? 0.35 + (index + 0.5) * 2.4 / fronts : 1.55, 1.035);
-      primaryVanity.add(front);
-      front.name = drawer ? 'Primary vanity center drawer' : 'Upstairs vanity cabinet door';
-      front.userData = { cabinetFront: true, width: frontWidth, height: frontHeight, ...(drawer ? { drawerTravelFeet: 1.25 } : { hingeSide: index % 2 === 0 ? -1 : 1 }) };
-      for (const side of [-1, 1]) {
-        box(front, side * (frontWidth - 0.15) / 2, 0, 0, 0.15, frontHeight, 0.07, oak).name = 'Primary vanity Shaker stile';
-        box(front, 0, side * (frontHeight - 0.15) / 2, 0, frontWidth - 0.3, 0.15, 0.07, oak).name = 'Primary vanity Shaker rail';
-      }
-      box(front, 0, 0, -0.02, frontWidth - 0.3, frontHeight - 0.3, 0.03, primaryPanel).name = 'Primary vanity recessed Shaker field';
-      box(front, 0, drawer ? 0 : 0.25, 0.11, drawer ? 0.45 : 0.06, drawer ? 0.06 : 0.55, 0.08, primaryBrass).name = 'Upstairs vanity handle';
-    }
-  }
-  // Split the stone around the two bowls instead of burying them in a solid top.
-  for (const [x, width] of [[-2.8, 0.5], [0, 1.9], [2.8, 0.5]]) {
-    box(primaryVanity, x, 2.8125, 0, width, 0.125, 2.1, cream).name = 'Primary vanity counter side';
-  }
-  for (const x of [-1.75, 1.75]) {
-    for (const side of [-1, 1]) box(primaryVanity, x, 2.8125, side * 0.825, 1.6, 0.125, 0.45, cream).name = 'Primary vanity counter rim';
-    box(primaryVanity, x, 2.52, 0, 1.6, 0.08, 1.2, windowTrim).name = 'Primary vanity bowl bottom';
-    for (const side of [-1, 1]) {
-      box(primaryVanity, x + side * 0.77, 2.66, 0, 0.06, 0.28, 1.2, windowTrim).name = 'Primary vanity basin side';
-      box(primaryVanity, x, 2.66, side * 0.57, 1.48, 0.28, 0.06, windowTrim).name = 'Primary vanity basin end';
-    }
-    box(primaryVanity, x, 3.05, -0.8, 0.08, 0.5, 0.08, primaryBrass).name = 'Primary vanity faucet riser';
-    box(primaryVanity, x, 3.25, -0.6, 0.08, 0.08, 0.45, primaryBrass).name = 'Primary vanity faucet spout';
-  }
-  // Keep the 36-inch window sill clear; retain the mirrors on the solid south wall.
-  const primaryMirrors = furniture('Primary bath mirrors', g.primaryEast + 3.8, g.closetNorth - 0.25, Math.PI);
-  for (const x of [-1.75, 1.75]) {
-    box(primaryMirrors, x, 5.1, 0, 2.1, 3, 0.08, primaryBrass).name = 'Primary vanity mirror frame';
-    box(primaryMirrors, x, 5.1, 0.055, 1.95, 2.85, 0.025, steel).name = 'Primary vanity mirror';
-  }
-  box(primaryVanity, 0, 2.925, -0.99, 6.1, 0.1, 0.08, cream).name = 'Primary vanity low backsplash';
-  const primaryLinen = furniture('Primary bath linen shelves', g.primaryEast - 2.35, g.north - 1.175);
-  primaryLinen.userData = { shelfDepthInches: 15, shelfWidthInches: 22.8, doorInches: [18, 96], storageOnly: true, loadsVerified: false };
-  for (const height of [1.5, 3, 4.5, 6]) box(primaryLinen, 0, height, 0, 1.25, 0.08, 1.9, oak).name = 'Primary linen fixed shelf';
+  vanity('Primary north vanity', g.toiletEast + 2.8, g.bathNorth + 1.2, 5);
+  vanity('Primary south vanity', g.primaryEast + 5.3, g.closetNorth - 1.2, 4, Math.PI);
   vanity('Bedroom 2 vanity', g.bedEast + 2, g.north + 4.65, 3, Math.PI);
   vanity('West bath vanity', 1.75, g.serviceSouth + 1.25, 2.5);
   vanity('East bath vanity', g.southEast - 1.75, g.serviceSouth + 1.25, 2.5);
-  toilet('Primary toilet', g.primaryEast - 1.675, g.bathNorth + 1.5);
+  toilet('Primary toilet', (g.bathWest + g.toiletEast) / 2, g.bathNorth + 1.5);
   toilet('Bedroom 2 toilet', g.bedEast + 4.8, g.north + 1.5);
   toilet('West bath toilet', 4.8, g.serviceSouth + 1.3);
   toilet('East bath toilet', g.southEast - 4.7, g.serviceSouth + 1.3);
   for (const [name, x, z, w, d] of [
+    ['Primary shower', g.bathEast - 2.1, g.closetNorth - 3.25, 3.5, 6],
     ['Bedroom 2 shower', g.east - 1.6, g.north + 2.925, 2.5, 5],
     ['West bath shower', 7.6, g.serviceSouth + 2.675, 3, 4.4],
     ['East bath shower', g.linenWest + 1.75, g.serviceSouth + 2.675, 3, 4.4]
@@ -533,33 +505,17 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     const item = furniture(name, x, z);
     box(item, 0, 0.12, 0, w, 0.24, d, cream);
     box(item, 0, 3, -d / 2 + 0.08, w, 6, 0.12, tile);
-    box(item, 0, 5.5, -d / 2 + 0.2, 0.5, 0.06, 0.5, steel);
+    box(item, 0, 5.5, -d / 2 + 0.4, 0.5, 0.06, 0.5, steel);
     box(item, 0, 3.2, -d / 2 + 0.18, 0.25, 0.4, 0.08, steel);
     box(item, 0, 0.25, 0, 0.3, 0.015, 0.3, steel);
   }
-  const primaryShower = furniture('Primary shower', g.bathEast - 2.3, g.closetNorth - 2.8, Math.PI);
-  primaryShower.userData = { widthInches: 48, depthInches: 60, entryInches: 36, entrySide: 'West', productSelected: false, splashControlVerified: false };
-  box(primaryShower, 0, 0.12, 0, 4, 0.24, 5, cream).name = 'Primary shower pan';
-  box(primaryShower, 0, 3.5, -2.44, 4, 7, 0.12, tile).name = 'Primary shower tiled back';
-  box(primaryShower, -1.94, 3.5, 0, 0.12, 7, 4.88, tile).name = 'Primary shower tiled side';
-  box(primaryShower, 1.96, 3.7, -1.515, 0.06, 7, 1.97, primaryGlass).name = 'Primary shower fixed entry glass';
-  box(primaryShower, 0, 3.7, 2.47, 4, 7, 0.06, primaryGlass).name = 'Primary shower fixed north glass';
-  box(primaryShower, 0, 6.6, -2.05, 0.7, 0.06, 0.7, primaryBrass).name = 'Primary shower head';
-  box(primaryShower, 0, 3.3, -2.3, 0.3, 0.5, 0.1, primaryBrass).name = 'Primary shower controls';
-  box(primaryShower, 0, 0.25, -2, 2.5, 0.015, 0.08, steel).name = 'Primary shower linear drain';
-  const tub = furniture('Primary built-in tub', g.bathEast - 1.8, g.bathNorth + 3.05, Math.PI / 2);
-  tub.userData = { widthInches: 66, depthInches: 36, deckHeightInches: 20, productSelected: false, lowTubIntent: true, windowAccessVerified: false };
-  for (const side of [-1, 1]) {
-    box(tub, side * 2.625, 0.79, 0, 0.25, 1.58, 3, cream).name = 'Primary built-in tub end apron';
-    box(tub, 0, 0.79, side * 1.375, 5, 1.58, 0.25, cream).name = 'Primary built-in tub long apron';
-    box(tub, side * 2.475, 1.625, 0, 0.55, 1 / 12, 3, windowTrim).name = 'Primary tub deck end';
-    box(tub, 0, 1.625, side * 1.225, 4.4, 1 / 12, 0.55, windowTrim).name = 'Primary tub deck side';
-    box(tub, side * 2.17, 1, 0, 0.06, 1.17, 1.9, windowTrim).name = 'Primary tub basin end';
-    box(tub, 0, 1, side * 0.92, 4.28, 1.17, 0.06, windowTrim).name = 'Primary tub basin side';
-  }
-  box(tub, 0, 0.45, 0, 4.4, 0.08, 1.9, windowTrim).name = 'Primary tub basin bottom';
-  box(tub, -2.45, 1.85, 0, 0.08, 0.4, 0.08, primaryBrass).name = 'Primary tub deck faucet riser';
-  box(tub, -2.2, 2.02, 0, 0.5, 0.08, 0.08, primaryBrass).name = 'Primary tub deck faucet spout';
+  shelving('Primary bath linen shelves', g.bathWest + 0.95, (g.toiletSouth + g.north) / 2, 1.8, Math.PI / 2);
+  const tub = furniture('Primary freestanding tub', g.bathEast - 2.1, g.bathNorth + 3.1);
+  box(tub, 0, 1, 0, 2.8, 2, 5.2, windowTrim, true);
+  box(tub, 0, 1.9, 0, 2.25, 0.15, 4.4, cream, true);
+  box(tub, 0, 1.99, 0, 1.9, 0.025, 3.9, windowTrim, true);
+  box(tub, -1.7, 1.3, 0, 0.1, 2.6, 0.1, steel);
+  box(tub, -1.4, 2.6, 0, 0.7, 0.1, 0.1, steel);
   for (const [index, x] of [g.southEast + 2, g.southEast + 5.4].entries()) {
     const machine = furniture(index === 0 ? 'Washer' : 'Dryer', x, g.serviceSouth - 2, Math.PI);
     box(machine, 0, 1.6, 0, 2.8, 3.2, 2.8, windowTrim);
@@ -581,10 +537,10 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   hangingBay('Primary closet return hanging', g.closetEast - 1.3, g.north + 3, 4.8, Math.PI / 2);
   const closetDresser = furniture('Primary closet drawers', g.primaryEast + 5.8, g.closetNorth + 0.95, 0, true);
   cabinet(closetDresser, 0, 0, 6, 2.9, 1.4, 4);
-  hangingBay('Bedroom 2 closet hanging', g.east - 1.3, g.loftNorth - 3.4, 5, Math.PI / 2, true);
+  hangingBay('Bedroom 2 closet hanging', g.bedroom2ClosetEast - 1.3, g.loftNorth - 3.4, 5, Math.PI / 2, true);
   shelving('Bedroom 2 closet shelves', g.bedEast + 2.7, g.loftNorth - 0.95, 3, Math.PI);
   hangingBay('Bedroom 3 closet hanging', (g.southClosetWest + g.southClosetEast) / 2, g.bedNorth + 5.2, 4, Math.PI, true);
-  hangingBay('Bedroom 4 closet hanging', (g.southClosetWest + g.southClosetEast) / 2, g.south - 1.3, 4, Math.PI, true);
+  hangingBay('Bedroom 4 closet hanging', (g.southClosetWest + g.southClosetEast) / 2, g.southClosetSouth - 1.3, 4, Math.PI, true);
   shelving('Linen shelves', (g.linenWest + g.furnaceWest) / 2, g.serviceSouth - 0.95, 1.8, Math.PI);
   const loftCenterX = (g.laundryEast + g.east) / 2;
   const loftSofa = furniture('Loft sofa', loftCenterX, g.serviceSouth - 1.9, 0, true);

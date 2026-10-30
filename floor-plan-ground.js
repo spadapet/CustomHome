@@ -291,8 +291,13 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     };
   }
 
-  function getLivableFloorArea(plan) {
+  function getLivableFloorArea(plan, { includeStairs = false } = {}) {
     const floors = plan.floors.filter((floor) => !/^(Garage|Front porch|Mechanical(?:\b|$))/.test(floor.room ?? floor.name ?? ''));
+    if (includeStairs) {
+      if (!plan.stairs) throw new Error('Cannot calculate livable area without the stair footprint.');
+      const { x, z, width: w, depth: d } = plan.stairs;
+      floors.push({ x, z, w, d });
+    }
     for (const floor of floors) {
       if (![floor.x, floor.z, floor.w, floor.d].every(Number.isFinite) || floor.w < 0 || floor.d < 0) throw new Error('Cannot calculate livable area from invalid floor geometry.');
     }
