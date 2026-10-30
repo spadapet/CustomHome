@@ -38,6 +38,12 @@ automatically. Preserve essential errors and actionable safety warnings.
 Use screen-reader-only announcements when interaction feedback does not
 need a visible status area.
 
+Use short, preferably one-word labels and maximize model space. Keep Windows,
+Area, 1st, 2nd and Size visible in the compact footer: Area is the combined
+interior total; 1st and 2nd are the respective floor areas, with units.
+Keep breakdowns and qualifications in tooltips or closed optional details,
+not extra visible prose. Preserve accessible names and actionable warnings.
+
 1. Trace the existing helper and shared layout before adding geometry. Units
    are feet; garage and upstairs floor datums differ from the house floor.
 2. Preserve unrelated owner decisions and saved layout data. For changed

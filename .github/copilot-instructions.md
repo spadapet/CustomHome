@@ -8,6 +8,9 @@ before changing a layout. Room pages describe the owner's requirements.
   request; do not add unrequested banners, slogans, badges, explanatory panels,
   duplicate menus or links. Do not restore the removed top slogan, concept
   badge or visible garage-door explanation banner.
+- Maximize model space and minimize visible text. Prefer one-word UI labels;
+  keep Windows, Area and Size compact and visible. Put explanations in
+  optional notes/tooltips, not persistent panels; retain actionable warnings.
 - Reuse existing navigation and optional design notes for help and assumptions,
   without opening them automatically. Keep essential errors and genuinely
   actionable safety warnings explicit; use screen-reader-only announcements

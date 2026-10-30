@@ -10,6 +10,14 @@ applyTo: "floor-plan-3d.js,floor-plan-3d.html,floor-plan-3d.css"
   Keep the viewer minimal and model-first; reuse existing navigation, optional
   notes and status elements. No unrequested banners, slogans, badges, duplicate
   menus, explanatory panels or automatically opened notes.
+- Owner preference: maximize model real estate. Use one-word control/metric
+  labels where clear (Windows, Area, Size, Dimensions, Notes). Keep the live
+  window count visible without scrolling past descriptive text; put count
+  breakdowns, measurement qualifiers and detailed lists in tooltips or closed
+  optional details. Preserve units, accessible names and actionable warnings.
+- Keep first- and second-floor area totals visible beside Area, labeled 1st
+  and 2nd with sq ft units. Area remains the combined total; all three update
+  from the resolved floor geometry, not hardcoded values.
 - Trace existing control/state helpers before adding handlers. Keep pointer,
   keyboard, accessible labels and pressed/expanded state consistent. Use
   screen-reader-only feedback for nonessential interaction status; keep errors
@@ -24,7 +32,9 @@ applyTo: "floor-plan-3d.js,floor-plan-3d.html,floor-plan-3d.css"
   foreground objects, pendants, ceiling hardware and lights after temporary
   hiding; do not fix occlusion by deleting required geometry.
 - Preserve Day/Night choice across views, tours and Reset. Reload starts in
-  Night. Treat visible glow and actual light sources as separate checks.
+  Day with Night unchecked. Both 2D plans default to dimensions on; preserve
+  manual choices and explicit dimensions=0/1 links. Treat visible glow and
+  actual light sources as separate checks.
 - Keep rendering event-driven, coalesce orbit updates, avoid unnecessary buffer
   reallocations, and restore full stationary quality after interaction.
   Do not add an unconditional animation loop to fix a missed render.

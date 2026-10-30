@@ -149,6 +149,20 @@ test('project instructions and README link to existing guidance and the bundled 
   assert.ok(fs.existsSync(path.join(root, '.github', 'skills', 'home-model-editing', 'scripts', 'check-model.cjs')));
 });
 
+test('viewer guidance preserves the compact model-first preference and current defaults', () => {
+  const project = fs.readFileSync(path.join(root, '.github', 'copilot-instructions.md'), 'utf8');
+  const viewer = fs.readFileSync(path.join(root, '.github', 'instructions', 'viewer-behavior.instructions.md'), 'utf8');
+  assert.match(project, /one-word UI labels/);
+  assert.match(project, /Windows, Area and Size compact and visible/);
+  assert.match(viewer, /live\s+window count visible/);
+  assert.match(viewer, /tooltips or closed\s+optional details/);
+  assert.match(viewer, /Day with Night unchecked/);
+  const editing = fs.readFileSync(path.join(root, '.github', 'skills', 'home-model-editing', 'SKILL.md'), 'utf8');
+  assert.match(editing, /short, preferably one-word labels/);
+  assert.match(editing, /Area, 1st, 2nd and Size visible in the compact footer/);
+  assert.match(viewer, /labeled 1st\s+and 2nd with sq ft units/);
+});
+
 test('project instructions and both skills preserve the minimal viewer requirement', () => {
   for (const relative of [
     path.join('.github', 'copilot-instructions.md'),
