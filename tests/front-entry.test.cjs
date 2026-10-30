@@ -84,6 +84,7 @@ test('wider front stairs have equal risers, flush nosings and join the existing 
   const context = {
     THREE: { Group: Steps, PointLight: class extends Steps {} }, group: new Steps(),
     stepStone: {}, stepEdge: {}, glow: {},
+    frontShift: require('../floor-plan-ground.js').getGroundFrontLayout().extension,
     box(parent, x, y, z, width, height, depth) { const part = { x, y, z, width, height, depth }; parts.push(part); parent.add(part); return part; }
   };
   const start = source.indexOf('  function exteriorSteps('), end = source.indexOf('  const livingAccess =', start);
@@ -101,7 +102,16 @@ test('wider front stairs have equal risers, flush nosings and join the existing 
     assert.ok(Math.abs(tread.y + tread.height / 2 + (index + 1) * 0.45) < 1e-9);
     assert.ok(Math.abs(nosings[index].y + 0.025 - tread.y - tread.height / 2) < 1e-9);
   }
-  assert.ok(Math.abs(treads.at(-1).z + treads.at(-1).depth / 2 - 64.5) < 1e-9);
+  assert.ok(Math.abs(treads.at(-1).z + treads.at(-1).depth / 2 - (64.5 + context.frontShift)) < 1e-9);
+  let approach;
+  Object.assign(context, {
+    westPaverEdgeX: -11.355, drivewayLeft: 30.9, pathWidth: 3.5,
+    addWalk(name, x, z, width, depth) { approach = { name, x, z, width, depth }; }
+  });
+  const approachCall = source.split('\n').find(line => line.includes("addWalk('Front paver walk west of driveway'"));
+  assert.ok(approachCall);
+  vm.runInContext(approachCall, context);
+  assert.ok(Math.abs(treads.at(-1).z + treads.at(-1).depth / 2 - approach.z) < 1e-9, 'Final tread meets the real approach without duplicate paving');
 });
 
 test('exterior taps reach the entry-door picker while orbit drags do not open doors', () => {
@@ -140,14 +150,15 @@ test('entry uses an uninterrupted porch plane instead of a decorative pediment',
   assert.equal(definitions[0].planes.length, 1);
   assert.doesNotMatch(source, /const entryPediment = gable/);
   assert.ok(definitions.every((definition) => definition.finish === 'metal'));
-  assert.ok(definitions.every((definition) => definition.bounds[2] < 53.2), 'Metal plane reaches the house');
+  const frontWallZ = require('../floor-plan-ground.js').getGroundFrontLayout().wallZ;
+  assert.ok(definitions.every((definition) => definition.bounds[2] < frontWallZ - 1), 'Metal plane reaches the house');
 });
 
 test('porch fascia remains below the sloped metal underside instead of striping the roof surface', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
   const parts = [];
   const context = {
-    group: {}, trim: {},
+    group: {}, trim: {}, frontShift: require('../floor-plan-ground.js').getGroundFrontLayout().extension,
     box(parent, x, y, z, width, height, depth) { const part = { x, y, z, width, height, depth }; parts.push(part); return part; }
   };
   vm.createContext(context);
@@ -165,7 +176,7 @@ test('porch fascia remains below the sloped metal underside instead of striping 
   }
   const vertices = [-0.35, 0.35].flatMap((z) => [-0.25, 0.25].map((y) => ({ y, z })));
   const header = {
-    position: { y: 9.95, z: 60.5 }, userData: {},
+    position: { y: 9.95, z: 60.5 + context.frontShift }, userData: {},
     geometry: {
       attributes: { position: {
         count: vertices.length, getY: (index) => vertices[index].y, getZ: (index) => vertices[index].z,

@@ -58,7 +58,7 @@ test('arched entry is coordinated through the same builder for furnished and ext
   assert.equal(layout.width, 5);
   assert.equal(layout.height, 8);
   assert.equal(layout.spring, 7.1);
-  assert.match(source, /archedEntry\.position\.set\(15\.6, 0, 54\.2\)/);
+  assert.match(source, /archedEntry\.position\.set\(15\.6, 0, frontWallZ\)/);
   assert.match(source, /buildArchedFrontEntry\(THREE, .*archedEntry\)/);
   assert.match(fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8'), /const frontEntryLeaves = buildArchedFrontEntry/);
 });
@@ -68,6 +68,7 @@ test('farmhouse porch has four white columns and its raised beam clears the eigh
   const meshes = [];
   const context = {
     THREE: { Group: class { constructor() { this.userData = {}; } } },
+    frontShift: require('../floor-plan-ground.js').getGroundFrontLayout().extension,
     group: { add() {} }, trim: {}, baseBrick: {}, dark: {}, accentStone: {}, porchColumnFinish: {}, porchPillars: [], fitTrimTopToPorchRoof: (part) => part,
     box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d }; meshes.push(mesh); return mesh; },
     brickBox(parent, x, y, z, w, h, d) { const mesh = { name: 'Column brick base', x, y, z, w, h, d }; meshes.push(mesh); return mesh; }
@@ -285,6 +286,7 @@ test('hipped exterior removes applied front gables and retains fixed openings wi
   const context = { group: { userData: {} }, dark: {}, box() { return {}; }, wall(name, ...args) { const value = { name, args, userData: {} }; walls.push(value); return value; }, win(center, width, sill = 3, height = 5) { return { center, width, sill, height }; }, floorToFloor: 10, upper: 10, eaves: 19 };
   context.getUpstairsFrontWindows = getUpstairsFrontWindows;
   context.getGroundFrontWindows = require('../floor-plan-ground.js').getGroundFrontWindows;
+  context.frontWallZ = require('../floor-plan-ground.js').getGroundFrontLayout().wallZ;
   vm.createContext(context);
   const lines = source.split('\n');
   for (const name of ['front ground floor']) {

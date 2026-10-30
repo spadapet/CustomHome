@@ -34,6 +34,10 @@ function mapBrickBoxUVs(geometry, widthFeet, heightFeet) {
 
 function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations = [] }, floorToFloor, garageFloorY) {
   const group = new THREE.Group();
+  const frontLayout = getGroundFrontLayout();
+  const frontShift = frontLayout.extension;
+  const frontWallZ = frontLayout.wallZ;
+  const frontPorchEdgeZ = frontLayout.porchEdgeZ;
   group.name = 'Hipped cream-brick transitional exterior concept';
   group.visible = false;
   group.userData = { provisional: true, style: 'Restrained transitional warm-white brick house with red-brown brick base, quiet hipped roofs, white eaves and natural oak doors', floorToFloorFeet: floorToFloor, coordinatedConstructionDrawings: false, frontElevationStudy: true, frontOpeningsCoordinatedWithInteriors: true, garageUpperVolume: 'Unoccupied roof void only; no room, storage or access approval', wallCladding: 'Neutral warm-white queen brick veneer with red-brown brick base; physical samples, support and wall assembly require design' };
@@ -478,19 +482,19 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const garageClerestories = getGarageClerestoryLayout(garageFloorY);
   const westFrontWindowCenterZ = 49;
   const westFrontWindowWidth = 4;
-  wall('front ground floor', 0, 54.2, 31.2, 54.2, -0.4, 9, [...getGroundFrontWindows(), { center: 15.6, width: 5, sill: 0, height: 8, door: true }].sort((a,b)=>a.center-b.center));
+  wall('front ground floor', 0, frontWallZ, 31.2, frontWallZ, -0.4, 9, [...getGroundFrontWindows(), { center: 15.6, width: 5, sill: 0, height: 8, door: true }].sort((a,b)=>a.center-b.center));
   const archedEntry = new THREE.Group();
   archedEntry.name = 'Coordinated arched oak entry and deep white surround';
-  archedEntry.position.set(15.6, 0, 54.2);
+  archedEntry.position.set(15.6, 0, frontWallZ);
   group.add(archedEntry);
   buildArchedFrontEntry(THREE, { box, wood: entryWood, field: mat('#b88e5a'), oakMaps: masonryMaps?.oak, trim, hardware: dark }, archedEntry);
   for (const {center: x, width} of getGroundFrontWindows()) {
-    box(group, x, 8.32, 54.54, width + 0.65, 0.35, 0.24, trim).name = 'Front window projecting limestone lintel';
-    box(group, x, 2.78, 54.55, width + 0.6, 0.18, 0.3, trim).name = 'Front window cut-stone sill';
+    box(group, x, 8.32, frontWallZ + 0.34, width + 0.65, 0.35, 0.24, trim).name = 'Front window projecting limestone lintel';
+    box(group, x, 2.78, frontWallZ + 0.35, width + 0.6, 0.18, 0.3, trim).name = 'Front window cut-stone sill';
   }
   const livingFeatureWall = getLivingRoomFeatureLayout();
   const guestEntry = getGuestEntryLayout();
-  wall('west ground floor', 0, 8, 0, 54.2, -0.4, 9, [
+  wall('west ground floor', 0, 8, 0, frontWallZ, -0.4, 9, [
     ...livingFeatureWall.windowCenters.map((z) => win(z - 8, livingFeatureWall.fireplaceWindows.width, livingFeatureWall.fireplaceWindows.sill, livingFeatureWall.fireplaceWindows.height)),
     ...guestEntry.windows.map(({ z, width, height, sill, openingWidth, openingHeight, openingSill, privacyLowerHalf }) => ({ center: z - 8, width: openingWidth, height: openingHeight, sill: openingSill, frameWidth: width, frameHeight: height, frameSill: sill, privacyLowerHalf })),
     win(westFrontWindowCenterZ - 8, westFrontWindowWidth)
@@ -529,7 +533,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     { center: 5.8, width: 9, sill: garageFloorY, height: 8, door: true },
     { center: 17.3, width: 9, sill: garageFloorY, height: 8, door: true }
   ]);
-  wall('garage porch return', 31.2, 54.2, 31.2, 49, -0.4, 9);
+  wall('garage porch return', 31.2, frontWallZ, 31.2, 49, -0.4, 9);
   const upper = floorToFloor;
   const measuredUpper = getUpstairsMeasuredGeometry();
   for (const [name, x1, z1, x2, z2] of getUpstairsExteriorSegments()) {
@@ -1166,9 +1170,9 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   livingAccess.position.set(diningLandingLeft + diningPatioStairWidth / 2, 0, diningLandingRear);
   livingPatio.add(livingAccess);
   exteriorSteps(livingAccess, 'Covered dining patio steps', 0, 0, -1, diningPatioStairWidth, { riseFeet: -patioGrade / 3, baseFeet: patioGrade - 0.3, treadCount: 2, flareFeet: 0, flushNosing: true });
-  paving(group, 'Covered front porch', 0, 54.2, 31.2, 7, 0, 1.65, palePaving);
+  paving(group, 'Covered front porch', 0, frontWallZ, 31.2, frontLayout.porchDepth, 0, 1.65, palePaving);
   const porchPaving = group.getObjectByName('Covered front porch');
-  const porchFoundation = brickBox(group, 15.6, -0.825, 57.7, 31.2, 1.65, 7, true);
+  const porchFoundation = brickBox(group, 15.6, -0.825, 57.7 + frontShift, 31.2, 1.65, frontLayout.porchDepth, true);
   porchFoundation.name = 'Red-brown brick porch exposed foundation';
   const porchTop = palePaving.clone();
   porchTop.map = palePaving.map.clone();
@@ -1183,13 +1187,13 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     const height = 9.7;
     const entryColumn = x === 11.65 || x === 19.55;
     const width = 1;
-    const pillar = box(group, x, height / 2, 60.5, width, height, width, porchColumnFinish);
+    const pillar = box(group, x, height / 2, 60.5 + frontShift, width, height, width, porchColumnFinish);
     pillar.name = 'White farmhouse porch column';
     pillar.userData = { entryColumn, widthInches: width * 12, heightFeet: height, provisional: true };
     porchPillars.push(pillar);
-    brickBox(group, x, 1.25, 60.5, 7 / 6, 2.5, 7 / 6, true).name = 'Red-brown brick porch-column base';
-    box(group, x, 2.55, 60.5, 1.25, 0.1, 1.25, trim).name = 'Limestone column base coping';
-    box(group, x, 9.6, 60.5, 1.25, 0.2, 1.25, trim).name = 'White porch column capital';
+    brickBox(group, x, 1.25, 60.5 + frontShift, 7 / 6, 2.5, 7 / 6, true).name = 'Red-brown brick porch-column base';
+    box(group, x, 2.55, 60.5 + frontShift, 1.25, 0.1, 1.25, trim).name = 'Limestone column base coping';
+    box(group, x, 9.6, 60.5 + frontShift, 1.25, 0.2, 1.25, trim).name = 'White porch column capital';
   }
   // Deep, flat-headed entry portal beneath the retained single roof plane.
   // Preserve the existing posts/support positions and the full central approach.
@@ -1198,14 +1202,14 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   entryPortal.userData = { supportApproved: false, beamUndersideFeet: 8.9, clearWidthFeet: 6.65 };
   group.add(entryPortal);
   for (const x of [11.65, 19.55]) {
-    box(entryPortal, x, 5.75, 60.5, 1, 6.3, 1, trim).name = 'Entry portal masonry pier jacket';
-    brickBox(entryPortal, x, 0.1, 60.5, 1.25, 0.2, 1.25, true).name = 'Entry portal brick foot';
-    box(entryPortal, x, 8.8, 60.5, 1.25, 0.2, 1.25, trim).name = 'Entry portal impost';
+    box(entryPortal, x, 5.75, 60.5 + frontShift, 1, 6.3, 1, trim).name = 'Entry portal masonry pier jacket';
+    brickBox(entryPortal, x, 0.1, 60.5 + frontShift, 1.25, 0.2, 1.25, true).name = 'Entry portal brick foot';
+    box(entryPortal, x, 8.8, 60.5 + frontShift, 1.25, 0.2, 1.25, trim).name = 'Entry portal impost';
   }
-  box(entryPortal, 15.6, 9.3, 60.5, 9.15, 0.8, 1.25, trim).name = 'Entry portal deep stone entablature';
+  box(entryPortal, 15.6, 9.3, 60.5 + frontShift, 9.15, 0.8, 1.25, trim).name = 'Entry portal deep stone entablature';
   // Recessed inner face makes the structural depth legible from street eye.
-  box(entryPortal, 15.6, 9.03, 61.08, 6.65, 0.16, 0.12, porchColumnFinish).name = 'Entry portal recessed lintel face';
-  const porchCanopyHeight = 10.5, porchCanopyAngle = 0.13, porchCanopyThickness = 0.22, porchCanopyCenterZ = 57.5;
+  box(entryPortal, 15.6, 9.03, 61.08 + frontShift, 6.65, 0.16, 0.12, porchColumnFinish).name = 'Entry portal recessed lintel face';
+  const porchCanopyHeight = 10.5, porchCanopyAngle = 0.13, porchCanopyThickness = 0.22, porchCanopyCenterZ = 57.5 + frontShift;
   function porchCanopyUndersideAt(z) {
     return porchCanopyHeight - (z - porchCanopyCenterZ) * Math.tan(porchCanopyAngle) - porchCanopyThickness / 2 / Math.cos(porchCanopyAngle);
   }
@@ -1239,14 +1243,14 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   box(garageCanopy, 55.8, 3.245, 49.3, 0.16, 9.79, 0.16, trim).name = 'Garage brow rainwater leader concept';
   // Closed stepped wall abutment at the porch end; no invented level
   // roof or new support post between the two different wall heights.
-  const canopyStepBottom = 7.55 - 0.16;
-  const canopyStepTop = porchCanopyUndersideAt(54.22);
-  fitTrimTopToPorchRoof(box(garageCanopy, 30.4375, (canopyStepBottom + canopyStepTop) / 2, 54.16,
+  const canopyStepBottom = 8.75 - (frontWallZ - 49.4) / 4 - 0.16;
+  const canopyStepTop = porchCanopyUndersideAt(frontWallZ + 0.02);
+  fitTrimTopToPorchRoof(box(garageCanopy, 30.4375, (canopyStepBottom + canopyStepTop) / 2, frontWallZ - 0.04,
     1.075, canopyStepTop - canopyStepBottom, 0.12, trim)).name = 'Canopy stepped porch-end closure and flashing concept';
   garageCanopy.userData = { supportConcept: 'Wall-ledger and outriggers; connections and garage header loads not designed',
     drainageIntent: 'Brow gutter to east leader; return falls to porch-end collector, outlets unverified', constructionApproved: false };
-  fitTrimTopToPorchRoof(box(group, 15.6, 9.95, 60.5, 32.5, 0.5, 0.7, trim)).name = 'Raised farmhouse porch header clear of eight-foot door';
-  const porchFasciaZ = 62.15, porchFasciaDepth = 0.3, porchFasciaHeight = 0.3;
+  fitTrimTopToPorchRoof(box(group, 15.6, 9.95, 60.5 + frontShift, 32.5, 0.5, 0.7, trim)).name = 'Raised farmhouse porch header clear of eight-foot door';
+  const porchFasciaZ = 62.15 + frontShift, porchFasciaDepth = 0.3, porchFasciaHeight = 0.3;
   const porchFasciaTop = porchCanopyUndersideAt(porchFasciaZ + porchFasciaDepth / 2);
   box(group, 15.6, porchFasciaTop - porchFasciaHeight / 2, porchFasciaZ, 32.5, porchFasciaHeight, porchFasciaDepth, trim).name = 'White farmhouse porch fascia';
   for (const center of [37, 48.5]) {
@@ -1287,8 +1291,8 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   }
   for (const pillar of porchPillars.filter((column) => column.userData.entryColumn)) lantern(pillar, 0, 5.8 - pillar.position.y, 0.72);
   for (const x of [37, 48.5]) lantern(group, x, 8.7, 49.7);
-  brickBox(group, 15.6, -0.15, 61.275, 10.8, 0.3, 0.15, true).name = 'Entry landing brick nose';
-  exteriorSteps(group, 'Contrasting front entry steps', 15.6, 61.35, 1, 10.8, { riseFeet: 0.45, baseFeet: -1.65, treadCount: 3, goingFeet: 1.05, flareFeet: 0, flushNosing: true });
+  brickBox(group, 15.6, -0.15, 61.275 + frontShift, 10.8, 0.3, 0.15, true).name = 'Entry landing brick nose';
+  exteriorSteps(group, 'Contrasting front entry steps', 15.6, 61.35 + frontShift, 1, 10.8, { riseFeet: 0.45, baseFeet: -1.65, treadCount: 3, goingFeet: 1.05, flareFeet: 0, flushNosing: true });
   const frontSteps = group.getObjectByName('Contrasting front entry steps');
   for (const tread of frontSteps.children.filter((part) => part.name === 'Darker stone entry tread')) {
     const brick = baseBrick.clone();
@@ -1367,11 +1371,11 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   addWalk('East gate to garage side door', 56.5, eastGateApproachZ, pathWidth, garageApproachFrontZ - eastGateApproachZ);
   addWalk('Garage side door threshold connector', 55.725, garageSideDoorCenterZ - garageSideDoorWidth / 2, 56.5 - 55.725, garageSideDoorWidth);
   addWalk('Garage driveway to side path connector', drivewayLeft + drivewayWidth, 49, 56.5 - drivewayLeft - drivewayWidth, pathWidth);
-  addWalk('Front paver walk west of driveway', westPaverEdgeX, 64.5, drivewayLeft - westPaverEdgeX, pathWidth);
+  addWalk('Front paver walk west of driveway', westPaverEdgeX, 64.5 + frontShift, drivewayLeft - westPaverEdgeX, pathWidth);
   // Bounded follow-up interpretation: west of the raised porch only, not the front lawn.
   const westPorchPocket = {
     left: westPaverEdgeX + pathWidth, right: -wallThickness / 2,
-    rear: 54.2, front: 64.5
+    rear: frontWallZ, front: 64.5 + frontShift
   };
   addWalk('West porch pocket paver infill', westPorchPocket.left, westPorchPocket.rear,
     westPorchPocket.right - westPorchPocket.left, westPorchPocket.front - westPorchPocket.rear);
@@ -1600,8 +1604,8 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   }
   for (const x of canopyLightXs) canopyDownlight('Shielded warm patio ceiling light', x, livingPatioCenterZ);
   canopyDownlight('Open-patio approach ceiling light', 3.3, 0.8, 0, -2, 26);
-  for (const x of [4.2, 26.5]) downlight('Front porch approach ceiling light', x, porchCanopyUndersideAt(58.5) - 0.075, 58.5, x, 60.5, 24, 0);
-  wallDownlight('Front door wall downlight', 15.6, 8.6, 54.875, 0, 15.6, 59.5, 26, 0);
+  for (const x of [4.2, 26.5]) downlight('Front porch approach ceiling light', x, porchCanopyUndersideAt(58.5 + frontShift) - 0.075, 58.5 + frontShift, x, 60.5 + frontShift, 24, 0);
+  wallDownlight('Front door wall downlight', 15.6, 8.6, frontWallZ + 0.675, 0, 15.6, 59.5 + frontShift, 26, 0);
   wallDownlight('Driveway motion-boost downlight', 43, 8.6, 49.475, 0, 43, 58, 32);
   for (const z of [14, 28]) wallDownlight('West side-path wall downlight', -0.475, 8.6, z, -Math.PI / 2, westGateCenterX, z, 30);
   wallDownlight('West side-entry downlight', -0.475, 8.6, 42, -Math.PI / 2, westGateCenterX, westFenceReturnZ, 30);
@@ -1683,14 +1687,14 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const frontBedEdge = mat('#b8b09e', 0.9);
   const lowFoliage = mat('#839277', 0.95);
   for (const [name, left, right] of [['West front porch mulch bed', 0, 10.7], ['East front porch mulch bed', 20.5, drivewayLeft]]) {
-    const bed = box(group, (left + right) / 2, -1.65, (61.2 + 64.5) / 2, right - left, 0.1, 64.5 - 61.2, mulch);
+    const bed = box(group, (left + right) / 2, -1.65, (frontPorchEdgeZ + 64.5 + frontShift) / 2, right - left, 0.1, 64.5 - 61.2, mulch);
     bed.name = name;
-    bed.userData = { surface: 'Brown mulch / soil planting bed', limits: { left, right, rear: 61.2, front: 64.5 }, topFeet: -1.6 };
+    bed.userData = { surface: 'Brown mulch / soil planting bed', limits: { left, right, rear: frontPorchEdgeZ, front: 64.5 + frontShift }, topFeet: -1.6 };
     const edgeInset = frontShrubRadius + 0.2;
     for (let index = 0; index < frontShrubCount; index++) {
       const shrub = new THREE.Mesh(new THREE.SphereGeometry(frontShrubRadius, 10, 8), foliage);
       shrub.name = 'Front mulch-bed shrub';
-      shrub.position.set(left + edgeInset + index * (right - left - 2 * edgeInset) / (frontShrubCount - 1), bed.userData.topFeet + frontShrubRadius, 62.35);
+      shrub.position.set(left + edgeInset + index * (right - left - 2 * edgeInset) / (frontShrubCount - 1), bed.userData.topFeet + frontShrubRadius, 62.35 + frontShift);
       shrub.userData = { plantingBed: name, baseFeet: bed.userData.topFeet, provisional: true };
       group.add(shrub);
     }
@@ -1700,18 +1704,19 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       const plant = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), lowFoliage);
       plant.name = 'Low front-bed planting mound';
       plant.scale.set(0.42, 0.34, 0.42);
-      plant.position.set(left + 0.7 + index * (right - left - 1.4) / 6, bed.userData.topFeet + 0.34, 63.85);
+      plant.position.set(left + 0.7 + index * (right - left - 1.4) / 6, bed.userData.topFeet + 0.34, 63.85 + frontShift);
       plant.userData = { plantingBed: name, provisional: true, speciesAndMatureSpreadUnselected: true };
       group.add(plant);
     }
     // Two-inch coping stays within the soil footprint; no raised walk obstruction.
-    const edge = box(group, (left + right) / 2, -1.6, 64.5 - 1 / 12,
+    const bedFrontZ = 64.5 + frontShift;
+    const edge = box(group, (left + right) / 2, -1.6, bedFrontZ - 1 / 12,
       right - left, 0.16, 1 / 6, frontBedEdge);
     edge.name = 'Front planting-bed stone edge';
     edge.userData = { plantingBed: name, drainageAndFrostDetailRequired: true };
     for (const x of [left + 1 / 12, right - 1 / 12]) {
-      box(group, x, -1.6, (61.2 + 64.5 - 1 / 6) / 2,
-        1 / 6, 0.16, 3.3 - 1 / 6, frontBedEdge).name = 'Front planting-bed stone edge return';
+      box(group, x, -1.6, (frontPorchEdgeZ + bedFrontZ - 1 / 6) / 2,
+        1 / 6, 0.16, bedFrontZ - frontPorchEdgeZ - 1 / 6, frontBedEdge).name = 'Front planting-bed stone edge return';
     }
   }
   for (const [start, end, z] of [[32, 54, 8]]) {

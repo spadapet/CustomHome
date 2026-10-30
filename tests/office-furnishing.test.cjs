@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const frontLayout = require('../floor-plan-ground.js').getGroundFrontLayout();
 
 class Group {
   constructor() {
@@ -24,6 +25,7 @@ function buildOfficeFurniture() {
   const roots = [];
   const context = {
     officeNorthZ: 41,
+    groundFrontWallZ: frontLayout.wallZ,
     officeEntry: { x: 12.2, z: 45.25, width: 5, height: 8 },
     oak: {}, black: {}, steel: {}, cream: {}, cushion: {}, windowTrim: {}, brass: {}, glass: {},
     THREE: {
@@ -112,7 +114,7 @@ test('office matches the revised top view: centered north desk, northwest equipm
     [12.2 - 0.175 - 1 / 12 - 1 - 2.35, 50.85, Math.PI / 2]
   ]);
   assert.ok(Math.abs(loveseat.position.x - 2.8208333333333333) < 1e-8);
-  assert.ok(Math.abs(loveseat.position.z - 52.47916666666667) < 1e-8);
+  assert.ok(Math.abs(loveseat.position.z - (52.47916666666667 + frontLayout.extension)) < 1e-8);
   assert.equal(loveseat.rotation.y, Math.PI);
   assert.equal(loveseat.userData.widthInches, 60);
   assert.equal(loveseat.userData.productSelected, false);
@@ -135,14 +137,14 @@ test('office matches the revised top view: centered north desk, northwest equipm
   assert.ok(Math.abs((sofa.maxX - sofa.minX) * 12 - 60) < 1e-8, 'Restore the full 60-inch loveseat instead of shrinking it to fit');
   assert.ok(Math.abs((sofa.maxZ - sofa.minZ) * 12 - 33.6) < 1e-8);
   assert.ok(Math.abs((sofa.minX - 0.2375) * 12 - 1) < 1e-8, 'Loveseat clears west baseboard by one inch');
-  assert.ok(Math.abs((53.9625 - sofa.maxZ) * 12 - 1) < 1e-8, 'Loveseat clears south baseboard by one inch');
+  assert.ok(Math.abs((frontLayout.wallZ - 0.2375 - sofa.maxZ) * 12 - 1) < 1e-8, 'Loveseat clears south baseboard by one inch');
   const sofaTop = Math.max(...loveseat.children.map(mesh => mesh.position.y + mesh.h / 2));
   const windowSill = require('../floor-plan-ground.js').getGroundFrontWindows()[0].sill;
   assert.ok(Math.abs((windowSill - 1 / 12 - sofaTop) * 12 - 2.6) < 1e-8, 'Loveseat back is 2.6 inches below the one-inch sill underside; access is not implied');
   const machine = bounds(elliptical);
   assert.ok(Math.abs((machine.minZ - 41.2375) * 12 - 1) < 1e-8, 'Equipment clears north baseboard by one inch');
   assert.ok(Math.abs((northDesktop.minX - machine.maxX) * 12 - 12.4) < 1e-8, 'Desk-to-equipment side gap is 12.4 inches, not a route');
-  assert.ok(Math.abs((sofa.minZ - machine.maxZ) * 12 - 52.1) < 1e-8, 'Access equipment from the 52.1-inch southern gap');
+  assert.ok(Math.abs((sofa.minZ - machine.maxZ) * 12 - (52.1 + frontLayout.extension * 12)) < 1e-8, 'Equipment access gap grows by the front extension');
   const doorLeafWidth = 29.75 / 12;
   const doorLeafTipX = 12.2 - doorLeafWidth;
   assert.ok(sofa.maxX < doorLeafTipX, 'Southwest loveseat stays west of both open leaf tips');
@@ -166,7 +168,7 @@ test('furniture clears paint and other furniture with both chairs in place and p
     const boxes = furniture.map(root => ({ root, ...bounds(root) }));
     for (const b of boxes) {
       assert.ok(b.minX >= 0.175 - 1e-8 && b.maxX <= 12.025 + 1e-8 &&
-        b.minZ >= 41.175 - 1e-8 && b.maxZ <= 54.025 + 1e-8, `${b.root.name} clears finished walls`);
+        b.minZ >= 41.175 - 1e-8 && b.maxZ <= frontLayout.wallZ - 0.175 + 1e-8, `${b.root.name} clears finished walls`);
       for (const other of boxes) if (b !== other) assert.ok(!overlaps(b, other), `${b.root.name} overlaps ${other.root.name} at ${pull * 12} in pull`);
     }
   }
@@ -217,7 +219,7 @@ test('a continuous 30-inch study route reaches both work areas, loveseat and exe
       for (let sample = 0; sample <= 100; sample++) {
         const x = a[0] + (b[0] - a[0]) * sample / 100;
         const z = a[1] + (b[1] - a[1]) * sample / 100;
-        assert.ok(x - radius >= 0.175 && z - radius >= 41.175 && z + radius <= 54.025);
+        assert.ok(x - radius >= 0.175 && z - radius >= 41.175 && z + radius <= frontLayout.wallZ - 0.175);
         for (const box of obstacles) {
           const dx = Math.max(box.minX - x, 0, x - box.maxX);
           const dz = Math.max(box.minZ - z, 0, z - box.maxZ);

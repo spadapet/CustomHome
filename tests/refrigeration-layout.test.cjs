@@ -52,6 +52,7 @@ test('the shared kitchen wall and refrigeration bank move six inches without wid
 test('sink/window bank stays centered and actual side counters fit the relocated cooking wall', () => {
   const context = { casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12, getKitchenPassageLayout: require('../floor-plan-ground.js').getKitchenPassageLayout, getPrepWindowLayout: require('../floor-plan-ground.js').getPrepWindowLayout, getPrepWindowBankLayout: require('../floor-plan-ground.js').getPrepWindowBankLayout };
   const start = source.indexOf('  const kitchenWallLeft =');
+  context.getGroundFrontLayout = require('../floor-plan-ground.js').getGroundFrontLayout;
   context.getKitchenWindowBankLayout = require('../floor-plan-ground.js').getKitchenWindowBankLayout;
   const end = source.indexOf('  const kidsRoomNorthZ =', start);
   assert.ok(start >= 0 && end > start);

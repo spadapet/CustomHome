@@ -60,6 +60,8 @@ function buildLighting() {
   const group = new Group();
   const context = {
     HomeRoof: require('../floor-plan-roof.js'), floorToFloor: 10, white: {},
+    frontShift: require('../floor-plan-ground.js').getGroundFrontLayout().extension,
+    frontWallZ: require('../floor-plan-ground.js').getGroundFrontLayout().wallZ,
     THREE: {
       Group,
       SpotLight: class extends Group {
@@ -126,7 +128,7 @@ test('wall lights have correctly oriented mounting plates and porch housings mee
     if (fixture.name.startsWith('West')) close(wallX, -0.225);
     else if (fixture.name.startsWith('East')) close(wallX, 55.725);
     else if (fixture.name.startsWith('Dining patio')) close(wallX, 12.975);
-    else if (fixture.name.startsWith('Front door')) close(wallZ, 54.625);
+    else if (fixture.name.startsWith('Front door')) close(wallZ, context.frontWallZ + 0.425);
     else if (fixture.name.startsWith('Driveway')) close(wallZ, 49.225);
     else if (fixture.name.startsWith('Rear dining')) close(wallZ, -0.325);
     else close(wallZ, 6.775);

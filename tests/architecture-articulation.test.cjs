@@ -9,6 +9,7 @@ function harness() {
   const meshes = [];
   return {
     THREE: { Group }, group: new Group(), trim: {}, baseBrick: {}, porchColumnFinish: {}, meshes,
+    frontShift: require('../floor-plan-ground.js').getGroundFrontLayout().extension,
     box(parent, x, y, z, w, h, d) {
       const mesh = { x, y, z, w, h, d, min: [x-w/2,y-h/2,z-d/2], max: [x+w/2,y+h/2,z+d/2] };
       meshes.push(mesh); parent.add(mesh); return mesh;
@@ -26,7 +27,7 @@ test('built portal constituents preserve approach and provide honest lintel dept
   assert.ok(Math.abs((shafts[1].min[0]-shafts[0].max[0])*12-82.8)<1e-8);
   assert.ok(Math.abs(beam.min[1]-8.9)<1e-8);
   assert.ok(Math.abs(beam.max[1]-9.7)<1e-8);
-  assert.ok(shafts.every(o=>o.d===1 && o.max[2]===61));
+  assert.ok(shafts.every(o=>o.d===1 && o.max[2]===61 + c.frontShift));
 });
 test('upper stone constituents border rather than fill actual glazing; cornice fits below wall head', () => {
   const c = harness();

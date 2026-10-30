@@ -1,5 +1,20 @@
 # Ground-floor plan reference
 
+## Viewer defaults - October 30
+
+Start in Day lighting with Night unchecked. Preserve the selected lighting
+through views, floor changes, tours and Reset; reload starts Day.
+Room dimensions default on in both ground and upstairs 2D plans, hidden
+and disabled in 3D. Preserve manual dimension toggles through view changes;
+explicit dimensions=0/1 links retain the requested state on reload.
+No layout geometry, saved layouts or fixture placement changes.
+
+Compact viewer follow-up: Windows shows the live unit count first; Area
+shows the combined interior total; 1st and 2nd show the respective floor areas
+in sq ft; Size shows the same maximum plan bounds.
+Breakdowns/qualifiers remain in tooltips. One-word controls, a narrower menu
+and closed Sizes details leave more model space. On-plan labels stay visible.
+
 ## Guest closet door width corrected - October 28
 
 Owner's pictured walk-in entry is 30 x 96 in, not 36 in wide. Keep the
@@ -460,7 +475,8 @@ professionally. Wall proximity does not approve the existing omissions.
 ## Current west porch-side paving follow-up — October 27
 
 Assumed photo location, reversible study: x=-7.855 to -0.225,
-z=54.2–64.5 ft. Add 7.63 × 10.3 ft / 78.589 sq ft of matching
+z=54.67917–64.97917 ft after the October 30 front extension.
+Add 7.63 × 10.3 ft / 78.589 sq ft of matching
 pavers at y=-1.35, joining the west path and front crosswalk without
 duplicate surfaces. Stop at the porch-side wall plane; preserve gardens,
 open front lawn, existing steps and raised porch y=0 (16.2 inches higher).
@@ -728,10 +744,11 @@ occupied operation and fire separation require professional review; no code appr
 
 ## Current roof/elevation — articulated hipped transitional, October 26
 
-Front beds remain x=0–10.7 and 20.5–30.9 ft, z=61.2–64.5 ft.
-Each contains five radius-0.9 ft evergreen mounds centered at z=62.35,
+Front beds remain x=0–10.7 and 20.5–30.9 ft, shifted with the porch to
+z=61.679–64.979 ft.
+Each contains five radius-0.9 ft evergreen mounds centered at z=62.829,
 with at least 0.25 ft between crowns, plus seven low 0.84 × 0.68 × 0.84 ft
-foreground mounds at z=63.85. Two-inch stone front/side edging stays within
+foreground mounds at z=64.329. Two-inch stone front/side edging stays within
 the bed bounds; top y=-1.52 ft remains below the -1.35 ft walk.
 The 9.8 ft gap between beds and all circulation geometry remain unchanged.
 Plants are provisional size envelopes; verify mature spread, maintenance,
@@ -933,7 +950,8 @@ backplates mount outside the wider column faces rather than disappearing
 inside them. Keep the raised 9.7 ft beam underside and pediment.
 Front stair width is now 10.8 ft, with three equal 5.4 in risers and
 12.6 in goings. A 1.8 in brick landing nose joins the existing porch;
-the last tread ends z = 64.5 at the existing path top y = -1.35.
+the last tread and front crosswalk meet at z = 64.97917 after the October 30
+extension, at the existing path top y = -1.35.
 Nosings are flush and brick UVs use actual face orientation, avoiding
 stretched mortar on the tread tops. Patio steps remain unchanged.
 Porch loads, step/guard/handrail requirements and surveyed grades remain
@@ -1972,9 +1990,9 @@ in optional viewer/room notes. No geometry, hook-height or lighting changes;
 high access and loading remain unverified, not approved by sign removal.
 
 Latest owner request supersedes camera-specific base brightness: a Menu
-Night lighting / Day lighting toggle defaults to Night (0.5 ambient,
-250 fill, 0.75 exposure), with Day at 2.5/650/1.25. Selection stays fixed
-during Tour, floor/room/exterior/2D changes and Reset; reload starts Night.
+Night lighting / Day lighting toggle defaults to Day (2.5 ambient,
+650 fill, 1.25 exposure), with Night at 0.5/250/0.75. Selection stays fixed
+during Tour, floor/room/exterior/2D changes and Reset; reload starts Day.
 Existing spotlights and fixture controls remain independent. No geometry or
 paint changes; these are preview settings rather than solar/daylight analysis.
 
@@ -2327,8 +2345,25 @@ Current model audit: October 21, 2026. This is the consolidated reference for th
 - Room sizes follow the model's nominal floor envelopes, mostly to wall centerlines; subtract wall/finish thickness where relevant. Most walls are modeled 0.35 ft (4.2 in) thick. Window meshes are sometimes inset 0.1 ft from the opening plane.
 - Feet/inches are rounded to the nearest inch in the room schedule. Decimal coordinates retain the geometry needed to reproduce placement. Do not treat rounded room dimensions as cabinet fabrication dimensions.
 - Ground-floor datum is y = 0; walls/ceiling are 9 ft high. The provisional 12 in floor assembly makes the upstairs/basement floor-to-floor difference 10 ft. Garage slab is y = -1.25 ft, or 15 in below the house.
-- The modeled building's maximum plan extents are x = 0-55.5, z = -2.1-61.2: approximately 55 ft 6 in by 63 ft 4 in. This is a stepped bounding box, **not** a rectangular footprint or an approved gross/conditioned floor-area calculation.
+- Ground-floor exterior masonry faces run x = -0.225 to 55.725 ft (55 ft 11 3/8 in measured; approximately 56 ft wide). The broadest modeled north-south plan bounds run from the stepped rear projection z = -2.325 ft to the front porch slab edge z = 61.2 ft (63 ft 6 1/4 in deep). The viewer rounds the width to 56 ft while retaining the exact measured bounds in its tooltip. Together these are a maximum bounding rectangle over a stepped plan, not a rectangular footprint or the legal/buildable envelope. Birmingham setbacks, projection allowances, easements, and survey dimensions remain unverified.
 - The viewer contains a furnished ground floor, adapted upstairs study, stairs up/down, below-grade stair enclosure, and a separate conceptual English-country exterior shell. It does not contain basement rooms, engineered framing/roof geometry, or a coordinated MEP design.
+
+## Front extension to approximately 64 feet - October 30
+
+The front wall moves forward 5.75 inches, from z=54.2 to z=54.67917 ft,
+lengthening the office, entry hall and ground-floor guest bedroom without
+changing their widths or north/side walls. The 31.2-ft-wide porch follows,
+retaining its 7-ft depth; the entry, matching front windows, porch furnishings,
+columns, roof, steps and front planting move with it. The office is now
+approximately 12 ft 2 in x 13 ft 8 in (166.89 nominal sq ft); the guest
+bedroom is approximately 12 ft 2 in x 11 ft 6 in (140.05 nominal sq ft).
+The porch edge is z=61.67917 ft; from the unchanged rear projection at
+z=-2.325 ft, the modeled north-south span is approximately 64 ft
+(64.004 ft, about 64 ft 0.05 in). This is a maximum bound across a stepped
+plan, not a rectangular house footprint or a surveyed/buildable envelope.
+Lot placement stays fixed; the remaining front-boundary distance is
+approximately 36 ft. Birmingham projection allowances, setbacks, survey
+dimensions and structural/elevation approvals remain unverified.
 
 ## House square footage - October 18, 2026
 
@@ -2336,9 +2371,9 @@ Current model audit: October 21, 2026. This is the consolidated reference for th
 
 | Included floor | Source-plan figures | Default 3D model envelopes |
 |---|---:|---:|
-| Ground floor, excluding garage and outdoor spaces | 1,828.90 sq ft | 1,900.31 sq ft |
+| Ground floor, excluding garage and outdoor spaces | 1,828.90 sq ft | 1,915.26 sq ft |
 | Upstairs | 1,808.50 sq ft label | 2,047.13 sq ft, no above-garage room |
-| **Both floors** | **3,637.40 sq ft, provisional** | **3,947.44 sq ft** |
+| **Both floors** | **3,637.40 sq ft, provisional** | **3,962.39 sq ft** |
 
 The [ground-floor source drawing](assets/ground-floor-3d-source.png) prints total surface area 2,716.5 sq ft, garage 671.1 sq ft, and porch 216.5 sq ft: `2,716.5 - 671.1 - 216.5 = 1,828.9 sq ft` indoors. Its room schedule contains no separate covered-patio entry; do not subtract the later outdoor patio from this indoor subtotal. The individual printed room figures sum to 2,716.2 rather than 2,716.5 sq ft, a 0.3 sq ft schedule discrepancy.
 
@@ -2355,8 +2390,8 @@ The first-floor model takeoff consists of these non-overlapping rectangles. Coor
 | Rear indoor band across living/hall/kitchen/prep | 0-55.5 | 8-15 | 55.5 x 7 | 388.50 |
 | Living/hall/kitchen/mudroom band, west of garage | 0-45.4 | 15-26.9 | 45.4 x 11.9 | 540.26 |
 | Kids/hall/stair band, west of garage | 0-29 | 26.9-34.6 | 29 x 7.7 | 223.30 |
-| Front rooms/hall, ending before porch | 0-31.2 | 34.6-54.2 | 31.2 x 19.6 | 611.52 |
-| **Ground-floor model total** | | | | **1,900.31** |
+| Front rooms/hall, ending before porch | 0-31.2 | 34.6-54.67917 | 31.2 x 20.07917 | 626.47 |
+| **Ground-floor model total** | | | | **1,915.26** |
 
 Upstairs model: `(15.5 x 5.5) + (25.7 x 2.4) + (54 x 5.4) + (52 x 20.8) + (31 x 17) = 2,047.13 sq ft`.
 
@@ -2436,17 +2471,17 @@ Dimensions include nominal room envelopes, not guaranteed usable clear rectangle
 | Hall / circulation zone | Nominal 13.3 x 17.7 ft schedule | 13 ft 4 in x 17 ft 8 in | Irregular connected route around stairs/private rooms, not a separate unobstructed rectangle |
 | Prep kitchen | 37.5-55.5 / 7-15 | 18 ft x 8 ft | Continuous south wall behind pantry; pantry/left counter meet relocated kitchen wall |
 | Mudroom | 37.5-45.4 / 15-26.9 | 7 ft 11 in x 11 ft 11 in | West wall/cases coordinated at x = 37.5; coat closet centered at x = 41.45; cubby bench and garage entry fixed |
-| Garage | 45.4-55.5 / 15-26.9 plus 29-55.5 / 26.9-34.6 plus 31.2-55.5 / 34.6-49 | 26 ft 6 in x 34 ft maximum | Stepped footprint; narrow forward bike alcove, two parking bays, lower slab |
+| Garage | 44.233-55.5 / 15-26.9 plus 31.2-55.5 / 26.9-49 | 24 ft 4 in x 34 ft maximum extents; L-shaped | West edge steps east to x=44.233 for the north leg, then returns to x=31.2 at z=26.9; narrow forward bike alcove, two parking bays, lower slab |
 | Kids' room | West x19-25.75 / z24.7367-37.2; middle x25.75-29 / z24.7367-33.6; east x29-31.2 / z26.9-33.6 | Stepped, 127.67 sq ft | Closet shift adds 8.10; bathroom shift takes 5.45; net +2.65 sq ft. Both desks/chairs move 1 ft north; bins, board and hall entry fixed |
 | Powder room | 0-7.1 / 35.1-41 | 7 ft 1 in x 5 ft 11 in | Hall-facing east-wall entry; centered vanity sink with matching side drawers, east-wall towel hook, one centered west-wall half-frosted window |
 | Guest coat closet | 7.1-12.2 / 38.6-41 | 5 ft 1 in x 2 ft 5 in | Mirrored against office-shared wall; 24.6 in clear depth, upper shelf/hanging rail, closed 48 x 96 in oak doors facing north into alcove |
 | Guest entry alcove | 7.1-12.2 / 35.1-38.6 | 5 ft 1 in x 3 ft 6 in | Open east to entry hall; 37.8 in between finished north/south wall faces, not occupied/accessibility approval |
-| Office | 0-12.2 / 41-54.2 | 12 ft 2 in x 13 ft 2 in | 161.04 sq ft nominal; centered north desk, northwest elliptical, southwest loveseat facing north and lower-right east-facing desk. Room shell, windows and French doors retained |
+| Office | 0-12.2 / 41-54.67917 | 12 ft 2 in x 13 ft 8 in | 166.89 sq ft nominal; centered north desk, northwest elliptical, southwest loveseat facing north and lower-right east-facing desk. Front window and loveseat move with front wall; side/north walls and French doors retained |
 | Guest walk-in closet | 19-25.75 / 37.2-43.2 | 6.75 x 6 ft | Connected north/west L remains 24 in deep, 87 in top; entry x22.79375-25.29375, 30 x 96 in left pocket |
-| Entry hall | 12.2-19 / 34.6-54.2 | 6 ft 10 in x 19 ft 7 in | Full width restored, approximately 77.4 in between finished wall faces; no borrowed closet strip |
+| Entry hall | 12.2-19 / 34.6-54.67917 | 6 ft 10 in x 20 ft 1 in | Full width restored, approximately 77.4 in between finished wall faces; no borrowed closet strip |
 | Guest shower bathroom | 25.75-31.2 / 33.6-43.2 | 5.45 x 9.6 ft | Footprint/fixtures fixed; shower 58.2 x 36 in curb-interior; 28 x 96 in west-hinged inward entry, 90-degree stop, closed default |
-| Ground-floor bedroom | 19-31.2 / 43.2-54.2 | 12.2 x 11 ft; 134.2 sq ft | One rectangle, no nook/entry slabs. Hall entry z43.8-46.8; bed/nightstands, shell and hall width fixed. North nightstand gap 17.73 in, not an aisle |
-| Front porch | 0-31.2 / 54.2-61.2 | 31 ft 2 in x 7 ft | Paving, two benches, centered double front entry; low perimeter edges |
+| Ground-floor bedroom | 19-31.2 / 43.2-54.67917 | 12 ft 2 in x 11 ft 6 in; 140.05 sq ft | One rectangle, no nook/entry slabs. Hall entry z43.8-46.8; bed/nightstands move with the front wall; hall width fixed. North nightstand gap 17.73 in, not an aisle |
+| Front porch | 0-31.2 / 54.67917-61.67917 | 31 ft 2 in x 7 ft | Paving, two lounge chairs and table, centered double front entry; low perimeter edges |
 
 The kitchen/prep exterior wall now lies at z = 7 rather than z = 8 across x = 26.5-55.5. The one-foot outward move adds about 29 sq ft to the conceptual footprint. Sink runs, five north windows, prep tower/appliances, floors, and wall returns move with it; island, cooktop, refrigeration, pantry shelves, end-wall prep window, and passages stay fixed. Setbacks, foundation, roof, elevations, and utilities are not resolved by this edit.
 
@@ -2695,8 +2730,8 @@ The detailed wall-window rows below are an October 27 snapshot, superseded where
 | Garage east wall, 3 | 72 x 18 each | 75 / 93 house datum; 90 / 108 above garage slab | (55.5, 19.5), (55.5, 29.5), (55.5, 39.5) | One fixed picture each; clear lower wall for storage; side door retained; headers, property-line/fire limits and daylight unverified |
 | Powder west, 1 | Standard 2640: approximately 2.4583 x 3.9583 ft frame; minimum 2.5 x 4 ft rough opening | Frame approximately 4.0208 / 7.9792 ft; rough 4 / 8 ft | (0, 38.05) | One taller casement, lower half frosted to 6 ft / upper clear; standard dimensions verified in [manufacturer chart](https://www.arlcoal.com/m/AndersenWindowsLearnMore/pdfs/Sizing/sizing-windows--100series-casement.pdf); product, installation and privacy unapproved |
 | Office side, 1 | 48 x 60 | 36 / 96 | (0, 49) | Two bays |
-| Office porch, 1 | 91.2 x 60 | 36 / 96 | (6, 54.2) | Three equal bays, casement / fixed picture / casement; matches bedroom porch per October 28 owner correction |
-| Bedroom porch, 1 | 91.2 x 60 | 36 / 96 | (25, 54.2) | Three bays |
+| Office porch, 1 | 91.2 x 60 | 36 / 96 | (6, 54.679) | Three equal bays, casement / fixed picture / casement; matches bedroom porch per October 28 owner correction |
+| Bedroom porch, 1 | 91.2 x 60 | 36 / 96 | (25, 54.679) | Three bays |
 | Upstairs laundry roof windows, 2 | 21 x 45.75 rough opening each | Roof-mounted; no sill/head | (34.2708, 31.4), (37.6708, 31.4) | Fixed, south-facing 4:12 East rear wing roof; VELUX FS C06 dimensional candidate only; product and roof compatibility not approved |
 
 The October 27 wall-window table above totals **20 ground-floor groups / 31 units** and is retained as a historical schedule, not the current furnished-model takeoff. The current whole-house count is stated above; the added roof windows are two additional openings/units. Andersen 100 Series applies to the vertical wall-window intent only. Fixed pictures have no center mullion or crank/lock. All operable windows are shown closed; divisions do not establish manufacturer combination approval. Product combinations, safety glazing, installation allowances, outward sash clearance and weatherproofing remain provisional.
@@ -2759,7 +2794,7 @@ All house doors and doorless cased passages have nominal **8 ft / 96 in heads** 
 | Bedroom to walk-in | Nominal 30 x 96 in, z43.2, x22.79375-25.29375 | Closed white left pocket. Casing/reveal/cap reaches finished corner x25.575 exactly. Cavity x19.175-22.79375 (43.425 in); 30.96 in overlapping leaf travels 30.48 in, open bounds x20.21375-22.79375. Track/end framing, split jamb/header, skins, services and nonpenetrating storage/trim fixings require product/architect review |
 | Bedroom to shower bathroom | Nominal 28 x 96 in, z43.2, x26.2-28.5333 | Closed white Shaker/gold knobs, west hinge, inward 90-degree stop. Old pocket removed. Close vanity drawers before swing; verify hardware, occupied and sanitary clearances |
 | Guest shower | South-facing opening x26.15-28.65 at z37.95; modeled width 30 in | Fixed glass, 58.2 x 36 in curb-interior; sampled 26 in route from separate bedroom door past toilet. Step-over curb, not accessible; splash control, glazing/support and products unverified |
-| Front entry | 60 x 96 in, z = 54.2, x = 13.1-18.1 | Two oak/glass leaves shown closed; click/tap either leaf to the modeled 180-degree endpoint; no sidelights/transom; final door unit unselected |
+| Front entry | 60 x 96 in, z = 54.679, x = 13.1-18.1 | Two oak/glass leaves shown closed; click/tap either leaf to the modeled 180-degree endpoint; no sidelights/transom; final door unit unselected |
 | Front entry lock | Wyze brand selected; exact model/finish unconfirmed | One schematic interior smart-lock body above the existing pull, positive-x leaf provisionally active; exterior keypad/reader and product dimensions not assumed. Verify stile/glazing, bore/backset, latch/strike, inactive leaf, and egress with supplier; see [lock notes](front-entry.html#smart-lock) |
 | Dining patio | 72 x 96 in combined assembly, x = 26.5, z = 0-6 | Higher-z nominal 36 in inward-hinged door stays closed by default; click/tap toggles to a 180-degree display, with the dining-view button also available; other half stacked casements; dining end chairs removed, so the modeled sweep clears the six side chairs |
 | Mudroom to garage | 36 x 96 in, z = 26.9, x = 39.5-42.5 | Solid leaf, west hinge, 90-degree inward open default; click/tap 0/90. Sampled sweep clears storage; rated/self-closing/latching assembly, landing and occupied operation unverified |
@@ -2784,7 +2819,7 @@ blocking, fire separation, window headers and daylight remain unapproved.
 Main interior stair flights have warm-white (2700 K) LED strips beneath
 the oak tread edges, inset 1.5 inches at each side. Garage steps have no
 LED strips. The interior strips and soft local tread washes now turn on in
-Night mode (default), superseding the earlier off-only pose. Day, 2D plans,
+Night mode (opt-in), superseding the earlier off-only pose. Day, 2D plans,
 basement cutaway, exterior and structural previews turn them off; returning
 to an interior Night view restores them. These are continuous diffused
 strips, not individual exposed LED dots. Existing stair visibility/cutaways
@@ -2849,6 +2884,28 @@ Physical samples must confirm stain, sheen, upholstery durability, quartz color,
 ## Open decisions and known differences
 
 ### Current measured upstairs — October 28, 2026
+
+Primary bathroom, owner-marked revision October 29: footprint, north window,
+private WC and bedroom entry stay. Mark 1: generic 66 x 36 in built-in tub,
+20 in deck, lengthwise in the northeast corner (latest image mark 1).
+Latest image mark 2 is the 48 x 60 in southeast shower; the 72 x 24 in
+double vanity under north window, facing south; standard 30 + 12 + 30 in oak
+Shaker boxes, 34.5 in counter, satin gold, three 15 in-travel center drawers.
+Keep counter/low splash below 36 in sill; retain two mirrors on solid south
+wall rather than covering glass. Mark 3: west recess gets an 18 x 96 in
+closed operable linen door and four fixed oak shelves, 15 in deep / 22.8 in
+across. New closet face is part of Toilet partition; saved JSON stays unchanged.
+SE shower entry stays west: nominal 36 in / modeled 35.64 in between glass
+edges. Fixed north splash glass separates the 15.24 in tub/shower gap,
+which is not a route. Tub/vanity side separation 17.89 in is not a route;
+approach the tub from the southern portion of its west side.
+Separate 30 x 30 in basin/tub/shower approach rectangles clear closed fronts.
+WC/linen leaves hinge south and reload closed, 96 in heads; sampled sweeps
+and 12 in avatar routes do not establish human/accessibility approval.
+This supersedes the earlier tub-under-window placement and window-by-tub
+intent. Window reach, glazing/privacy, splash control, waterproofing, structure,
+linen retrieval/support, plumbing and selected products remain unresolved.
+See [bathroom notes](bathrooms.html#master-bathroom).
 
 2D overlay labels use short room names and compact dimensions only, with
 room-fit text capped at 10 px. The detailed list/tooltips retain full names

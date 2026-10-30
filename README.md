@@ -50,7 +50,7 @@ The viewer opens on **Whole floor** in **Rotate** mode unless a link selects a
 view. **Refresh model** below the canvas reloads the latest model there;
 **Reset view** returns to Whole floor and Rotate without reloading.
 The Menu's **Night lighting / Day lighting** button switches preview illumination.
-Night is the softer default (pressed); click for Day, then again for Night.
+Day is the default (Night unchecked); enable Night for the softer illuminated preview.
 Warm 2700 K-intent deep-regressed recessed fixtures now cover both modeled
 floors: 4 in apertures, dark baffles and lenses recessed 2 in above the
 ceiling plane, replacing the surface-mounted disks. They provide broad
@@ -60,7 +60,7 @@ the dark living-room loveseat; its bench is provisional. Recessed kitchen
 cans provide broad ambient light only. Product glare/output and occupied
 piano access still require verification.
 The choice stays in effect during tours, floor/view changes and Reset.
-Reload/Refresh starts in Night. In exterior views, Night enables the warm
+Reload/Refresh starts in Day. In exterior views, Night enables the warm
 porch/door, driveway, side-path,
 rear garden-path and patio lights plus the lanterns and step washes.
 Day switches exterior sources and lens glow off; returning to Night
@@ -81,12 +81,18 @@ and [upstairs plan](http://127.0.0.1:4173/floor-plan-3d.html?view=upstairs-top).
 For every room's approximate modeled width and depth, open the
 [dimensioned ground floor](http://127.0.0.1:4173/floor-plan-3d.html?view=top&dimensions=1)
 or [dimensioned upstairs](http://127.0.0.1:4173/floor-plan-3d.html?view=upstairs-top&dimensions=1).
-The **Room dimensions (2D)** checkbox toggles compact labels with a short room
+The **Dimensions** checkbox defaults on for both 2D plans and toggles compact labels with a short room
 name and dimensions only (for example, **Bed 2 / 13' x 12'6"**). Labels fit
 their room and enlarge with zoom up to 10 px. Full names and qualifications
-remain in the list below the plan and label tooltips. Values round to inches;
+remain in the collapsed **Sizes** list and label tooltips. Values round to inches;
 upstairs uses paint-face main rectangles, while ground rooms use nominal
 envelopes. The stepped kids' room shows its area instead of a misleading rectangle.
+Labels stay hidden in 3D. A manual toggle is preserved across views;
+`dimensions=0` explicitly opens a plan without labels and `dimensions=1` enables them.
+The compact footer keeps **Windows**, **Area**, **1st**, **2nd** and **Size** visible.
+Windows counts individual units; its tooltip has openings/types. Area is the
+combined interior total; 1st and 2nd show floor areas in sq ft. Tooltips keep
+measurement qualifications. Size is maximum modeled plan bounds, not a zoning envelope.
 
 In **Garage**, **Bikes** or **2D floor plan**, click or tap the yellow car-door
 panels to toggle estimated swings (0 / 60 degrees), or Tab to a door control

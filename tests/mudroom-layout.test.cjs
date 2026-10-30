@@ -72,26 +72,27 @@ test('mudroom and kitchen lighting stay scoped and restore other floor/view sett
   }
 });
 
-test('Night checkbox defaults to Night and changes only lighting state', () => {
+test('Night checkbox defaults off and changes only lighting state', () => {
   const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
-  assert.match(html, /id="toggle-night-lighting" checked disabled title="Checked uses Night lighting; unchecked uses Day lighting"> Night lighting<\/label>/);
+  assert.match(html, /id="toggle-night-lighting" disabled title="Checked uses Night lighting; unchecked uses Day lighting"> Night<\/label>/);
   assert.match(source, /let nightLighting = nightLightingInput\.checked;/);
   let change;
   let renders = 0;
-  const nightInput = { checked: true, disabled: true, addEventListener(event, callback) { assert.equal(event, 'change'); change = callback; } };
-  const input = { checked: true };
+  const nightInput = { checked: false, disabled: true, addEventListener(event, callback) { assert.equal(event, 'change'); change = callback; } };
+  const input = { checked: false };
   const context = { nightLightingInput: nightInput, islandLightsInput: input, render() { renders++; } };
   const start = source.indexOf('  nightLightingInput.disabled = false;');
   const end = source.indexOf('\n  });', start) + '\n  });'.length;
   assert.ok(start >= 0 && end > start);
-  vm.runInNewContext('let nightLighting = true;\nlet daytimeIslandLights = false;\n' + source.slice(start, end), context);
+  vm.runInNewContext('let nightLighting = false;\nlet daytimeIslandLights = false;\n' + source.slice(start, end), context);
   assert.equal(nightInput.disabled, false);
-  nightInput.checked = false;
-  change();
   assert.equal(input.checked, false);
   nightInput.checked = true;
   change();
   assert.equal(input.checked, true);
+  nightInput.checked = false;
+  change();
+  assert.equal(input.checked, false);
   assert.equal(renders, 2);
 });
 

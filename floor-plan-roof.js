@@ -161,15 +161,19 @@
   }
 
   function getPorchRoofDefinitions() {
-    const angle = 0.13, centerHeight = 10.5, centerZ = 57.5, halfWidth = 4.5;
+    const front = typeof getGroundFrontLayout === 'function'
+      ? getGroundFrontLayout() : require('./floor-plan-ground.js').getGroundFrontLayout();
+    const angle = 0.13, centerHeight = 10.5, centerZ = 57.5 + front.extension, halfWidth = 4.5;
     const slope = 2.4 / halfWidth;
     const halfRoofWidth = halfWidth + 0.65 / Math.sqrt(1 + slope * slope);
     return [
-      { id: 'Porch metal', finish: 'metal', bounds: [-0.65, 31.85, 52.75, 62.25], planes: [[0, -Math.tan(angle), centerHeight + centerZ * Math.tan(angle)]] }
+      { id: 'Porch metal', finish: 'metal', bounds: [-0.65, 31.85, 52.75 + front.extension, 62.25 + front.extension], planes: [[0, -Math.tan(angle), centerHeight + centerZ * Math.tan(angle)]] }
     ];
   }
 
   function getGarageCanopyDefinitions() {
+    const front = typeof getGroundFrontLayout === 'function'
+      ? getGroundFrontLayout() : require('./floor-plan-ground.js').getGroundFrontLayout();
     // A lower matching metal brow, with a return to the porch/garage pier.
     // The change in datum is real: a level continuation would cut the
     // one-story garage gable or require raising the garage wall.
@@ -181,7 +185,7 @@
       { id: 'Garage metal brow', finish: 'metal', bounds: [29.9, 56, 49.95, 51.2], planes: [[0, -0.25, 8.75 + 49.4 * 0.25]] },
       // Abut the west face of the 0.45 ft garage return wall, never run
       // the metal through the wall's solid top.
-      { id: 'Garage metal return', finish: 'metal', bounds: [29.9, 30.975, 51.2, 54.2], planes: [[0, -0.25, 8.75 + 49.4 * 0.25]] }
+      { id: 'Garage metal return', finish: 'metal', bounds: [29.9, 30.975, 51.2, front.wallZ], planes: [[0, -0.25, 8.75 + 49.4 * 0.25]] }
     ];
   }
 

@@ -107,7 +107,7 @@ test('grid is occluded by furniture and excluded from tour collision and floor p
   assert.equal(grid.material.depthWrite, false);
   assert.equal(grid.userData.tourDecoration, true);
   const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
-  assert.match(html, /<label[^>]*><input type="checkbox" id="show-floor-grid" disabled> 1 ft grid<\/label>/);
+  assert.match(html, /<label[^>]*title="One-foot floor grid"[^>]*><input type="checkbox" id="show-floor-grid" disabled> Grid<\/label>/);
   assert.match(source, /floorGridInput\.addEventListener\('change', \(\) => \{\s*updateFloorGrid\(\);\s*render\(\);/);
   const errorSource = source.slice(source.indexOf('function showModelError('), source.indexOf('function buildPreview('));
   assert.match(errorSource, /floorGridInput\.disabled = true/);

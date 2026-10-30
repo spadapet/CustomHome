@@ -4,9 +4,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+const frontLayout = require('../floor-plan-ground.js').getGroundFrontLayout();
 function fixture(old = false) {
   class Group { constructor() { this.children = []; this.userData = {}; } add(o) { this.children.push(o); } }
-  const c = { THREE: { Group }, group: new Group(), paving(parent, name, x, z, width, depth, top = -1.35) {
+  const c = { THREE: { Group }, group: new Group(), frontWallZ: frontLayout.wallZ, frontShift: frontLayout.extension, paving(parent, name, x, z, width, depth, top = -1.35) {
     const m = { name, x, z, width, depth, top }; parent.add(m); return m;
   }};
   vm.createContext(c);
@@ -38,12 +39,13 @@ test('east strip is completely and uniquely paved at the original datum; fence/p
 });
 test('west porch pocket has exact bounded unique coverage without paving the open front lawn', () => {
   const { pieces, pocket:p } = fixture();
-  for (const [key,value] of Object.entries({left:-7.855,right:-.225,rear:54.2,front:64.5,topFeet:-1.35,areaSquareFeet:78.589})) {
+  const pocketArea = 7.63 * 10.3;
+  for (const [key,value] of Object.entries({left:-7.855,right:-.225,rear:frontLayout.wallZ,front:64.5+frontLayout.extension,topFeet:-1.35,areaSquareFeet:pocketArea})) {
     assert.ok(Math.abs(p[key]-value)<1e-9, key);
   }
   const infill=pieces.filter(m=>m.name==='West porch pocket paver infill');
   assert.equal(infill.length,1);
-  assert.ok(Math.abs(area(infill)-78.589)<1e-9);
+  assert.ok(Math.abs(area(infill)-pocketArea)<1e-9);
   for(let x=p.left+.01;x<p.right;x+=.13) for(let z=p.rear+.01;z<p.front;z+=.13) {
     const hits=pieces.filter(m=>x>m.x&&x<m.x+m.width&&z>m.z&&z<m.z+m.depth);
     assert.equal(hits.length,1); assert.equal(hits[0].top,-1.35);

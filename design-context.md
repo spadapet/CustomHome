@@ -1,5 +1,40 @@
 # Ground-floor design context
 
+## Viewer defaults - October 30
+
+Owner requests Night lighting off by default: reload opens in Day.
+Lighting selection still survives room/floor changes, tours and Reset.
+Room dimensions default on for both 2D floor plans, hidden/disabled in 3D.
+Manual label choices persist through views; dimensions=0 explicitly disables
+labels on reload and dimensions=1 enables them. Saved layouts and unrelated
+geometry remain unchanged.
+
+## Front extension to approximately 64 feet - October 30
+
+The front wall moves 5.75 inches forward to z=54.67917 ft, lengthening the
+office, entry hall and ground-floor guest bedroom while preserving their
+widths, north/side walls and the 7-ft porch depth. The porch edge is
+z=61.67917 ft; from the unchanged stepped rear projection at z=-2.325 ft,
+the maximum modeled span is about 64 ft (64.004 ft, approximately
+64 ft 0.05 in). The office is about 12 ft 2 in x 13 ft 8 in; the guest
+bedroom is about 12 ft 2 in x 11 ft 6 in. The front entry, windows, porch
+furniture, columns, roof, steps and planting move to remain coordinated.
+The entry-hall floor extends with its walls. The front-door light retains
+its mounting offset; the garage canopy return closure follows its lowered
+end. The last stair tread and front crosswalk meet at z=64.97917 ft.
+The west porch-side paver pocket translates to z=54.67917-64.97917 ft,
+retaining its 7.63 x 10.3 ft area; the west approach still reaches it.
+Lot placement is unchanged and leaves about 36 ft from the porch slab edge
+to the modeled front boundary. This stepped-plan bound is not a survey,
+rectangular footprint, zoning/buildable envelope, or construction approval.
+
+Owner prefers minimal text and maximum model space: one-word controls and
+Windows / Area / 1st / 2nd / Size metrics, with windows first. Area is the
+combined interior total; 1st and 2nd show each floor's area with sq ft units.
+Keep count breakdowns and measurement qualifications in tooltips; collapse the
+detailed Sizes list, not the on-plan labels. Preserve actionable warnings.
+This preference is saved in project/viewer instructions and the model-editing skill.
+
 ## Guest walk-in: 2.5-foot door - October 28
 
 Correct the pictured closet entry from 36 to 30 in wide, keeping 96 in
@@ -363,7 +398,8 @@ Earlier two-frame and comparison layouts are superseded, not saved JSON.
 ## Current west porch-side paving follow-up — October 27
 
 Reversible interpretation of the narrow grass photo: fill only the west
-porch-side pocket, x=-7.855 to -0.225, z=54.2–64.5 ft, between the
+porch-side pocket, x=-7.855 to -0.225, z=54.67917–64.97917 ft after the
+October 30 front extension, between the
 west path's inner edge, porch-side wall plane and front crosswalk.
 Matching pavers add 78.589 sq ft (7.63 × 10.3 ft) at y=-1.35.
 Do not extend this infill toward the rear garden or across the open front lawn.
@@ -531,6 +567,10 @@ to clear the bathroom; north bins/board stay. Occupied storage use remains seque
 Refit garage tool storage at x=34.6 with 72-inch shelves/board (was81.6),
 retaining four crates, tools, mower and vacuum. Shift the mower 1.2 inches
 within that rack and inset the toolbox; keep the service-door approach clear.
+The actual garage slab is L-shaped: x=31.2-55.5 ft, z=15-49 ft overall,
+24 ft 3.6 in by 34 ft maximum extents. Its north leg starts at x=44.233 ft;
+the west edge returns to x=31.2 at z=26.9 ft. The 2D plan should outline the
+slab rather than imply its empty northwest bounding-box corner is floor.
 Exterior footprint, upstairs, doors and saved layouts remain unchanged.
 Garage fire separation, structure and occupied vehicle access need review;
 these model areas are not a certified living-area calculation.
@@ -812,7 +852,8 @@ separation at least 0.24 inch; against all garage angles at least 50.64 inches.
 The 48-inch nominal front has a 36-inch-deep storage-free approach.
 24-inch-wide centered standing envelope leaves 18.25 inches to empty bench,
 overlaps a 24-inch seated projection by 5.75 inches. Not simultaneous-use approval.
-Night-default lighting, garage opening, east run and saved JSON remain fixed.
+Lighting controls, garage opening, east run and saved JSON remain fixed;
+the October 30 viewer default is Day.
 Interpret “move this to the end” as the opposite, south end nearest the garage:
 the 90 × 18-inch bench now spans z=17.54–25.04 ft and the seven-cell
 shoe tower z=25.04–26.60 ft, in the same east-wall footprint. Peter, Lila,
@@ -1913,10 +1954,10 @@ stone bench, tile, names, clothing, layout and hook heights. Safe high access
 and actual loads remain unverified; removing the sign is not approval.
 
 Latest owner lighting control supersedes camera-dependent base illumination:
-Menu has a Night lighting / Day lighting toggle, Night pressed by default.
+Menu has a Night lighting / Day lighting toggle, Night unchecked by default.
 Night uses ambient 0.5, fill 250, exposure 0.75; Day uses 2.5/650/1.25.
 One viewer-wide choice applies during Tour, both floors, 2D, room and exterior
-views, and survives Reset/view changes. Reload starts Night. Existing local
+views, and survives Reset/view changes. Reload starts Day. Existing local
 study spotlights and physical fixture controls remain independent; no layouts,
 paint or fixture poses change. This is illustrative lighting, not sun simulation.
 
@@ -2117,6 +2158,26 @@ concept operation only: close fronts for circulation, and verify hinges,
 slides, plumbing, appliance conflicts and occupied clearances separately.
 
 ## Measured upstairs rebuild — October 28
+
+Primary bath owner marks, October 29 supersede the first rebuild: 1 = east-wall
+66 x 36 in built-in tub in northeast corner, deck 20 in; latest image 2 =
+southeast shower. North-window 72 x 24 in double vanity stays facing south;
+the previous mark 3 remains the west linen recess with an
+18 x 96 in closed white single-panel door and four 15 in-deep / 22.8 in-wide
+fixed oak shelves. Outer footprint, existing window/WC/bedroom entry and saved
+JSON stay. Retain stock 30 + 12 + 30 in oak Shaker vanity, three 15 in-travel
+drawers, pale stone at 34.5 in, satin gold. Counter/low splash below 36 in sill;
+two mirrors move to solid south wall, not across the window. Generic SE shower
+48 x 60 in now opens west, nominal 36 in / modeled 35.64 in between glass.
+Fixed north splash glass; 15.24 in to tub is not an approach. Tub/vanity side
+gap 17.89 in is not a route; approach tub on the southern part of its west side.
+Separate closed-front 30 x 30 in standing rectangles
+clear basins, west tub side and west shower entry. WC/linen south-jamb hinges
+swing outward into bath, all default closed at 96 in heads. Linen recess is
+storage, not approved walk-in space. Window-by-tub intent is superseded by the
+owner marks; window reach/glazing/privacy, water containment, waterproofing,
+structure, shelf loads/retrieval, plumbing, service and selected products remain
+unapproved. Retain bathroom exhaust/night-light requirements.
 
 2D overlays now show only short room names and compact dimensions, with a
 10 px text cap and room-fit sizing. Full names, paint-face qualifications and
@@ -2764,7 +2825,7 @@ z = 6 to 31 ft); hidden comparison layouts must stay excluded.
 ## Interior stair LEDs - October 24 local change
 
 October 25 owner revision: turn the existing continuous 2700 K tread-edge
-LED strips and soft local tread washes on in Night mode by default.
+LED strips and soft local tread washes on when Night mode is selected.
 This supersedes the off-only instruction below. Day, 2D plans, basement
 cutaway, exterior and structural previews disable them; return restores
 Night illumination. Preserve the existing diffused strip geometry, tread
@@ -3272,7 +3333,7 @@ Important audit findings: the patio leaf is shown closed with the higher-z hinge
 
 - Exterior shell in the [3D viewer](floor-plan-3d.html?view=exterior): English-country cream limestone, medium-brown shingle gables, black exterior window trim, oak double entry doors, and warm-cream garage doors. The latest simplified gabled entry replaces the separate arched surround; keep white interior window trim.
 - Entry cleanup: remove the full-height 'Arched stone entry surround' and its extra vertical legs. Align a single inner pair at x = 11.9 / 19.3, z = 60.5, each 0.65 ft square and 8 ft high, with one 0.95 ft stone foot. Join them with an 8.2 ft-wide header, underside y = 8/top 8.5, under the existing small gable. Shaft-to-shaft clear width 6.75 ft. Keep outer porch columns at x = 1 / 30.2 and all doors, steps, plants and slabs fixed. The two entry lanterns follow the inner pair at world (11.9 / 19.3, 5.8, 60.95), not the door wall. Verify load paths, spans, bearing, footings and roof junctions; this is visual coordination, not structural approval.
-- Site placement — owner correction October 27: retain the stationary house and 75 x 130 ft lot; move both side boundaries 1 ft east from the preceding 5 ft study. Exactly 6 ft separates finished east garage wall x = 55.725 from nearest inward fence rail face x = 61.725; fence center x = 61.895. Lot boundaries x = -12.605 / 62.395, center x = 24.895; z = -32.325 / 97.675 unchanged. Modeled property-line wall clearances are 6.67 ft east / 12.38 ft west, not legal setbacks. Reference rear wall z = -0.325 retains 32 ft; stepped rear projection z = -2.325 retains 30 ft. Front porch clearance remains 36.48 ft. Side paths and west gate follow the boundaries; terrace west edge moves 1 ft east with its 3 ft graded join, losing 12.1 sq ft (about 251.7 sq ft remaining) without moving roof, furniture or steps. East garden connector lengthens 1 ft; rear path and rear boundary stay fixed. Survey, zoning/projections, gate swings, grades and drainage require review.
+- Site placement — owner correction October 27: retain the stationary house and 75 x 130 ft lot; move both side boundaries 1 ft east from the preceding 5 ft study. Exactly 6 ft separates finished east garage wall x = 55.725 from nearest inward fence rail face x = 61.725; fence center x = 61.895. Lot boundaries x = -12.605 / 62.395, center x = 24.895; z = -32.325 / 97.675 unchanged. Exterior masonry faces span x = -0.225 to 55.725 (55 ft 11 3/8 in measured, approximately 56 ft); maximum modeled plan bounds span stepped rear projection z = -2.325 to porch slab edge z = 61.2 (63 ft 6 1/4 in). The viewer rounds the displayed width to 56 ft and retains the measured value in its tooltip. This bounding rectangle includes projections over a stepped plan and is not Birmingham's zoning/buildable envelope. Modeled property-line wall clearances are 6.67 ft east / 12.38 ft west, not legal setbacks. Reference rear wall z = -0.325 retains 32 ft; stepped rear projection z = -2.325 retains 30 ft. Front porch clearance remains 36.48 ft. Side paths and west gate follow the boundaries; terrace west edge moves 1 ft east with its 3 ft graded join, losing 12.1 sq ft (about 251.7 sq ft remaining) without moving roof, furniture or steps. East garden connector lengthens 1 ft; rear path and rear boundary stay fixed. Survey, zoning/projections, gate swings, grades and drainage require review.
 - Placement verification datum: measure constituent finished wall and fence rail faces, not a group envelope or fence centerline. Preserve 3.5 ft side paths, 0.75 ft fence-centerline offsets (nearest east constituent gap 0.58 ft; west 0.625 ft), the 3 ft west patio transition and both nominal 4 ft gates. Earlier 5 ft measurements and route-sampling results describe the superseded placement, not current approval.
 - Projection distinction: 6 ft is primary finished masonry to inner rail; base coping reaches x = 55.815 and leaves 5.91 ft locally. Roof/eaves and hardware are not the wall-face datum. Firepit shifts 3 in east to x = -3.5 to retain its entire footprint on flat terrace (0.9 in to slope), cold storage only.
 - Lot plan provides a top-down view with the property boundary, 75/130 ft labels, front/rear orientation, and rear-setback dimension. The driveway extends to the front boundary; remove the separate 5 ft-wide straight entry walk at x = 13.1-18.1, z = 68 to that boundary. Leave lawn there and retain access from the garage/continuous driveway through the porch-side paver connection at z = 64.5-68 to the steps. Do not reintroduce a paver apron across the driveway. See [lot placement assumptions](the-lot.html#modeled-placement).

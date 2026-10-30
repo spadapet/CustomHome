@@ -5,8 +5,25 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const layout = require('../upstairs-layout.js');
-const { getGroundFloorDefaultPlan, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout } = require('../floor-plan-ground.js');
+const { getGroundFloorDefaultPlan, getGroundFrontLayout, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout } = require('../floor-plan-ground.js');
 const baseline = getGroundFloorDefaultPlan();
+
+test('front rooms and porch extend 5.75 inches to an approximately 64-foot envelope', () => {
+  const front = getGroundFrontLayout();
+  const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-8, `${actual} != ${expected}`);
+  close(front.extension, 23 / 48);
+  close(front.wallZ, 54.2 + 23 / 48);
+  close(front.porchDepth, 7);
+  close(front.porchEdgeZ, front.wallZ + 7);
+  const office = baseline.rooms.find(({ name }) => name === 'Office');
+  const bedroom = baseline.rooms.find(({ name }) => name === 'Guest room');
+  const porch = baseline.rooms.find(({ name }) => name === 'Front porch');
+  close(office.d, front.wallZ - 41);
+  close(bedroom.d, front.wallZ - 43.2);
+  close(porch.z, front.wallZ);
+  close(porch.d, 7);
+  close(front.porchEdgeZ - (-2.325), 64.00416666666666);
+});
 
 test('whole bathroom translates exactly one foot and closet aligns without floor overlap', () => {
   const s = getGuestSuiteLayout();
@@ -37,6 +54,7 @@ test('powder room uses the shared hardwood floor without a tile overlay', () => 
   const end = source.indexOf(';', source.indexOf('].forEach(([x, z, w, d, hardwood')) + 1;
   vm.runInNewContext(source.slice(start, end), {
     guestEntry, guestSuite, stairOpening, shell: {}, powderNorthZ: guestEntry.powder.z,
+    groundFrontWallZ: getGroundFrontLayout().wallZ, groundFrontLayout: getGroundFrontLayout(),
     powderEntryWallZ: guestEntry.alcove.z, officeNorthZ: guestEntry.officeNorthZ,
     kidsRoom: { x: 19, z: 25.7, depth: 8.9 },
     floor(x, z, w, d, hardwood) { floors.push({ x, z, w, d, hardwood }); }
@@ -70,12 +88,12 @@ test('guest suite retains a walk-in closet alongside the comfortable shower', ()
   assert.equal(guestRoom.x, 19);
   assert.equal(guestRoom.z, 43.2);
   assert.equal(guestRoom.w, 12.2);
-  close(guestRoom.d, 11);
+  close(guestRoom.d, 11 + getGroundFrontLayout().extension);
   assert.ok(!baseline.rooms.some((room) => /Guest room (entry|nook)/.test(room.name)));
   assert.deepEqual(baseline.rooms.find((room) => room.name === 'Closet'), { name: 'Closet', ...suite.closet });
   assert.ok(!baseline.rooms.some((room) => room.name === 'Laundry'));
   assert.ok(!baseline.walls.some(([name]) => name === 'Laundry north'));
-  close(baseline.floors.filter((floor) => ['Closet', 'Bathroom', 'Kids room extension', 'Guest room'].includes(floor.room)).reduce((area, floor) => area + floor.w * floor.d, 0), 12.2 * 19.6 + 5.45);
+  close(baseline.floors.filter((floor) => ['Closet', 'Bathroom', 'Kids room extension', 'Guest room'].includes(floor.room)).reduce((area, floor) => area + floor.w * floor.d, 0), 12.2 * (19.6 + getGroundFrontLayout().extension) + 5.45);
   assert.ok(!baseline.rooms.some((room) => room.name === 'Guest sink alcove'));
   close(suite.bathroom.z + suite.bathroom.d, guestRoom.z);
   assert.ok(!baseline.walls.some(([name]) => name === 'Guest vanity privacy return'));
@@ -115,7 +133,7 @@ test('guest suite retains a walk-in closet alongside the comfortable shower', ()
   close(suite.closetDoor.height * 12, 96);
   close(suite.closetDoor.x + suite.closetDoor.width + 2.5 / 12 + 0.125 / 12 + 0.0625, 25.75 - 0.175);
   assert.ok(suite.closetDoor.pocket.w >= suite.closetDoor.pocket.leafWidth);
-  assert.deepEqual(baseline.rooms.find((room) => room.name === 'Entry hall'), { name: 'Entry hall', x: 12.2, z: 34.6, w: 6.8, d: 19.6 });
+  assert.deepEqual(baseline.rooms.find((room) => room.name === 'Entry hall'), { name: 'Entry hall', x: 12.2, z: 34.6, w: 6.8, d: getGroundFrontLayout().wallZ - 34.6 });
   assert.ok(!baseline.rooms.some((room) => room.name === 'Closet hall'), 'No narrowed north hall remains');
   for (const zone of [...suite.closetStorage.hanging, suite.closetStorage.shelves]) assert.ok(zone.x >= 0.2375 && zone.x + zone.w <= 6.7625 && zone.z + zone.d <= 5.7625, 'Storage clears finished walls and base trim');
   close(suite.kidsExtension.w * suite.kidsExtension.d, 17.55);
@@ -399,8 +417,8 @@ test('guest powder room and coat closet have separate doors off an open hall alc
   assert.ok(entry.alcove.z + entry.alcove.d - 0.175 - entry.powderDoor.z - entry.powderDoor.width > casingWidth, 'South jamb has room for the casing and reveal');
   assert.ok(!baseline.walls.some(([, x1, z1, x2, z2]) => x1 === 12.2 && x2 === 12.2 && Math.min(z1, z2) < entry.alcove.z + entry.alcove.d && Math.max(z1, z2) > entry.alcove.z), 'No wall blocks the hall-facing alcove');
   const sharedArea = baseline.floors.filter((floor) => ['Powder room', 'Guest coat closet', 'Guest entry alcove', 'Office'].includes(floor.room)).reduce((sum, floor) => sum + floor.w * floor.d, 0);
-  close(sharedArea, 12.2 * (54.2 - 35.1));
-  close(baseline.rooms.find((room) => room.name === 'Office').d, 13.2);
+  close(sharedArea, 12.2 * (getGroundFrontLayout().wallZ - 35.1));
+  close(baseline.rooms.find((room) => room.name === 'Office').d, 13.2 + getGroundFrontLayout().extension);
   assert.ok(entry.vanity.z - entry.vanity.depth / 2 - 0.2 > entry.powderDoor.z + entry.powderDoor.width, 'Office-wall vanity stays south of the entire door opening');
   close(entry.coatCloset.z + entry.coatCloset.d, entry.officeNorthZ);
   close(entry.alcove.z + entry.alcove.d, entry.coatCloset.z);
@@ -943,7 +961,7 @@ test('first-floor baseline matches the furnished model floors and canonical wall
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
   const floors = [], walls = [];
   const context = {
-    UpstairsLayout: layout, getGroundFloorDefaultPlan, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getKitchenPassageLayout: require('../floor-plan-ground.js').getKitchenPassageLayout, getPrepWindowLayout: require('../floor-plan-ground.js').getPrepWindowLayout, getPrepWindowBankLayout: require('../floor-plan-ground.js').getPrepWindowBankLayout, ceilingHeight: 9, garageFloorY: -1.25, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
+    UpstairsLayout: layout, getGroundFloorDefaultPlan, getGroundFrontLayout, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getKitchenPassageLayout: require('../floor-plan-ground.js').getKitchenPassageLayout, getPrepWindowLayout: require('../floor-plan-ground.js').getPrepWindowLayout, getPrepWindowBankLayout: require('../floor-plan-ground.js').getPrepWindowBankLayout, ceilingHeight: 9, garageFloorY: -1.25, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
     garageEntry: { x: 38, width: 3, height: 8 },
     garageFloorAreas: [{ x: 44.9 - 8 / 12, z: 15, w: 10.6 + 8 / 12, d: 11.9 }, { x: 31.2, z: 26.9, w: 24.3, d: 7.7 }, { x: 31.2, z: 34.6, w: 24.3, d: 14.4 }],
     scene: {}, shell: {},
@@ -1008,5 +1026,5 @@ test('irregular garage floors and porch follow their room bounds without filling
   const edits = layout.editRoom(baseline, layout.empty(), 'Front porch', { d: 8 });
   assert.equal(layout.resolve(baseline, edits).floors.find((floor) => floor.room === 'Front porch').d, 8);
   const garage = layout.editRoom(baseline, layout.empty(), 'Garage', { w: 27.5 });
-  assert.equal(layout.resolve(baseline, garage).rooms.find((room) => room.name === 'Garage').w, 27.5);
+  assert.ok(Math.abs(layout.resolve(baseline, garage).rooms.find((room) => room.name === 'Garage').w - 27.5) < 1e-9);
 });

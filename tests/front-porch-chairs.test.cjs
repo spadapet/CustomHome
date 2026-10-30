@@ -3,12 +3,14 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const frontLayout = require('../floor-plan-ground.js').getGroundFrontLayout();
 
 test('two cushioned porch chairs meet paving and leave entry approach clear', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
   const chairs = [];
   const context = {
     oak: {}, mat: color => ({ color }),
+    groundFrontWallZ: frontLayout.wallZ,
     furnishing(name, x, z, rotation, elevation) {
       const chair = { name, x, z, elevation, parts: [] };
       chairs.push(chair);
@@ -33,7 +35,7 @@ test('two cushioned porch chairs meet paving and leave entry approach clear', ()
     assert.ok(Math.abs(table.elevation + leg.y - leg.h / 2 - 0.035) < 1e-8);
   for (const [index, chair] of seats.entries()) {
     assert.equal(chair.x, index ? 8 : 3.2);
-    assert.equal(chair.z, 56.15);
+    assert.ok(Math.abs(chair.z - (56.15 + frontLayout.extension)) < 1e-9);
     assert.equal(chair.parts.filter(p => /timber leg/.test(p.name)).length, 4);
     for (const leg of chair.parts.filter(p => /timber leg/.test(p.name)))
       assert.ok(Math.abs(chair.elevation + leg.y - leg.h / 2 - 0.035) < 1e-8);
@@ -43,8 +45,8 @@ test('two cushioned porch chairs meet paving and leave entry approach clear', ()
       const left = chair.x + part.x - part.w / 2;
       const right = chair.x + part.x + part.w / 2;
       assert.ok(right < 10.6 || left > 20.6, 'clear of full entry sweep envelope');
-      assert.ok(chair.z + part.z - part.d / 2 > 54.2, 'clear of house wall');
-      assert.ok(chair.z + part.z + part.d / 2 <= 57.475 + 1e-8, '44.7-inch front strip retained');
+      assert.ok(chair.z + part.z - part.d / 2 > frontLayout.wallZ, 'clear of house wall');
+      assert.ok(chair.z + part.z + part.d / 2 <= 57.475 + frontLayout.extension + 1e-8, '44.7-inch front strip retained');
     }
     assert.equal(chair.userData.seatHeightFeet, 1.5);
   }

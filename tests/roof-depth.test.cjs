@@ -72,16 +72,17 @@ test('roof edges receive closed soffits and deep trim only along the envelope pe
 });
 
 test('garage brow and return are one clipped metal surface with real undersides and correctly falling constituent vertices', () => {
+  const frontWallZ = require('../floor-plan-ground.js').getGroundFrontLayout().wallZ;
   const { model, definitions } = render(true, HomeRoof.getGarageCanopyDefinitions());
   const plan = HomeRoof.buildRoofEnvelope(definitions);
-  close(plan.faces.reduce((sum, face) => sum + HomeRoof.signedArea(face.polygon), 0), 22.9 * 0.75 + 26.1 * 1.25 + 1.075 * 3);
+  close(plan.faces.reduce((sum, face) => sum + HomeRoof.signedArea(face.polygon), 0), 22.9 * 0.75 + 26.1 * 1.25 + 1.075 * (frontWallZ - 51.2));
   const surfaces = model.children.filter((part) => part.userData.roofSurface);
   assert.equal(surfaces.length, 3);
   for (const part of surfaces) {
     const positions = part.geometry.attributes.position.array;
     for (let i = 0; i < positions.length; i += 3) {
       close(positions[i + 1], 8.75 - (positions[i + 2] - 49.4) / 4);
-      assert.ok(positions[i + 1] >= 7.55 - 1e-6);
+      assert.ok(positions[i + 1] >= 8.75 - (frontWallZ - 49.4) / 4 - 1e-6);
       assert.ok(positions[i + 1] <= 8.8 + 1e-6);
     }
   }
@@ -90,7 +91,7 @@ test('garage brow and return are one clipped metal surface with real undersides 
   const garage = HomeRoof.getConnectedRoofDefinitions().find(({ id }) => id === 'Garage hip');
   for (const face of plan.faces) {
     for (let x = face.polygon.reduce((min, p) => Math.min(min, p[0]), Infinity); x <= 56; x += 0.05) {
-      for (let z = 49.2; z <= 54.2; z += 0.05) {
+      for (let z = 49.2; z <= frontWallZ; z += 0.05) {
         if (!HomeRoof.contains(face.polygon, [x, z])) continue;
         if (x >= garage.bounds[0] && x <= garage.bounds[1] && z < garage.bounds[3]) {
           const top = Math.min(...garage.planes.map((plane) => HomeRoof.heightAt(plane, [x, z])));

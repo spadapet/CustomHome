@@ -20,6 +20,8 @@ function buildKidsRoom() {
   const kidsRoom = { x: 19, z: 26.725 - 25 / 12 - 0.08 + 0.175, width: 10, southWidth: 12.2 };
   const context = {
     kidsRoom,
+    groundFrontWallZ: require('../floor-plan-ground.js').getGroundFrontLayout().wallZ,
+    officeEntry: { x: 12.2, z: 45.25, width: 5, height: 8 },
     guestSuite: require('../floor-plan-ground.js').getGuestSuiteLayout(),
     kidsDoorway: { x: 19, z: 27, width: 4.5, height: 8 },
     casingSideWidth: 3.5 / 12,
@@ -315,7 +317,7 @@ test('white panelling continues along the hall to the foyer without blocking eit
   assert.ok(Math.abs(b.minX - (18.825 - 0.5 / 12)) < 1e-9);
   assert.ok(Math.abs(b.maxX - 18.825) < 1e-9, 'Finish stays on hall face, outside kids and guest rooms');
   assert.ok(Math.abs(b.minZ - corner.maxZ) < 1e-9, 'Continuation meets existing corner return without overlap');
-  assert.ok(Math.abs(b.maxZ - 54.025) < 1e-9, 'Finish stops at foyer south-wall face');
+  assert.ok(Math.abs(b.maxZ - (require('../floor-plan-ground.js').getGroundFrontLayout().wallZ - 0.175)) < 1e-9, 'Finish stops at foyer south-wall face');
   assert.ok(model.find('Hall vertical wall panel').length > 50, 'Continue vertical grooves along entire run');
   const white = model.find('Family vertical wall panel')[0].material;
   for (const panel of model.find('Hall vertical wall panel')) assert.equal(panel.material, white);

@@ -132,7 +132,7 @@ function getUpstairsDefaultPlan(stairOpening) {
     if (room.circulationOnly) continue; // Irregular gallery floor is assembled below.
     if (room.name === 'Primary bath') {
       slab(room.name, p, bn, be - p, cn - bn, room.name);
-      slab('Primary bath west return', p - 3.35, n - 2.35, 3.35, 2.35, room.name);
+      slab('Primary bath linen closet', p - 3.35, n - 2.35, 3.35, 2.35, room.name);
     } else slab(room.name, room.x, room.z, room.w, room.d, room.name);
   }
   slab('Primary closet return', be, n, c - be, cn - n, 'Primary closet');
@@ -157,7 +157,7 @@ function getUpstairsDefaultPlan(stairOpening) {
     ['Primary south', 0, ps, p, ps],
     ['Toilet west', p - 3.35, bn, p - 3.35, n, [], [-1]],
     ['Bath north', p - 3.35, bn, be, bn, [win(6.85, 3)], [1]],
-    ['Toilet partition', p, bn, p, n, [door(2.3, 2.5)]],
+    ['Toilet partition', p, bn, p, n, [door(2.3, 2.5), door(n - bn - 2.35 + 0.425, 1.5)]],
     ['Toilet south', p - 3.35, n - 2.35, p, n - 2.35],
     ['Toilet linen south', p - 3.35, n, p, n],
     ['Bath east', be, bn, be, cn, [], [1]],
@@ -264,12 +264,12 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
       if (bottom === 0 && end - start <= 3.05) {
         // Deliberate 90-degree operating envelopes, not a 180-degree fold-back
         // through casings, fixtures or furniture. Default leaves remain closed.
-        const rightHinge = name === 'Bedroom 4 north' && start > 10;
+        const rightHinge = (name === 'Bedroom 4 north' && start > 10) || name === 'Toilet partition';
         const swingSign = rightHinge ? -1 : (name === 'Bedroom 3 north' && start < 4) ? 1
           : ['Primary suite entry', 'Storage west', 'Bedroom 3 north', 'Bedroom 4 north', 'Furnace entry'].includes(name) ? -1 : 1;
         const closedRotationY = rightHinge ? Math.PI : 0;
         const hinge = new THREE.Group();
-        hinge.name = `Upstairs ${name} interior door hinge`;
+        hinge.name = name === 'Toilet partition' && start > 5 ? 'Upstairs Primary bath linen closet door hinge' : `Upstairs ${name} interior door hinge`;
         hinge.position.set(closedRotationY ? end - 0.02 : start + 0.02, 0, 0);
         hinge.rotation.y = closedRotationY;
         hinge.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: swingSign, closedRotationY }, nominalOpeningFeet: end - start };
@@ -465,7 +465,59 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     box(item, 0, 0.8, 0.1, 1.4, 1.5, 1.7, windowTrim, true);
     box(item, 0, 1.58, 0.1, 1.2, 0.08, 1.5, cream, true);
   }
-  vanity('Primary double vanity', g.primaryEast + 3.5, g.bathNorth + 1.2, 6);
+  const primaryBrass = mat('#b59859');
+  const primaryPanel = mat('#b69a72');
+  const primaryGlass = mat('#b8d2cf');
+  Object.assign(primaryGlass, { transparent: true, opacity: 0.22, roughness: 0.12 });
+  const primaryVanity = furniture('Primary double vanity', g.primaryEast + 4.4, g.bathNorth + 1.3);
+  primaryVanity.userData = { cabinetWidthsInches: [30, 12, 30], depthInches: 24, counterHeightInches: 34.5, finish: 'Natural white oak Shaker / satin gold', productSelected: false, plumbingVerified: false };
+  for (const [x, width] of [[-1.75, 2.5], [0, 1], [1.75, 2.5]]) {
+    for (const side of [-1, 1]) box(primaryVanity, x + side * (width / 2 - 0.03125), 1.525, 0, 0.0625, 2.45, 2, oak).name = 'Primary vanity stock cabinet side';
+    box(primaryVanity, x, 1.525, -0.96875, width - 0.125, 2.45, 0.0625, oak).name = 'Primary vanity cabinet back';
+    box(primaryVanity, x, 0.35, 0, width - 0.125, 0.0625, 1.875, oak).name = 'Primary vanity cabinet floor';
+    box(primaryVanity, x, 0.15, -0.1, width - 0.125, 0.3, 1.7, oak).name = 'Primary vanity recessed plinth';
+    const fronts = width > 1 ? 2 : 3;
+    for (let index = 0; index < fronts; index++) {
+      const drawer = width === 1;
+      const frontWidth = (drawer ? width : width / fronts) - 0.04;
+      const frontHeight = drawer ? 2.4 / fronts - 0.04 : 2.36;
+      const front = new THREE.Group();
+      front.position.set(drawer ? x : x - width / 2 + (index + 0.5) * width / fronts, drawer ? 0.35 + (index + 0.5) * 2.4 / fronts : 1.55, 1.035);
+      primaryVanity.add(front);
+      front.name = drawer ? 'Primary vanity center drawer' : 'Upstairs vanity cabinet door';
+      front.userData = { cabinetFront: true, width: frontWidth, height: frontHeight, ...(drawer ? { drawerTravelFeet: 1.25 } : { hingeSide: index % 2 === 0 ? -1 : 1 }) };
+      for (const side of [-1, 1]) {
+        box(front, side * (frontWidth - 0.15) / 2, 0, 0, 0.15, frontHeight, 0.07, oak).name = 'Primary vanity Shaker stile';
+        box(front, 0, side * (frontHeight - 0.15) / 2, 0, frontWidth - 0.3, 0.15, 0.07, oak).name = 'Primary vanity Shaker rail';
+      }
+      box(front, 0, 0, -0.02, frontWidth - 0.3, frontHeight - 0.3, 0.03, primaryPanel).name = 'Primary vanity recessed Shaker field';
+      box(front, 0, drawer ? 0 : 0.25, 0.11, drawer ? 0.45 : 0.06, drawer ? 0.06 : 0.55, 0.08, primaryBrass).name = 'Upstairs vanity handle';
+    }
+  }
+  // Split the stone around the two bowls instead of burying them in a solid top.
+  for (const [x, width] of [[-2.8, 0.5], [0, 1.9], [2.8, 0.5]]) {
+    box(primaryVanity, x, 2.8125, 0, width, 0.125, 2.1, cream).name = 'Primary vanity counter side';
+  }
+  for (const x of [-1.75, 1.75]) {
+    for (const side of [-1, 1]) box(primaryVanity, x, 2.8125, side * 0.825, 1.6, 0.125, 0.45, cream).name = 'Primary vanity counter rim';
+    box(primaryVanity, x, 2.52, 0, 1.6, 0.08, 1.2, windowTrim).name = 'Primary vanity bowl bottom';
+    for (const side of [-1, 1]) {
+      box(primaryVanity, x + side * 0.77, 2.66, 0, 0.06, 0.28, 1.2, windowTrim).name = 'Primary vanity basin side';
+      box(primaryVanity, x, 2.66, side * 0.57, 1.48, 0.28, 0.06, windowTrim).name = 'Primary vanity basin end';
+    }
+    box(primaryVanity, x, 3.05, -0.8, 0.08, 0.5, 0.08, primaryBrass).name = 'Primary vanity faucet riser';
+    box(primaryVanity, x, 3.25, -0.6, 0.08, 0.08, 0.45, primaryBrass).name = 'Primary vanity faucet spout';
+  }
+  // Keep the 36-inch window sill clear; retain the mirrors on the solid south wall.
+  const primaryMirrors = furniture('Primary bath mirrors', g.primaryEast + 3.8, g.closetNorth - 0.25, Math.PI);
+  for (const x of [-1.75, 1.75]) {
+    box(primaryMirrors, x, 5.1, 0, 2.1, 3, 0.08, primaryBrass).name = 'Primary vanity mirror frame';
+    box(primaryMirrors, x, 5.1, 0.055, 1.95, 2.85, 0.025, steel).name = 'Primary vanity mirror';
+  }
+  box(primaryVanity, 0, 2.925, -0.99, 6.1, 0.1, 0.08, cream).name = 'Primary vanity low backsplash';
+  const primaryLinen = furniture('Primary bath linen shelves', g.primaryEast - 2.35, g.north - 1.175);
+  primaryLinen.userData = { shelfDepthInches: 15, shelfWidthInches: 22.8, doorInches: [18, 96], storageOnly: true, loadsVerified: false };
+  for (const height of [1.5, 3, 4.5, 6]) box(primaryLinen, 0, height, 0, 1.25, 0.08, 1.9, oak).name = 'Primary linen fixed shelf';
   vanity('Bedroom 2 vanity', g.bedEast + 2, g.north + 4.65, 3, Math.PI);
   vanity('West bath vanity', 1.75, g.serviceSouth + 1.25, 2.5);
   vanity('East bath vanity', g.southEast - 1.75, g.serviceSouth + 1.25, 2.5);
@@ -474,7 +526,6 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   toilet('West bath toilet', 4.8, g.serviceSouth + 1.3);
   toilet('East bath toilet', g.southEast - 4.7, g.serviceSouth + 1.3);
   for (const [name, x, z, w, d] of [
-    ['Primary shower', g.bathEast - 2.3, g.bathNorth + 2.3, 3.5, 3.8],
     ['Bedroom 2 shower', g.east - 1.6, g.north + 2.925, 2.5, 5],
     ['West bath shower', 7.6, g.serviceSouth + 2.675, 3, 4.4],
     ['East bath shower', g.linenWest + 1.75, g.serviceSouth + 2.675, 3, 4.4]
@@ -486,12 +537,29 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     box(item, 0, 3.2, -d / 2 + 0.18, 0.25, 0.4, 0.08, steel);
     box(item, 0, 0.25, 0, 0.3, 0.015, 0.3, steel);
   }
-  const tub = furniture('Primary freestanding tub', g.bathEast - 2.3, g.closetNorth - 3.2);
-  box(tub, 0, 1, 0, 2.8, 2, 5.2, windowTrim, true);
-  box(tub, 0, 1.9, 0, 2.25, 0.15, 4.4, cream, true);
-  box(tub, 0, 1.99, 0, 1.9, 0.025, 3.9, windowTrim, true);
-  box(tub, -1.7, 1.3, 0, 0.1, 2.6, 0.1, steel);
-  box(tub, -1.4, 2.6, 0, 0.7, 0.1, 0.1, steel);
+  const primaryShower = furniture('Primary shower', g.bathEast - 2.3, g.closetNorth - 2.8, Math.PI);
+  primaryShower.userData = { widthInches: 48, depthInches: 60, entryInches: 36, entrySide: 'West', productSelected: false, splashControlVerified: false };
+  box(primaryShower, 0, 0.12, 0, 4, 0.24, 5, cream).name = 'Primary shower pan';
+  box(primaryShower, 0, 3.5, -2.44, 4, 7, 0.12, tile).name = 'Primary shower tiled back';
+  box(primaryShower, -1.94, 3.5, 0, 0.12, 7, 4.88, tile).name = 'Primary shower tiled side';
+  box(primaryShower, 1.96, 3.7, -1.515, 0.06, 7, 1.97, primaryGlass).name = 'Primary shower fixed entry glass';
+  box(primaryShower, 0, 3.7, 2.47, 4, 7, 0.06, primaryGlass).name = 'Primary shower fixed north glass';
+  box(primaryShower, 0, 6.6, -2.05, 0.7, 0.06, 0.7, primaryBrass).name = 'Primary shower head';
+  box(primaryShower, 0, 3.3, -2.3, 0.3, 0.5, 0.1, primaryBrass).name = 'Primary shower controls';
+  box(primaryShower, 0, 0.25, -2, 2.5, 0.015, 0.08, steel).name = 'Primary shower linear drain';
+  const tub = furniture('Primary built-in tub', g.bathEast - 1.8, g.bathNorth + 3.05, Math.PI / 2);
+  tub.userData = { widthInches: 66, depthInches: 36, deckHeightInches: 20, productSelected: false, lowTubIntent: true, windowAccessVerified: false };
+  for (const side of [-1, 1]) {
+    box(tub, side * 2.625, 0.79, 0, 0.25, 1.58, 3, cream).name = 'Primary built-in tub end apron';
+    box(tub, 0, 0.79, side * 1.375, 5, 1.58, 0.25, cream).name = 'Primary built-in tub long apron';
+    box(tub, side * 2.475, 1.625, 0, 0.55, 1 / 12, 3, windowTrim).name = 'Primary tub deck end';
+    box(tub, 0, 1.625, side * 1.225, 4.4, 1 / 12, 0.55, windowTrim).name = 'Primary tub deck side';
+    box(tub, side * 2.17, 1, 0, 0.06, 1.17, 1.9, windowTrim).name = 'Primary tub basin end';
+    box(tub, 0, 1, side * 0.92, 4.28, 1.17, 0.06, windowTrim).name = 'Primary tub basin side';
+  }
+  box(tub, 0, 0.45, 0, 4.4, 0.08, 1.9, windowTrim).name = 'Primary tub basin bottom';
+  box(tub, -2.45, 1.85, 0, 0.08, 0.4, 0.08, primaryBrass).name = 'Primary tub deck faucet riser';
+  box(tub, -2.2, 2.02, 0, 0.5, 0.08, 0.08, primaryBrass).name = 'Primary tub deck faucet spout';
   for (const [index, x] of [g.southEast + 2, g.southEast + 5.4].entries()) {
     const machine = furniture(index === 0 ? 'Washer' : 'Dryer', x, g.serviceSouth - 2, Math.PI);
     box(machine, 0, 1.6, 0, 2.8, 3.2, 2.8, windowTrim);
@@ -623,6 +691,9 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
       }
     });
     tile.dispose();
+    primaryBrass.dispose();
+    primaryPanel.dispose();
+    primaryGlass.dispose();
   }
   return { group, rooms, areas, plan, baseline, dispose, coordinationWarnings, start: [16.5, 33], mapLabels: rooms.map((room) => [room.name, room.x + room.w / 2, room.z + room.d / 2]) };
 }

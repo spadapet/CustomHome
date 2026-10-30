@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+const frontLayout = require('../floor-plan-ground.js').getGroundFrontLayout();
 
 function planting() {
   class Mesh {
@@ -17,6 +18,7 @@ function planting() {
   const group = { add(mesh) { children.push(mesh); } };
   const c = { THREE: { Mesh, SphereGeometry: class { constructor(radius) { this.radius = radius; } } },
     group, mat: () => ({}), drivewayLeft: 30.9,
+    frontPorchEdgeZ: frontLayout.porchEdgeZ, frontShift: frontLayout.extension,
     box(parent,x,y,z,w,h,d) {
       const mesh = { position: {x,y,z}, w,h,d };
       parent.add(mesh); return mesh;
@@ -51,7 +53,7 @@ test('stone edging remains inside existing soil, below the walk, and outside ent
   const edges = all.filter(o=>o.name?.startsWith('Front planting-bed stone edge'));
   assert.equal(edges.length,6);
   for (const e of edges) {
-    assert.ok(e.position.z+e.d/2 <= 64.5+1e-8);
+    assert.ok(e.position.z+e.d/2 <= 64.5+frontLayout.extension+1e-8);
     assert.ok(e.position.y+e.h/2 < -1.35);
     assert.ok(e.position.x+e.w/2 <= 10.7+1e-8 || e.position.x-e.w/2 >= 20.5-1e-8);
     assert.ok(e.position.x+e.w/2 <= 30.9+1e-8);

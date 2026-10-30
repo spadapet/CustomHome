@@ -30,7 +30,7 @@ function setRoomMenuVisible(visible) {
   notes.hidden = !visible;
   document.querySelector('.design-workspace').classList.toggle('notes-hidden', !visible);
   notesButton.setAttribute('aria-expanded', String(visible));
-  notesButton.textContent = visible ? 'Hide design notes' : 'Show design notes';
+  notesButton.textContent = 'Notes';
 }
 
 notesButton.addEventListener('click', () => setRoomMenuVisible(notes.hidden));
@@ -831,7 +831,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       part(cursor, start, base, height);
       part(start, end, base, bottom);
       part(start, end, top, height);
-      if ((bottom === 0 || bottom === base) && !(z1 === 54.2 && z2 === 54.2 && start === 13.1 && end === 18.1)) {
+      if ((bottom === 0 || bottom === base) && !(z1 === groundFrontWallZ && z2 === groundFrontWallZ && start === 13.1 && end === 18.1)) {
         for (const side of trimSides) openingCasing(group, (start + end) / 2, bottom, end - start, top - bottom, 0.175, side, false,
           { ...casingOptions, legBottom: casingOptions.splitFloor ? (side === -1 ? 0.0405 : -garageRise) : 0 });
       }
@@ -1034,6 +1034,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const kitchenWallLeft = 26.5;
   const kitchenWallRight = 37.5;
+  const groundFrontLayout = getGroundFrontLayout();
+  const groundFrontWallZ = groundFrontLayout.wallZ;
+  const frontPorchEdgeZ = groundFrontLayout.porchEdgeZ;
   const cookingWallShiftX = kitchenWallRight - 38;
   const kitchenWindowWallZ = 7;
   const kitchenSinkRunZ = kitchenWindowWallZ + 1.2;
@@ -1113,12 +1116,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [kidsRoom.x, kidsRoom.z, 6.75, kidsRoom.depth, true],
     [25.75, kidsRoom.z, 3.25, guestSuite.bathroom.z - kidsRoom.z, true],
     [29, 26.9, 2.2, guestSuite.bathroom.z - 26.9, true],
-    [12.2, 34.6, 6.8, 19.6, true], [0, powderNorthZ, 7.1, guestEntry.powder.d, true], [7.1, powderEntryWallZ, 5.1, guestEntry.alcove.d, true],
-    [0, officeNorthZ, 12.2, 54.2 - officeNorthZ, true],
+    [12.2, 34.6, 6.8, groundFrontWallZ - 34.6, true], [0, powderNorthZ, 7.1, guestEntry.powder.d, true], [7.1, powderEntryWallZ, 5.1, guestEntry.alcove.d, true],
+    [0, officeNorthZ, 12.2, groundFrontWallZ - officeNorthZ, true],
     ...[guestSuite.kidsExtension, guestSuite.closet].map(({ x, z, w, d }) => [x, z, w, d, true]),
     [guestSuite.bathroom.x, guestSuite.bathroom.z, guestSuite.bathroom.w, guestSuite.bathroom.d],
-    [19, guestSuite.bathroomDoor.z, 12.2, 54.2 - guestSuite.bathroomDoor.z, true],
-    [0, 54.2, 31.2, 7, false, false],
+    [19, guestSuite.bathroomDoor.z, 12.2, groundFrontWallZ - guestSuite.bathroomDoor.z, true],
+    [0, groundFrontWallZ, 31.2, groundFrontLayout.porchDepth, false, false],
     [7.1, guestEntry.coatCloset.z, 5.1, guestEntry.coatCloset.d, true]
   ].forEach(([x, z, w, d, hardwood = false, interior = true]) => floor(x, z, w, d, hardwood, shell, interior));
 
@@ -1132,10 +1135,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [55.5, kitchenWindowWallZ, 55.5, 15, false, [[prepEndWindow.z - prepEndWindow.openingWidth / 2 - kitchenWindowWallZ, prepEndWindow.z + prepEndWindow.openingWidth / 2 - kitchenWindowWallZ, prepEndWindow.openingSill, prepEndWindow.openingSill + prepEndWindow.openingHeight]], ceilingHeight, [1]],
     [55.5, 15, 55.5, 49, false, [...garageClerestories.map(({ z, width, sill, height }) => [z - width / 2 - 15, z + width / 2 - 15, sill, sill + height]), [29, 32, garageFloorY, garageFloorY + 8]], ceilingHeight, [1], 0, garageFloorY],
     [55.5, 49, 31.2, 49, false, [[2.5, 11.5, garageFloorY, garageFloorY + 8], [14, 23, garageFloorY, garageFloorY + 8]], ceilingHeight, [1], 0, garageFloorY],
-    [31.2, 49, 31.2, 54.2], [31.2, 54.2, 31.2, 61.2, false, [], 2.6], [31.2, 61.2, 0, 61.2, false, [], 2.6],
-    [0, 61.2, 0, 54.2, false, [], 2.6],     [0, 54.2, 0, livingFeatureWall.wallEndZ, false, [
-      [3.2, 7.2, 3, 8],
-      ...[...guestEntry.windows].reverse().map(({ z, openingWidth, openingSill, openingHeight }) => [54.2 - z - openingWidth / 2, 54.2 - z + openingWidth / 2, openingSill, openingSill + openingHeight])
+    [31.2, 49, 31.2, groundFrontWallZ], [31.2, groundFrontWallZ, 31.2, frontPorchEdgeZ, false, [], 2.6], [31.2, frontPorchEdgeZ, 0, frontPorchEdgeZ, false, [], 2.6],
+    [0, frontPorchEdgeZ, 0, groundFrontWallZ, false, [], 2.6],     [0, groundFrontWallZ, 0, livingFeatureWall.wallEndZ, false, [
+      [groundFrontWallZ - 49 - 2, groundFrontWallZ - 49 + 2, 3, 8],
+      ...[...guestEntry.windows].reverse().map(({ z, openingWidth, openingSill, openingHeight }) => [groundFrontWallZ - z - openingWidth / 2, groundFrontWallZ - z + openingWidth / 2, openingSill, openingSill + openingHeight])
     ]],
     [0, livingFeatureWall.wallEndZ, 0, 8, true, [...livingWindowCenters].reverse().map((z) => [livingFeatureWall.wallEndZ - z - livingWindowWidth / 2, livingFeatureWall.wallEndZ - z + livingWindowWidth / 2, livingWindowSill, livingWindowHead])],
     [kidsRoom.x, kidsRoom.z, kidsRoom.x + kidsRoom.width, kidsRoom.z, true],
@@ -1144,9 +1147,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [7.1, powderNorthZ, 7.1, officeNorthZ, false, [[guestEntry.powderDoor.z - powderNorthZ, guestEntry.powderDoor.z - powderNorthZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
     [7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, false, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
     [12.2, guestEntry.coatCloset.z, 12.2, officeNorthZ],
-    [officeEntry.x, officeNorthZ, officeEntry.x, 54.2, false, [[officeEntry.z - officeEntry.width / 2 - officeNorthZ, officeEntry.z + officeEntry.width / 2 - officeNorthZ, 0, officeEntry.height]]],
-    [0, officeNorthZ, 12.2, officeNorthZ], [0, 54.2, 31.2, 54.2, false, [...getGroundFrontWindows().map(w => [w.center - w.width / 2, w.center + w.width / 2, w.sill, w.sill + w.height]), [13.1, 18.1, 0, 8]].sort((a, b) => a[0] - b[0]), ceilingHeight, [-1]],
-    [19, 34.6, 19, 54.2, false, [[guestSuite.bedroomDoor.z - 34.6, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - 34.6, 0, 8]]],
+    [officeEntry.x, officeNorthZ, officeEntry.x, groundFrontWallZ, false, [[officeEntry.z - officeEntry.width / 2 - officeNorthZ, officeEntry.z + officeEntry.width / 2 - officeNorthZ, 0, officeEntry.height]]],
+    [0, officeNorthZ, 12.2, officeNorthZ], [0, groundFrontWallZ, 31.2, groundFrontWallZ, false, [...getGroundFrontWindows().map(w => [w.center - w.width / 2, w.center + w.width / 2, w.sill, w.sill + w.height]), [13.1, 18.1, 0, 8]].sort((a, b) => a[0] - b[0]), ceilingHeight, [-1]],
+    [19, 34.6, 19, groundFrontWallZ, false, [[guestSuite.bedroomDoor.z - 34.6, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - 34.6, 0, 8]]],
     ...getGroundFloorDefaultPlan().walls.filter(([name]) => ['Closet north', 'Closet east', 'Closet south', 'Bathroom south', 'Bathroom north'].includes(name)).map(([name, x1, z1, x2, z2, openings = []]) => [x1, z1, x2, z2, false, openings, ceilingHeight, [-1, 1], 0, 0, { sideWidth: 2.5 / 12, ...(name === 'Closet south' ? { pocket: { x: guestSuite.closetDoor.pocket.x - x1, w: guestSuite.closetDoor.pocket.w } } : {}) }]),
     [31.2, 34.6, 31.2, 49, false, [], ceilingHeight, [-1, 1], 0, garageFloorY], [31.2, 26.9, 31.2, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
     [29, 26.9, 29.1875, 26.9, true],
@@ -1169,9 +1172,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     ['Living room', 13.2, 17.7], ['Dining room', 13.675, 8.1], ['Kitchen', 11, 26.9 - kitchenWindowWallZ],
     ['Hall', 13.3, kidsRoom.z - 8], ['Prep kitchen', 18, 15 - kitchenWindowWallZ, true], ['Mudroom', 7.4 - 8 / 12, 11.9],
     ['Garage', 26.5, 34, true], ['Kids room (L-shaped)', kidsRoom.southWidth, kidsRoom.depth, true],
-    ['Powder room', 7.1, guestEntry.powder.d], ['Guest coat closet', 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 5.1, guestEntry.alcove.d], ['Office', 12.2, 54.2 - officeNorthZ],
+    ['Powder room', 7.1, guestEntry.powder.d], ['Guest coat closet', 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 5.1, guestEntry.alcove.d], ['Office', 12.2, groundFrontWallZ - officeNorthZ],
     ['Guest walk-in closet', guestSuite.closet.w, guestSuite.closet.d], ['Guest shower bathroom', guestSuite.bathroom.w, guestSuite.bathroom.d],
-    ['Bedroom', 12.2, 11], ['Porch', 31.2, 7]
+    ['Bedroom', 12.2, groundFrontWallZ - 43.2], ['Porch', 31.2, groundFrontLayout.porchDepth]
   ].forEach((room) => roomDimensions(...room));
 
   // Proposed feature wall, following the existing living-room requirements.
@@ -3906,7 +3909,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(familyEdgeTrim, side * (kidsRoom.width / 2 + 0.175 + familyPanelDepth / 2), (9 + 8 / 12) / 2, (familyPanelDepth - 0.35) / 2, familyPanelDepth, 9 - 8 / 12, 0.35 + familyPanelDepth, familyPanelFinish).name = 'Family white edge corner return';
   }
   const hallPanelStartZ = kidsRoom.z + 0.175;
-  const hallPanelLength = 54.2 - 0.175 - hallPanelStartZ;
+  const hallPanelLength = groundFrontWallZ - 0.175 - hallPanelStartZ;
   const hallPanels = furnishing('Hall-facing white wall panelling', kidsRoom.x - 0.175, hallPanelStartZ, -Math.PI / 2);
   hallPanels.userData = { finish: 'Warm-white painted vertical grooved panelling', thicknessInches: 0.5, bottomInches: 8, topInches: 108, face: 'Hall side of kids and guest west walls, continuing to foyer', provisional: true };
   const hallPanelCutouts = [];
@@ -4076,7 +4079,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   }
   const officeLoveseatWidth = 5;
-  const officeLounge = furnishing('Office loveseat', officeFurnitureInset + officeLoveseatWidth / 2, 54.2 - officeFurnitureInset - 1.4, Math.PI, 0, true);
+  const officeLounge = furnishing('Office loveseat', officeFurnitureInset + officeLoveseatWidth / 2, groundFrontWallZ - officeFurnitureInset - 1.4, Math.PI, 0, true);
   officeLounge.userData = { widthInches: 60, depthInches: 33.6, provisional: true, productSelected: false, layoutIntent: 'Restored full-size two-seat concept below the front window, facing north; compact north-wall trial superseded' };
   box(officeLounge, 0, 1, 0, officeLoveseatWidth, 0.8, 2.8, cream, true);
   box(officeLounge, 0, 2, -1.15, officeLoveseatWidth, 1.4, 0.35, cushion, true);
@@ -4169,7 +4172,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const bedroomBedWidth = 63.5 / 12;
   const bedroomBedDepth = 82.75 / 12;
   const bedroomFurnitureBack = 31.2 - 0.175 - 0.15;
-  const bedroomBedZ = 54.2 - 0.175 - 0.15 - 3.7 - 0.78;
+  const bedroomBedZ = groundFrontWallZ - 0.175 - 0.15 - 3.7 - 0.78;
   const bed = furnishing('Article Lenia queen bed', bedroomFurnitureBack - bedroomBedDepth / 2, bedroomBedZ, -Math.PI / 2, 0, true);
   bed.userData = { widthInches: 63.5, depthInches: 82.75 };
   box(bed, 0, 1, 0, bedroomBedWidth, 0.5, bedroomBedDepth, oak);
@@ -4608,7 +4611,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(guestShower, 1.6, 6.8, 0.65, 0.6, 0.06, 0.6, brass).name = 'Guest shower rain head';
   box(guestShower, 2.85, 3.5, 0.16, 0.18, 0.35, 0.12, brass).name = 'Guest shower mixer control';
 
-  const frontDoor = furnishing('Double front entry', 15.6, 54.2);
+  const frontDoor = furnishing('Double front entry', 15.6, groundFrontWallZ);
   frontDoor.userData = { heightInches: 96, lockBrand: 'Wyze', lockModel: null, activeLeafHandingVerified: false, hardwareCompatibilityVerified: false };
   const frontEntryLeaves = buildArchedFrontEntry(THREE, { box, wood: mat('#c99f6b'), field: mat('#b88e5a'), oakMaps: masonryMaps.oak, trim: windowTrim, hardware: black }, frontDoor);
   const activeFrontEntryLeaf = frontEntryLeaves[1];
@@ -4619,12 +4622,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   activeFrontEntryLeaf.add(entrySmartLock);
   box(entrySmartLock, 0, 0, -0.06, 0.28, 0.55, 0.12, black, true).name = 'Schematic smart-lock interior housing';
   box(entrySmartLock, 0, -0.12, -0.14, 0.16, 0.045, 0.05, steel, true).name = 'Schematic smart-lock thumbturn';
-  tiledFloor('Porch paving', 0, 54.2, 31.2, 7, mat('#c9c7bc'));
+  tiledFloor('Porch paving', 0, groundFrontWallZ, 31.2, groundFrontLayout.porchDepth, mat('#c9c7bc'));
   const porchCushion = mat('#a49780', 0.95);
   const porchPillow = mat('#74745b', 0.96);
   const frontPorchChairs = [];
   for (const x of [3.2, 8]) {
-    const chair = furnishing('Front porch cushioned lounge chair', x, 56.15, 0, 0.035, true);
+    const chair = furnishing('Front porch cushioned lounge chair', x, groundFrontWallZ + 1.95, 0, 0.035, true);
     frontPorchChairs.push(chair);
     chair.userData = { widthFeet: 2.6, depthFeet: 2.65, seatHeightFeet: 1.5, backHeightFeet: 2.75, outdoorProductSelected: false };
     for (const side of [-1, 1]) {
@@ -4641,15 +4644,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     back.rotation.x = -0.08;
     box(chair, 0, 1.83, -0.64, 1.3, 0.55, 0.26, porchPillow, true).name = 'Porch chair olive lumbar pillow';
   }
-  const frontPorchTable = furnishing('Front porch small table between chairs', 5.6, 56.15, 0, 0.035, true);
+  const frontPorchTable = furnishing('Front porch small table between chairs', 5.6, groundFrontWallZ + 1.95, 0, 0.035, true);
   box(frontPorchTable, 0, 1.65, 0, 1.5, 0.12, 1.5, oak, true).name = 'Porch side-table top';
   for (const x of [-0.57, 0.57]) for (const z of [-0.57, 0.57])
     box(frontPorchTable, x, 0.795, z, 0.12, 1.59, 0.12, oak).name = 'Porch side-table leg';
   windowFrame('Office side window', 0.1, 49, 4, 5, 3, -Math.PI / 2, rest, -1);
   const officeFront = getGroundFrontWindows()[0];
-  windowFrame(officeFront.name, officeFront.center, 54.2, officeFront.width, officeFront.height, officeFront.sill, 0, rest, -1, { frontGrid: true });
+  windowFrame(officeFront.name, officeFront.center, groundFrontWallZ, officeFront.width, officeFront.height, officeFront.sill, 0, rest, -1, { frontGrid: true });
   const guestFront = getGroundFrontWindows()[1];
-  windowFrame(guestFront.name, guestFront.center, 54.1, guestFront.width, guestFront.height, guestFront.sill, 0, rest, -1, { frontGrid: true });
+  windowFrame(guestFront.name, guestFront.center, groundFrontWallZ, guestFront.width, guestFront.height, guestFront.sill, 0, rest, -1, { frontGrid: true });
 
   const ground = new THREE.Group();
   ground.name = 'Site ground around lowered garage and basement stairwell';
@@ -4723,20 +4726,27 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const upstairsArea = getLivableFloorArea({ floors: [...upstairs.plan.floors, upstairs.baseline.arrival] });
     const format = (area) => Math.round(area).toLocaleString('en-US');
     const output = document.getElementById('livable-area');
-    output.textContent = `Livable: ~${format(groundArea + upstairsArea)} sq ft | First floor: ~${format(groundArea)} sq ft | Second floor: ~${format(upstairsArea)} sq ft`;
+    output.textContent = `Area: ~${format(groundArea + upstairsArea)} sq ft`;
     output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. Combined modeled interior floor surfaces; overlaps counted once. Includes closets, halls, bathrooms and laundry. Excludes garage, porch, mechanical space and open stair voids. Not certified living area; wall thickness and headroom eligibility are not verified.`;
+    const firstFloorOutput = document.getElementById('first-floor-area');
+    firstFloorOutput.textContent = `1st: ~${format(groundArea)} sq ft`;
+    firstFloorOutput.title = output.title;
+    const secondFloorOutput = document.getElementById('second-floor-area');
+    secondFloorOutput.textContent = `2nd: ~${format(upstairsArea)} sq ft`;
+    secondFloorOutput.title = output.title;
     const openings = new Set(windowInstallations.map(window => window.openingId)).size;
     const units = windowInstallations.reduce((total, window) => total + window.units, 0);
     const pictures = windowInstallations.reduce((total, window) => total + (window.pictureUnits ?? (window.picture ? window.units : 0)), 0);
     const singleHung = windowInstallations.filter(window => window.singleHung).reduce((total, window) => total + window.units, 0);
     const roofWindows = windowInstallations.filter(window => window.roofWindow).reduce((total, window) => total + window.units, 0);
     const windowOutput = document.getElementById('window-count');
-    windowOutput.textContent = `Windows: ${openings} openings / ${units} units`;
+    windowOutput.textContent = `Windows: ${units}`;
     windowOutput.title = `Whole house, both floors including garage: ${openings} openings containing ${units} individual units (${units - pictures - singleHung - roofWindows} casements, ${singleHung} single-hung, ${pictures} fixed pictures, ${roofWindows} fixed roof windows). A joined bank counts as one opening and each section as one unit. Includes hidden windows; excludes door glazing and duplicate exterior representations. Modeled count, not an approved order schedule.`;
   }
   const roomDimensionsInput = document.getElementById('show-room-dimensions');
   const planDimensionLabels = document.getElementById('plan-dimension-labels');
   const planDimensionsPanel = document.getElementById('plan-dimensions');
+  const planGarageOutline = document.getElementById('plan-garage-outline');
   let dimensionRooms = [];
   function planRoomName(name) {
     const shortNames = {
@@ -4769,7 +4779,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       const kidsShape = activeFloor === 'ground' && room.name === 'Kids room';
       const kidsArea = kidsShape ? groundBaseline.floors.filter(({ room }) => /^Kids room/.test(room ?? '')).reduce((sum, { w, d }) => sum + w * d, 0) : 0;
       const clear = activeFloor === 'upstairs' ? getUpstairsRoomClearDimensions(room, upstairs.plan.walls) : room;
-      const dimensions = kidsShape ? `${kidsArea.toFixed(2)} sq ft, stepped plan; west edge to z37.2, east edge to z33.6` : `${feet(clear.w)} x ${feet(clear.d)}${activeFloor === 'upstairs' ? ' paint-face' : ''}`;
+      const maxExtent = activeFloor === 'ground' && room.name === 'Garage';
+      const dimensions = kidsShape ? `${kidsArea.toFixed(2)} sq ft, stepped plan; west edge to z37.2, east edge to z33.6` : `${feet(clear.w)} x ${feet(clear.d)}${activeFloor === 'upstairs' ? ' paint-face' : ''}${maxExtent ? ' max extents; L-shaped footprint' : ''}`;
       const label = document.createElement('div');
       label.className = 'plan-dimension-label';
       label.title = `${room.name}: ${dimensions}`;
@@ -4777,7 +4788,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       name.textContent = planRoomName(room.name);
       const size = document.createElement('span');
       size.textContent = kidsShape ? `${kidsArea.toFixed(2)} sq ft`
-        : `${feet(clear.w)} x ${feet(clear.d)}`.replace(/' /g, "'").replace(/'0"/g, "'");
+        : `${feet(clear.w)} x ${feet(clear.d)}${maxExtent ? ' max' : ''}`.replace(/' /g, "'").replace(/'0"/g, "'");
       label.append(name, size);
       planDimensionLabels.append(label);
       const item = document.createElement('li');
@@ -4786,9 +4797,36 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   }
   function positionPlanDimensions() {
-    if (planDimensionLabels.hidden) return;
     const width = viewport.clientWidth;
     const height = viewport.clientHeight;
+    const showGarageOutline = currentView === 'top' && activeFloor === 'ground';
+    planGarageOutline.hidden = !showGarageOutline;
+    if (showGarageOutline) {
+      const garageFloors = (groundLayoutPreview?.plan ?? groundBaseline).floors.filter(floor => floor.room === 'Garage');
+      const xEdges = [...new Set(garageFloors.flatMap(floor => [floor.x, floor.x + floor.w]))].sort((a, b) => a - b);
+      const zEdges = [...new Set(garageFloors.flatMap(floor => [floor.z, floor.z + floor.d]))].sort((a, b) => a - b);
+      const occupied = (x, z) => garageFloors.some(floor => x > floor.x && x < floor.x + floor.w && z > floor.z && z < floor.z + floor.d);
+      const segments = [];
+      for (let ix = 0; ix < xEdges.length - 1; ix++) {
+        for (let iz = 0; iz < zEdges.length - 1; iz++) {
+          const x1 = xEdges[ix], x2 = xEdges[ix + 1], z1 = zEdges[iz], z2 = zEdges[iz + 1];
+          const x = (x1 + x2) / 2, z = (z1 + z2) / 2;
+          if (!occupied(x, z)) continue;
+          if (!occupied(x, z1 - 0.001)) segments.push([[x1, z1], [x2, z1]]);
+          if (!occupied(x2 + 0.001, z)) segments.push([[x2, z1], [x2, z2]]);
+          if (!occupied(x, z2 + 0.001)) segments.push([[x2, z2], [x1, z2]]);
+          if (!occupied(x1 - 0.001, z)) segments.push([[x1, z2], [x1, z1]]);
+        }
+      }
+      const project = ([x, z]) => {
+        const point = new THREE.Vector3(x, -1.25, z).project(camera);
+        return `${(point.x + 1) * width / 2},${(1 - point.y) * height / 2}`;
+      };
+      const path = segments.map(([a, b]) => `M${project(a)}L${project(b)}`).join('');
+      planGarageOutline.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      for (const outline of planGarageOutline.children) outline.setAttribute('d', path);
+    }
+    if (planDimensionLabels.hidden) return;
     dimensionRooms.forEach((room, index) => {
       const center = new THREE.Vector3(room.x + room.w / 2, activeFloor === 'upstairs' ? stairFloorToFloor : 0, room.z + room.d / 2).project(camera);
       const roomWidth = room.w * width / (camera.right - camera.left) * camera.zoom;
@@ -4804,7 +4842,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     updatePlanDimensions();
     const url = new URL(window.location.href);
     if (roomDimensionsInput.checked) url.searchParams.set('dimensions', '1');
-    else url.searchParams.delete('dimensions');
+    else url.searchParams.set('dimensions', '0');
     url.searchParams.set('view', currentView);
     window.history.replaceState(null, '', url);
     render();
@@ -6263,7 +6301,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       viewport.setAttribute('aria-label', `3D ground floor. Click the floor to enter the tour. Drag to ${navigationMode === 'move' ? 'move' : 'rotate'}; scroll or pinch to zoom.`);
     }
     if (planView) {
-      viewport.setAttribute('aria-label', '2D floor plan. Drag to pan; scroll or pinch to zoom. Select Whole floor or Upstairs to return to 3D.');
+      viewport.setAttribute('aria-label', '2D floor plan. Drag to pan; scroll or pinch to zoom. Select Ground or Upstairs to return to 3D.');
     }
     renderer.domElement.setAttribute('aria-label', planView ? `2D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground-floor'} orthographic furnished plan, north at top` : outside ? `3D hipped cream-brick transitional concept: ${exteriorLabel}, white trim, pale stone portal and oak doors; daylight sky and shadows are illustrative; roof and cladding construction unverified` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
     updateFloorGrid();
@@ -6459,7 +6497,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   applyLivingLayout(livingLayouts[0], false);
   const initialParameters = new URLSearchParams(window.location.search);
-  roomDimensionsInput.checked = initialParameters.get('dimensions') === '1';
+  roomDimensionsInput.checked = initialParameters.get('dimensions') !== '0';
   const initialView = initialParameters.get('view');
   if (initialView && Object.hasOwn(presets, initialView)) currentView = initialView;
   new ResizeObserver(resize).observe(viewport);

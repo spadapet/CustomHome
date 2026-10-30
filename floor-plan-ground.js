@@ -34,6 +34,12 @@ function getGroundFrontWindows() {
     {name: 'Bedroom porch window', center: 25, width: 7.6, sill: 3, height: 5}
   ];
 }
+function getGroundFrontLayout() {
+  const extension = 23 / 48;
+  const wallZ = 54.2 + extension;
+  const porchDepth = 7;
+  return { extension, wallZ, porchDepth, porchEdgeZ: wallZ + porchDepth };
+}
 // Six-light colonial concept per unit. Bars sit off the glazing faces;
 // this is not a selected Andersen grille option or approved order.
 function addFrontWindowGrilles(parent, box, material, width, height, columns = 1, rows = 1, glassDepth = 0.04, inset = 0.235) {
@@ -93,7 +99,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
   function getFrontEntryLayout() {
     const width = 5, height = 8, spring = 7.1;
     const radius = ((width / 2) ** 2 + (height - spring) ** 2) / (2 * (height - spring));
-    return { x: 15.6, z: 54.2, width, height, spring, radius, centerY: height - radius, surroundWidth: 0.65, hingeZ: -0.34 };
+    return { x: 15.6, z: getGroundFrontLayout().wallZ, width, height, spring, radius, centerY: height - radius, surroundWidth: 0.65, hingeZ: -0.34 };
   }
 
   function buildArchedFrontEntry(THREE, { box, wood, trim, hardware, field, oakMaps }, parent) {
@@ -311,19 +317,22 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     const guestEntry = getGuestEntryLayout(stairs);
     const guestSuite = getGuestSuiteLayout();
     const kitchenPassages = getKitchenPassageLayout();
+    const front = getGroundFrontLayout();
     const powderZ = guestEntry.powder.z;
     const entryZ = guestEntry.alcove.z, officeZ = guestEntry.officeNorthZ;
     const kidsNorthZ = 26.725 - 25 / 12 - 0.08 + 0.175;
+    const garageNorthWestX = 44.9 - 8 / 12, garageWestX = 31.2, garageEastX = 55.5;
+    const garageNorthZ = 15, garageStepZ = 26.9, garageSouthZ = 49;
     const rooms = [
       ['Living room', 0, 8, 13.2, 17.7], ['Dining room', 13.2, -0.1, 13.675, 8.1],
       ['Hall', 13.2, 8, 13.3, kidsNorthZ - 8], ['Kitchen', 26.5, 7, 11, 19.9],
       ['Prep kitchen', 37.5, 7, 18, 8], ['Mudroom', 37.5, 15, 7.4 - 8 / 12, 11.9],
       ['Kids room', 19, kidsNorthZ, 12.2, 33.6 - kidsNorthZ], ['Powder room', 0, powderZ, 7.1, guestEntry.powder.d],
       ['Guest coat closet', 7.1, guestEntry.coatCloset.z, 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 7.1, entryZ, 5.1, guestEntry.alcove.d],
-      ['Office', 0, officeZ, 12.2, 54.2 - officeZ], ['Entry hall', 12.2, 34.6, 6.8, 19.6],
+      ['Office', 0, officeZ, 12.2, front.wallZ - officeZ], ['Entry hall', 12.2, 34.6, 6.8, front.wallZ - 34.6],
       ...[['Kids room extension', guestSuite.kidsExtension], ['Closet', guestSuite.closet], ['Bathroom', guestSuite.bathroom]].map(([name, { x, z, w, d }]) => [name, x, z, w, d]),
-      ['Guest room', 19, 43.2, 12.2, 11],
-      ['Garage', 29, 15, 26.5, 34], ['Front porch', 0, 54.2, 31.2, 7]
+      ['Guest room', 19, 43.2, 12.2, front.wallZ - 43.2],
+      ['Garage', garageWestX, garageNorthZ, garageEastX - garageWestX, garageSouthZ - garageNorthZ], ['Front porch', 0, front.wallZ, 31.2, front.porchDepth]
     ].map(([name, x, z, w, d]) => ({ name, x, z, w, d }));
     const floors = [
       [0, 8, 13.2, 17.7, 'Living room'], [13.2, -0.1, 13.675, 8.1, 'Dining room'],
@@ -336,13 +345,14 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       [12.2, 25.7, 6.8, 8.9], [19, kidsNorthZ, 6.75, 34.6 - kidsNorthZ, 'Kids room'],
       [25.75, kidsNorthZ, 3.25, 33.6 - kidsNorthZ, 'Kids room'],
       [29, 26.9, 2.2, 6.7, 'Kids room'],
-      [12.2, 34.6, 6.8, 19.6, 'Entry hall'], [0, powderZ, 7.1, guestEntry.powder.d, 'Powder room'],
-      [7.1, entryZ, 5.1, guestEntry.alcove.d, 'Guest entry alcove'], [0, officeZ, 12.2, 54.2 - officeZ, 'Office'],
+      [12.2, 34.6, 6.8, front.wallZ - 34.6, 'Entry hall'], [0, powderZ, 7.1, guestEntry.powder.d, 'Powder room'],
+      [7.1, entryZ, 5.1, guestEntry.alcove.d, 'Guest entry alcove'],       [0, officeZ, 12.2, front.wallZ - officeZ, 'Office'],
       ...[['Kids room extension', guestSuite.kidsExtension], ['Closet', guestSuite.closet], ['Bathroom', guestSuite.bathroom]].map(([name, { x, z, w, d }]) => [x, z, w, d, name]),
-      [19, 43.2, 12.2, 11, 'Guest room'],
+      [19, 43.2, 12.2, front.wallZ - 43.2, 'Guest room'],
       [7.1, guestEntry.coatCloset.z, 5.1, guestEntry.coatCloset.d, 'Guest coat closet'],
-      [44.9 - 8 / 12, 15, 10.6 + 8 / 12, 11.9, 'Garage', -1.25], [31.2, 26.9, 24.3, 7.7, 'Garage', -1.25],
-      [31.2, 34.6, 24.3, 14.4, 'Garage', -1.25], [0, 54.2, 31.2, 7, 'Front porch']
+      [garageNorthWestX, garageNorthZ, garageEastX - garageNorthWestX, garageStepZ - garageNorthZ, 'Garage', -1.25],
+      [garageWestX, garageStepZ, garageEastX - garageWestX, 34.6 - garageStepZ, 'Garage', -1.25],
+      [garageWestX, 34.6, garageEastX - garageWestX, garageSouthZ - 34.6, 'Garage', -1.25], [0, front.wallZ, 31.2, front.porchDepth, 'Front porch']
     ].map(([x, z, w, d, room, elevation = 0]) => ({ x, z, w, d, room: room ?? null, elevation }));
     const sideWindows = [livingFeatureWall.sideWindowBank].map(({ x, openingWidth, openingSill, openingHeight }) => [x - openingWidth / 2, x + openingWidth / 2, openingSill, openingSill + openingHeight]);
     const segments = [
@@ -355,10 +365,10 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       ['Prep east', 55.5, 7, 55.5, 15, getPrepWindowLayout().filter((window) => window.x === 55.5).map(({ z, openingWidth, openingSill, openingHeight }) => [z - openingWidth / 2 - 7, z + openingWidth / 2 - 7, openingSill, openingSill + openingHeight])],
       ['Garage east', 55.5, 15, 55.5, 49, [...getGarageClerestoryLayout().map(({ z, width, sill, height }) => [z - width / 2 - 15, z + width / 2 - 15, sill, sill + height]), [29, 32, -1.25, 6.75]]],
       ['Garage south', 31.2, 49, 55.5, 49, [[1.3, 10.3, -1.25, 6.75], [12.8, 21.8, -1.25, 6.75]]],
-      ['Guest east', 31.2, 49, 31.2, 54.2],
-      ['Porch east', 31.2, 54.2, 31.2, 61.2], ['Porch south', 0, 61.2, 31.2, 61.2],
-      ['Porch west', 0, 54.2, 0, 61.2],
-      ['Office west', 0, livingFeatureWall.wallEndZ, 0, 54.2, [
+      ['Guest east', 31.2, 49, 31.2, front.wallZ],
+      ['Porch east', 31.2, front.wallZ, 31.2, front.porchEdgeZ], ['Porch south', 0, front.porchEdgeZ, 31.2, front.porchEdgeZ],
+      ['Porch west', 0, front.wallZ, 0, front.porchEdgeZ],
+      ['Office west', 0, livingFeatureWall.wallEndZ, 0, front.wallZ, [
         ...guestEntry.windows.map(({ z, openingWidth, openingSill, openingHeight }) => [z - openingWidth / 2 - livingFeatureWall.wallEndZ, z + openingWidth / 2 - livingFeatureWall.wallEndZ, openingSill, openingSill + openingHeight]),
         [21.3 - (livingFeatureWall.wallEndZ - 25.7), 25.3 - (livingFeatureWall.wallEndZ - 25.7), 3, 8]
       ]],
@@ -368,10 +378,10 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       ['Powder east', 7.1, powderZ, 7.1, officeZ, [[guestEntry.powderDoor.z - powderZ, guestEntry.powderDoor.z - powderZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
       ['Guest coat closet front', 7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
       ['Guest coat closet east', 12.2, guestEntry.coatCloset.z, 12.2, officeZ],
-      ['Office east', 12.2, officeZ, 12.2, 54.2, [[45.25 - 2.5 - officeZ, 45.25 + 2.5 - officeZ, 0, 8]]],
+      ['Office east', 12.2, officeZ, 12.2, front.wallZ, [[45.25 - 2.5 - officeZ, 45.25 + 2.5 - officeZ, 0, 8]]],
       ['Office north', 0, officeZ, 12.2, officeZ],
-      ['House south', 0, 54.2, 31.2, 54.2, [...getGroundFrontWindows().map(w => [w.center-w.width/2,w.center+w.width/2,w.sill,w.sill+w.height]), [13.1,18.1,0,8]].sort((a,b)=>a[0]-b[0])],
-      ['Guest west', 19, 34.6, 19, 54.2, [[guestSuite.bedroomDoor.z - 34.6, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - 34.6, 0, 8]]],
+      ['House south', 0, front.wallZ, 31.2, front.wallZ, [...getGroundFrontWindows().map(w => [w.center-w.width/2,w.center+w.width/2,w.sill,w.sill+w.height]), [13.1,18.1,0,8]].sort((a,b)=>a[0]-b[0])],
+      ['Guest west', 19, 34.6, 19, front.wallZ, [[guestSuite.bedroomDoor.z - 34.6, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - 34.6, 0, 8]]],
       ['Closet north', 19, guestSuite.closet.z, guestSuite.bathroom.x, guestSuite.closet.z], ['Closet east', guestSuite.bathroom.x, guestSuite.bathroom.z, guestSuite.bathroom.x, guestSuite.bathroomDoor.z],
       ['Closet south', 19, guestSuite.closetDoor.z, guestSuite.bathroom.x, guestSuite.closetDoor.z, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x - 19 + guestSuite.closetDoor.width, 0, guestSuite.closetDoor.height]]],
       ['Bathroom south', guestSuite.bathroom.x, guestSuite.bathroomDoor.z, 31.2, guestSuite.bathroomDoor.z, [[guestSuite.bathroomDoor.x - guestSuite.bathroom.x, guestSuite.bathroomDoor.x - guestSuite.bathroom.x + guestSuite.bathroomDoor.width, 0, guestSuite.bathroomDoor.height]]],
@@ -443,5 +453,5 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       }
     };
   };
-  if (typeof module !== 'undefined' && module.exports) module.exports = { addWindowShadeDivisions, addSingleHungSashes, getGroundFrontWindows, getWindowProductIntent, getGroundFloorDefaultPlan, getKitchenPassageLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getFrontEntryLayout, buildArchedFrontEntry };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { addWindowShadeDivisions, addSingleHungSashes, getGroundFrontWindows, getGroundFrontLayout, getWindowProductIntent, getGroundFloorDefaultPlan, getKitchenPassageLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getFrontEntryLayout, buildArchedFrontEntry };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

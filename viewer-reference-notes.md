@@ -1,5 +1,46 @@
 # Viewer reference notes
 
+## Compact viewer
+
+Windows shows the live whole-house unit count; its tooltip explains openings
+and unit types. Area gives the combined interior total; 1st and 2nd display
+the respective floor areas in sq ft. Tooltips retain measurement qualifications.
+Size gives maximum modeled plan bounds, not zoning/buildable
+limits. Controls use short labels; the detailed Sizes list is closed by
+default while 2D room labels remain on. Preserve essential warnings.
+
+## Viewer defaults - October 30
+
+The October 30 front extension carries the hall floor, front-door light,
+garage canopy return closure and front approach with the front wall.
+The final stair tread meets the crosswalk at z=64.97917 ft; the west
+porch-side paver pocket remains 7.63 x 10.3 ft, now z54.67917-64.97917.
+These are model alignments, not approved grades, routes or construction.
+
+Reload starts in Day with Night lighting unchecked. Lighting choice remains
+viewer-wide through view/floor changes, tours and Reset. Both 2D plans show
+room dimensions by default; 3D hides/disables the labels without discarding
+the choice. Manual toggles persist through views and explicit dimensions=0/1
+links preserve off/on on reload. No geometry or saved layout changes.
+
+## Primary bathroom rebuild
+
+Latest October 29 owner marks: 1 = low 66 x 36 in built-in tub in northeast
+corner, deck 20 in; 2 = southeast shower. Keep 72 x 24 in double vanity below north window,
+stock 30 + 12 + 30 in oak Shaker boxes, satin gold, three 15 in-travel drawers;
+3 = west linen recess, closed 18 x 96 in door and four fixed shelves,
+15 in deep / 22.8 in across. Mirrors retained on solid south wall, not over
+window. SE shower 48 x 60 in, west entry nominal 36 in / modeled 35.64 in.
+North glass faces the 15.24 in tub gap, which is not a route. Tub/vanity side
+gap 17.89 in is not a route; tub access is farther south along its west side.
+Closed-front 30 x 30 in basin/tub/shower approaches are clear;
+close fronts before passing. Footprint/window/WC unchanged; new linen face
+only. WC/linen leaves hinge south, swing into bath and reload closed.
+New marks supersede tub-under-window/window-by-tub intent. Generic study:
+verify window reach, glazing/privacy, water containment, waterproofing,
+structure/service access, shelf support/retrieval, plumbing, lighting and
+occupied use. Linen recess is storage, not approved walk-in space.
+
 ## Task-based kitchen inventory - October 28
 
 Existing cabinets accommodate two dry nested drain baskets (main sink left
