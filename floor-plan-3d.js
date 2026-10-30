@@ -354,7 +354,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     });
     walkControls.hidden = !walking;
     viewport.classList.toggle('walking', walking);
-    viewport.setAttribute('aria-label', activeFloor === 'exterior' ? `3D hipped cream-brick transitional exterior concept. Drag to ${moving ? 'move' : 'rotate'}; scroll or pinch to zoom. Select Front, Rear, West side, or East side for elevations.` : walking
+    viewport.setAttribute('aria-label', activeFloor === 'exterior' ? `3D paired-gable stone and modern brick exterior study. Drag to ${moving ? 'move' : 'rotate'}; scroll or pinch to zoom. Select Front, Rear, West side, or East side for elevations.` : walking
       ? `3D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground floor'} third-person tour. Click the floor or plan to travel; drag to look. Tour or Escape exits, Home resets.`
       : `3D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground floor'}. Click the floor to enter the tour. Drag to ${moving ? 'move' : 'rotate'}; scroll or pinch to zoom. Keyboard: left/right arrows rotate, plus/minus zoom, Home resets.`);
     setTourStatus(walking ? 'Tour on.' : '');
@@ -5514,7 +5514,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     tourMapBounds.right = Math.max(...areas.map((area) => area.x + area.w));
     tourMapBounds.bottom = Math.max(...areas.map((area) => area.z + area.d));
     tourMapScale = (tourMap.width - 24) / Math.max(tourMapBounds.right - tourMapBounds.x, tourMapBounds.bottom - tourMapBounds.z);
-    viewport.setAttribute('aria-label', floor === 'exterior' ? '3D hipped cream-brick transitional exterior concept. Drag to orbit; select an elevation to view each facade.' : `3D ${floor === 'upstairs' ? 'upstairs' : 'ground floor'}. Click the floor to enter the tour. Drag to ${navigationMode === 'move' ? 'move' : 'rotate'}; scroll or pinch to zoom.`);
+    viewport.setAttribute('aria-label', floor === 'exterior' ? '3D paired-gable stone and modern brick exterior study. Drag to orbit; select an elevation to view each facade.' : `3D ${floor === 'upstairs' ? 'upstairs' : 'ground floor'}. Click the floor to enter the tour. Drag to ${navigationMode === 'move' ? 'move' : 'rotate'}; scroll or pinch to zoom.`);
     tourMap.setAttribute('aria-label', `Clickable ${floor === 'upstairs' ? 'upstairs' : 'ground-floor'} plan. Arrow keys select a destination; Enter travels there.`);
     islandLightsInput.closest('details').hidden = floor !== 'ground';
     document.getElementById('exterior-views').hidden = floor !== 'exterior';
@@ -6303,7 +6303,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (planView) {
       viewport.setAttribute('aria-label', '2D floor plan. Drag to pan; scroll or pinch to zoom. Select Ground or Upstairs to return to 3D.');
     }
-    renderer.domElement.setAttribute('aria-label', planView ? `2D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground-floor'} orthographic furnished plan, north at top` : outside ? `3D hipped cream-brick transitional concept: ${exteriorLabel}, white trim, pale stone portal and oak doors; daylight sky and shadows are illustrative; roof and cladding construction unverified` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
+    renderer.domElement.setAttribute('aria-label', planView ? `2D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground-floor'} orthographic furnished plan, north at top` : outside ? `3D paired-gable stone and modern brick study: ${exteriorLabel}, charcoal arched canopy, pale trim and oak doors; daylight sky and shadows are illustrative; roof and cladding construction unverified` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
     updateFloorGrid();
     updateLivableArea();
     updatePlanDimensions();

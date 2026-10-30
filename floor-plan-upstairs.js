@@ -567,57 +567,6 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     box(machine, 0, 1.5, 1.48, 1.4, 1.4, 0.04, steel, true);
     box(machine, 0.8, 2.85, 1.45, 0.22, 0.22, 0.08, black, true);
   }
-  const roofWindowFinish = windowTrim.clone();
-  roofWindowFinish.side = THREE.DoubleSide;
-  const roofWindowGlass = mat('#b3cad0').clone();
-  Object.assign(roofWindowGlass, {
-    roughness: 0.15, metalness: 0.15,
-    transparent: true, opacity: 0.52, side: THREE.DoubleSide
-  });
-  for (const roofWindow of HomeRoof.getLaundryRoofWindows(elevation)) {
-    const [left, right, south, north] = roofWindow.bounds;
-    const topAt = (z) => HomeRoof.heightAt(roofWindow.plane, [roofWindow.x, z]) - elevation - 0.16;
-    const addShaftWall = (name, vertices) => {
-      const geometry = new THREE.BufferGeometry();
-      geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices.flat(), 3));
-      geometry.setIndex([0, 1, 2, 0, 2, 3]);
-      geometry.computeVertexNormals();
-      const wall = new THREE.Mesh(geometry, roofWindowFinish);
-      wall.name = name;
-      wall.userData = { roofWindowShaft: true, ceilingHeightFeet: 9, framingApprovalRequired: true };
-      group.add(wall);
-    };
-    addShaftWall(`${roofWindow.name} shaft west wall`, [
-      [left, 9, south], [left, 9, north], [left, topAt(north), north], [left, topAt(south), south]
-    ]);
-    addShaftWall(`${roofWindow.name} shaft east wall`, [
-      [right, 9, north], [right, 9, south], [right, topAt(south), south], [right, topAt(north), north]
-    ]);
-    addShaftWall(`${roofWindow.name} shaft north wall`, [
-      [left, 9, north], [right, 9, north], [right, topAt(north), north], [left, topAt(north), north]
-    ]);
-    addShaftWall(`${roofWindow.name} shaft south wall`, [
-      [right, 9, south], [left, 9, south], [left, topAt(south), south], [right, topAt(south), south]
-    ]);
-    const interiorWindow = new THREE.Group();
-    interiorWindow.name = `${roofWindow.name} interior glazing`;
-    interiorWindow.position.set(roofWindow.x, roofWindow.roofElevation - elevation - 0.16, roofWindow.z);
-    interiorWindow.rotation.x = -Math.atan(3);
-    interiorWindow.userData = {
-      roofWindow: true, operation: roofWindow.operation,
-      roughOpeningWidthInches: roofWindow.roughOpeningWidthInches,
-      roughOpeningLengthInches: roofWindow.roughOpeningLengthInches,
-      candidateProduct: roofWindow.candidateProduct, productSelected: false,
-      framingAndInstallationApprovalRequired: true
-    };
-    const width = roofWindow.frameWidthInches / 12;
-    const length = roofWindow.frameLengthInches / 12;
-    const rail = 0.055;
-    for (const x of [-1, 1]) box(interiorWindow, x * (width - rail) / 2, 0, -0.07, rail, length, 0.1, windowTrim).name = `${roofWindow.name} interior frame`;
-    for (const y of [-1, 1]) box(interiorWindow, 0, y * (length - rail) / 2, -0.07, width, rail, 0.1, windowTrim).name = `${roofWindow.name} interior frame`;
-    box(interiorWindow, 0, 0, -0.055, roofWindow.width - 0.12, roofWindow.length - 0.12, 0.035, roofWindowGlass).name = `${roofWindow.name} interior glass`;
-    group.add(interiorWindow);
-  }
   const laundryStorage = furniture('Laundry wall cupboards', g.southEast + 4, g.serviceSouth - 0.9, Math.PI);
   for (const x of [-2, 0, 2]) cabinet(laundryStorage, x, 0, 2, 2, 1.2, 1, true);
   laundryStorage.position.y = 5.2;

@@ -143,15 +143,16 @@ test('exterior taps reach the entry-door picker while orbit drags do not open do
   assert.match(source, /const exteriorWidth = name === 'exterior-entry' \? 20 :/, 'Entry close-up must not inherit the 66-foot whole-facade framing');
 });
 
-test('entry uses an uninterrupted porch plane instead of a decorative pediment', () => {
+test('segmental barrel entry is clipped into the retained porch plane, without a pediment', () => {
   const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
   const definitions = require('../floor-plan-roof.js').getPorchRoofDefinitions();
-  assert.equal(definitions.length, 1);
+  assert.equal(definitions.length, 2);
   assert.equal(definitions[0].planes.length, 1);
   assert.doesNotMatch(source, /const entryPediment = gable/);
   assert.ok(definitions.every((definition) => definition.finish === 'metal'));
   const frontWallZ = require('../floor-plan-ground.js').getGroundFrontLayout().wallZ;
-  assert.ok(definitions.every((definition) => definition.bounds[2] < frontWallZ - 1), 'Metal plane reaches the house');
+  assert.ok(definitions[0].bounds[2] < frontWallZ - 1, 'Main metal plane reaches the house');
+  assert.equal(definitions[1].planes.length, 17, 'Sixteen curved facets and a falling rear return');
 });
 
 test('porch fascia remains below the sloped metal underside instead of striping the roof surface', () => {
@@ -165,11 +166,12 @@ test('porch fascia remains below the sloped metal underside instead of striping 
   const roofStart = source.indexOf('  const porchCanopyHeight =');
   const roofEnd = source.indexOf('  const porchMetal =', roofStart);
   const fasciaStart = source.indexOf('  const porchFasciaZ =');
-  const fasciaEnd = source.indexOf('  for (const center of [37, 48.5])', fasciaStart);
+  const fasciaEnd = source.indexOf('  // The actual arch has depth', fasciaStart);
   assert.ok(roofStart >= 0 && roofEnd > roofStart && fasciaStart >= 0 && fasciaEnd > fasciaStart);
   vm.runInContext(source.slice(roofStart, roofEnd) + source.slice(fasciaStart, fasciaEnd), context);
   const fascia = parts[0];
-  assert.equal(fascia.name, 'White farmhouse porch fascia');
+  assert.equal(fascia.name, 'Porch side fascia');
+  assert.equal(parts.length, 2);
   for (const z of [fascia.z - fascia.depth / 2, fascia.z, fascia.z + fascia.depth / 2]) {
     const underside = context.porchCanopyUndersideAt(z);
     assert.ok(fascia.y + fascia.height / 2 <= underside + 1e-9, 'No white fascia vertex is above the roof underside');

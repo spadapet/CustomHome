@@ -233,13 +233,13 @@ Sources: [ground storage geometry](../floor-plan-3d.js#L3946),
 
 ## 2. Windows: whole-house schedule
 
-**32 openings / 55 individual units = 45 casements + 8 vertical fixed pictures + 2 fixed roof windows.**
+**30 openings / 53 individual units = 45 casements + 8 vertical fixed pictures; no roof windows.**
 Ground floor: **15 / 30 = 22 casements + 8 pictures**.
-Upstairs: **17 / 25 = 23 casements + 2 fixed roof windows**.
+Upstairs: **15 / 23 = 23 casements**.
 
 Vertical windows use **Andersen 100 Series intent, White Fibrex inside/outside**.
-The two fixed laundry roof windows are a separate VELUX FS C06 dimensional
-candidate, not a selected product; see the [roof-window study](../windows.html).
+The two proposed fixed laundry roof windows were removed; the former VELUX
+FS C06 size study is historical, not a selected product.
 No exact SKU, dealer, approved factory-mulled assembly or order has been
 selected. A pair/triple is one architectural opening containing two/three
 units, not necessarily one orderable factory combination.
@@ -288,8 +288,7 @@ measured rooms without changing these sizes/counts.
 | Bedroom 3 west | 1 | 2 casements | 48 x 60 |
 | Bedroom 3 front | 2 | 1 casement | 36 x 60 |
 | Bedroom 4 front | 2 | 1 casement | 36 x 60 |
-| Laundry roof | 2 | 1 fixed roof window | 21 x 45.75 rough opening; 21.5 x 46.25 candidate frame |
-| **Upper total** | **17** | **23 casements + 2 fixed roof windows** | |
+| **Upper total** | **15** | **23 casements** | |
 
 ### Window sources, trim and ordering holds
 
@@ -416,9 +415,9 @@ occupied-use limits are in the [office notes](../office.html#layout).
 | Countertops / kitchen wall finish | Warm ivory quartz; prep backsplash 4 high | Physical brand/slab TBD. Main/prep quartz appearance is procedurally drawn in the model, not a named stone product. |
 | Engineered hardwood | 7-wide plank direction, including stairs and powder | Manufacturer/species/finish TBD; model wood texture is illustrative. Full baths, laundry and mudroom use tile intent. |
 | Mudroom floor | 24 x 48 rectified limestone-look porcelain; matte/honed, modeled 1/16 joints | Physical manufacturer TBD; joint width, slip resistance and installation need product/installer approval. |
-| Main exterior brick / raised base | Warm-white brick / red-brown base; visual face module 8 x 3.125 including joints | Physical brick/mortar supplier TBD. Poly Haven **Brick Wall 001** scan, separately graded palettes; not a supplier sample or verified brick format. |
-| Pale stone accents / paving | Visual stone reference | Physical material and walking-finish product TBD. Poly Haven **Stone Wall** scan is not an approved paver/slip/frost specification. |
-| Main roofing / porch metal | Slate-style main-roof appearance; standing-seam porch/entry direction | Physical manufacturers/assemblies TBD. Poly Haven **Roof Slates 03** texture does not select slate or asphalt shingles. |
+| Exterior upper brick / lower-half stone — October 30 | Warm-gray modern queen brick above y9 ft; light neutral stone below on every elevation/return. Brick visual module8 x3.125 including joints; stone assumed8-ft scan tile | Physical suppliers TBD. Existing local CC0 Poly Haven **Brick Wall 001** and **Stone Wall** scans are independently graded appearance references, not supplier samples, approved dimensions or selected products. Require stone/brick/cream-gray mortar/coping panels in sun/shade; design veneer support and transition/cavity flashing. Supersedes white brick/red plinth. |
+| Pale stone accents / paving | Separate pale coping, porch paving and treads; stone-faced foundation, post bases and risers | Physical materials and exterior slip/frost-rated walking finish TBD. Wall stone is not approved paving. Scan appearance does not establish limestone species, coating or manufacturer. |
+| Main roofing / porch metal | Slate-style main roof with paired14.35-ft cross-gables,25.4-ft ridges; charcoal standing-seam porch and segmental entry barrel | Physical manufacturers/assemblies TBD. Poly Haven **Roof Slates 03** does not select slate or asphalt shingles. Barrel is9.15 ft wide/19.2-in rise, with supported curved trim, not approved bending/fabrication or framing. Engineer valleys/header/posts/ledger/uplift, assumed18-in main framing zone, snow/ice/runoff, gutters and waterproofing. Rear roof/solar provisions retained. |
 | Oak entry/door appearance | Warm oak visual direction | Physical door maker/finish TBD. Poly Haven **Oak Veneer 01** supplies the entry texture, not the door product. |
 | Whole-home recessed lights | 4 aperture, 2 recessed baffle/lens depth, warm 2700 K intent | Fixture manufacturer/SKU TBD; older 3000 K kitchen notes are not a finalized purchase schedule. |
 | Kitchen decorative/task lights | 2 restored ivory/brass sink-wall sconces; 2 island pendants; 2 hood-side under-cabinet strips; hood task light; 4 ambient cans | Product SKUs TBD; RAB/Cooper links explain fixture type/layering, not selected products. No sink-upper strips remain. Sconce listing, wet-area suitability, electrical layout and illumination need review. |

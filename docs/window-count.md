@@ -13,13 +13,10 @@ intent, White Fibrex inside/outside. Front house windows have conceptual six-lig
 colonial grilles (2 wide × 3 high per unit), eight openings / fourteen units
 including loft south. Side/rear windows and door glazing stay clear, including
 the living return's casement / fixed picture / casement bank.
-Two fixed laundry roof windows are separate from the Andersen wall-window
-intent. The official [VELUX product-size chart](https://pro.veluxusa.com/-/media/marketing/us/img/professional/product-sizes/product%20sizes%20codes.pdf),
-retrieved October 28, 2026, lists a 21 x 45.75 in rough opening and 21.5 x
-46.25 in frame for a fixed deck-mounted FS C06. This is a dimensional candidate
-only, not a selected product or approval of this roof application. Pitch
-compatibility, framing, shaft/fire detailing, flashing, drainage, insulation,
-ventilation and installation require review.
+The two proposed fixed laundry roof windows have been removed. The East rear
+wing roof is continuous across their former locations, with no openings or
+interior shafts. The October 28, 2026 VELUX FS C06 size study is historical
+only, not a selected product or active installation decision.
 No exact SKU or joined assembly is approved. See [windows](../windows.html)
 for official manufacturer sources and actual-frame versus rough-opening
 limits. Nominal 36-in casements and 72-in-high casement concepts need actual
@@ -27,9 +24,9 @@ frame/rough-opening review; garage 72 x18 in fixed pictures, large pictures,
 kitchen flankers, banks and partial-height powder privacy need dealer review.
 Do not order from the modeled count or nominal study codes.
 
-Updated October 28, 2026 for the matching porch banks and fixed laundry roof-window study; includes hidden room groups.
+Current count includes hidden room groups and the matching porch banks.
 
-**32 window openings containing 55 individual modeled units: 45 casements, 8 vertical fixed picture windows and 2 fixed roof windows.**
+**30 window openings containing 53 individual modeled units: 45 casements and 8 vertical fixed picture windows; no roof windows.**
 
 The X-marked office porch bank now matches the circled guest bank: both
 91.2 x 60 in, three equal bays, casement / fixed picture / casement, white
@@ -56,7 +53,7 @@ so it does not change these totals.
 
 Includes three high garage pictures, three prep casements and one prep picture, and one standard-size single-casement powder window; the former two-unit ground stairwell window was previously removed.
 
-An **opening** is one window group; a **unit** is one casement, single-hung or fixed glazing section within that group. Each single-hung counts once, not once per sash. A paired casement counts as one opening and two units. Each roof window is one roof opening and one fixed roof-window unit, counted separately from vertical pictures. The garden-facing dining window has two side-by-side casements; patio-door glazing is excluded.
+An **opening** is one window group; a **unit** is one casement, single-hung or fixed glazing section within that group. Each single-hung counts once, not once per sash. A paired casement counts as one opening and two units. Any future roof window would count as one opening and one roof-window unit, separate from vertical pictures; none is currently modeled. The garden-facing dining window has two side-by-side casements; patio-door glazing is excluded.
 
 ## Room-by-room count
 
@@ -79,9 +76,8 @@ An **opening** is one window group; a **unit** is one casement, single-hung or f
 | Upstairs / stairwell | 1 | 1 | 0 | 0 | 1 |
 | Upstairs / bedroom 3 | 3 | 4 | 0 | 0 | 4 |
 | Upstairs / bedroom 4 | 2 | 2 | 0 | 0 | 2 |
-| Upstairs / laundry roof windows | 2 | 0 | 0 | 2 | 2 |
-| **Upstairs subtotal** | **17** | **23** | **0** | **2** | **25** |
-| **Whole house** | **32** | **45** | **8** | **2** | **55** |
+| **Upstairs subtotal** | **15** | **23** | **0** | **0** | **23** |
+| **Whole house** | **30** | **45** | **8** | **0** | **53** |
 
 ## Scope and sources
 

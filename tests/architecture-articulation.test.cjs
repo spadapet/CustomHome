@@ -16,17 +16,15 @@ function harness() {
     }
   };
 }
-test('built portal constituents preserve approach and provide honest lintel depth', () => {
+test('retained portal supports preserve the approach beneath the new segmental arch', () => {
   const c = harness();
   c.brickBox = c.box;
   vm.runInNewContext(source.slice(source.indexOf('  const entryPortal ='), source.indexOf('  const porchCanopyHeight =')), c);
-  const feet = c.meshes.filter(o => o.name === 'Entry portal brick foot');
+  const feet = c.meshes.filter(o => o.name === 'Entry portal stone foot');
   const shafts = c.meshes.filter(o => o.name === 'Entry portal masonry pier jacket');
-  const beam = c.meshes.find(o => o.name === 'Entry portal deep stone entablature');
   assert.ok(Math.abs((feet[1].min[0]-feet[0].max[0])*12-79.8)<1e-8);
   assert.ok(Math.abs((shafts[1].min[0]-shafts[0].max[0])*12-82.8)<1e-8);
-  assert.ok(Math.abs(beam.min[1]-8.9)<1e-8);
-  assert.ok(Math.abs(beam.max[1]-9.7)<1e-8);
+  assert.ok(!c.meshes.some(o => o.name === 'Entry portal deep stone entablature'), 'No flat beam blocks the arched opening');
   assert.ok(shafts.every(o=>o.d===1 && o.max[2]===61 + c.frontShift));
 });
 test('upper stone constituents border rather than fill actual glazing; cornice fits below wall head', () => {

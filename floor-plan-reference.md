@@ -1,5 +1,41 @@
 # Ground-floor plan reference
 
+## Current exterior roof and masonry study — October 30
+
+Adapt the owner's paired-gable/metal-canopy reference, not its floor plan
+or shingle siding. Two true cross-gables centered at x6.425/25.145833 ft
+over the fixed front bedroom pairs: width14.35 ft, eave19.2, rise6.2,
+ridge25.4 ft, approximately10.37:12. Rear hip returns start z40.5; their
+union with the existing main hip forms shared valleys and fitted brick attic
+closures. The original main/east-wing4:12 planes, lower6:12 garage hip,
+rear solar provisions and accepted headroom envelope are not reduced.
+No new dormers, rooms, windows or floor area.
+
+Complete lower-story stone, not a30-in plinth: top y9 ft, around all four
+elevations and returns, cut at every opening. Original finished wall faces
+and six-foot east ground-side fence clearance stay. Warm-gray modern queen
+brick above; pale trim/coping, charcoal metal and oak doors. The local stone
+scan has an assumed8-ft tile; brick face module8 x3.125 in. These are rendering
+scales, not selected products. Support bases remain30 in high, shafts12 in,
+bases14 in and caps15 in; porch foundation/nose/risers now stone, with separate
+pale paving/treads. Require stone/brick/mortar sample panels in sun/shade.
+
+The retained porch plane receives a9.15-ft-wide segmental entry barrel,
+19.2-in rise, sixteen sloping facets and a rear return clipped into the porch.
+Its open arch trim is8.4 in high/7.8 in deep. Retain four support centers,
+79.8-in foot passage, existing96-in arched door, matching office/guest
+triples, all other openings, shutter removal, furniture and saved JSON.
+Roof-window/schedule edits occurring concurrently are not part of this study.
+No additional roof glazing is created or restored by the cross-gables.
+
+Engineer cross-gable valleys, assumed18-in main framing zone, curved framed
+header, post/ledger/anchor/uplift connections and foundations. Roof skins,
+trim and veneer do not establish load capacity. Resolve veneer support,
+cavity/transition flashing/weeps/drips, valley concentration/snow/ice at the
+porch, gutter outlets, lawful discharge, roofing build-up and electrical
+listings. Preserve separate upper-rear drainage and cold-storage-only firepit.
+This is a reversible architectural study, not construction or product approval.
+
 ## Viewer defaults - October 30
 
 Start in Day lighting with Night unchecked. Preserve the selected lighting
@@ -14,6 +50,16 @@ shows the combined interior total; 1st and 2nd show the respective floor areas
 in sq ft; Size shows the same maximum plan bounds.
 Breakdowns/qualifiers remain in tooltips. One-word controls, a narrower menu
 and closed Sizes details leave more model space. On-plan labels stay visible.
+
+## Owner decision: remove laundry skylights
+
+Remove both proposed fixed roof windows above the laundry. The East rear wing
+roof is continuous across their former locations; no roof cuts, exterior
+frames/glazing or interior shafts remain. The laundry and its wall windows
+stay unchanged. The current model takeoff is 30 openings / 53 units (45
+casements and 8 vertical fixed pictures; no roof windows): ground floor
+15 openings / 30 units and upstairs 15 openings / 23 units. The October 28
+roof-window product study below is historical and not an active selection.
 
 ## Guest closet door width corrected - October 28
 
@@ -98,10 +144,10 @@ same bank as the circled guest-bedroom porch window. Both are nominal
 91.2 x 60 in, three equal 30.4 in bays, casement / fixed picture / casement,
 white with six-light colonial grilles per unit. Keep centers x=6 / 25 ft,
 z=54.2 ft wall datum, sill/head 36/96 in. Office widens 9.6 in per side;
-shared geometry coordinates wall cuts, frames, divisions, header/sill and
-decorative shutter positions. No room, furniture, door-pose or saved-layout
+shared geometry coordinates wall cuts, frames, divisions and header/sill.
+The October 30 owner decision removes exterior shutters. No room, furniture, door-pose or saved-layout
 change. Adds one fixed picture, not an opening or casement: current totals
-32 openings / 55 units, 45 casements, 8 vertical pictures, 2 roof windows.
+30 openings / 53 units, 45 casements and 8 vertical pictures; no roof windows.
 Concept envelopes are not approved products or rough openings; header,
 mulling, flashing, shade support and casement operation remain unverified.
 
@@ -142,7 +188,7 @@ handles, nesting, lids, hinges, hand access, racks, shelf/slide loads and
 cooktop service space need review. Retain all island dishes, cups/mugs,
 seasonings, platters, tools, services and spare high storage.
 
-## Laundry roof windows - October 28
+## Historical laundry roof-window study - October 28 (removed)
 
 Add two fixed roof-window concepts above the unchanged interior laundry in the
 south-facing East rear wing roof. The 4:12 roof plane is modeled at centers
@@ -152,9 +198,8 @@ lists these dimensions for a fixed deck-mounted FS C06; it is an unselected
 dimensional candidate, not product or roof-compatibility approval. Fixed units
 add daylight but not ventilation. Structure, pitch compatibility, shaft/fire
 detailing, flashing, drainage, insulation and installation remain unverified.
-Whole-house modeled total: **32 openings / 55 units (45 casements, 8 vertical
-fixed pictures, 2 fixed roof windows)**; the roof windows are excluded from
-casement/picture counts.
+Historical concept takeoff before removal: **32 openings / 55 units (45
+casements, 8 vertical fixed pictures, 2 proposed fixed roof windows)**.
 
 ## Wall-backed upstairs stair guards removed - October 28
 
@@ -172,19 +217,12 @@ anchorage and headroom still require professional review; the model is
 not construction or safety approval. Regression coverage checks the absent
 wall-backed runs and the retained east run.
 
-## Front louvered shutters - October 28
+## Front shutters removed - October 30
 
-Add charcoal-black fixed-open decorative louvered shutters to the eight
-front-facing house openings, including loft south: six pairs / twelve panels.
-The four tightly spaced upper bedroom windows form two banks with outer
-shutters only; no panels occupy their one-foot intermediate masonry gaps.
-Ground panels are 18 x 60 in; upper bedroom panels are 15 x 60 in and loft
-panels 12 x 60 in, leaving 2.85 in between adjacent loft panels. Panel edges sit
-4.8 in beyond the opening edges, with backs 0.9 in ahead of the projecting
-upper masonry piers. White frames, front-only grilles, openings, roof,
-porch and saved layouts stay unchanged. These are decorative, not closing
-or storm-protection shutters; product sizes, masonry anchorage, flashing,
-wind resistance and outward-casement operation require supplier/design review.
+Remove all six pairs / twelve decorative shutter panels, including loft south.
+This supersedes the October 28 louvered-shutter study. Keep all eight front
+openings, white window frames, grilles, masonry trim, roof and porch unchanged.
+No saved-layout or window-count change.
 
 ## Living woven Roman shades - October 27
 
@@ -209,9 +247,9 @@ Guest and office front now have a fixed center picture between two casements;
 other operations remain. The office widens per the October 28 matching-bank correction. Single pictures, single casements, garage clerestories,
 door glass and front grille patterns remain unchanged. No opening, room,
 sill/head or saved-layout changes.
-Current count supersedes operation breakdowns below: **32 openings / 55 units,
-45 casements / 8 vertical pictures / 2 fixed roof windows** (ground 22/8;
-upstairs 23 vertical units plus 2 roof windows).
+Current count supersedes operation breakdowns below: **30 openings / 53 units,
+45 casements / 8 vertical pictures / 0 roof windows** (ground 22/8; upstairs
+23 vertical units).
 Trim is not a structural pier or approved shade mount. Factory joining,
 header/framing, flashing, crank clearance, shade support and egress need review.
 
@@ -229,8 +267,8 @@ These are mull covers, not structural wall piers; shade support, load paths,
 header, flashing, standard-unit selection, grille/product availability and
 factory combination all require review. Fireplace windows, wall cuts and room
 geometry stay fixed. Supersedes the single-hung interpretation only.
-Current whole-house count: 32 openings / 55 units = 45 casements + 8 vertical
-fixed pictures + 2 fixed roof windows.
+Current whole-house count: 30 openings / 53 units = 45 casements + 8 vertical
+fixed pictures; there are no roof windows.
 
 ## Kitchen sink-window bottom trim removed - October 27
 
@@ -304,7 +342,7 @@ wall/frame/exterior drift. Return-bank dimensions remain unchanged.
 Front house windows only: six-light white colonial concept per unit
 (2 columns × 3 rows), eight openings / fourteen units, including loft south.
 No side/rear grids, door grids or garage-door lite grids.
-Whole-house modeled count is 32 openings / 55 units: 45 casements, 8 vertical fixed pictures and 2 fixed roof windows.
+Current whole-house modeled count is 30 openings / 53 units: 45 casements and 8 vertical fixed pictures, with no roof windows.
 Prior no-grille notes apply only to non-front windows. Andersen 100 Series
 White Fibrex intent retained; selected grille system, sizes, mullions,
 rough openings, egress and installation require dealer/architect review.
@@ -547,8 +585,8 @@ furnished banks: office center6,width6; guest center25,width7.6 ft,
 sill/head3/8. Remove four narrow facade-only substitutes, not room openings.
 Living west facade sills2.6/head8 now match furnished frames.
 The loft-south openings are part of the current wall-window schedule; current
-whole-house total is 32 openings / 55 units (45 casements, 8 vertical pictures,
-2 fixed roof windows).
+whole-house total is 30 openings / 53 units (45 casements, 8 vertical pictures,
+no roof windows).
 The owner's white-brick collage supersedes the rejected pinkish/red-base
 study, not the accepted hip roof architecture. The latest close-up request restores
 red-brown ONLY on the raised base, not the main brick. Base tops at house
@@ -742,7 +780,7 @@ Required rail projections would reduce the route. Threshold finish transition,
 landing/rails, supports, drainage, rated self-closing/latching assembly,
 occupied operation and fire separation require professional review; no code approval.
 
-## Current roof/elevation — articulated hipped transitional, October 26
+## Historical all-hip roof/elevation — October 26, front silhouette superseded October 30
 
 Front beds remain x=0–10.7 and 20.5–30.9 ft, shifted with the porch to
 z=61.679–64.979 ft.
@@ -1595,7 +1633,7 @@ projection and headroom before construction.
   the same bank. Restoring the flankers adds two operable units.
 - House shape, room sizes, counters, sink, base/cooking storage, prep bank
 and saved layouts are unchanged. Current whole-house window takeoff is
-32 openings / 55 units, including two fixed laundry roof windows.
+30 openings / 53 units, with no laundry roof windows.
 
 This is a conceptual mulled assembly, not approved manufacturer CAD.
 Verify factory joining, actual frame/rough-opening dimensions, header and
@@ -2713,9 +2751,9 @@ Room requirements: [kids/living](foyer/living-room.html#connected-kids-room), [o
 
 ## Window schedule
 
-**Current whole-house count, October 28, 2026:** 32 openings / 55 units: 45 wall casements, 8 vertical fixed pictures and 2 fixed roof windows. Ground floor: 15 openings / 30 units (22 casements + 8 pictures). Upstairs: 15 vertical openings / 23 casements plus 2 roof windows, for 17 openings / 25 units. Main kitchen and prep each have three units in one joined opening. Exterior duplicates and door glazing are excluded. See the [counting rules](docs/window-count.md); not an approved procurement schedule.
+**Current whole-house count:** 30 openings / 53 units: 45 wall casements and 8 vertical fixed pictures, with no roof windows. Ground floor: 15 openings / 30 units (22 casements + 8 pictures). Upstairs: 15 openings / 23 casements. Main kitchen and prep each have three units in one joined opening. Exterior duplicates and door glazing are excluded. See the [counting rules](docs/window-count.md); not an approved procurement schedule.
 
-The detailed wall-window rows below are an October 27 snapshot, superseded where they conflict with the current measured upstairs plan. The two fixed laundry roof windows are separate from that legacy wall-opening schedule. All sizes are **provisional opening/group envelopes**, not confirmed catalog units, rough openings or clear glass, except where a verified standard frame is identified. Sill/head heights are inches above house datum unless explicitly labeled otherwise; the powder-window row uses feet and garage-relative heights are labeled separately. Coordinates identify the opening wall, not small frame insets.
+The detailed wall-window rows below are an October 27 snapshot, superseded where they conflict with the current measured upstairs plan. The roof-window row is a removed concept, not part of the current takeoff. All sizes are **provisional opening/group envelopes**, not confirmed catalog units, rough openings or clear glass, except where a verified standard frame is identified. Sill/head heights are inches above house datum unless explicitly labeled otherwise; the powder-window row uses feet and garage-relative heights are labeled separately. Coordinates identify the opening wall, not small frame insets.
 
 | Location / quantity | Opening W x H (in) | Sill / head (in) | Opening centers (x, z), ft | Concept grouping |
 |---|---|---|---|---|
@@ -2732,9 +2770,9 @@ The detailed wall-window rows below are an October 27 snapshot, superseded where
 | Office side, 1 | 48 x 60 | 36 / 96 | (0, 49) | Two bays |
 | Office porch, 1 | 91.2 x 60 | 36 / 96 | (6, 54.679) | Three equal bays, casement / fixed picture / casement; matches bedroom porch per October 28 owner correction |
 | Bedroom porch, 1 | 91.2 x 60 | 36 / 96 | (25, 54.679) | Three bays |
-| Upstairs laundry roof windows, 2 | 21 x 45.75 rough opening each | Roof-mounted; no sill/head | (34.2708, 31.4), (37.6708, 31.4) | Fixed, south-facing 4:12 East rear wing roof; VELUX FS C06 dimensional candidate only; product and roof compatibility not approved |
+| Upstairs laundry roof windows (removed concept) | 21 x 45.75 rough opening each | Roof-mounted; no sill/head | (34.2708, 31.4), (37.6708, 31.4) | Historical VELUX FS C06 size study only; no roof opening or unit is modeled |
 
-The October 27 wall-window table above totals **20 ground-floor groups / 31 units** and is retained as a historical schedule, not the current furnished-model takeoff. The current whole-house count is stated above; the added roof windows are two additional openings/units. Andersen 100 Series applies to the vertical wall-window intent only. Fixed pictures have no center mullion or crank/lock. All operable windows are shown closed; divisions do not establish manufacturer combination approval. Product combinations, safety glazing, installation allowances, outward sash clearance and weatherproofing remain provisional.
+The October 27 wall-window table above totals **20 ground-floor groups / 31 units** and is retained as a historical schedule, not the current furnished-model takeoff. The removed roof-window concept is excluded from the current count above. Andersen 100 Series applies to the vertical wall-window intent only. Fixed pictures have no center mullion or crank/lock. All operable windows are shown closed; divisions do not establish manufacturer combination approval. Product combinations, safety glazing, installation allowances, outward sash clearance and weatherproofing remain provisional.
 
 ### Powder-room window options in feet
 
@@ -3077,8 +3115,8 @@ Two nominal 48 x 60-inch paired casements occupy the formerly blank loft
 south wall, z = 36.2 ft, centers x = 40.75 / 47.75 ft, sill/head 36/96 in
 above upstairs floor. Shared furnished/exterior data replaces the blind
 masonry fields without changing rooms or furniture. Loft total: four openings,
-eight casement units. Current whole-house count: 32 openings / 55 units
-(45 casements, 8 vertical pictures, 2 fixed roof windows). Headers, veneer
+eight casement units. Current whole-house count: 30 openings / 53 units
+(45 casements, 8 vertical pictures, no roof windows). Headers, veneer
 support, roof clearance, flashing and operation
 remain unapproved; see [window count](docs/window-count.md).
 # Prep shelf depth update - October 27

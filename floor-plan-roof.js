@@ -98,6 +98,12 @@
       { id: 'Main house', bounds: [-0.75, mainRight, mainRear, mainFront],
         planes: [[0, 1 / 3, eaves + 0.2 - mainRear / 3], [0, -1 / 3, eaves + 0.2 + mainFront / 3],
           [1 / 3, 0, eaves + 0.2 + 0.75 / 3], [-1 / 3, 0, eaves + 0.2 + mainRight / 3]] },
+      // Reversible cross-gables above the fixed paired bedroom banks. Union
+      // with (never replacement of) the accepted hip preserves its entire
+      // headroom envelope and rear solar study surfaces.
+      ...[6.425, g.southEast - 6.425].map((center, index) =>
+        gableRoof(`${index ? 'East' : 'West'} front gable`, center - 7.175, center + 7.175,
+          40.5, mainFront, eaves + 0.2, 6.2, true)),
       hipRoof('East rear wing', g.bathEast - 0.75, g.east + 0.75, g.north - 0.75, g.serviceSouth + 0.75,
         eaves + 0.2, eaves + 0.2 + (g.serviceSouth - g.north + 1.5) / 6,
         (g.north + g.serviceSouth) / 2, g.bathEast + (g.serviceSouth - g.north) / 2, g.east - (g.serviceSouth - g.north) / 2),
@@ -109,36 +115,6 @@
       { ...gableRoof('Dining rear projection', 12.55, 27.525, -0.75, 7.5, 8.68, 5.82, true),
         bounds: [13.2, 27.525, -0.75, 7.5] }
     ];
-  }
-
-  function getLaundryRoofWindows(floorToFloor = 10) {
-    const g = upperGeometry();
-    const width = 21 / 12;
-    const length = 45.75 / 12;
-    const zProjection = length * 3 / Math.sqrt(10);
-    const z = g.serviceSouth - 3.7;
-    const centers = [g.southEast + 2.7, g.southEast + 6.1];
-    const plan = buildRoofEnvelope(getConnectedRoofDefinitions(floorToFloor));
-    return centers.map((x, index) => {
-      const bounds = [x - width / 2, x + width / 2, z - zProjection / 2, z + zProjection / 2];
-      const corners = [[bounds[0], bounds[2]], [bounds[0], bounds[3]], [bounds[1], bounds[2]], [bounds[1], bounds[3]]];
-      const face = plan.faces.find(candidate => candidate.roof === 'East rear wing'
-        && corners.every(point => contains(candidate.polygon, point)));
-      if (!face) throw new Error(`Laundry roof window ${index + 1} does not fit on the east rear wing.`);
-      return {
-        name: `Laundry roof window ${index + 1}`,
-        x, z, width, length, zProjection, bounds, plane: face.plane,
-        roofElevation: heightAt(face.plane, [x, z]),
-        roughOpeningWidthInches: 21,
-        roughOpeningLengthInches: 45.75,
-        frameWidthInches: 21.5,
-        frameLengthInches: 46.25,
-        pitchRise: 4, pitchRun: 12,
-        candidateProduct: 'VELUX FS C06 fixed deck-mounted skylight',
-        productSelected: false,
-        operation: 'fixed'
-      };
-    });
   }
 
   function getSetbackRoofDefinitions() {
@@ -166,8 +142,22 @@
     const angle = 0.13, centerHeight = 10.5, centerZ = 57.5 + front.extension, halfWidth = 4.5;
     const slope = 2.4 / halfWidth;
     const halfRoofWidth = halfWidth + 0.65 / Math.sqrt(1 + slope * slope);
+    const porchPlane = [0, -Math.tan(angle), centerHeight + centerZ * Math.tan(angle)];
+    // Segmental barrel accent: sixteen true sloping facets, clipped into the
+    // porch plane with a rear falling return, not a floating applied arch.
+    const archHalf = 4.575, archRise = 1.6, archCenter = 15.6;
+    const points = Array.from({ length: 17 }, (_, i) => {
+      const dx = -archHalf + 2 * archHalf * i / 16;
+      return [archCenter + dx, archRise * (1 - (dx / archHalf) ** 2)];
+    });
+    const archPlanes = points.slice(1).map((b, i) => {
+      const a = points[i], slope = (b[1] - a[1]) / (b[0] - a[0]);
+      return [slope, porchPlane[1], porchPlane[2] + a[1] - slope * a[0]];
+    });
     return [
-      { id: 'Porch metal', finish: 'metal', bounds: [-0.65, 31.85, 52.75 + front.extension, 62.25 + front.extension], planes: [[0, -Math.tan(angle), centerHeight + centerZ * Math.tan(angle)]] }
+      { id: 'Porch metal', finish: 'metal', bounds: [-0.65, 31.85, 52.75 + front.extension, 62.25 + front.extension], planes: [porchPlane] },
+      { id: 'Entry barrel metal', finish: 'metal', bounds: [archCenter - archHalf, archCenter + archHalf, 57.5 + front.extension, 62.25 + front.extension],
+        planes: [...archPlanes, [0, 1, centerHeight - (57.5 + front.extension)]] }
     ];
   }
 
@@ -351,7 +341,7 @@
     }
     return segments;
   }
-  const api = { getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, getGarageCanopyDefinitions, getLaundryRoofWindows, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, wallHeadSegments };
+  const api = { getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, getGarageCanopyDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, wallHeadSegments };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.HomeRoof = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

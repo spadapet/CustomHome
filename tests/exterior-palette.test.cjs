@@ -7,7 +7,7 @@ const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'ut
 const context = {};
 vm.runInNewContext(source.slice(0, source.indexOf('function buildExteriorModel')), context);
 
-test('actual diffuse conversion produces pale ivory rather than yellow or grey', () => {
+test('actual diffuse conversion produces restrained warm-gray brick without source chroma', () => {
   const normal = new Uint8ClampedArray([128, 132, 254, 255]);
   const roughness = new Uint8ClampedArray([190, 190, 190, 255]);
   const before = [...normal, ...roughness];
@@ -16,9 +16,9 @@ test('actual diffuse conversion produces pale ivory rather than yellow or grey',
     const data = new Uint8ClampedArray([l, l, l, 237]);
     context.gradeExteriorBrickPixels(data);
     const [r, g, b, a] = data;
-    assert.ok(r >= 188 && r <= 256);
-    assert.ok(g >= 187 && g <= 255);
-    assert.ok(b >= 182 && b <= 250);
+    assert.ok(r >= 168 && r <= 233);
+    assert.ok(g >= 167 && g <= 232);
+    assert.ok(b >= 162 && b <= 227);
     assert.ok(r > g && g > b);
     assert.ok(r - g <= 1 && g - b <= 5, 'no red/pink or yellow chroma tails');
     assert.equal(a, 237);
@@ -35,8 +35,8 @@ test('red-brown conversion is contrasting and independent from white diffuse byt
   context.gradeExteriorBrickPixels(base, true);
   assert.deepEqual([...base], [140, 72, 53, 255]);
   assert.ok(ivory[1] > base[1] + 40);
-  assert.match(source, /const baseMap = new THREE\.CanvasTexture\(baseCanvas\)/,
-    'independent base Source cannot recolor white walls');
+  assert.match(source, /const stoneColor = new THREE\.CanvasTexture\(stoneCanvas\)/,
+    'stone has an independent diffuse Source, not red brick');
 });
 
 test('red-brown brick retains pale scan mortar and alpha without changing main grading', () => {
@@ -88,7 +88,15 @@ test('actual brickBox selects independent base diffuse and clones matching relie
   assert.equal(red.material.bumpMap,null);
   assert.deepEqual(frontBrick.map.repeat.values,[]);
   assert.deepEqual(baseBrick.map.repeat.values,[]);
-  assert.ok(Math.abs(red.geometry.attributes.uv.value[1]*14-4.8)<1e-10);
+  assert.ok(Math.abs(red.geometry.attributes.uv.value[1]-1.25/8)<1e-10, 'Stone has its own eight-foot scan module');
+});
+
+test('stone grading neutralizes brown source faces, preserves joint contrast and never changes alpha', () => {
+  const data = new Uint8ClampedArray([60,30,0,237,210,180,150,255]);
+  context.gradeExteriorStonePixels(data);
+  assert.deepEqual([...data], [135,133,127,237,222,220,214,255]);
+  assert.ok(data[4]-data[0] > 80);
+  assert.match(source, /normalScale = new THREE\.Vector2\(0\.3, 0\.3\)/);
 });
 
 test('all source hue tails become the same low-chroma warm white', () => {

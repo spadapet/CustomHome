@@ -64,7 +64,7 @@ test('arched entry is coordinated through the same builder for furnished and ext
 });
 
 test('farmhouse porch has four white columns and its raised beam clears the eight-foot door', () => {
-  assert.doesNotMatch(source, /entryArch|Reference arched front-door surround|Reference arched entry side casing|notch\.absellipse/);
+  assert.doesNotMatch(source, /Reference arched front-door surround|Reference arched entry side casing|notch\.absellipse/);
   const meshes = [];
   const context = {
     THREE: { Group: class { constructor() { this.userData = {}; } } },
@@ -84,15 +84,15 @@ test('farmhouse porch has four white columns and its raised beam clears the eigh
     assert.equal(column.d, column.w);
     assert.ok(Math.abs(column.userData.widthInches - column.w * 12) < 1e-9);
   }
-  const bases = meshes.filter(m => m.name === 'Red-brown brick porch-column base');
+  const bases = meshes.filter(m => m.name === 'Ashlar stone porch-column base');
   assert.equal(bases.length, 4);
   assert.ok(bases.every(m => m.w === 7/6 && m.d === 7/6 && m.y+m.h/2===2.5));
-  const header = source.split('\n').find((line) => line.includes("name = 'Raised farmhouse porch header clear of eight-foot door'"));
-  assert.ok(header);
-  vm.runInNewContext(header, context);
+  const headerStart = source.indexOf('  for (const [left, right] of [[-0.65, 11.025]');
+  vm.runInNewContext(source.slice(headerStart, source.indexOf('  const porchFasciaZ =', headerStart)), context);
   const beam = meshes.at(-1);
   assert.ok(Math.abs(beam.y - beam.h / 2 - 9.7) < 1e-9, 'Header has 1.7 ft clearance above the door head');
-  assert.equal(beam.w, 32.5);
+  assert.equal(meshes.filter(m => m.name === 'Raised porch side header clear of eight-foot door').length, 2);
+  assert.ok(Math.abs(beam.w - 11.675) < 1e-8);
   assert.doesNotMatch(source, /Continuous porch fascia and cornice|Continuous shingle porch roof/);
 });
 
@@ -177,7 +177,7 @@ test('reference elevation uses fixed brick without an optional finish control', 
   const end = source.indexOf('  if (masonryMaps) {', start);
   vm.runInContext(source.slice(start, end), context);
   const base = vm.runInContext('brickBox({}, 0, 0, 0, 6, 1, 0.45)', context);
-  assert.equal(base.name, 'Cream exterior brick masonry');
+  assert.equal(base.name, 'Warm-gray modern brick masonry');
   assert.ok(base.material.map);
   assert.equal(base.material.bumpMap, base.material.map);
   assert.deepEqual(repeats, [[2.25, 12 / 25]]);
@@ -185,13 +185,13 @@ test('reference elevation uses fixed brick without an optional finish control', 
   assert.doesNotMatch(fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8'), /front-brick-toggle/);
 });
 
-test('cream brick constituents respect every fixed opening without applied siding or battens', () => {
+test('lower-half stone constituents respect every fixed opening without applied siding or battens', () => {
   const meshes = [], walls = [];
   class Group {
     constructor() { this.userData = {}; this.position = { set() {} }; this.rotation = {}; }
     add(mesh) { meshes.push(mesh); }
   }
-  const context = { accentStone: { clone: () => ({}) }, stoneTexture: { clone: () => ({repeat:{set(){}}}) }, THREE: { Group }, white: {}, trim: {}, garageFloorY: -1.25, group: { add(wall) { walls.push(wall); } }, wallThickness: 0.45, box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'siding' }; parent.add(mesh); return mesh; }, brickBox(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'brick' }; parent.add(mesh); return mesh; }, windowUnit() {}, addFrontShutters() {} };
+  const context = { accentStone: { clone: () => ({}) }, stoneTexture: { clone: () => ({repeat:{set(){}}}) }, THREE: { Group }, white: {}, trim: {}, garageFloorY: -1.25, group: { add(wall) { walls.push(wall); } }, wallThickness: 0.45, box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'siding' }; parent.add(mesh); return mesh; }, brickBox(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'brick' }; parent.add(mesh); return mesh; }, windowUnit() {} };
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  function wall('), source.indexOf('  const win =')), context);
   for (const name of ['front ground floor', 'west ground floor', 'kitchen and prep rear', 'east ground floor', 'upper west', 'upper bath rear', 'garage front']) {
@@ -204,10 +204,10 @@ test('cream brick constituents respect every fixed opening without applied sidin
   for (const mesh of meshes.filter((mesh) => mesh.finish === 'brick')) {
     assert.ok(mesh.x + mesh.w / 2 <= 4 + 1e-9 || mesh.x - mesh.w / 2 >= 6 - 1e-9 || mesh.y + mesh.h / 2 <= 3 + 1e-9 || mesh.y - mesh.h / 2 >= 8 - 1e-9, 'Panels and battens do not fill the window opening');
   }
-  const stone = meshes.filter(m => m.name === 'Continuous red-brown brick base - 30 inch house datum');
-  assert.equal(stone.length, 21);
-  assert.ok(stone.every(m => Math.abs(m.y+m.h/2-2.5)<1e-8), 'one 30-inch house datum even at garage');
-  assert.ok(stone.every(m => 3-(m.y+m.h/2)>=0.5-1e-8), 'six inches below fixed sill');
+  const stone = meshes.filter(m => m.name === 'Continuous lower-half stone wall - 9 foot house datum');
+  assert.equal(stone.length, 28);
+  assert.ok(stone.every(m => m.y+m.h/2 <= 9+1e-8), 'Stone terminates at the ground-story head, cut around every window');
+  assert.ok(stone.some(m => Math.abs(m.y+m.h/2-9)<1e-8));
   assert.doesNotMatch(source, /board-and-batten siding|siding vertical batten|gable vertical batten|Coursed cream limestone|Limestone gable end|White front gable end/);
 });
 
@@ -237,7 +237,7 @@ test('slim paired masonry bays create 2.4-inch pockets without occupying fixed a
   }
 });
 
-test('photographic cream grading preserves contrast and independent normal/roughness data', () => {
+test('modern gray brick and light stone have independent diffuse sources and relief', () => {
   const pixels = { data: new Uint8ClampedArray([40,40,40,255,200,200,200,255]) };
   let ivoryBytes;
   const paint = { drawImage() {}, getImageData() { return pixels; }, putImageData() { if (!ivoryBytes) ivoryBytes = [...pixels.data]; } };
@@ -256,11 +256,11 @@ test('photographic cream grading preserves contrast and independent normal/rough
   const start = source.indexOf('  if (masonryMaps) {', source.indexOf('  function brickBox('));
   vm.runInNewContext(source.slice(0, source.indexOf('function buildExteriorModel')) + '\nlet baseBrick;\n' + source.slice(start, source.indexOf('  function brickFaceUVs(', start)) + '\nglobalThis.testBaseBrick = baseBrick;', context);
   assert.equal(paint.filter, 'none');
-  assert.deepEqual(ivoryBytes, [209,208,203,255,250,249,244,255], 'Warm white retains joint separation without red cast or clipped white');
+  assert.deepEqual(ivoryBytes, [178,177,172,255,219,218,213,255], 'Warm-gray brick retains joint separation without red cast');
   assert.equal(context.frontBrick.normalMap, normalMap);
   assert.equal(context.frontBrick.roughnessMap, roughnessMap);
   assert.equal(context.frontBrick.bumpMap, null);
-  assert.equal(context.frontBrick.normalScale.x, 0.5);
+  assert.equal(context.frontBrick.normalScale.x, 0.18);
   assert.notEqual(context.testBaseBrick.map.source, context.frontBrick.map.source,
     'actual palette construction must not share Three Texture Source');
   assert.notEqual(context.testBaseBrick.map.image, context.frontBrick.map.image);

@@ -14,29 +14,27 @@ The viewer has no runtime dependency on Poly Haven.
 | Oak Veneer 01 | https://polyhaven.com/a/oak_veneer_01 | Jenelle van Heerden | diffuse, OpenGL normal, roughness |
 | Roof Slates 03 | https://polyhaven.com/a/roof_slates_03 | Rob Tuytel | diffuse, OpenGL normal, roughness |
 
-The owner-corrected warm-WHITE brick grades photographic diffuse luminance
-L at runtime: V=min(246,194+0.265L), RGB(V+4,V+3,V-2), rounded
-to clamped bytes. All source hue tails are removed: R-G <=1, G-B=5,
-not pink, peach, yellow or neutral grey. Mortar/face luminance survives.
-This supersedes rejected pinkish ivory; the collage
-is inspiration, not a selected product or an exact paint/brand match.
-The latest close-up request uses decorative red-brown brick ONLY on the raised
-base. Its independent diffuse Source uses the original Brick Wall 001 scan,
-not the white-graded map or tinted ashlar. Face RGB is
-(92+0.48L,38+0.34L,26+0.27L); pale low-chroma mortar (channel range <24,
-L>115) uses (164+0.18L,158+0.18L,145+0.18L). Original normal/roughness
-maps remain independent. No added random cracks or procedural noise.
-Porch exposed foundation, support bases, landing nose and step risers match.
+The October 30 study uses warm-gray modern queen brick above full lower-story
+light stone, superseding the white-brick/red-plinth study. Brick diffuse
+luminance L grades to V=min(229,164+0.255L), RGB(V+4,V+3,V-2), rounded
+to clamped bytes. Stone uses its own Stone Wall scan, not recolored brick:
+V=110+0.58L, RGB(V+8,V+6,V). Independent diffuse Sources retain original
+normal/roughness maps; brick relief strength0.18, stone0.3. No new assets
+or manufacturer photography; the repository's existing CC0 provenance above
+is retained, not a new manufacturer sourcing claim.
+Porch exposed foundation, support bases, landing nose and step risers use stone.
 Pale coping, porch paving and stone treads retain contrast; walking finishes
 require exterior slip/frost selection. Wall veneer is not approved paving.
 All diffuse Sources are sRGB with white material multipliers.
 White trim/portal stay pale. Physical brick/mortar/stone panels required.
 Original JPGs remain unchanged. Normal and roughness
 maps remain non-color data; they are not derived from the color map.
-Brick repeats are interpreted as five nominal 8-inch face modules across and
-fourteen 3.125-inch courses high for BOTH queen-brick palettes, not supplier CAD.
-Per-face physical projection includes narrow column returns; no 8-ft base tile.
-The stone scan is a visual reference, not a selected limestone product.
+Brick repeats are interpreted as five nominal8-inch modules across and
+fourteen3.125-inch courses high, not supplier CAD. Stone is projected at an
+assumed8-ft tile, independently on front/return faces rather than stretched.
+Both are appearance references, not selected/approved products. Require actual
+stone/brick/mortar panels in sunlight/shade; no coating, integral color or
+limestone species is established by the scan or owner reference.
 
 Directional sunlight, HDR sky/reflections and one 2048-pixel shadow map are
 enabled only for exterior Day views. Exterior Night/interior views restore

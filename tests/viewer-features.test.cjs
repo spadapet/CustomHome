@@ -61,14 +61,13 @@ test('2D room dimensions identify garage maximum extents and explain adjacent ro
   assert.equal(garageFloors.some(floor => floor.x < 40 && floor.x + floor.w > 40 && floor.z < 20 && floor.z + floor.d > 20), false, 'The bounding-box corner is not garage floor');
 });
 
-test('whole-house window count separates fixed roof windows from wall casements and pictures', () => {
+test('whole-house window count retains roof-window category without adding skylight units', () => {
   const source = read('floor-plan-3d.js');
   assert.match(source, /filter\(window => window\.roofWindow\)/);
   assert.match(source, /units - pictures - singleHung - roofWindows/);
   assert.match(source, /\$\{roofWindows\} fixed roof windows/);
   const exterior = read('floor-plan-exterior.js');
-  assert.match(exterior, /roofWindow: true/);
-  assert.match(exterior, /windowInstallations\.push\(\{[\s\S]*?roofWindow: true/);
+  assert.doesNotMatch(exterior, /roofWindow: true|Laundry roof window/);
 });
 
 test('room navigation gives every room its own floor-aware camera and keeps inspection shortcuts out of the toolbar', () => {

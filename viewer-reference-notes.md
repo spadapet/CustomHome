@@ -60,15 +60,10 @@ goods to reach lower ones. Generic dimensions and nesting are assumptions;
 verify real items, hand access, hinges, rack/shelf/slide loads and cooktop
 service fit. Under-sink services and spare high compartments remain clear.
 
-## Front louvered shutters - October 28
+## Front shutters removed - October 30
 
-Charcoal-black decorative fixed-open shutters: six pairs / twelve panels
-around eight front-facing openings, including loft south. Closely spaced
-upstairs bedroom windows share outer panels. Ground 18 x 60 in; upper bedroom
-15 x 60 in; loft 12 x 60 in, with 2.85 in between adjacent loft panels.
-White windows, front grilles, openings and masonry remain.
-Not functional closing/storm shutters; product dimensions, masonry anchorage,
-flashing, wind loads and outward-casement operation require review.
+Remove all exterior shutters, including loft south. The October 28 study
+is superseded. Preserve white windows, front grilles, openings and masonry trim.
 
 ## Current cooking run - October 27
 
@@ -93,23 +88,24 @@ isolation, drainage away from masonry, downspout discharge, frost base and
 permeability before building. Not structural, code or accessible-route approval;
 existing wood/firepit storage restrictions remain.
 
-## Current exterior material/proportion correction — October 27
+## Current exterior architecture — October 30
 
-Neutral warm-white queen brick, no pink/peach diffuse tails; independent relief
-and raking Day light remain. Collage is inspiration, not a selected product.
-Light-sand ashlar top is 30 inches above house floor (49.8 above modeled lawn),
-continuous around returns/garage, cut at every opening. Front sill gap6 inches.
-Porch exposed foundation,30-inch support bases, landing nose and risers match.
-Matching horizontal paving needs exterior slip/frost selection; not wall veneer.
-All four support shafts12 inches, bases14, caps/feet15; support centers fixed.
-Portal underside8.9 ft, foot passage79.8 inches,96-inch door crown unchanged.
-Upper decorative veneer piers12 inches wide,2.4-inch projection.
-Connected leaders hug stepped upper/lower wall corners with short diagonal
-canopy bypasses and wall brackets; sizing/support/outlets remain unapproved.
-Keep hip roofs, four front casements, White Andersen100/no-grille caveats,
-38 exterior fixtures, saved layouts, interiors and cold-storage-only firepit.
-Professional structural, veneer/flashing, drainage, electrical and paving review
-required; this reversible finish study is not construction documentation.
+Paired true front cross-gables over the fixed bedroom pairs: 14.35-ft width,
+6.2-ft rise, 25.4-ft ridge, approximately10.37:12 pitch. Keep the main/east
+hip envelope underneath, rear solar provisions and subordinate garage roof.
+Charcoal metal porch with9.15-ft segmental entry barrel/19.2-in rise, real
+clipped seams, rear return and open8.4-in curved trim band7.8 in deep.
+Stone covers the complete lower story to y9 ft on all elevations/returns;
+warm-gray modern brick above replaces the earlier warm-white/red-plinth study.
+Existing local CC0 scans are appearance references, not selected products.
+Require stone/brick/mortar panels in sun/shade and separate slip/frost-rated paving.
+Keep four support centers,12-in shafts,14-in stone bases/15-in caps,79.8-in
+foot passage,96-in door crown, matching office/guest triples, shutter removal,
+all interiors and saved layouts. Concurrent window-count edits are independent.
+Engineer gable valleys, curved header, structural connections and veneer support;
+detail cavity/transition flashing, drips, snow/ice/runoff concentration, gutters,
+outlets, electrical listings and lawful discharge. No load on veneer.
+Rear post-free canopy remains approval-required; firepit stays cold storage only.
 
 These notes were moved out of the 3D viewer page so the viewer stays model-first. They are reference material, not product selections or approvals.
 

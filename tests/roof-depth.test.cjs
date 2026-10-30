@@ -19,7 +19,7 @@ function render(metal = false, override = null) {
     constructor() {
       this.children = []; this.userData = {};
       this.position = new Vector();
-      this.quaternion = { setFromUnitVectors() {} };
+      this.quaternion = { setFromUnitVectors: (from, to) => { this.axis = to.clone(); } };
     }
     add(child) { child.parent = this; this.children.push(child); }
   }
@@ -154,6 +154,11 @@ test('metal ribs follow clipped porch/entry polygons with one shared finish and 
   const ribs = model.children.filter((part) => part.name === 'Clipped standing-seam roof rib');
   assert.ok(ribs.length > 10);
   assert.ok(ribs.every((part) => part.material === finish && part.userData.noExteriorShadow));
-  assert.ok(!model.children.some((part) => part.name === 'Connected roof valley'), 'Single porch plane has no decorative entry valley');
+  const barrelRibs = ribs.filter(part => part.userData.roof === 'Entry barrel metal');
+  assert.ok(barrelRibs.length > 4);
+  assert.ok(barrelRibs.every(part => Math.abs(part.axis.x) < 1e-8), 'Barrel seams run longitudinally, not as sixteen diagonal grids');
+  assert.ok(!model.children.some(part => part.userData.roofJoin &&
+    part.userData.roofs.every(roof => roof === 'Entry barrel metal')), 'Curved approximation facets are not separate raised hip caps');
+  assert.ok(model.children.some((part) => part.name === 'Connected roof valley'), 'Barrel accent joins the porch through actual clipped valleys');
   assert.ok(!model.children.some((part) => /fascia|gutter/.test(part.name)), 'Preserve the corrected metal-roof perimeter trim rather than adding crossing white strips');
 });
