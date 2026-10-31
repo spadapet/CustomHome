@@ -6392,7 +6392,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   resize();
   message.hidden = true;
   viewport.dataset.ready = 'true';
-  window.__guestSuiteVerification = { scene, guestSuite, THREE };
   function previewGround(edits) {
     if (navigationMode === 'walk') setNavigationMode('rotate');
     const replacement = edits.rooms.length || edits.walls.length ? buildGroundLayoutPreview(THREE, groundBaseline, edits) : null;

@@ -270,7 +270,9 @@ Image-derived placement: west shower proxy, north-middle toilet at
 side, southeast 30 x 96 in inward door. A world-space geometry check moved
 the toilet west/north from its first concept location to eliminate a small
 modeled toilet/vanity overlap; the revised proxy leaves about 30 in from its
-frontmost extent to the finished south wall. Sampled door leaf geometry
+frontmost extent to the finished south wall. Its tank proxy meets the
+north-side finish; final fixture setback and rough-in require review.
+Sampled door leaf geometry
 clears the toilet, vanity and shower from 0-90 degrees at 5-degree intervals.
 These are geometric tests only, not occupied-use, accessibility, product or
 code approval.
