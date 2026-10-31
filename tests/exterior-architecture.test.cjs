@@ -13,7 +13,7 @@ const height = (definitions, x, z) => Math.max(...definitions
 
 test('paired cross-gables center on fixed bedroom banks with measured rise and subordinate garage', () => {
   const defs = roof.getConnectedRoofDefinitions();
-  const gables = defs.filter(d => /front gable/.test(d.id));
+  const gables = defs.filter(d => /^(?:East|West) front gable$/.test(d.id));
   assert.equal(gables.length, 2);
   const windows = upper.getUpstairsFrontWindows();
   gables.forEach((g, i) => {

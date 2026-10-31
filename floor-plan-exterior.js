@@ -679,7 +679,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const slateFinish = new THREE.MeshStandardMaterial({ ...(masonryMaps?.roof ?? {}), map: roofTexture, roughness: 0.95, side: THREE.DoubleSide });
   slateFinish.normalScale.set(0.35, 0.35);
   const houseRoof = renderRoofEnvelope('Connected main-house roof system', HomeRoof.getConnectedRoofDefinitions(floorToFloor)
-    .filter(({ id }) => !['Garage hip', 'Garage cross-gable', 'Dining rear projection'].includes(id)), slateFinish);
+    .filter(({ id }) => !['Garage hip', 'Garage front gable', 'Dining rear projection'].includes(id)), slateFinish);
   const setbackFinish = mat('#656863', 0.85);
   const setbackRoofs = renderRoofEnvelope('Closed ground-floor setback roofs', HomeRoof.getLowerRoofDefinitions(), slateFinish, false, setbackFinish);
   setbackRoofs.userData.designReview = 'Illustrative low-slope metal roof closure; selected roofing minimum slope, tapered build-up, wall flashing, support and east-side drainage require design. No terrace or added room.';
@@ -712,8 +712,8 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     setbackRoofs.add(mesh);
     return mesh;
   }
-  // The new garage gable closes at the EXISTING wall, behind the retained
-  // brow. Vertex-defined depth, not a floating front triangle or bonus room.
+  // The full-width garage gable closes at the EXISTING wall. Vertex-defined
+  // depth, not a floating front triangle or bonus room.
   for (const face of setbackPlan.faces) {
     const polygon = HomeRoof.intersectPolygons(
       [[31.2, 49 - wallThickness / 2], [55.5, 49 - wallThickness / 2],
@@ -737,7 +737,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     geometry.computeVertexNormals();
     brickFaceUVs(geometry, 'x');
     const closure = new THREE.Mesh(geometry, frontBrick);
-    closure.name = 'Garage cross-gable fitted brick wall-head closure';
+    closure.name = 'Garage front gable fitted brick wall-head closure';
     closure.castShadow = closure.receiveShadow = true;
     closure.userData = { cladding: 'brick', finishOnly: true, structuralSupportDesigned: false };
     setbackRoofs.add(closure);
@@ -818,7 +818,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       houseRoof.add(closure);
     }
   }
-  houseRoof.userData.drainageIntent = 'Paired front gables remain primary. The loft clipped cross-gable joins the retained east hip through derived valleys; its rakes have no gutters, side eaves collect runoff. Garage cross-gable joins the retained lower hip, with closed brick wall heads and hipped shoulders. Engineer new valleys, jerkinhead framing, garage header/bearing and step/counterflashing; veneer carries no roof loads. Check valley snow/ice and runoff onto lower roofs/brow. Roof surfaces north of z22.5 and rear solar provisions remain unchanged. Upper rear water must be piped separately, not onto the post-free canopy. Size gutters, outlets and lawful discharge professionally.';
+  houseRoof.userData.drainageIntent = 'Paired front gables remain primary. The loft clipped cross-gable joins the retained east hip through derived valleys; its rakes have no gutters, side eaves collect runoff. One full-width garage front gable covers both doors and meets the retained lower hip at derived rear valleys; no separate brow/canopy roof. Engineer new valleys, gable framing, garage headers/bearing and step/counterflashing; veneer carries no roof loads. Check valley snow/ice and runoff onto lower roofs. Roof surfaces north of z22.5 and rear solar provisions remain unchanged. Upper rear water must be piped separately, not onto the post-free canopy. Size gutters, outlets and lawful discharge professionally.';
   houseRoof.userData.framingAllowanceInches = 18;
   houseRoof.userData.framingAllowanceVerified = false;
 
@@ -864,6 +864,10 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     [56.2, 8.8, 49.85], [55.85, 8.1, 49.35],
     [55.85, -1.35, 49.35], [55.85, -1.6, 49.7]
   ], [1, 4, 7].map(y => [[55.725, y, 49.225], [55.85, y, 49.35]]));
+  drainageRoute(group, 'Garage west eave to front-corner leader - capacity unverified', [
+    [30.3, 8.8, 49.85], [30.7, 8.35, 49.45], [30.975, 8.1, 49.225],
+    [30.975, -1.35, 49.225], [30.975, -1.6, 49.575]
+  ], [1, 4, 7].map(y => [[30.725, y, 49.225], [30.975, y, 49.225]]));
   // Follow the REAL stepped walls. Only the short canopy bypass is stood off;
   // the upper/lower vertical runs are corner-mounted, not 20-foot free drops.
   for (const east of [false, true]) {
@@ -1256,31 +1260,6 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   }
   const porchMetal = mat(cladding.metal, 0.65);
   const porchRoof = renderRoofEnvelope('Connected standing-seam porch and entry roof', HomeRoof.getPorchRoofDefinitions(), porchMetal, true);
-  const garageCanopy = renderRoofEnvelope('Stepped garage metal canopy and porch return', HomeRoof.getGarageCanopyDefinitions(), porchMetal, true);
-  const garageCanopyPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getGarageCanopyDefinitions());
-  // Match the porch's white 3.6-inch fascia; close every exposed brow edge
-  // and collect the low edge rather than leaving a floating metal sheet.
-  for (const edge of garageCanopyPlan.boundaries) {
-    const a = new THREE.Vector3(...edge.start), b = new THREE.Vector3(...edge.end);
-    const direction = b.clone().sub(a);
-    const part = box(garageCanopy, (a.x + b.x) / 2, (a.y + b.y) / 2 - 0.31, (a.z + b.z) / 2,
-      direction.length(), 0.3, 0.18, trim);
-    part.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), direction.normalize());
-    part.name = 'Garage metal canopy closed white fascia';
-    if (Math.abs(a.y - b.y) < 0.01 && a.z > 51) {
-      box(garageCanopy, (a.x + b.x) / 2, a.y - 0.08, a.z + 0.12, Math.abs(b.x - a.x), 0.18, 0.24, trim).name = 'Garage brow low-edge gutter';
-    }
-  }
-  box(garageCanopy, 55.8, 8.14, 50.3, 0.16, 0.16, 2.16, trim).name = 'Garage brow gutter return to wall leader';
-  box(garageCanopy, 55.8, 3.245, 49.3, 0.16, 9.79, 0.16, trim).name = 'Garage brow rainwater leader concept';
-  // Closed stepped wall abutment at the porch end; no invented level
-  // roof or new support post between the two different wall heights.
-  const canopyStepBottom = 8.75 - (frontWallZ - 49.4) / 4 - 0.16;
-  const canopyStepTop = porchCanopyUndersideAt(frontWallZ + 0.02);
-  fitTrimTopToPorchRoof(box(garageCanopy, 30.4375, (canopyStepBottom + canopyStepTop) / 2, frontWallZ - 0.04,
-    1.075, canopyStepTop - canopyStepBottom, 0.12, trim)).name = 'Canopy stepped porch-end closure and flashing concept';
-  garageCanopy.userData = { supportConcept: 'Wall-ledger and outriggers; connections and garage header loads not designed',
-    drainageIntent: 'Brow gutter to east leader; return falls to porch-end collector, outlets unverified', constructionApproved: false };
   for (const [left, right] of [[-0.65, 11.025], [20.175, 31.85]]) {
     fitTrimTopToPorchRoof(box(group, (left + right) / 2, 9.95, 60.5 + frontShift,
       right - left, 0.5, 0.7, trim)).name = 'Raised porch side header clear of eight-foot door';
@@ -1349,7 +1328,6 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     fixture.add(light);
   }
   for (const pillar of porchPillars.filter((column) => column.userData.entryColumn)) lantern(pillar, 0, 5.8 - pillar.position.y, 0.72);
-  for (const x of [37, 48.5]) lantern(group, x, 8.7, 49.7);
   brickBox(group, 15.6, -0.15, 61.275 + frontShift, 10.8, 0.3, 0.15, true).name = 'Entry landing brick nose';
   exteriorSteps(group, 'Contrasting front entry steps', 15.6, 61.35 + frontShift, 1, 10.8, { riseFeet: 0.45, baseFeet: -1.65, treadCount: 3, goingFeet: 1.05, flareFeet: 0, flushNosing: true });
   const frontSteps = group.getObjectByName('Contrasting front entry steps');
@@ -1656,6 +1634,51 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     box(fixture, 0, 0, -0.2, 0.3, 0.3, 0.1, dark).name = 'Exterior downlight wall backplate';
     return fixture;
   }
+  function garageGooseneck(name, x) {
+    const finishedWallFaceZ = 49 + wallThickness / 2;
+    const fixture = new THREE.Group();
+    fixture.name = name;
+    fixture.userData = {
+      mount: 'wall', style: 'bronze gooseneck', colorTemperatureKelvin: 2700,
+      downwardOnly: true, productSelected: false, photometryVerified: false,
+      finishedWallFaceZ
+    };
+    // Garage doors use the lowered garage-floor datum; mount just above the
+    // projecting header cap rather than at the house-floor wall-light height.
+    fixture.position.set(x, garageFloorY + 9, finishedWallFaceZ + 0.25);
+    lighting.add(fixture);
+    const bronze = mat('#5c4635', 0.38);
+    bronze.metalness = 0.75;
+    box(fixture, 0, 0, -0.2, 0.3, 0.3, 0.1, bronze).name = 'Garage gooseneck bronze mounting plate';
+    const neck = [
+      [0, 0.1, 0.035], [0, 0.23, 0.1], [0, 0.35, 0.23],
+      [0, 0.36, 0.42], [0, 0.23, 0.56]
+    ];
+    for (let index = 1; index < neck.length; index++) {
+      const start = new THREE.Vector3(...neck[index - 1]);
+      const end = new THREE.Vector3(...neck[index]);
+      const direction = end.clone().sub(start);
+      const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, direction.length(), 8), bronze);
+      tube.position.copy(start.clone().add(end).multiplyScalar(0.5));
+      tube.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+      tube.name = 'Garage gooseneck bronze arm segment';
+      fixture.add(tube);
+    }
+    const shade = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.34, 0.15, 16, 1, true), bronze);
+    shade.position.set(0, 0.15, 0.57);
+    shade.name = 'Garage gooseneck downward shade';
+    fixture.add(shade);
+    const diffuser = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.02, 16), glow);
+    diffuser.position.set(0, 0.065, 0.57);
+    diffuser.name = 'Garage gooseneck warm diffuser';
+    fixture.add(diffuser);
+    const light = new THREE.SpotLight('#ffd09a', 26, 18, Math.PI / 4.5, 0.65, 2);
+    light.name = `${name} shielded downward light source`;
+    light.position.set(x, garageFloorY + 9.15, finishedWallFaceZ + 0.82);
+    light.target.position.set(x, garageFloorY + 4, finishedWallFaceZ - 0.05);
+    lighting.add(light, light.target);
+    return fixture;
+  }
   function canopyDownlight(name, x, z, targetX = x, targetZ = z, intensity = 22) {
     const fixture = downlight(name, x, canopySoffitBottomAt(z) - 0.115, z, targetX, targetZ, intensity, patioGrade);
     // Slope-fitting mounting plate; fixture and beam remain vertical.
@@ -1665,7 +1688,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   canopyDownlight('Open-patio approach ceiling light', 3.3, 0.8, 0, -2, 26);
   for (const x of [4.2, 26.5]) downlight('Front porch approach ceiling light', x, porchCanopyUndersideAt(58.5 + frontShift) - 0.075, 58.5 + frontShift, x, 60.5 + frontShift, 24, 0);
   wallDownlight('Front door wall downlight', 15.6, 8.6, frontWallZ + 0.675, 0, 15.6, 59.5 + frontShift, 26, 0);
-  wallDownlight('Driveway motion-boost downlight', 43, 8.6, 49.475, 0, 43, 58, 32);
+  for (const [index, x] of [37, 48.5].entries()) garageGooseneck(`Garage door ${index + 1} bronze gooseneck wall light`, x);
   for (const z of [14, 28]) wallDownlight('West side-path wall downlight', -0.475, 8.6, z, -Math.PI / 2, westGateCenterX, z, 30);
   wallDownlight('West side-entry downlight', -0.475, 8.6, 42, -Math.PI / 2, westGateCenterX, westFenceReturnZ, 30);
   for (const z of [18, 31]) wallDownlight('East side-path wall downlight', 55.975, 8.6, z, Math.PI / 2, 58.25, z, 26);
@@ -1678,7 +1701,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const upperSoffitPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getConnectedRoofDefinitions(floorToFloor)
     .filter(({ id }) => ['Main house', 'East rear wing'].includes(id)));
   const rightSoffitPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getConnectedRoofDefinitions(floorToFloor)
-    .filter(({ id }) => !['Garage hip', 'Garage cross-gable', 'Dining rear projection'].includes(id)));
+    .filter(({ id }) => !['Garage hip', 'Garage front gable', 'Dining rear projection'].includes(id)));
   const upperSoffitPositions = [
     ...[3.5, 10, 21, 27.5].map(x => [x, 54.3]),
     ...[12, 25, 40, 49].map(z => [-0.5, z]),

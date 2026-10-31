@@ -98,10 +98,14 @@
     // A short, steep forward hip clips only the crown (a real jerkinhead),
     // leaving a brick gable below it; not an applied triangle on a hip.
     loftGable.planes.push([0, -1.25, eaves + 4.3 + 1.25 * (g.serviceSouth + .75)]);
-    const garageGable = gableRoof('Garage cross-gable', 35, 51.5, 37.5, 49.85, 8.9, 5, true);
-    // Cross-fall the hidden rear returns instead of creating level transverse
-    // valleys where two opposing hips meet. Actual derived valley fall is
-    // tested; this geometric intent is not a hydraulic/flashing approval.
+    const garageGable = gableRoof('Garage front gable', 30.3, 56.2, 37.5, 49.85, 8.9, 7.2, true);
+    // Keep the garage's full door pair under one uninterrupted front gable.
+    // Cross-fall the rear return where it meets the retained hip so the
+    // intersection resolves into sloped valleys, not level transverse seams.
+    // Derived fall is checked; this is not hydraulic/flashing approval.
+    const garageRearPitch = 7.2 / (49.85 - 37.5);
+    garageGable.planes[2][1] = garageRearPitch;
+    garageGable.planes[2][2] = 8.9 - garageRearPitch * 37.5;
     for (const [roof, center] of [[loftGable, loftCenter], [garageGable, 43.25]]) {
       roof.planes[2][0] += 1 / 16;
       roof.planes[2][2] -= center / 16;
@@ -143,7 +147,7 @@
   }
 
   function getLowerRoofDefinitions() {
-    return [...getConnectedRoofDefinitions().filter(({ id }) => ['Garage hip', 'Garage cross-gable', 'Dining rear projection'].includes(id)), ...getSetbackRoofDefinitions()];
+    return [...getConnectedRoofDefinitions().filter(({ id }) => ['Garage hip', 'Garage front gable', 'Dining rear projection'].includes(id)), ...getSetbackRoofDefinitions()];
   }
 
   function getSetbackAbutments() {
@@ -174,24 +178,6 @@
       { id: 'Porch metal', finish: 'metal', bounds: [-0.65, 31.85, 52.75 + front.extension, 62.25 + front.extension], planes: [porchPlane] },
       { id: 'Entry barrel metal', finish: 'metal', bounds: [archCenter - archHalf, archCenter + archHalf, 57.5 + front.extension, 62.25 + front.extension],
         planes: [...archPlanes, [0, 1, centerHeight - (57.5 + front.extension)]] }
-    ];
-  }
-
-  function getGarageCanopyDefinitions() {
-    const front = typeof getGroundFrontLayout === 'function'
-      ? getGroundFrontLayout() : require('./floor-plan-ground.js').getGroundFrontLayout();
-    // A lower matching metal brow, with a return to the porch/garage pier.
-    // The change in datum is real: a level continuation would cut the
-    // one-story garage gable or require raising the garage wall.
-    return [
-      // Narrow attachment behind the front eave avoids the two low gable
-      // corners. The full-width brow starts 0.10 ft beyond that eave;
-      // its 0.18 ft fascia depth must also stay clear of the roof edge.
-      { id: 'Garage metal wall attachment', finish: 'metal', bounds: [31.8, 54.7, 49.2, 49.95], planes: [[0, -0.25, 8.75 + 49.4 * 0.25]] },
-      { id: 'Garage metal brow', finish: 'metal', bounds: [29.9, 56, 49.95, 51.2], planes: [[0, -0.25, 8.75 + 49.4 * 0.25]] },
-      // Abut the west face of the 0.45 ft garage return wall, never run
-      // the metal through the wall's solid top.
-      { id: 'Garage metal return', finish: 'metal', bounds: [29.9, 30.975, 51.2, front.wallZ], planes: [[0, -0.25, 8.75 + 49.4 * 0.25]] }
     ];
   }
 
@@ -357,7 +343,7 @@
     }
     return segments;
   }
-  const api = { getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, getGarageCanopyDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, wallHeadSegments };
+  const api = { getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, wallHeadSegments };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.HomeRoof = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

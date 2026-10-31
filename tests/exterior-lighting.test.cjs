@@ -57,21 +57,45 @@ class Group {
     this.userData = {};
     this.rotation = { y: 0 };
     this.scale = { x: 1, y: 1, z: 1 };
-    this.position = { x: 0, y: 0, z: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } };
+    this.position = {
+      x: 0, y: 0, z: 0,
+      set(x, y, z) { Object.assign(this, { x, y, z }); },
+      copy(other) { Object.assign(this, { x: other.x, y: other.y, z: other.z }); return this; }
+    };
+    this.quaternion = { setFromUnitVectors() {} };
   }
   add(...children) { for (const child of children) { child.parent = this; this.children.push(child); } }
   traverse(callback) { callback(this); for (const child of this.children) child.traverse(callback); }
 }
 
+class Vector {
+  constructor(x, y, z) { Object.assign(this, { x, y, z }); }
+  clone() { return new Vector(this.x, this.y, this.z); }
+  sub(other) { this.x -= other.x; this.y -= other.y; this.z -= other.z; return this; }
+  add(other) { this.x += other.x; this.y += other.y; this.z += other.z; return this; }
+  multiplyScalar(value) { this.x *= value; this.y *= value; this.z *= value; return this; }
+  length() { return Math.hypot(this.x, this.y, this.z); }
+  normalize() { const length = this.length(); this.x /= length; this.y /= length; this.z /= length; return this; }
+}
+
+class Mesh extends Group {
+  constructor(geometry, material) { super(); Object.assign(this, { isMesh: true, geometry, material }); }
+}
+
 function buildLighting() {
   const group = new Group();
   const context = {
-    HomeRoof: require('../floor-plan-roof.js'), floorToFloor: 10, white: {},
+    HomeRoof: require('../floor-plan-roof.js'), floorToFloor: 10, garageFloorY: -1.25, wallThickness: 0.45, white: {},
     measuredUpper: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry(),
     frontShift: require('../floor-plan-ground.js').getGroundFrontLayout().extension,
     frontWallZ: require('../floor-plan-ground.js').getGroundFrontLayout().wallZ,
     THREE: {
-      Group,
+      Group, Mesh, Vector3: Vector,
+      CylinderGeometry: class {
+        constructor(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded) {
+          this.parameters = { radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded };
+        }
+      },
       SpotLight: class extends Group {
         constructor(color, intensity, distance, angle, penumbra, decay) {
           super();
@@ -79,13 +103,13 @@ function buildLighting() {
         }
       }
     },
-    group, dark: {}, glow: { emissiveIntensity: 0.8, emissive: { getHex: () => 0xffbf68 } }, patioGrade: -1.625,
+    group, dark: {}, mat: () => ({ metalness: 0 }), glow: { emissiveIntensity: 0.8, emissive: { getHex: () => 0xffbf68 } }, patioGrade: -1.625,
     patioRoofCenterX: 6.6, patioRoofWidth: 13.2, livingPatioCenterZ: 3.725,
     patioRoofUndersideAt: (z) => 8.26780663414694 + z * 3 / 16,
     westGateCenterX: -10.605, westFenceReturnZ: 45, eastFenceReturnZ: 41, garageSideDoorCenterZ: 45.5,
     box(parent, x, y, z, width, height, depth, material) {
       const mesh = new Group();
-      Object.assign(mesh, { isMesh: true, material, width, height, depth });
+      Object.assign(mesh, { isMesh: true, material, width, height, depth, geometry: { width, height, depth } });
       mesh.position.set(x, y, z);
       parent.add(mesh);
       return mesh;
@@ -100,12 +124,12 @@ function buildLighting() {
 }
 
 test('warm downward fixtures cover entrances, side paths, garden and patio without path posts', () => {
-  const { lighting } = buildLighting();
+  const { lighting, context } = buildLighting();
   const fixtures = lighting.children.filter((part) => part.userData.mount);
   const sources = lighting.children.filter((part) => part.isLight);
-  assert.equal(fixtures.length, 29);
-  assert.equal(sources.length, 29);
-  assert.equal(fixtures.filter((part) => part.userData.mount === 'wall').length, 12);
+  assert.equal(fixtures.length, 30);
+  assert.equal(sources.length, 30);
+  assert.equal(fixtures.filter((part) => part.userData.mount === 'wall').length, 13);
   for (const fixture of fixtures) {
     assert.equal(fixture.userData.colorTemperatureKelvin, 2700);
     assert.equal(fixture.userData.downwardOnly, true);
@@ -118,6 +142,11 @@ test('warm downward fixtures cover entrances, side paths, garden and patio witho
     assert.equal(source.decay, 2);
     assert.ok(!source.castShadow, 'Do not add costly exterior shadow maps');
   }
+  for (const source of sources.filter((part) => part.name.startsWith('Garage door '))) {
+    assert.equal(source.position.y, context.garageFloorY + 9.15);
+    assert.equal(source.target.position.y, context.garageFloorY + 4);
+    assert.equal(source.target.position.z, 49 + context.wallThickness / 2 - 0.05);
+  }
   for (const phrase of ['Front porch', 'Front door', 'West side-path', 'East side-path', 'Rear kitchen garden', 'Rear prep garden', 'Dining patio steps', 'Open-patio approach']) {
     assert.ok(fixtures.some((part) => part.name.includes(phrase)), phrase);
   }
@@ -129,11 +158,25 @@ test('wall lights have correctly oriented mounting plates and porch housings mee
   const fixtures = lighting.children.filter((part) => part.userData.mount);
   const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-8, `${actual} should equal ${expected}`);
   for (const fixture of fixtures.filter((part) => part.userData.mount === 'wall')) {
-    const plate = fixture.children.find((part) => part.name === 'Exterior downlight wall backplate');
+    const garage = fixture.name.startsWith('Garage door ');
+    const plate = fixture.children.find((part) => part.name === (garage
+      ? 'Garage gooseneck bronze mounting plate' : 'Exterior downlight wall backplate'));
     assert.ok(plate);
     const wallX = fixture.position.x - Math.sin(fixture.rotation.y) * 0.25;
     const wallZ = fixture.position.z - Math.cos(fixture.rotation.y) * 0.25;
-    if (fixture.name.startsWith('West')) close(wallX, -0.225);
+    if (garage) {
+      close(fixture.position.x, fixture.name.includes('1 ') ? 37 : 48.5);
+      close(fixture.position.y, context.garageFloorY + 9);
+      close(wallZ, 49.225);
+      close(fixture.position.z - 0.2 - plate.depth / 2, 49 + 0.45 / 2);
+      close((fixture.position.y - plate.height / 2) - (context.garageFloorY + 8 + 2 / 3 + 0.06 + 0.06), 0.06333333333333346);
+      assert.equal(fixture.userData.style, 'bronze gooseneck');
+      const arms = fixture.children.filter((part) => part.name === 'Garage gooseneck bronze arm segment');
+      assert.equal(arms.length, 4);
+      assert.ok(arms.every((part) => part.geometry.parameters.radiusTop === 0.035));
+      assert.ok(fixture.children.some((part) => part.name === 'Garage gooseneck downward shade'));
+      assert.ok(fixture.children.some((part) => part.name === 'Garage gooseneck warm diffuser'));
+    } else if (fixture.name.startsWith('West')) close(wallX, -0.225);
     else if (fixture.name.startsWith('East')) close(wallX, 55.725);
     else if (fixture.name.startsWith('Dining patio')) close(wallX, 12.975);
     else if (fixture.name.startsWith('Front door')) close(wallZ, context.frontWallZ + 0.425);
@@ -154,7 +197,7 @@ test('wall lights have correctly oriented mounting plates and porch housings mee
   }
   const roof = require('../floor-plan-roof.js');
   const plan = roof.buildRoofEnvelope(roof.getConnectedRoofDefinitions().filter(d =>
-    !['Garage hip', 'Garage cross-gable', 'Dining rear projection'].includes(d.id)));
+    !['Garage hip', 'Garage front gable', 'Dining rear projection'].includes(d.id)));
   for (const fixture of upper.slice(-2)) {
     const { x, y, z } = fixture.position;
     close(x, context.measuredUpper.east + .45);

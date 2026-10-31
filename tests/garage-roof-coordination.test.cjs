@@ -34,7 +34,7 @@ test('exposed laundry/loft facade closes to the measured bedroom return', () => 
   assert.match(source, /getUpstairsExteriorSegments\(\)/);
 });
 
-test('actual clipped garage hip has a subordinate 12.475 ft crown without raising walls or screening upstairs windows', () => {
+test('retained garage hip stays below its 16.1 ft front gable without raising walls or screening upstairs windows', () => {
   const definitions = roof.getConnectedRoofDefinitions();
   const garage = definitions.find((item) => item.id === 'Garage hip');
   const height = (x, z) => Math.min(...garage.planes.map((plane) => roof.heightAt(plane, [x, z])));

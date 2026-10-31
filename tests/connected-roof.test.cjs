@@ -71,7 +71,7 @@ for (const [label, definitions] of [['main house', getConnectedRoofDefinitions()
 
 test('paired true cross-gables articulate the front while the garage remains subordinate', () => {
   const roof = buildRoofEnvelope(getConnectedRoofDefinitions());
-  assert.deepEqual([...new Set(roof.faces.filter(face => /front gable/.test(face.roof)).map(face => face.roof))].sort(),
+  assert.deepEqual([...new Set(roof.faces.filter(face => /^(?:East|West) front gable$/.test(face.roof)).map(face => face.roof))].sort(),
     ['East front gable', 'West front gable']);
   const garage = roof.faces.filter((face) => face.roof === 'Garage hip');
   assert.ok(garage.length >= 4);

@@ -26,13 +26,30 @@ Size gives maximum modeled plan bounds, not zoning/buildable
 limits. Controls use short labels; the detailed Sizes list is closed by
 default while 2D room labels remain on. Preserve essential warnings.
 
-## Viewer defaults - October 30
+## Viewer defaults - October 31
 
 The October 30 front extension carries the hall floor, front-door light,
-garage canopy return closure and front approach with the front wall.
+and front approach with the front wall. The garage uses a separate full-width
+front gable; the old garage brow and canopy return are removed. The porch
+canopy remains.
 The final stair tread meets the crosswalk at z=64.97917 ft; the west
 porch-side paver pocket remains 7.63 x 10.3 ft, now z54.67917-64.97917.
 These are model alignments, not approved grades, routes or construction.
+
+Garage roof/light study: preserve both nominal 9 x 8 ft doors and their centers.
+One front gable spans x30.3-56.2 ft, eave y8.9, ridge y16.1 at z49.85;
+clipped valleys join the retained hip behind it. No upper room, window, floor,
+or storage is added. Two generic bronze gooseneck fixtures center over the
+doors. Because the garage slab datum is y=-1.25 ft, their plates mount at
+world y7.75 (9 ft above the slab), flush to the wall face z49.225; the actual
+plate-to-header-cap clearance is 0.76 in. Day/Night preview is illustrative,
+not product or photometric approval. Valley, framing, wall flashing, support,
+drainage, gutters and lawful discharge require project-professional design.
+World-space check after matrix updates: seven garage-gable roof meshes reach
+y16.1 at the front ridge; four wall-head closure meshes (144 vertices) finish
+0.16 ft below their matching roof surface. The least derived garage-valley
+fall is0.0288072 ft/ft, not a drainage or roofing approval. Focused checks:
+33 tests/6 suites plus11 JavaScript syntax checks.
 
 Reload starts in Day with Night lighting unchecked. Lighting choice remains
 viewer-wide through view/floor changes, tours and Reset. Both 2D plans show

@@ -71,39 +71,31 @@ test('roof edges receive closed soffits and deep trim only along the envelope pe
   assert.ok(undersides.every((part) => part.userData.noExteriorShadow));
 });
 
-test('garage brow and return are one clipped metal surface with real undersides and correctly falling constituent vertices', () => {
-  const frontWallZ = require('../floor-plan-ground.js').getGroundFrontLayout().wallZ;
-  const { model, definitions } = render(true, HomeRoof.getGarageCanopyDefinitions());
+test('garage roof is one full-width front gable joined to the retained hip, with real roof faces and no brow canopy', () => {
+  const { model, definitions } = render(false, HomeRoof.getLowerRoofDefinitions());
   const plan = HomeRoof.buildRoofEnvelope(definitions);
-  close(plan.faces.reduce((sum, face) => sum + HomeRoof.signedArea(face.polygon), 0), 22.9 * 0.75 + 26.1 * 1.25 + 1.075 * (frontWallZ - 51.2));
-  const surfaces = model.children.filter((part) => part.userData.roofSurface);
-  assert.equal(surfaces.length, 3);
-  for (const part of surfaces) {
+  const gable = definitions.find(({ id }) => id === 'Garage front gable');
+  assert.deepEqual(gable.bounds, [30.3, 56.2, 37.5, 49.85]);
+  close(Math.hypot(gable.planes[0][0], gable.planes[0][1]) * 12, 7.2 / 12.95 * 12);
+  close(HomeRoof.heightAt(gable.planes[0], [43.25, 49.85]), 16.1);
+  const garageFaces = model.children.filter((part) => part.userData.roofSurface && part.userData.roof === gable.id);
+  assert.ok(garageFaces.length >= 2, 'The actual roof mesh contains both broad gable slopes');
+  for (const part of garageFaces) {
+    const face = plan.faces.find(({ id }) => id === part.userData.patch);
+    assert.ok(face);
     const positions = part.geometry.attributes.position.array;
     for (let i = 0; i < positions.length; i += 3) {
-      close(positions[i + 1], 8.75 - (positions[i + 2] - 49.4) / 4);
-      assert.ok(positions[i + 1] >= 8.75 - (frontWallZ - 49.4) / 4 - 1e-6);
-      assert.ok(positions[i + 1] <= 8.8 + 1e-6);
+      close(positions[i + 1], HomeRoof.heightAt(face.plane, [positions[i], positions[i + 2]]));
     }
   }
-  assert.equal(model.children.filter((part) => part.name === 'Closed connected roof underside').length, surfaces.length);
-  assert.ok(model.children.some((part) => part.name === 'Clipped standing-seam roof rib'));
-  const garage = HomeRoof.getConnectedRoofDefinitions().find(({ id }) => id === 'Garage hip');
-  for (const face of plan.faces) {
-    for (let x = face.polygon.reduce((min, p) => Math.min(min, p[0]), Infinity); x <= 56; x += 0.05) {
-      for (let z = 49.2; z <= frontWallZ; z += 0.05) {
-        if (!HomeRoof.contains(face.polygon, [x, z])) continue;
-        if (x >= garage.bounds[0] && x <= garage.bounds[1] && z < garage.bounds[3]) {
-          const top = Math.min(...garage.planes.map((plane) => HomeRoof.heightAt(plane, [x, z])));
-          assert.ok(top - 0.16 - HomeRoof.heightAt(face.plane, [x, z]) >= 0.01 - 1e-6,
-            'Attachment remains under the real garage roof skin, including near its low corners');
-        }
-        if (z > 51.2) assert.ok(x <= 31.2 - 0.45 / 2 + 1e-7, 'Return abuts, never pierces, the solid west wall');
-      }
-    }
-  }
-  const brow = definitions.find(({ id }) => id === 'Garage metal brow');
-  assert.ok(brow.bounds[2] - 0.18 / 2 > garage.bounds[3], 'Full-width fascia clears the garage front roof edge');
+  const frontApex = plan.faces.find((face) => face.roof === gable.id && HomeRoof.contains(face.polygon, [43.25, 49.225]));
+  assert.ok(frontApex);
+  close(HomeRoof.heightAt(frontApex.plane, [43.25, 49.225]), 15.73562753036437);
+  assert.ok(plan.joins.some((join) => join.type === 'valley' && join.roofs.includes(gable.id) && join.roofs.includes('Garage hip')));
+  const undersides = model.children.filter((part) => part.name === 'Closed connected roof underside');
+  assert.equal(undersides.length, model.children.filter((part) => part.userData.roofSurface).length);
+  const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  assert.doesNotMatch(source, /Garage metal canopy|Garage brow|GarageCanopyDefinitions/);
   function close(actual, expected) { assert.ok(Math.abs(actual - expected) < 1e-5, `${actual} != ${expected}`); }
 });
 

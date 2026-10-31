@@ -7,7 +7,7 @@ const roof = require('../floor-plan-roof.js');
 const close = (a, b, tolerance = 1e-6) => assert.ok(Math.abs(a - b) < tolerance, `${a} != ${b} ft`);
 const definitions = roof.getConnectedRoofDefinitions();
 const plan = roof.buildRoofEnvelope(definitions);
-const additions = ['Loft clipped cross-gable', 'Garage cross-gable'];
+const additions = ['Loft clipped cross-gable', 'Garage front gable'];
 const height = (defs, x, z) => Math.max(...defs.filter(({ bounds: [l, r, b, f] }) =>
   x >= l && x <= r && z >= b && z <= f).map(({ planes }) => Math.min(...planes.map(p => roof.heightAt(p, [x, z])))));
 
@@ -19,9 +19,13 @@ test('right roofs have a measured descending hierarchy and a genuine clipped lof
   close(height([loft], 48.075, 33), 24.4);
   close(height([loft], 48.075, 35.85), 23.3);
   close(height([loft], 48.075, 34.97), 24.4);
-  close(height([garage], 43.25, 49.85), 13.9);
-  close(garage.bounds[1] - garage.bounds[0], 16.5);
-  assert.ok(25.4 > 24.4 && 24.4 > 13.9);
+  close(height([garage], 43.25, 49.85), 16.1);
+  close(garage.bounds[1] - garage.bounds[0], 25.9);
+  close(garage.bounds[2], 37.5);
+  close(garage.bounds[3], 49.85);
+  close(Math.hypot(garage.planes[0][0], garage.planes[0][1]) * 12, 7.2 / 12.95 * 12);
+  assert.ok(25.4 > 24.4 && 24.4 > 16.1, 'Garage gable stays subordinate to both upper rooflines');
+  for (const x of [37, 48.5]) assert.ok(height([garage], x, 49.225) > 12, 'Gable spans both fixed garage-door lights');
   const lower = roof.getLowerRoofDefinitions();
   assert.equal(lower.filter(d => d.id === garage.id).length, 1, 'Same cross-roof in lower and full envelopes');
   for (const id of additions) {
@@ -38,7 +42,11 @@ test('new unions retain accepted headroom, roof footprint and northern solar sur
     assert.equal(Number.isFinite(after), Number.isFinite(before), 'No roof footprint expansion');
     if (!Number.isFinite(before)) continue;
     assert.ok(after >= before - 1e-7, `No headroom reduction at ${x},${z}`);
-    if (z < 22.5 || x < 35) close(after, before);
+    const withinAddedRoof = additions.some((id) => {
+      const { bounds: [left, right, rear, front] } = definitions.find((definition) => definition.id === id);
+      return x >= left && x <= right && z >= rear && z <= front;
+    });
+    if (z < 22.5 || !withinAddedRoof) close(after, before);
     if (after > before + .05) raised++;
     samples++;
   }
@@ -76,7 +84,7 @@ test('garage wall-head solids have full wall depth and fit actual lower roof fac
     }
   };
   vm.runInNewContext(source.slice(start, end), context);
-  assert.ok(meshes.length >= 5);
+  assert.ok(meshes.length >= 1, 'Full-width gable has actual fitted wall-head geometry');
   const vertices = meshes.flatMap(m => m.geometry.position.array);
   let minZ = Infinity, maxZ = -Infinity, maxY = 0;
   for (let i = 0; i < vertices.length; i += 3) {
@@ -86,7 +94,7 @@ test('garage wall-head solids have full wall depth and fit actual lower roof fac
     minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); maxY = Math.max(maxY, y);
   }
   close(maxZ - minZ, .45);
-  close(maxY, 13.74);
+  close(maxY, 15.61244862659365);
 });
 
 test('clipped high eave has a falling conductor tied to the real east rake and leader node', () => {

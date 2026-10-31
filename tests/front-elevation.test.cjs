@@ -107,7 +107,8 @@ test('slim column lantern constituents mount at the face without positive embedd
       const m={x,y,z,w,h,d,parent};parts.push(m);return m;
     }};
   vm.createContext(context);
-  const start=source.indexOf('  function lantern('),end=source.indexOf('  for (const x of [37, 48.5])',start);
+  const start=source.indexOf('  function lantern('),end=source.indexOf('  brickBox(group, 15.6, -0.15,',start);
+  assert.ok(start >= 0 && end > start, 'Porch lantern extraction ends before the entry landing');
   context.porchPillars=[{userData:{entryColumn:true},position:{y:4.85},add(o){o.parent=this;}}];
   vm.runInContext(source.slice(start,end),context);
   for(const p of parts) {

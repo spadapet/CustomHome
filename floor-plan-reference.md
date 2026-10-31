@@ -1,6 +1,6 @@
 # Ground-floor plan reference
 
-## Current exterior roof and masonry study — October 30
+## Current coordinated exterior roof and lighting study — October 31
 
 Adapt the owner's paired-gable/metal-canopy reference, not its floor plan
 or shingle siding. Two true cross-gables centered at x6.425/25.145833 ft
@@ -12,28 +12,59 @@ remain minimum envelopes beneath the local right-hand cross-roofs described
 below; rear solar provisions and accepted headroom are not reduced.
 No new dormers, rooms, windows or floor area.
 
-Right-hand roof refinement: the south loft window pair receives a
+Right-hand upper-roof refinement: the south loft window pair receives a
 16.85-ft-wide clipped cross-gable centered x48.075, eave19.2, ridge24.4 ft,
 side pitch7.41:12. A15:12 forward hip clips1.1 ft from the crown over0.88 ft
 of run, reaching23.3 ft at z35.85. It joins the retained east hip, starting
 at z22.5; roofs north of that line remain unchanged. The garage receives
-one16.5-ft cross-gable centered x43.25, eave8.9, rise5, ridge13.9 ft,
-pitch7.27:12, retaining hipped shoulders. The original primary front
-gables remain tallest at25.4 ft. Real envelope unions, no applied triangles,
-fake openings or added living/storage volume. Rear return cross-fall1:16
-eliminates level new transverse valleys; measured derived fall exceeds
-0.02 ft/ft. Garage brick closure fills the existing z49 wall across its
-5.4-in depth to the actual roof underside, maximum y13.74 ft.
-Closed soffits, rake fascia/eave gutters and east loft/garage shoulder
-leaders are modeled. Loft pipe at x56.5 clears the lower roof edge by2.76 in.
-West collection, valley concentration/snow/ice, outlets, freeze protection,
-lawful discharge, ventilation, jerkinhead framing, garage headers/bearing
-and step/counterflashing remain approval-required. Keep the existing metal
-brow, porch arch, all18 upper wall segments,53 units, areas, poses and JSON.
-The clipped high gutter has an east-end rake conductor to the same leader;
-maintenance access, support/flashing and freeze protection need design.
-Two existing east soffit fixtures move to x56.2,z22/32 at the actual roof
-underside; no added fixtures or product/photometric approval.
+Garage roofline decision, October31: remove the inset central gable with
+exposed hip shoulders and the separate3:12 metal brow/return. Use one
+uninterrupted front-facing gable across the existing garage roof bounds
+x30.3–56.2 ft (25.9 ft), centered x43.25, eave y8.9, rise7.2, nominal
+ridge y16.1 at z49.85 and side pitch6.67:12. Its front return meets the
+retained garage hip through real clipped valleys. At the existing outer
+front-wall face z49.225, the gable surface reaches y15.77; fitted brick
+closure ends at y15.61 under the0.16-ft roof skin. This changes roof shape
+inside the existing envelope; no extra room, upper window, floor, storage,
+footprint or area. Roof skins, closed undersides, rake fascia and side-eave
+gutters derive from one shared envelope; rakes are not gutter edges.
+
+Two bronze gooseneck fixtures align over the fixed door centers x37/48.5 ft.
+The garage slab datum is y=-1.25 ft; modeled mounting plates sit flush on the
+finished front face z49.225 at world y7.75 (9 ft above that slab). Their lower
+edge is 0.76 in above the actual projecting header cap. This is measured
+model contact/clearance, not selected mounting hardware, backing, wiring,
+wet-location listing or photometry. Day/Night glow is illustrative.
+Conceptual west/east eave leaders are modeled. The upper loft/east leader at
+x56.5 still clears the lower roof edge by2.76 in. A rear-return1:16
+cross-fall avoids level new valleys; least derived garage valley fall is
+0.0288 ft/ft, not drainage capacity or acceptable roofing slope.
+The primary house gables remain tallest at25.4 ft; the loft clipped gable
+stays at24.4 ft. Keep the porch arch/canopy, all18 upper wall segments,
+53 units, room/opening dimensions, doors, areas, poses and saved JSON.
+
+Public roof-water principles reviewed October31: Building Science
+Corporation [Info-303: Common Flashing Details](https://buildingscience.com/documents/information-sheets/common-flashing-details)
+and the DOE Building America Solution Center
+[Step and Kick-Out Flashing at Roof-Wall Intersections](https://basc.pnnl.gov/resource-guides/step-and-kick-out-flashing-roof-wall-intersections)
+describe gravity drainage “down and out” and flashing integrated with the
+wall drainage plane. DOE's [Roof Valleys and Penetrations Sealed](https://basc.pnnl.gov/resource-guides/roof-valleys-and-penetrations-sealed)
+guide recommends continuous, integrated valley-deck membrane and shingle-lapped
+sections. These are general principles, not approval of this roof's assembly
+or measured valley fall. Valley/wall flashing, framing, headers/bearing, support,
+ventilation, snow/ice, gutter/outlet/overflow sizing, freeze protection,
+maintenance and lawful discharge require project professionals. Veneer
+carries no roof load.
+
+Browser/model check, October31: Front, Three-quarter, East/West sides, Rear,
+Roof plan and front Day/Night were inspected. Three.js world-space geometry
+after matrix updates measures seven connected gable roof meshes, four fitted
+wall-head closure meshes (144 vertices), a 0.16-ft roof-to-closure gap, and
+0.0288072 ft/ft minimum modeled valley fall. Both light plates are flush at
+z49.225, centered on their doors, with 0.76 in above the actual header caps.
+The 33-test / 6-suite focused regression run and 11-file JavaScript syntax
+check pass. These model checks do not approve framing, flashing, products,
+lighting output or drainage.
 
 Right-roof evidence:416 tests/65 suites plus11 syntax checks pass.
 HTTP front, three-quarter, both sides, rear, overhead and front/east Night

@@ -1,6 +1,6 @@
 # Ground-floor design context
 
-## Current exterior architecture — October 30 reference adaptation
+## Current coordinated exterior architecture — October 31 garage roof/light revision
 
 The new owner reference supersedes the quiet all-hip silhouette and low
 red-brick plinth studies. Use two true front cross-gables centered on the
@@ -15,50 +15,69 @@ the union cannot reduce their headroom envelope. Rear surfaces north of
 z=22.5 and solar provisions are unchanged; this study does not select or
 approve photovoltaic layout, attachment, setbacks, shading or capacity.
 
-Right-hand refinement, October 30: a true clipped-tip loft cross-gable
+Right-hand upper-roof refinement, October 30: a true clipped-tip loft cross-gable
 centers on the two fixed south-facing upper windows at x48.075 ft. Its
 16.85-ft span, y19.2-ft eaves and y24.4-ft ridge (about7.41:12 side pitch)
 sit below the primary25.4-ft front gables. A15:12 forward hip clips the last
 1.1 ft of crown over0.88 ft of run to y23.3 at z35.85; no false dormer/window.
-The lower garage retains its6:12 hip and shoulders, with one16.5-ft central
-cross-gable at x43.25, y13.9-ft ridge,5-ft rise/about7.27:12 pitch.
-Both additions have real clipped intersections/valleys, fitted Linen brick
-wall heads, closed undersides, rake fascia and eave-only gutters. Garage
-wall-head solids are5.4 in deep at the existing z49 wall, not a forward facade.
-Rear return planes carry1:16 transverse cross-fall to avoid level valleys;
-derived valley fall exceeds0.02 ft/ft, not approved hydraulic capacity.
+Garage roofline redesign, October31: replace the visually competing inset
+16.5-ft cross-gable/hip shoulders and separate3:12 metal brow with one
+continuous front-facing gable over both fixed9x8-ft doors. The shared roof
+envelope spans x30.3–56.2 ft (25.9 ft), centered x43.25, eave y8.9,
+rise7.2, nominal ridge y16.1 at z49.85, about6.67:12 side pitch. Its
+rear return clips into the retained lower hip through derived sloped valleys.
+At the outside wall face z49.225, the gable surface reaches y15.77 and the
+fitted brick closure ends y15.61 beneath the0.16-ft roof skin. This is a roof
+void only: no room, upper window, slab, accessible storage, footprint or area.
+Gable rake edges have fascia, not gutters; horizontal side eaves carry
+conceptual west/east collectors and leaders. The old brow collector is gone.
+New rear returns use1:16 cross-fall; least measured garage valley fall is
+0.0288 ft/ft, not hydraulic capacity or roofing-system approval.
 An east loft leader bypasses the lower roof at x56.5; its0.14-ft pipe clears
-the x56.2 garage roof edge by2.76 in. A separate east garage shoulder outlet
-returns to the garage corner. Existing brow/porch, other rainwater routes and
-rear canopy provisions remain. New valley concentration, west-side
-collection/tie-ins, outlets, freeze protection, lawful discharge, roof
-ventilation, jerkinhead framing, garage headers/trusses/bearing and
-step/counterflashing require professional design; veneer supports no roof.
-No roof footprint expansion or accepted headroom reduction. No interior,
-18-segment upper perimeter,53-unit window inventory, area or saved JSON changes.
+The primary house gables remain tallest at25.4 ft; loft clipped gable stays
+24.4 ft. Keep the porch canopy/barrel and rear drainage provisions. No roof
+footprint/headroom reduction or interior,18-segment upper perimeter,53-unit
+window inventory, area or saved JSON changes.
 The short clipped-tip high gutter has an east-end conductor within the rake
 trim allowance, falling to the same east leader; access, flashing, support
-and freeze protection are unresolved. The two existing east soffit lights
-move to x56.2,z22/32, on the real roof underside outside the finished upper
-wall; no added fixtures or photometric/product approval.
+and freeze protection are unresolved. Two warm bronze gooseneck fixtures
+replace garage lanterns and the redundant centered driveway downlight. Their
+centers align x37/48.5 over each door. With the garage slab at y=-1.25 ft,
+mounting plates contact the finished front wall face z49.225 ft at world
+y7.75 (9 ft above the garage slab); the lower plate edge clears the actual
+header cap by0.76 in. Finish/color, light aim and nominal2700 K output are
+visual assumptions, not selected product, mounting backing, electrical/
+listing or photometric approval.
 
-Right-roof verification:416 tests in65 suites and11 JavaScript syntax checks
-pass. Production HTTP views inspected in front, three-quarter, east, west,
-rear and overhead, plus front/east Night. Updated Three.js world matrices
-measure five visible skin meshes per new cross-roof, loft ridge24.3999996 ft
-and garage13.8999996 ft. Garage closure288 constituent vertices span
-z48.775–49.225 ft and top at13.7399998 ft; maximum numerical excursion above
-the roof underside is below0.000001 ft. Minimum new derived valley fall
-0.02187005 ft/ft. The high clipped-eave conductor has three continuously
-falling segments to the east leader elbow. East light housings clear the
-finished upper wall by0.9 in, lenses by1.5 in; installation still unapproved.
-Exterior mesh visibility/world matrices restore exactly through both floors,
-2D and exterior in Day/Night;38 active exterior Night sources and zero Day
-sources. Reset preserves Night and exterior restoration. Temporary browser
-route removed, clean production reload: one model render canvas, no debug
-global/page errors/failed requests, Notes closed, Day default,53 units and
-unchanged approximately4075 sq ft total (1921 ground/2155 upper).
-All changes remain local; no commit/push for this refinement.
+Roof-water principles were checked October31 in Building Science Corporation
+[Info-303: Common Flashing Details](https://buildingscience.com/documents/information-sheets/common-flashing-details)
+and DOE Building America Solution Center's
+[Step and Kick-Out Flashing at Roof-Wall Intersections](https://basc.pnnl.gov/resource-guides/step-and-kick-out-flashing-roof-wall-intersections):
+direct water “down and out” and integrate
+flashing with drainage planes. DOE's [Roof Valleys and Penetrations Sealed](https://basc.pnnl.gov/resource-guides/roof-valleys-and-penetrations-sealed)
+guide describes a continuous, integrated valley membrane with shingle-lapped
+sections, not an approved roof assembly or valley fall for this project.
+Structural framing, header/
+bearing, support, wall transitions, step/counterflashing, ventilation,
+snow/ice, collection sizing, overflow/freeze controls and lawful discharge
+remain professional decisions. Veneer carries no roof loads.
+
+Garage roof/light verification — October31: the HTTP model was inspected in
+Front, Three-quarter, East side, West side, Rear and Roof plan, and in front
+Day/Night. After Three.js world matrices updated, seven connected garage-gable
+roof meshes span x30.3–56.2 ft and reach y16.1 ft at the front ridge. Four
+fitted brick wall-head closure meshes contain144 vertices; their highest edge
+is y15.61245 ft, exactly0.16 ft below the roof surface at matching samples.
+The least measured new valley fall is0.0288072 ft/ft (geometry only).
+Two plate centers are (37,7.75,49.475) and (48.5,7.75,49.475) ft; each plate
+is flush to z49.225 and its lower edge clears the projecting header cap by
+0.76 in. Night enables all37 modeled exterior light sources; Day disables
+them, and ground/upstairs changes hide the exterior and restore it on return
+while preserving the Night selection. The focused roof/light regression
+runner passes33 tests across6 suites and syntax-checks11 JavaScript files.
+No door, opening, floor plan, saved layout, upper roof or area is changed.
+Production reload and view restoration were checked; changes remain local,
+with no commit or push.
 
 The owner's later October 30 request supersedes the full 9-ft stone story:
 use a continuous LOW stone wainscot to y=2 ft (24 in), separate warm off-white
