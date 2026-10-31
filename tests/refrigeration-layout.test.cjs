@@ -54,6 +54,7 @@ test('sink/window bank stays centered and actual side counters fit the relocated
   const start = source.indexOf('  const kitchenWallLeft =');
   context.getGroundFrontLayout = require('../floor-plan-ground.js').getGroundFrontLayout;
   context.getKitchenWindowBankLayout = require('../floor-plan-ground.js').getKitchenWindowBankLayout;
+  context.getGuestSuiteLayout = require('../floor-plan-ground.js').getGuestSuiteLayout;
   const end = source.indexOf('  const kidsRoomNorthZ =', start);
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext(`${source.slice(start, end)}\nglobalThis.geometry = { kitchenWallLeft, kitchenWallRight, kitchenSinkX, kitchenSinkWindows };`, context);
@@ -90,10 +91,9 @@ test('kids-room expansion preserves kitchen return and all opening widths', () =
   const kidsFloors = plan.floors.filter((floor) => floor.room === 'Kids room');
   const kidsNorthZ = plan.walls.find(([name]) => name === 'Kids north')[2];
   assert.deepEqual(kidsFloors.map(({ x, z, w, d, elevation }) => [x, z, w, d, elevation]), [
-    [19, kidsNorthZ, 6.75, 34.6 - kidsNorthZ, 0],
-    [25.75, kidsNorthZ, 3.25, 33.6 - kidsNorthZ, 0],
-    [29, 26.9, 2.2, 6.7, 0]
-  ], 'Guest-suite revision splits the western strip at x=25.75; the expanded east strip stops at the bathroom');
+    [19, kidsNorthZ, 10, 37.2 - kidsNorthZ, 0],
+    [29, 26.9, 2.2, 37.2 - 26.9, 0]
+  ], 'Both kids floor strips stop at the full-width bathroom; the east strip starts below the preserved kitchen return');
   for (const floor of kidsFloors) {
     assert.ok(floor.x + floor.w <= 29 || floor.z >= 26.9, 'No kids flooring may enter the preserved refrigeration run');
   }
@@ -197,11 +197,11 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
   assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), false);
 });
 
-test('modeled room doors and exterior overhead leaves carry click-operation metadata', () => {
+test('modeled room doors, cabinet pullouts and exterior overhead leaves carry click-operation metadata', () => {
   assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 115/);
   assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90/);
-  assert.match(source, /interactiveHouseDoor: \{ operation: 'sliding', open: false, closedCenterX: closetOpening\.x/);
-  assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 180/);
+  assert.match(source, /interactiveHouseDoor: \{ operation: 'sliding', axis: 'z', open: false, closedCenterX: 0, openCenterX: 1\.75 \}/);
+  assert.match(source, /powderLeaf\.userData = \{ interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 90, openRotationSign: 1 \}/);
   assert.match(exteriorSource, /interactiveHouseDoor: \{ operation: 'overhead', open: false, maxAngleDegrees: 90/);
   assert.match(exteriorSource, /buildArchedFrontEntry\(THREE,/);
   assert.match(fs.readFileSync(require.resolve('../floor-plan-ground.js'), 'utf8'), /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 110/);

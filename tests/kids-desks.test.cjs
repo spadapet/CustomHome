@@ -104,8 +104,8 @@ test('two electric IKEA MITTZON desks use the referenced product dimensions', ()
   }
   for (const [index, desk] of desks.entries()) {
     assert.equal(desk.rotation.y, Math.PI);
-    const southFace = index === 0 ? 37.025 : 33.425;
-    assert.ok(Math.abs(desk.position.z - (index === 0 ? 35.7125 : 32.1125)) < 1e-9);
+    const southFace = 37.025;
+    assert.ok(Math.abs(desk.position.z - 35.7125) < 1e-9, 'Both desks align to the full-width bathroom-side wall');
     const top = desk.children.find(part => part.name === 'MITTZON desktop');
     assert.ok(Math.abs(southFace - bounds(top).maxZ) < 1e-9, 'Actual rear tabletop meets its finished south wall above trim');
     for (const foot of desk.children.filter(part => part.name === 'MITTZON T foot')) {
@@ -114,9 +114,8 @@ test('two electric IKEA MITTZON desks use the referenced product dimensions', ()
   }
   const rightWallFace = model.kidsRoom.x + model.kidsRoom.southWidth - 0.175;
   assert.ok(Math.abs((rightWallFace - bounds(desks[1]).maxX) * 12 - 1) < 1e-9, 'Right desk is one inch off the finished east wall');
-  const extension = require('../floor-plan-ground.js').getGuestSuiteLayout().kidsExtension;
-  assert.ok(Math.abs(desks[0].position.x - (extension.x + extension.w / 2)) < 1e-9, 'Circled PC desk is centered in the marked southwest alcove');
-  assert.ok(Math.abs(desks[1].position.x - 28.972916666666666) < 1e-9, 'Homework desk stays in its accepted position');
+  assert.ok(Math.abs(desks[0].position.x - 22.375) < 1e-9, 'PC desk stays west of the retained paired-entry approach');
+  assert.ok(Math.abs(desks[1].position.x - 28.972916666666666) < 1e-9, 'Homework desk remains in the east end of the south-wall arrangement');
   const craftChair = model.find('Kids desk chair 2')[0];
   assert.equal(craftChair.rotation.y, 2 * Math.PI);
   assert.equal(craftChair.position.x, desks[1].position.x);
@@ -128,7 +127,7 @@ test('two electric IKEA MITTZON desks use the referenced product dimensions', ()
   const pc = bounds(desks[0]);
   assert.ok(Math.abs((pc.minX - 19.175) * 12 - 14.775) < 1e-9);
   assert.ok(Math.abs((25.575 - pc.maxX) * 12 - 14.775) < 1e-9);
-  assert.ok(Math.abs((pc.minZ - bounds(desks[1]).maxZ) * 12 - 11.7) < 1e-9, 'PC desk starts south of the bathroom step');
+  assert.ok(Math.abs((bounds(desks[1]).minX - pc.maxX) * 12 - 31.925) < 1e-9, 'The desks sit side-by-side with a 31.925-inch clear gap');
   pcChair.position.z -= 9 / 12;
   const pulledChair = bounds(pcChair);
   assert.ok(pulledChair.minZ > 31.5 && pulledChair.maxZ < pc.minZ, 'Nine-inch chair pull clears the desktop front and west opening');
@@ -173,31 +172,35 @@ test('bench, floor books and upper artwork are removed while TROFAST bins remain
   assert.equal(model.find('Kids play rug').length, 0, 'Oak floor stays exposed without a carpet or rug');
 });
 
-test('desks, chairs and relocated storage clear room edges and preserve a passage', () => {
+test('retained desks, chairs and toy storage fit the stepped room and preserve the paired-entry approach', () => {
   const model = buildKidsRoom();
-  const desks = model.roots.filter((item) => item.name.startsWith('IKEA MITTZON kids desk ')).map(bounds);
-  const chairs = model.roots.filter((item) => item.name.startsWith('Kids desk chair ')).map(bounds);
+  const desks = model.roots.filter((item) => item.name.startsWith('IKEA MITTZON kids desk '));
+  const chairs = model.roots.filter((item) => item.name.startsWith('Kids desk chair '));
   const storage = model.roots.filter((item) => item.name.startsWith('IKEA TROFAST toy storage '));
-  const toyBounds = storage.map(bounds);
-  const toyFront = Math.max(...toyBounds.map((b) => b.maxZ));
-  for (const root of model.roots) {
-    if (['Family glass dry-erase and cork board', 'Family message wall panelling', 'Family message wall white edge trim', 'Hall-facing white wall panelling'].includes(root.name)) continue;
-    const b = bounds(root);
-    const eastFace = b.maxZ > 33.425 + 1e-9 ? 25.575 : b.minZ < 26.9 + 0.175 ? 28.825 : 31.025;
-    const southFace = b.maxX <= 25.575 ? 37.025 : 33.425;
-    assert.ok(b.minX >= 19.3 && b.maxX <= eastFace + 1e-9, root.name);
-    assert.ok(b.minZ >= model.kidsRoom.z + 0.3 && b.maxZ <= southFace + 1e-9, root.name);
+  assert.equal(desks.length, 2);
+  assert.equal(chairs.length, 2);
+  assert.equal(storage.length, 1, 'Retain the existing TROFAST rather than removing required toy storage');
+  const deskBounds = desks.map(bounds);
+  const chairBounds = chairs.map(bounds);
+  const toyBounds = bounds(storage[0]);
+  const finishedWest = 19.175, finishedEast = 31.025, finishedSouth = 37.025;
+  for (const b of [...deskBounds, ...chairBounds]) {
+    assert.ok(b.minX >= finishedWest - 1e-9 && b.maxX <= finishedEast + 1e-9);
+    assert.ok(b.minZ >= model.kidsRoom.z + 0.175 - 1e-9 && b.maxZ <= finishedSouth + 1e-9);
   }
-  const deskFront = desks[1].minZ;
-  const pulledFront = toyFront + storage[0].userData.binPullAllowanceInches / 12;
-  assert.ok((deskFront - toyFront) * 12 > 49, 'Shifted opposing furniture fronts have over 49 inches');
-  assert.ok((deskFront - 30 / 12 - pulledFront) * 12 > 1, 'Chair and full bin-pull allowances remain separate but do not leave a passing aisle');
-  for (const chair of chairs) assert.ok((chair.minZ - pulledFront) * 12 > 22, 'Full bin pull leaves over 22 inches to tucked chairs, not occupied approval');
-  assert.ok(Math.min(...toyBounds.map(b => b.minX)) > 21.9, 'Storage is east-aligned, not across west entrance');
+  assert.ok(toyBounds.minX >= finishedWest && toyBounds.maxX < 29);
+  assert.ok(toyBounds.minZ >= model.kidsRoom.z + 0.175 && toyBounds.maxZ < 26.9);
+  assert.ok(Math.abs((finishedEast - deskBounds[1].maxX) * 12 - 1) < 1e-9, 'East desk leaves one inch to finished return');
+  assert.ok(Math.abs((finishedSouth - deskBounds[0].maxZ) * 12) < 1e-9, 'Desk tops meet the finished south wall above its projecting baseboard');
+  assert.ok(Math.abs((deskBounds[1].minX - deskBounds[0].maxX) * 12 - 31.925) < 1e-9);
+  assert.ok(Math.abs(chairs[0].position.z - 34.375) < 1e-9 && Math.abs(chairs[1].position.z - 34.375) < 1e-9);
+  const entryApproach = { minX: 19.175, maxX: 21.675, minZ: 27, maxZ: 31.5 };
   const approach = { minX: 19.175, maxX: 21.675, minZ: 27, maxZ: 30.625 };
-  for (const b of [...desks, ...chairs, ...toyBounds]) {
-    assert.ok(b.minX >= approach.maxX || b.maxX <= approach.minX || b.minZ >= approach.maxZ || b.maxZ <= approach.minZ, 'Furniture clears a 30-inch-wide by 43.5-inch entry approach');
+  for (const b of [...deskBounds, ...chairBounds, toyBounds]) {
+    assert.ok(b.minX >= entryApproach.maxX || b.maxX <= entryApproach.minX || b.minZ >= entryApproach.maxZ || b.maxZ <= entryApproach.minZ, 'Retained furniture clears the full paired-door opening');
+    assert.ok(b.minX >= approach.maxX || b.maxX <= approach.minX || b.minZ >= approach.maxZ || b.maxZ <= approach.minZ, 'Furniture clears the 30-inch-wide entry approach');
   }
+  assert.ok(chairBounds.every((b, index) => b.maxZ < deskBounds[index].maxZ), 'Default chairs sit north of the desk rear edge and are not claimed as operating clearance');
 });
 
 test('one retained TROFAST matches the linked size and has nine removable boxes, not drawers', () => {
@@ -322,7 +325,7 @@ test('white panelling continues along the hall to the foyer without blocking eit
   const white = model.find('Family vertical wall panel')[0].material;
   for (const panel of model.find('Hall vertical wall panel')) assert.equal(panel.material, white);
   const cutouts = [];
-  for (const [start, end] of [[27, 31.5], [43.8, 46.8]]) {
+  for (const [start, end] of [[27, 31.5], [44.8, 47.8]]) {
     const sideExtent = 3.625 / 12;
     const headerTop = 8 + 0.125 / 12 + 5.5 / 12;
     cutouts.push(
@@ -340,7 +343,7 @@ test('white panelling continues along the hall to the foyer without blocking eit
       assert.ok(p.maxZ <= cut.minZ + 1e-9 || p.minZ >= cut.maxZ - 1e-9 || top <= cut.bottom + 1e-9 || bottom >= cut.top - 1e-9, 'No panelling in door opening or casing envelope');
     }
   }
-  for (const [start, end] of [[27, 31.5], [43.8, 46.8]]) {
+  for (const [start, end] of [[27, 31.5], [44.8, 47.8]]) {
     assert.ok(hall.children.some(part => {
       const p = bounds(part);
       return p.minZ < (start + end) / 2 && p.maxZ > (start + end) / 2 && part.position.y - part.h / 2 > 8.5;

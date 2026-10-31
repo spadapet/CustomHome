@@ -249,45 +249,45 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
   function getGuestEntryLayout(stairs = UpstairsLayout.stairOpening()) {
     // Fixed room/door datum: moving the shared stair opening must not move rooms.
     const northZ = 35.1;
+    // Room-side casing, half the modeled leaf thickness, and a 1/8-inch reserve.
+    const hingeOffset = 0.35 / 2 + 0.75 / 12 + 0.13 / 2 + 0.125 / 12;
     return {
       powder: { x: 0, z: northZ, w: 7.1, d: 5.9 },
-      coatCloset: { x: 7.1, z: northZ + 3.5, w: 5.1, d: 2.4 },
-      alcove: { x: 7.1, z: northZ, w: 5.1, d: 3.5 },
+      coatCloset: { x: 7.1, z: northZ, w: 5.1, d: 2.4 },
+      alcove: { x: 7.1, z: northZ + 2.4, w: 5.1, d: 3.5 },
       stairGuard: { x: 7.45, z: northZ, endX: stairs.x + stairs.width, height: 42 / 12, postWidth: 0.09, barCount: 11, barSpacing: 3.5 / 12 },
       officeNorthZ: northZ + 5.9,
-      powderDoor: { x: 7.1, z: northZ + 0.5, width: 2.5, height: 8 },
-      closetDoor: { x: 7.65, z: northZ + 3.5, width: 4, height: 8 },
-      toilet: { x: 1.65, z: northZ + 4.55, rotation: Math.PI },
-      vanity: { x: 4.75, z: northZ + 4.775, width: 3.5, depth: 1.75, rotation: Math.PI },
+      powderDoor: { x: 7.1, z: northZ + 2.9, width: 2.5, height: 8, hingeOffset },
+      closetDoor: { x: 7.65, z: northZ + 2.4, width: 4, height: 8, hingeOffset },
+      toilet: { x: 1.65, z: northZ + 1.35, rotation: 0 },
+      vanity: { x: 4.75, z: northZ + 1.125, width: 3.5, depth: 1.75, rotation: 0 },
       windows: [{ x: 0, z: northZ + 2.95, width: 29.5 / 12, height: 47.5 / 12, sill: 48.25 / 12, openingWidth: 2.5, openingHeight: 4, openingSill: 4, standardSizeCode: '2640', privacyLowerHalf: true }]
     };
   }
 
   function getGuestSuiteLayout() {
-    // Include the projecting header cap, not just the 2.5-inch casing legs.
-    const closetRight = 25.75 - 0.175 - (2.5 / 12 + 0.125 / 12 + 0.125 / 2);
-    const closetDoorWidth = 2.5;
+    // Image-scaled concept dimensions within the unchanged x19–31.2 shell.
+    // The guest/kids zone proportions are assumptions, not site measurements.
+    const bathroomNorthZ = 37.2;
+    const bathroomSouthZ = 42;
+    const closetSouthZ = 44.4;
+    const front = getGroundFrontLayout();
     return {
-      closet: { x: 19, z: 37.2, w: 6.75, d: 6 },
-      kidsExtension: { x: 19, z: 34.6, w: 6.75, d: 2.6 },
-      bedroomDoor: { x: 19, z: 43.8, width: 3, height: 8 },
-      closetDoor: { x: closetRight - closetDoorWidth, z: 43.2, width: closetDoorWidth, height: 8,
-        pocket: { x: 19.175, w: closetRight - closetDoorWidth - 19.175, retract: 'left', leafWidth: closetDoorWidth + 0.08, travel: closetDoorWidth + 0.04, approvalRequired: true } },
-      bathroom: { x: 25.75, z: 33.6, w: 5.45, d: 9.6 },
-      closetStorage: {
-        hanging: [
-          { x: 2.25, z: 0.25, w: 2, d: 2, double: false },
-          { x: 4.25, z: 0.25, w: 2, d: 2, double: true }
-        ],
-        corner: { x: 0.25, z: 0.25, w: 2, d: 2, clip: 1.25 },
-        shelves: { x: 0.25, z: 2.25, w: 2, d: 2 },
-        westShelving: { x: 0.25, z: 4.25, w: 2, d: 1.5 },
-        northFiller: { x: 6.25, z: 0.25, w: 0.25, d: 2 }
-      },
-      bathroomDoor: { x: 26.2, z: 43.2, width: 28 / 12, height: 8, hinge: 'west', inward: true, maxAngleDegrees: 90 },
-      shower: { x: 25.95, z: 33.8, w: 5.05, d: 3.2, rotation: 0, clearWidth: 4.85, clearDepth: 3, entryOffset: 0.2, doorWidth: 2.5, height: 8 },
-      toilet: { x: 29.9, z: 38.5, rotation: -Math.PI / 2 },
-      vanity: { x: 30.15, z: 41.4, width: 2.5, mirrorWidth: 2, rotation: -Math.PI / 2, basinCount: 1 }
+      kidsSouthZ: bathroomNorthZ,
+      bathroom: { x: 19, z: bathroomNorthZ, w: 12.2, d: bathroomSouthZ - bathroomNorthZ },
+      bathroomDoor: { x: 27.95, z: bathroomSouthZ, width: 2.5, height: 8, hinge: 'west', inward: true, maxAngleDegrees: 90 },
+      bathroomRecess: { x: 28.9, z: bathroomNorthZ + 0.175, w: 2.125, d: 1.825, openSide: 'south' },
+      shower: { x: 19.375, z: bathroomNorthZ + 0.175, w: 3.2, d: 4.45, rotation: 0, clearWidth: 3, clearDepth: 4.25, entryOffset: 0.35, doorWidth: 2.5, height: 8 },
+      toilet: { x: 24.5, z: 38.475, rotation: 0 },
+      vanity: { x: 27.05, z: 38.15, width: 2.5, mirrorWidth: 2, rotation: 0, basinCount: 1 },
+      closet: { x: 19, z: bathroomSouthZ, w: 12.2, d: closetSouthZ - bathroomSouthZ },
+      closetSouthZ,
+      closets: [
+        { name: 'single', x: 19.6, z: bathroomSouthZ + 0.2, w: 3.2, d: 2, door: { x: 19.95, z: closetSouthZ, width: 2.5, height: 8, leaves: 1 } },
+        { name: 'paired', x: 23, z: bathroomSouthZ + 0.2, w: 4.7, d: 2, door: { x: 23.35, z: closetSouthZ, width: 4, height: 8, leaves: 2 } }
+      ],
+      bedroom: { x: 19, z: closetSouthZ, w: 12.2, d: front.wallZ - closetSouthZ },
+      bedroomDoor: { x: 19, z: 44.8, width: 3, height: 8, hinge: 'south', inward: true, maxAngleDegrees: 90 }
     };
   }
 
@@ -391,11 +391,11 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       ['Living room', 0, 8, 13.2, 17.7], ['Dining room', 13.2, -0.1, 13.675, 8.1],
       ['Hall', 13.2, 8, 13.3, kidsNorthZ - 8], ['Kitchen', 26.5, 7, 11, 19.9],
       ['Prep kitchen', 37.5, 7, 18, 8], ['Mudroom', 37.5, 15, 7.4 - 8 / 12, 11.9],
-      ['Kids room', 19, kidsNorthZ, 12.2, 33.6 - kidsNorthZ], ['Powder room', 0, powderZ, 7.1, guestEntry.powder.d],
+      ['Kids room', 19, kidsNorthZ, 12.2, guestSuite.kidsSouthZ - kidsNorthZ], ['Powder room', 0, powderZ, 7.1, guestEntry.powder.d],
       ['Guest coat closet', 7.1, guestEntry.coatCloset.z, 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 7.1, entryZ, 5.1, guestEntry.alcove.d],
       ['Office', 0, officeZ, 12.2, front.wallZ - officeZ], ['Entry hall', 12.2, 34.6, 6.8, front.wallZ - 34.6],
-      ...[['Kids room extension', guestSuite.kidsExtension], ['Closet', guestSuite.closet], ['Bathroom', guestSuite.bathroom]].map(([name, { x, z, w, d }]) => [name, x, z, w, d]),
-      ['Guest room', 19, 43.2, 12.2, front.wallZ - 43.2],
+      ...[['Closet', guestSuite.closet], ['Bathroom', guestSuite.bathroom]].map(([name, { x, z, w, d }]) => [name, x, z, w, d]),
+      ['Guest room', guestSuite.bedroom.x, guestSuite.bedroom.z, guestSuite.bedroom.w, guestSuite.bedroom.d],
       ['Garage', garageWestX, garageNorthZ, garageEastX - garageWestX, garageSouthZ - garageNorthZ], ['Front porch', 0, front.wallZ, 31.2, front.porchDepth]
     ].map(([name, x, z, w, d]) => ({ name, x, z, w, d }));
     const floors = [
@@ -406,13 +406,12 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       [0, 25.7, 12.2, stairs.z - 25.7], [0, stairs.z, stairs.x, stairs.depth],
       [stairs.x + stairs.width, stairs.z, 12.2 - stairs.x - stairs.width, stairs.depth],
       [0, stairs.z + stairs.depth, 12.2, powderZ - stairs.z - stairs.depth],
-      [12.2, 25.7, 6.8, 8.9], [19, kidsNorthZ, 6.75, 34.6 - kidsNorthZ, 'Kids room'],
-      [25.75, kidsNorthZ, 3.25, 33.6 - kidsNorthZ, 'Kids room'],
-      [29, 26.9, 2.2, 6.7, 'Kids room'],
+      [12.2, 25.7, 6.8, 8.9],       [19, kidsNorthZ, 10, guestSuite.kidsSouthZ - kidsNorthZ, 'Kids room'],
+      [29, 26.9, 2.2, guestSuite.kidsSouthZ - 26.9, 'Kids room'],
       [12.2, 34.6, 6.8, front.wallZ - 34.6, 'Entry hall'], [0, powderZ, 7.1, guestEntry.powder.d, 'Powder room'],
       [7.1, entryZ, 5.1, guestEntry.alcove.d, 'Guest entry alcove'],       [0, officeZ, 12.2, front.wallZ - officeZ, 'Office'],
-      ...[['Kids room extension', guestSuite.kidsExtension], ['Closet', guestSuite.closet], ['Bathroom', guestSuite.bathroom]].map(([name, { x, z, w, d }]) => [x, z, w, d, name]),
-      [19, 43.2, 12.2, front.wallZ - 43.2, 'Guest room'],
+      ...[['Closet', guestSuite.closet], ['Bathroom', guestSuite.bathroom]].map(([name, { x, z, w, d }]) => [x, z, w, d, name]),
+      [guestSuite.bedroom.x, guestSuite.bedroom.z, guestSuite.bedroom.w, guestSuite.bedroom.d, 'Guest room'],
       [7.1, guestEntry.coatCloset.z, 5.1, guestEntry.coatCloset.d, 'Guest coat closet'],
       [garageNorthWestX, garageNorthZ, garageEastX - garageNorthWestX, garageStepZ - garageNorthZ, 'Garage', -1.25],
       [garageWestX, garageStepZ, garageEastX - garageWestX, 34.6 - garageStepZ, 'Garage', -1.25],
@@ -437,19 +436,21 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
         [21.3 - (livingFeatureWall.wallEndZ - 25.7), 25.3 - (livingFeatureWall.wallEndZ - 25.7), 3, 8]
       ]],
       ['Living west', 0, 8, 0, livingFeatureWall.wallEndZ, livingFeatureWall.windowCenters.map((z) => [z - 8 - livingFeatureWall.fireplaceWindows.width / 2, z - 8 + livingFeatureWall.fireplaceWindows.width / 2, livingFeatureWall.fireplaceWindows.sill, livingFeatureWall.fireplaceWindows.head])],
-      ['Kids north', 19, kidsNorthZ, 29, kidsNorthZ], ['Kids west', 19, kidsNorthZ, 19, 34.6, [[27 - kidsNorthZ, 31.5 - kidsNorthZ, 0, 8]]],
-      ['Kids east return', 29, kidsNorthZ, 29, 26.9], ['Powder north', 0, powderZ, guestEntry.stairGuard.x, powderZ],
+      ['Kids north', 19, kidsNorthZ, 29, kidsNorthZ], ['Kids west', 19, kidsNorthZ, 19, guestSuite.kidsSouthZ, [[27 - kidsNorthZ, 31.5 - kidsNorthZ, 0, 8]]],
+      ['Kids east return', 29, kidsNorthZ, 29, 26.9], ['Powder north', 0, powderZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderZ],
       ['Powder east', 7.1, powderZ, 7.1, officeZ, [[guestEntry.powderDoor.z - powderZ, guestEntry.powderDoor.z - powderZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
       ['Guest coat closet front', 7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
-      ['Guest coat closet east', 12.2, guestEntry.coatCloset.z, 12.2, officeZ],
+      ['Guest coat closet east', 12.2, guestEntry.coatCloset.z, 12.2, guestEntry.coatCloset.z + guestEntry.coatCloset.d],
       ['Office east', 12.2, officeZ, 12.2, front.wallZ, [[45.25 - 2.5 - officeZ, 45.25 + 2.5 - officeZ, 0, 8]]],
       ['Office north', 0, officeZ, 12.2, officeZ],
       ['House south', 0, front.wallZ, 31.2, front.wallZ, [...getGroundFrontWindows().map(w => [w.center-w.width/2,w.center+w.width/2,w.sill,w.sill+w.height]), [13.1,18.1,0,8]].sort((a,b)=>a[0]-b[0])],
-      ['Guest west', 19, 34.6, 19, front.wallZ, [[guestSuite.bedroomDoor.z - 34.6, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - 34.6, 0, 8]]],
-      ['Closet north', 19, guestSuite.closet.z, guestSuite.bathroom.x, guestSuite.closet.z], ['Closet east', guestSuite.bathroom.x, guestSuite.bathroom.z, guestSuite.bathroom.x, guestSuite.bathroomDoor.z],
-      ['Closet south', 19, guestSuite.closetDoor.z, guestSuite.bathroom.x, guestSuite.closetDoor.z, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x - 19 + guestSuite.closetDoor.width, 0, guestSuite.closetDoor.height]]],
-      ['Bathroom south', guestSuite.bathroom.x, guestSuite.bathroomDoor.z, 31.2, guestSuite.bathroomDoor.z, [[guestSuite.bathroomDoor.x - guestSuite.bathroom.x, guestSuite.bathroomDoor.x - guestSuite.bathroom.x + guestSuite.bathroomDoor.width, 0, guestSuite.bathroomDoor.height]]],
-      ['Bathroom north', guestSuite.bathroom.x, guestSuite.bathroom.z, 31.2, guestSuite.bathroom.z],
+      ['Kids south', 19, guestSuite.kidsSouthZ, 31.2, guestSuite.kidsSouthZ],
+      ['Guest west', 19, guestSuite.kidsSouthZ, 19, front.wallZ, [[guestSuite.bedroomDoor.z - guestSuite.kidsSouthZ, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - guestSuite.kidsSouthZ, 0, 8]]],
+      ['Closet south', 19, guestSuite.closetSouthZ, 27.7, guestSuite.closetSouthZ, guestSuite.closets.map(({ door }) => [door.x - 19, door.x - 19 + door.width, 0, door.height])],
+      ['Guest closet divider', 22.9, guestSuite.closet.z, 22.9, guestSuite.closetSouthZ],
+      ['Bathroom south', guestSuite.bathroom.x, guestSuite.bathroomDoor.z, guestSuite.bathroom.x + guestSuite.bathroom.w, guestSuite.bathroomDoor.z, [[guestSuite.bathroomDoor.x - guestSuite.bathroom.x, guestSuite.bathroomDoor.x - guestSuite.bathroom.x + guestSuite.bathroomDoor.width, 0, guestSuite.bathroomDoor.height]]],
+      ['Bathroom recess west', guestSuite.bathroomRecess.x, guestSuite.bathroomRecess.z - 0.175, guestSuite.bathroomRecess.x, guestSuite.bathroomRecess.z + guestSuite.bathroomRecess.d],
+      ['Bathroom recess south', guestSuite.bathroomRecess.x, guestSuite.bathroomRecess.z + guestSuite.bathroomRecess.d, 31.2, guestSuite.bathroomRecess.z + guestSuite.bathroomRecess.d],
       ['Garage west', 31.2, 34.6, 31.2, 49], ['Garage west return', 31.2, 26.9, 31.2, 34.6],
       ['Kitchen south left', 29, 26.9, 29.1875, 26.9], ['Kids kitchen return', 29.1875, 26.9, 31.2, 26.9],
       ['Kitchen south', 31.2, 26.9, 37.3, 26.9],

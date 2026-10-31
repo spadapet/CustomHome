@@ -119,7 +119,7 @@ test('room navigation gives every room its own floor-aware camera and keeps insp
   assert.doesNotMatch(toolbar, /data-view="(?:social|prep|mudroom-cubbies|mudroom-storage)"/);
   for (const key of ['social:', 'prep:', "'mudroom-cubbies':", "'mudroom-storage':"]) assert.ok(source.includes(key), 'Legacy inspection/deep-link presets remain available');
   assert.ok(source.includes("presets[name].floor ??"));
-  assert.match(source, /'guest-bathroom': \{ target: \[28\.45, 1\.5, 39\.4\], offset: \[0\.2, 14, 1\], span: 11 \}/);
+  assert.match(source, /'guest-bathroom': \{ target: \[25\.1, 1\.5, 39\.5\], offset: \[0\.2, 15, 0\.01\], span: 15 \}/);
   const startSource = source.slice(source.indexOf('  function startWalking('), source.indexOf('    buildWalkObstacles();', source.indexOf('  function startWalking(')));
   vm.runInNewContext(`${startSource}return { x, z, lookX, lookZ }; }`, context);
   for (const view of ['powder', 'prep-kitchen', 'office', upstairsButtons[0].dataset.view]) {
@@ -284,11 +284,11 @@ test('floor-plan archive preserves both revisions and marks the shower option as
       assert.equal(label.children[0].textContent, context.planRoomName(room.name));
       const clear = floor === 'upstairs' ? scope.getUpstairsRoomClearDimensions(room, upstairsPlan.walls) : room;
       const maxExtent = floor === 'ground' && room.name === 'Garage';
-      const size = floor === 'ground' && room.name === 'Kids room' ? '127.67 sq ft, stepped plan; west edge to z37.2, east edge to z33.6' : `${context.feet(clear.w)} x ${context.feet(clear.d)}${floor === 'upstairs' ? ' paint-face' : ''}${maxExtent ? ' max extents; L-shaped footprint' : ''}`;
+      const size = floor === 'ground' && room.name === 'Kids room' ? '147.29 sq ft, stepped plan' : `${context.feet(clear.w)} x ${context.feet(clear.d)}${floor === 'upstairs' ? ' paint-face' : ''}${maxExtent ? ' max extents; L-shaped footprint' : ''}`;
       assert.equal(elements['plan-dimension-list'].children[index].textContent, `${room.name}: ~ ${size}`);
       assert.equal(label.title, `${room.name}: ${size}`, 'Detailed names and qualifications remain available');
       assert.doesNotMatch(label.children[1].textContent, /paint-face|stepped|edge|to z/);
-      const compact = floor === 'ground' && room.name === 'Kids room' ? '127.67 sq ft'
+      const compact = floor === 'ground' && room.name === 'Kids room' ? '147.29 sq ft'
         : `${context.feet(clear.w)} x ${context.feet(clear.d)}${maxExtent ? ' max' : ''}`.replace(/' /g, "'").replace(/'0"/g, "'");
       assert.equal(label.children[1].textContent, compact);
       if (floor === 'upstairs' && room.name === 'Bedroom 2') {

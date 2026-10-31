@@ -189,7 +189,7 @@ Keep count breakdowns and measurement qualifications in tooltips; collapse the
 detailed Sizes list, not the on-plan labels. Preserve actionable warnings.
 This preference is saved in project/viewer instructions and the model-editing skill.
 
-## Guest walk-in: 2.5-foot door - October 28
+## Historical guest walk-in door study — superseded October 31
 
 Correct the pictured closet entry from 36 to 30 in wide, keeping 96 in
 height, closed white left-pocket pose and fixed east jamb/corner trim.
@@ -243,23 +243,48 @@ approaches with doors at 90. No generous passing/simultaneous-use,
 occupied, accessibility or code approval. Verify selected seating/comfort,
 stops, window/shade reach, moving equipment, user headroom, services/cables.
 
-## Kids PC desk follows the marked X - October 28
+## Current image-led guest suite and kids room — October 31
 
-Move the circled left/PC MITTZON desk into the southwest extension above
-the guest closet, centered at (22.375,35.7125) ft and facing south. Back
-the tabletop onto paint at z=37.025 ft; each side has 14.775 in to paint,
-not a walking aisle. Retain the 47.25 x 31.5 in top, 29.5 in display height,
-attached PC/keyboard/mouse and child-use review. Chair follows rigidly to
-(22.375,34.375) ft, same size and tucked pose. Low T feet keep 1.20 in
-to baseboard. A 9 in chair pull clears the tabletop front and retains
-the existing west entry approach.
+Implement the owner's north-up reference as a coordinated, reversible
+ground-floor concept. Keep the existing outer shell, kitchen-to-mudroom
+opening, all unrelated rooms/windows, queen-bed size and retained kids'
+desks, chairs and toy storage. The image has no dimensions; proportions are
+scaled within the existing x19-31.2 ft zone, and all new dimensions are
+assumptions rather than a survey.
 
-Homework desk/chair remain (28.972917,32.1125)/(28.972917,30.775) ft.
-One north TROFAST, nine bins/inserts, message board, room boundaries,
-openings and saved JSON stay. Remaining homework/bin front gap is 51.19 in;
-30 in chair use plus full bin withdrawal leaves only 3.81 in, not a passing
-aisle. Keep sequential use and verify actual occupied access, lift/pinch
-space, cables and child seating; geometry is not product or safety approval.
+The kids room is north, with a stepped northeast edge following the existing
+kitchen return: floor rectangles x19-29 / z24.7367-37.2 and x29-31.2 /
+z26.9-37.2, about 147.29 sq ft. Model paired 27 x 96 in west entry leaves.
+Keep both 47.25 x 31.5 in MITTZON desks and 18 in chairs; align desktop
+centers at (22.375,35.7125) and (28.972917,35.7125), rotation 180 degrees,
+with chairs centered north at z34.375. Tops align to the finished south
+wall; side-to-side tabletop gap is 31.925 in, and the east desk is 1 in off
+the finished east return. Retain one TROFAST frame and the family board.
+These static gaps do not establish an occupied/pass-through route. Test the
+paired door sweeps, chair pulls, bin retrieval, cables, child reach and
+sit-stand operation before treating the room as resolved.
+
+The bathroom is full width x19-31.2 / z37.2-42 (12 ft 2 in x 4 ft 9.6 in).
+Image-derived placement: west shower proxy, north-middle toilet at
+(24.5,38.475), single 30 x 18 in vanity at (27.05,38.15) on the north/east
+side, southeast 30 x 96 in inward door. A world-space geometry check moved
+the toilet west/north from its first concept location to eliminate a small
+modeled toilet/vanity overlap; the revised proxy leaves about 30 in from its
+frontmost extent to the finished south wall. Sampled door leaf geometry
+clears the toilet, vanity and shower from 0-90 degrees at 5-degree intervals.
+These are geometric tests only, not occupied-use, accessibility, product or
+code approval.
+The small NE recess (about 25.5 x 21.9 in) is provisionally interpreted as
+linen storage, open south; confirm this reading before specifying storage.
+Below, two separate south-facing reach-ins occupy the shallow z42-44.4
+strip: 30 x 96 in single leaf and 48 x 96 in paired leaves, both 96 in high,
+with 24 in deep cabinet envelopes and separately shown fillers. The guest
+bedroom begins at z44.4 and remains 12.2 ft wide; west entry opening
+z44.8-47.8 is 36 x 96 in. Keep the queen with east headboard and west-wall
+TV proxy. Actual circulation, occupied use, window access, shower detailing,
+storage needs, plumbing, waterproofing, electrical and code matters require
+appropriate owner/product/professional review. Not construction drawings or
+certified compliance.
 
 ## Match the X-marked porch bank to the circled bank - October 28
 
@@ -3400,7 +3425,7 @@ Each [STRANDMON](https://www.ikea.com/us/en/p/strandmon-wing-chair-talliden-beig
 
 Retain A-E as earlier comparisons; E preserves the previous corner chairs/ottomans/book and 105-inch sofa, without STRANDMONs. Reload restores F. SVGs use the sectional and STRANDMON placement data; switching layouts updates visibility and tour obstacles, with no hidden chairs or old sofa blocking F. Keep fireplace, flush 24-inch media cabinets, bookcases, windows, stairs, dining furniture and Christmas tree fixed. No living-room tables or floor lamp return. No sectional product is selected; verify actual dimensions, delivery, occupied circulation, cabinet/window access and fireplace heat clearances before purchase. This study supersedes the earlier default-E, no-sectional and chair-free F directions below.
 
-## Guest-bedroom walk-in closet and shower bathroom
+## Historical guest-bedroom walk-in / east-bath layout — superseded October 31
 
 October 27 layout shift: translate the whole bathroom 1 ft north and the whole closet 1.2 ft south, aligning both bedroom-facing partitions at z43.2. Move the hall entry south to z43.8-46.8. Retain the shell, hall width, queen bed, nightstands and north/west L storage. The sink stays INSIDE the bathroom, with paired white-oak Shaker doors concealing the removable basket and three right-side drawers. This supersedes the earlier staggered south partitions.
 
@@ -3449,17 +3474,50 @@ Keep the centered feature wall: finished dining-return face z = 8.175 and stair 
 
 ## Guest powder room and coat closet
 
-The guest-entry arrangement is mirrored toward the office-shared south wall; guest coat doors retain solid white-oak Shaker panels, satin-gold pulls, a 48 x 96 in opening and closed default pose. Two nominal 24 in leaves hinge at x = 7.65 / 11.65, z = 38.6, meeting at x = 9.65; each swings 90 degrees north into the alcove independently. Actual stops, occupied circulation and hardware remain unverified.
+October 31 owner image supersedes the south-wall mirror arrangement. Preserve
+room sizes, the office north wall and existing finishes. Put the coat closet
+north of the alcove and the powder toilet/vanity on the north wall. Restore
+the continuous north wall at z=35.1, x=0-12.2; replace the now-buried ground
+stair-side rail, retaining the upper-flight guard above the nine-foot wall head.
+Stairs, upper arrival and basement protection are unchanged. Wall-head
+enclosure, structural support and handrail continuity still need review.
 
-The 42 x 21-inch natural white oak Shaker vanity is at (4.75, 39.875) and the southwest toilet at (1.65, 39.65), both facing north from the office-shared south wall. Retain the round brass mirror, paired opal sconces, low backsplash, inset basin and night light. Keep the hall's 7-inch engineered hardwood; confirm bathroom-use warranty and moisture protection. The mirrored toilet retains its separate 30 x 30-inch forward approach west of the vanity and approximately 42 inches to the north wall. Keep the powder door inward and its 90-degree default pose. The powder camera frames the whole arrangement.
+Guest coat doors retain solid white-oak Shaker panels, satin-gold pulls, a
+48 x 96 in opening and closed default pose. Two nominal 24 in leaves hinge
+at x=7.65 / 11.65, z=37.5, meeting at x=9.65; each swings 90 degrees south
+into the alcove independently. Actual stops, occupied circulation and hardware
+remain unverified.
+
+The standard 42 x 21-inch natural white oak Shaker vanity is at (4.75,36.225)
+and northwest toilet at (1.65,36.45), both facing south from the north wall.
+Retain the round brass mirror, paired opal sconces, low backsplash, inset basin
+and night light. Keep the hall's 7-inch engineered hardwood; the image changes
+layout, not the selected finish. Confirm bathroom-use warranty and moisture
+protection. Retain the separate 30 x 30-inch toilet approach west of the vanity
+and approximately 42.3 inches to the south painted wall. Powder door hinges
+at the south jamb, z=40.5, opens west into the room, and starts 90 degrees open.
+Limit modeled operation to 0/90 degrees, not an unverified 180-degree sweep
+through the office wall.
+Both powder and coat pivots sit 3.755 inches beyond the wall centerline toward
+their swing side: 2.1-inch wall half-depth, 0.75-inch casing, 0.78-inch leaf
+half-thickness and 0.125-inch reserve. This clears the modeled trim without
+shrinking the standard leaves; selected jamb/hinge assemblies remain unverified.
 
 Implemented taller powder window: one centered west-wall Andersen 100 Series standard size 2640 at (0, 38.05), replacing the shorter 2630. The [2024-25 manufacturer size chart, dealer-hosted copy](https://www.arlcoal.com/m/AndersenWindowsLearnMore/pdfs/Sizing/sizing-windows--100series-casement.pdf) gives an approximately 2.4583 x 3.9583 ft frame and minimum 2.5 x 4 ft rough opening. Shared/furnished/exterior wall cuts use the rough opening; frame geometry uses catalog dimensions. Rough sill/head 4/8 ft, frame sill/head approximately 4.0208/7.9792 ft. Lower half remains frosted to 6 ft; upper half clear, white inside/black outside. The center and width stay unchanged; the nominal head aligns with the 8 ft doors. This is now modeled, not a pending recommendation. See the [window-size comparison in feet](floor-plan-reference.md#powder-room-window-options-in-feet). Standard dimensions are verified; half-frosted product availability, sightlines/night privacy, handing, safety glazing, installation allowances and weatherproofing remain unapproved.
 
-Owner's centered-sink reference remains: 42 x 21 in overall, basin/faucet/round mirror centered at world x = 4.75, equal counter spaces and paired sconces. Retain the 22 in paired-door plumbing cupboard, matching 10 in three-drawer banks and satin-gold knobs. The 48 in-high east-wall brass hook/hand towel mirrors to z = 38.85.
+Owner's centered-sink reference remains: 42 x 21 in overall, basin/faucet/round mirror centered at world x = 4.75, equal counter spaces and paired sconces. Retain the 22 in paired-door plumbing cupboard, matching 10 in three-drawer banks and satin-gold knobs. Move the 48 in-high east-wall brass hook/hand towel to z=37.25, north of the entry casing; the paper holder follows the toilet.
 
 Retain 15 in drawer travel. Close all drawers before entry or door movement: the entry-side bank can intersect the sweep. Earlier pre-flip route checks are not new occupied-use verification. Final plumbing, usable drawer interiors, slides, towel reach, occupied use and accessibility require verification.
 
-The office north wall remains at z = 41. Powder bounds remain x = 0-7.1, z = 35.1-41. Its 30 x 96 in east opening is z = 35.6-38.1, with casing room at both jambs. Coat storage is x = 7.1-12.2, z = 38.6-41, retaining 24.6 in clear depth, shelf and continuous rail. The alcove is x = 7.1-12.2, z = 35.1-38.6, open east to the hall, with 37.8 in between finished north/south faces. Guests do not pass through the powder room to reach coats.
+The office north wall remains at z=41. Powder bounds remain x=0-7.1,
+z=35.1-41. Its 30 x 96 in east opening moves to z=38-40.5, with casing room
+at both jambs. Coat storage is x=7.1-12.2, z=35.1-37.5, retaining 24.6 in
+clear depth, shelf and continuous rail. Alcove is x=7.1-12.2, z=37.5-41,
+open east to the hall: 37.8 in between paint, 36.3 in between baseboards
+away from door/casing projections. These are model dimensions, not occupied
+accessibility approval. Guests do not pass through the powder room for coats.
+The powder/coat rearrangement does not change room footprints, exterior
+dimensions or gross area.
 
 Office remains 12.2 x 13.2 ft, 161.04 sq ft nominal. Latest owner trial centers north-facing 60 x 24 in desk at (6.1,42.175), rear top on north paint; east-facing desk remains (10.941667,50.85), with four monitors and two task chairs total. Move elliptical to northwest (1.65,44.029167) and restore the original 60 x 33.6 in loveseat concept southwest (2.820833,52.479167), facing north under the front window. Compact 48 in north-wall trial is superseded, with no selected product rescaled. Equipment/sofa gap 52.1 in; 12.4 in equipment/desk side gap is not a route. Adjacent equipment/sofa baseboard gaps 1 in; sofa top is 2.6 in below sill underside, not verified window access. French-door opening, 90-degree defaults and 0-90 study stops remain. Selected stops, occupied use, window/shade reach, moving equipment/headroom and services remain unapproved; sampled 30 in study route is not code/accessibility or simultaneous-use approval. Windows, stairs, shell, saved layouts and exterior footprint stay. The 6-inch stair-edge-to-wall-centerline buffer is not a passage. Shared geometry drives furnished walls/floors and room dimensions. Verify services, door/frame clear widths, accessibility, plumbing, closet hardware, framing and guard separation with the relevant professionals.
 

@@ -932,14 +932,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
         if (to - from > tolerance) covered.push([from, to]);
       }
       for (const run of edges) cover(run.a, run.b, run.normal);
-      // The guard abuts this painted wall end; a projecting trim return would cross its post and bars.
-      cover(new THREE.Vector2(guestEntry.stairGuard.x, guestEntry.stairGuard.z - 0.175), new THREE.Vector2(guestEntry.stairGuard.x, guestEntry.stairGuard.z + 0.175), new THREE.Vector2(1, 0));
       // Keep timber trim out of the guest shower and behind fitted bathroom fixtures.
       cover(new THREE.Vector2(guestSuite.shower.x, guestSuite.shower.z - 0.025), new THREE.Vector2(guestSuite.shower.x + guestSuite.shower.w, guestSuite.shower.z - 0.025), new THREE.Vector2(0, 1));
-      cover(new THREE.Vector2(guestSuite.bathroom.x + 0.175, guestSuite.shower.z), new THREE.Vector2(guestSuite.bathroom.x + 0.175, guestSuite.shower.z + guestSuite.shower.d), new THREE.Vector2(1, 0));
-      cover(new THREE.Vector2(31.025, guestSuite.shower.z), new THREE.Vector2(31.025, guestSuite.shower.z + guestSuite.shower.d), new THREE.Vector2(-1, 0));
-      cover(new THREE.Vector2(31.025, guestSuite.toilet.z - 0.9), new THREE.Vector2(31.025, guestSuite.toilet.z + 0.9), new THREE.Vector2(-1, 0));
-      cover(new THREE.Vector2(31.025, guestSuite.vanity.z - 1.6), new THREE.Vector2(31.025, guestSuite.vanity.z + 1.6), new THREE.Vector2(-1, 0));
+      cover(new THREE.Vector2(guestSuite.shower.x + guestSuite.shower.w - 0.175, guestSuite.shower.z), new THREE.Vector2(guestSuite.shower.x + guestSuite.shower.w - 0.175, guestSuite.shower.z + guestSuite.shower.d), new THREE.Vector2(-1, 0));
+      cover(new THREE.Vector2(31.025, guestSuite.bathroom.z), new THREE.Vector2(31.025, guestSuite.bathroom.z + guestSuite.bathroom.d), new THREE.Vector2(-1, 0));
       // Fireplace stone only (built-ins removed): base trim runs continuously from each wall end to the stone side return.
       cover(new THREE.Vector2(0.175, livingFeatureWall.centerZ - fireplaceStoneHalfWidth), new THREE.Vector2(0.175, livingFeatureWall.centerZ + fireplaceStoneHalfWidth), new THREE.Vector2(1, 0));
       // Fitted mudroom joinery meets these wall faces without baseboards behind it.
@@ -1028,7 +1024,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   function roomDimensions(text, width, depth, irregular = false) {
     const kidsArea = text === 'Kids room (L-shaped)' ? getGroundFloorDefaultPlan().floors.filter(({ room }) => /^Kids room/.test(room ?? '')).reduce((sum, { w, d }) => sum + w * d, 0) : 0;
-    const dimensions = kidsArea ? `${kidsArea.toFixed(2)} sq ft, stepped boundary (west z37.2 / east z33.6)` : `~ ${feet(width)} x ${feet(depth)}${irregular ? ' max' : ''}`;
+    const dimensions = kidsArea ? `${kidsArea.toFixed(2)} sq ft, stepped boundary` : `~ ${feet(width)} x ${feet(depth)}${irregular ? ' max' : ''}`;
     const item = document.createElement('li');
     item.textContent = `${text}: ${dimensions}`;
     document.getElementById('room-dimension-summary').append(item);
@@ -1058,8 +1054,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const prepCounterWindows = prepWindows.filter((window) => window.z === kitchenWindowWallZ);
   const prepCounterWindowBank = getPrepWindowBankLayout();
   const prepEndWindow = prepWindows.find((window) => window.x === 55.5);
+  const guestSuite = getGuestSuiteLayout();
   const kidsRoomNorthZ = 26.725 - 25 / 12 - 0.08 + 0.175;
-  const kidsRoom = { x: 19, z: kidsRoomNorthZ, width: 10, southWidth: 12.2, depth: 34.6 - kidsRoomNorthZ };
+  const kidsRoom = { x: 19, z: kidsRoomNorthZ, width: 10, southWidth: 12.2, depth: guestSuite.kidsSouthZ - kidsRoomNorthZ };
   const kidsDoorway = { x: kidsRoom.x, z: 27, width: 4.5, height: 8 };
   const officeEntry = { x: 12.2, z: 45.25, width: 5, height: 8 };
   const livingFeatureWall = getLivingRoomFeatureLayout();
@@ -1091,7 +1088,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const stairOpening = UpstairsLayout.stairOpening(stairFloorToFloor);
   const wallSideStairWidth = stairOpening.depth - stairWidth - stairGap;
   const guestEntry = getGuestEntryLayout(stairOpening);
-  const guestSuite = getGuestSuiteLayout();
   const garageClerestories = getGarageClerestoryLayout(garageFloorY);
   const powderNorthZ = guestEntry.powder.z;
   const powderEntryWallZ = guestEntry.alcove.z;
@@ -1115,14 +1111,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [stairOpening.x + stairOpening.width, stairOpening.z, 12.2 - stairOpening.x - stairOpening.width, stairOpening.depth, true],
     [0, stairOpening.z + stairOpening.depth, 12.2, powderNorthZ - stairOpening.z - stairOpening.depth, true],
     [12.2, 25.7, kidsRoom.x - 12.2, 8.9, true],
-    [kidsRoom.x, kidsRoom.z, 6.75, kidsRoom.depth, true],
-    [25.75, kidsRoom.z, 3.25, guestSuite.bathroom.z - kidsRoom.z, true],
-    [29, 26.9, 2.2, guestSuite.bathroom.z - 26.9, true],
+    [kidsRoom.x, kidsRoom.z, kidsRoom.width, kidsRoom.depth, true],
+    [29, 26.9, 2.2, guestSuite.kidsSouthZ - 26.9, true],
     [12.2, 34.6, 6.8, groundFrontWallZ - 34.6, true], [0, powderNorthZ, 7.1, guestEntry.powder.d, true], [7.1, powderEntryWallZ, 5.1, guestEntry.alcove.d, true],
     [0, officeNorthZ, 12.2, groundFrontWallZ - officeNorthZ, true],
-    ...[guestSuite.kidsExtension, guestSuite.closet].map(({ x, z, w, d }) => [x, z, w, d, true]),
+    [guestSuite.closet.x, guestSuite.closet.z, guestSuite.closet.w, guestSuite.closet.d, true],
     [guestSuite.bathroom.x, guestSuite.bathroom.z, guestSuite.bathroom.w, guestSuite.bathroom.d],
-    [19, guestSuite.bathroomDoor.z, 12.2, groundFrontWallZ - guestSuite.bathroomDoor.z, true],
+    [guestSuite.bedroom.x, guestSuite.bedroom.z, guestSuite.bedroom.w, guestSuite.bedroom.d, true],
     [0, groundFrontWallZ, 31.2, groundFrontLayout.porchDepth, false, false],
     [7.1, guestEntry.coatCloset.z, 5.1, guestEntry.coatCloset.d, true]
   ].forEach(([x, z, w, d, hardwood = false, interior = true]) => floor(x, z, w, d, hardwood, shell, interior));
@@ -1144,15 +1139,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     ]],
     [0, livingFeatureWall.wallEndZ, 0, 8, true, [...livingWindowCenters].reverse().map((z) => [livingFeatureWall.wallEndZ - z - livingWindowWidth / 2, livingFeatureWall.wallEndZ - z + livingWindowWidth / 2, livingWindowSill, livingWindowHead])],
     [kidsRoom.x, kidsRoom.z, kidsRoom.x + kidsRoom.width, kidsRoom.z, true],
-    [kidsDoorway.x, kidsRoom.z, kidsDoorway.x, 34.6, true, [[kidsDoorway.z - kidsRoom.z, kidsDoorway.z - kidsRoom.z + kidsDoorway.width, 0, kidsDoorway.height]]],
-    [29, kidsRoom.z, 29, 26.9, true, [], ceilingHeight, [1]], [0, powderNorthZ, guestEntry.stairGuard.x, powderNorthZ],
+    [kidsDoorway.x, kidsRoom.z, kidsDoorway.x, guestSuite.kidsSouthZ, true, [[kidsDoorway.z - kidsRoom.z, kidsDoorway.z - kidsRoom.z + kidsDoorway.width, 0, kidsDoorway.height]]],
+    [29, kidsRoom.z, 29, 26.9, true, [], ceilingHeight, [1]], [0, powderNorthZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderNorthZ],
     [7.1, powderNorthZ, 7.1, officeNorthZ, false, [[guestEntry.powderDoor.z - powderNorthZ, guestEntry.powderDoor.z - powderNorthZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
     [7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, false, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
-    [12.2, guestEntry.coatCloset.z, 12.2, officeNorthZ],
+    [12.2, guestEntry.coatCloset.z, 12.2, guestEntry.coatCloset.z + guestEntry.coatCloset.d],
     [officeEntry.x, officeNorthZ, officeEntry.x, groundFrontWallZ, false, [[officeEntry.z - officeEntry.width / 2 - officeNorthZ, officeEntry.z + officeEntry.width / 2 - officeNorthZ, 0, officeEntry.height]]],
     [0, officeNorthZ, 12.2, officeNorthZ], [0, groundFrontWallZ, 31.2, groundFrontWallZ, false, [...getGroundFrontWindows().map(w => [w.center - w.width / 2, w.center + w.width / 2, w.sill, w.sill + w.height]), [13.1, 18.1, 0, 8]].sort((a, b) => a[0] - b[0]), ceilingHeight, [-1]],
-    [19, 34.6, 19, groundFrontWallZ, false, [[guestSuite.bedroomDoor.z - 34.6, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - 34.6, 0, 8]]],
-    ...getGroundFloorDefaultPlan().walls.filter(([name]) => ['Closet north', 'Closet east', 'Closet south', 'Bathroom south', 'Bathroom north'].includes(name)).map(([name, x1, z1, x2, z2, openings = []]) => [x1, z1, x2, z2, false, openings, ceilingHeight, [-1, 1], 0, 0, { sideWidth: 2.5 / 12, ...(name === 'Closet south' ? { pocket: { x: guestSuite.closetDoor.pocket.x - x1, w: guestSuite.closetDoor.pocket.w } } : {}) }]),
+    [19, guestSuite.kidsSouthZ, 19, groundFrontWallZ, false, [[guestSuite.bedroomDoor.z - guestSuite.kidsSouthZ, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - guestSuite.kidsSouthZ, 0, 8]]],
+    ...getGroundFloorDefaultPlan().walls.filter(([name]) => ['Kids south', 'Closet south', 'Guest closet divider', 'Bathroom south', 'Bathroom recess west', 'Bathroom recess south'].includes(name)).map(([name, x1, z1, x2, z2, openings = []]) => [x1, z1, x2, z2, false, openings, ceilingHeight, [-1, 1], 0, 0, { sideWidth: 2.5 / 12 }]),
     [31.2, 34.6, 31.2, 49, false, [], ceilingHeight, [-1, 1], 0, garageFloorY], [31.2, 26.9, 31.2, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
     [29, 26.9, 29.1875, 26.9, true],
     [29.1875, 26.9, 31.2, 26.9, true],
@@ -1175,8 +1170,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     ['Hall', 13.3, kidsRoom.z - 8], ['Prep kitchen', 18, 15 - kitchenWindowWallZ, true], ['Mudroom', 7.4 - 8 / 12, 11.9],
     ['Garage', 26.5, 34, true], ['Kids room (L-shaped)', kidsRoom.southWidth, kidsRoom.depth, true],
     ['Powder room', 7.1, guestEntry.powder.d], ['Guest coat closet', 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 5.1, guestEntry.alcove.d], ['Office', 12.2, groundFrontWallZ - officeNorthZ],
-    ['Guest walk-in closet', guestSuite.closet.w, guestSuite.closet.d], ['Guest shower bathroom', guestSuite.bathroom.w, guestSuite.bathroom.d],
-    ['Bedroom', 12.2, groundFrontWallZ - 43.2], ['Porch', 31.2, groundFrontLayout.porchDepth]
+    ['Guest closet strip (overall)', guestSuite.closet.w, guestSuite.closet.d], ['Guest shower bathroom', guestSuite.bathroom.w, guestSuite.bathroom.d],
+    ['Bedroom', guestSuite.bedroom.w, guestSuite.bedroom.d], ['Porch', 31.2, groundFrontLayout.porchDepth]
   ].forEach((room) => roomDimensions(...room));
 
   // Proposed feature wall, following the existing living-room requirements.
@@ -2628,20 +2623,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   const stairStepGlow = new THREE.MeshStandardMaterial({ color: '#fff0d7', emissive: '#ffd5a0', emissiveIntensity: 0, roughness: 0.6 });
-  const alcoveGuard = furnishing('Guest entry stair-side guard', 0, 0, 0, 0.005);
-  alcoveGuard.userData = { provisional: true, approvalRequired: true, note: '42-inch horizontal guard concept; engineer review of wall removal, jamb support, anchorage, openings and climbability required. Existing stair handrail omissions remain unresolved.' };
   const guard = guestEntry.stairGuard;
-  for (const x of [guard.x + guard.postWidth / 2, guard.endX - guard.postWidth / 2]) {
-    box(alcoveGuard, x, guard.height / 2, guard.z, guard.postWidth, guard.height, guard.postWidth, black).name = 'Alcove stair guard post';
-  }
-  box(alcoveGuard, (guard.x + guard.endX) / 2, guard.height - 0.06, guard.z, guard.endX - guard.x, 0.12, 0.12, black).name = 'Alcove stair guard top rail';
-  for (let rail = 1; rail <= guard.barCount; rail++) {
-    box(alcoveGuard, (guard.x + guard.endX) / 2, rail * guard.barSpacing, guard.z, guard.endX - guard.x, 0.045, 0.045, black).name = 'Alcove stair horizontal guard rail';
-  }
-  // The removed wall also backed part of the upper flight: a ground guard alone cannot protect it.
+  // Retain protection above the restored wall's nine-foot head.
   const exposedUpperGuard = new THREE.Group();
   exposedUpperGuard.name = 'Newly exposed upper-flight outer guard';
-  exposedUpperGuard.userData = { provisional: true, approvalRequired: true, note: 'Partial outer guard replaces removed wall backing only; remaining wall-backed handrail continuity still requires review.' };
+  exposedUpperGuard.userData = { provisional: true, approvalRequired: true, note: 'Retained upper-flight guard above the restored powder/coat wall; wall-head enclosure and handrail continuity still require review.' };
   stairs.add(exposedUpperGuard);
   const exposedRun = stairOpening.x + stairOpening.width - guard.x;
   const exposedPitch = [
@@ -4016,12 +4002,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const kidsDeskWidth = 47.25 / 12;
   const kidsDeskDepth = 31.5 / 12;
   const kidsDeskHeight = 29.5 / 12;
-  const kidsDeskZ = guestSuite.bathroom.z - 0.175 - kidsDeskDepth / 2;
+  const kidsDeskZ = guestSuite.kidsSouthZ - 0.175 - kidsDeskDepth / 2;
   for (let index = 0; index < 2; index++) {
     const rotation = Math.PI;
-    const x = index === 0 ? guestSuite.kidsExtension.x + guestSuite.kidsExtension.w / 2
+    const x = index === 0 ? 22.375
       : kidsRoom.x + kidsRoom.southWidth - 0.175 - 1 / 12 - kidsDeskWidth / 2;
-    const z = index === 0 ? guestSuite.closet.z - 0.175 - kidsDeskDepth / 2 : kidsDeskZ;
+    const z = kidsDeskZ;
     const desk = furnishing(`IKEA MITTZON kids desk ${index + 1}`, x, z, rotation, 0, true);
     desk.userData = { manufacturer: 'IKEA', model: 'MITTZON', widthInches: 47.25, depthInches: 31.5, heightInches: 29.5, minHeightInches: 24.375, maxHeightInches: 49.625, productURL: 'https://www.ikea.com/us/en/p/mittzon-desk-sit-stand-electric-birch-veneer-white-s09527743/', finish: 'Birch veneer / white', manufacturerCAD: false, chairAllowanceInches: 30, purpose: index === 0 ? 'All-in-one PC' : 'Homework and crafts', childUseRequiresReview: true };
     box(desk, 0, kidsDeskHeight - 0.05, 0, kidsDeskWidth, 0.1, kidsDeskDepth, oak).name = 'MITTZON desktop';
@@ -4189,6 +4175,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     cylinder(nightstand, 0, 2.4, 0, 0.05, 1.2, brass);
     cylinder(nightstand, 0, 3, 0, 0.4, 0.45, cream, 0.25);
   }
+  const guestBedroomTV = furnishing('Guest bedroom west-wall television', 19.27, 50.35, Math.PI / 2);
+  guestBedroomTV.userData = { genericScreenProxy: true, screenWidthInches: 44, screenHeightInches: 25, wall: 'West', faces: 'East', mountingHeightUnverified: true };
+  box(guestBedroomTV, 0, 4.65, 0, 44 / 12, 25 / 12, 0.14, black, true).name = 'Guest bedroom wall television screen';
+  box(guestBedroomTV, 0, 4.65, -0.02, 1.5, 0.12, 0.12, steel).name = 'Guest bedroom television mounting rail concept';
   // South-jamb hinge opens into the bedroom, away from the closet return.
   const guestBedroomEntry = furnishing('Guest bedroom entry', guestSuite.bedroomDoor.x, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width);
   const guestBedroomLeaf = new THREE.Group();
@@ -4198,154 +4188,67 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   singlePanelDoor(guestBedroomLeaf, 0, 4, -1.5, 2.96, 7.96, 1.375 / 12, windowTrim, Math.PI / 2).name = 'Guest bedroom white single-panel door';
   for (const side of [-1, 1]) cylinder(guestBedroomLeaf, side * 0.13, 3.2, -2.72, 0.07, 0.14, brass).name = 'Guest bedroom gold door knob';
 
-  const wardrobe = furnishing('Guest walk-in closet fittings', guestSuite.closet.x, guestSuite.closet.z);
-  wardrobe.userData = { hangingRunInches: 48, clothingDepthAllowanceInches: 24, doorless: true, provisional: true,
-    finish: 'Proposed light natural oak-look; California Closets design direction, not selected product',
-    review: 'Confirm finish, reach, adjustable fittings, loads, anchorage and drawer hardware with supplier' };
-  const closetPanel = 0.0625;
-  // Standard 24-inch envelopes; the dedicated clipped corner is open to the
-  // aisle, not a blind square behind two perpendicular hanging reservations.
-  function closetCarcass(parent, width, depth, cornerSide = 0) {
-    // Corner-facing partitions stop at the diagonal opening, rather than
-    // sealing the corner behind two full-depth panels that meet at a point.
-    for (const side of [-1, 1]) box(parent, side * (width - closetPanel) / 2, 3.75,
-      side === cornerSide ? -0.625 : 0,
-      closetPanel, 7, side === cornerSide ? 0.75 : depth, oak).name =
-        side === cornerSide ? 'Guest closet full-height corner return panel' : 'Guest closet full-height side panel';
-    for (const y of [0.28125, 7.21875]) box(parent, 0, y, 0,
-      width - 2 * closetPanel, closetPanel, depth, oak).name = 'Guest closet carcass floor or cap';
-    box(parent, 0, 3.75, -depth / 2 + closetPanel / 2,
-      width - 2 * closetPanel, 6.875, closetPanel, oak).name = 'Guest closet back panel';
-    box(parent, 0, 0.125, -0.05, width, 0.25, depth - 0.1, oak).name = 'Guest closet recessed plinth';
+  for (const compartment of guestSuite.closets) {
+    const storage = furnishing(`Guest ${compartment.name} shallow closet storage`, compartment.x + compartment.w / 2, compartment.z + compartment.d / 2);
+    storage.userData = { storageType: 'Reach-in closet', widthInches: compartment.w * 12, depthInches: 24, heightInches: 84,
+      standardDepthEnvelope: true, separateFillers: true, removableAccessories: false, provisional: true };
+    const panel = 0.0625, bodyWidth = compartment.w - 0.5;
+    const storageCenterZ = guestSuite.closetSouthZ - 1.2 - 1;
+    const closetFrontZ = guestSuite.closetSouthZ - 0.175;
+    const backZ = closetFrontZ - 2;
+    const centerZ = (backZ + closetFrontZ) / 2;
+    storage.position.set(compartment.x + compartment.w / 2, 0, centerZ);
+    box(storage, 0, 7.15, 0, bodyWidth, panel, 1.9375, cabinetRailFinish).name = 'Guest reach-in closet top shelf';
+    box(storage, 0, 0.2, 0, bodyWidth, panel, 1.9375, cabinetRailFinish).name = 'Guest reach-in closet lower shelf';
+    for (const side of [-1, 1]) box(storage, side * bodyWidth / 2, 3.65, 0, panel, 6.9, 1.9375, cabinetFinish).name = 'Guest reach-in closet side panel';
+    const rod = cylinder(storage, 0, 5.85, -0.15, 0.035, bodyWidth - 2 * panel, brass);
+    rod.rotation.z = Math.PI / 2;
+    rod.name = 'Guest reach-in closet hanging rod';
+    box(storage, 0, 7.35, -0.025, bodyWidth - 2 * panel, 0.08, 0.12, cabinetRailFinish).name = 'Guest reach-in closet separate top filler';
+    storage.userData.storageCenterZ = storageCenterZ;
+    storage.userData.backZ = backZ;
+    storage.userData.frontZ = closetFrontZ;
   }
-  for (const run of guestSuite.closetStorage.hanging) {
-    const centerX = run.x + run.w / 2, centerZ = run.z + run.d / 2;
-    const bay = new THREE.Group();
-    bay.name = run.double ? 'Guest closet 24-inch double-hang module' : 'Guest closet 24-inch long-hang module';
-    bay.position.set(centerX, 0, centerZ);
-    wardrobe.add(bay);
-    closetCarcass(bay, run.w, run.d, run.double ? 0 : -1);
-    const shelf = box(bay, 0, 7, 0.03125, run.w - 2 * closetPanel, closetPanel, run.d - closetPanel, oak);
-    shelf.name = 'Guest closet hanging-zone upper shelf';
-    shelf.userData.hangingDepthInches = run.d * 12;
-    for (const y of run.double ? [3.45, 6.7] : [5.8]) {
-      const rail = cylinder(wardrobe, centerX, y, centerZ + 0.05, 0.035, run.w - 2 * closetPanel, brass);
-      rail.rotation.z = Math.PI / 2;
-      rail.name = run.double ? 'Guest closet continuous short-hang rail' : 'Guest closet continuous long-hang rail';
-    }
-    const count = 4;
-    for (let i = 0; i < count; i++) {
-      const x = run.x + (i + 0.5) * run.w / count;
-      for (const railY of run.double ? [3.45, 6.7] : [5.8]) {
-        const hanger = cylinder(wardrobe, x, railY - 0.14, centerZ + 0.05, 0.018, 1.5, brass);
-        hanger.rotation.x = Math.PI / 2;
-        hanger.name = 'Guest closet garment hanger';
-        const length = run.double ? 2.8 : 5.05;
-        box(wardrobe, x, railY - 0.25 - length / 2, centerZ + 0.05, 0.12, length, 1.7, i % 2 ? cream : linen).name = 'Guest closet hanging garment';
-      }
-    }
+  const kidsEntry = furnishing('Kids room paired west entry doors', kidsDoorway.x, kidsDoorway.z);
+  kidsEntry.userData = { nominalWidthInches: kidsDoorway.width * 12, nominalHeightInches: 96, leaves: 2, nominalLeafWidthInches: 27, inwardSwing: true, defaultClosed: true, provisional: true };
+  for (const side of [-1, 1]) {
+    const leafWidth = kidsDoorway.width / 2 - 0.02;
+    const hinge = new THREE.Group();
+    hinge.name = side < 0 ? 'Kids room north entry leaf hinge' : 'Kids room south entry leaf hinge';
+    hinge.position.set(0, 4, side < 0 ? 0 : kidsDoorway.width);
+    hinge.rotation.y = side < 0 ? -Math.PI / 2 : Math.PI / 2;
+    hinge.userData = { nominalWidthInches: 27, nominalHeightInches: 96, defaultClosed: true,
+      interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, closedRotationY: hinge.rotation.y, openRotationSign: side < 0 ? 1 : -1 } };
+    kidsEntry.add(hinge);
+    singlePanelDoor(hinge, side < 0 ? leafWidth / 2 : -leafWidth / 2, 0, 0, leafWidth, 7.96, 1.375 / 12, windowTrim);
   }
-  const closetShelves = guestSuite.closetStorage.shelves;
-  const corner = guestSuite.closetStorage.corner;
-  // Five-sided shelves join both runs along 9-inch edges, leaving a 21.2-inch
-  // diagonal opening. Back boards stop at contact; no double-occupied corner.
-  function cornerDeck(y, name) {
-    const p = closetPanel;
-    const shape = new THREE.Shape();
-    shape.moveTo(p, p); shape.lineTo(2, p); shape.lineTo(2, 2 - corner.clip);
-    shape.lineTo(2 - corner.clip, 2); shape.lineTo(p, 2); shape.closePath();
-    const deck = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: p, bevelEnabled: false }), oak);
-    deck.rotation.x = Math.PI / 2;
-    // Shape y becomes world z; extrusion points downward.
-    deck.position.set(corner.x, y + p / 2, corner.z);
-    deck.name = name;
-    wardrobe.add(deck);
-  }
-  box(wardrobe, corner.x + 1, 3.75, corner.z + closetPanel / 2, 2, 7, closetPanel, oak).name = 'Guest closet corner north back';
-  box(wardrobe, corner.x + closetPanel / 2, 3.75, corner.z + 1 + closetPanel / 2, closetPanel, 7, 2 - closetPanel, oak).name = 'Guest closet corner west back';
-  for (const y of [0.28125, 2.65, 3.8, 5, 6.2, 7, 7.21875])
-    cornerDeck(y, 'Guest closet connected diagonal corner shelf');
-  for (const [x, z, w, d] of [[1, 0.15, 2, 0.2], [0.15, 1.125, 0.2, 1.75]])
-    box(wardrobe, corner.x + x, 0.125, corner.z + z, w, 0.25, d, oak).name = 'Guest closet corner recessed plinth';
-  const endBay = new THREE.Group();
-  const end = guestSuite.closetStorage.westShelving;
-  endBay.name = 'Guest closet west 18-inch shelf module';
-  endBay.position.set(end.x + end.w / 2, 0, end.z + end.d / 2);
-  endBay.rotation.y = Math.PI / 2;
-  wardrobe.add(endBay);
-  closetCarcass(endBay, 1.5, 2);
-  for (const y of [1.45, 2.65, 3.8, 5, 6.2, 7])
-    box(endBay, 0, y, 0.03125, 1.375, closetPanel, 1.9375, oak).name = 'Guest closet west end adjustable shelf';
-  const filler = guestSuite.closetStorage.northFiller;
-  box(wardrobe, filler.x + filler.w / 2, 3.75, filler.z + filler.d - 0.03125, filler.w, 7, closetPanel, oak).name = 'Guest closet separate 3-inch east filler';
-  for (const y of [0.28125, 7.21875])
-    box(wardrobe, filler.x + filler.w / 2, y, filler.z + (filler.d - closetPanel) / 2,
-      filler.w, closetPanel, filler.d - closetPanel, oak).name = 'Guest closet east filler floor or cap';
-  box(wardrobe, filler.x + filler.w / 2, 3.75, filler.z + closetPanel / 2,
-    filler.w, 6.875, closetPanel, oak).name = 'Guest closet east filler back panel';
-  box(wardrobe, filler.x + filler.w / 2, 0.125, filler.z + 0.95,
-    filler.w, 0.25, 1.9, oak).name = 'Guest closet east filler recessed plinth';
-  const westTower = new THREE.Group();
-  westTower.name = 'Guest closet west 24-inch drawer and shelf tower';
-  westTower.position.set(closetShelves.x + closetShelves.w / 2, 0, closetShelves.z + closetShelves.d / 2);
-  westTower.rotation.y = Math.PI / 2;
-  wardrobe.add(westTower);
-  closetCarcass(westTower, 2, 2, 1);
-  for (const y of [2.65, 3.8, 5, 6.2, 7]) {
-    box(westTower, 0, y, 0.03125, 1.875, closetPanel, 1.9375, oak).name = 'Guest wardrobe adjustable folded-clothes shelf';
-    for (const side of [-1, 1]) for (const z of [-0.5, 0.5])
-      box(westTower, side * 0.92, y - 0.045, z, 0.035, 0.035, 0.06, brass).name = 'Guest closet schematic shelf pin';
-  }
-  // Schematic 32 mm adjustment pattern, limited to a useful upper adjustment
-  // band rather than thousands of individual holes throughout the house.
-  for (const [bay, width] of [[westTower, 2], [endBay, 1.5]]) {
-    for (const side of [-1, 1]) for (const z of [-0.75, 0.75]) for (let i = 0; i < 12; i++)
-      box(bay, side * (width / 2 - closetPanel - 0.001), 4.1 + i * 32 / 304.8, z,
-        0.002, 0.012, 0.012, black).name = 'Guest closet schematic 32mm shelf-pin hole';
-  }
-  for (let row = 0; row < 3; row++) {
-    const drawer = new THREE.Group();
-    drawer.name = `Guest closet pull-out drawer ${row + 1}`;
-    drawer.position.y = 0.7 + row * 0.65;
-    drawer.userData = { travelFeet: 1.25, shownClosed: true, hardwareSelected: false };
-    westTower.add(drawer);
-    const front = new THREE.Group();
-    front.position.set(0, 0, 1.04);
-    front.userData = { cabinetFront: true, width: 1.94, height: 0.59 };
-    drawer.add(front);
-    box(front, 0, 0, 0, 1.94, 0.59, 0.0625, oak).name = 'Guest closet flat drawer slab';
-    front.name = 'Guest closet flat drawer front';
-    front.userData.finish = 'Proposed light oak-look, not solid wood or selected vendor finish';
-    front.traverse((part) => { if (part.isMesh) part.material = oak; });
-    cabinetPull(front, 0, 0, 0.09, 0.5);
-    box(drawer, 0, -0.22, 0.3, 1.75, 0.04, 1.3, oak).name = 'Guest closet drawer floor';
-    for (const side of [-1, 1]) {
-      box(drawer, side * 0.855, 0, 0.3, 0.04, 0.4, 1.3, oak).name = 'Guest closet drawer side';
-      box(drawer, 0, 0, 0.3 + side * 0.63, 1.67, 0.4, 0.04, oak).name = 'Guest closet drawer end';
+  for (const [index, compartment] of guestSuite.closets.entries()) {
+    const opening = compartment.door;
+    const pair = furnishing(index === 0 ? 'Guest single-leaf closet door' : 'Guest paired-leaf closet doors', opening.x, opening.z);
+    pair.userData = { nominalWidthInches: opening.width * 12, nominalHeightInches: opening.height * 12, leaves: opening.leaves,
+      swingDirection: 'Into guest bedroom', defaultClosed: true, provisional: true };
+    const count = opening.leaves;
+    for (let leafIndex = 0; leafIndex < count; leafIndex++) {
+      const leafWidth = opening.width / count - 0.02;
+      const hinge = new THREE.Group();
+      const right = leafIndex === count - 1 && count === 2;
+      hinge.name = `Guest closet ${compartment.name} leaf ${leafIndex + 1} hinge`;
+      hinge.position.set(right ? opening.width : 0, 4, 0);
+      hinge.rotation.y = right ? Math.PI : 0;
+      hinge.userData = { nominalWidthInches: leafWidth * 12, nominalHeightInches: 96, defaultClosed: true,
+        interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90,
+          closedRotationY: hinge.rotation.y, openRotationSign: right ? 1 : -1 } };
+      pair.add(hinge);
+      singlePanelDoor(hinge, right ? -leafWidth / 2 : leafWidth / 2, 0, 0, leafWidth, 7.96, 1.375 / 12, windowTrim);
     }
   }
-  wardrobe.traverse((part) => {
-    if (part.isMesh && part.material === oak)
-      part.material = /shelf|floor|cap|plinth/.test(part.name) ? cabinetRailFinish : cabinetFinish;
-  });
   const bathroomOpening = guestSuite.bathroomDoor;
-  const bathroomDoor = furnishing('Guest bathroom inward-opening door', bathroomOpening.x, bathroomOpening.z);
-  bathroomDoor.userData = { hinge: 'West jamb', heightInches: 96, nominalWidthInches: 28, provisional: true,
+  const bathroomDoor = furnishing('Guest bathroom southeast inward-opening door', bathroomOpening.x, bathroomOpening.z);
+  bathroomDoor.userData = { hinge: 'West jamb', heightInches: 96, nominalWidthInches: 30, inward: true, defaultClosed: true, provisional: true,
     interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: 1 } };
   singlePanelDoor(bathroomDoor, bathroomOpening.width / 2, 4, 0, bathroomOpening.width - 0.04, 7.96, 0.13, windowTrim).name = 'Guest bathroom painted-white Shaker leaf';
   for (const side of [-1, 1]) box(bathroomDoor, bathroomOpening.width - 0.2, 3, side * 0.14, 0.16, 0.15, 0.15, brass, true).name = 'Guest bathroom satin-gold knob';
-  const closetOpening = guestSuite.closetDoor;
-  const closetPocket = furnishing('Guest walk-in closet left pocket door', closetOpening.x + closetOpening.width / 2, closetOpening.z);
-  closetPocket.userData = { nominalWidthInches: closetOpening.width * 12, heightInches: closetOpening.height * 12, provisional: true,
-    interactiveHouseDoor: { operation: 'sliding', open: false, closedCenterX: closetOpening.x + closetOpening.width / 2, openCenterX: closetOpening.x + closetOpening.width / 2 - closetOpening.pocket.travel } };
-  singlePanelDoor(closetPocket, 0, 4, 0, closetOpening.pocket.leafWidth, 7.96, 0.13, windowTrim).name = 'Guest closet painted-white pocket leaf';
-  for (const side of [-1, 1]) box(closetPocket, closetOpening.pocket.leafWidth / 2 - 0.08, 3, side * 0.066, 0.12, 0.5, 0.012, brass).name = 'Guest closet flush pocket pull';
-  // Edge pull remains exposed on the trailing edge when both face pulls tuck away.
-  box(closetPocket, closetOpening.pocket.leafWidth / 2 - 0.005, 3, 0, 0.01, 0.3, 0.08, brass).name = 'Guest closet flush retractable edge pull concept';
-  const closetTrack = furnishing('Guest closet pocket track framing concept', closetOpening.pocket.x, closetOpening.z);
-  box(closetTrack, (closetOpening.x + closetOpening.width - closetOpening.pocket.x) / 2, 8.15, 0, closetOpening.x + closetOpening.width - closetOpening.pocket.x, 0.1, 0.12, steel).name = 'Guest closet pocket overhead track';
   const guestCoats = furnishing('Guest coat closet', 9.65, guestEntry.coatCloset.z + guestEntry.coatCloset.d / 2);
-  guestCoats.scale.z = -1;
   guestCoats.userData = { purpose: 'Guest coats, separate from powder room', nominalWidthInches: 61.2, nominalDepthInches: 28.8, clearDepthInches: 24.6, doorWidthInches: 48, doorHeightInches: guestEntry.closetDoor.height * 12, provisional: true };
   box(guestCoats, 0, 6.5, 0, 4.65, 0.1, 1.95, cabinetFinish).name = 'Guest coat closet upper shelf';
   const guestCoatRail = cylinder(guestCoats, 0, 5.65, 0, 0.045, 4.4, brass);
@@ -4358,7 +4261,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const width = guestEntry.closetDoor.width / 2 - 0.04;
     const hinge = new THREE.Group();
     hinge.name = 'Guest coat closet French door hinge';
-    hinge.position.set(guestEntry.closetDoor.x + (side < 0 ? 0 : guestEntry.closetDoor.width) - 9.65, guestEntry.closetDoor.height / 2, guestCoats.position.z - guestEntry.closetDoor.z);
+    hinge.position.set(guestEntry.closetDoor.x + (side < 0 ? 0 : guestEntry.closetDoor.width) - 9.65, guestEntry.closetDoor.height / 2, guestEntry.closetDoor.z + guestEntry.closetDoor.hingeOffset - guestCoats.position.z);
     hinge.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: side } };
     guestCoats.add(hinge);
     const door = singlePanelDoor(hinge, -side * width / 2, 0, 0, width, guestEntry.closetDoor.height - 0.04, 0.13, windowTrim);
@@ -4366,15 +4269,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     cabinetPull(door, -side * 0.8, 3.5 - guestEntry.closetDoor.height / 2, 0.09, 0.65);
   }
 
-  const powderDoor = furnishing('Powder room inward-opening door', guestEntry.powderDoor.x, guestEntry.powderDoor.z);
-  powderDoor.userData = { nominalWidthInches: 30, heightInches: guestEntry.powderDoor.height * 12, openAngleDegrees: 90, inwardSwing: true, hinge: 'North jamb', provisional: true };
+  const powderDoor = furnishing('Powder room inward-opening door', guestEntry.powderDoor.x - guestEntry.powderDoor.hingeOffset, guestEntry.powderDoor.z + guestEntry.powderDoor.width);
+  powderDoor.userData = { nominalWidthInches: 30, heightInches: guestEntry.powderDoor.height * 12, openAngleDegrees: 90, inwardSwing: true, hinge: 'South jamb', provisional: true };
   const powderLeaf = new THREE.Group();
   powderLeaf.position.set(0, 4, 0);
-  powderLeaf.rotation.y = -Math.PI / 2;
-  powderLeaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 180, openRotationSign: -1 } };
+  powderLeaf.rotation.y = Math.PI / 2;
+  powderLeaf.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 90, openRotationSign: 1 } };
   powderDoor.add(powderLeaf);
-  singlePanelDoor(powderLeaf, 0, 0, 1.25, 2.46, guestEntry.powderDoor.height - 0.04, 0.13, windowTrim, Math.PI / 2).name = 'Powder painted-white door leaf';
-  for (const side of [-1, 1]) box(powderLeaf, side * 0.14, -1, 2.2, 0.16, 0.15, 0.15, brass, true).name = 'Powder door satin-gold knob';
+  singlePanelDoor(powderLeaf, 0, 0, -1.25, 2.46, guestEntry.powderDoor.height - 0.04, 0.13, windowTrim, Math.PI / 2).name = 'Powder painted-white door leaf';
+  for (const side of [-1, 1]) box(powderLeaf, side * 0.14, -1, -2.2, 0.16, 0.15, 0.15, brass, true).name = 'Powder door satin-gold knob';
 
   function toilet(name, x, z, rotation = 0) {
     const wc = furnishing(name, x, z, rotation);
@@ -4547,8 +4450,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     cylinder(powderVanity, powderSinkX + side * 1.4, 5.25, -0.59, 0.13, 0.8, powderGlow).name = 'Powder warm opal sconce';
   }
   box(powderVanity, 0, 0.11, 0.98, 3.2, 0.045, 0.04, powderGlow).name = 'Powder low-level night-light concept';
-  const powderTowel = furnishing('Powder wall-mounted hand towel', guestEntry.powder.w - 0.175, officeNorthZ - 2.15);
-  powderTowel.userData = { wall: 'East, beside vanity and south of entry casing', hookHeightInches: 48, towelSizeInches: [16, 28], foldedWidthInches: 8, provisional: true };
+  const powderTowel = furnishing('Powder wall-mounted hand towel', guestEntry.powder.w - 0.175, powderNorthZ + 2.15);
+  powderTowel.userData = { wall: 'East, beside vanity and north of entry casing', hookHeightInches: 48, towelSizeInches: [16, 28], foldedWidthInches: 8, provisional: true };
   box(powderTowel, -0.035, 4, 0, 0.06, 0.2, 0.14, brass).name = 'Powder towel hook backplate';
   box(powderTowel, -0.15, 4, 0, 0.22, 0.045, 0.045, brass).name = 'Powder towel hook arm';
   cylinder(powderTowel, -0.25, 4.04, 0, 0.035, 0.14, brass).name = 'Powder towel hook upturned tip';
@@ -4556,7 +4459,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(powderTowel, -0.29, 2.68, 0, 0.045, 0.08, 8 / 12, linen).name = 'Powder hand towel hem';
   cylinder(powderVanity, -1.25, 3.02, -0.3, 0.1, 0.35, porcelain).name = 'Powder soap dispenser';
   box(powderVanity, -1.25, 3.23, -0.25, 0.06, 0.07, 0.2, brass).name = 'Powder soap pump';
-  const powderPaper = furnishing('Powder toilet paper holder', 0.4, guestEntry.toilet.z - 0.6);
+  const powderPaper = furnishing('Powder toilet paper holder', 0.4, guestEntry.toilet.z + 0.6);
   box(powderPaper, 0, 2, 0, 0.4, 0.08, 0.08, brass).name = 'Powder paper holder arm';
   const powderRoll = cylinder(powderPaper, 0.15, 2, 0, 0.16, 0.36, porcelain);
   powderRoll.rotation.x = Math.PI / 2;
@@ -4584,17 +4487,23 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   const guestNightLight = furnishing('Guest bathroom independent night-light concept', guestSuite.vanity.x, guestSuite.vanity.z, guestSuite.vanity.rotation);
   box(guestNightLight, 0, 0.15, 0.9, 2.5, 0.05, 0.04, powderGlow).name = 'Guest bathroom warm low-level night light';
-  const guestTowel = furnishing('Guest bathroom wall-mounted towel hook', guestSuite.bathroom.x + 0.3, guestSuite.toilet.z - 0.5, Math.PI);
-  guestTowel.userData = { wall: 'West, beside the shower approach', hookHeightInches: 48, towelSizeInches: [16, 28], provisional: true };
+  const guestTowel = furnishing('Guest bathroom wall-mounted towel hook', 30.95, 40.3);
+  guestTowel.userData = { wall: 'East, south of the linen recess', hookHeightInches: 48, towelSizeInches: [16, 28], provisional: true };
   box(guestTowel, 0.035, 4, 0, 0.06, 0.2, 0.14, brass).name = 'Guest bathroom towel hook backplate';
   box(guestTowel, -0.08, 4, 0, 0.22, 0.045, 0.045, brass).name = 'Guest bathroom towel hook arm';
   cylinder(guestTowel, -0.18, 4.04, 0, 0.035, 0.14, brass).name = 'Guest bathroom towel hook upturned tip';
   box(guestTowel, -0.2, 3.3, 0, 0.035, 1.3, 16 / 12, linen, true).name = 'Guest bathroom hanging towel';
   box(guestTowel, -0.22, 2.68, 0, 0.045, 0.08, 16 / 12, linen).name = 'Guest bathroom towel hem';
+  const linenRecess = guestSuite.bathroomRecess;
+  const guestLinenNiche = furnishing('Guest bathroom northeast enclosed linen recess', linenRecess.x + linenRecess.w / 2, linenRecess.z + linenRecess.d / 2);
+  guestLinenNiche.userData = { widthInches: linenRecess.w * 12, depthInches: linenRecess.d * 12, openSide: 'South', storageOnly: true, productSelected: false };
+  for (const y of [1.5, 3.5, 5.5, 7.25])
+    box(guestLinenNiche, 0, y, 0, linenRecess.w - 0.2, 0.08, 1.5, cabinetRailFinish).name = 'Guest bathroom linen recess shelf';
+  box(guestLinenNiche, -(linenRecess.w - 0.2) / 2, 3.75, 0, 0.08, 7.5, 1.5, cabinetFinish).name = 'Guest bathroom linen recess west side';
   toilet('Guest bathroom toilet', guestSuite.toilet.x, guestSuite.toilet.z, guestSuite.toilet.rotation);
   const showerLayout = guestSuite.shower;
   const guestShower = furnishing('Guest bathroom shower', showerLayout.x, showerLayout.z, showerLayout.rotation);
-  guestShower.userData = { clearWidthInches: showerLayout.clearWidth * 12, clearDepthInches: showerLayout.clearDepth * 12, doorOpeningInches: showerLayout.doorWidth * 12, provisional: true };
+  guestShower.userData = { clearWidthInches: showerLayout.clearWidth * 12, clearDepthInches: showerLayout.clearDepth * 12, doorOpeningInches: showerLayout.doorWidth * 12, entryType: 'Open walk-in, fixed splash glass only', provisional: true };
   box(guestShower, showerLayout.w / 2, 0.1, showerLayout.d / 2, showerLayout.w, 0.2, showerLayout.d, porcelain).name = 'Guest shower pan';
   for (const x of [0.05, showerLayout.w - 0.05]) box(guestShower, x, 0.22, showerLayout.d / 2, 0.1, 0.24, showerLayout.d, countertop).name = 'Guest shower side curb';
   for (const z of [0.05, showerLayout.d - 0.05]) box(guestShower, showerLayout.w / 2, 0.22, z, showerLayout.w, 0.24, 0.1, countertop).name = 'Guest shower end curb';
@@ -4606,7 +4515,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const showerRightWidth = showerLayout.w - showerRightStart;
   box(guestShower, showerRightStart + showerRightWidth / 2, showerGlassCenterY, showerLayout.d - 0.05, showerRightWidth, showerLayout.height, 0.06, glass).name = 'Guest shower fixed southeast glass';
   box(guestShower, showerLayout.w - 0.05, showerGlassCenterY, showerLayout.d / 2, 0.06, showerLayout.height, showerLayout.d, glass).name = 'Guest shower fixed east glass';
-  guestShower.userData = { ...guestShower.userData, entryType: 'Open walk-in, fixed splash glass only', slidingDoor: false };
+  guestShower.userData.slidingDoor = false;
   box(guestShower, showerLayout.w / 2, 0.21, 0.65, 0.55, 0.02, 0.18, steel).name = 'Guest shower drain';
   cylinder(guestShower, 1.6, 5.8, 0.16, 0.035, 2.2, brass).name = 'Guest shower riser';
   box(guestShower, 1.6, 6.85, 0.42, 0.07, 0.07, 0.6, brass).name = 'Guest shower head arm';
@@ -4781,7 +4690,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       const kidsArea = kidsShape ? groundBaseline.floors.filter(({ room }) => /^Kids room/.test(room ?? '')).reduce((sum, { w, d }) => sum + w * d, 0) : 0;
       const clear = activeFloor === 'upstairs' ? getUpstairsRoomClearDimensions(room, upstairs.plan.walls) : room;
       const maxExtent = activeFloor === 'ground' && room.name === 'Garage';
-      const dimensions = kidsShape ? `${kidsArea.toFixed(2)} sq ft, stepped plan; west edge to z37.2, east edge to z33.6` : `${feet(clear.w)} x ${feet(clear.d)}${activeFloor === 'upstairs' ? ' paint-face' : ''}${maxExtent ? ' max extents; L-shaped footprint' : ''}`;
+      const dimensions = kidsShape ? `${kidsArea.toFixed(2)} sq ft, stepped plan` : `${feet(clear.w)} x ${feet(clear.d)}${activeFloor === 'upstairs' ? ' paint-face' : ''}${maxExtent ? ' max extents; L-shaped footprint' : ''}`;
       const label = document.createElement('div');
       label.className = 'plan-dimension-label';
       label.title = `${room.name}: ${dimensions}`;
@@ -5550,9 +5459,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     pantry: { target: [46.75, 4.5, 14.325], offset: [0, 0.2, -2.5], span: 14 },
     'prep-counter': { target: [46.6, 4.5, prepCounterZ], offset: [0, 1.2, 2.6], span: 14 },
     powder: { target: [3.7, 1, powderNorthZ + 2.95], offset: [4, 34, 4], span: 12 },
-    'guest-bathroom': { target: [28.45, 1.5, 39.4], offset: [0.2, 14, 1], span: 11 },
-    'guest-closet': { target: [21, 3.7, 39], offset: [3.9, 1.9, 3.5], span: 9 },
-    'guest-suite': { target: [25.1, 0, 42.8], offset: [0, 40, 0.01], span: 25 },
+    'guest-bathroom': { target: [25.1, 1.5, 39.5], offset: [0.2, 15, 0.01], span: 15 },
+    'guest-closet': { target: [23.65, 3.7, 43.2], offset: [0, 4, 9], span: 10 },
+    'guest-suite': { target: [25.1, 0, 42.8], offset: [0, 42, 0.01], span: 30 },
     private: { target: [15.6, 1, 43], offset: [32, 49, 37], span: 40 },
     basement: { target: [stairOpening.x + stairOpening.width / 2, -3, stairOpening.z + stairOpening.depth / 2], offset: [4, 30, 5], span: 21 },
     top: { target: [27, 0, 29], offset: [0, 110, 0], span: 72 }
@@ -5562,7 +5471,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     'Guest coat closet': 'guest-coats', 'Guest entry alcove': 'guest-entry', 'Closet': 'guest-closet',
     'Bathroom': 'guest-bathroom', 'Guest room': 'guest-bedroom'
   };
-  const roomViewLabels = { Closet: 'Guest walk-in', Bathroom: 'Guest bathroom', 'Guest room': 'Guest bedroom' };
+  const roomViewLabels = { Closet: 'Guest closets', Bathroom: 'Guest bathroom', 'Guest room': 'Guest bedroom' };
   const groundRooms = [
     ...getGroundFloorDefaultPlan().rooms,
     { name: 'Stairs', x: stairOpening.x, z: stairOpening.z, w: stairOpening.width, d: stairOpening.depth }
@@ -6483,6 +6392,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   resize();
   message.hidden = true;
   viewport.dataset.ready = 'true';
+  window.__guestSuiteVerification = { scene, guestSuite, THREE };
   function previewGround(edits) {
     if (navigationMode === 'walk') setNavigationMode('rotate');
     const replacement = edits.rooms.length || edits.walls.length ? buildGroundLayoutPreview(THREE, groundBaseline, edits) : null;

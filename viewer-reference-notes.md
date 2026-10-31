@@ -2,6 +2,14 @@
 
 ## Compact viewer
 
+October 31 guest-entry layout: powder toilet and retained 42 x 21 in vanity
+face south from the north wall; south-jamb powder entry is lower right.
+Coat closet is north of the alcove, with its closed 48 x 96 in pair opening
+south. The full north wall replaces the ground rail; retain upper-flight
+protection above its nine-foot head. Room sizes, hardwood, privacy window
+and exterior footprint stay unchanged. Door/cabinet operation, occupied coat
+retrieval, wall support and stair-head enclosure still require review.
+
 Windows shows the live whole-house unit count; its tooltip explains openings
 and unit types. Area gives the combined ANSI-style exterior-measured gross
 finished-area estimate; 1st and 2nd show each story in sq ft. Include wall
