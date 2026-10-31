@@ -148,6 +148,11 @@ test('image-scaled guest bath positions fixtures in the west / north-middle / no
 
   const toiletBounds = meshes(toilet).map(worldBounds).reduce(union);
   const vanityBounds = meshes(vanity).map(worldBounds).reduce(union);
+  close(suite.toilet.x, 24.5);
+  close(suite.toilet.z, 38.475);
+  close(suite.vanity.x, 27.05);
+  close(suite.vanity.z, 38.15);
+  close(toiletBounds.minZ, suite.bathroom.z + 0.175);
   assert.ok(suite.toilet.x > suite.bathroom.x + suite.shower.w, 'Toilet is beyond the west shower zone');
   assert.ok(suite.toilet.z < suite.bathroom.z + suite.bathroom.d / 2, 'Toilet is north of bath center');
   assert.ok(toiletBounds.maxZ < suite.bathroomDoor.z - 0.175, 'Toilet remains north of the finished south wall');
