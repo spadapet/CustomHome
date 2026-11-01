@@ -4,9 +4,9 @@ const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID } = require('node:crypto');
-const layout = require('./upstairs-layout.js');
-const { getUpstairsDefaultPlan } = require('./floor-plan-upstairs.js');
-const { getGroundFloorDefaultPlan } = require('./floor-plan-ground.js');
+const layout = require('./assets/js/upstairs-layout.js');
+const { getUpstairsDefaultPlan } = require('./assets/js/floor-plan-upstairs.js');
+const { getGroundFloorDefaultPlan } = require('./assets/js/floor-plan-ground.js');
 
 class RequestError extends Error {
   constructor(status, message) {
@@ -48,8 +48,8 @@ function inside(root, file) {
 
 function createPreviewServer({ root = __dirname } = {}) {
   const plans = {
-    '/api/upstairs-layout': { baseline: getUpstairsDefaultPlan(layout.stairOpening()), file: 'upstairs-layout.json' },
-    '/api/ground-layout': { baseline: getGroundFloorDefaultPlan(), file: 'ground-layout.json' }
+    '/api/upstairs-layout': { baseline: getUpstairsDefaultPlan(layout.stairOpening()), file: 'assets/data/upstairs-layout.json' },
+    '/api/ground-layout': { baseline: getGroundFloorDefaultPlan(), file: 'assets/data/ground-layout.json' }
   };
   let writes = Promise.resolve();
   const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.md': 'text/plain; charset=utf-8', '.mp4': 'video/mp4', '.vtt': 'text/vtt; charset=utf-8' };
@@ -104,7 +104,7 @@ function createPreviewServer({ root = __dirname } = {}) {
     try {
       resolved = await fs.realpath(file);
       if (!inside(await fs.realpath(root), resolved)) throw new RequestError(404, 'Preview file not found.');
-      if (inside(path.join(root, 'assets'), resolved)) {
+      if (inside(path.join(root, 'assets'), resolved) && !['.js', '.cjs', '.mjs', '.css', '.json'].includes(path.extname(resolved).toLowerCase())) {
         const stat = await fs.stat(resolved);
         if (!stat.isFile()) throw new RequestError(404, 'Preview file not found.');
         const etag = `W/"${stat.size.toString(16)}-${stat.mtimeMs.toString(16)}"`;

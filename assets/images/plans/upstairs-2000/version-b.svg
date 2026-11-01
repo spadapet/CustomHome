@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1160" viewBox="0 0 1440 1160" style="width:100%;height:auto;display:block" role="img" aria-labelledby="title desc">
-  <title id="title">Furnished upstairs revision: tucked laundry wall, swapped Bath 2 and Closet 2</title>
-  <desc id="desc">A furnished preliminary diagram, not an implemented model. Bath 2 and Closet 2 swap positions: the nine by five-foot bathroom is east, and the 5.3 by 7-foot closet is west with single-sided two-foot hanging and north drawers. Both doors open from Bedroom 2; its full bed moves east to clear their sweeps and its four-foot desk stays on the south wall. The laundry gallery-side wall moves east 2.075 feet to meet the counter ends, returning about 17.3 square feet to the gallery without changing the exterior. Laundry is now 13.425 by 8 feet clear with a three-foot nominal west entry between counter runs. Counters wrap north and east above side-by-side east-wall machines, with a south folding run interrupted at the furnace entry. North and south counters leave 45.3 inches before handles; a separate route reaches furnace without crossing illustrative 18-inch machine-door projections. Primary closet storage wraps west, south and east, with bath-only entry. Mechanical remains a six by five-foot provisional upstairs-furnace and service reservation, not a selected furnace size or approved installation. No bedroom rugs or dressers or gallery furniture are added. Exterior-face area remains 2,042.5992 square feet, 42.5992 over target. Products, occupied routes, simultaneous door and appliance operation, equipment replacement, storage capacity, headroom and structure remain unverified. The 3D model is unchanged.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1380" viewBox="0 0 1600 1380" style="width:100%;height:auto;display:block" role="img" aria-labelledby="title desc">
+  <title id="title">Under-2000 upstairs Version B: Version A plus unfinished attic storage over the garage</title>
+  <desc id="desc">Version B furnished preliminary diagram: the Version A rooms plus unfinished attic storage. Dashed purple ground-floor garage wall centerlines show partial garage coverage by most of the laundry, the east part of Bath 4 and the mechanical room, not bedroom interiors. An unfinished, unconditioned attic storage room about 11 by 25 feet extends east over the north garage, entered from the furnace room; it is excluded from finished square footage and would be counted if finished or conditioned. South of it the garage keeps its roof. Bedroom 3 and Bedroom 4 lose eighteen inches of front depth; Bedroom 4 also loses 8.4 inches of east width to align its wall with the garage west wall. Bedroom 3 is 12.5 by 11.5 feet clear; Bedroom 4 is 12.15 by 11.5 feet. Their full beds, desks, chairs and nightstands remain full size and are repositioned. Closet 4 is 5.5 by 4.5 feet clear, retaining five feet of hanging and 3.3 feet of shelves, with a door swinging into the bedroom. Four bedrooms, four bathrooms and the shared open gallery remain. Bath 2 stays east at nine by five feet, Closet 2 west at 5.3 by 7 feet. Laundry remains 13.425 by 8 feet with wraparound counters and a 45.3-inch counter aisle before handles. Primary closet keeps three-wall storage and bath-only access. Mechanical remains a six by five-foot provisional furnace/service reservation. Exterior-face gross area including walls and descending stairs, less the actual stair gap, is 1,985.7792 square feet, 14.2208 below 2,000. Products, occupied routes, simultaneous door and appliance operation, storage capacity, HVAC installation and garage fire separation remain unverified. The existing garage roof is not evidence of usable upstairs headroom; roof redesign, load-bearing floor and structure require professional review. Version A (version-a.svg) matches the local 3D trial.</desc>
   <defs>
     <pattern id="stairHatch" width="0.7" height="0.7" patternUnits="userSpaceOnUse">
       <path d="M0 0H0.7" stroke="#9c9b94" stroke-width="0.05"/>
@@ -66,14 +66,14 @@
       .overhead { fill: none; stroke: #637e89; stroke-width: .09; stroke-dasharray: .2 .14; }
     </style>
   </defs>
-  <rect width="1440" height="1160" fill="#faf8f2"/>
-  <text x="55" y="53" class="heading">Furnished upstairs study: keep the central gallery open</text>
-  <text x="55" y="84" class="sub">PRELIMINARY DIAGRAM ONLY | Approximately 2,043 sq ft: target needs further trimming | 3D model unchanged</text>
+  <rect width="1600" height="1380" fill="#faf8f2"/>
+  <text x="55" y="53" class="heading">Version B: Version A + unfinished attic storage over the garage</text>
+  <text x="55" y="84" class="sub">PRELIMINARY DIAGRAM ONLY | 1,985.78 sq ft finished gross | + ~293 sq ft unfinished attic storage (not counted)</text>
   <text x="55" y="115" class="small">Rear / north at top; street / front at bottom. Plan geometry is to scale. Room sizes are approximate painted-face dimensions.</text>
 
   <g transform="translate(70 195) scale(15)">
-    <!-- Centerlines: main 0..44 / 6.65..35.1; front 0..31.9 / 35.1..53.8. -->
-    <path d="M-0.225 6.425H14.875V-0.075H29.225V6.425H44.225V35.325H44.075V40.675H32.125V54.025H18.475V53.525H13.075V54.025H-0.225Z" fill="#eadfcb"/>
+    <!-- Ground-floor garage wall centerlines come from assets/js/floor-plan-ground.js. -->
+    <path d="M-0.225 6.425H14.875V-0.075H29.225V6.425H44.225V35.325H44.075V40.675H31.425V52.525H18.475V52.025H13.075V52.525H-0.225Z" fill="#eadfcb"/>
     <path d="M15.1 23.35H29V25.35H33V26.75H33V35.1H22.55V40.45H9.35V35.1H13.675V26.75H15.1Z" fill="#dceee4"/>
     <rect x="0" y="6.65" width="15.1" height="20.1" fill="#e9ddc7"/>
     <rect x="15.1" y="0.15" width="13.9" height="13.85" fill="#e0e9ee"/>
@@ -87,10 +87,13 @@
     <rect x="22.55" y="35.1" width="5.6" height="5.35" fill="#dceee4"/>
     <rect x="28.15" y="35.1" width="9.35" height="5.35" fill="#e0e9ee"/>
     <rect x="37.5" y="35.1" width="6.35" height="5.35" fill="#e9e3d7"/>
-    <rect x="0" y="40.45" width="12.85" height="13.35" fill="#e9ddc7"/>
-    <rect x="18.7" y="40.45" width="13.2" height="13.35" fill="#e9ddc7"/>
+    <rect x="0" y="40.45" width="12.85" height="11.85" fill="#e9ddc7"/>
+    <rect x="18.7" y="40.45" width="12.5" height="11.85" fill="#e9ddc7"/>
     <rect x="12.85" y="40.45" width="5.85" height="6.5" fill="#e9e3d7"/>
-    <rect x="12.85" y="46.95" width="5.85" height="6.35" fill="#e9e3d7"/>
+    <rect x="12.85" y="46.95" width="5.85" height="4.85" fill="#e9e3d7"/>
+    <g id="garage-below" fill="none" stroke="#9279a4" stroke-width=".1" stroke-dasharray=".45 .3">
+      <path id="garage-footprint" d="M44.233333 15H55.5V49H31.2V26.9H44.233333Z"/>
+    </g>
 
     <rect x="0.175" y="27.016667" width="9.833333" height="7.825" fill="#efefea" stroke="#9c9b94" stroke-width="0.08"/>
     <rect x="0.175" y="27.016667" width="9.833333" height="7.825" fill="url(#stairHatch)"/>
@@ -103,12 +106,12 @@
     <text x="11.84" y="33.4" class="tiny">arrival</text>
     <path d="M11.8 32H16.9" fill="none" stroke="#258373" stroke-width="0.15" marker-end="url(#arrow)"/>
 
-    <path class="wall" d="M0 6.65H15.1V0.15H29V6.65H44V35.1H43.85V40.45H31.9V53.8H18.7V53.3H12.85V53.8H0Z"/>
+    <path class="wall" d="M0 6.65H15.1V0.15H29V6.65H44V35.1H43.85V40.45H31.2V52.3H18.7V51.8H12.85V52.3H0Z"/>
     <path class="wall" d="M0 26.75H15.1M15.1 6.65V8.2M15.1 11.2V23.6M15.1 26.6V26.75M15.1 14H20.55M23.55 14H29M15.1 23.35H29M29 6.65V23.55M29 26.55V26.75"/>
     <path class="wall" d="M34.65 12H35.65M38.65 12H44M34.65 6.65V14M29 14H29.6M32.1 14H34.65"/>
     <path class="wall" d="M28.15 26.75H44M30.225 26.75V29.35M30.225 32.35V35.1M37.5 35.1V40.45M28.15 35.1H37.9M40.4 35.1H43.85"/>
-    <path class="wall" d="M0 35.1H9.35V40.45M28.15 35.1V40.45M0 40.45H0.8M3.3 40.45H9.9M12.4 40.45H19.25M21.75 40.45H28.6M31.1 40.45H31.9"/>
-    <path class="wall" d="M12.85 40.45V41.05M12.85 43.55V53.3M12.85 46.95H18.7M18.7 40.45V49.45M18.7 51.95V53.3"/>
+    <path class="wall" d="M0 35.1H9.35V40.45M28.15 35.1V40.45M0 40.45H0.8M3.3 40.45H9.9M12.4 40.45H19.25M21.75 40.45H28.6M31.1 40.45H31.2"/>
+    <path class="wall" d="M12.85 40.45V41.05M12.85 43.55V51.8M12.85 46.95H18.7M18.7 40.45V48.95M18.7 51.45V51.8"/>
 
     <g id="furnishings">
       <g data-room="primary" data-item="Queen bed frame">
@@ -127,19 +130,19 @@
         <rect x=".411" y="43.4" width="6.45" height="4.7" rx=".12" class="cabinet"/>
       </g>
       <g data-room="bed4" data-item="Full bed frame">
-        <rect x="24.689" y="44.6" width="6.45" height="4.7" rx=".12" class="cabinet"/>
+        <rect x="23.989" y="44.6" width="6.45" height="4.7" rx=".12" class="cabinet"/>
       </g>
       <g data-room="primary" data-item="Nightstand 1"><use href="#nightstand" x=".6" y="11.55"/></g>
       <g data-room="primary" data-item="Nightstand 2"><use href="#nightstand" x=".6" y="19.2"/></g>
       <g data-room="bed2" data-item="Nightstand"><use href="#nightstand" x="41.5" y="15.5"/></g>
       <g data-room="bed3" data-item="Nightstand"><use href="#nightstand" x=".6" y="48.35"/></g>
-      <g data-room="bed4" data-item="Nightstand"><use href="#nightstand" x="29.2" y="49.75"/></g>
+      <g data-room="bed4" data-item="Nightstand"><use href="#nightstand" x="28.5" y="49.75"/></g>
       <g data-room="primary" data-item="Writing desk"><use href="#desk" x="6.8" y="6.95"/></g>
       <g data-room="primary" data-item="Desk chair"><use href="#desk-chair" x="8" y="9.05"/></g>
       <g data-room="bed2" data-item="Writing desk"><use href="#desk" x="36.25" y="24.55"/></g>
       <g data-room="bed2" data-item="Desk chair"><use href="#desk-chair" x="37.45" y="22.45"/></g>
-      <g data-room="bed3" data-item="Writing desk"><use href="#desk" x="8.5" y="51.45"/></g>
-      <g data-room="bed3" data-item="Desk chair"><use href="#desk-chair" x="9.7" y="49.45"/></g>
+      <g data-room="bed3" data-item="Writing desk"><use href="#desk" x="8.5" y="49.95"/></g>
+      <g data-room="bed3" data-item="Desk chair"><use href="#desk-chair" x="9.7" y="47.95"/></g>
       <g data-room="bed4" data-item="Writing desk" transform="translate(19 48.9) rotate(-90)"><use href="#desk"/></g>
       <g data-room="bed4" data-item="Desk chair"><use href="#desk-chair" x="21.1" y="46.2"/></g>
       <g data-room="primary" data-item="Sitting chair 1"><use href="#lounge" x="2.325" y="24.1"/></g>
@@ -147,8 +150,8 @@
       <g data-room="primary" data-item="Side table"><rect x="5.95" y="24.95" width="1.4" height="1.4" class="cabinet"/></g>
       <g data-room="primary" data-item="Media console"><rect x="13.45" y="15.6" width="1.2" height="4" class="cabinet"/><path d="M14.5 15.9V19.3" stroke="#45534d" stroke-width=".12"/></g>
       <g data-room="bed2" data-item="Reading chair"><use href="#lounge" x="40.9" y="23.6"/></g>
-      <g data-room="bed3" data-item="Reading chair"><use href="#lounge" x="1.3" y="50.05"/></g>
-      <g data-room="bed4" data-item="Reading chair"><use href="#lounge" x="26.5" y="51.15"/></g>
+      <g data-room="bed3" data-item="Reading chair"><use href="#lounge" x="3.95" y="49.05"/></g>
+      <g data-room="bed4" data-item="Reading chair"><use href="#lounge" x="25.8" y="49.65"/></g>
 
       <g data-room="primaryBath" data-item="Private WC enclosure">
         <path class="wall" d="M15.275 .325H18.725V2.75M18.725 5.25V5.425H15.275" />
@@ -191,7 +194,7 @@
       <g data-room="closet3" data-item="Double hang"><rect x="13.2" y="44.7" width="5" height="2" fill="url(#hanging)" stroke="#9e8a6d" stroke-width=".07"/></g>
       <g data-room="closet3" data-item="Shelves and drawers"><rect x="17.1" y="40.8" width="1.3" height="3.5" class="cabinet"/></g>
       <g data-room="closet4" data-item="Double hang"><rect x="13.2" y="47.3" width="5" height="2" fill="url(#hanging)" stroke="#9e8a6d" stroke-width=".07"/></g>
-      <g data-room="closet4" data-item="Shelves and drawers"><rect x="13.15" y="49.7" width="1.3" height="3.3" class="cabinet"/></g>
+      <g data-room="closet4" data-item="Shelves and drawers"><rect x="13.2" y="50.15" width="3.3" height="1.3" class="cabinet"/></g>
       <g data-room="laundry" data-item="Washer" transform="translate(43.6 29.15) rotate(90)"><use href="#machine"/></g>
       <g data-room="laundry" data-item="Dryer" transform="translate(43.6 32.025) rotate(90)"><use href="#machine"/></g>
       <g data-room="laundry" data-item="North 24 36 36 24 inch bases"><rect x="30.5" y="26.95" width="10" height="2" class="cabinet"/><path d="M32.5 26.95V28.95M35.5 26.95V28.95M38.5 26.95V28.95" stroke="#9e8a6d" stroke-width=".07"/></g>
@@ -203,7 +206,7 @@
       <rect x="30.4" y="32.825" width="6.7" height="2.1" fill="none" stroke="#637e89" stroke-width=".08"/>
     </g>
     <g id="operating-envelopes">
-      <rect x="9.6" y="48.7" width="1.8" height="2.45" class="operation"/>
+      <rect x="9.6" y="47.2" width="1.8" height="2.45" class="operation"/>
       <rect x="20.35" y="46.1" width="2.35" height="1.9" class="operation"/>
       <rect x="39.3" y="29.15" width="1.5" height="2.8" class="operation"/>
       <rect x="39.3" y="32.025" width="1.5" height="2.8" class="operation"/>
@@ -215,6 +218,7 @@
       <path id="mechanical-door-sweep" d="M37.9 35.1V32.6A2.5 2.5 0 0 1 40.4 35.1" class="operation"/>
       <path d="M.8 40.45V37.95A2.5 2.5 0 0 1 3.3 40.45M31.1 40.45V37.95A2.5 2.5 0 0 0 28.6 40.45" class="operation"/>
       <path d="M18.725 5.25H21.225A2.5 2.5 0 0 0 18.725 2.75" class="operation"/>
+      <path id="closet4-door-sweep" d="M18.7 51.45H21.2A2.5 2.5 0 0 0 18.7 48.95" class="operation"/>
     </g>
     <rect x="0.511" y="13.65" width="6.667" height="5" rx="0.12" class="bed"/>
     <path d="M1.6 13.65V18.65" stroke="#a69b89" stroke-width="0.07"/>
@@ -222,8 +226,8 @@
     <path d="M36.6 16.4H41.1" stroke="#a69b89" stroke-width="0.07"/>
     <rect x="0.511" y="43.5" width="6.25" height="4.5" rx="0.12" class="bed"/>
     <path d="M1.55 43.5V48" stroke="#a69b89" stroke-width="0.07"/>
-    <rect x="24.789" y="44.7" width="6.25" height="4.5" rx="0.12" class="bed"/>
-    <path d="M30 44.7V49.2" stroke="#a69b89" stroke-width="0.07"/>
+    <rect x="24.089" y="44.7" width="6.25" height="4.5" rx="0.12" class="bed"/>
+    <path d="M29.3 44.7V49.2" stroke="#a69b89" stroke-width="0.07"/>
 
     <text x="7.55" y="11.8" class="room">PRIMARY BEDROOM</text>
     <text x="7.55" y="13" class="size">14 ft 9 in x 19 ft 9 in</text>
@@ -253,14 +257,14 @@
     <text x="3.9" y="40" class="furniture-note">9 ft x 5 ft</text>
     <text x="32" y="39" class="room">BATH 4</text>
     <text x="32" y="40" class="furniture-note">9 ft x 5 ft</text>
-    <text x="6.43" y="50.4" class="room">BEDROOM 3</text>
-    <text x="6.43" y="51.8" class="size">12 ft 6 in x 13 ft</text>
-    <text x="25.3" y="50.9" class="room">BEDROOM 4</text>
-    <text x="25.3" y="52.2" class="size">12 ft 6 in x 13 ft</text>
+    <text x="6.43" y="41.9" class="room">BEDROOM 3</text>
+    <text x="6.43" y="42.9" class="size">12 ft 6 in x 11 ft 6 in</text>
+    <text x="25.3" y="42" class="room">BEDROOM 4</text>
+    <text x="25.3" y="43.1" class="size">12 ft 2 in x 11 ft 6 in</text>
     <text x="15" y="42.7" class="furniture-note">CLOSET 3</text>
     <text x="15" y="43.7" class="furniture-note">5 ft 6 in wide</text>
-    <text x="16.35" y="50.6" class="furniture-note">CLOSET 4</text>
-    <text x="16.35" y="51.7" class="furniture-note">5 ft 6 in wide</text>
+    <text x="15.7" y="49.7" class="furniture-note">CLOSET 4</text>
+    <text x="15.7" y="51" class="furniture-note">5 ft 6 in x 4 ft 6 in</text>
 
     <path class="sightline" d="M20 28L15.1 25.1M20 28L29 25.05M20 28L11.175 40.45M20 28L20.475 40.45"/>
     <circle cx="20" cy="28" r="0.48" fill="#258373"/>
@@ -281,45 +285,76 @@
     <text x="11.175" y="40.75" class="door-number">3</text>
     <text x="20.475" y="40.75" class="door-number">4</text>
 
-    <path d="M-0.225 56.3H32.125M-0.225 55.7V56.9M32.125 55.7V56.9" fill="none" stroke="#88968d" stroke-width="0.07"/>
-    <text x="15.95" y="58" class="size">Front width retained: 32 ft 4.2 in exterior-face</text>
+    <path d="M-0.225 54.8H31.425M-0.225 54.2V55.4M31.425 54.2V55.4" fill="none" stroke="#88968d" stroke-width="0.07"/>
+    <text x="15.6" y="56.5" class="size">Front width: 31 ft 7.8 in exterior-face</text>
     <path d="M-0.225 -2.3H44.225M-0.225 -2.9V-1.7M44.225 -2.9V-1.7" fill="none" stroke="#88968d" stroke-width="0.07"/>
     <text x="22" y="-3.5" class="size">Main-body exterior width: 44 ft 5.4 in</text>
+    <g id="attic-storage" data-area-counted="false">
+      <rect x="44" y="15" width="11.5" height="25.45" fill="#efe9dc"/>
+      <rect x="44" y="15" width="11.5" height="25.45" fill="url(#stairHatch)" opacity=".45"/>
+      <path d="M44 15H55.5V40.45H43.85" fill="none" stroke="#6f6a5d" stroke-width=".22" stroke-dasharray=".7 .25"/>
+      <path d="M49.75 22V30.5M47 22H52.5M47 30.5H52.5" fill="none" stroke="#9e8a6d" stroke-width=".07" stroke-dasharray=".3 .2"/>
+    </g>
+    <text x="49.75" y="19.4" class="room" style="fill:#6f6a5d">ATTIC STORAGE</text>
+    <text x="49.75" y="20.7" class="tiny">Unfinished / unconditioned</text>
+    <text x="49.75" y="21.9" class="tiny">~11 ft x 25 ft; not counted</text>
+    <text x="49.75" y="33" class="tiny">Headroom / framing TBD</text>
+    <g id="attic-storage-door">
+      <rect x="43.75" y="36.6" width="0.55" height="2.5" fill="#efe9dc"/>
+      <path d="M44.225 36.6H46.725" fill="none" stroke="#45534d" stroke-width=".1"/>
+      <path d="M46.725 36.6A2.5 2.5 0 0 1 44.225 39.1" class="operation"/>
+      <text x="46.4" y="40" class="tiny">Door from furnace</text>
+    </g>
+    <text x="49.5" y="42.1" class="room" style="fill:#79618b">GARAGE BELOW</text>
+    <text x="49.5" y="43.5" class="tiny">Dashed: lower wall centerlines</text>
+    <text x="49.5" y="45" class="tiny">South of storage: garage roof only</text>
   </g>
 
-  <g transform="translate(820 165)">
+  <g transform="translate(970 165)">
     <rect width="555" height="212" rx="12" fill="#e4eee5"/>
     <text x="25" y="38" class="panel-heading">The organizing move</text>
     <text x="25" y="73" class="body">Come up the existing stair into one open area.</text>
     <text x="25" y="101" class="body">The green dot is a shared viewing position;</text>
     <text x="25" y="129" class="body">dashed lines reach all four bedroom entrances.</text>
-    <text x="25" y="164" class="small">Laundry wall tucked in; Bath 2 / Closet 2 swapped.</text>
-    <text x="25" y="187" class="small">Four door sightlines remain clear in the schematic.</text>
+    <text x="25" y="164" class="small">Purple dashed outline: actual garage walls below.</text>
+    <text x="25" y="187" class="small">Laundry / east Bath 4 / furnace overlap part of garage.</text>
 
-    <text x="5" y="266" class="panel-heading">Furnished, without filling the gallery</text>
+    <text x="5" y="266" class="panel-heading">Four bedrooms; no bedroom over garage</text>
     <text x="5" y="303" class="body">Queen primary; three full beds with actual frame sizes.</text>
     <text x="5" y="332" class="body">Nightstands, four desks / chairs and reading seats.</text>
     <text x="5" y="361" class="body">Two primary chairs, side table and media console.</text>
     <text x="5" y="390" class="body">Primary closet: west / south / east wraparound storage.</text>
-    <text x="5" y="430" class="body">Bath 2 now east: 9 x 5 ft, same fixture sizes.</text>
-    <text x="5" y="459" class="body">Closet 2 now west: about 5 ft 4 in x 7 ft.</text>
-    <text x="5" y="488" class="body">Laundry wall meets counter ends; 3-ft nominal entry.</text>
+    <text x="5" y="430" class="body">Bath 2 / Closet 2 stay swapped; laundry counters retained.</text>
+    <text x="5" y="459" class="body">Front bedrooms: 18 in shallower; Bed 4 also 8.4 in narrower.</text>
+    <text x="5" y="488" class="body">Closet 4: 5 ft 6 in x 4 ft 6 in; same storage run lengths.</text>
     <text x="5" y="524" class="small">Furnace room size is provisional; service / ducts need sizing.</text>
     <text x="5" y="547" class="small">Dashed amber: door sweeps / pulled chairs / appliance zones.</text>
 
     <rect x="0" y="585" width="555" height="232" rx="12" fill="#f0e8d9"/>
-    <text x="25" y="624" class="panel-heading">Area check: further reduction needed</text>
-    <text x="25" y="657" class="body">Main body: 44.45 x 28.90 = 1,284.605 sq ft</text>
-    <text x="25" y="684" class="body">Front extension: 32.35 x 18.70 = 604.945 sq ft</text>
-    <text x="25" y="711" class="body">Bath projection: 14.35 x 6.50 = 93.275 sq ft</text>
-    <text x="25" y="738" class="body">Net base area 1,978.667 + service extension 63.933</text>
-    <text x="25" y="778" font-size="24" font-weight="700">TOTAL  2,042.60 sq ft  |  42.60 over target</text>
-    <text x="5" y="854" class="small">About 17.3 sq ft returned to gallery; gross area unchanged.</text>
-    <text x="5" y="877" class="small">Bedroom 4 chair gap: 23.9 in tucked / 14.9 in pulled.</text>
-    <text x="5" y="900" class="small">Not a passing route. Simultaneous operation still unverified.</text>
+    <text x="25" y="624" class="panel-heading">Area check: below 2,000 sq ft gross</text>
+    <text x="25" y="657" class="body">Previous exterior-face gross: 2,042.599 sq ft</text>
+    <text x="25" y="684" class="body">Front depth trim: 32.35 x 1.50 = 48.525 sq ft</text>
+    <text x="25" y="711" class="body">Bed 4 east trim: 0.70 x 11.85 = 8.295 sq ft</text>
+    <text x="25" y="738" class="body">Includes walls / stairs; excludes only actual stair gap.</text>
+    <text x="25" y="778" font-size="24" font-weight="700">TOTAL  1,985.78 sq ft  |  14.22 below target</text>
+    <text x="5" y="854" class="small">Attic storage ~293 sq ft gross stays unfinished/unconditioned; not counted.</text>
+    <text x="5" y="877" class="small">Garage roof/headroom, floor loads and fire separation unresolved.</text>
+    <text x="5" y="900" class="small">Compact front rooms: occupied seating / storage use need review.</text>
   </g>
 
-  <path d="M55 1080H1380" stroke="#d5d8ce"/>
-  <text x="55" y="1109" class="small">Generic study footprints, not selected products. Static fit is not occupied-use approval; door swings, fixture spacing and storage capacity need review.</text>
-  <text x="55" y="1135" class="small">Mechanical service/replacement route through laundry is unverified. Windows, roof, headroom, stair protection and structure remain review-required.</text>
+  <g transform="translate(70 1100)">
+    <rect width="1470" height="190" rx="12" fill="#efe9dc"/>
+    <text x="25" y="40" class="panel-heading">Version B adds attic storage over the garage</text>
+    <text x="25" y="78" class="body">About 11 ft x 25 ft (~293 sq ft gross) over the north garage, beside Bedroom 2 / laundry / furnace.</text>
+    <text x="25" y="108" class="body">Door from the furnace room, which also serves equipment access.</text>
+    <text x="25" y="138" class="body">Upper wall lines up with the garage's east wall, so the second-floor mass reads continuous outside.</text>
+    <text x="25" y="178" class="body" font-weight="700">Kept unfinished and unconditioned, so not counted in the 1,985.78 sq ft.</text>
+    <text x="800" y="78" class="small">If drywalled, finished, heated or cooled later it becomes counted living area (~2,280 sq ft).</text>
+    <text x="800" y="108" class="small">Assessors may still add minor value for unfinished space; confirm with the county assessor.</text>
+    <text x="800" y="138" class="small">Floor framing over the garage span, roof/headroom and garage fire separation need professional review.</text>
+  </g>
+
+  <path d="M55 1300H1540" stroke="#d5d8ce"/>
+  <text x="55" y="1329" class="small">Generic study footprints, not selected products. Static fit is not occupied-use approval; door swings, fixture spacing and storage capacity need review.</text>
+  <text x="55" y="1355" class="small">Over-garage floor, roof/headroom, fire separation, HVAC and plumbing require professional review. This diagram does not approve construction.</text>
 </svg>

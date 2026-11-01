@@ -4,8 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const HomeRoof = require('../floor-plan-roof.js');
-const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+const HomeRoof = require('../assets/js/floor-plan-roof.js');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
 
 function render(metal = false, override = null) {
   class Vector {
@@ -91,10 +91,10 @@ test('garage roof is one full-width front gable joined to the retained hip, with
   const frontApex = plan.faces.find((face) => face.roof === gable.id && HomeRoof.contains(face.polygon, [43.25, 49.225]));
   assert.ok(frontApex);
   close(HomeRoof.heightAt(frontApex.plane, [43.25, 49.225]), 15.73562753036437);
-  assert.ok(plan.joins.some((join) => join.type === 'valley' && join.roofs.includes(gable.id) && join.roofs.includes('Garage hip')));
+  assert.ok(plan.joins.some((join) => join.type === 'valley' && join.roofs.includes(gable.id) && join.roofs.includes('Garage service return')));
   const undersides = model.children.filter((part) => part.name === 'Closed connected roof underside');
   assert.equal(undersides.length, model.children.filter((part) => part.userData.roofSurface).length);
-  const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   assert.doesNotMatch(source, /Garage metal canopy|Garage brow|GarageCanopyDefinitions/);
   function close(actual, expected) { assert.ok(Math.abs(actual - expected) < 1e-5, `${actual} != ${expected}`); }
 });
@@ -132,10 +132,10 @@ test('lower mixed roof renders clipped metal ribs and opaque undersides on the d
       assert.ok(Math.abs(positions[i + 1] - HomeRoof.heightAt(face.plane, [positions[i], positions[i + 2]])) < 1e-5);
     }
   }
-  assert.ok(model.children.some(p => p.name === 'Clipped standing-seam roof rib'));
+  assert.ok(!model.children.some(p => p.name === 'Clipped standing-seam roof rib'), 'Orphan metal loft transition has been removed');
   const metalPerimeter = model.children.filter(p => /Connected roof .*fascia/.test(p.name) &&
     p.position.x > 55.7 && p.position.z < 35.55);
-  assert.equal(metalPerimeter.length, 0, 'Metal eaves receive their own fitted sections, not slate fascia');
+  assert.ok(metalPerimeter.length >= 1, 'The replacement slate lean-to now receives actual perimeter fascia');
 });
 
 test('metal ribs follow clipped porch/entry polygons with one shared finish and no standalone intersecting panels', () => {

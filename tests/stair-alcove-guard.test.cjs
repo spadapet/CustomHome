@@ -4,9 +4,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const layout = require('../upstairs-layout.js');
-const { getGuestEntryLayout, getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const layout = require('../assets/js/upstairs-layout.js');
+const { getGuestEntryLayout, getGroundFloorDefaultPlan } = require('../assets/js/floor-plan-ground.js');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 const entry = getGuestEntryLayout();
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 

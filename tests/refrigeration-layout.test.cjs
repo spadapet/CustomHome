@@ -3,8 +3,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
-const exteriorSource = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
+const exteriorSource = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
 
 test('the shared kitchen wall and refrigeration bank move six inches without widening the oven tower', () => {
   class Group {
@@ -36,7 +36,7 @@ test('the shared kitchen wall and refrigeration bank move six inches without wid
   assert.equal(fridgeCenter, 30.5);
   assert.equal(freezerCenter, 35.75);
   assert.equal(context.layout.pantryCenterX, (fridgeCenter + freezerCenter) / 2);
-  const plan = require('../floor-plan-ground.js').getGroundFloorDefaultPlan();
+  const plan = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan();
   const movedWall = plan.walls.find(([name]) => name === 'Kids east return');
   assert.equal(movedWall[1], 29, 'Restore the gray kids-room return');
   assert.equal(movedWall[3], 29);
@@ -50,11 +50,11 @@ test('the shared kitchen wall and refrigeration bank move six inches without wid
 });
 
 test('sink/window bank stays centered and actual side counters fit the relocated cooking wall', () => {
-  const context = { casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12, getKitchenPassageLayout: require('../floor-plan-ground.js').getKitchenPassageLayout, getPrepWindowLayout: require('../floor-plan-ground.js').getPrepWindowLayout, getPrepWindowBankLayout: require('../floor-plan-ground.js').getPrepWindowBankLayout };
+  const context = { casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12, getKitchenPassageLayout: require('../assets/js/floor-plan-ground.js').getKitchenPassageLayout, getPrepWindowLayout: require('../assets/js/floor-plan-ground.js').getPrepWindowLayout, getPrepWindowBankLayout: require('../assets/js/floor-plan-ground.js').getPrepWindowBankLayout };
   const start = source.indexOf('  const kitchenWallLeft =');
-  context.getGroundFrontLayout = require('../floor-plan-ground.js').getGroundFrontLayout;
-  context.getKitchenWindowBankLayout = require('../floor-plan-ground.js').getKitchenWindowBankLayout;
-  context.getGuestSuiteLayout = require('../floor-plan-ground.js').getGuestSuiteLayout;
+  context.getGroundFrontLayout = require('../assets/js/floor-plan-ground.js').getGroundFrontLayout;
+  context.getKitchenWindowBankLayout = require('../assets/js/floor-plan-ground.js').getKitchenWindowBankLayout;
+  context.getGuestSuiteLayout = require('../assets/js/floor-plan-ground.js').getGuestSuiteLayout;
   const end = source.indexOf('  const kidsRoomNorthZ =', start);
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext(`${source.slice(start, end)}\nglobalThis.geometry = { kitchenWallLeft, kitchenWallRight, kitchenSinkX, kitchenSinkWindows };`, context);
@@ -85,7 +85,7 @@ test('sink/window bank stays centered and actual side counters fit the relocated
 });
 
 test('kids-room expansion preserves kitchen return and all opening widths', () => {
-  const plan = require('../floor-plan-ground.js').getGroundFloorDefaultPlan();
+  const plan = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan();
   const kids = plan.rooms.find((room) => room.name === 'Kids room');
   assert.equal(kids.w, 12.2);
   const kidsFloors = plan.floors.filter((floor) => floor.room === 'Kids room');
@@ -204,5 +204,5 @@ test('modeled room doors, cabinet pullouts and exterior overhead leaves carry cl
   assert.match(source, /powderLeaf\.userData = \{ interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 90, openRotationSign: 1 \}/);
   assert.match(exteriorSource, /interactiveHouseDoor: \{ operation: 'overhead', open: false, maxAngleDegrees: 90/);
   assert.match(exteriorSource, /buildArchedFrontEntry\(THREE,/);
-  assert.match(fs.readFileSync(require.resolve('../floor-plan-ground.js'), 'utf8'), /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 110/);
+  assert.match(fs.readFileSync(require.resolve('../assets/js/floor-plan-ground.js'), 'utf8'), /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 110/);
 });

@@ -30,12 +30,12 @@ function buildRoof() {
     traverse() {}
   }
   const context = {
-    projectionWest: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathWest - .225,
-    projectionEast: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathEast + .225,
-    projectionRear: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathNorth - .225,
+    projectionWest: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathWest - .225,
+    projectionEast: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathEast + .225,
+    projectionRear: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathNorth - .225,
     masonryMaps: null,
     lot: { left: -12.605, right: 62.395, rear: -32.325 }, fenceBoundaryInset: 0.5,
-    THREE: { BoxGeometry, SphereGeometry: class extends BoxGeometry { constructor(radius) { super(radius * 2, radius * 2, radius * 2); } }, PointLight: class extends Group { constructor(color, intensity, distance, decay) { super(); Object.assign(this, { color, intensity, distance, decay }); } }, Mesh, Group }, livingFeatureWall: require('../floor-plan-ground.js').getLivingRoomFeatureLayout(), glass: {}, mat: () => ({}), wallThickness: 0.45, frontBrick: {}, brickFaceUVs() {}, wood: {}, dark: {}, white: {}, baseStone: {}, stepStone: {}, stepEdge: {}, glow: {},
+    THREE: { BoxGeometry, SphereGeometry: class extends BoxGeometry { constructor(radius) { super(radius * 2, radius * 2, radius * 2); } }, PointLight: class extends Group { constructor(color, intensity, distance, decay) { super(); Object.assign(this, { color, intensity, distance, decay }); } }, Mesh, Group }, livingFeatureWall: require('../assets/js/floor-plan-ground.js').getLivingRoomFeatureLayout(), glass: {}, mat: () => ({}), wallThickness: 0.45, frontBrick: {}, brickFaceUVs() {}, wood: {}, dark: {}, white: {}, baseStone: {}, stepStone: {}, stepEdge: {}, glow: {},
     patio: { add(mesh) { meshes.push(mesh); } },
     group: { add(mesh) { meshes.push(mesh); }, getObjectByName() { return { traverse() {} }; } },
     texturedBox(parent, x, y, z, w, h, d) {
@@ -54,7 +54,7 @@ function buildRoof() {
     mesh.userData = { x, z, widthFeet: w, depthFeet: d, topFeet: top };
     return mesh;
   };
-  const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const start = source.indexOf('  const patioBounds =');
   const end = source.indexOf('  const portableFirepit =', start);
   assert.ok(start >= 0 && end > start);
@@ -316,7 +316,7 @@ test('vegetable garden includes trellised cucumbers and beans plus trailing pump
 });
 
 test('patio camera mounts to the dining wall after its post is removed', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const start = source.indexOf('  const cameraSchedule =');
   const end = source.indexOf('  cameras.userData.schedule', start);
   assert.ok(start >= 0 && end > start);
@@ -334,7 +334,7 @@ test('patio camera mounts to the dining wall after its post is removed', () => {
 test('garden connector meets patio grade and transitions to the existing perimeter path', () => {
   const { meshes, context } = buildRoof();
   Object.assign(context, { paths: context.patio, eastPaverEdgeX: 60.145, pathWidth: 3.5 });
-  const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const start = source.indexOf('  const patioConnectorX =');
   const end = source.indexOf('  const lawn =', start);
   assert.ok(start >= 0 && end > start);

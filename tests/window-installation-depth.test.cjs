@@ -3,7 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 
 // Focused datum-solver tests. Actual THREE constituent geometry on the served
 // full house is checked separately by window-flush-geometry.js.

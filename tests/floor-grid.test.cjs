@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 const gridSource = source.slice(source.indexOf('  const floorGrid ='), source.indexOf('  const groundVisibility ='));
 
 function createGrid() {

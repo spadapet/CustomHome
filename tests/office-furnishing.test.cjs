@@ -4,8 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
-const frontLayout = require('../floor-plan-ground.js').getGroundFrontLayout();
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
+const frontLayout = require('../assets/js/floor-plan-ground.js').getGroundFrontLayout();
 
 class Group {
   constructor() {
@@ -139,7 +139,7 @@ test('office matches the revised top view: centered north desk, northwest equipm
   assert.ok(Math.abs((sofa.minX - 0.2375) * 12 - 1) < 1e-8, 'Loveseat clears west baseboard by one inch');
   assert.ok(Math.abs((frontLayout.wallZ - 0.2375 - sofa.maxZ) * 12 - 1) < 1e-8, 'Loveseat clears south baseboard by one inch');
   const sofaTop = Math.max(...loveseat.children.map(mesh => mesh.position.y + mesh.h / 2));
-  const windowSill = require('../floor-plan-ground.js').getGroundFrontWindows()[0].sill;
+  const windowSill = require('../assets/js/floor-plan-ground.js').getGroundFrontWindows()[0].sill;
   assert.ok(Math.abs((windowSill - 1 / 12 - sofaTop) * 12 - 2.6) < 1e-8, 'Loveseat back is 2.6 inches below the one-inch sill underside; access is not implied');
   const machine = bounds(elliptical);
   assert.ok(Math.abs((machine.minZ - 41.2375) * 12 - 1) < 1e-8, 'Equipment clears north baseboard by one inch');

@@ -1,6 +1,156 @@
 # Ground-floor plan reference
 
-## Current coordinated exterior roof and lighting study — October 31
+## Rear alignment — implemented primary suite replan
+
+Actual Version A rear centerline is **z6.65 ft**, rear masonry face z6.425,
+now continuous across primary bedroom, bathroom/WC, Closet 2 and Bath 2.
+The bath rear moves **6.5 ft**, not H's 5-ft alternative. H and its red
+unadopted overlay remain historical; no unrelated H changes are applied.
+
+Owner-authorized replan replaces the failed shortened serial layout:
+primary bath **13.55 × 13.5 → 13.55 × 9.8 ft**; divider z14 → z16.8.
+Closet **13.55 × 9 → 13.55 × 6.2 ft** plus a 6.85 × 3.4-ft open linen
+extension into the central gallery, x18.45–25.65/z23.35–26.75 centerlines.
+Approximately 107.30 sq ft clear closet floor versus 121.95 before.
+Two side gallery routes remain; fixed stairs and all other room bounds
+and openings, including both bedroom gallery entries, remain unchanged.
+
+Retain the original 33.6 × 62.4-in north–south tub, rotated 42 × 72-in
+two-person shower northeast, both standard 60/48-in single-sink vanities
+on the south wall, and enclosed northwest WC (3.275 × 4.925 ft clear).
+WC south door now opens inward. Rear 36 × 60-in casement centers x20.9,
+1.5 in west of the tub center to clear the shower wet-wall return and casing.
+Tub centers x21.025, balancing its complete faucet envelope and shower body.
+Bedroom → closet west entry z18.85–21.85 → bath south entry x25.65–28.65;
+all fifteen room leaves default closed at 96-in heads.
+Closet entry is north-hinged into the bedroom; its fixed gallery opening is
+south-hinged into the bedroom to clear the unchanged chairs. The full-size
+console/TV move one foot north to z16.65. The retained drawer bank turns east
+at (19.325,23.2), keeping the open linen extension accessible.
+Three full 5-ft hanging bays, five continuous 4.85-ft rods (24.25 linear ft),
+both original six-level shelves (6.6 × 1.3 and 2.7 × 2 ft, 83.88 sq ft shelf
+area), all clothes and the original 48-in four-drawer bank remain.
+
+Actual constituent geometry including faucets/handles: bathroom aisle
+**30.6 in**, WC approach **29.25 in** at casing (30 in from paint),
+hanging aisle **26.4 in**, linen route beside drawers **40.56 in**,
+both gallery side routes with
+baseboards **34.5 in**. The closet is narrow single-file; no accessibility,
+occupied-comfort or simultaneous door/cabinet use approval. Close cabinet
+fronts before passing. Tub/shower body separation and faucet/WC paint gap are
+**4.5 in** each:
+selected products, cleaning, enclosure, waterproofing and service clearances
+need review. These are measured model trade-offs, not code thresholds.
+
+Floors/walls, window/trim, roof, rear exterior/soffit light mounts and the
+current Version A SVG are coordinated. Saved JSON and ground geometry stay.
+Implemented upstairs gross **1,892.5041667 sq ft**, down **93.275** from
+1,985.7791667; unchanged ground **1,966.4427083**, combined **3,858.946875**.
+Local only, not construction drawings. Structure/support, garage separation,
+egress, plumbing/electrical, wet glazing/privacy/reach, roof drainage/flashing
+and occupied operation remain professional-review requirements.
+
+Verification: full editing runner **420 tests / 67 suites / 12 syntax files**;
+actual HTTP Three.js r170 meshes measured after matrix updates, including
+trim, faucets and handles; final browser sweeps include 552 nonempty suite
+constituent meshes. Balanced tub/shower and faucet/WC paint gaps both measure
+4.5 in in r170. Room-door sweeps sampled 465 poses and individual
+vanity-front/drawer operations 341 poses, with defaults restored. A 24-in
+disk reaches bedroom/closet/bath/WC/linen approaches with doors open and
+fronts closed, not occupied-use certification. Inspected bath/closet,
+furnished 2D, Version A SVG, front/rear/both side elevations and roof.
+Day/Night, floor/2D and six closet-canopy restorations checked; furnishing
+tuples unchanged. Production reloads have one Three canvas, no temporary
+measurement hook and Day/closed defaults; no application runtime errors.
+The direct SVG preview's Electron preload diagnostic is a browser-host
+limitation, not a model error. Git whitespace passes; saved JSON unchanged.
+
+## Current implemented under-2000 upstairs — October 31
+
+Approved exact-coordinate reference: `assets/images/plans/upstairs-2000/version-a.svg`.
+Unimplemented diagram alternatives in the same folder: `version-b.svg`
+(unfinished attic over the garage), `version-c.svg` (finished wing,
+1,988.83 sq ft), `version-d.svg` (Version B with a finished family loft
+over the garage, 1,993.73 sq ft), `version-e.svg` (the Version D
+over-garage loft with the Version B primary bath and a 2-ft-4-in narrower
+primary bedroom, 1,997.61 sq ft), `version-g.svg` (Version B with 12x13
+Bedrooms 3 and 4, a 14x19 primary bedroom, 5x6 Closet 2, 6x5 Closet 4,
+13x8 laundry and 5x5 furnace room, ~299 sq ft attic unfinished,
+1,992.63 sq ft), `version-h.svg` (whole-house study near 3,800: upstairs with one
+straight rear wall, primary tub restored, 14x19 primary, 14x13 Bedroom 2 and
+11x8 laundry, 1,850.59 sq ft; ground keeps its front wall, with the kitchen,
+prep kitchen and living room sharing one rear line: 11x19'11" kitchen,
+15x8 prep kitchen, 13'2"x18'8" living room and 14x7 dining, plus a 12x7'10"
+kids room, 12x12 guest room and 12x14 office, 1,955.31 sq ft; total
+3,805.89 sq ft, 5.89 over) and `version-f.svg` (compact gallery with
+Bedrooms 3 and 4 pulled 5 ft 4 in north, Bath 4 directly above Bedroom 4
+and Bath 3 beside it off a 36-in hall, and the south half of the attic
+finished as laundry, furnace closet and ~190 sq ft flex loft; the north half stays unfinished,
+1,984.00 sq ft).
+The actual furnished model now uses that compact topology, not the older
+loft plan. Measured exterior-face gross is **1,892.5041667 sq ft upstairs**,
+**1,966.4427083 sq ft ground**, **3,858.946875 sq ft combined**. Walls and
+descending stairs count; only actual stair gaps are deducted. These are
+model gross estimates, not certified appraisal or permit areas.
+
+| Space | Paint-face study dimension |
+|---|---|
+| Primary bedroom | 14.75 × 19.75 ft |
+| Primary bath | 13.55 × 9.8 ft overall, including private WC |
+| Primary closet | 13.55 × 6.2 ft plus 6.85 × 3.4-ft linen extension; bedroom-to-closet-to-bath |
+| Bedroom 2 | Stepped 14.65 × 14.4-ft main envelope |
+| Bath 2 / Closet 2 | East 9 × 5 ft / west 5.3 × 7 ft |
+| Bedroom 3 / Bedroom 4 | 12.5 × 11.5 / 12.15 × 11.5 ft |
+| Closet 3 / Closet 4 | 5.5 × 6.15 / 5.5 × 4.5 ft |
+| Bath 3 / Bath 4 | 9 × 5 ft each |
+| Laundry | 13.425 × 8 ft, wraparound counters meeting west wall |
+| Mechanical | Provisional 6 × 5-ft reservation |
+
+Fixed stair x0.175–10.008333/z27.016667–34.841667 and its 44 × 46.9-in
+arrival remain. Gallery faces all four bedroom entrances. Fifteen private
+leaves retain 96-in heads and closed defaults. Exact bed, desk, nightstand,
+fixture/storage positions follow the SVG; existing full-size chair proxies
+remain. No upstairs rugs/dressers or loft furnishings. Standard north laundry
+bases are 24/36/36/24 in; south bases 24/24/24 in. Counter aisle is 45.3 in
+before projecting hardware, not a simultaneous operating approval.
+The actual four-entry gallery sightlines pass constituent checks. All 465
+sampled room-leaf poses clear retained desks/chairs/nightstands/vanities and
+the mechanical proxy. The 12-in avatar reaches all four bedrooms and fifteen
+room approaches. Bath 2 reverses the SVG's outward arc to an inward swing,
+preserving its exact opening and closed pose while clearing the bed-head
+corner. These measurements are not occupied or simultaneous-use approval.
+
+Partial garage coverage is limited to laundry, east Bath 4 and mechanical,
+not bedroom paint-face interiors. Test both actual centerline garage bays:
+north x44.2333333–55.5/z15–26.9 and south x31.2–55.5/z26.9–49.
+Compact upstairs perimeter: 16 shared segments; 13 actual upstairs openings,
+48 whole-house window units. Front pairs center x6.425/24.95, z52.3.
+The retained 25.4-ft paired-gable crowns sit over these smaller bedrooms.
+Compact 3:12 main/east hips start y20.6 above 9-ft wall heads at y19,
+with an 18-in provisional framing zone. The old loft roof/transition is gone.
+Low garage north lean-to and service-south return join the full-width
+garage gable outside the upper footprint. Their east-side cap y12 stays
+below bedroom/laundry sills y13; actual full-height service interiors remain
+under the main/east-wing roof. The service return also hips down east,
+with a bracketed upper-corner drop and enclosed charcoal roof-surface
+collector to the east perimeter leader rather than a suspended high pipe.
+Support/flashing/ice/overflow/capacity need review.
+Shared roof clipping, soffits/fascia, wall-head closures,
+windows and floor/room cameras are coordinated. Ground model and saved JSON
+are unchanged; local trial only, no commit/push.
+Verification: 412 tests across 66 suites and 11 JS syntax checks pass.
+HTTP model/elevation/room screenshots, Day/Night, floor/visibility restoration
+and world-space countertop/roof/window-exposure checks were performed;
+temporary browser instrumentation was removed. No construction approval.
+
+Occupied routes, simultaneous doors/appliances/drawers, exact products,
+window operation/egress, HVAC service, over-garage structural floor/bearing
+and fire separation, roof framing/ventilation/valleys, waterproofing,
+guards/handrails and drainage/overflow/freeze/lawful discharge require
+professional review. Roof skins, veneer and finish soffits are not support.
+No construction or code approval. Patio firepit remains cold storage only.
+
+## Historical superseded exterior/loft roof study — October 31
 
 Adapt the owner's paired-gable/metal-canopy reference, not its floor plan
 or shingle siding. Two true cross-gables centered at x6.425/25.145833 ft
@@ -86,7 +236,7 @@ All heights reference the house floor, not grade/garage floor. Measured east
 prep sill-trim underside26.37 in leaves0.87 in above coping; west living
 trim underside28.32 in and front cut-stone sill underside32.28 in are higher.
 Original finished wall faces and six-foot east ground-side fence clearance stay.
-Owner selected palette 2 Linen from the [palette sheet](assets/exterior-palette-options.svg),
+Owner selected palette 2 Linen from the [palette sheet](assets/images/exterior/exterior-palette-options.svg),
 replacing Oatmeal. Pale warm limestone, putty mortar, warm off-white
 trim/coping #f3eee4, muted warm-charcoal metal/roof #595953 and retained oak:
 light warm-neutral, not yellow/orange, pink or dark brown. At scan luminance128,
@@ -2116,7 +2266,7 @@ approval; close fronts for circulation and verify real products separately.
 
 Provide one door-mounted, full-extension base-cabinet organizer in the main
 kitchen with wooden vertical slots for cutting boards, baking sheets,
-muffin tins and serving trays. See the [owner's reference](assets/kitchen-tray-divider-reference.png)
+muffin tins and serving trays. See the [owner's reference](assets/images/interiors/kitchen-tray-divider-reference.png)
 and [kitchen requirement](kitchen.html#tray-divider-pullout). Match the existing
 white-oak Shaker cabinetry and satin-gold pull, not the photo's painted finish.
 Approved location: far-right sink-wall base bay, immediately right of the
@@ -2463,7 +2613,7 @@ bikes, equipment, door operation and fire separation.
 ## Living-room rendered study
 
 The [living-room page](foyer/living-room.html#cycles-render) includes a
-[1600 x 1000 Cycles image](assets/living-room-cycles.png) of the October 24,
+[1600 x 1000 Cycles image](assets/images/interiors/living-room-cycles.png) of the October 24,
 2026 furnished model. It preserves the exported geometry and adds render-only
 daylight, microtexture and a nominal 9 ft ceiling. It is a static visualization,
 not a photograph, updated model, photometric study or clearance approval.
@@ -2509,7 +2659,7 @@ extents, not finished clear dimensions or construction approval.
 
 The [viewer](floor-plan-3d.html?view=upstairs) no longer includes either floor designer. Camera views, tours, visibility controls and the one-foot grid remain.
 
-Serve over HTTP to read the existing [upstairs](upstairs-layout.json) and [ground-floor](ground-layout.json) saved layout data; removing the designers does not erase it. Empty overrides retain the furnished baseline. Saved ground edits still display structure only, with a warning; saved upstairs edits retain coordination warnings. The page no longer edits or automatically saves layouts. [Viewing guide](upstairs.html#model-study). Written schedules remain baseline context and require reconciliation after geometry changes.
+Serve over HTTP to read the existing [upstairs](assets/data/upstairs-layout.json) and [ground-floor](assets/data/ground-layout.json) saved layout data; removing the designers does not erase it. Empty overrides retain the furnished baseline. Saved ground edits still display structure only, with a warning; saved upstairs edits retain coordination warnings. The page no longer edits or automatically saves layouts. [Viewing guide](upstairs.html#model-study). Written schedules remain baseline context and require reconciliation after geometry changes.
 
 Every bathroom and powder room on every floor requires built-in warm, dim night lighting independent of the main lights. A switch-integrated night light is one option; product and controls remain undecided. See [electrical requirements](electrical.html#bathroom-night-lighting).
 
@@ -2517,11 +2667,11 @@ No firepit or firewood remains in front. The closed firepit at rear (40, -15), o
 
 The refrigerator and freezer doors start closed. Click or tap either modeled door to toggle its conceptual swing to the manufacturer-guide 115-degree full-access angle and back. The hinge and swing geometry are not manufacturer CAD; verify actual hinges, full opening, drawer withdrawal, and circulation separately.
 
-Current model audit: October 21, 2026. This is the consolidated reference for the [interactive floor plan](floor-plan-3d.html), checked against [model geometry](floor-plan-3d.js). Update it, [design context](design-context.md), and affected room requirements whenever the design changes.
+Current model audit: October 21, 2026. This is the consolidated reference for the [interactive floor plan](floor-plan-3d.html), checked against [model geometry](assets/js/floor-plan-3d.js). Update it, [design context](design-context.md), and affected room requirements whenever the design changes.
 
 ## Scope and measurement rules
 
-- The model follows the separately supplied [dimensioned stepped-footprint plan](assets/ground-floor-3d-source.png), not the [October 4 drawings](floor-plan-design.html#latest-plans). Those images and older preview renders are not updated when the model changes.
+- The model follows the separately supplied [dimensioned stepped-footprint plan](assets/images/plans/ground-floor-3d-source.png), not the [October 4 drawings](floor-plan-design.html#latest-plans). Those images and older preview renders are not updated when the model changes.
 - Dimensions are design-study measurements, not surveyed dimensions, certified clearances, rough openings, manufacturer CAD, or construction instructions. Product references do not mean a purchase or installation is approved.
 - Coordinates below are feet: **x increases right/east, z increases down/toward the front porch, y increases upward**. The compass points north toward decreasing z. `(x, z)` locates a plan center unless an extent is stated.
 - Room sizes follow the model's nominal floor envelopes, mostly to wall centerlines; subtract wall/finish thickness where relevant. Most walls are modeled 0.35 ft (4.2 in) thick. Window meshes are sometimes inset 0.1 ft from the opening plane.
@@ -2567,11 +2717,11 @@ includes the basement. Neither is the current viewer's exterior-face estimate.
 | Upstairs | 1,808.50 sq ft label | 2,047.13 sq ft, no above-garage room |
 | **Both floors** | **3,637.40 sq ft, provisional** | **3,962.39 sq ft** |
 
-The [ground-floor source drawing](assets/ground-floor-3d-source.png) prints total surface area 2,716.5 sq ft, garage 671.1 sq ft, and porch 216.5 sq ft: `2,716.5 - 671.1 - 216.5 = 1,828.9 sq ft` indoors. Its room schedule contains no separate covered-patio entry; do not subtract the later outdoor patio from this indoor subtotal. The individual printed room figures sum to 2,716.2 rather than 2,716.5 sq ft, a 0.3 sq ft schedule discrepancy.
+The [ground-floor source drawing](assets/images/plans/ground-floor-3d-source.png) prints total surface area 2,716.5 sq ft, garage 671.1 sq ft, and porch 216.5 sq ft: `2,716.5 - 671.1 - 216.5 = 1,828.9 sq ft` indoors. Its room schedule contains no separate covered-patio entry; do not subtract the later outdoor patio from this indoor subtotal. The individual printed room figures sum to 2,716.2 rather than 2,716.5 sq ft, a 0.3 sq ft schedule discrepancy.
 
-Adding the [upstairs source image's](assets/upstairs-dimensioned-reference.png) 1,808.5 sq ft label gives `1,828.9 + 1,808.5 = 3,637.4 sq ft`, consistent with an estimate of about 3,600. The upstairs label's measurement rules and treatment of the depicted above-garage area are unverified, so this is not a certified current-design total. The model exceeds these source figures by 98.01 sq ft downstairs and 238.63 sq ft upstairs. Adaptations and measurement bases differ; the known 29 sq ft kitchen/prep extension does not explain the full discrepancy. Do not attribute the entire difference to wall thickness or revise geometry merely to match a label.
+Adding the [upstairs source image's](assets/images/plans/upstairs-dimensioned-reference.png) 1,808.5 sq ft label gives `1,828.9 + 1,808.5 = 3,637.4 sq ft`, consistent with an estimate of about 3,600. The upstairs label's measurement rules and treatment of the depicted above-garage area are unverified, so this is not a certified current-design total. The model exceeds these source figures by 98.01 sq ft downstairs and 238.63 sq ft upstairs. Adaptations and measurement bases differ; the known 29 sq ft kitchen/prep extension does not explain the full discrepancy. Do not attribute the entire difference to wall thickness or revise geometry merely to match a label.
 
-Historical basis: the then-current default [ground-floor geometry](floor-plan-3d.js) and [upstairs geometry](floor-plan-upstairs.js), not the older drawing labels or browser-saved upstairs layout edits. Each story's nominal enclosed plan envelope included interior partitions, circulation, and full stair/landing footprints on each level. These older mostly wall-centerline measurements were a conceptual planning estimate, not certified exterior-face gross area, net usable area, appraised living area, or a zoning calculation.
+Historical basis: the then-current default [ground-floor geometry](assets/js/floor-plan-3d.js) and [upstairs geometry](assets/js/floor-plan-upstairs.js), not the older drawing labels or browser-saved upstairs layout edits. Each story's nominal enclosed plan envelope included interior partitions, circulation, and full stair/landing footprints on each level. These older mostly wall-centerline measurements were a conceptual planning estimate, not certified exterior-face gross area, net usable area, appraised living area, or a zoning calculation.
 
 The first-floor model takeoff consists of these non-overlapping rectangles. Coordinates and dimensions are feet:
 
@@ -2802,8 +2952,8 @@ The ground stair connection and saved layouts remain fixed. No above-garage
 bonus room or accessible storage is added; the measured upper projections
 require structural and site review.
 
-The earlier [dimensioned plan](assets/upstairs-dimensioned-reference.png) and
-[furnished reference](assets/upstairs-furnished-reference.png) are historical
+The earlier [dimensioned plan](assets/images/plans/upstairs-dimensioned-reference.png) and
+[furnished reference](assets/images/plans/upstairs-furnished-reference.png) are historical
 references, not the current measured layout. Earlier laundry/loft coordinates
 and service-core arrangements are superseded. The hall adapts around the
 fixed west stair rather than replacing it with the screenshot's stair box.

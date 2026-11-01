@@ -3,8 +3,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-const frontLayout = require('../floor-plan-ground.js').getGroundFrontLayout();
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
+const frontLayout = require('../assets/js/floor-plan-ground.js').getGroundFrontLayout();
 
 function planting() {
   class Mesh {

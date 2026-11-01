@@ -4,8 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const suite = require('../floor-plan-ground.js').getGuestSuiteLayout();
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const suite = require('../assets/js/floor-plan-ground.js').getGuestSuiteLayout();
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 
 class Group {
   constructor() {

@@ -26,7 +26,18 @@ function run(args, label) {
   return result.stdout;
 }
 
-const scripts = fs.readdirSync(root, { withFileTypes: true }).filter((entry) => entry.isFile() && /\.(?:js|cjs|mjs)$/.test(entry.name)).map((entry) => entry.name);
+function scriptFiles(directory) {
+  return fs.readdirSync(path.join(root, directory), { withFileTypes: true }).flatMap((entry) => {
+    const file = path.join(directory, entry.name);
+    return entry.isDirectory() ? scriptFiles(file) : /\.(?:js|cjs|mjs)$/.test(entry.name) ? [file] : [];
+  });
+}
+
+const scripts = [
+  ...fs.readdirSync(root, { withFileTypes: true }).filter((entry) => entry.isFile() && /\.(?:js|cjs|mjs)$/.test(entry.name)).map((entry) => entry.name),
+  ...scriptFiles(path.join('assets', 'js')),
+  ...scriptFiles('scripts')
+];
 for (const file of [...scripts, __filename]) run(['--check', file], file);
 
 let total = 0;

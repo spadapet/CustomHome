@@ -4,8 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const exteriorSource = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-const viewerSource = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const exteriorSource = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
+const viewerSource = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 
 test('exterior daylight isolates the raking sun, sky and exposure and restores both interior modes', () => {
   const context = {
@@ -85,10 +85,10 @@ class Mesh extends Group {
 function buildLighting() {
   const group = new Group();
   const context = {
-    HomeRoof: require('../floor-plan-roof.js'), floorToFloor: 10, garageFloorY: -1.25, wallThickness: 0.45, white: {},
-    measuredUpper: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry(),
-    frontShift: require('../floor-plan-ground.js').getGroundFrontLayout().extension,
-    frontWallZ: require('../floor-plan-ground.js').getGroundFrontLayout().wallZ,
+    HomeRoof: require('../assets/js/floor-plan-roof.js'), floorToFloor: 10, garageFloorY: -1.25, wallThickness: 0.45, white: {},
+    measuredUpper: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry(),
+    frontShift: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().extension,
+    frontWallZ: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().wallZ,
     THREE: {
       Group, Mesh, Vector3: Vector,
       CylinderGeometry: class {
@@ -195,7 +195,7 @@ test('wall lights have correctly oriented mounting plates and porch housings mee
     assert.ok(housing.position.y + housing.height * housing.scale.y / 2 < 0.16);
     assert.ok(lens.position.y - lens.height / 2 < 0);
   }
-  const roof = require('../floor-plan-roof.js');
+  const roof = require('../assets/js/floor-plan-roof.js');
   const plan = roof.buildRoofEnvelope(roof.getConnectedRoofDefinitions().filter(d =>
     !['Garage hip', 'Garage front gable', 'Dining rear projection'].includes(d.id)));
   for (const fixture of upper.slice(-2)) {

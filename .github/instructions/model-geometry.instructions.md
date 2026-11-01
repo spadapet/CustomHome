@@ -1,6 +1,6 @@
 ---
 description: "Use when editing shared room geometry, windows, doors, roof envelopes, exterior assemblies, upstairs placement or saved layout data."
-applyTo: "floor-plan-ground.js,floor-plan-upstairs.js,floor-plan-exterior.js,floor-plan-roof.js,upstairs-layout.js,ground-layout.json,upstairs-layout.json"
+applyTo: "assets/js/floor-plan-ground.js,assets/js/floor-plan-upstairs.js,assets/js/floor-plan-exterior.js,assets/js/floor-plan-roof.js,assets/js/upstairs-layout.js,assets/data/ground-layout.json,assets/data/upstairs-layout.json"
 ---
 
 # Coordinated model geometry

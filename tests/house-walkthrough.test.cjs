@@ -127,7 +127,7 @@ test('video is discoverable, accessible, responsive and does not autoplay or pre
   assert.match(page, /original soft instrumental music/);
   assert.doesNotMatch(page.slice(page.indexOf('id="house-walkthrough"'), page.indexOf('<video')), /<p>/);
   assert.match(read('floor-plan-3d.html'), /href="floor-plan-design\.html#house-walkthrough"/);
-  assert.match(read('style.css'), /\.house-walkthrough-video\{[^}]*width:100%;height:auto;aspect-ratio:16\/9/);
+  assert.match(read('assets/css/style.css'), /\.house-walkthrough-video\{[^}]*width:100%;height:auto;aspect-ratio:16\/9/);
   const poster = fs.readFileSync(path.join(root, 'assets', 'videos', 'whole-house-walkthrough.jpg'));
   assert.equal(poster.readUInt16BE(0), 0xffd8);
 });

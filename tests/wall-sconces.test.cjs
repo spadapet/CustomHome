@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 test('decorative sconces default to wall-backed ivory half-oval shades with bounded projection', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   assert.match(source, /function wallSconce\(parent, x, z, rotation, fabricShade = true\)/);
   const positions = [];
   const start = source.indexOf('      const shadePositions =');
@@ -21,12 +21,12 @@ test('decorative sconces default to wall-backed ivory half-oval shades with boun
 });
 
 test('restored kitchen pair uses existing ivory shades outside the full-width window trim', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   class Group {
     constructor() { this.children = []; this.userData = {}; }
     add(part) { this.children.push(part); }
   }
-  const shared = require('../floor-plan-ground.js');
+  const shared = require('../assets/js/floor-plan-ground.js');
   const sconces = [];
   const context = {
     THREE: { Group }, scene: new Group(), kitchenWallLeft: 26.5, kitchenWallRight: 37.5,

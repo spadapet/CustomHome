@@ -13,6 +13,34 @@ A furnished Three.js home-design study with two-floor views, tours, exterior
 studies and a one-foot floor grid. Dimensions and storage/access arrangements
 are conceptual, not construction drawings or code approval.
 
+## Project layout
+
+Browser assets are grouped by purpose:
+
+```text
+assets/
+  css/                Site and viewer styles
+  data/               Saved ground/upstairs layout JSON
+  documents/          Reference PDFs
+  images/
+    exterior/         Elevation studies and color palettes
+    interiors/        Kitchen and living-room references
+    plans/            Floor-plan images and upstairs concept versions
+    references/       Other inspiration and product images
+  js/                 Viewer, geometry, layout and site scripts
+  models/             Licensed 3D models and their bundled dependencies
+  textures/           Model material maps and environment lighting
+  videos/             Walkthrough video, poster and captions
+scripts/              Asset validation tools
+tests/                Dependency-free regression tests
+```
+
+HTML pages and design notes retain their existing URLs. Keep imported model
+resources and license records together; do not move their bundled textures
+individually. Saved layout contents and home geometry are unchanged by this
+organization. Restart a preview server started before the reorganization so
+its layout endpoints and asset-cache policy use the current paths.
+
 ## Preview
 
 Use Node.js 20 or newer. No package installation is needed.

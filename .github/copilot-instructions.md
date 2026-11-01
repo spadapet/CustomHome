@@ -16,7 +16,7 @@ before changing a layout. Room pages describe the owner's requirements.
   actionable safety warnings explicit; use screen-reader-only announcements
   for interaction feedback that does not need a visible status area.
 - The model uses feet. Shared ground-floor geometry lives in
-  `floor-plan-ground.js`; the furnished model is `floor-plan-3d.js`.
+  `assets/js/floor-plan-ground.js`; the furnished model is `assets/js/floor-plan-3d.js`.
   Coordinate both when changing room boundaries or openings.
 - Preserve saved layout JSON when changing viewer tools. Both interactive
   floor designers were removed; camera views, tours and the floor grid remain.

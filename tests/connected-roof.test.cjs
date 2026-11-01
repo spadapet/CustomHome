@@ -3,8 +3,8 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const { getConnectedRoofDefinitions, getPorchRoofDefinitions, buildRoofEnvelope, contains, heightAt, signedArea, trianglesOutsideRectangle, wallHeadSegments } = require('../floor-plan-roof.js');
-const upper = require('../floor-plan-upstairs.js');
+const { getConnectedRoofDefinitions, getPorchRoofDefinitions, buildRoofEnvelope, contains, heightAt, signedArea, trianglesOutsideRectangle, wallHeadSegments } = require('../assets/js/floor-plan-roof.js');
+const upper = require('../assets/js/floor-plan-upstairs.js');
 const g = upper.getUpstairsMeasuredGeometry();
 const close = (actual, expected, tolerance = 1e-6) => assert.ok(Math.abs(actual - expected) < tolerance, `${actual} should equal ${expected}`);
 
@@ -73,33 +73,41 @@ test('paired true cross-gables articulate the front while the garage remains sub
   const roof = buildRoofEnvelope(getConnectedRoofDefinitions());
   assert.deepEqual([...new Set(roof.faces.filter(face => /^(?:East|West) front gable$/.test(face.roof)).map(face => face.roof))].sort(),
     ['East front gable', 'West front gable']);
-  const garage = roof.faces.filter((face) => face.roof === 'Garage hip');
-  assert.ok(garage.length >= 4);
+  const garage = roof.faces.filter((face) => face.roof === 'Garage front gable');
+  assert.ok(garage.length >= 2);
   assert.ok(garage.every((face) => face.polygon.every((point) => heightAt(face.plane, point) <= 24 + 1e-7)));
-  assert.ok(garage.every((face) => face.polygon.every((point) => point[1] >= 35.55 - 1e-7)),
-    'No garage eave across the east loft windows north of the actual garage wall');
+  const api=require('../assets/js/floor-plan-roof.js');
+  const upper=require('../assets/js/floor-plan-upstairs.js').getUpstairsDefaultPlan(require('../assets/js/upstairs-layout.js').stairOpening());
+  const serviceRooms=upper.rooms.filter(r=>['Laundry (relocated)','Shared bath east','Mechanical (relocated)'].includes(r.name));
+  assert.equal(serviceRooms.length,3);
+  for(const face of garage)for(const room of serviceRooms){
+    const footprint=[[room.x+.175,room.z+.175],[room.x+room.w-.175,room.z+.175],
+      [room.x+room.w-.175,room.z+room.d-.175],[room.x+.175,room.z+room.d-.175]];
+    assert.ok(Math.abs(api.signedArea(api.intersectPolygons(face.polygon,footprint)))<1e-7,
+      'Lower visible garage gable never overlaps the full-height service interiors');
+  }
   const wingAtAbutment = roof.faces.filter((face) => face.roof === 'East rear wing');
-  assert.ok(wingAtAbutment.some((face) => face.polygon.some((point) => Math.abs(point[1] - (g.serviceSouth + .75)) < 1e-6)),
-    'Upper wing keeps its own eave over the measured south loft wall');
+  assert.ok(wingAtAbutment.some((face) => face.polygon.some((point) => Math.abs(point[1] - (g.bedNorth + .75)) < 1e-6)),
+    'Upper wing keeps its eave over the new service south wall');
 });
 
-test('main and wing have equal 4:12 hips and garage has a low 6:12 hip', () => {
+test('compact main and wing have 3:12 hips with a framing allowance; garage retains its low 6:12 minimum hip', () => {
   const definitions = getConnectedRoofDefinitions();
   const main = definitions.find((definition) => definition.id === 'Main house');
-  for (const plane of main.planes) close(Math.hypot(plane[0], plane[1]), 1 / 3);
+  for (const plane of main.planes) close(Math.hypot(plane[0], plane[1]), 1 / 4);
   const center = g.southEast / 2, halfWidth = (g.southEast + 1.5) / 2;
-  for (const point of [[center, 17.6], [center, 37]]) {
-    close(Math.min(...main.planes.map((plane) => heightAt(plane, point))), 19.2 + halfWidth / 3);
+  for (const point of [[center, 25], [center, 35]]) {
+    close(Math.min(...main.planes.map((plane) => heightAt(plane, point))), 20.6 + halfWidth / 4);
   }
   const plan = buildRoofEnvelope(definitions);
   const ridge = plan.joins.filter((join) => join.type === 'ridge' && join.roofs.every((roof) => roof === 'Main house'));
-  close(ridge.reduce((length, join) => length + Math.abs(join.end[2] - join.start[2]), 0), g.south - g.bathNorth - g.southEast);
+  close(ridge.reduce((length, join) => length + Math.abs(join.end[2] - join.start[2]), 0), g.south - g.north - g.southEast);
   for (const join of ridge) for (const point of [join.start, join.end]) {
     close(point[0], center);
-    close(point[1], 19.2 + halfWidth / 3);
+    close(point[1], 20.6 + halfWidth / 4);
   }
   const wing = definitions.find((definition) => definition.id === 'East rear wing');
-  for (const plane of wing.planes) close(Math.hypot(plane[0], plane[1]), 1 / 3);
+  for (const plane of wing.planes) close(Math.hypot(plane[0], plane[1]), 1 / 4);
   for (const name of ['Garage hip']) {
     const gable = definitions.find(({ id }) => id === name);
     for (const plane of gable.planes) close(Math.hypot(plane[0], plane[1]), 0.5);
@@ -113,9 +121,9 @@ test('main and wing have equal 4:12 hips and garage has a low 6:12 hip', () => {
 });
 
 test('laundry roof remains continuous with no skylight openings, frames or interior shafts', () => {
-  const roof = require('../floor-plan-roof.js');
-  const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-  const upstairs = fs.readFileSync(require.resolve('../floor-plan-upstairs.js'), 'utf8');
+  const roof = require('../assets/js/floor-plan-roof.js');
+  const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
+  const upstairs = fs.readFileSync(require.resolve('../assets/js/floor-plan-upstairs.js'), 'utf8');
   const eastWing = buildRoofEnvelope(getConnectedRoofDefinitions()).faces.filter((face) => face.roof === 'East rear wing');
   assert.ok(eastWing.length > 0);
   assert.equal(roof.getLaundryRoofWindows, undefined);
@@ -162,15 +170,15 @@ test('hip roof undersides cover the upper wall heads instead of exposing white w
 });
 
 test('only visible envelope surfaces are rendered, with a persistent roof-plan camera and clipped metal ribs', () => {
-  const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
-  const viewer = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const viewer = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   assert.match(exterior, /renderRoofEnvelope\('Connected main-house roof system', HomeRoof\.getConnectedRoofDefinitions/);
   assert.match(exterior, /renderRoofEnvelope\('Connected standing-seam porch and entry roof', HomeRoof\.getPorchRoofDefinitions/);
   assert.match(exterior, /Clipped standing-seam roof rib/);
   assert.doesNotMatch(exterior, /panel\.name = entryPediment \? 'Entry standing-seam metal roof panel' : 'Brown-shingle pitched roof'/);
   assert.match(exterior, /Fitted upper attic wall-head closure/);
-  assert.ok(html.indexOf('floor-plan-roof.js') < html.indexOf('floor-plan-exterior.js'));
+  assert.ok(html.indexOf('assets/js/floor-plan-roof.js') < html.indexOf('assets/js/floor-plan-exterior.js'));
   assert.match(html, /data-view="exterior-roof"[^>]*>Roof plan/);
   assert.match(viewer, /'exterior-roof': \{ target: \[27\.75, 12, 31\]/);
 });

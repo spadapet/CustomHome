@@ -3,7 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
 const context = {};
 vm.runInNewContext(source.slice(0, source.indexOf('function buildExteriorModel')), context);
 
@@ -126,7 +126,7 @@ test('actual grading and trim match palette 2 Linen swatches at scan luminance 1
     assert.equal(bytes[3],255);
   }
   const study = context.getExteriorCladdingStudy();
-  const board = fs.readFileSync(require.resolve('../assets/exterior-palette-options.svg'), 'utf8');
+  const board = fs.readFileSync(require.resolve('../assets/images/exterior/exterior-palette-options.svg'), 'utf8');
   const start = board.indexOf('>2 Linen<'), end = board.indexOf('>3 Pebble<');
   assert.ok(start >= 0 && end > start);
   const swatches = [...board.slice(start, end).matchAll(/<rect[^>]+fill="(#[0-9a-f]{6})"/g)].map(match => match[1]);

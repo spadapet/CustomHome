@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 
 test('orbit events coalesce into one frame and synchronous draws cancel redundant queued work', () => {
   const callbacks = new Map();
@@ -112,10 +112,10 @@ test('saved layouts load concurrently, preserve floor association and expose eac
     }
   });
   assert.equal(pending.size, 2);
-  pending.get('ground-layout.json')({ ok: true, json: async () => ({ floor: 'ground' }) });
-  pending.get('upstairs-layout.json')({ ok: true, json: async () => ({ floor: 'upstairs' }) });
+  pending.get('assets/data/ground-layout.json')({ ok: true, json: async () => ({ floor: 'ground' }) });
+  pending.get('assets/data/upstairs-layout.json')({ ok: true, json: async () => ({ floor: 'upstairs' }) });
   assert.deepEqual(JSON.parse(JSON.stringify(await loaded)), [{ floor: 'upstairs' }, { floor: 'ground' }]);
-  for (const failed of ['ground-layout.json', 'upstairs-layout.json']) {
+  for (const failed of ['assets/data/ground-layout.json', 'assets/data/upstairs-layout.json']) {
     await assert.rejects(vm.runInNewContext(code, {
       fetch: async file => ({ ok: file !== failed, status: 503, json: async () => ({}) })
     }), error => error.message.includes(`${failed} (503)`));

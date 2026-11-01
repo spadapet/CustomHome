@@ -7,24 +7,26 @@ const os = require('node:os');
 const path = require('node:path');
 const http = require('node:http');
 const { createPreviewServer } = require('../preview-server.cjs');
-const layout = require('../upstairs-layout.js');
-const { getUpstairsDefaultPlan } = require('../floor-plan-upstairs.js');
-const { getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
+const layout = require('../assets/js/upstairs-layout.js');
+const { getUpstairsDefaultPlan } = require('../assets/js/floor-plan-upstairs.js');
+const { getGroundFloorDefaultPlan } = require('../assets/js/floor-plan-ground.js');
 const baseline = getUpstairsDefaultPlan(layout.stairOpening());
 
 async function fixture(t) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), 'customhome-preview-test-'));
-  const file = path.join(root, 'upstairs-layout.json');
+  let server;
+  t.after(async () => {
+    if (server?.listening) await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    await fs.rm(root, { recursive: true });
+  });
+  const file = path.join(root, 'assets/data/upstairs-layout.json');
+  await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, layout.serialize(layout.empty()));
   await fs.writeFile(path.join(root, 'index.html'), '<!doctype html><title>Preview test</title>');
-  const server = createPreviewServer({ root });
+  server = createPreviewServer({ root });
   await new Promise((resolve, reject) => {
     server.once('error', reject);
     server.listen(0, '127.0.0.1', resolve);
-  });
-  t.after(async () => {
-    await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
-    await fs.rm(root, { recursive: true });
   });
   const origin = `http://127.0.0.1:${server.address().port}`;
   return {
@@ -56,13 +58,14 @@ test('autosave validates, persists and confirms the exact layout without leaving
   assert.equal(response.status, 200);
   assert.deepEqual((await response.json()).layout, document);
   assert.equal(await fs.readFile(file, 'utf8'), layout.serialize(document));
-  assert.deepEqual(await (await fetch(`${origin}/upstairs-layout.json`)).json(), document);
-  assert.deepEqual((await fs.readdir(root)).sort(), ['index.html', 'upstairs-layout.json']);
+  assert.deepEqual(await (await fetch(`${origin}/assets/data/upstairs-layout.json`)).json(), document);
+  assert.deepEqual((await fs.readdir(root)).sort(), ['assets', 'index.html']);
+  assert.deepEqual(await fs.readdir(path.dirname(file)), ['upstairs-layout.json']);
 });
 
 test('model assets revalidate without retransferring unchanged bytes and changed assets remain fresh', async (t) => {
   const { root, origin } = await fixture(t);
-  await fs.mkdir(path.join(root, 'assets'));
+  await fs.mkdir(path.join(root, 'assets'), { recursive: true });
   const file = path.join(root, 'assets', 'model.glb');
   await fs.writeFile(file, 'model-v1');
   const first = await fetch(`${origin}/assets/model.glb`);
@@ -83,7 +86,7 @@ test('model assets revalidate without retransferring unchanged bytes and changed
   assert.equal(await changed.text(), 'updated-model-v2');
   const html = await fetch(origin, { headers: { 'If-None-Match': etag } });
   assert.equal(html.headers.get('cache-control'), 'no-store');
-  const layoutFile = await fetch(`${origin}/upstairs-layout.json`);
+  const layoutFile = await fetch(`${origin}/assets/data/upstairs-layout.json`);
   assert.equal(layoutFile.headers.get('cache-control'), 'no-store');
 });
 
@@ -176,7 +179,7 @@ test('writes require local origin, JSON, PUT and the dedicated endpoint', async 
   assert.equal(invalidHost, 403);
   assert.equal((await update(layout.empty(), layout.empty(), { 'Content-Type': 'text/plain' })).status, 415);
   assert.equal((await fetch(`${origin}/api/upstairs-layout`)).status, 405);
-  assert.equal((await fetch(`${origin}/upstairs-layout.json`, { method: 'PUT', body: '{}' })).status, 405);
+  assert.equal((await fetch(`${origin}/assets/data/upstairs-layout.json`, { method: 'PUT', body: '{}' })).status, 405);
   assert.equal(await fs.readFile(file, 'utf8'), layout.serialize(layout.empty()));
 });
 
@@ -199,7 +202,7 @@ test('private paths and escaped paths are not served', async (t) => {
 
 test('first-floor saves persist independently, reject invalid edits and protect concurrent changes', async (t) => {
   const { origin, root, file, update } = await fixture(t);
-  const groundFile = path.join(root, 'ground-layout.json');
+  const groundFile = path.join(root, 'assets/data/ground-layout.json');
   await fs.writeFile(groundFile, layout.serialize(layout.empty()));
   const ground = getGroundFloorDefaultPlan();
   const a = layout.editRoom(ground, layout.empty(), 'Living room', { w: 14.2 });
@@ -213,7 +216,7 @@ test('first-floor saves persist independently, reject invalid edits and protect 
   assert.deepEqual(results.map((response) => response.status).sort(), [200, 409]);
   const winner = (await results.find((response) => response.ok).json()).layout;
   assert.deepEqual(JSON.parse(await fs.readFile(groundFile, 'utf8')), winner);
-  assert.deepEqual(await (await fetch(`${origin}/ground-layout.json`)).json(), winner);
+  assert.deepEqual(await (await fetch(`${origin}/assets/data/ground-layout.json`)).json(), winner);
   assert.equal((await save(winner)).status, 200);
   assert.equal((await save({ version: 2, rooms: [], walls: [] }, winner)).status, 400);
   assert.equal((await fetch(`${origin}/api/ground-layout`)).status, 405);

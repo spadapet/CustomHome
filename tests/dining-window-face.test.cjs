@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 test('garden-facing dining window points white trim and inset sill west into the room', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const line = source.split('\n').find((line) => line.includes("windowFrame('Dining garden-facing casements'"));
   let args;
   vm.runInNewContext(line, { scene: {}, windowFrame: (...values) => { args = values; } });

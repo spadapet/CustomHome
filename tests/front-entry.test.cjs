@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const { getFrontEntryLayout, buildArchedFrontEntry } = require('../floor-plan-ground.js');
+const { getFrontEntryLayout, buildArchedFrontEntry } = require('../assets/js/floor-plan-ground.js');
 
 class Group {
   constructor() {
@@ -78,13 +78,13 @@ test('deep white frame, molded panels and paired dark pulls form one entry in bo
 });
 
 test('wider front stairs have equal risers, flush nosings and join the existing approach without overlapping it', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const parts = [];
   class Steps extends Group { constructor() { super(); this.position.set = (x, y, z) => Object.assign(this.position, { x, y, z }); } }
   const context = {
     THREE: { Group: Steps, PointLight: class extends Steps {} }, group: new Steps(),
     stepStone: {}, stepEdge: {}, glow: {},
-    frontShift: require('../floor-plan-ground.js').getGroundFrontLayout().extension,
+    frontShift: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().extension,
     box(parent, x, y, z, width, height, depth) { const part = { x, y, z, width, height, depth }; parts.push(part); parent.add(part); return part; }
   };
   const start = source.indexOf('  function exteriorSteps('), end = source.indexOf('  const livingAccess =', start);
@@ -115,7 +115,7 @@ test('wider front stairs have equal risers, flush nosings and join the existing 
 });
 
 test('exterior taps reach the entry-door picker while orbit drags do not open doors', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const listeners = {};
   let doorPicks = 0, floorPicks = 0;
   const context = {
@@ -144,22 +144,22 @@ test('exterior taps reach the entry-door picker while orbit drags do not open do
 });
 
 test('segmental barrel entry is clipped into the retained porch plane, without a pediment', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-  const definitions = require('../floor-plan-roof.js').getPorchRoofDefinitions();
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
+  const definitions = require('../assets/js/floor-plan-roof.js').getPorchRoofDefinitions();
   assert.equal(definitions.length, 2);
   assert.equal(definitions[0].planes.length, 1);
   assert.doesNotMatch(source, /const entryPediment = gable/);
   assert.ok(definitions.every((definition) => definition.finish === 'metal'));
-  const frontWallZ = require('../floor-plan-ground.js').getGroundFrontLayout().wallZ;
+  const frontWallZ = require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().wallZ;
   assert.ok(definitions[0].bounds[2] < frontWallZ - 1, 'Main metal plane reaches the house');
   assert.equal(definitions[1].planes.length, 17, 'Sixteen curved facets and a falling rear return');
 });
 
 test('porch fascia remains below the sloped metal underside instead of striping the roof surface', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const parts = [];
   const context = {
-    group: {}, trim: {}, frontShift: require('../floor-plan-ground.js').getGroundFrontLayout().extension,
+    group: {}, trim: {}, frontShift: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().extension,
     box(parent, x, y, z, width, height, depth) { const part = { x, y, z, width, height, depth }; parts.push(part); return part; }
   };
   vm.createContext(context);

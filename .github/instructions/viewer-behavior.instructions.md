@@ -1,6 +1,6 @@
 ---
 description: "Use when editing the furnished Three.js viewer, camera presets, floor switching, lighting modes, tours, interaction controls, accessibility or render performance."
-applyTo: "floor-plan-3d.js,floor-plan-3d.html,floor-plan-3d.css"
+applyTo: "assets/js/floor-plan-3d.js,floor-plan-3d.html,assets/css/floor-plan-3d.css"
 ---
 
 # Model-first viewer behavior

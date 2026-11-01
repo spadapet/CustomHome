@@ -4,8 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const layout = require('../upstairs-layout.js');
-const { getGroundFloorDefaultPlan, getGroundFrontLayout, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout } = require('../floor-plan-ground.js');
+const layout = require('../assets/js/upstairs-layout.js');
+const { getGroundFloorDefaultPlan, getGroundFrontLayout, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout } = require('../assets/js/floor-plan-ground.js');
 const baseline = getGroundFloorDefaultPlan();
 
 test('front rooms and porch extend 5.75 inches to an approximately 64-foot envelope', () => {
@@ -52,7 +52,7 @@ test('image-scaled kids, bathroom, shallow-closet and bedroom bands meet without
 });
 
 test('powder room uses the shared hardwood floor without a tile overlay', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const floors = [];
   const guestEntry = getGuestEntryLayout();
   const guestSuite = getGuestSuiteLayout();
@@ -150,7 +150,7 @@ test.skip('superseded walk-in closet and east-side bath study', () => {
 });
 
 test.skip('superseded walk-in fixtures, pocket door and bath-clearance study', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   class Group {
     constructor() {
       this.children = [];
@@ -441,7 +441,7 @@ test('guest powder room and coat closet have separate doors off an open hall alc
 });
 
 test('guest coat French doors span the opening and swing outward from opposite jambs', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   class Group {
     constructor() {
       this.children = [];
@@ -527,7 +527,7 @@ test('October 31 reference aligns powder fixtures on the north wall and preserve
   assert.ok(entry.toilet.x - 0.175 - 0.125 >= 15 / 12, 'Toilet center clears the west wall and base trim by at least 15 inches');
   assert.ok(westVanityEdge > entry.toilet.x + 1.25, 'Vanity stays east of a 30-inch-wide toilet approach');
   assert.ok(entry.officeNorthZ - 0.175 - entry.toilet.z - 0.848 >= 30 / 12, 'At least 30 inches forward of the modeled toilet front');
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   for (const name of ['Powder round brass mirror frame', 'Powder round mirror glass', 'Powder warm opal sconce', 'Powder low-level night-light concept', 'Powder inset basin interior']) assert.ok(source.includes(name), name);
   for (let angle = 0; angle <= 90; angle++) {
     const radians = angle * Math.PI / 180;
@@ -566,7 +566,7 @@ test('one standard-size powder window cuts the west wall and retains half-froste
   Group.prototype.localToWorld = function (vector) { return vector; };
   Group.prototype.worldToLocal = function (vector) { return vector; };
   const context = {
-    getWindowProductIntent: require('../floor-plan-ground.js').getWindowProductIntent,
+    getWindowProductIntent: require('../assets/js/floor-plan-ground.js').getWindowProductIntent,
     THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, scene: new Group(), windowTrim: {}, windowExterior: {}, glass: {}, privacyGlass: {},
     windowFaceDepth: () => 0.075, windowInstallations: [], wallThickness: 0.45,
     openingCasing() {},
@@ -576,9 +576,9 @@ test('one standard-size powder window cuts the west wall and retains half-froste
       return part;
     }
   };
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   vm.runInNewContext(source.slice(source.indexOf('  function windowFrame('), source.indexOf('  const livingWindowBank =')), context);
-  const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const exteriorContext = { ...context, glass: {}, privacyGlass: {}, windowBlack: {}, trim: {} };
   vm.runInNewContext(exterior.slice(exterior.indexOf('  function windowUnit('), exterior.indexOf('  function wall(')), exteriorContext);
   for (const window of entry.windows) {
@@ -636,7 +636,7 @@ test('powder vanity centers its sink and lighting between matching drawer banks 
     }
   };
   context.cylinder = (parent, x, y, z, radius, height, material) => context.box(parent, x, y, z, radius * 2, height, radius * 2, material);
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   vm.runInNewContext(source.slice(source.indexOf('  function singlePanelDoor('), source.indexOf('  function cabinetCupPull(')), context);
   vm.runInNewContext(source.slice(source.indexOf('  const powderStone ='), source.indexOf("  tiledFloor('Guest bathroom tile'")), context);
   const vanity = items.find((item) => item.name === 'Powder vanity');
@@ -682,7 +682,7 @@ test('powder vanity centers its sink and lighting between matching drawer banks 
 });
 
 test('original wall-backed rail omissions preserve stringers and unrelated exposed-edge rails', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const parts = [];
   class Group {
     add() {}
@@ -760,7 +760,7 @@ test('kids-room kitchen return and garage partition stay aligned around the full
 });
 
 test('fireplace built-ins are removed entirely and baseboard runs continuously from each wall end to the stone return', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   // Both remaining halved boxes and every constituent part are deleted from the source, not hidden.
   assert.doesNotMatch(source, /fireplaceBuiltIns|fireplaceBuiltInLayout|Paired low white-oak fireplace built-ins|halved fireplace built-in'|Fireplace cabinet recessed plinth|Standard 36 inch cabinet side|Fireplace cabinet media shelf|Closed Shaker media door|Stone-side cabinet scribe filler|Finished exposed cabinet end panel|Continuous low oak built-in top/);
   assert.doesNotMatch(source, /builtInRunWidth|restored fireplace built-in|Restored cabinet recessed plinth|Separate fireplace cabinet end filler|builtInsHalved|builtInFrontX/);
@@ -797,7 +797,7 @@ test('fireplace built-ins are removed entirely and baseboard runs continuously f
 });
 
 test('double-chaise sectional has exactly chaise-seat-seat-chaise modules and fits the living area', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   class Group {
     constructor() {
       this.children = [];
@@ -840,7 +840,7 @@ test('double-chaise sectional has exactly chaise-seat-seat-chaise modules and fi
 });
 
 test('earlier sectional comparison restores visibility and obstacle flags when switching from the default', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   function object(children = []) {
     return {
       children, userData: {}, visible: true, position: { set() {} }, rotation: {},
@@ -899,7 +899,7 @@ test('earlier sectional comparison restores visibility and obstacle flags when s
 });
 
 test('earlier corner-chair comparison preserves centered fireplace and sofa', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const context = { getLivingRoomFeatureLayout };
   const feature = getLivingRoomFeatureLayout();
   const windowData = source.slice(source.indexOf('  const livingFeatureWall ='), source.indexOf('  const livingSideWindows ='));
@@ -948,7 +948,7 @@ test('earlier corner-chair comparison preserves centered fireplace and sofa', ()
 });
 
 test('matching chair ottomans use tan upholstery, scaled dimensions and follow their parent chairs', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   class Group {
     constructor() { this.children = []; this.position = {}; }
     add(child) { this.children.push(child); }
@@ -975,18 +975,18 @@ test('matching chair ottomans use tan upholstery, scaled dimensions and follow t
 });
 
 test('first-floor baseline matches the furnished model floors and canonical wall openings', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const floors = [], walls = [];
   const context = {
-    UpstairsLayout: layout, getGroundFloorDefaultPlan, getGroundFrontLayout, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getKitchenPassageLayout: require('../floor-plan-ground.js').getKitchenPassageLayout, getPrepWindowLayout: require('../floor-plan-ground.js').getPrepWindowLayout, getPrepWindowBankLayout: require('../floor-plan-ground.js').getPrepWindowBankLayout, ceilingHeight: 9, garageFloorY: -1.25, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
+    UpstairsLayout: layout, getGroundFloorDefaultPlan, getGroundFrontLayout, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getKitchenPassageLayout: require('../assets/js/floor-plan-ground.js').getKitchenPassageLayout, getPrepWindowLayout: require('../assets/js/floor-plan-ground.js').getPrepWindowLayout, getPrepWindowBankLayout: require('../assets/js/floor-plan-ground.js').getPrepWindowBankLayout, ceilingHeight: 9, garageFloorY: -1.25, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
     garageEntry: { x: 38, width: 3, height: 8 },
     garageFloorAreas: [{ x: 44.9 - 8 / 12, z: 15, w: 10.6 + 8 / 12, d: 11.9 }, { x: 31.2, z: 26.9, w: 24.3, d: 7.7 }, { x: 31.2, z: 34.6, w: 24.3, d: 14.4 }],
     scene: {}, shell: {},
     floor: (x, z, w, d) => floors.push([x, z, w, d]),
     wall: (x1, z1, x2, z2, furnished, openings = []) => walls.push([x1, z1, x2, z2, openings])
   };
-  context.getKitchenWindowBankLayout = require('../floor-plan-ground.js').getKitchenWindowBankLayout;
-  context.getGroundFrontWindows = require('../floor-plan-ground.js').getGroundFrontWindows;
+  context.getKitchenWindowBankLayout = require('../assets/js/floor-plan-ground.js').getKitchenWindowBankLayout;
+  context.getGroundFrontWindows = require('../assets/js/floor-plan-ground.js').getGroundFrontWindows;
   vm.runInNewContext(source.slice(source.indexOf('  const kitchenWallLeft ='), source.indexOf('  joinWallCorners();')), context);
   const round = (value) => JSON.parse(JSON.stringify(value, (key, number) => typeof number === 'number' ? Math.round(number * 1000000) / 1000000 : number));
   assert.deepEqual(round(baseline.floors.map(({ x, z, w, d }) => [x, z, w, d]).sort()), round(floors.sort()));

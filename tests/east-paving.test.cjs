@@ -3,8 +3,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-const frontLayout = require('../floor-plan-ground.js').getGroundFrontLayout();
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
+const frontLayout = require('../assets/js/floor-plan-ground.js').getGroundFrontLayout();
 function fixture(old = false) {
   class Group { constructor() { this.children = []; this.userData = {}; } add(o) { this.children.push(o); } }
   const c = { THREE: { Group }, group: new Group(), frontWallZ: frontLayout.wallZ, frontShift: frontLayout.extension, paving(parent, name, x, z, width, depth, top = -1.35) {

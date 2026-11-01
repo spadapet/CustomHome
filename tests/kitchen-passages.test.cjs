@@ -4,8 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const { getKitchenPassageLayout, getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const { getKitchenPassageLayout, getGroundFloorDefaultPlan } = require('../assets/js/floor-plan-ground.js');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} should equal ${b}`);
 
 test('shared floor plan provides two owner-selected doorless 30-inch clear openings with unchanged outer edges', () => {

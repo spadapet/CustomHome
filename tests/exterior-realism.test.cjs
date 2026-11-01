@@ -4,8 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
-const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
+const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
 
 test('bundled exterior scans have separate local color, normal and roughness JPG resources', () => {
   const directory = path.join(__dirname, '..', 'assets', 'textures', 'exterior');

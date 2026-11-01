@@ -3,11 +3,11 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const ground = require('../floor-plan-ground.js');
-const upper = require('../floor-plan-upstairs.js');
-const HomeRoof = require('../floor-plan-roof.js');
-const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-const groundSource = fs.readFileSync(require.resolve('../floor-plan-ground.js'), 'utf8');
+const ground = require('../assets/js/floor-plan-ground.js');
+const upper = require('../assets/js/floor-plan-upstairs.js');
+const HomeRoof = require('../assets/js/floor-plan-roof.js');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
+const groundSource = fs.readFileSync(require.resolve('../assets/js/floor-plan-ground.js'), 'utf8');
 const close = (a,b) => assert.ok(Math.abs(a-b)<1e-7, `${a} != ${b} ft`);
 
 function fixture() {
@@ -47,7 +47,7 @@ function fixture() {
   const actualWall=c.wall;
   c.wall=(...args)=>{openings.push(args);return actualWall(...args);};
   c.buildArchedFrontEntry=()=>{}; // Door assembly is unchanged; retain its opening cut.
-  run(source,'  const win =','  // The resolved upstairs stops');
+  run(source,'  const win =','  // Compact service rooms cover');
   for(const name of ['patioBounds','livingPatioBounds']){
     const line=source.split('\n').find(line=>line.startsWith(`  const ${name} =`));
     assert.ok(line);vm.runInContext(line,c);

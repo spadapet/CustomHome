@@ -3,10 +3,10 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const { getLivingRoomFeatureLayout, getWindowProductIntent } = require('../floor-plan-ground.js');
+const { getLivingRoomFeatureLayout, getWindowProductIntent } = require('../assets/js/floor-plan-ground.js');
 
 test('living woven shades clear every bay division and leave lower glass exposed on both wall orientations', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   class Group {
     constructor() {
       this.children = [];

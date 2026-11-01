@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 
 function build() {
   class Group {
@@ -23,11 +23,11 @@ function build() {
   }
   const frames = [];
   const context = {
-    addWindowShadeDivisions: require('../floor-plan-ground.js').addWindowShadeDivisions,
+    addWindowShadeDivisions: require('../assets/js/floor-plan-ground.js').addWindowShadeDivisions,
     THREE: { Group, Vector3: class {} }, scene: new Group(), walls: [],
     kitchenSinkX: 32, kitchenWindowWallZ: 7, kitchenSinkWindowSill: 3.5, kitchenSinkWindowHeight: 4.5,
-    kitchenCounterWindowBank: require('../floor-plan-ground.js').getKitchenWindowBankLayout(),
-    kitchenSinkWindows: require('../floor-plan-ground.js').getKitchenWindowBankLayout().units,
+    kitchenCounterWindowBank: require('../assets/js/floor-plan-ground.js').getKitchenWindowBankLayout(),
+    kitchenSinkWindows: require('../assets/js/floor-plan-ground.js').getKitchenWindowBankLayout().units,
     windowTrim: { name: 'White trim' }, wallMaterial: { name: 'White drywall' }, kitchenSillQuartz: { name: 'Quartz' },
     windowFrame(...args) { frames.push(args); return new Group(); },
     box(parent, x, y, z, w, h, d, material) {
@@ -111,7 +111,7 @@ test('two flat drywall returns surround the bank and joined unit frames have no 
 });
 
 test('floor plan and exterior restore one shared opening around the 90-inch bank', () => {
-  const shared = require('../floor-plan-ground.js');
+  const shared = require('../assets/js/floor-plan-ground.js');
   const bank = shared.getKitchenWindowBankLayout();
   close(bank.width * 12, 90);
   assert.deepEqual(bank.units.map((unit) => unit.x), [29, 32, 35]);
@@ -122,7 +122,7 @@ test('floor plan and exterior restore one shared opening around the 90-inch bank
   close(north[1] + end, 35.75);
   close(sill * 12, 42);
   close(head * 12, 96);
-  const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   assert.match(exterior, /\[getPrepWindowBankLayout\(\), getKitchenWindowBankLayout\(\)\]/);
   let rear;
   const context = {
@@ -143,7 +143,7 @@ test('floor plan and exterior restore one shared opening around the 90-inch bank
 });
 
 test('restored bank has a 54-inch fixed center and unchanged height and prep datums', () => {
-  const shared = require('../floor-plan-ground.js');
+  const shared = require('../assets/js/floor-plan-ground.js');
   const bank = shared.getKitchenWindowBankLayout();
   assert.deepEqual(bank.units.map(u => [u.width * 12, u.height * 12, u.sill * 12, (u.sill + u.height) * 12, u.picture]),
     [[18, 54, 42, 96, false], [54, 54, 42, 96, true], [18, 54, 42, 96, false]]);

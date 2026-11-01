@@ -1,118 +1,81 @@
 'use strict';
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const vm = require('node:vm');
-const roof = require('../floor-plan-roof.js');
-const close = (a, b, tolerance = 1e-6) => assert.ok(Math.abs(a - b) < tolerance, `${a} != ${b} ft`);
-const definitions = roof.getConnectedRoofDefinitions();
-const plan = roof.buildRoofEnvelope(definitions);
-const additions = ['Loft clipped cross-gable', 'Garage front gable'];
-const height = (defs, x, z) => Math.max(...defs.filter(({ bounds: [l, r, b, f] }) =>
-  x >= l && x <= r && z >= b && z <= f).map(({ planes }) => Math.min(...planes.map(p => roof.heightAt(p, [x, z])))));
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const roof=require('../assets/js/floor-plan-roof.js');
+const upper=require('../assets/js/floor-plan-upstairs.js');
+const defs=roof.getConnectedRoofDefinitions();
+const plan=roof.buildRoofEnvelope(defs);
+const height=(x,z)=>Math.max(...defs.filter(d=>x>=d.bounds[0]&&x<=d.bounds[1]&&z>=d.bounds[2]&&z<=d.bounds[3])
+  .map(d=>Math.min(...d.planes.map(p=>roof.heightAt(p,[x,z])))));
+const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} != ${b}`);
 
-test('right roofs have a measured descending hierarchy and a genuine clipped loft crown', () => {
-  const loft = definitions.find(d => d.id === additions[0]);
-  const garage = definitions.find(d => d.id === additions[1]);
-  close(loft.bounds[1] - loft.bounds[0], 16.85);
-  close((loft.bounds[0] + loft.bounds[1]) / 2, (44.65 + 51.5) / 2);
-  close(height([loft], 48.075, 33), 24.4);
-  close(height([loft], 48.075, 35.85), 23.3);
-  close(height([loft], 48.075, 34.97), 24.4);
-  close(height([garage], 43.25, 49.85), 16.1);
-  close(garage.bounds[1] - garage.bounds[0], 25.9);
-  close(garage.bounds[2], 37.5);
-  close(garage.bounds[3], 49.85);
-  close(Math.hypot(garage.planes[0][0], garage.planes[0][1]) * 12, 7.2 / 12.95 * 12);
-  assert.ok(25.4 > 24.4 && 24.4 > 16.1, 'Garage gable stays subordinate to both upper rooflines');
-  for (const x of [37, 48.5]) assert.ok(height([garage], x, 49.225) > 12, 'Gable spans both fixed garage-door lights');
-  const lower = roof.getLowerRoofDefinitions();
-  assert.equal(lower.filter(d => d.id === garage.id).length, 1, 'Same cross-roof in lower and full envelopes');
-  for (const id of additions) {
-    assert.ok(plan.faces.some(f => f.roof === id));
-    assert.ok(plan.joins.some(j => j.type === 'valley' && j.roofs.includes(id)));
+test('paired front gables retain their 25.4-ft crowns and follow the compact bedroom pairs',()=>{
+  const g=upper.getUpstairsMeasuredGeometry();
+  for(const [id,center] of [['West front gable',g.southClosetWest/2],['East front gable',(g.southClosetEast+g.southEast)/2]]){
+    const d=defs.find(d=>d.id===id);
+    close((d.bounds[0]+d.bounds[1])/2,center);
+    close(Math.min(...d.planes.map(p=>roof.heightAt(p,[center,g.south+.75]))),25.4);
+    assert.ok(plan.faces.some(f=>f.roof===id));
+  }
+  close(height(43.25,49.85),16.1);
+  assert.ok(!defs.some(d=>/Loft/.test(d.id)));
+});
+
+test('raised garage returns cover only remaining garage roof with real clipped joints',()=>{
+  for(const id of ['Garage north lean-to','Garage service return','Garage front gable']){
+    assert.ok(plan.faces.some(f=>f.roof===id));
+    if(id!=='Garage north lean-to')assert.ok(plan.joins.some(j=>j.roofs.includes(id)));
+  }
+  const north=defs.find(d=>d.id==='Garage north lean-to'),service=defs.find(d=>d.id==='Garage service return');
+  for(const x of [45,49,55])close(roof.heightAt(north.planes[0],[x,41]),roof.heightAt(service.planes[1],[x,41]));
+  close(height(45,30),roof.heightAt(north.planes[0],[45,30]));
+  assert.ok(height(55.5,30)>9);
+  assert.ok(height(45,16.5)<13&&height(45,23)<13&&height(45,30.7)<13,'Garage roof does not bury upper east glazing');
+  for(const j of plan.joins)for(const p of [j.start,j.end]){
+    const touching=plan.faces.filter(f=>roof.contains(f.polygon,[p[0],p[2]])&&Math.abs(roof.heightAt(f.plane,[p[0],p[2]])-p[1])<1e-6);
+    assert.ok(touching.length>=2,'No orphan joint or roof gap');
   }
 });
 
-test('new unions retain accepted headroom, roof footprint and northern solar surfaces', () => {
-  const baseline = definitions.filter(d => !additions.includes(d.id));
-  let samples = 0, raised = 0;
-  for (let x = -.5; x < 56.5; x += .4) for (let z = -2; z < 54.5; z += .4) {
-    const before = height(baseline, x, z), after = height(definitions, x, z);
-    assert.equal(Number.isFinite(after), Number.isFinite(before), 'No roof footprint expansion');
-    if (!Number.isFinite(before)) continue;
-    assert.ok(after >= before - 1e-7, `No headroom reduction at ${x},${z}`);
-    const withinAddedRoof = additions.some((id) => {
-      const { bounds: [left, right, rear, front] } = definitions.find((definition) => definition.id === id);
-      return x >= left && x <= right && z >= rear && z <= front;
-    });
-    if (z < 22.5 || !withinAddedRoof) close(after, before);
-    if (after > before + .05) raised++;
-    samples++;
-  }
-  assert.ok(samples > 14000 && raised > 300, 'Measure actual changed surfaces, not metadata');
-});
-
-test('new transverse valleys have positive fall and all join endpoints share real faces', () => {
-  const valleys = plan.joins.filter(j => j.type === 'valley' && j.roofs.some(id => additions.includes(id)));
-  assert.ok(valleys.length >= 8);
-  for (const join of valleys) {
-    const length = Math.hypot(join.end[0] - join.start[0], join.end[2] - join.start[2]);
-    assert.ok(Math.abs(join.end[1] - join.start[1]) / length >= .02,
-      'No level rear-return valley; modeled fall is not hydraulic approval');
-    for (const p of [join.start, join.end]) {
-      const touching = plan.faces.filter(f => roof.contains(f.polygon, [p[0], p[2]]) &&
-        Math.abs(roof.heightAt(f.plane, [p[0], p[2]]) - p[1]) < 1e-6);
-      assert.ok(touching.length >= 2, 'Clipped roofs meet without gaps');
-    }
-  }
-});
-
-test('garage wall-head solids have full wall depth and fit actual lower roof faces at every constituent vertex', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-  const start = source.indexOf('  for (const face of setbackPlan.faces) {');
-  const end = source.indexOf('  for (const edge of setbackPlan.boundaries)', start);
-  assert.ok(start > 0 && end > start);
-  const meshes = [], lower = roof.buildRoofEnvelope(roof.getLowerRoofDefinitions());
-  const context = {
-    HomeRoof: roof, setbackPlan: lower, wallThickness: .45, garageFacadeEaves: 9, frontBrick: {},
-    brickFaceUVs() {}, setbackRoofs: { add: m => meshes.push(m) },
-    THREE: {
-      BufferGeometry: class { setAttribute(key, value) { this[key] = value; } computeVertexNormals() {} },
-      Float32BufferAttribute: class { constructor(array) { this.array = array; } },
-      Mesh: class { constructor(geometry) { this.geometry = geometry; } }
-    }
-  };
-  vm.runInNewContext(source.slice(start, end), context);
-  assert.ok(meshes.length >= 1, 'Full-width gable has actual fitted wall-head geometry');
-  const vertices = meshes.flatMap(m => m.geometry.position.array);
-  let minZ = Infinity, maxZ = -Infinity, maxY = 0;
-  for (let i = 0; i < vertices.length; i += 3) {
-    const [x, y, z] = vertices.slice(i, i + 3);
-    const top = height(roof.getLowerRoofDefinitions(), x, z) - .16;
-    assert.ok(y >= 9 - 1e-6 && y <= top + 1e-6, 'No masonry poking through roof skin');
-    minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); maxY = Math.max(maxY, y);
-  }
-  close(maxZ - minZ, .45);
-  close(maxY, 15.61244862659365);
-});
-
-test('clipped high eave has a falling conductor tied to the real east rake and leader node', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-  const start = source.indexOf('  const clippedEave =');
-  const end = source.indexOf("  drainageRoute(group, 'Garage east shoulder", start);
-  assert.ok(start > 0 && end > start);
-  let points;
-  vm.runInNewContext(source.slice(start, end), {
-    houseRoofPlan: plan, measuredUpper: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry(),
-    group: {}, drainageRoute: (parent, name, route) => { points = route; }
+test('garage front wall-head solids retain full wall depth and fit the actual lower roof at every vertex',()=>{
+  const source=fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'),'utf8');
+  const start=source.indexOf('  for (const face of setbackPlan.faces) {');
+  const end=source.indexOf('  for (const edge of setbackPlan.boundaries)',start);
+  const meshes=[];
+  vm.runInNewContext(source.slice(start,end),{
+    HomeRoof:roof,setbackPlan:roof.buildRoofEnvelope(roof.getLowerRoofDefinitions()),wallThickness:.45,garageFacadeEaves:9,frontBrick:{},
+    brickFaceUVs(){},setbackRoofs:{add:m=>meshes.push(m)},
+    THREE:{BufferGeometry:class{setAttribute(k,v){this[k]=v;}computeVertexNormals(){}},
+      Float32BufferAttribute:class{constructor(array){this.array=array;}},Mesh:class{constructor(geometry){this.geometry=geometry;}}}
   });
-  assert.ok(points && points.length === 4, 'High clipped eave must not end in a dead gutter');
-  close(points[0][0], 49.85721153846155);
-  close(points[0][1], 23.2);
-  close(points[0][2], 35.85);
-  for (let i = 1; i < points.length; i++) assert.ok(points[i][1] < points[i - 1][1]);
-  close(points[2][0], 56.5);
-  close(points[2][1], 18.9);
-  assert.deepEqual(Array.from(points[3]), [56.5, 18.5, 35.5], 'Joins actual east leader elbow');
+  assert.ok(meshes.length);
+  let minZ=Infinity,maxZ=-Infinity;
+  for(const m of meshes)for(let i=0;i<m.geometry.position.array.length;i+=3){
+    const [x,y,z]=m.geometry.position.array.slice(i,i+3);
+    assert.ok(y>=9-1e-6&&y<=height(x,z)-.16+1e-6);
+    minZ=Math.min(minZ,z);maxZ=Math.max(maxZ,z);
+  }
+  close(maxZ-minZ,.45);
+});
+
+test('compact service leader bypasses the garage perimeter and no clipped loft conductor remains',()=>{
+  const source=fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'),'utf8');
+  const start=source.indexOf("  drainageRoute(group, 'Compact service eave");
+  const end=source.indexOf("  drainageRoute(group, 'Garage east shoulder",start);
+  let points;
+  vm.runInNewContext(source.slice(start,end),{group:{},measuredUpper:upper.getUpstairsMeasuredGeometry(),
+    dark:{},drainageRoute:(parent,name,route)=>{points=route;}});
+  assert.equal(points.length,7);
+  for(let i=1;i<points.length;i++)assert.ok(points[i][1]<points[i-1][1]);
+  assert.ok(points.slice(4).every(p=>p[0]>56.2),'Vertical leader clears lower roof edge');
+  const defs=roof.getConnectedRoofDefinitions(),envelope=roof.buildRoofEnvelope(defs);
+  for(const p of points.slice(2,4)){
+    const face=envelope.faces.find(f=>roof.contains(f.polygon,[p[0],p[2]]));
+    assert.ok(face);
+    const h=roof.heightAt(face.plane,[p[0],p[2]]);
+    assert.ok(p[1]-h>=.07&&p[1]-h<.15,'Enclosed collector sits above the actual east-falling roof, not across a high void');
+  }
+  assert.doesNotMatch(source,/const clippedEave|Clipped loft high-eave/);
 });

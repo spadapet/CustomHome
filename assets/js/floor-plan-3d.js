@@ -60,7 +60,7 @@ async function initializePreview() {
     if (window.location.protocol === 'file:') {
       console.warn('File preview uses the original layouts. Serve the repository over HTTP to load saved layout data.');
     } else {
-      [savedUpstairsLayout, savedGroundLayout] = await Promise.all(['upstairs-layout.json', 'ground-layout.json'].map(async file => {
+      [savedUpstairsLayout, savedGroundLayout] = await Promise.all(['assets/data/upstairs-layout.json', 'assets/data/ground-layout.json'].map(async file => {
         const response = await fetch(file, { cache: 'no-store' });
         if (!response.ok) throw new Error(`Could not load ${file} (${response.status}). Restore that file before loading the viewer.`);
         return response.json();
@@ -247,7 +247,7 @@ initializePreview();
 function showModelError(text) {
   message.replaceChildren(document.createTextNode(text));
   const link = document.createElement('a');
-  link.href = 'assets/ground-floor-3d-source.png';
+  link.href = 'assets/images/plans/ground-floor-3d-source.png';
   link.textContent = 'View your original floor plan instead';
   message.append(link);
   message.hidden = false;
@@ -5238,10 +5238,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     const upperDimensions = getUpstairsMeasuredGeometry();
     for (const [x, z] of [
-      [19, (upperDimensions.loftNorth + upperDimensions.laundryNorth) / 2],
-      [31, (upperDimensions.loftNorth + upperDimensions.laundryNorth) / 2],
+      [(upperDimensions.primaryEast + upperDimensions.closetTailWest) / 2, (upperDimensions.loftNorth + upperDimensions.laundryNorth) / 2],
+      [(upperDimensions.closetTailEast + upperDimensions.closetEast) / 2, (upperDimensions.loftNorth + upperDimensions.laundryNorth) / 2],
       [17, 33], [15.5, (upperDimensions.serviceSouth + upperDimensions.bedNorth) / 2]
     ]) fixture(upstairs.group, 'Upstairs hall', x, upstairs.group.userData.ceilingHeightFeet, z, 2 / 12, 14, 'upstairs');
+    fixture(upstairs.group, 'Primary closet linen extension', (upperDimensions.closetTailWest + upperDimensions.closetTailEast) / 2,
+      upstairs.group.userData.ceilingHeightFeet, 24.3, 2 / 12, 9, 'upstairs');
     fixture(piano, 'Piano music', 0, 3.6, 0.25, 0.24, 3, 'ground', true);
     box(piano, 0, 3.27, -0.45, 0.04, 0.66, 0.04, rosewood).name = 'Piano lamp support';
     return rigs;
@@ -5436,9 +5438,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     'exterior-firepit': { target: [-3.75, -0.5, -2.325], offset: [-12, 12, -16], span: 18 },
     'exterior-wood': { target: [57, 0.5, 26.5], offset: [18, 24, -16], span: 24 },
     'exterior-security': { target: [exterior.userData.lot.centerX, 0, (exterior.userData.lot.rear + exterior.userData.lot.front) / 2], offset: [0, 160, 0.01], span: 150 },
-    upstairs: { target: [27, stairFloorToFloor + 1, 28], offset: [34, 68, 43], span: 74 },
-    'upstairs-top': { target: [27, stairFloorToFloor, 28], offset: [0, 110, 0], span: 70 },
+    upstairs: { target: [22, stairFloorToFloor + 1, 26], offset: [30, 68, 43], span: 65 },
+    'upstairs-top': { target: [22, stairFloorToFloor, 26], offset: [0, 110, 0], span: 61 },
     'upstairs-arrival-gallery': { target: [22, stairFloorToFloor + 3, 29.5], offset: [-8, 11, 12], span: 25 },
+    'upstairs-gallery': { target: [22, stairFloorToFloor + 2, 29], offset: [0, 13, 4], span: 28 },
+    'upstairs-primary-closet': { target: [22.05, stairFloorToFloor + 1, 21.7], offset: [4, 34, 4], span: 18.9 },
     social: { target: [19, 2, 12], offset: [27, 55, 32], span: 43 },
     living: { target: [12.5, 1.5, livingCenterZ], offset: [28, 27, 7], span: 32 },
     kids: { target: [24, 1, 30.15], offset: [-12, 30, 18], span: 17 },
@@ -5505,8 +5509,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (!edits.rooms.length && !edits.walls.length) {
       presets.upstairs.target = [27, stairFloorToFloor + 1, 28];
       presets.upstairs.span = 74;
-      presets['upstairs-top'].target = [27, stairFloorToFloor, 28];
-      presets['upstairs-top'].span = 70;
+      presets['upstairs-top'].target = [22, stairFloorToFloor, 26];
+      presets['upstairs-top'].span = 61;
       return;
     }
     const minX = Math.min(...upstairs.rooms.map((room) => room.x), ...upstairs.plan.walls.map((wall) => wall.x1));

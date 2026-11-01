@@ -20,12 +20,12 @@ Identify the relevant surfaces:
 
 | Surface | Source |
 |---|---|
-| Ground rooms, floors and openings | `floor-plan-ground.js` |
-| Furniture, cabinetry, trim, cameras, tours and grid | `floor-plan-3d.js` |
-| Upstairs geometry and saved overrides | `floor-plan-upstairs.js`, `upstairs-layout.js`, layout JSON |
-| Exterior walls, paths, fence and outdoor storage | `floor-plan-exterior.js` |
-| Shared roof envelopes and exterior roof assemblies | `floor-plan-roof.js`, `floor-plan-exterior.js` |
-| Controls and room notes | `floor-plan-3d.html`, `floor-plan-3d.css` |
+| Ground rooms, floors and openings | `assets/js/floor-plan-ground.js` |
+| Furniture, cabinetry, trim, cameras, tours and grid | `assets/js/floor-plan-3d.js` |
+| Upstairs geometry and saved overrides | `assets/js/floor-plan-upstairs.js`, `assets/js/upstairs-layout.js`, layout JSON |
+| Exterior walls, paths, fence and outdoor storage | `assets/js/floor-plan-exterior.js` |
+| Shared roof envelopes and exterior roof assemblies | `assets/js/floor-plan-roof.js`, `assets/js/floor-plan-exterior.js` |
+| Controls and room notes | `floor-plan-3d.html`, `assets/css/floor-plan-3d.css` |
 
 ## Make the change
 
@@ -72,7 +72,7 @@ Run the smallest relevant suites from the repository root:
 node .\.github\skills\home-model-editing\scripts\check-model.cjs mudroom-layout floor-grid
 ```
 
-Omit selectors to run every suite and check the root JavaScript syntax.
+Omit selectors to run every suite and check browser and tooling JavaScript syntax.
 The runner uses the existing Node tests with an explicit TAP reporter across
 supported Node versions; it needs no installed packages.
 An unknown suite, missing TAP summary, failed child process or syntax error

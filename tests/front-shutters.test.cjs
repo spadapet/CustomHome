@@ -3,15 +3,15 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const { getGroundFrontWindows } = require('../floor-plan-ground.js');
-const { getUpstairsFrontWindows, getUpstairsMeasuredGeometry, getUpstairsExteriorOpenings } = require('../floor-plan-upstairs.js');
-const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+const { getGroundFrontWindows } = require('../assets/js/floor-plan-ground.js');
+const { getUpstairsFrontWindows, getUpstairsMeasuredGeometry, getUpstairsExteriorOpenings } = require('../assets/js/floor-plan-upstairs.js');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
 
 test('exterior shutter geometry and its unused material are removed', () => {
   assert.doesNotMatch(source, /shutter/i);
 });
 
-test('all eight front openings retain their windows and front grilles without shutters', () => {
+test('six retained ground/compact upper front openings have no shutters; loft openings are removed', () => {
   class Group {
     constructor() {
       this.children = [];
@@ -42,8 +42,7 @@ test('all eight front openings retain their windows and front grilles without sh
   const fronts = [
     ['front ground floor', getGroundFrontWindows()],
     ['upper front bedrooms', getUpstairsFrontWindows().filter(o => o.center < g.southClosetWest).map(o => ({ ...o, sill: o.sill + 10 }))],
-    ['upper front bedroom 4', getUpstairsFrontWindows().filter(o => o.center > g.southClosetEast).map(o => ({ ...o, center: o.center - g.southClosetEast, sill: o.sill + 10 }))],
-    ['upper loft south', getUpstairsExteriorOpenings(g.southEast, g.serviceSouth, g.east, g.serviceSouth)]
+    ['upper front bedroom 4', getUpstairsFrontWindows().filter(o => o.center > g.southClosetEast).map(o => ({ ...o, center: o.center - g.southClosetEast, sill: o.sill + 10 }))]
   ];
   for (const [name, openings] of fronts) {
     const before = JSON.stringify(openings);
@@ -54,5 +53,5 @@ test('all eight front openings retain their windows and front grilles without sh
       ({ center, sill, width, height, front: true })));
     assert.ok(wall.children.every(child => !/shutter/i.test(child.name ?? '')));
   }
-  assert.equal(windows.length, 8);
+  assert.equal(windows.length, 6);
 });

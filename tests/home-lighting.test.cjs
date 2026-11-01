@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 
 class Group {
   constructor() {
@@ -36,8 +36,8 @@ function build() {
     guestVanity: { children: [{ name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }, { name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }] },
     powderGlow: { emissiveIntensity: 0.45 },
     upstairs: { group: Object.assign(new Group(), { userData: { ceilingHeightFeet: 9 } }), rooms: [{ name: 'Bedroom 2', x: 31, z: 10, w: 13, d: 12 }] },
-    getGroundFloorDefaultPlan: require('../floor-plan-ground.js').getGroundFloorDefaultPlan,
-    getUpstairsMeasuredGeometry: require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry,
+    getGroundFloorDefaultPlan: require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan,
+    getUpstairsMeasuredGeometry: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry,
     cream: {}, brass: {}, rosewood: {}, windowTrim: {}, black: { clone() { return {}; } }, ceilingHeight: 9, garageFloorY: -1.25,
     nightLighting: true, canLightsInput: { checked: true }, activeFloor: 'ground', currentView: 'living', groundLayoutPreview: null,
     cylinder(parent, x, y, z, radius, height, material) {

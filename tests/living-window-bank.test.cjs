@@ -4,12 +4,12 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const { getLivingRoomFeatureLayout, getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const { getLivingRoomFeatureLayout, getGroundFloorDefaultPlan } = require('../assets/js/floor-plan-ground.js');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-6, `${actual} should equal ${expected}`);
 
 test('single-hung sashes have equal clear lower and four-light fixed upper apertures', () => {
-  const { addSingleHungSashes } = require('../floor-plan-ground.js');
+  const { addSingleHungSashes } = require('../assets/js/floor-plan-ground.js');
   for (const glassDepth of [0.04, 0.12]) {
     const parts = [];
     addSingleHungSashes({}, (parent, x, y, z, w, h, d) => {
@@ -54,7 +54,7 @@ test('living return restores three joined windows with the patio door on the per
   assert.deepEqual(diningOpenings[0].slice(2), [0, 8]);
   assert.deepEqual(getLivingRoomFeatureLayout().patioDoor, { x: 13.2, z: 3.95, width: 3, height: 8 });
   assert.deepEqual(openings[0].slice(2), [3, 8]);
-  const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const calls = [];
   vm.runInNewContext(exterior.slice(exterior.indexOf("  wall('living rear return'"), exterior.indexOf("  wall('dining west'")), {
     livingFeatureWall: getLivingRoomFeatureLayout(),
@@ -97,7 +97,7 @@ test('three living frames share one flush sill and drywall returns with the reta
   const bank = getLivingRoomFeatureLayout().sideWindowBank;
   const frames = [];
   const context = {
-    addWindowShadeDivisions: require('../floor-plan-ground.js').addWindowShadeDivisions,
+    addWindowShadeDivisions: require('../assets/js/floor-plan-ground.js').addWindowShadeDivisions,
     THREE: { Group, Vector3: class {} }, scene: new Group(), walls: [],
     windowTrim: {}, wallMaterial: {}, livingSideWindowBank: bank, livingSideWindows: bank.units,
     windowFrame(...args) {

@@ -57,11 +57,11 @@ For each change, inspect its affected surfaces and update them together:
 
 | Design surface | Source |
 |---|---|
-| Ground walls, rooms, openings, floor areas | `floor-plan-ground.js` |
-| Furniture, fixtures, trim, lighting, cameras and tours | `floor-plan-3d.js` |
-| Upper floor and shared stairs | `floor-plan-upstairs.js`, `upstairs-layout.js` |
-| All elevations, roof edges, soffits, fascia, paths and site | `floor-plan-exterior.js` |
-| Shared roof envelopes | `floor-plan-roof.js` |
+| Ground walls, rooms, openings, floor areas | `assets/js/floor-plan-ground.js` |
+| Furniture, fixtures, trim, lighting, cameras and tours | `assets/js/floor-plan-3d.js` |
+| Upper floor and shared stairs | `assets/js/floor-plan-upstairs.js`, `assets/js/upstairs-layout.js` |
+| All elevations, roof edges, soffits, fascia, paths and site | `assets/js/floor-plan-exterior.js` |
+| Shared roof envelopes | `assets/js/floor-plan-roof.js` |
 | Owner notes and schedules | Affected HTML pages, plan reference and design context |
 
 - Review front, rear and both side elevations, not just the requested camera.

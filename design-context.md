@@ -1,6 +1,155 @@
 # Ground-floor design context
 
-## Current coordinated exterior architecture — October 31 garage roof/light revision
+## October 31 rear alignment — implemented retained-program replan
+
+The owner authorized primary bathroom/closet boundary and suite-entry replanning.
+The actual rear wall centerline is now **z6.65 ft** continuously across primary
+bedroom, bathroom/WC, Closet 2 and Bath 2; masonry rear face is **z6.425 ft**.
+The primary bath/WC rear moved 6.5 ft from z0.15. Version H remains an
+unadopted, different whole-house alternative; no H ground or bedroom edits apply.
+
+The rejected 13.55 × 7-ft serial-fixture shell is superseded by a fitted
+**13.55 × 9.8-ft** bathroom, previously 13.55 × 13.5. The divider moves from
+z14 to z16.8. Retain the 33.6 × 62.4-in tub north–south beside the rotated
+42 × 72-in two-person shower (72-in axis east–west). Both original meshes
+and plumbing fittings remain full size. The 60- and 48-in single-sink
+vanities face north from the south wall; original source names remain stable.
+The northwest WC retains its 3.275 × 4.925-ft clear enclosure and toilet,
+with a 30 × 96-in south door swinging inward, not across the basin route.
+The retained 36 × 60-in rear casement moves over the tub at x20.9/z6.75,
+offset 1.5 in west of the tub center to clear the shower wet-wall return/casing.
+The tub centers x21.025, balancing its full faucet envelope against the WC
+paint face and its body against the shower at 4.5 in each.
+
+Bedroom-to-suite access now enters the closet at west-wall z18.85–21.85,
+hinged north and opening into the bedroom. The retained console/TV shift
+one foot north to z16.65, clearing this leaf and its continuous approach.
+The bath entry is x25.65–28.65 at z16.8, opening into the bathroom.
+All fifteen room leaves retain 96-in heads and closed defaults.
+The bedroom's own gallery opening stays fixed, now south-hinged into the
+bedroom to avoid the chair/leaf pinch; chairs themselves remain unmoved.
+Every unrelated room/opening stays fixed.
+
+Closet main clear envelope changes **13.55 × 9 → 13.55 × 6.2 ft** with a
+**6.85-ft-wide × 3.4-ft-deep open linen extension** between x18.45–25.65,
+ending at z26.75. This borrows 24.48 sq ft of nominal internal gallery floor,
+not exterior area, and preserves separate west/east bedroom approach routes.
+Approximate clear closet footprint is 107.30 sq ft versus 121.95 before.
+Storage is not reduced: three original 5-ft × 2-ft hanging bays (one long,
+two double; five continuous 4.85-ft rods = 24.25 linear ft), original
+6.6 × 1.3-ft and 2.7 × 2-ft six-level shelf units (83.88 sq ft shelf area),
+all folded clothes/hanging contents, and original 48-in four-drawer bank.
+
+Measured model trade-offs: **30.6 in** tub-to-vanity-hardware aisle,
+**29.25 in** WC casing leg to vanity hardware (30 in from paint);
+**26.4 in** between full-depth
+hanging bays (narrow single-file closet, not accessibility or occupied-comfort
+approval); **40.56 in** between rotated drawer handles and east hanging bay
+on the route into the linen extension;
+**34.5 in** gallery side routes including baseboards. Room openings are 36 in
+except the retained 30-in WC door. Cabinet fronts may reduce passing space
+while open; close them before passing. Tub-to-shower bodies and faucet-to-WC
+paint face are 4.5 in apart: cleaning, waterproofing, enclosure/service details require professional
+and selected-product review. No fixture/trim/handle collision is hidden.
+
+Shared floors, walls, window/trim, exterior segments, roof envelope, projection
+underside and rear soffit light positions follow the new plane. Version A SVG
+is updated; saved ground/upstairs JSON and all ground rooms remain unchanged.
+Gross upstairs is **1,892.5041667 sq ft**, down **93.275**; ground stays
+**1,966.4427083**, combined **3,858.946875 sq ft**. Model estimates, not
+appraisal/permit areas. Local only; no commit or push. Structure/support,
+garage fire separation, egress, plumbing, wet-area electrical, safety glazing,
+window reach, roof flashing/drainage and occupied simultaneous use remain
+professional decisions; do not build from this model.
+
+Validation of this implemented arrangement: the full editing runner passes
+**420 tests in 67 suites**, with **12 JavaScript syntax checks**. Actual
+HTTP-served Three.js r170 constituent bounds and window/fixture separation
+were checked after matrix updates; 465 room-door poses and 341 individual
+vanity-front/drawer poses clear retained suite objects and restore defaults.
+Final browser sweep includes 552 nonempty constituent meshes, including the
+real hollow-cabinet panels, pull-out drawer parts and handles. Actual r170
+gaps after balancing the tub are 4.5000003 in to the shower and 4.5000000 in
+from the faucet envelope to the WC paint face (rounded to 4.5 in above).
+The route regression reaches all room approaches with a 12-in avatar and
+suite/linen destinations with a 24-in disk, room doors open and fronts closed;
+neither is a person, accessibility or simultaneous-use approval.
+Inspected bathroom/closet at oblique and temporary eye-level viewpoints,
+furnished 2D, current Version A SVG, all four
+elevations and roof screenshots. Existing control handlers exercised
+Day/Night and floor/2D restoration without changing furnishing tuples.
+All six closet canopies hide in closet inspection and restore elsewhere.
+The linen light has real Night intensity 9 and diffuser emission 0.4;
+Day returns the light off and emission to zero. Temporary browser interception
+and cached instrumented script were removed; both preview pages load production
+with one Three render canvas, no measurement hook and Day/default closed fronts.
+No application runtime errors were observed; direct SVG viewing emitted a
+VS Code/Electron preload diagnostic, not a home-model runtime failure.
+Git whitespace checks pass and saved layout JSON hashes are unchanged.
+
+## Current implemented compact upstairs trial — October 31
+
+The owner-approved `assets/images/plans/upstairs-2000/version-a.svg` is implemented in the
+actual model, superseding the larger loft plan and its right-hand roof study.
+Exterior-face gross upstairs after the rear replan is **1,892.5041667 sq ft**, including walls,
+arrival and descending stairs, less the 1.4583333-sq-ft actual stair gap.
+Ground remains **1,966.4427083 sq ft**, combined **3,858.946875 sq ft**.
+The saved version-one empty upstairs layout and all ground fixtures/layout
+remain unchanged. No commit or push.
+
+Four bedrooms/baths surround the fixed stair's open sightline gallery.
+Primary remains 14.75 × 19.75 ft; front Bedroom 3 is 12.5 × 11.5 ft and
+Bedroom 4 is 12.15 × 11.5 ft. Closet 4 is 5.5 × 4.5 ft with the half-foot
+front notch. Full-size queen/full mattresses, frames, desks, existing
+chair proxies, five nightstands, reading seats and primary media remain;
+no upstairs rugs, freestanding dressers or orphan loft furniture.
+Bath 2 stays east (9 × 5 ft), Closet 2 west (5.3 × 7 ft).
+Primary closet is the 13.55 × 6.2-ft main envelope plus open linen extension
+described above; bedroom → closet → bath access retains all storage.
+Laundry is 13.425 × 8 ft with standard 24/36/36/24-in north bases,
+three 24-in south bases, east appliances and continuous wraparound counters.
+Counter edges leave 45.3 in before hardware; simultaneous door/appliance,
+occupied chair, closet and fixture operation is not approved.
+Constituent sightline checks connect one gallery position to all four
+bedroom entries. Door-to-retained-furniture sampling has no conflicts in
+465 poses. The 12-in avatar reaches all bedrooms and fifteen room approaches.
+Bath 2 uses an inward swing rather than the SVG's outward arc, preserving
+the exact opening and closed pose while avoiding the bed-head pinch.
+These checks are not occupied or simultaneous-use approval.
+
+Only laundry, east Bath 4 and the 6 × 5-ft provisional mechanical room
+overlap the garage: north bay x44.2333333–55.5/z15–26.9, south bay
+x31.2–55.5/z26.9–49. No bedroom paint-face interior overlaps either bay.
+Upper perimeter has 14 nonzero segments and 13 window openings; the whole furnished
+house has 48 window units. All private doors have 96-in heads and start closed.
+Main front paired gables remain, centered x6.425/24.95 with 25.4-ft crowns.
+Compact main/east 3:12 hips start y20.6, reserving a provisional 18-in
+framing zone over nine-foot walls. The old loft gable/low transition is
+removed; low garage north/south returns meet the retained full-width garage
+front gable. The upper main/east roofs cover all actual service interiors;
+outside them garage returns cap at y12, below the east window sills at y13.
+The service return hips east as well as front. The enclosed charcoal
+collector drops at a bracketed upper corner, then follows that roof fall
+before exiting to a wall-bracketed east perimeter leader, not a high suspended pipe.
+Collector support/flashing, ice/overflow and capacity remain unresolved.
+Soffits, fascia, closures, opening
+projections and cameras follow shared geometry. Rear bath underside remains
+finish-only; solar, drainage and structural studies must be reassessed.
+
+This reversible implementation is not construction drawings or certified
+compliance. Engineer over-garage floors, bearings/headers/connections,
+garage fire separation, HVAC ducts/service, guards/handrails/headroom,
+roof/valley build-up and flashing, waterproofing, egress, electrical and
+gutters/overflow/freeze/lawful discharge. Veneer/soffits carry no proven load.
+Retain patio firepit cold-storage restrictions and ground door/fixture poses.
+Local verification: full runner passes 412 tests in 66 suites plus 11 JS
+syntax checks. HTTP-served front/rear/both sides, roof plan, upstairs 2D,
+laundry, primary closet/bath and Bedroom 4 were inspected. Day/Night and
+floor switching restore real-light state and unchanged furniture tuples.
+Temporary browser-only instrumentation was removed. World-space measures
+and sampled headroom are concept evidence, not professional approval.
+
+## Historical superseded exterior/loft study — October 31 garage roof/light revision
 
 The new owner reference supersedes the quiet all-hip silhouette and low
 red-brick plinth studies. Use two true front cross-gables centered on the
@@ -90,7 +239,7 @@ at 28.32 in and front cut-stone sills at 32.28 in. Do not lift the continuous
 band to the front glass sill and bury lower side trim.
 Keep existing finished faces, openings, 53 window units, retained roof envelopes, seven-foot
 porch, door poses, furniture, saved JSON and no shutters.
-Owner selected palette 2, Linen, from the [palette sheet](assets/exterior-palette-options.svg),
+Owner selected palette 2, Linen, from the [palette sheet](assets/images/exterior/exterior-palette-options.svg),
 superseding the earlier Oatmeal color study. Pale warm limestone, quiet putty
 mortar, warm off-white trim #f3eee4 and muted warm-charcoal metal #595953
 accompany retained natural oak. At scan luminance 128, graded brick is #d8cdbb,
@@ -2366,7 +2515,7 @@ Keep native playback/volume controls, optional captions and no autoplay.
 ## Historical simplified kitchen trim - October 24 (superseded)
 
 The owner rejected the oversized continuous header and wide white pier
-boards. Use the [new reference](assets/kitchen-slim-window-reference.png)
+boards. Use the [new reference](assets/images/interiors/kitchen-slim-window-reference.png)
 for lighter proportions, not its transoms, grilles, beam or painted cabinets.
 Keep existing openings, 53 in sills, 95 in heads, fixed center pane and
 operable side windows. Use 1 in white side/head edging, 1/2 in thick, with
@@ -2571,7 +2720,7 @@ supports and code compliance require review; see [upstairs notes](upstairs.html#
 
 Require one full-height main-kitchen base-cabinet pull-out with wooden
 vertical dividers for cutting boards, baking sheets, muffin tins and trays.
-The [owner's photo](assets/kitchen-tray-divider-reference.png) establishes
+The [owner's photo](assets/images/interiors/kitchen-tray-divider-reference.png) establishes
 the door-mounted, full-extension storage arrangement, not the painted finish.
 Match the existing light natural-stained white-oak Shaker front and satin-gold
 pull. Do not substitute shallow stacked drawers or a hinged-door cabinet.
@@ -3649,7 +3798,7 @@ Important audit findings: the patio leaf is shown closed with the higher-z hinge
 
 ## Kitchen correction - October 17, 2026
 
-- Source: [user-supplied kitchen/mud-room reference](assets/kitchen-mudroom-layout-reference.png). The fridge/freezer belongs on the **bottom kitchen wall**, not the dark vertical run beside the mud room. The latest request separates the columns with the oven/storage tower: facing the wall from the kitchen, wall/filler, freezer, tower, refrigerator, narrow pull-out, stair bookcases.
+- Source: [user-supplied kitchen/mud-room reference](assets/images/interiors/kitchen-mudroom-layout-reference.png). The fridge/freezer belongs on the **bottom kitchen wall**, not the dark vertical run beside the mud room. The latest request separates the columns with the oven/storage tower: facing the wall from the kitchen, wall/filler, freezer, tower, refrigerator, narrow pull-out, stair bookcases.
 - Stair base finish: continuous flat white 8 in-high, 3/4 in-thick baseboard along the kitchen-facing under-stair wall/bookcases, with no quarter-round or shoe molding. Extend to the bottom step with a reduced-height section below the tread and a front return; wrap the landing-end bookcase side with matching flat baseboard. Keep the bookcase plinths at 0.72 ft and first shelf at 0.76 ft so trim does not cover books. Retain stair geometry and guards.
 - Front entry: remove the built-in console at x = 18.25, z = 47.5 and its wall picture. Leave the entry wall and floor clear; retain the double doors and wall trim.
 - Front entry smart lock: Wyze brand selected for one active leaf of the double door. Exact model, finish, active-leaf handing, and exterior keypad/reader are unconfirmed; do not assume Lock Bolt versus interior retrofit. Show a schematic dark interior housing above the existing pull on the positive-x leaf, provisionally, without changing the doors, glass, or handles. It is not manufacturer geometry or verified hardware fit. Confirm stile/glazing clearance, door thickness, bore/backset, deadbolt versus multipoint compatibility, inactive-leaf astragal/strike/flush bolts, battery access, weather exposure, and free interior egress with the supplier. See [front-entry lock notes](front-entry.html#smart-lock).
@@ -3670,7 +3819,7 @@ Important audit findings: the patio leaf is shown closed with the higher-z hinge
 
 ### Implemented geometry
 
-[Model code](floor-plan-3d.js) uses feet: x increases rightward and z downward on the source plan; y is height.
+[Model code](assets/js/floor-plan-3d.js) uses feet: x increases rightward and z downward on the source plan; y is height.
 
 | Item | Current model |
 |---|---|
@@ -3723,7 +3872,7 @@ Stair-side opening: retain the open backdrop at x = 26.7-29.6875 to expose the s
 
 ## Retained concept decisions
 
-- Upstairs study: add a separate selectable floor at y = +10 ft, provisionally 9 ft ceiling height, using the [dimensioned](assets/upstairs-dimensioned-reference.png) and [furnished](assets/upstairs-furnished-reference.png) references. Include four bedrooms, primary bath/toilet/closet, bedroom-2 bath/closet, two front bedrooms with separate closets, two shared baths, loft, laundry, linen, and mechanical storage. Remove the source's 24 x 13 ft “Above garage” area entirely: no upper slab, room, label, tour area, or upper exterior volume/window. Retain the garage below with a single-story roof; the loft and bedrooms stay unchanged. See [upstairs room dimensions and caveats](upstairs.html#model-study).
+- Upstairs study: add a separate selectable floor at y = +10 ft, provisionally 9 ft ceiling height, using the [dimensioned](assets/images/plans/upstairs-dimensioned-reference.png) and [furnished](assets/images/plans/upstairs-furnished-reference.png) references. Include four bedrooms, primary bath/toilet/closet, bedroom-2 bath/closet, two front bedrooms with separate closets, two shared baths, loft, laundry, linen, and mechanical storage. Remove the source's 24 x 13 ft “Above garage” area entirely: no upper slab, room, label, tour area, or upper exterior volume/window. Retain the garage below with a single-story roof; the loft and bedrooms stay unchanged. See [upstairs room dimensions and caveats](upstairs.html#model-study).
 - Upstairs registration: preserve the existing central ground-floor stair, +10 ft upper arrival, and 4 ft turning landings; adapt the upper hall and floor void to it. Do not move the lower stair to match the source's left-wall stair. Put laundry in that old stair area and relocate linen/mechanical storage east of the actual stair. Room/fixture coordinates are traced/adapted envelopes, not approved clear dimensions or a verified 1,808.5 sq ft area. Interpret source “Room 20” as the bath shown in the furnished image.
 - Floor controls: Upstairs isolates the upper rooms and retains the connecting stair below; Whole floor/ground room buttons restore the ground model. Top view follows the selected floor. Tour and the clickable map operate on the selected level with height-correct avatar/camera/marker and stair-void protection; selecting a floor exits Tour. Continuous walking up/down between stories is not implemented. Upper room labels hide during Tour. There is no room/floor above the garage's front section. Open doorway cutouts do not verify swings; proposed windows, roof/headroom, bearing/spans, MEP, fire protection, guards, and egress remain unverified.
 
@@ -3733,7 +3882,7 @@ Add below-grade stairwell walls without blocking the entry. Omit the level groun
 
 Steam-oven placement: relocate the tower between the separated fridge and freezer, retaining a generic 30 x 24 x 24-inch oven envelope starting 36 inches above the floor, Shaker storage above/below, and overhead cabinetry. The 25-inch-deep tower now has a 31.5-inch bay and 30-inch clear width between provisional 0.75-inch sides; this is only an envelope fit, with no additional installation tolerance or selected cutout. Verify the chosen model's minimum cabinet width, cutout, ventilation, shelf load, electrical and water/drain needs, hot-door access, and landing surface. The final cabinet width may need revision. Existing appliance package pricing is unchanged.
 
-Latest island treatment: retain the [waterfall reference](assets/waterfall-island-reference.png), plain oak base, three drawer banks, gold pulls, and two 2-inch quartz ends, now at 8 x 3.5 ft centered (28.65, 16.95). Preserve the 2 ft living-room shift. Four 18 in stools sit hall-side at 24 in centers, with 6 in nominal seat gaps and 3 in end margins. Pendants follow the new center. Comfort, stone support, knee room, occupied circulation, and appliance access remain to verify. This supersedes earlier island sizes and checks below.
+Latest island treatment: retain the [waterfall reference](assets/images/interiors/waterfall-island-reference.png), plain oak base, three drawer banks, gold pulls, and two 2-inch quartz ends, now at 8 x 3.5 ft centered (28.65, 16.95). Preserve the 2 ft living-room shift. Four 18 in stools sit hall-side at 24 in centers, with 6 in nominal seat gaps and 3 in end margins. Pendants follow the new center. Comfort, stone support, knee room, occupied circulation, and appliance access remain to verify. This supersedes earlier island sizes and checks below.
 
 - Ceiling study: 9 ft throughout, controlled by `ceilingHeight` in the model. Lower the fireplace veneer, refrigeration tower framing and uppers, hood chimney, and pendant cords to suit. Keep appliance sizes, pendant shades, 8 ft openings, and low porch walls. Stair floor-to-floor height now follows the ceiling plus a provisional 12-inch floor assembly, giving 10 ft rather than the old 11 ft placeholder. Actual floor assembly depth and stair headroom remain unverified.
 - Windows: Andersen 100 Series casement/picture intent per current schedules, white inside/outside. All use white drywall returns and white opening-width sills, 1 in thick and exactly 6 in from interior frame face to front flush with the room wall. Window casing/aprons and kitchen quartz ledges are superseded. Frames move outward only normal to the wall with solid local backing allowances; door casing stays unchanged. Models are concepts, not manufacturer CAD or approved wall assemblies. Review units/combinations, deeper framing/header support, insulation/condensation, bucks/anchors, flashing/drainage, operation, egress and safety glazing. Keep the front double-door opening at x = 13.1-18.1, z = 54.2, without sidelights/transom. See [window schedules](windows.html); door leaves/glazing stay unchanged.
@@ -3747,7 +3896,7 @@ Latest island treatment: retain the [waterfall reference](assets/waterfall-islan
 - House-door interaction: click/tap modeled door leaves to toggle hinged doors, bifolds, pocket sliders and exterior overhead doors to their modeled endpoints. Ordinary hinged leaves use a conceptual 180-degree endpoint, selected refrigeration columns use the manufacturer-guide 115-degree limit, bifolds 90 degrees and sliders their modeled track endpoints. The guest shower is doorless, with fixed splash glass. Preserve each saved default pose; the patio door stays closed at 0 degrees on reload/view changes and has a keyboard-accessible button. Hidden/obstructed leaves cannot be clicked through walls, and camera drags do not toggle. These display limits do not verify product stops, structure or operating clearance. The patio-end chair conflicts with the full modeled sweep, even when tucked: move it clear before real operation. The door toggles do not move furniture or approve clearance. Vehicle doors retain their separate control.
 - Stair geometry: set both stacked U-turn landing platforms to exactly 4 ft deep, retaining their approximately 7 ft 10 in width across the two flights. Keep the garage-side end at x = 28.825 and move the flights/opening start from x = 17.4 to approximately 18.992, about 19.1 in toward that wall. The opening/run length becomes 9 ft 10 in; extend the adjoining hall floor into the recovered strip. Soffits, guards, basement excavation/retaining walls, and four bookcase bays follow the shared geometry; do not leave an unguarded gap behind the landing. Keep sixteen 7.5-inch rises per level, seven 10-inch treads per flight, 44/46.9-inch flight widths, turning elevations +5/-5 ft, and arrival elevations +10/-10 ft. The separate upper arrival landing remains 3 ft 8 in deep and moves with the flights. The 10 ft floor-to-floor height still assumes a 9 ft ceiling plus a provisional 12-inch floor assembly. Platform dimensions are not certified clear dimensions between rails. Verify the shifted entry route, actual basement depth, framing, headroom, handrail/guard details, and code compliance with the architect.
 
-- [Base plan](assets/ground-floor-3d-source.png): use this dimensioned stepped-footprint plan, not the different October 4 layout. Model scale is approximate; walls are 9 ft high for the current ceiling study.
+- [Base plan](assets/images/plans/ground-floor-3d-source.png): use this dimensioned stepped-footprint plan, not the different October 4 layout. Model scale is approximate; walls are 9 ft high for the current ceiling study.
 - [Kitchen](kitchen.html): retain the centered 36-inch unequal-bowl farmhouse sink, main faucet and hot/cold filtered-water/soap dispensers. Prefer 30/70 or similar, not 50/50; the current candidate is about 35/65. Trash stays left, dishwasher right. October 28 owner decision removes the sink-wall cabinet trials and sample dishes, restoring the 90 x 54 in joined bank, nominal 18 / 54 / 18 in casement/picture/casement at 42/96 in sill/head, and two ivory/brass end sconces. Retain flush 90 in white sill, side/top casing, three plants, no applied bottom board/apron, full-wall quartz, bases/goods, cooking/prep storage, island, appliances and other lighting. No sink-upper task strips return. Actual standard window sizing, assembly/header, crank/faucet reach, listed fixture suitability, task illumination and moisture detailing remain unapproved. The induction cooktop stays 36 inches.
 - All closed cabinetry: light natural-stained white oak, Shaker recessed-panel doors and drawer fronts, frameless boxes with full-overlay fronts, and satin-gold pulls. Apply throughout the kitchen perimeter, island, prep kitchen, mudroom coat/drop-zone cabinets, bathroom vanities/linen storage, and other modeled closed storage. Door rails and stiles are not cabinet face frames. Preserve open shelving, appliance finishes/handles, cabinet footprints, counters, and flooring. Confirm stain, sheen, hardware, and protective finishes on physical samples.
 - Drawer hardware: use [Top Knobs Dakota Charlotte M2223 cup pulls in Honey Bronze](https://www.topknobs.com/collections/charlotte-cup-pull.html) on the main-kitchen perimeter, island, and prep-extension drawers. One centered cup per drawer; pair them at quarter points on drawers at least 30 in wide. Manufacturer dimensions: 3 3/4 in overall length, 1 1/8 in height, 15/16 in projection, and 2 9/16 in mounting centers. The model approximates the curved, downward-open cup, decorative front screws, and finish; it is not installation CAD. Keep existing bars on hinged doors, tall/trash pull-outs, and appliances. Confirm finish and drilling with physical samples.

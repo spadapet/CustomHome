@@ -5,10 +5,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const read = (file) => fs.readFileSync(require.resolve(`../${file}`), 'utf8');
-const source = read('floor-plan-3d.js');
+const source = read('assets/js/floor-plan-3d.js');
 
 test('all model trim excludes quarter-round and shoe molding while retaining flat baseboards', () => {
-  for (const file of ['floor-plan-3d.js', 'floor-plan-upstairs.js', 'floor-plan-exterior.js']) {
+  for (const file of ['assets/js/floor-plan-3d.js', 'assets/js/floor-plan-upstairs.js', 'assets/js/floor-plan-exterior.js']) {
     assert.doesNotMatch(read(file), /quarter[- ]round|shoeProfile|stairShoe|firstStepShoe|endShoe|shoeRadiusInches/i, file);
   }
   class Shape {
@@ -21,7 +21,7 @@ test('all model trim excludes quarter-round and shoe molding while retaining fla
   assert.deepEqual(profile.points.map((point) => Array.from(point)), [[0, 0], [0.75 / 12, 0], [0.75 / 12, 8 / 12], [0, 8 / 12]]);
   assert.match(source, /mesh\.name = '8 inch interior baseboard'/);
   assert.match(source, /heightInches: 8, thicknessInches: 0\.75, side: run\.side/);
-  assert.match(read('floor-plan-upstairs.js'), /box\(parent, .*2 \/ 3, 0\.0625, windowTrim\)\.name = 'Upstairs white baseboard'/);
+  assert.match(read('assets/js/floor-plan-upstairs.js'), /box\(parent, .*2 \/ 3, 0\.0625, windowTrim\)\.name = 'Upstairs white baseboard'/);
 });
 
 test('under-stair flat boards retain their bottom-step and enclosure-end returns without extra molding', () => {

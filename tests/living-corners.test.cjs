@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const { getLivingRoomFeatureLayout } = require('../floor-plan-ground.js');
+const { getLivingRoomFeatureLayout } = require('../assets/js/floor-plan-ground.js');
 
 test('low-set fireplace keeps the ember bed and every flame inside the lowered firebox', () => {
   class Group {
@@ -24,7 +24,7 @@ test('low-set fireplace keeps the ember bed and every flame inside the lowered f
     }
   }
   const scene = new Group();
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   vm.runInNewContext(source.slice(source.indexOf('  const fireboxBottom ='), source.indexOf('  const mantel =')), {
     scene, fireplaceFaceX: 1.38, livingCenterZ: 17.475, black: {},
     THREE: { Group, Shape, Mesh, ShapeGeometry: class {}, MeshStandardMaterial: class {}, MeshBasicMaterial: class {} },
@@ -53,10 +53,10 @@ test('Christmas tree stays in the actual northwest living corner for every seati
       this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } };
     }
   }
-  const { getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
+  const { getGroundFloorDefaultPlan } = require('../assets/js/floor-plan-ground.js');
   const roots = [];
   const context = { THREE: { Group }, livingFeatureWall: getLivingRoomFeatureLayout(), scene: { add(root) { roots.push(root); } } };
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const start = source.indexOf('  const christmasTree =');
   const end = source.indexOf('  const evergreen =', start);
   assert.ok(start >= 0 && end > start);
@@ -89,7 +89,7 @@ test('seasonal move preserves all branches, stand, lights, ornaments and seven-f
     }
     add(part) { this.children.push(part); }
   }
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const roots = [];
   function solid(parent, x, y, z, w, h, d) {
     const part = new Part();
@@ -159,7 +159,7 @@ test('textured armchairs retain corner centers and inward angles with uniformly 
     }
   };
   context.cylinder = (parent, x, y, z, radius, h) => context.box(parent, x, y, z, radius * 2, h, radius * 2);
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  const livingChairWidth ='), source.indexOf('  function loungeChair(')), context);
   vm.runInContext(source.slice(source.indexOf('  const livingLayouts ='), source.indexOf('  const tableX =')), context);
@@ -186,7 +186,7 @@ test('textured armchairs retain corner centers and inward angles with uniformly 
   });
 
   await t.test('licensed product sofa remains available without removing earlier comparisons', () => {
-    const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+    const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
     const context = { livingCenterZ: getLivingRoomFeatureLayout().centerZ, livingFeatureWall: getLivingRoomFeatureLayout() };
     vm.createContext(context);
     vm.runInContext(source.slice(source.indexOf('  const livingLayouts ='), source.indexOf('  const tableX =')), context);
@@ -218,7 +218,7 @@ test('textured armchairs retain corner centers and inward angles with uniformly 
   });
 
   await t.test('family layout provides five planning positions, a correctly scaled soft surface and a 16 inch sofa gap', () => {
-    const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+    const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
     const context = {
       livingCenterZ: getLivingRoomFeatureLayout().centerZ, livingFeatureWall: getLivingRoomFeatureLayout(),
       familyLiving: {}, sofaGeometry: { userData: { widthInches: 86, depthInches: 40.1944462443542 } },

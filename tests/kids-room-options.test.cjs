@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { room, generate, overlap, assess } = require('../kids-room-options.js');
+const { room, generate, overlap, assess } = require('../assets/js/kids-room-options.js');
 const options = generate();
 
 test('comparison covers all 54 unique wall assignments with stable numbers', () => {

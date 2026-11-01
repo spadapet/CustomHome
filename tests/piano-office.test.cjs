@@ -5,18 +5,18 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 test('piano shifts six more inches toward west windows while preserving its rear gap', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   let parent;
   const piano = { position: { set(x, y, z) { Object.assign(this, { x, y, z }); } }, rotation: {}, userData: {} };
   const start = source.indexOf('  scene.add(piano);');
   const end = source.indexOf('\n', source.indexOf('  piano.userData.location =', start));
   assert.ok(start >= 0 && end > start);
-  const stairOpening = require('../upstairs-layout.js').stairOpening();
+  const stairOpening = require('../assets/js/upstairs-layout.js').stairOpening();
   vm.runInNewContext(source.slice(start, end), { piano, scene: { add(object) { parent = object; } }, stairOpening, pianoDepth: 411 / 304.8 });
   assert.equal(parent, piano);
   assert.equal(piano.rotation.y, Math.PI);
   const halfWidth = 1350 / 304.8 / 2;
-  const wall = require('../floor-plan-ground.js').getGroundFloorDefaultPlan().stairs;
+  const wall = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan().stairs;
   assert.deepEqual([piano.userData.wallRun.minX, piano.userData.wallRun.maxX], [wall.x, wall.x + wall.width]);
   const previousX = (wall.x + wall.x + wall.width) / 2 - 10 / 12;
   assert.ok(Math.abs((previousX - piano.position.x) * 12 - 6) < 1e-9, 'Actual cabinet midpoint shifts another six inches west');

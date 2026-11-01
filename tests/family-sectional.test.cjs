@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const { getLivingRoomFeatureLayout } = require('../floor-plan-ground.js');
+const { getLivingRoomFeatureLayout } = require('../assets/js/floor-plan-ground.js');
 
 test('family L sectional has five full cushions without counting its corner and preserves measured access gaps', () => {
   class Group {
@@ -24,7 +24,7 @@ test('family L sectional has five full cushions without counting its corner and 
       return part;
     }
   };
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   vm.runInNewContext(source.slice(source.indexOf('  const familySectional ='), source.indexOf('  const livingLayouts =')), context);
   const sectional = scene.children[0];
   assert.equal(sectional.userData.planningSeats, 5);
@@ -90,11 +90,11 @@ function buildLounge() {
     }
   };
   vm.createContext(context);
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const loungeSource = source.slice(source.indexOf('  const referenceLounge ='), source.indexOf('  const familySectional ='));
   vm.runInContext(loungeSource, context);
   const placeSource = source.slice(source.indexOf('  scene.add(piano);'), source.indexOf('\n', source.indexOf('  piano.userData.location =')));
-  context.stairOpening = require('../upstairs-layout.js').stairOpening();
+  context.stairOpening = require('../assets/js/upstairs-layout.js').stairOpening();
   context.pianoDepth = 411 / 304.8;
   vm.runInContext(placeSource, context);
   return { context, source, loungeSource, scene, Group, feature };
@@ -228,7 +228,7 @@ test('piano moves west and against trim with tucked bench, with no built-in besi
   const { context, scene } = buildLounge();
   const piano = scene.children.find((child) => child.name === 'Yamaha CLP-825 Rosewood digital piano');
   assert.ok(piano, 'Piano is a direct scene child, independent of seating layouts');
-  const stairs = require('../floor-plan-ground.js').getGroundFloorDefaultPlan().stairs;
+  const stairs = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan().stairs;
   const wallMin = stairs.x, wallMax = stairs.x + stairs.width;
   near(wallMin, 0.175, 'Enclosure starts at the living west wall face');
   const cabinet = worldBounds({ traverse: (cb) => cb(piano.children.find((part) => part.name === 'Piano console cabinet')) });
@@ -300,7 +300,7 @@ test('U layout placement tuple restores after switching living layouts', () => {
 });
 
 test('both fireplace built-ins are removed with no constituent meshes, group or userData', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   for (const name of ['Paired low white-oak fireplace built-ins', 'halved fireplace built-in', 'Fireplace cabinet recessed plinth', 'Standard 36 inch cabinet side',
     'Fireplace cabinet media shelf', 'Closed Shaker media door', 'Stone-side cabinet scribe filler', 'Finished exposed cabinet end panel', 'Continuous low oak built-in top']) {
     assert.ok(!source.includes(name), `${name} is deleted, not hidden`);

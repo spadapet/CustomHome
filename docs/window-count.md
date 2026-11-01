@@ -90,6 +90,6 @@ An **opening** is one window group; a **unit** is one casement, single-hung or f
 - The modeled powder window is now standard size 2640: approximately 2.4583 x 3.9583 ft frame in a minimum 2.5 x 4 ft opening, bottom at 4 ft and top at 8 ft, with lower-half frosting to 6 ft. This replaces the shorter 2630 without changing the count; see the [options and placement in feet](../floor-plan-reference.md#powder-room-window-options-in-feet). Half-frosted product availability, installation and site/nighttime privacy are unverified.
 - This is a model takeoff, not a supplier order or egress/ventilation approval. Final unit sizes, mulled assemblies, rough openings, safety glazing and egress remain unverified.
 
-Sources: [ground-floor window construction](../floor-plan-3d.js), [upstairs window schedule](../floor-plan-upstairs.js), [window requirements and room schedules](../windows.html#whole-house-window-count), and [consolidated window schedule](../floor-plan-reference.md#window-schedule).
+Sources: [ground-floor window construction](../assets/js/floor-plan-3d.js), [upstairs window schedule](../assets/js/floor-plan-upstairs.js), [window requirements and room schedules](../windows.html#whole-house-window-count), and [consolidated window schedule](../floor-plan-reference.md#window-schedule).
 
 Recount both furnished floors and update this document and the linked schedules when window layouts change.

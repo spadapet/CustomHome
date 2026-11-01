@@ -4,8 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
-const { getGroundFloorDefaultPlan, getGarageClerestoryLayout, getPrepWindowLayout } = require('../floor-plan-ground.js');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
+const { getGroundFloorDefaultPlan, getGarageClerestoryLayout, getPrepWindowLayout } = require('../assets/js/floor-plan-ground.js');
 
 test('three high garage picture openings share the lowered slab datum and preserve the side door', () => {
   const windows = getGarageClerestoryLayout();
@@ -28,7 +28,7 @@ test('three high garage picture openings share the lowered slab datum and preser
 });
 
 test('exterior stone cuts reverse the east-wall windows correctly without covering the side door', () => {
-  const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   let openings;
   const start = exterior.indexOf('  const garageSideWall =');
   const end = exterior.indexOf('  const garageSideDoor =', start);

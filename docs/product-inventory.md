@@ -60,7 +60,7 @@ version. Both adjoining passages are currently 30 inches finished clear.
 | Counter | 1 run | 106.15 long x 25.5 deep; finished top 36.6 high | Five base boxes total 102 wide, plus 4.15 total fillers. Quartz brand TBD. |
 
 Source: [current cooking schedule](../kitchen.html#standard-cooking-cabinets)
-and [furnished model](../floor-plan-3d.js). The older 94.15-inch run, 21-inch
+and [furnished model](../assets/js/floor-plan-3d.js). The older 94.15-inch run, 21-inch
 side boxes and single-door upper descriptions are superseded.
 
 ### Main kitchen: sink wall and island
@@ -82,9 +82,9 @@ before ordering. Do not treat visible fronts as independently selected boxes.
 | Island countertop | 1 | 96 long x 42 deep; top 36.6 above floor | Quartz waterfall ends; 15 knee-overhang intent, four seats. Standard box/filler takeoff TBD. |
 | Sink-wall uppers | 0 | Removed | Owner rejects both cabinet trials; remove trial sample dishes, fillers and ceiling trim. Existing island/prep dishes stay. Restore 90-inch bank and two wall sconces. |
 
-Sources: [sink-run geometry](../floor-plan-3d.js#L2009),
+Sources: [sink-run geometry](../assets/js/floor-plan-3d.js#L2009),
 [tray-divider study](../kitchen.html#tray-divider-pullout),
-[island geometry](../floor-plan-3d.js#L2483).
+[island geometry](../assets/js/floor-plan-3d.js#L2483).
 
 ### Main kitchen: refrigeration / steam-oven wall
 
@@ -103,7 +103,7 @@ Generic main steam-oven allowance: **30 W x 24 D x 24 H**, bottom/top
 position; dealer coordination may require a standard tower and revised
 fillers, not an unapproved widening or raised oven.
 
-Sources: [refrigeration/tower model](../floor-plan-3d.js#L2373),
+Sources: [refrigeration/tower model](../assets/js/floor-plan-3d.js#L2373),
 [kitchen requirements](../kitchen.html),
 [steam-oven hold](../appliances.html#steam-and-combi-steam-models).
 
@@ -136,8 +136,8 @@ the former 54.6. An open dishwasher leaves only an estimated 18.6, not
 approved passing space.
 
 Sources: [prep schedule and depth update](../kitchen.html),
-[prep cabinet geometry](../floor-plan-3d.js#L2761),
-[pantry geometry](../floor-plan-3d.js#L2974).
+[prep cabinet geometry](../assets/js/floor-plan-3d.js#L2761),
+[pantry geometry](../assets/js/floor-plan-3d.js#L2974).
 
 ### Mudroom and ground-floor closets
 
@@ -156,9 +156,9 @@ Sources: [prep schedule and depth update](../kitchen.html),
 | Guest walk-in end filler | 1 | 3 wide | Separate fitted piece. |
 
 Sources: [current mudroom](../mud-room.html#finish-palette),
-[mudroom model](../floor-plan-3d.js#L3254),
+[mudroom model](../assets/js/floor-plan-3d.js#L3254),
 [guest closet requirements and evidence](../bedrooms.html#guest-suite),
-[guest layout](../floor-plan-ground.js#L257).
+[guest layout](../assets/js/floor-plan-ground.js#L257).
 
 **California Closets is an inspiration/system direction, not a placed order:**
 [finishes](https://www.californiaclosets.com/our-finishes/),
@@ -185,10 +185,10 @@ bookcase bays, former kitchen counter niche and end pull-out.
 | Upstairs primary closet drawer cabinet | 1 | Body 72 x 16.8 x 34.8 | Four modeled fronts; generic custom geometry. |
 
 Sources: [bathroom requirements](../bathrooms.html),
-[powder model](../floor-plan-3d.js#L4442),
-[guest vanity model](../floor-plan-3d.js#L4353),
-[upper vanities](../floor-plan-upstairs.js#L416),
-[upper laundry/closet model](../floor-plan-upstairs.js#L475).
+[powder model](../assets/js/floor-plan-3d.js#L4442),
+[guest vanity model](../assets/js/floor-plan-3d.js#L4353),
+[upper vanities](../assets/js/floor-plan-upstairs.js#L416),
+[upper laundry/closet model](../assets/js/floor-plan-upstairs.js#L475).
 All bath/utility cabinet suppliers remain **TBD**. Body heights are not the
 same as finished countertop heights.
 
@@ -215,8 +215,8 @@ walk-in closet hanging, shelves and built-in drawers remain.
 | Upstairs linen shelving | 1 | Shelves 21.6 W x 15.6 D; top shelf center 86.4 | Generic geometry. |
 | Garage wall tool shelves | 2 | 72 W x 19.2 D x 1.44 thick | Builder-fitted metal shelf concepts, not selected rack products; separate 72 W x 21.6 H tool board. |
 
-Sources: [ground storage geometry](../floor-plan-3d.js#L3946),
-[upper furniture/closet geometry](../floor-plan-upstairs.js#L350),
+Sources: [ground storage geometry](../assets/js/floor-plan-3d.js#L3946),
+[upper furniture/closet geometry](../assets/js/floor-plan-upstairs.js#L350),
 [garage storage](../garage.html#daylight-and-hanging-tools).
 
 ### Cabinet hardware and organizers
@@ -329,8 +329,8 @@ measured rooms without changing these sizes/counts.
 
 Internal sources: [window requirements/sources](../windows.html),
 [room-by-room count](window-count.md),
-[current ground model](../floor-plan-3d.js),
-[upper window definitions](../floor-plan-upstairs.js#L53).
+[current ground model](../assets/js/floor-plan-3d.js),
+[upper window definitions](../assets/js/floor-plan-upstairs.js#L53).
 Some older consolidated-plan rows retain removed windows/old totals; the
 current furnished definitions and the 32/55 count govern this inventory.
 
@@ -359,8 +359,8 @@ package is selected.
 | Upstairs interior doors | Per current upper wall-opening schedule; 96 high | Generic white single-panel geometry; handing, widths, clear passage and complete supplier schedule still need coordination. |
 
 Sources: [door requirements](../doors.html), [front entry](../front-entry.html),
-[guest suite layout](../floor-plan-ground.js#L257),
-[upper wall/door schedule](../floor-plan-upstairs.js#L98).
+[guest suite layout](../assets/js/floor-plan-ground.js#L257),
+[upper wall/door schedule](../assets/js/floor-plan-upstairs.js#L98).
 Verify clear passage, structural openings, door swings, safety glazing,
 hardware and fire separation with selected products.
 

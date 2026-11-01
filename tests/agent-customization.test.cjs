@@ -119,8 +119,8 @@ test('adopted space planning retains attribution and is wired into design, editi
 test('file instructions are scoped, linked and cover the intended repository surfaces', () => {
   const directory = path.join(root, '.github', 'instructions');
   const expected = new Map([
-    ['model-geometry.instructions.md', 'floor-plan-ground.js'],
-    ['viewer-behavior.instructions.md', 'floor-plan-3d.js'],
+    ['model-geometry.instructions.md', 'assets/js/floor-plan-ground.js'],
+    ['viewer-behavior.instructions.md', 'assets/js/floor-plan-3d.js'],
     ['model-tests.instructions.md', 'tests/**/*.cjs'],
     ['design-documentation.instructions.md', '**/*.html']
   ]);

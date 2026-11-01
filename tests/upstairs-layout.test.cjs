@@ -1,255 +1,129 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const vm = require('node:vm');
-const path = require('node:path');
-const layout = require('../upstairs-layout.js');
-const scope = {};
-vm.runInNewContext(fs.readFileSync(path.join(__dirname, '..', 'floor-plan-upstairs.js'), 'utf8') + '\nthis.defaults = getUpstairsDefaultPlan;', scope);
-const stairs = layout.stairOpening();
-const baseline = JSON.parse(JSON.stringify(scope.defaults(stairs)));
-const measured = require('../floor-plan-upstairs.js').getUpstairsMeasuredGeometry();
-const room = (plan, name) => plan.rooms.find((item) => item.name === name);
-const wall = (plan, name) => plan.walls.find((item) => item.name === name);
-const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 0.001, `${actual} differs from ${expected}`);
+'use strict';
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const upper=require('../assets/js/floor-plan-upstairs.js');
+const layout=require('../assets/js/upstairs-layout.js');
+const stairs=layout.stairOpening();
+const baseline=upper.getUpstairsDefaultPlan(stairs);
+const plan=layout.resolve(baseline,layout.empty());
+const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-8,`${a} != ${b}`);
+const room=(p,n)=>p.rooms.find(r=>r.name===n);
+const wall=(p,n)=>p.walls.find(r=>r.name===n);
 
-test('every upstairs doorway is eight feet tall and remains so with saved-layout resolution', () => {
-  const plan = layout.resolve(baseline, layout.empty());
-  let count = 0;
-  for (const wall of plan.walls) {
-    for (const [, , bottom, top] of wall.openings) {
-      if (bottom !== 0) continue;
-      assert.equal(top, 8, `${wall.name} opening is 96 inches tall`);
-      count++;
-    }
-  }
-  assert.ok(count >= 15, 'Covers bedroom, bathroom, closet and service-room doorways');
+test('every compact doorway is 96 inches and saved resolution preserves closed opening sizes',()=>{
+  const doors=plan.walls.flatMap(w=>w.openings.filter(o=>o[2]===0));
+  assert.equal(doors.length,15);
+  assert.ok(doors.every(o=>o[3]===8&&o[1]-o[0]>=2.5-1e-8));
 });
-
-test('Closet 4 front exterior wall is recessed six inches with real floor and masonry returns', () => {
-  const plan = layout.resolve(baseline, layout.empty());
-  const closet = room(plan, 'Bedroom 4 closet');
-  const front = wall(plan, 'Closet 4 south');
-  close(closet.w - .35, 5.5);
-  close(closet.d - .35, 6);
-  close(front.z1, measured.south - .5);
-  close(closet.z + closet.d, front.z1);
-  close(front.x1, measured.southClosetWest);
-  close(front.x2, measured.southClosetEast);
-  const recessX = (front.x1 + front.x2) / 2;
-  const recessZ = (front.z1 + measured.south) / 2;
-  assert.ok(!plan.floors.some(f => recessX > f.x && recessX < f.x + f.w && recessZ > f.z && recessZ < f.z + f.d), 'No upstairs slab fills exterior notch');
-  const segments = require('../floor-plan-upstairs.js').getUpstairsExteriorSegments();
-  assert.deepEqual(segments.find(([name]) => name === 'closet 4 front').slice(1), [front.x1, front.z1, front.x2, front.z2]);
-  for (const side of ['west', 'east']) {
-    const furnished = wall(plan, `Closet 4 ${side} return`);
-    const exterior = segments.find(([name]) => name === `closet 4 ${side} return`);
-    close(Math.abs(furnished.z2 - furnished.z1), .5);
-    close(exterior[1], furnished.x1);
-    close(Math.min(exterior[2], exterior[4]), front.z1);
-    close(Math.max(exterior[2], exterior[4]), measured.south);
-  }
-  close(room(plan, 'Bedroom 3').z + room(plan, 'Bedroom 3').d, measured.south);
-  close(room(plan, 'Bedroom 4').z + room(plan, 'Bedroom 4').d, measured.south);
-});
-
-test('upper arrival follows the powder-room-side flight after the stair swap', () => {
-  const arrival = baseline.arrival;
-  close(arrival.z + arrival.d, stairs.z + stairs.depth);
-  close(arrival.x, stairs.x + stairs.width);
-  const approach = baseline.floors.find((floor) => floor.name === 'North arrival approach');
-  assert.ok(approach);
-  close(approach.z, stairs.z);
-  close(approach.z + approach.d, arrival.z);
-});
-
-test('empty overrides preserve every baseline room, wall opening, floor and window', () => {
-  const plan = layout.resolve(baseline, layout.empty());
-  assert.deepEqual(plan.rooms, baseline.rooms);
-  assert.equal(plan.walls.length, baseline.walls.length);
-  assert.equal(plan.windows.length, 15);
-  baseline.walls.forEach((original) => {
-    const resolved = wall(plan, original[0]);
-    assert.deepEqual(resolved.openings, original[5] ?? []);
-    close(resolved.thickness, 0.35);
-  });
-  plan.windows.forEach((window, index) => window.forEach((value, field) => {
-    if (typeof value === 'number') close(value, baseline.windows[index][field]);
-    else assert.equal(value, baseline.windows[index][field]);
-  }));
-  assert.deepEqual(plan.floors, baseline.floors);
-  assert.deepEqual(layout.warnings(baseline, layout.empty()), []);
-});
-
-test('room width moves the shared wall, joins, adjoining floors and window host', () => {
-  const width = room(baseline, 'Bedroom 2').w + 1;
-  const east = measured.bedEast + 1;
-  const edit = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { w: width });
-  const plan = layout.resolve(baseline, edit);
-  close(room(plan, 'Bedroom 2').w, width);
-  close(room(plan, 'Bedroom 2 bath').x, east);
-  close(room(plan, 'Bedroom 2 bath').w, measured.east - east);
-  close(room(plan, 'Bedroom 2 closet').x, east);
-  close(wall(plan, 'Bedroom 2 east').x1, east);
-  close(wall(plan, 'Bath 2 north').x1, east);
-  close(wall(plan, 'Bath 2 south').x1, east);
-  const floor = plan.floors.find((item) => item.room === 'Bedroom 2');
-  close(floor.w, width);
-  const before = baseline.windows.find((item) => item[0] === 'Bedroom 2');
-  const after = plan.windows.find((item) => item[0] === 'Bedroom 2');
-  close(after[1], before[1] + 0.5);
-  close(after[3], before[3]);
-  assert.equal(layout.serialize(JSON.parse(layout.serialize(edit))), layout.serialize(edit));
-});
-
-test('wall movement updates T-junctions and neighboring room bounds without changing openings', () => {
-  const east = measured.bedEast + 1;
-  const document = layout.editWall(baseline, layout.empty(), 'Bedroom 2 east', { x1: east, x2: east });
-  const plan = layout.resolve(baseline, document);
-  close(wall(plan, 'Bath 2 south').x1, east);
-  close(room(plan, 'Bedroom 2').w, 14.35);
-  close(room(plan, 'Bedroom 2 bath').x, east);
-  const original = baseline.walls.find((item) => item[0] === 'Bedroom 2 east')[5];
-  wall(plan, 'Bedroom 2 east').openings.forEach((opening, index) => close(opening[1] - opening[0], original[index][1] - original[index][0]));
-});
-
-test('wall thickness and length are real geometry data; window width stays fixed', () => {
-  const document = layout.editWall(baseline, layout.empty(), 'Bedroom 2 north', { x2: measured.bedEast + 1, thickness: 0.5 });
-  const plan = layout.resolve(baseline, document);
-  close(layout.length(wall(plan, 'Bedroom 2 north')), 14.35);
-  close(wall(plan, 'Bedroom 2 north').thickness, 0.5);
-  close(plan.windows.find((item) => item[0] === 'Bedroom 2')[3], 4);
-});
-
-test('invalid values, unknown/duplicate objects and unsupported schema fail explicitly', () => {
-  const invalid = [
-    { version: 2, rooms: [], walls: [] },
-    { version: 1, rooms: [], walls: [], secret: 'unexpected' },
-    { version: 1, rooms: [{ name: 'Unknown', x: 0, z: 0, w: 5, d: 5 }], walls: [] },
-    { version: 1, rooms: [{ name: 'Bedroom 2', x: null, z: 10, w: 13, d: 12 }], walls: [] },
-    { version: 1, rooms: [{ name: 'Bedroom 2', x: 31, z: 10, w: -1, d: 12 }], walls: [] },
-    { version: 1, rooms: [], walls: [{ name: 'Bedroom 2 north', x1: 31, z1: 10, x2: 44, z2: 11, thickness: 0.35 }] }
-  ];
-  for (const value of invalid) assert.throws(() => layout.resolve(baseline, value));
-  const duplicate = { name: 'Bedroom 2', x: 31, z: 10, w: 13, d: 12 };
-  assert.throws(() => layout.resolve(baseline, { version: 1, rooms: [duplicate, duplicate], walls: [] }), /duplicate/);
-});
-
-test('stair protections reject covering the void with a room or wall', () => {
-  assert.throws(() => layout.editRoom(baseline, layout.empty(), 'Linen (relocated)', { x: 6 }), /stair/);
-  assert.throws(() => layout.editWall(baseline, layout.empty(), 'Storage west', { x1: 6, x2: 6 }), /stair/);
-});
-
-test('relocated stairs fit the former kids room with an east-facing upper arrival', () => {
-  close(stairs.x, 0.175);
-  close(stairs.z, 27 + 0.2 / 12);
-  close(stairs.width, 9 + 10 / 12);
-  close(stairs.depth, 7.825);
-  close(stairs.rotation, Math.PI);
-  assert.ok(stairs.x + stairs.width < 12.2);
-  assert.ok(stairs.z + stairs.depth < 36.1);
-  close(baseline.arrival.x, stairs.x + stairs.width);
-  close(baseline.arrival.z, stairs.z + stairs.depth - baseline.arrival.d);
-  close(baseline.arrival.w, 44 / 12);
-  close(baseline.arrival.d, 46.9 / 12);
-  const laundry = room(baseline, 'Laundry (relocated)');
-  close(laundry.x, measured.southEast);
-  assert.ok(laundry.x > baseline.arrival.x + baseline.arrival.w);
-  for (const floor of baseline.floors) {
-    assert.ok(floor.w > 0 && floor.d > 0, floor.name);
-    const xOverlap = Math.min(floor.x + floor.w, stairs.x + stairs.width) - Math.max(floor.x, stairs.x);
-    const zOverlap = Math.min(floor.z + floor.d, stairs.z + stairs.depth) - Math.max(floor.z, stairs.z);
-    assert.ok(xOverlap < 0.001 || zOverlap < 0.001, `${floor.name} covers the relocated stair void`);
+test('compact paint-face inventory matches the approved SVG',()=>{
+  for(const [name,w,d] of [['Primary bedroom',14.75,19.75],['Primary bath',13.55,9.8],['Primary closet',13.55,6.2],
+    ['Bedroom 2 bath',9,5],['Bedroom 2 closet',5.3,7],['Laundry (relocated)',13.425,8],
+    ['Shared bath west',9,5],['Shared bath east',9,5],['Bedroom 3',12.5,11.5],
+    ['Bedroom 4',12.15,11.5],['Bedroom 4 closet',5.5,4.5],['Mechanical (relocated)',6,5]]){
+    const r=room(plan,name);
+    close(r.w-.35,w);close(r.d-.35,d);
   }
 });
-
-test('powder-side gap closure translates shared voids without moving rooms or narrowing arrival', () => {
-  const ground = require('../floor-plan-ground.js');
-  const old = { ...stairs, z: 26.775 };
-  close((stairs.z - old.z) * 12, 2.9);
-  close((35.1 - 0.175 - stairs.z - stairs.depth) * 12, 1);
-  close((35.1 - 0.175 - 0.75 / 12 - stairs.z - stairs.depth) * 12, 0.25);
-  assert.deepEqual(ground.getGuestEntryLayout(stairs), ground.getGuestEntryLayout(old));
-  assert.deepEqual(ground.getLivingRoomFeatureLayout(stairs), ground.getLivingRoomFeatureLayout(old));
-  const lower = ground.getGroundFloorDefaultPlan();
-  close(lower.stairs.z, stairs.z);
-  close(lower.stairs.depth, stairs.depth);
-  for (const plan of [lower, baseline, layout.resolve(baseline, require('../upstairs-layout.json'))]) {
-    for (const f of plan.floors) {
-      const rect = Array.isArray(f) ? { x: f[0], z: f[1], w: f[2], d: f[3] } : f;
-      const dx = Math.min(rect.x + rect.w, stairs.x + stairs.width) - Math.max(rect.x, stairs.x);
-      const dz = Math.min(rect.z + rect.d, stairs.z + stairs.depth) - Math.max(rect.z, stairs.z);
-      assert.ok(dx < 0.001 || dz < 0.001, `${rect.name || 'ground slab'} crosses shared void`);
-    }
+test('Closet 4 six-inch front notch has real walls and no floor filling the recess',()=>{
+  const r=room(plan,'Bedroom 4 closet'),front=wall(plan,'Closet 4 south');
+  close(r.z+r.d,51.8);close(front.z1,51.8);
+  for(const name of ['Closet 4 west return','Closet 4 east return'])close(Math.abs(wall(plan,name).z2-wall(plan,name).z1),.5);
+  assert.ok(!plan.floors.some(f=>15>f.x&&15<f.x+f.w&&52>f.z&&52<f.z+f.d));
+});
+test('fixed stair and 44-inch arrival preserve their exact ground registration',()=>{
+  close(stairs.x,.175);close(stairs.z,27+.2/12);close(stairs.width,9+10/12);close(stairs.depth,7.825);
+  close(baseline.arrival.x,stairs.x+stairs.width);close(baseline.arrival.w*12,44);close(baseline.arrival.d*12,46.9);
+  close(baseline.arrival.z+baseline.arrival.d,stairs.z+stairs.depth);
+  close(baseline.floors.find(f=>f.name==='North arrival approach').z,stairs.z);
+  const ground=require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan();
+  assert.deepEqual(ground.stairs,stairs);
+});
+test('empty version-one saved overrides preserve baseline rooms floors walls windows without warnings',()=>{
+  assert.deepEqual(plan.rooms,baseline.rooms);assert.deepEqual(plan.floors,baseline.floors);
+  assert.equal(plan.windows.length,13);
+  for(let i=0;i<baseline.walls.length;i++)assert.deepEqual(plan.walls[i].openings,baseline.walls[i][5]||[]);
+  plan.windows.forEach((w,i)=>w.forEach((v,j)=>typeof v==='number'?close(v,baseline.windows[i][j]):assert.equal(v,baseline.windows[i][j])));
+  assert.deepEqual(layout.warnings(baseline,layout.empty()),[]);
+  assert.deepEqual(JSON.parse(fs.readFileSync(require.resolve('../assets/data/upstairs-layout.json'),'utf8')),layout.empty());
+});
+test('gallery is continuous unique floor coverage around the stair without orphan loft slabs',()=>{
+  for(let i=0;i<plan.floors.length;i++)for(let j=0;j<i;j++){
+    const a=plan.floors[i],b=plan.floors[j];
+    assert.ok(Math.min(a.x+a.w,b.x+b.w)<=Math.max(a.x,b.x)+1e-8 ||
+      Math.min(a.z+a.d,b.z+b.d)<=Math.max(a.z,b.z)+1e-8,`${a.name}/${b.name}`);
   }
-  close(baseline.arrival.d * 12, 46.9);
-  const south = baseline.floors.find(f => f.name === 'South landing connection');
-  close(south.d * 12, 3.1);
-  const north = baseline.floors.find(f => f.name === 'North stair edge');
-  close(north.z + north.d, stairs.z);
-  close(south.z, stairs.z + stairs.depth);
+  for(const [x,z] of [[11,33],[14,33],[16.5,33],[22,33],[26,30],[20,38],[26.5,25]]){
+    assert.equal([...plan.floors,baseline.arrival].filter(f=>x>=f.x&&x<=f.x+f.w&&z>=f.z&&z<=f.z+f.d).length,1,`${x},${z}`);
+  }
+  assert.ok(!plan.floors.some(f=>/loft/i.test(f.name)));
 });
-
-test('walls cannot be shortened through an opening or overlapping openings', () => {
-  assert.throws(() => layout.editWall(baseline, layout.empty(), 'Bedroom 2 north', { x2: measured.closetEast + 2 }), /too short/);
-  assert.throws(() => layout.editWall(baseline, layout.empty(), 'Primary suite entry', { z2: 15 }), /overlap/);
+test('primary closet access is bath-only and all four bedroom entries face the gallery',()=>{
+  assert.deepEqual(wall(plan,'Bath south').openings,[[10.55,13.55,0,8]]);
+  assert.equal(wall(plan,'Primary closet south').openings.length,0);
+  const west=wall(plan,'Primary suite entry');
+  assert.equal(west.openings.length,2,'Bath and gallery, not closet shortcut');
+  assert.equal(wall(plan,'Primary closet east').openings.length,1,'Bedroom 2 entry below closet');
+  close(wall(plan,'Primary closet east').z1+wall(plan,'Primary closet east').openings[0][0],23.55);
+  for(const n of ['Bedroom 3 north','Bedroom 4 north'])assert.equal(wall(plan,n).openings.length,2);
 });
-
-test('furniture anchors move proportionally but do not prescribe furniture scaling', () => {
-  const edit = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { w: 14.35 });
-  const x = measured.closetEast + 13.35 / 2, z = measured.north + 4.5;
-  const position = layout.furniturePosition(baseline, layout.resolve(baseline, edit), x, z);
-  close(position.x, x + 0.5);
-  close(position.z, z);
+test('changed room widths retain floor transforms, adjoining wall joins and fixed window widths',()=>{
+  const edit=layout.editRoom(baseline,layout.empty(),'Bedroom 4',{w:13});
+  const p=layout.resolve(baseline,edit);
+  close(room(p,'Bedroom 4').w,13);
+  close(wall(p,'Bedroom 4 east').x1,31.7);
+  const before=baseline.windows.find(w=>w[0]==='Bedroom 4 south left');
+  const after=p.windows.find(w=>w[0]===before[0]);
+  close(after[3],before[3]);
+  assert.equal(layout.serialize(JSON.parse(layout.serialize(edit))),layout.serialize(edit));
 });
-
-test('successive room and wall edits retain joins and round-trip without mutating prior state', () => {
-  const original = JSON.stringify(baseline);
-  const first = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { w: 14.35 });
-  const firstSnapshot = layout.serialize(first);
-  const east = measured.bedEast + 1.5;
-  const second = layout.editWall(baseline, first, 'Bedroom 2 east', { x1: east, x2: east, thickness: 0.5 });
-  const plan = layout.resolve(baseline, second);
-  close(room(plan, 'Bedroom 2').w, 14.85);
-  close(room(plan, 'Bedroom 2 bath').x, east);
-  close(room(plan, 'Bedroom 2 bath').w, measured.east - east);
-  close(wall(plan, 'Bedroom 2 north').x2, east);
-  close(wall(plan, 'Bath 2 south').x1, east);
-  close(wall(plan, 'Bedroom 2 east').thickness, 0.5);
-  assert.deepEqual(layout.resolve(baseline, JSON.parse(layout.serialize(second))), plan);
-  assert.equal(layout.serialize(first), firstSnapshot);
-  assert.equal(JSON.stringify(baseline), original);
-  assert.throws(() => layout.editRoom(baseline, second, 'Bedroom 2', { w: -3 }));
-  assert.equal(layout.serialize(first), firstSnapshot);
-  assert.equal(JSON.stringify(baseline), original);
+test('wall movement follows T-junctions and room bounds without scaling openings',()=>{
+  const p=layout.resolve(baseline,layout.editWall(baseline,layout.empty(),'Bedroom 4 east',{x1:31.7,x2:31.7}));
+  close(room(p,'Bedroom 4').w,13);
+  close(wall(p,'Bedroom 4 south').x2,31.7);
+  const a=wall(plan,'Bedroom 4 south').openings,b=wall(p,'Bedroom 4 south').openings;
+  a.forEach((o,i)=>close(o[1]-o[0],b[i][1]-b[i][0]));
 });
-
-test('moving a room preserves its dimensions and keeps connected walls axis-aligned', () => {
-  const x = measured.closetEast + 0.5;
-  const document = layout.editRoom(baseline, layout.empty(), 'Bedroom 2', { x });
-  const plan = layout.resolve(baseline, document);
-  close(room(plan, 'Bedroom 2').x, x);
-  close(room(plan, 'Bedroom 2').w, 13.35);
-  close(wall(plan, 'Bedroom 2 north').x1, x);
-  close(wall(plan, 'Bedroom 2 east').x1, measured.bedEast + 0.5);
-  close(room(plan, 'Bedroom 2 bath').x, measured.bedEast + 0.5);
-  for (const item of plan.walls) assert.ok(Math.abs(item.x1 - item.x2) < 0.001 || Math.abs(item.z1 - item.z2) < 0.001, item.name);
+test('wall thickness and length remain physical data and cannot shorten through windows',()=>{
+  const original=wall(plan,'Bedroom 3 west');
+  const p=layout.resolve(baseline,layout.editWall(baseline,layout.empty(),original.name,{z2:53,thickness:.5}));
+  close(wall(p,original.name).thickness,.5);
+  close(p.windows.find(w=>w[0]==='Bedroom 3 west')[3],4);
+  assert.throws(()=>layout.editWall(baseline,layout.empty(),original.name,{z2:42}),/too short/);
 });
-
-test('horizontal and vertical walls can translate in all four directions with connected joints', () => {
-  for (const name of ['Bedroom 2 north', 'Bedroom 2 east']) {
-    for (const [dx, dz] of [[-0.25, 0], [0.25, 0], [0, -0.25], [0, 0.25]]) {
-      const before = wall(layout.resolve(baseline, layout.empty()), name);
-      const document = layout.editWall(baseline, layout.empty(), name, { x1: before.x1 + dx, z1: before.z1 + dz, x2: before.x2 + dx, z2: before.z2 + dz });
-      const plan = layout.resolve(baseline, document);
-      const after = wall(plan, name);
-      close(after.x1, before.x1 + dx);
-      close(after.z1, before.z1 + dz);
-      close(after.x2, before.x2 + dx);
-      close(after.z2, before.z2 + dz);
-      close(layout.length(after), layout.length(before));
-      assert.equal(plan.walls.length, baseline.walls.length);
-      for (const item of plan.walls) assert.ok(Math.abs(item.x1 - item.x2) < 0.001 || Math.abs(item.z1 - item.z2) < 0.001, item.name);
-    }
+test('invalid schema dimensions duplicates orientation and unsupported fields fail explicitly',()=>{
+  for(const value of [{version:2,rooms:[],walls:[]},{version:1,rooms:[],walls:[],unexpected:true},
+    {version:1,rooms:[{name:'Unknown',x:0,z:0,w:5,d:5}],walls:[]},
+    {version:1,rooms:[{name:'Bedroom 4',x:null,z:40,w:12,d:11}],walls:[]},
+    {version:1,rooms:[{name:'Bedroom 4',x:19,z:40,w:-1,d:11}],walls:[]}])assert.throws(()=>layout.resolve(baseline,value));
+  const r={name:'Bedroom 4',x:19,z:40,w:12,d:11};
+  assert.throws(()=>layout.resolve(baseline,{version:1,rooms:[r,r],walls:[]}),/duplicate/);
+  assert.throws(()=>layout.editWall(baseline,layout.empty(),'Bedroom 4 east',{x2:32}),/orientation/);
+});
+test('rooms and walls cannot cover the protected fixed stair',()=>{
+  assert.throws(()=>layout.editRoom(baseline,layout.empty(),'Mechanical (relocated)',{x:5,z:28}),/stair/);
+  assert.throws(()=>layout.editWall(baseline,layout.empty(),'Laundry west',{x1:6,x2:6}),/stair/);
+});
+test('proportional furniture anchors do not scale furniture and serialization does not mutate prior state',()=>{
+  const before=JSON.stringify(baseline);
+  const first=layout.editRoom(baseline,layout.empty(),'Bedroom 4',{w:13.5});
+  const snapshot=layout.serialize(first);
+  const p=layout.resolve(baseline,first),pos=layout.furniturePosition(baseline,p,24.95,45);
+  close(pos.x,25.45);close(pos.z,45);
+  assert.throws(()=>layout.editRoom(baseline,first,'Bedroom 4',{w:-3}));
+  assert.equal(layout.serialize(first),snapshot);assert.equal(JSON.stringify(baseline),before);
+});
+test('walls translate in four directions with axis-aligned connected joins',()=>{
+  // Exercise join propagation on a nondegenerate rectangle; the approved
+  // compact perimeter's 1.8-inch service step cannot translate by 3 inches.
+  const fixture={rooms:[{name:'Left',x:0,z:0,w:5,d:10},{name:'Right',x:5,z:0,w:5,d:10}],
+    floors:[],windows:[],stairs:{x:20,z:20,width:4,depth:8},
+    walls:[['Shared',5,0,5,10],['North',0,0,10,0],['South',0,10,10,10],['West',0,0,0,10],['East',10,0,10,10]]};
+  const original=layout.resolve(fixture,layout.empty());
+  for(const name of ['Shared','North'])for(const [dx,dz] of [[-.25,0],[.25,0],[0,-.25],[0,.25]]){
+    const b=wall(original,name);
+    const p=layout.resolve(fixture,layout.editWall(fixture,layout.empty(),name,{x1:b.x1+dx,z1:b.z1+dz,x2:b.x2+dx,z2:b.z2+dz}));
+    close(wall(p,name).x1,b.x1+dx);close(wall(p,name).z1,b.z1+dz);
+    for(const w of p.walls)assert.ok(Math.abs(w.x1-w.x2)<.001||Math.abs(w.z1-w.z2)<.001,w.name);
   }
 });

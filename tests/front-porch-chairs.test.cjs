@@ -3,10 +3,10 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const frontLayout = require('../floor-plan-ground.js').getGroundFrontLayout();
+const frontLayout = require('../assets/js/floor-plan-ground.js').getGroundFrontLayout();
 
 test('two cushioned porch chairs meet paving and leave entry approach clear', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const chairs = [];
   const context = {
     oak: {}, mat: color => ({ color }),
@@ -53,7 +53,7 @@ test('two cushioned porch chairs meet paving and leave entry approach clear', ()
 });
 
 test('fireplace flanking openings share equal right-reference dimensions', () => {
-  const ground = require('../floor-plan-ground.js');
+  const ground = require('../assets/js/floor-plan-ground.js');
   const feature = ground.getLivingRoomFeatureLayout();
   assert.deepEqual(feature.fireplaceWindows, { width: 4, sill: 2.6, height: 5.4, head: 8 });
   const wall = ground.getGroundFloorDefaultPlan().walls.find(w => w[0] === 'Living west');

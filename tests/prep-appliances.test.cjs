@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 
 function buildPrepCounter() {
   class Group {
@@ -21,7 +21,7 @@ function buildPrepCounter() {
   const context = {
     THREE: { Group, MeshStandardMaterial: class {} },
     prepSinkX: 47.4, prepCounterZ: 8.25, kitchenWindowWallZ: 7, rest: new Group(),
-    prepCounterWindowBank: require('../floor-plan-ground.js').getPrepWindowBankLayout(), casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
+    prepCounterWindowBank: require('../assets/js/floor-plan-ground.js').getPrepWindowBankLayout(), casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
     ...Object.fromEntries(['cabinetFinish', 'cabinetPanelFinish', 'cabinetRailFinish', 'countertop', 'steel', 'black', 'brass', 'porcelain'].map(name => [name, { name }])),
     furnishing(name, x, z) {
       const group = new Group();
@@ -89,7 +89,7 @@ test('prep backsplash matches the countertop quartz and is notched behind the fl
     [`min${axis}`, Math.min(...pieces.map(piece => piece[`min${axis}`]))],
     [`max${axis}`, Math.max(...pieces.map(piece => piece[`max${axis}`]))]
   ]));
-  const bank = require('../floor-plan-ground.js').getPrepWindowBankLayout();
+  const bank = require('../assets/js/floor-plan-ground.js').getPrepWindowBankLayout();
   const trimBottom = bank.sill - 1 / 12 - 3.5 / 12;
   const halfWidth = bank.width / 2 + (3.5 + 0.125) / 12;
   for (const piece of pieces) assert.ok(piece.maxY <= trimBottom + 1e-9 || piece.maxX < bank.x - halfWidth || piece.minX > bank.x + halfWidth);
@@ -215,14 +215,14 @@ test('prep adds two standard tall casements and uses the tallest fitting standar
   const frames = [];
   const casings = [];
   const context = {
-    casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12, rest: { add() {} }, garageClerestories: [], ...require('../floor-plan-ground.js'),
+    casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12, rest: { add() {} }, garageClerestories: [], ...require('../assets/js/floor-plan-ground.js'),
     windowTrim: {}, box() { return {}; },
     THREE: { Group: class { constructor() { this.userData = {}; this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } }; } } },
     windowFrame(...args) { frames.push(args); return { userData: {} }; },
     openingCasing(...args) { casings.push(args); }, windowFaceDepth: () => 0.075
   };
   const start = source.indexOf('  const kitchenWallLeft =');
-  context.getKitchenWindowBankLayout = require('../floor-plan-ground.js').getKitchenWindowBankLayout;
+  context.getKitchenWindowBankLayout = require('../assets/js/floor-plan-ground.js').getKitchenWindowBankLayout;
   const end = source.indexOf('  const kidsRoomNorthZ =', start);
   const framesStart = source.indexOf('  const prepWindowBank =');
   const framesEnd = source.indexOf('  const prepTower =', framesStart);
@@ -256,7 +256,7 @@ test('prep adds two standard tall casements and uses the tallest fitting standar
       assert.ok(7 + 0.175 < 7 + 0.22 - 0.08 / 2, 'Flush sill is behind the retained backsplash normal plane, not a projecting shelf');
     }
   }
-  const plan = require('../floor-plan-ground.js').getGroundFloorDefaultPlan();
+  const plan = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan();
   const bank = context.getPrepWindowBankLayout();
   const bankWall = plan.walls.find(([label]) => label === 'Prep north');
   assert.equal(bankWall[5].length, 1, 'One structural opening for the three-unit bank');
@@ -274,16 +274,16 @@ test('prep adds two standard tall casements and uses the tallest fitting standar
 });
 
 test('exterior prep openings match the furnished windows and the picture pane has no center bar', () => {
-  const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+  const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const walls = [];
   const context = {
     garageSideDoorCenterZ: 45.5, garageSideDoorWidth: 3, garageFloorY: -1.25, garageClerestories: [],
     win: (center, width, sill, height) => ({ center, width, sill, height }),
     wall(...args) { walls.push(args); }
   };
-  context.getPrepWindowLayout = require('../floor-plan-ground.js').getPrepWindowLayout;
-  context.getPrepWindowBankLayout = require('../floor-plan-ground.js').getPrepWindowBankLayout;
-  context.getKitchenWindowBankLayout = require('../floor-plan-ground.js').getKitchenWindowBankLayout;
+  context.getPrepWindowLayout = require('../assets/js/floor-plan-ground.js').getPrepWindowLayout;
+  context.getPrepWindowBankLayout = require('../assets/js/floor-plan-ground.js').getPrepWindowBankLayout;
+  context.getKitchenWindowBankLayout = require('../assets/js/floor-plan-ground.js').getKitchenWindowBankLayout;
   const rear = exterior.match(/^  wall\('kitchen and prep rear'.+$/m);
   const sideStart = exterior.indexOf('  const garageSideWall =');
   const sideEnd = exterior.indexOf('  const garageSideDoor =', sideStart);
@@ -314,7 +314,7 @@ test('exterior prep openings match the furnished windows and the picture pane ha
   const helperEnd = exterior.indexOf('  function wall(', helperStart);
   assert.ok(helperStart >= 0 && helperEnd > helperStart);
   vm.runInNewContext(exterior.slice(helperStart, helperEnd) + '\nwindowUnit(new THREE.Group(), 8.1, 4.25, 5, 3.5, false, true);', {
-    getWindowProductIntent: require('../floor-plan-ground.js').getWindowProductIntent,
+    getWindowProductIntent: require('../assets/js/floor-plan-ground.js').getWindowProductIntent,
     windowInstallations: [], wallThickness: 0.45,
     THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, glass: {}, privacyGlass: {}, windowBlack: {}, trim: {},
     box(parent, x, y, z, w, h, d) { const part = { x, y, z, w, h, d }; parts.push(part); return part; }

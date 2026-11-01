@@ -3,9 +3,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const roof = require('../floor-plan-roof.js');
-const upper = require('../floor-plan-upstairs.js');
-const front = require('../floor-plan-ground.js').getGroundFrontLayout();
+const roof = require('../assets/js/floor-plan-roof.js');
+const upper = require('../assets/js/floor-plan-upstairs.js');
+const front = require('../assets/js/floor-plan-ground.js').getGroundFrontLayout();
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-6, `${a} != ${b} ft`);
 const height = (definitions, x, z) => Math.max(...definitions
   .filter(({bounds:[l,r,b,f]}) => x >= l && x <= r && z >= b && z <= f)
@@ -25,7 +25,9 @@ test('paired cross-gables center on fixed bedroom banks with measured rise and s
     close(rear,40.5);
   });
   const garage = defs.find(d => d.id === 'Garage hip');
-  close(height([garage],43.25,42.7),12.475);
+  close(height([garage],43.25,42.7),9.65);
+  assert.ok(height(defs,43.25,39)>20.6,'Shared upper wing roofs the actual full-height service rooms');
+  assert.ok(height(defs,45,30.7)<13,'Outside the upper footprint, garage roof stays below the laundry sill');
 });
 
 test('cross-gable union never reduces the accepted headroom envelope and leaves rear solar surfaces unchanged', () => {
@@ -53,7 +55,7 @@ test('entry barrel has a real 19.2-inch rise, falling rear return and no added p
 });
 
 test('production arch trim is an open, dimensioned extruded curved band, not a blocking rectangle', () => {
-  const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'),'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'),'utf8');
   class Shape {
     constructor(){this.points=[];}
     moveTo(x,y){this.points.push([x,y]);}

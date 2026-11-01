@@ -12,20 +12,20 @@ test('compact footer keeps windows first, area, size and controls without verbos
   for (const id of ['livable-area', 'first-floor-area', 'second-floor-area', 'building-envelope', 'window-count', 'refresh-model', 'reset-view']) assert.ok(footer.includes(`id="${id}"`));
   assert.match(footer, /id="first-floor-area" aria-label="First-floor area"[^>]*>1st: \.\.\.<\/output>/);
   assert.match(footer, /id="second-floor-area" aria-label="Second-floor area"[^>]*>2nd: \.\.\.<\/output>/);
-  const { getUpstairsMeasuredGeometry } = require('../floor-plan-upstairs.js');
-  const { getGroundFrontLayout } = require('../floor-plan-ground.js');
+  const { getUpstairsMeasuredGeometry } = require('../assets/js/floor-plan-upstairs.js');
+  const { getGroundFrontLayout } = require('../assets/js/floor-plan-ground.js');
   const upper = getUpstairsMeasuredGeometry(), front = getGroundFrontLayout();
-  assert.ok(Math.abs((upper.east + .45) - 56.2) < 1e-8, 'Outside masonry width follows the current upper east wall');
-  assert.ok(Math.abs((front.porchEdgeZ - (upper.bathNorth - .225)) - 63.25416666666667) < 1e-8, 'Depth includes the current upper bath projection and retained front extension');
-  assert.match(footer, /Size: ~56 ft &times; 63 ft/);
-  assert.match(footer, /front porch slab edge z=61\.67917 ft, approximately 63 ft 3\.05 in/);
-  assert.match(footer, /exactly 56 ft 2\.4 in \(shown rounded to 56 ft\)/);
+  assert.ok(Math.abs((Math.max(upper.east,55.5)+.45)-55.95)<1e-8,'Retained ground east wall now controls outside masonry width');
+  assert.ok(Math.abs((front.porchEdgeZ - (-.325)) - 62.00416666666667) < 1e-8, 'Retained dining rear finish controls depth, not removed upper projection');
+  assert.match(footer, /Size: ~56 ft &times; 62 ft/);
+  assert.match(footer, /front porch slab edge z=61\.67917 ft, approximately 62 ft 0\.05 in/);
+  assert.match(footer, /exactly 55 ft 11\.4 in \(shown rounded to 56 ft\)/);
   assert.match(footer, /not a surveyed or Birmingham zoning\/buildable envelope/i);
   assert.ok(footer.indexOf('id="window-count"') < footer.indexOf('id="livable-area"'));
   const visible = footer.replace(/<[^>]*>/g, '');
   assert.doesNotMatch(visible, /modeled|zoning|calculating|First floor|Second floor|openings|units/);
   assert.ok(visible.length < 100);
-  assert.doesNotMatch(read('floor-plan-3d.js'), /querySelector\('\.model-footer span'\)/);
+  assert.doesNotMatch(read('assets/js/floor-plan-3d.js'), /querySelector\('\.model-footer span'\)/);
 });
 
 test('viewer uses concise controls and collapses dimension explanations without hiding plan labels', () => {
@@ -42,7 +42,7 @@ test('viewer uses concise controls and collapses dimension explanations without 
   assert.match(panel, /<ul id="plan-dimension-list"/);
   assert.doesNotMatch(panel, /<details[^>]*\bopen\b/);
   assert.ok(html.indexOf('id="plan-dimension-labels"') < html.indexOf('<section id="plan-dimensions"'));
-  assert.match(read('floor-plan-3d.js'), /notesButton.textContent = 'Notes'/);
+  assert.match(read('assets/js/floor-plan-3d.js'), /notesButton.textContent = 'Notes'/);
 });
 
 test('2D room dimensions identify garage maximum extents without a garage border', () => {
@@ -53,10 +53,10 @@ test('2D room dimensions identify garage maximum extents without a garage border
   assert.match(html, /they are separated north-south and do not touch/i);
   assert.match(html, /plan's centerline span is 55 ft 6 in/i);
   assert.doesNotMatch(html, /plan-garage-outline|shown in orange/i);
-  assert.doesNotMatch(read('floor-plan-3d.js'), /planGarageOutline|showGarageOutline/);
-  assert.doesNotMatch(read('floor-plan-3d.css'), /garage-outline-/);
+  assert.doesNotMatch(read('assets/js/floor-plan-3d.js'), /planGarageOutline|showGarageOutline/);
+  assert.doesNotMatch(read('assets/css/floor-plan-3d.css'), /garage-outline-/);
   assert.match(html, /footer gives the larger outside-face overall dimensions/i);
-  const { getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
+  const { getGroundFloorDefaultPlan } = require('../assets/js/floor-plan-ground.js');
   const plan = getGroundFloorDefaultPlan();
   const garage = plan.rooms.find(room => room.name === 'Garage');
   assert.equal(garage.x, 31.2);
@@ -70,19 +70,19 @@ test('2D room dimensions identify garage maximum extents without a garage border
 });
 
 test('whole-house window count retains roof-window category without adding skylight units', () => {
-  const source = read('floor-plan-3d.js');
+  const source = read('assets/js/floor-plan-3d.js');
   assert.match(source, /filter\(window => window\.roofWindow\)/);
   assert.match(source, /units - pictures - singleHung - roofWindows/);
   assert.match(source, /\$\{roofWindows\} fixed roof windows/);
-  const exterior = read('floor-plan-exterior.js');
+  const exterior = read('assets/js/floor-plan-exterior.js');
   assert.doesNotMatch(exterior, /roofWindow: true|Laundry roof window/);
 });
 
 test('room navigation gives every room its own floor-aware camera and keeps inspection shortcuts out of the toolbar', () => {
-  const { getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
-  const UpstairsLayout = require('../upstairs-layout.js');
+  const { getGroundFloorDefaultPlan } = require('../assets/js/floor-plan-ground.js');
+  const UpstairsLayout = require('../assets/js/upstairs-layout.js');
   const upstairsScope = {};
-  vm.runInNewContext(read('floor-plan-upstairs.js'), upstairsScope);
+  vm.runInNewContext(read('assets/js/floor-plan-upstairs.js'), upstairsScope);
   const stairOpening = UpstairsLayout.stairOpening();
   const upstairs = { rooms: upstairsScope.getUpstairsDefaultPlan(stairOpening).rooms, start: [16.5, 33] };
   const containers = Object.fromEntries(['ground', 'upstairs'].map((floor) => [`${floor}-room-views`, { children: [], append(button) { this.children.push(button); } }]));
@@ -95,7 +95,7 @@ test('room navigation gives every room its own floor-aware camera and keeps insp
       querySelectorAll() { return Object.values(containers).flatMap((container) => container.children); }
     }
   };
-  const source = read('floor-plan-3d.js');
+  const source = read('assets/js/floor-plan-3d.js');
   vm.runInNewContext(source.slice(source.indexOf('  const roomViewAliases ='), source.indexOf('  function fitEditedUpstairs(')), context);
   const groundButtons = containers['ground-room-views'].children;
   const upstairsButtons = containers['upstairs-room-views'].children;
@@ -130,7 +130,7 @@ test('room navigation gives every room its own floor-aware camera and keeps insp
 });
 
 test('2D plans use orthographic projection and pan without changing the layout', () => {
-  const source = read('floor-plan-3d.js');
+  const source = read('assets/js/floor-plan-3d.js');
   assert.match(read('floor-plan-3d.html'), /data-view="top"[^>]*>2D</);
   assert.match(source, /const planView = name === 'top' \|\| name === 'upstairs-top'/);
   assert.match(source, /planView \|\| name === 'cooktop'.*\? cooktopElevationCamera : perspectiveCamera/);
@@ -147,10 +147,10 @@ test('2D plans use orthographic projection and pan without changing the layout',
 
 test('viewer removes both editors without removing saved layout loading or viewing tools', () => {
   const html = read('floor-plan-3d.html');
-  const source = read('floor-plan-3d.js');
+  const source = read('assets/js/floor-plan-3d.js');
   assert.doesNotMatch(html, /upstairs-designer|ground-designer|designer-save-status/);
   assert.doesNotMatch(source, /createUpstairsDesigner|designer-open|designer-launch/);
-  for (const file of ['upstairs-layout.json', 'ground-layout.json']) assert.ok(source.includes(`'${file}'`));
+  for (const file of ['assets/data/upstairs-layout.json', 'assets/data/ground-layout.json']) assert.ok(source.includes(`'${file}'`));
   assert.match(source, /fetch\(file, \{ cache: 'no-store' \}\)/);
   for (const control of ['show-floor-grid', 'data-navigation="walk"', 'data-view="upstairs"', 'data-view="exterior"']) assert.ok(html.includes(control));
   for (const id of ['ground-preview-status', 'upstairs-preview-status', 'firepit-storage-note']) assert.match(html, new RegExp(`id="${id}"[^>]*hidden`));
@@ -159,7 +159,7 @@ test('viewer removes both editors without removing saved layout loading or viewi
 
 test('furniture checkbox hides and restores only tagged loose furniture', () => {
   const html = read('floor-plan-3d.html');
-  const source = read('floor-plan-3d.js');
+  const source = read('assets/js/floor-plan-3d.js');
   assert.match(html, /id="show-furniture" checked disabled> Furniture<\/label>/);
   const input = {
     checked: false,
@@ -204,7 +204,7 @@ test('furniture checkbox hides and restores only tagged loose furniture', () => 
 
 test('model refresh reloads fresh files into Whole floor and Rotate by default', () => {
   const html = read('floor-plan-3d.html');
-  const source = read('floor-plan-3d.js');
+  const source = read('assets/js/floor-plan-3d.js');
   assert.match(html, /id="refresh-model"[^>]*>Refresh<\/button>/);
   assert.match(html, /data-view="whole" aria-pressed="true"/);
   assert.match(html, /data-view="top" aria-pressed="false"/);
@@ -219,7 +219,7 @@ test('model refresh reloads fresh files into Whole floor and Rotate by default',
 
 test('reference sections below the viewer live in markdown, not on the page', () => {
   const html = read('floor-plan-3d.html');
-  const source = read('floor-plan-3d.js');
+  const source = read('assets/js/floor-plan-3d.js');
   const notes = read('viewer-reference-notes.md');
   assert.doesNotMatch(html, /Living-room layout lab|Meet the furniture|Model assumptions|furniture-card|concept-details|data-living-choice/);
   assert.doesNotMatch(source, /living-layout-options|living-layout-status|furniture-card|furniture-photo|function livingPlan/);
@@ -229,10 +229,10 @@ test('reference sections below the viewer live in markdown, not on the page', ()
 });
 
 test('floor-plan archive preserves both revisions and marks the shower option as not adopted', () => {
-  const source = read('floor-plan-3d.js');
+  const source = read('assets/js/floor-plan-3d.js');
   const archive = read('floor-plan-design.html');
   for (const image of ['revision-1-ground.png', 'revision-1-upstairs.png', 'revision-2-ground.png', 'revision-2-upstairs.png']) {
-    assert.ok(archive.includes(`assets/${image}`), `${image} is archived`);
+    assert.ok(archive.includes(`assets/images/plans/${image}`), `${image} is archived`);
   }
   assert.ok(archive.includes('Revision 2 — not adopted'));
   assert.ok(archive.includes('href="floor-plan-3d.html">Open the current 3D model</a>'));
@@ -244,12 +244,12 @@ test('floor-plan archive preserves both revisions and marks the shower option as
 
   const elements = Object.fromEntries(['show-room-dimensions', 'plan-dimension-labels', 'plan-dimensions', 'plan-dimension-list'].map((id) => [id, element()]));
   elements['show-room-dimensions'].addEventListener = () => {};
-  const { getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
+  const { getGroundFloorDefaultPlan } = require('../assets/js/floor-plan-ground.js');
   const scope = {};
-  vm.runInNewContext(read('floor-plan-upstairs.js'), scope);
-  const upstairsPlan = require('../upstairs-layout.js').resolve(
-    scope.getUpstairsDefaultPlan(require('../upstairs-layout.js').stairOpening()),
-    require('../upstairs-layout.js').empty()
+  vm.runInNewContext(read('assets/js/floor-plan-upstairs.js'), scope);
+  const upstairsPlan = require('../assets/js/upstairs-layout.js').resolve(
+    scope.getUpstairsDefaultPlan(require('../assets/js/upstairs-layout.js').stairOpening()),
+    require('../assets/js/upstairs-layout.js').empty()
   );
   const context = {
     document: { getElementById: (id) => elements[id], createElement: element },
@@ -292,7 +292,7 @@ test('floor-plan archive preserves both revisions and marks the shower option as
         : `${context.feet(clear.w)} x ${context.feet(clear.d)}${maxExtent ? ' max' : ''}`.replace(/' /g, "'").replace(/'0"/g, "'");
       assert.equal(label.children[1].textContent, compact);
       if (floor === 'upstairs' && room.name === 'Bedroom 2') {
-        assert.equal(label.children[1].textContent, '13\' x 12\'6"', 'Whole feet omit zero inches without losing the dimension separator');
+        assert.equal(label.children[1].textContent, '14\'8" x 14\'5"', 'Compact stepped Bedroom 2 dimensions use actual paint faces');
       }
     });
   }
@@ -330,7 +330,7 @@ test('floor-plan archive preserves both revisions and marks the shower option as
 });
 
 test('2D dimensions default on and explicit URL choices survive toggle and reload', () => {
-  const source = read('floor-plan-3d.js');
+  const source = read('assets/js/floor-plan-3d.js');
   assert.match(read('floor-plan-3d.html'), /id="show-room-dimensions" checked disabled/);
   const initialization = source.split('\n').find(line => line.includes('roomDimensionsInput.checked = initialParameters'));
   assert.ok(initialization);
@@ -369,7 +369,7 @@ test('2D dimensions default on and explicit URL choices survive toggle and reloa
 
 test('viewer consolidates controls in a collapsible sidebar without duplicate plan links', () => {
   const html = read('floor-plan-3d.html');
-  const source = read('floor-plan-3d.js');
+  const source = read('assets/js/floor-plan-3d.js');
   const sidebar = html.split('<details class="viewer-navigation"')[1].split('<div class="viewer-stage">')[0];
   for (const control of ['data-view="top"', 'id="ground-room-views"', 'id="upstairs-room-views"', 'id="show-room-dimensions"', 'id="show-floor-grid"', 'id="exterior-views"', 'data-navigation="walk"']) assert.ok(sidebar.includes(control));
   assert.equal((sidebar.match(/data-view="exterior"/g) || []).length, 1);
@@ -392,7 +392,7 @@ test('viewer omits promotional heading and visible garage explanation without br
   const html = read('floor-plan-3d.html');
   assert.doesNotMatch(html, /YOUR HOME, A LITTLE MORE REAL|TWO-FLOOR CONCEPT|class="studio-heading"|class="concept-badge"|Garage door study:/);
   assert.match(html, /<p id="vehicle-door-status" class="tour-screen-reader" role="status" hidden><\/p>/);
-  assert.match(read('floor-plan-3d.css'), /\.tour-screen-reader\{[^}]*position:absolute;[^}]*width:1px;height:1px/);
+  assert.match(read('assets/css/floor-plan-3d.css'), /\.tour-screen-reader\{[^}]*position:absolute;[^}]*width:1px;height:1px/);
 });
 
 test('night lighting applies to all bathrooms without prematurely selecting a switch product', () => {
@@ -427,7 +427,7 @@ test('firepit moves to uncovered patio cold storage and the wood rack stays besi
       return mesh;
     }
   };
-  const source = read('floor-plan-exterior.js');
+  const source = read('assets/js/floor-plan-exterior.js');
   const start = source.indexOf('  const portableFirepit =');
   const end = source.indexOf('  function exteriorSteps(', start);
   assert.ok(start >= 0 && end > start);

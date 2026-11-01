@@ -4,8 +4,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const { getLivableFloorArea, getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
-const layout = require('../upstairs-layout.js');
+const { getLivableFloorArea, getGroundFloorDefaultPlan } = require('../assets/js/floor-plan-ground.js');
+const layout = require('../assets/js/upstairs-layout.js');
 
 test('viewer footer retains its area outputs and required reset and refresh controls', () => {
   const html = fs.readFileSync(require.resolve('../floor-plan-3d.html'), 'utf8');
@@ -105,7 +105,7 @@ test('invalid wall dimensions and stair voids fail explicitly instead of produci
 
 test('current house uses exterior faces, includes descending stairs on both floors and excludes only actual stair gaps', () => {
   const ground = getGroundFloorDefaultPlan();
-  const upper = require('../floor-plan-upstairs.js').getUpstairsDefaultPlan(layout.stairOpening());
+  const upper = require('../assets/js/floor-plan-upstairs.js').getUpstairsDefaultPlan(layout.stairOpening());
   const upstairs = { ...layout.resolve(upper, layout.empty()), floors: [...upper.floors, upper.arrival], stairs: upper.stairs };
   const close = (actual, expected, message = '') => assert.ok(Math.abs(actual - expected) < 1e-8, `${message}: ${actual} != ${expected} sq ft`);
   const stairArea = ground.stairs.width * ground.stairs.depth;
@@ -117,8 +117,9 @@ test('current house uses exterior faces, includes descending stairs on both floo
   close(first - getLivableFloorArea(ground), stairArea - gap, 'First-floor stairs descend to basement');
   close(second - getLivableFloorArea(upstairs), stairArea - gap, 'Second-floor stairs descend to first floor');
   close(first, 1966.4427083333333);
-  close(second, 2312.5166666666666);
-  close(first + second, 4278.959375);
+  close(second, 1892.5041666666667);
+  assert.ok(second < 2000);
+  close(first + second, 3858.946875);
   close((upper.rooms.find(r => r.name === 'Bedroom 4 closet').w) * .5, 2.925, 'Closet 4 inset removes only the half-foot strip');
   for (const plan of [ground, upstairs]) {
     const before = JSON.stringify(plan);
@@ -129,7 +130,7 @@ test('current house uses exterior faces, includes descending stairs on both floo
 
 test('both floors use resolved floor geometry and changes recalculate the displayed total', () => {
   const scope = {};
-  vm.runInNewContext(fs.readFileSync(require.resolve('../floor-plan-upstairs.js'), 'utf8'), scope);
+  vm.runInNewContext(fs.readFileSync(require.resolve('../assets/js/floor-plan-upstairs.js'), 'utf8'), scope);
   const ground = getGroundFloorDefaultPlan();
   const upper = scope.getUpstairsDefaultPlan(layout.stairOpening());
   const upstairs = { plan: layout.resolve(upper, layout.empty()), baseline: upper };
@@ -149,7 +150,7 @@ test('both floors use resolved floor geometry and changes recalculate the displa
       'window-count': windowOutput, 'livable-area': output,
       'first-floor-area': firstFloorOutput, 'second-floor-area': secondFloorOutput
     })[id] } };
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const start = source.indexOf('  function updateLivableArea()');
   const end = source.indexOf('  const roomDimensionsInput =', start);
   assert.ok(start >= 0 && end > start);
@@ -181,8 +182,8 @@ test('both floors use resolved floor geometry and changes recalculate the displa
   assert.match(output.title, /Shared garage walls measured to the garage-side finish/);
   assert.match(output.title, /including the mechanical closet, are finished and conditioned/);
   assert.match(output.title, /Not a certified appraisal/);
-  assert.equal(output.textContent, 'Area: ~4,279 sq ft');
-  assertFloorOutputs(1966.4427083333333, 2312.5166666666666);
+  assert.equal(output.textContent, 'Area: ~3,859 sq ft');
+  assertFloorOutputs(1966.4427083333333, 1892.5041666666667);
   context.groundLayoutPreview = { plan: layout.resolve(ground, layout.empty()) };
   context.updateLivableArea();
   assertFloorOutputs(groundArea, upstairsArea);

@@ -1,8 +1,8 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { addWindowShadeDivisions, getWindowProductIntent, getKitchenWindowBankLayout, getPrepWindowBankLayout, getGroundFrontWindows, getGroundFloorDefaultPlan } = require('../floor-plan-ground.js');
-const { getUpstairsSideWindows } = require('../floor-plan-upstairs.js');
+const { addWindowShadeDivisions, getWindowProductIntent, getKitchenWindowBankLayout, getPrepWindowBankLayout, getGroundFrontWindows, getGroundFloorDefaultPlan } = require('../assets/js/floor-plan-ground.js');
+const { getUpstairsSideWindows } = require('../assets/js/floor-plan-upstairs.js');
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 
 test('owner X-marked office porch bank matches the circled guest bank without moving either center', () => {

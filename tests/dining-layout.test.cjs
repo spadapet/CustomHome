@@ -23,7 +23,7 @@ function buildDining() {
     mat() { return {}; },
     windowFrame() {},
     openingCasing() {},
-    livingFeatureWall: require('../floor-plan-ground.js').getLivingRoomFeatureLayout(),
+    livingFeatureWall: require('../assets/js/floor-plan-ground.js').getLivingRoomFeatureLayout(),
     box(parent, x, y, z, w, h, d, material) {
       const part = new Group();
       part.position.set(x, y, z);
@@ -33,7 +33,7 @@ function buildDining() {
     }
   };
   context.cylinder = (parent, x, y, z, radius, height, material) => context.box(parent, x, y, z, radius * 2, height, radius * 2, material);
-  const source = fs.readFileSync(require.resolve('../floor-plan-3d.js'), 'utf8');
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const start = source.indexOf('  const tableX =');
   const end = source.indexOf('  const kitchen =', start);
   assert.ok(start >= 0 && end > start);
@@ -159,7 +159,7 @@ test('patio door starts closed and leaves the centered table and tucked chairs u
 });
 
 test('dining side wall aligns with kitchen base cabinets without moving the backyard wall', () => {
-  const plan = require('../floor-plan-ground.js').getGroundFloorDefaultPlan();
+  const plan = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan();
   const room = plan.rooms.find((item) => item.name === 'Dining room');
   assert.deepEqual(room, { name: 'Dining room', x: 13.2, z: -0.1, w: 13.675, d: 8.1 });
   const rear = plan.walls.find(([name]) => name === 'Dining north');
@@ -179,8 +179,8 @@ test('dining side wall aligns with kitchen base cabinets without moving the back
   }
   assert.equal(plan.walls.find(([name]) => name === 'Kitchen north')[2], 7);
   assert.equal(plan.walls.find(([name]) => name === 'Mudroom north')[2], 15);
-  const exterior = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
-  const diningRoof = require('../floor-plan-roof.js').getConnectedRoofDefinitions().find((roof) => roof.id === 'Dining rear projection');
+  const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
+  const diningRoof = require('../assets/js/floor-plan-roof.js').getConnectedRoofDefinitions().find((roof) => roof.id === 'Dining rear projection');
   assert.equal(diningRoof.bounds[0], 13.2, 'Dining west roof stops at the shared canopy wall');
   assert.equal(diningRoof.bounds[2], -0.75);
   assert.doesNotMatch(exterior, /gable\('Dining rear projection roof'/, 'Hipped dining roof has no obsolete triangle piercing its surface');

@@ -3,13 +3,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const source = fs.readFileSync(require.resolve('../floor-plan-exterior.js'), 'utf8');
+const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
 function harness() {
   class Group { constructor() { this.children = []; this.userData = {}; } add(o) { this.children.push(o); } }
   const meshes = [];
   return {
     THREE: { Group }, group: new Group(), trim: {}, baseBrick: {}, porchColumnFinish: {}, meshes,
-    frontShift: require('../floor-plan-ground.js').getGroundFrontLayout().extension,
+    frontShift: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().extension,
     box(parent, x, y, z, w, h, d) {
       const mesh = { x, y, z, w, h, d, min: [x-w/2,y-h/2,z-d/2], max: [x+w/2,y+h/2,z+d/2] };
       meshes.push(mesh); parent.add(mesh); return mesh;
