@@ -40,9 +40,13 @@ approximately 4,104.00 sq ft**. Count stairs only once downstairs; subtract the
 upstairs traced stair block, 92.739234 sq ft, from its 2,230.299084-sq-ft gross
 outline. Upstairs exterior faces offset the centerline by half the drawn
 0.35-ft wall thickness; internal walls count, garage/porch/basement do not.
-Ground uses the shared model gross helper including stairs. Upstairs and
-combined values are comparison estimates, not certified finished area;
-conditioning/headroom and stair alignment still need verification. Stair
+Ground uses the shared model gross helper including stairs. The bottom of
+Version I now includes room-by-room tables and additional wall allowances:
+46.921875 sq ft downstairs, 36.376667 upstairs, 83.298542 combined. Room
+allocations include interior-wall portions, not clear usable floor areas;
+these allowances add only outward bands/corners, not the entire wall footprint.
+Upstairs and combined values are comparison estimates, not certified finished
+area; conditioning/headroom and stair alignment still need verification. Stair
 arrival, furnace service access, loft support/headroom, structural/roof
 alignment, egress and occupied operation remain unresolved. This is a 2D
 review, not construction approval.

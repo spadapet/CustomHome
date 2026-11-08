@@ -120,6 +120,57 @@ test('per-floor and combined areas are visible estimates with the stairway count
   assert.match(instructions, /Count the stairway only once/);
 });
 
+test('bottom area chart lists every counted room and reconciles stairs, wall allowances and combined area', () => {
+  const rows = (id, attribute) => {
+    const section = svg.match(new RegExp(`<g id="${id}"[^>]*>([\\s\\S]*?)\\n    </g>`));
+    assert.ok(section, `${id}: chart section`);
+    const entries = [...section[1].matchAll(new RegExp(`<g ${attribute}="([^"]+)"[^>]*>([\\s\\S]*?)</g>`, 'g'))];
+    const result = new Map();
+    for (const [, key, content] of entries) {
+      const texts = [...content.matchAll(/<text\b[^>]*>([^<]+)<\/text>/g)].map(match => match[1]);
+      assert.equal(texts.length, 2, `${key}: label and value columns`);
+      assert.ok(!result.has(key), `${key}: no duplicate row`);
+      result.set(key, Number(texts[1].replace(/ sq ft$/, '').replaceAll(',', '')));
+    }
+    return result;
+  };
+  const rounded = value => Number(value.toFixed(2));
+  const groundRooms = new Map();
+  for (const floor of plan.floors.filter(floor => !/^(Garage|Front porch)/.test(floor.room ?? ''))) {
+    const room = floor.room ?? 'Circulation';
+    groundRooms.set(room, (groundRooms.get(room) ?? 0) + floor.w * floor.d);
+  }
+  const upperRooms = new Map();
+  for (const floor of upstairsFloors.filter(floor => floor['data-room'] !== 'Stairs')) {
+    const room = floor['data-room'];
+    upperRooms.set(room, (upperRooms.get(room) ?? 0) + Number(floor.width) * Number(floor.height));
+  }
+  for (const [id, expected] of [['ground-area-chart', groundRooms], ['upstairs-area-chart', upperRooms]]) {
+    const displayed = rows(id, 'data-area-room');
+    assert.equal(displayed.size, expected.size, `${id}: full room inventory`);
+    for (const [room, area] of expected) assert.equal(displayed.get(room), rounded(area), `${id}: ${room}`);
+  }
+  const groundSubtotal = [...groundRooms.values()].reduce((sum, area) => sum + area, 0);
+  const upstairsSubtotal = [...upperRooms.values()].reduce((sum, area) => sum + area, 0);
+  const stairs = plan.stairs.width * plan.stairs.depth - (plan.stairs.voids ?? []).reduce((sum, cut) => sum + cut.w * cut.d, 0);
+  const lowerTotal = ground.getLivableFloorArea(plan, { includeStairs: true });
+  const upperTotal = Number(element('upstairs-area')['data-square-feet']);
+  const lowerWalls = lowerTotal - groundSubtotal - stairs;
+  const upperWalls = upperTotal - upstairsSubtotal;
+  const lowerItems = rows('ground-area-chart', 'data-area-item');
+  const upperItems = rows('upstairs-area-chart', 'data-area-item');
+  const wallItems = rows('wall-area-chart', 'data-area-item');
+  for (const [key, value] of [['rooms', groundSubtotal], ['stairs', stairs], ['walls', lowerWalls], ['total', lowerTotal]]) assert.equal(lowerItems.get(key), rounded(value), key);
+  for (const [key, value] of [['rooms', upstairsSubtotal], ['walls', upperWalls], ['total', upperTotal], ['excluded-stairs', Number(element('upstairs-area')['data-stair-deduction'])]]) assert.equal(upperItems.get(key), rounded(value), key);
+  for (const [key, value] of [['ground-walls', lowerWalls], ['upstairs-walls', upperWalls], ['combined-walls', lowerWalls + upperWalls], ['combined-total', lowerTotal + upperTotal]]) assert.equal(wallItems.get(key), rounded(value), key);
+  assert.match(svg, /NOT vertical wall surface area or the whole wall footprint/);
+  assert.match(svg, /already within the room allocations; do not add them again/);
+  assert.match(svg, /hundredths are arithmetic precision only/);
+  const rootTag = attributes(svg.slice(0, svg.indexOf('>') + 1));
+  assert.equal(rootTag.viewBox, `0 0 ${rootTag.width} ${rootTag.height}`);
+  assert.ok(Number(rootTag.height) > 2136, 'canvas extends below chart notes');
+});
+
 function noWallAcross(from, to) {
   const vertical = from[0] === to[0];
   const axis = vertical ? 1 : 0, fixed = 1 - axis;

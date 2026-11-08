@@ -41,6 +41,11 @@ its 2,230.299084-sq-ft traced exterior-face gross. Upstairs uses the drawn
 stairs. Internal walls count; garage, porch and basement are excluded. These
 are comparison estimates, not certified finished area or occupied/structural
 approval; conditioning/headroom and stair alignment remain unverified.
+Owner requests the room-area chart at the bottom of the current SVG; append
+side-by-side floor tables, subtotals, stair inclusion/exclusion and additional
+wall allowances (46.92 downstairs /36.38 upstairs /83.30 combined sq ft).
+Explain embedded wall portions, nominal thicknesses and unrounded arithmetic;
+room allocations are not clear usable areas and the stair blocks do not align.
 Preserve the per-floor/combined and one-stair-count rule in scoped SVG guidance.
 Resolve stair arrival, furnace service access, loft support/headroom, bearing
 and roof alignment, egress, products and door operation before adoption.
