@@ -217,6 +217,11 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     return { wallX: 37.5, wallZ, clearWidth: 2.5, clearHeight: 8, doorless: true, passages, openings };
   }
 
+  function getKitchenRefrigerationLayout() {
+    const returnX = 27.75;
+    return { returnX, runLeft: returnX + 0.1875, runRight: 37.3, columnWidth: 36 / 12, fridgeFillerWidth: 3 / 12 };
+  }
+
   function getPrepWindowLayout() {
     return [
       { name: 'Prep left counter window', x: 47.4 - 83 / 24, z: 7, openingWidth: 2, openingHeight: 5, openingSill: 41 / 12, standardSizeCode: '2050', picture: false },
@@ -385,6 +390,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     const powderZ = guestEntry.powder.z;
     const entryZ = guestEntry.alcove.z, officeZ = guestEntry.officeNorthZ;
     const kidsNorthZ = 26.725 - 25 / 12 - 0.08 + 0.175;
+    const refrigeration = getKitchenRefrigerationLayout();
     const garageNorthWestX = 44.9 - 8 / 12, garageWestX = 31.2, garageEastX = 55.5;
     const garageNorthZ = 15, garageStepZ = 26.9, garageSouthZ = 49;
     const rooms = [
@@ -401,13 +407,13 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     const floors = [
       [0, 8, 13.2, 17.7, 'Living room'], [13.2, -0.1, 13.675, 8.1, 'Dining room'],
       [13.2, 8, 5.8, 17.7, 'Hall'], [19, 8, 7.5, kidsNorthZ - 8, 'Hall'],
-      [26.875, 7, 10.625, 1, 'Kitchen'], [26.5, 8, 11, kidsNorthZ - 8, 'Kitchen'], [29, kidsNorthZ, 8.5, 26.9 - kidsNorthZ, 'Kitchen'],
+      [26.875, 7, 10.625, 1, 'Kitchen'], [26.5, 8, 11, kidsNorthZ - 8, 'Kitchen'], [refrigeration.returnX, kidsNorthZ, 37.5 - refrigeration.returnX, 26.9 - kidsNorthZ, 'Kitchen'],
       [37.5, 7, 7.9, 8, 'Prep kitchen'], [45.4, 7, 10.1, 8, 'Prep kitchen'], [37.5, 15, 7.4 - 8 / 12, 11.9, 'Mudroom'],
       [0, 25.7, 12.2, stairs.z - 25.7], [0, stairs.z, stairs.x, stairs.depth],
       [stairs.x + stairs.width, stairs.z, 12.2 - stairs.x - stairs.width, stairs.depth],
       [0, stairs.z + stairs.depth, 12.2, powderZ - stairs.z - stairs.depth],
-      [12.2, 25.7, 6.8, 8.9],       [19, kidsNorthZ, 10, guestSuite.kidsSouthZ - kidsNorthZ, 'Kids room'],
-      [29, 26.9, 2.2, guestSuite.kidsSouthZ - 26.9, 'Kids room'],
+      [12.2, 25.7, 6.8, 8.9],       [19, kidsNorthZ, refrigeration.returnX - 19, guestSuite.kidsSouthZ - kidsNorthZ, 'Kids room'],
+      [refrigeration.returnX, 26.9, 31.2 - refrigeration.returnX, guestSuite.kidsSouthZ - 26.9, 'Kids room'],
       [12.2, 34.6, 6.8, front.wallZ - 34.6, 'Entry hall'], [0, powderZ, 7.1, guestEntry.powder.d, 'Powder room'],
       [7.1, entryZ, 5.1, guestEntry.alcove.d, 'Guest entry alcove'],       [0, officeZ, 12.2, front.wallZ - officeZ, 'Office'],
       ...[['Closet', guestSuite.closet], ['Bathroom', guestSuite.bathroom]].map(([name, { x, z, w, d }]) => [x, z, w, d, name]),
@@ -436,8 +442,8 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
         [21.3 - (livingFeatureWall.wallEndZ - 25.7), 25.3 - (livingFeatureWall.wallEndZ - 25.7), 3, 8]
       ]],
       ['Living west', 0, 8, 0, livingFeatureWall.wallEndZ, livingFeatureWall.windowCenters.map((z) => [z - 8 - livingFeatureWall.fireplaceWindows.width / 2, z - 8 + livingFeatureWall.fireplaceWindows.width / 2, livingFeatureWall.fireplaceWindows.sill, livingFeatureWall.fireplaceWindows.head])],
-      ['Kids north', 19, kidsNorthZ, 29, kidsNorthZ], ['Kids west', 19, kidsNorthZ, 19, guestSuite.kidsSouthZ, [[27 - kidsNorthZ, 31.5 - kidsNorthZ, 0, 8]]],
-      ['Kids east return', 29, kidsNorthZ, 29, 26.9], ['Powder north', 0, powderZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderZ],
+      ['Kids north', 19, kidsNorthZ, refrigeration.returnX, kidsNorthZ], ['Kids west', 19, kidsNorthZ, 19, guestSuite.kidsSouthZ, [[27 - kidsNorthZ, 31.5 - kidsNorthZ, 0, 8]]],
+      ['Kids east return', refrigeration.returnX, kidsNorthZ, refrigeration.returnX, 26.9], ['Powder north', 0, powderZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderZ],
       ['Powder east', 7.1, powderZ, 7.1, officeZ, [[guestEntry.powderDoor.z - powderZ, guestEntry.powderDoor.z - powderZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
       ['Guest coat closet front', 7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
       ['Guest coat closet east', 12.2, guestEntry.coatCloset.z, 12.2, guestEntry.coatCloset.z + guestEntry.coatCloset.d],
@@ -452,7 +458,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       ['Bathroom recess west', guestSuite.bathroomRecess.x, guestSuite.bathroomRecess.z - 0.175, guestSuite.bathroomRecess.x, guestSuite.bathroomRecess.z + guestSuite.bathroomRecess.d],
       ['Bathroom recess south', guestSuite.bathroomRecess.x, guestSuite.bathroomRecess.z + guestSuite.bathroomRecess.d, 31.2, guestSuite.bathroomRecess.z + guestSuite.bathroomRecess.d],
       ['Garage west', 31.2, 34.6, 31.2, 49], ['Garage west return', 31.2, 26.9, 31.2, 34.6],
-      ['Kitchen south left', 29, 26.9, 29.1875, 26.9], ['Kids kitchen return', 29.1875, 26.9, 31.2, 26.9],
+      ['Kitchen south left', refrigeration.returnX, 26.9, refrigeration.runLeft, 26.9], ['Kids kitchen return', refrigeration.runLeft, 26.9, 31.2, 26.9],
       ['Kitchen south', 31.2, 26.9, 37.3, 26.9],
       ['Kitchen south right', 37.3, 26.9, 37.5, 26.9],
       ['Kitchen east', kitchenPassages.wallX, kitchenPassages.wallZ, kitchenPassages.wallX, 25.3, kitchenPassages.openings],
@@ -471,6 +477,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
   root.getGuestSuiteLayout = getGuestSuiteLayout;
   root.getGroundFloorDefaultPlan = getGroundFloorDefaultPlan;
   root.getKitchenPassageLayout = getKitchenPassageLayout;
+  root.getKitchenRefrigerationLayout = getKitchenRefrigerationLayout;
   root.getPrepWindowLayout = getPrepWindowLayout;
   root.getPrepWindowBankLayout = getPrepWindowBankLayout;
   root.getKitchenWindowBankLayout = getKitchenWindowBankLayout;
@@ -518,5 +525,5 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       }
     };
   };
-  if (typeof module !== 'undefined' && module.exports) module.exports = { addWindowShadeDivisions, addSingleHungSashes, getGroundFrontWindows, getGroundFrontLayout, getWindowProductIntent, getGroundFloorDefaultPlan, getKitchenPassageLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getFrontEntryLayout, buildArchedFrontEntry };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { addWindowShadeDivisions, addSingleHungSashes, getGroundFrontWindows, getGroundFrontLayout, getWindowProductIntent, getGroundFloorDefaultPlan, getKitchenPassageLayout, getKitchenRefrigerationLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getFrontEntryLayout, buildArchedFrontEntry };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

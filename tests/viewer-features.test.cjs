@@ -291,11 +291,11 @@ test('floor-plan archive preserves both revisions and marks the shower option as
       assert.equal(label.children[0].textContent, context.planRoomName(room.name));
       const clear = floor === 'upstairs' ? scope.getUpstairsRoomClearDimensions(room, upstairsPlan.walls) : room;
       const maxExtent = floor === 'ground' && room.name === 'Garage';
-      const size = floor === 'ground' && room.name === 'Kids room' ? '147.29 sq ft, stepped plan' : `${context.feet(clear.w)} x ${context.feet(clear.d)}${floor === 'upstairs' ? ' paint-face' : ''}${maxExtent ? ' max extents; L-shaped footprint' : ''}`;
+      const size = floor === 'ground' && room.name === 'Kids room' ? '144.59 sq ft, stepped plan' : `${context.feet(clear.w)} x ${context.feet(clear.d)}${floor === 'upstairs' ? ' paint-face' : ''}${maxExtent ? ' max extents; L-shaped footprint' : ''}`;
       assert.equal(elements['plan-dimension-list'].children[index].textContent, `${room.name}: ~ ${size}`);
       assert.equal(label.title, `${room.name}: ${size}`, 'Detailed names and qualifications remain available');
       assert.doesNotMatch(label.children[1].textContent, /paint-face|stepped|edge|to z/);
-      const compact = floor === 'ground' && room.name === 'Kids room' ? '147.29 sq ft'
+      const compact = floor === 'ground' && room.name === 'Kids room' ? '144.59 sq ft'
         : `${context.feet(clear.w)} x ${context.feet(clear.d)}${maxExtent ? ' max' : ''}`.replace(/' /g, "'").replace(/'0"/g, "'");
       assert.equal(label.children[1].textContent, compact);
       if (floor === 'upstairs' && room.name === 'Bedroom 2') {

@@ -1055,8 +1055,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const prepCounterWindowBank = getPrepWindowBankLayout();
   const prepEndWindow = prepWindows.find((window) => window.x === 55.5);
   const guestSuite = getGuestSuiteLayout();
+  const kitchenRefrigeration = getKitchenRefrigerationLayout();
   const kidsRoomNorthZ = 26.725 - 25 / 12 - 0.08 + 0.175;
-  const kidsRoom = { x: 19, z: kidsRoomNorthZ, width: 10, southWidth: 12.2, depth: guestSuite.kidsSouthZ - kidsRoomNorthZ };
+  const kidsRoom = { x: 19, z: kidsRoomNorthZ, width: kitchenRefrigeration.returnX - 19, southWidth: 12.2, depth: guestSuite.kidsSouthZ - kidsRoomNorthZ };
   const kidsDoorway = { x: kidsRoom.x, z: 27, width: 4.5, height: 8 };
   const officeEntry = { x: 12.2, z: 45.25, width: 5, height: 8 };
   const livingFeatureWall = getLivingRoomFeatureLayout();
@@ -1100,7 +1101,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   floor(19, 8, 7.5, kidsRoom.z - 8, true, scene);
   floor(26.875, kitchenWindowWallZ, 10.625, 8 - kitchenWindowWallZ, true, scene);
   floor(26.5, 8, 11, kidsRoom.z - 8, true, scene);
-  floor(29, kidsRoom.z, 8.5, 26.9 - kidsRoom.z, true, scene);
+  floor(kitchenRefrigeration.returnX, kidsRoom.z, kitchenWallRight - kitchenRefrigeration.returnX, 26.9 - kidsRoom.z, true, scene);
   floor(37.5, kitchenWindowWallZ, 7.9, 15 - kitchenWindowWallZ, true, scene);
   floor(45.4, kitchenWindowWallZ, 10.1, 15 - kitchenWindowWallZ, true, scene);
   for (const { x, z, w, d } of garageFloorAreas) floor(x, z, w, d, false, shell, false, garageFloorY);
@@ -1112,7 +1113,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [0, stairOpening.z + stairOpening.depth, 12.2, powderNorthZ - stairOpening.z - stairOpening.depth, true],
     [12.2, 25.7, kidsRoom.x - 12.2, 8.9, true],
     [kidsRoom.x, kidsRoom.z, kidsRoom.width, kidsRoom.depth, true],
-    [29, 26.9, 2.2, guestSuite.kidsSouthZ - 26.9, true],
+    [kitchenRefrigeration.returnX, 26.9, 31.2 - kitchenRefrigeration.returnX, guestSuite.kidsSouthZ - 26.9, true],
     [12.2, 34.6, 6.8, groundFrontWallZ - 34.6, true], [0, powderNorthZ, 7.1, guestEntry.powder.d, true], [7.1, powderEntryWallZ, 5.1, guestEntry.alcove.d, true],
     [0, officeNorthZ, 12.2, groundFrontWallZ - officeNorthZ, true],
     [guestSuite.closet.x, guestSuite.closet.z, guestSuite.closet.w, guestSuite.closet.d, true],
@@ -1140,7 +1141,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [0, livingFeatureWall.wallEndZ, 0, 8, true, [...livingWindowCenters].reverse().map((z) => [livingFeatureWall.wallEndZ - z - livingWindowWidth / 2, livingFeatureWall.wallEndZ - z + livingWindowWidth / 2, livingWindowSill, livingWindowHead])],
     [kidsRoom.x, kidsRoom.z, kidsRoom.x + kidsRoom.width, kidsRoom.z, true],
     [kidsDoorway.x, kidsRoom.z, kidsDoorway.x, guestSuite.kidsSouthZ, true, [[kidsDoorway.z - kidsRoom.z, kidsDoorway.z - kidsRoom.z + kidsDoorway.width, 0, kidsDoorway.height]]],
-    [29, kidsRoom.z, 29, 26.9, true, [], ceilingHeight, [1]], [0, powderNorthZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderNorthZ],
+    [kitchenRefrigeration.returnX, kidsRoom.z, kitchenRefrigeration.returnX, 26.9, true, [], ceilingHeight, [1]], [0, powderNorthZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderNorthZ],
     [7.1, powderNorthZ, 7.1, officeNorthZ, false, [[guestEntry.powderDoor.z - powderNorthZ, guestEntry.powderDoor.z - powderNorthZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
     [7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, false, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
     [12.2, guestEntry.coatCloset.z, 12.2, guestEntry.coatCloset.z + guestEntry.coatCloset.d],
@@ -1149,8 +1150,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [19, guestSuite.kidsSouthZ, 19, groundFrontWallZ, false, [[guestSuite.bedroomDoor.z - guestSuite.kidsSouthZ, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - guestSuite.kidsSouthZ, 0, 8]]],
     ...getGroundFloorDefaultPlan().walls.filter(([name]) => ['Kids south', 'Closet south', 'Guest closet divider', 'Bathroom south', 'Bathroom recess west', 'Bathroom recess south'].includes(name)).map(([name, x1, z1, x2, z2, openings = []]) => [x1, z1, x2, z2, false, openings, ceilingHeight, [-1, 1], 0, 0, { sideWidth: 2.5 / 12 }]),
     [31.2, 34.6, 31.2, 49, false, [], ceilingHeight, [-1, 1], 0, garageFloorY], [31.2, 26.9, 31.2, 34.6, false, [], ceilingHeight, [-1, 1], 0, garageFloorY],
-    [29, 26.9, 29.1875, 26.9, true],
-    [29.1875, 26.9, 31.2, 26.9, true],
+    [kitchenRefrigeration.returnX, 26.9, kitchenRefrigeration.runLeft, 26.9, true],
+    [kitchenRefrigeration.runLeft, 26.9, 31.2, 26.9, true],
     [31.2, 26.9, 37.3, 26.9, true, [], ceilingHeight, [1], -1, garageFloorY],
     [37.3, 26.9, 37.5, 26.9, true, [], ceilingHeight, [-1, 1], -1, garageFloorY],
     [37.5, kitchenWindowWallZ, 37.5, 25.3, true, kitchenSideOpenings, ceilingHeight, [-1, 1], 1],
@@ -2394,16 +2395,17 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const bottomRun = new THREE.Group();
   bottomRun.name = 'Bottom kitchen cabinet run';
   kitchen.add(bottomRun);
-  const columnWidth = 30 / 12;
+  const columnWidth = kitchenRefrigeration.columnWidth;
   const columnHeight = 84 / 12;
   const columnPanel = 0.75 / 12;
-  const bottomRunLeft = 29.1875;
-  const bottomRunRight = 37.3;
+  const bottomRunLeft = kitchenRefrigeration.runLeft;
+  const bottomRunRight = kitchenRefrigeration.runRight;
   const bottomRunCabinetLeft = bottomRunLeft;
   const bottomRunCenterX = (bottomRunCabinetLeft + bottomRunRight) / 2;
   const bottomRunWidth = bottomRunRight - bottomRunCabinetLeft;
   const wallFillerWidth = 2.85 / 12;
-  const fridgeLeft = bottomRunLeft + columnPanel;
+  const fridgeFillerWidth = kitchenRefrigeration.fridgeFillerWidth;
+  const fridgeLeft = bottomRunLeft + fridgeFillerWidth + columnPanel;
   const freezerRight = bottomRunRight - wallFillerWidth - columnPanel;
   const pantryLeft = fridgeLeft + columnWidth + columnPanel;
   const pantryRight = freezerRight - columnWidth - columnPanel;
@@ -2450,8 +2452,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(steamOven, 0, 0.76, 0.06, 2.2, 0.28, 0.02, black).name = 'Steam-oven control panel';
   box(steamOven, 0, 0.47, 0.14, 2.1, 0.07, 0.1, steel).name = 'Steam-oven handle';
   box(bottomRun, bottomRunRight - wallFillerWidth / 2, upperStorageTop / 2, 26, wallFillerWidth, upperStorageTop, 1.4, cabinetFinish).name = 'Recessed freezer wall-clearance filler';
+  box(bottomRun, bottomRunLeft + fridgeFillerWidth / 2, upperStorageTop / 2, 26, fridgeFillerWidth, upperStorageTop, 1.4, cabinetFinish).name = 'Recessed fridge wall-clearance filler';
+  const columnFrameDepth = 23.875 / 12;
   for (const x of [fridgeLeft - columnPanel / 2, fridgeLeft + columnWidth + columnPanel / 2, pantryRight + columnPanel / 2, freezerRight + columnPanel / 2]) {
-    box(bottomRun, x, upperStorageTop / 2, 26.725 - 25 / 24, columnPanel, upperStorageTop, 25 / 12, cabinetFinish).name = 'Full-height refrigeration side panel';
+    box(bottomRun, x, upperStorageTop / 2, 26.725 - columnFrameDepth / 2, columnPanel, upperStorageTop, columnFrameDepth, cabinetFinish).name = 'Full-height refrigeration side panel';
   }
   for (const x of [fridgeLeft + columnWidth / 2, freezerRight - columnWidth / 2]) {
     box(bottomRun, x, columnHeight + 0.075, 26.725 - 25 / 24, columnWidth, 0.15, 25 / 12, cabinetRailFinish).name = 'Individual refrigeration upper rail';
@@ -2477,28 +2481,35 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   box(bottomRun, bottomRunCenterX, upperStorageTop + 0.075, 25.65, bottomRunWidth, 0.15, 2.15, cabinetRailFinish).name = 'Continuous refrigeration cabinet cornice';
   for (const [name, model, x, handleX] of [
-    ['Column freezer', 'RS3084FLJK1', freezerRight - columnWidth / 2, 1.05],
-    ['Column fridge', 'RS3084SRHK1', fridgeLeft + columnWidth / 2, -1.05]
+    ['Column freezer', 'CL3650F/S/T/L', freezerRight - columnWidth / 2, 1.3],
+    ['Column fridge', 'CL3650R/S/T/R', fridgeLeft + columnWidth / 2, -1.3]
   ]) {
     const appliance = new THREE.Group();
     appliance.name = name;
-    appliance.userData = { manufacturer: 'Fisher & Paykel', model, nominalWidthInches: 30, productWidthInches: 29.75, heightInches: 84, bodyDepthInches: 24, cavityDepthInches: 25, finish: 'Stainless panel concept', provisional: true };
+    appliance.userData = { manufacturer: 'Sub-Zero', series: 'Classic', model, nominalWidthInches: 36, productWidthInches: 36, heightInches: 84, bodyDepthInches: 23.875, depthWithDoorInches: 26.1875, openingWidthInches: 35.5, openingHeightInches: 83.75, openingDepthInches: 24, cavityDepthInches: 25, finish: 'Stainless steel / tubular handle concept', doorStopDegrees: 90, factoryMaxAngleDegrees: 110, handleProjectionVerified: false, installationApproved: false, provisional: true };
     appliance.position.set(x, 0, 25.725);
     appliance.rotation.y = Math.PI;
     kitchen.add(appliance);
-    box(appliance, 0, columnHeight / 2, 0, 29.75 / 12, columnHeight, 2, steel).name = 'Fisher & Paykel column body';
-    // Approximate an articulating hinge ahead of each panel; these are not manufacturer hinge CAD.
-    const hingeX = (name === 'Column freezer' ? -1 : 1) * 29.75 / 24;
-    const hingeZ = 1.13;
+    const bodyDepth = 23.875 / 12;
+    const doorDepth = (26.1875 - 23.875) / 12;
+    const frontZ = bodyDepth / 2 + doorDepth;
+    box(appliance, 0, 83.75 / 24, 0, 35.5 / 12, 83.75 / 12, bodyDepth, steel).name = 'Sub-Zero Classic cavity envelope';
+    // Display hinge and handle are proxies; fit the supplied 90-degree stops at both side walls.
+    const hingeX = (name === 'Column freezer' ? -1 : 1) * columnWidth / 2;
+    const hingeZ = frontZ;
     const door = new THREE.Group();
     door.name = `${name} conceptual hinged door`;
-    door.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 115, openRotationSign: name === 'Column freezer' ? -1 : 1 }, conceptualHinge: true };
+    door.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: name === 'Column freezer' ? -1 : 1 }, conceptualHinge: true, doorStopRequired: true };
     door.position.set(hingeX, 0, hingeZ);
     appliance.add(door);
-    box(door, -hingeX, (columnHeight + 4 / 12) / 2, 1 + 0.75 / 24 - hingeZ, 29.75 / 12, columnHeight - 4 / 12, 0.75 / 12, steel).name = 'Column stainless door panel';
-    box(door, handleX - hingeX, 3.9, 1.13 - hingeZ, 0.065, 2.6, 0.1, black).name = 'Column tower-facing handle';
-    box(appliance, 0, 2 / 12, 1.01, 29.5 / 12, 4 / 12, 0.04, black).name = 'Column ventilation toe-kick';
-    for (const y of [0.08, 0.16, 0.24]) box(appliance, 0, y, 1.035, 29 / 12, 0.025, 0.015, steel).name = 'Column ventilation grille';
+    box(door, -hingeX, (75.25 + 4) / 24, -doorDepth / 2, columnWidth, 71.25 / 12, doorDepth, steel).name = 'Sub-Zero Classic stainless door';
+    const handleDepth = 2 / 12;
+    cylinder(door, handleX - hingeX, 3.9, handleDepth - 0.375 / 24, 0.375 / 24, 32 / 12, steel).name = 'Sub-Zero tower-facing tubular handle';
+    for (const y of [3.9 - 15 / 12, 3.9 + 15 / 12]) box(door, handleX - hingeX, y, handleDepth / 2, 0.375 / 12, 0.375 / 12, handleDepth, steel).name = 'Sub-Zero handle mounting post';
+    box(appliance, 0, 2 / 12, bodyDepth / 2, 35.5 / 12, 4 / 12, 0.04, black).name = 'Sub-Zero removable kickplate';
+    box(appliance, 0, (75.25 + 84) / 24, frontZ - 0.04, columnWidth, (84 - 75.25) / 12, 0.08, steel).name = 'Sub-Zero Classic top grille frame';
+    box(appliance, 0, (76 + 83.25) / 24, frontZ + 0.005, 34.5 / 12, 7.25 / 12, 0.02, black).name = 'Sub-Zero Classic upper ventilation';
+    for (let slat = 0; slat < 8; slat++) box(appliance, 0, (76.35 + slat * 0.9) / 12, frontZ + 0.035, 34.5 / 12, 0.4 / 12, 0.035, steel).name = 'Sub-Zero Classic top grille louver';
   }
 
   const island = new THREE.Group();

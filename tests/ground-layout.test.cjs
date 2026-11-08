@@ -39,9 +39,9 @@ test('image-scaled kids, bathroom, shallow-closet and bedroom bands meet without
   close(s.kidsSouthZ, s.bathroom.z);
   const kids = baseline.floors.filter(({ room }) => /^Kids room/.test(room ?? ''));
   assert.equal(kids.length, 2, 'The NE kitchen return creates a two-rectangle kids floor');
-  close(kids[0].x, 19); close(kids[0].w, 10); close(kids[0].z, baseline.rooms.find(({ name }) => name === 'Kids room').z);
-  close(kids[1].x, 29); close(kids[1].w, 2.2); close(kids[1].z, 26.9);
-  close(kids.reduce((sum, { w, d }) => sum + w * d, 0), 147.29333333333332);
+  close(kids[0].x, 19); close(kids[0].w, 8.75); close(kids[0].z, baseline.rooms.find(({ name }) => name === 'Kids room').z);
+  close(kids[1].x, 27.75); close(kids[1].w, 3.45); close(kids[1].z, 26.9);
+  close(kids.reduce((sum, { w, d }) => sum + w * d, 0), 144.58916666666667);
   const zones = baseline.floors.filter(({ room }) => /^(Kids room|Closet$|Bathroom$|Guest room$)/.test(room ?? ''));
   for (const f of zones) assert.ok(f.w > 0 && f.d > 0);
   for (let i = 0; i < zones.length; i++) for (let j = i + 1; j < zones.length; j++) {
@@ -61,6 +61,7 @@ test('powder room uses the shared hardwood floor without a tile overlay', () => 
   const end = source.indexOf(';', source.indexOf('].forEach(([x, z, w, d, hardwood')) + 1;
   vm.runInNewContext(source.slice(start, end), {
     guestEntry, guestSuite, stairOpening, shell: {}, powderNorthZ: guestEntry.powder.z,
+    kitchenRefrigeration: require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout(),
     groundFrontWallZ: getGroundFrontLayout().wallZ, groundFrontLayout: getGroundFrontLayout(),
     powderEntryWallZ: guestEntry.alcove.z, officeNorthZ: guestEntry.officeNorthZ,
     kidsRoom: { x: 19, z: 25.7, depth: 8.9 },
@@ -751,8 +752,8 @@ test('kids-room kitchen return and garage partition stay aligned around the full
   assert.ok(!baseline.walls.some(([name]) => name === 'Garage southwest return'));
   const floors = baseline.floors.filter((floor) => floor.room === 'Kids room');
   const area = floors.reduce((sum, floor) => sum + floor.w * floor.d, 0);
-  assert.ok(Math.abs(area - 147.29333333333332) < 1e-9);
-  assert.ok(Math.abs(floors.find(({ x }) => x === 29).w * floors.find(({ x }) => x === 29).d - 22.66) < 1e-9);
+  assert.ok(Math.abs(area - 144.58916666666667) < 1e-9);
+  assert.ok(Math.abs(floors.find(({ x }) => x === 27.75).w * floors.find(({ x }) => x === 27.75).d - 35.535) < 1e-9);
   for (const kids of floors) for (const garage of baseline.floors.filter((floor) => floor.room === 'Garage')) {
     assert.ok(Math.min(kids.x + kids.w, garage.x + garage.w) - Math.max(kids.x, garage.x) < 1e-9 ||
       Math.min(kids.z + kids.d, garage.z + garage.d) - Math.max(kids.z, garage.z) < 1e-9);
@@ -986,6 +987,7 @@ test('first-floor baseline matches the furnished model floors and canonical wall
     wall: (x1, z1, x2, z2, furnished, openings = []) => walls.push([x1, z1, x2, z2, openings])
   };
   context.getKitchenWindowBankLayout = require('../assets/js/floor-plan-ground.js').getKitchenWindowBankLayout;
+  context.getKitchenRefrigerationLayout = require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout;
   context.getGroundFrontWindows = require('../assets/js/floor-plan-ground.js').getGroundFrontWindows;
   vm.runInNewContext(source.slice(source.indexOf('  const kitchenWallLeft ='), source.indexOf('  joinWallCorners();')), context);
   const round = (value) => JSON.parse(JSON.stringify(value, (key, number) => typeof number === 'number' ? Math.round(number * 1000000) / 1000000 : number));

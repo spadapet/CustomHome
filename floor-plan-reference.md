@@ -1,5 +1,44 @@
 # Ground-floor plan reference
 
+## Current refrigeration - Sub-Zero Classic, November 8
+
+Owner approved adjusting walls to accommodate two 36-inch Classic units while
+retaining the center oven size. Move only the short kids-room return 15 inches
+west to x27.75: 12 inches for wider appliances plus a separate 3-inch fridge
+filler. North wall z24.736667, kids entry, stairs, cooking wall x37.5, passages,
+island and garage boundary x31.2 stay fixed. Kitchen/kids floor strips and rear
+wall backing follow; transfer 2.704167 sq ft to kitchen without changing total
+interior area. Kids floor becomes 144.589167 sq ft; keep both desks/chairs and
+all toy storage. Full-size TROFAST moves to (25.775,25.810625), board/light
+recenter to x23.375. This supersedes the previous fixed x29 return requirement.
+
+Bank 112.35 inches: two 36-inch units + 31.5-inch tower + four 0.75-inch panels
++ 3 / 2.85-inch fridge/freezer fillers. Freezer view-left CL3650F/S/T/L,
+fridge view-right CL3650R/S/T/R; stainless top grilles and tower-facing tubular
+handles (style provisional). Oven remains 30 x 24 x 24 inches, bottom 30 inches;
+tower remains 31.5 inches wide / 30 clear / 25 deep, shifted 6 inches west.
+Appliance plywood sides recess to 23.875-inch depth, behind the thick door
+backs; standard 36-inch upper boxes and the oven tower are not shortened.
+Closed defaults and supplied 90-degree stops replace the old 115-degree
+Fisher & Paykel swing. Factory Classic range is 110 degrees. See the active
+[refrigeration schedule](#refrigeration-and-steam-oven-wall) and
+[manufacturer facts/holds](appliances.html), accessed November 8, 2026.
+
+Verification: full runner reports 434 tests in 69 suites and 12 syntax checks.
+Actual HTTP-served Three.js r170 measures 36 x 84-inch fronts, retained oven,
+43.05 inches door-face to island and 41.05 inches including assumed 2-inch
+handles. Both front edges have 3.9 inches to side paint. Each stopped sweep
+was sampled at 901 poses (0-90 degrees in 0.1-degree increments), including
+pulls and recessed framing: no positive-volume interference with 218 nearby
+static meshes; minimum door-end/island gap 7.05 inches, not a passing route.
+Actual pointer open/close, desktop/narrow framing, floor/view/Grid/Night
+restoration and keyboard Night toggle passed. Clean production reload has
+one render canvas (plus the existing tour map), no debug hook, runtime errors
+or failed requests. Image-byte inspection is unavailable: no visual screenshot
+review or occupied-use approval is claimed. Verify selected handles, stopped
+drawer withdrawal, grille/service ventilation, cutouts/finished returns,
+anti-tip anchorage, floor loads, structure and services before installation.
+
 ## Current upstairs model - Version H, November 6
 
 The owner now adopts the upstairs portion of
@@ -2750,7 +2789,7 @@ Every bathroom and powder room on every floor requires built-in warm, dim night 
 
 No firepit or firewood remains in front. The closed firepit at rear (40, -15), on a 4 ft-square pad, is fully cold storage only; the checked rear arrangement does not meet Birmingham's 15 ft portable-unit operating separation. The requested 8 ft-long x 16 in-deep covered wood rack is beside the garage wall north of the waste bins, center (56.65, 22), cover z = 17.9-26.1. It leaves about 33 in of existing paving / 40 in to the fence locally, not a new narrower pinch than the carts. Close house separation needs fire/pest/moisture and local review; neither storage approval nor permission to light is implied. See [storage limits](patio.html#portable-firepit).
 
-The refrigerator and freezer doors start closed. Click or tap either modeled door to toggle its conceptual swing to the manufacturer-guide 115-degree full-access angle and back. The hinge and swing geometry are not manufacturer CAD; verify actual hinges, full opening, drawer withdrawal, and circulation separately.
+The selected Sub-Zero Classic refrigerator/freezer start closed. Click either leaf to toggle its conceptual 90-degree stopped swing; factory range is 110 degrees and the provided 90-degree stops are required at both side walls. Verify actual hinges, selected handles, stopped drawer withdrawal and occupied circulation separately.
 
 Current model audit: October 21, 2026. This is the consolidated reference for the [interactive floor plan](floor-plan-3d.html), checked against [model geometry](assets/js/floor-plan-3d.js). Update it, [design context](design-context.md), and affected room requirements whenever the design changes.
 
@@ -2899,7 +2938,7 @@ Dimensions include nominal room envelopes, not guaranteed usable clear rectangle
 | Prep kitchen | 37.5-55.5 / 7-15 | 18 ft x 8 ft | Continuous south wall behind pantry; pantry/left counter meet relocated kitchen wall |
 | Mudroom | 37.5-45.4 / 15-26.9 | 7 ft 11 in x 11 ft 11 in | West wall/cases coordinated at x = 37.5; coat closet centered at x = 41.45; cubby bench and garage entry fixed |
 | Garage | 44.233-55.5 / 15-26.9 plus 31.2-55.5 / 26.9-49 | 24 ft 4 in x 34 ft maximum extents; L-shaped | West edge steps east to x=44.233 for the north leg, then returns to x=31.2 at z=26.9; narrow forward bike alcove, two parking bays, lower slab |
-| Kids' room | x19-29 / z24.7367-37.2 plus x29-31.2 / z26.9-37.2 | Stepped, approximately 147.29 sq ft | Image-scaled proportions within fixed shell. Retain two full-size desks/chairs, one TROFAST and board. Proposed paired west leaves 54 x 96 in, z27-31.5. Both desk centers align along z35.7125; 31.925 in between top edges; east desk 1 in off finished east return. Occupied route and door sweeps remain unverified |
+| Kids' room | x19-27.75 / z24.7367-37.2 plus x27.75-31.2 / z26.9-37.2 | Stepped, approximately144.59 sq ft | November8 approved short-return revision for Classic units; south room/desk positions and paired west entry54 x96 in at z27-31.5 stay fixed. Retain full-size TROFAST at (25.775,25.810625), board/light centered x23.375. Occupied use remains unapproved |
 | Powder room | 0-7.1 / 35.1-41 | 7 ft 1 in x 5 ft 11 in | Lower east entry; south-facing northwest toilet and centered north-wall vanity, east towel hook, retained centered west privacy window |
 | Guest coat closet | 7.1-12.2 / 35.1-37.5 | 5 ft 1 in x 2 ft 5 in | North of alcove; 24.6 in clear depth, upper shelf/hanging rail, closed 48 x 96 in oak doors facing south into alcove |
 | Guest entry alcove | 7.1-12.2 / 37.5-41 | 5 ft 1 in x 3 ft 6 in | Open east to hall; 37.8 in between paint, 36.3 in between baseboards away from casing/door projections; not occupied/accessibility approval |
@@ -2940,19 +2979,19 @@ Both columns face decreasing z into the kitchen. From the kitchen, view-left to 
 
 | Element | Current model |
 |---|---|
-| Complete cabinet run | x = 29.1875-37.3; unchanged bank width; no end pull-out |
-| Freezer | Fisher & Paykel RS3084FLJK1, center (35.75, 25.725), left-hinge reference |
-| Refrigerator | Fisher & Paykel RS3084SRHK1, center (30.5, 25.725), right-hinge reference |
-| Each column | 30 in nominal bay; 29.75 x 84 x 24 in body; 25 in cavity-depth allowance |
-| Fridge / freezer bays | x = 29.25-31.75 / 34.5-37 |
-| Tower | x = 31.8125-34.4375, center x = 33.125; original 31.5 in bay, 30 in clear; 25 in deep; do not widen |
+| Complete cabinet run | x =27.9375-37.3;112.35 inches, no end pull-out |
+| Freezer | Sub-Zero Classic CL3650F/S/T/L, center (35.5,25.725), view-left/left hinge |
+| Refrigerator | Sub-Zero Classic CL3650R/S/T/R, center (29.75,25.725), view-right/right hinge |
+| Each unit | Manufacturer nominal36 x84 x24 in; standard opening35.5 x83.75 x24 in. Model front36 in, body-depth23.875 /door-depth26.1875 in;25 in cabinetry reservation, not a cutout |
+| Fridge / freezer bays | x =28.25-31.25 /34-37 |
+| Tower | x =31.3125-33.9375, center32.625; retained31.5 in bay,30 clear,25 deep |
 | Steam oven | Generic 30 x 24 x 24 in W/H/D envelope, bottom lowered to 30 in above floor; no model selected |
 | Storage | Original-width Shaker storage below/above oven; separate overhead cabinets above columns/tower; no end pull-out |
 | Full-depth upper storage | y = 7.15-8.85; cornice y = 8.85-9; stained oak, not the earlier cream-front trial |
-| Panels / filler | Four 0.75 in column framing panels; recessed 2.85 in wall-side filler |
-| Stair-side end | Gray return restored at x = 29; shifted bank begins x = 29.1875, about 0.15 in from wall face. Concealed kitchen-side trim omitted, kids-room side retained |
+| Panels / fillers | Four 0.75 in plywood sides, recessed to 23.875 in depth behind the Classic door backs; separate 3 in fridge-side and 2.85 in freezer-side fillers |
+| Return-side end | Gray return now x27.75; bank begins27.9375,0.15 in beyond side paint. Both appliance front edges have3.9 in to adjacent paint; finish/hinge installation unapproved |
 
-No counter niche or end pull-out remains. The shared kitchen/prep/mudroom wall, cooking units and refrigeration bank shift 6 in west, not the gray wall or exterior. Oven allowance and tower width remain unchanged. The modeled 0.15 in frame-to-gray-wall gap is not approved scribing or hinge clearance. Verify full opening/drawer withdrawal, actual cutouts, ventilation, supports and services. Island, garage steps/vehicles and exterior footprint stay fixed.
+No counter niche or end pull-out remains. Only the short kids return and its adjoining floor/backing move; cooking wall, kitchen passages, stairs, island, garage and exterior footprint stay fixed. Both appliance overheads are standard36-inch boxes; tower/storage/oven size and mounting stay. Tubular pulls, grille louvers and hinge motion are display proxies, not selected-product CAD. Check manufacturer openings/finished returns, grille/service ventilation, anti-tip anchorage, floor/support loads, services, stopped drawer withdrawal and occupied circulation.
 
 ### Island, seating and measured aisles
 
@@ -2966,11 +3005,11 @@ No counter niche or end pull-out remains. The shared kitchen/prep/mudroom wall, 
 |---|---|---|
 | Cooktop counter to island | 60.9 in | Counter edges after shared-wall move; island size/position unchanged |
 | Sink counter to island | 44.7 in | Counter edges; excludes dishwasher projection |
-| Closed refrigeration door face to island | 44.55 in | Not the handle, open freezer, or withdrawn appliance drawer |
+| Closed Classic door face /assumed handle to island |43.05 /41.05 in | Handle projection2 in is provisional; not open-door, drawer or occupied approval |
 | Prep doorway start beyond main sink counter front | 6 in | z = 9.725 minus z = 9.225; not a separate 18 in landing/work surface |
 | Mudroom casing cap to refrigeration panel | About 1.225 in | Trim-to-panel geometry, not appliance hinge clearance |
 
-Both columns stay closed by default; click or tap either modeled door to toggle its conceptual swing to the manufacturer-guide 115-degree full-access angle and back. The guide gives about 32 in projection at 90 degrees; verify actual hardware, full opening, drawer withdrawal, and circulation separately. An open freezer can obstruct the mudroom approach.
+Both Classic doors start closed; click toggles to the conceptual90-degree stopped pose and back. The manufacturer's factory range is110 degrees, with provided90-degree stops required at both close walls in this study. Side reserves3.9 inches exceed the guide's2 5/8-inch90-degree allowance, not its14 1/8-inch full-opening allowance. Verify actual hinge/handle envelope, stopped drawer withdrawal and occupied access; an open freezer can obstruct the mudroom approach.
 
 ## Prep kitchen and mudroom
 
@@ -3119,12 +3158,12 @@ offsets differ from the current marked-X placement. Layout choice is not install
 
 | Room | Furniture / fittings | Layout and constraints |
 |---|---|---|
-| Kids / kitchen hall edges | Warm-white painted front strips and corner returns matching the main panelling; natural-oak edges superseded | Each front strip 4.2 in wide, 1/2 in thick, flush with white panels; inner edges x = 19.175 / 28.825, outer edges x = 18.825 / 29.175. Outside corner returns cover the 4.2 in wall ends and front-panel thickness. Bottom 8 in, top 108 in; keep white baseboard and main panels. Board frame stays oak; verify scribing and adjoining cabinet/trim junctions |
+| Kids / kitchen hall edges | Warm-white painted front strips and corner returns matching the main panelling; natural-oak edges superseded | Each front strip 4.2 in wide, 1/2 in thick, flush with white panels; inner edges x = 19.175 / 27.575, outer edges x = 18.825 / 27.925 after the November 8 return revision. Outside corner returns cover the 4.2 in wall ends and front-panel thickness. Bottom 8 in, top 108 in; keep white baseboard and main panels. Board frame stays oak; verify scribing and adjoining cabinet/trim junctions |
 | Hall / foyer east wall | Continue matching white grooved panelling along the hall face of the kids/guest west wall | Join existing corner at z = 24.9117, stop at south-wall face z = 54.025; finished x = 18.7833-18.825. Nominal 1/2 in thick, bottom 8 in, top 108 in. Preserve kids opening z = 27-31.5 and guest opening z = 42-45, both 96 in high, plus side casing, header bead and projecting cap. Panels continue over headers. Room interiors and door sizes unchanged; verify occupied circulation and finish junctions |
-| Kids / kitchen hall | 84 x 48 in oak-framed charcoal tempered dry-erase glass/cork board centered x = 24 on the north partition's kitchen-facing side; bottom 30 in, top 78 in | Opaque light-coloured dry-erase markers approved for black glass, no chalk/liquid chalk; captive paper clips and shallow marker/eraser tray. Warm-white painted vertical grooved panelling covers the 115.8 in wall face above the 8 in white baseboard to 108 in, nominal 1/2 in thick, superseding sage. Board remounted outside panels; total modeled projection 3.08 in from original finished wall. Opposite face from desks; no lift-zone encroachment. Verify safety glazing, weight-rated anchorage into blocking, marker compatibility/cleaning, child reach/material safety, rounded edges and occupied hall clearance; no loose magnets/sharp pins. No product selected |
+| Kids / kitchen hall | 84 x 48 in oak-framed charcoal tempered dry-erase glass/cork board and attached light recentered x = 23.375 on the shortened north partition's kitchen-facing side; bottom 30 in, top 78 in | Opaque light-coloured dry-erase markers approved for black glass, no chalk/liquid chalk; captive paper clips and shallow marker/eraser tray. Warm-white painted vertical grooved panelling covers the 100.8 in wall face above the 8 in white baseboard to 108 in, nominal 1/2 in thick, superseding sage. Board remounted outside panels; total modeled projection 3.08 in from original finished wall. Opposite face from desks; no lift-zone encroachment. Verify safety glazing, weight-rated anchorage into blocking, marker compatibility/cleaning, child reach/material safety, rounded edges and occupied hall clearance; no loose magnets/sharp pins. No product selected |
 | Kids | Two retained 47.25 x 31.5 in MITTZON desks aligned along z35.7125, centers x22.375 and 28.972917, rotation 180 degrees | Chairs remain north of the work surfaces at z34.375. Top-to-top side gap 31.925 in; east desk has 1 in to the finished east return. Retain one TROFAST and family board. This is static placement only; verify paired-door sweeps, chair use, storage retrieval, cables, sit-stand motion and occupied routes |
 | Kids | Bench, floor books and upper artwork remain removed | Kitchen-facing family message board remains |
-| Kids | One [TROFAST 796.131.29](https://www.ikea.com/us/en/p/trofast-storage-combination-with-boxes-room-divider-white-dark-gray-s79613129/), 39 x 17.375 x 37 in, center (27.025,25.810625), rotation 0 | Back north, bins south; 2.1 in east/north gaps. Nine removable boxes with separate LEGO inserts; other frame removed. Anchor retained unit; no climbing/seating |
+| Kids | One [TROFAST 796.131.29](https://www.ikea.com/us/en/p/trofast-storage-combination-with-boxes-room-divider-white-dark-gray-s79613129/), 39 x 17.375 x 37 in, center (25.775,25.810625), rotation 0 after the November 8 return revision | Back north, bins south; 2.1 in east/north gaps. Nine removable boxes with separate LEGO inserts; other frame removed. Anchor retained unit; no climbing/seating |
 | Kids | Continuous oak floor exposed, two tucked chairs, freed storage footprint 4.71 sq ft | Homework/storage fronts 51.19 in apart; 30 in chair allowance plus full bin pull leaves 3.81 in, not a passing aisle. PC chair clears tabletop front after 9 in pull. Keep 30 x 43.5 in west-entry approach clear; verify reach, loads and occupied use |
 | Office | Two 60 x 24 in desks at (6.1, 42.175) / (10.9417, 50.85), latter rotated -90 degrees/facing east; two monitors and one chair each | North desk centered between finished side walls, rear top on north paint; low legs clear baseboard. East desk retains 1 in to paint and knob-clearance position. Door study sweep 0-90; selected stops and occupied use need review |
 | Office | Restored 60 x 33.6 in loveseat concept at (2.8208, 52.4792), rotation pi/facing north; E20 reference 65 x 22 x 64 in L/W/H at (1.65, 44.0292) | Southwest sofa and northwest equipment clear adjacent baseboards by 1 in. Equipment-to-sofa gap 52.1 in; 12.4 in desk/equipment side gap is not a route. Sofa top 2.6 in below sill underside; window reach unverified. Compact 48 in trial superseded, no selected product rescaled. Verify seats, moving equipment/headroom and occupied access |
@@ -3208,7 +3247,7 @@ Kitchen window piers and corner returns are 12 in; outer trim-cap returns are 7.
 
 ## Doors, openings and circulation
 
-All house doors and doorless cased passages have nominal **8 ft / 96 in heads** on both floors, superseding older 84-inch entries. Heights follow each floor datum; garage doors rise from the lowered garage floor. Leaves retain small fitting gaps; actual frames, rough openings, structural headers and clear passage require product/architect coordination. Click/tap modeled house-door leaves in the 3D viewer to toggle hinged, bifold, pocket and exterior overhead door poses. Ordinary hinged leaves use a conceptual 180-degree endpoint; the selected refrigerator/freezer use the manufacturer-guide 115-degree limit, bifolds 90 degrees, and pocket sliders their modeled track endpoints. Default poses stay as scheduled. These limits are not verified hardware stops, swept-clearance approval or construction specifications. Cabinet/appliance fronts and vehicle doors use separate controls. The guest shower has no door; its fixed splash glass is 96 inches high above the curb and needs supplier support/safety-glazing approval.
+All house doors and doorless cased passages have nominal **8 ft / 96 in heads** on both floors, superseding older 84-inch entries. Heights follow each floor datum; garage doors rise from the lowered garage floor. Leaves retain small fitting gaps; actual frames, rough openings, structural headers and clear passage require product/architect coordination. Click/tap modeled house-door leaves in the 3D viewer to toggle hinged, bifold, pocket and exterior overhead door poses. Ordinary hinged leaves use their conceptual endpoints; the selected Classic refrigerator/freezer use required 90-degree stop concepts instead of their factory 110-degree range, bifolds 90 degrees, and pocket sliders their modeled track endpoints. Default poses stay as scheduled. These display limits are not swept-clearance approval or construction specifications. Verify actual hardware/stops and drawer access. Cabinet/appliance fronts and vehicle doors use separate controls. The guest shower has no door; its fixed splash glass is 96 inches high above the curb and needs supplier support/safety-glazing approval.
 
 | Connection | Current opening / location | Operation or limitation |
 |---|---|---|

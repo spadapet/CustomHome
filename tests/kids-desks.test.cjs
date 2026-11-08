@@ -17,7 +17,8 @@ function buildKidsRoom() {
     add(child) { child.parent = this; this.children.push(child); }
   }
   const roots = [];
-  const kidsRoom = { x: 19, z: 26.725 - 25 / 12 - 0.08 + 0.175, width: 10, southWidth: 12.2 };
+  const returnX = require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout().returnX;
+  const kidsRoom = { x: 19, z: 26.725 - 25 / 12 - 0.08 + 0.175, width: returnX - 19, southWidth: 12.2 };
   const context = {
     kidsRoom,
     groundFrontWallZ: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().wallZ,
@@ -188,7 +189,7 @@ test('retained desks, chairs and toy storage fit the stepped room and preserve t
     assert.ok(b.minX >= finishedWest - 1e-9 && b.maxX <= finishedEast + 1e-9);
     assert.ok(b.minZ >= model.kidsRoom.z + 0.175 - 1e-9 && b.maxZ <= finishedSouth + 1e-9);
   }
-  assert.ok(toyBounds.minX >= finishedWest && toyBounds.maxX < 29);
+  assert.ok(toyBounds.minX >= finishedWest && toyBounds.maxX < model.kidsRoom.x + model.kidsRoom.width - 0.175);
   assert.ok(toyBounds.minZ >= model.kidsRoom.z + 0.175 && toyBounds.maxZ < 26.9);
   assert.ok(Math.abs((finishedEast - deskBounds[1].maxX) * 12 - 1) < 1e-9, 'East desk leaves one inch to finished return');
   assert.ok(Math.abs((finishedSouth - deskBounds[0].maxZ) * 12) < 1e-9, 'Desk tops meet the finished south wall above its projecting baseboard');
@@ -228,8 +229,8 @@ test('one retained TROFAST matches the linked size and has nine removable boxes,
       assert.ok(bb.minX > b.minX && bb.maxX < b.maxX && bb.minZ > b.minZ && bb.maxZ < b.maxZ, 'Bins fit inside each frame');
     }
   }
-  assert.ok(Math.abs((28.825 - bounds(storage[0]).maxX) * 12 - 2.1) < 1e-9, 'Retained storage aligns east with trim clearance');
-  assert.ok(Math.abs(bounds(storage[0]).minX - 25.4) < 1e-9, 'The former west storage footprint is open play floor');
+  assert.ok(Math.abs((model.kidsRoom.x + model.kidsRoom.width - 0.175 - bounds(storage[0]).maxX) * 12 - 2.1) < 1e-9, 'Retained storage follows the revised return with trim clearance');
+  assert.ok(Math.abs(bounds(storage[0]).minX - 24.15) < 1e-9, 'Retain full-size toy storage without blocking the west approach');
   for (const unit of storage) {
     assert.equal(unit.rotation.y, 0);
     assert.ok(Math.abs((bounds(unit).minZ - model.kidsRoom.z - 0.175) * 12 - 2.1) < 1e-9, 'Storage backs onto north wall');
@@ -272,7 +273,7 @@ test('warm-white wall panelling fits above the existing baseboard and behind the
   const b = bounds(panelling);
   const wallFace = model.kidsRoom.z - 0.175;
   assert.ok(Math.abs(b.minX - 19.175) < 1e-9);
-  assert.ok(Math.abs(b.maxX - 28.825) < 1e-9);
+  assert.ok(Math.abs(b.maxX - (model.kidsRoom.x + model.kidsRoom.width - 0.175)) < 1e-9);
   assert.ok(Math.abs(b.maxZ - wallFace) < 1e-9, 'Backing meets finished wall');
   assert.ok(Math.abs((wallFace - b.minZ) * 12 - 0.5) < 1e-9);
   for (const panel of panels) {
@@ -296,7 +297,7 @@ test('matching white strips cover both wall edges and return around the outside 
   assert.ok(Math.abs(strips[0].minX - 18.825) < 1e-9);
   assert.ok(Math.abs(strips[0].maxX - panels.minX) < 1e-9, 'Left edge meets white panelling without a gap');
   assert.ok(Math.abs(strips[1].minX - panels.maxX) < 1e-9, 'Right edge meets white panelling without a gap');
-  assert.ok(Math.abs(strips[1].maxX - 29.175) < 1e-9);
+  assert.ok(Math.abs(strips[1].maxX - (model.kidsRoom.x + model.kidsRoom.width + 0.175)) < 1e-9);
   for (const [index, strip] of strips.entries()) {
     assert.ok(Math.abs(strip.minZ - panels.minZ) < 1e-9, 'Edge and main panel front faces are flush');
     assert.ok(Math.abs(returns[index].minZ - strip.minZ) < 1e-9, 'Return covers front panel thickness');
