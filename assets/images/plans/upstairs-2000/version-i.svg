@@ -1,0 +1,289 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1100" viewBox="0 0 1600 1100" style="width:100%;height:auto;display:block" role="img" aria-labelledby="title desc">
+  <title id="title">Version I: new upstairs image study and current downstairs model</title>
+  <desc id="desc">November 8, 2026. Editable vector study of the owner's upstairs image; Version H and the upstairs 3D model remain unchanged. Both panels use feet at the same scale. Raster calibration is 224 pixels for the labelled 14 feet 8 inches primary width, or 15.272727 pixels per foot. Wall centerlines are approximate and source dimension labels are not measured SVG clear sizes. Downstairs is 1966.44 square feet including stairs. Upstairs estimate is 2137.56 square feet excluding its 92.74-square-foot stair block; combined estimate is 4104.00 square feet, counting stairs once downstairs. Upstairs gross outline includes half the drawn .35-foot wall thickness outside the centerline; garage, porch and basement are excluded. Dimensions do not all reconcile; upstairs and combined areas are approximate, not certified finished area. North primary suite and Bedroom 2 connect to a central hallway, east loft and stepped laundry. Two front bedrooms flank an inset hall and central closet extending to the front line; the service row contains Baths 3/4, linen, Closet 3 and furnace. Bedroom 3 entry hinges at its north/bath-wall jamb, its bath door opens inward toward the west exterior wall, and laundry enters through the north loft-facing partition with its west hallway wall closed. Eighteen provisional exterior window openings contain 28 conceptual units: ten 60-inch pairs of 30-inch units, six 30-inch singles and two 36-inch laundry singles, east and south. Closet 2 north, Closet 4 front and the exposed Bath 4 south-wall section east of Bedroom 4 have 30-inch singles. Laundry's new south window centers on its bottom exterior wall. Primary closet, Closet 3 and linen have no exterior walls and remain unglazed. No furnace or roof windows. Sill/head intent is 36/96 inches; bedroom front pairs are centered on traced rooms. Bathrooms require privacy/safety-glazing review. Product sizes, combinations, operation, egress/reach, closet storage, headers and flashing remain unverified. No unpictured furniture, sanitary fixtures or stair/furnace access repairs. Doors retain 96-inch-height proxy intent. Downstairs walls, openings and floor strips match current shared ground geometry, not H's alternative. Sub-Zero bank width is 112.35 inches, with 36-inch fridge at low world-x and 36-inch freezer at high world-x, separated by the unchanged 31.5-inch oven tower. Facing south, freezer is left and fridge right; north-up page order is reversed. Oven remains 30 by 24 by 24 inches, bottom 30 inches. Kids return x27.75 is 15 inches west of its former position; L-shaped kids floor is 144.589167 square feet. Kitchen receives 2.704167 square feet without changing ground gross 1966.442708 square feet. TROFAST center is x25.775/y25.810625; board/light center x23.375. Appliance fronts default closed; 90-degree stops, handles, cutouts, ventilation, drawer access, anti-tip anchors, loads and installation require review. Ground guest bath/closet/recess follow the model, not H's enlarged laundry niche/right partition. Stair arrival, furnace service, loft support/headroom, bearing/roof alignment, plumbing, egress and occupied operation remain unresolved. Design study only; no model scripts or saved layout JSON are changed.</desc>
+  <defs>
+	<pattern id="stairHatch" width="0.7" height="0.7" patternUnits="userSpaceOnUse"><path d="M0 0H0.7" stroke="#aaa99f" stroke-width="0.05"/></pattern>
+	<g id="toilet"><rect x="-.7" y="-.85" width="1.4" height=".6" rx=".08" class="fixture"/><ellipse cx="0" cy=".25" rx=".65" ry=".85" class="fixture"/><ellipse cx="0" cy=".25" rx=".4" ry=".5" fill="#e6eff1"/></g>
+	<style>
+	  text { font-family: Arial, Helvetica, sans-serif; fill: #263b35; }
+	  .heading { font-size: 30px; font-weight: 700; }
+	  .panel-heading { font-size: 22px; font-weight: 700; }
+	  .sub { font-size: 17px; fill: #58675f; }
+	  .small { font-size: 15px; fill: #58675f; }
+	  .room { font-size: .95px; font-weight: 700; text-anchor: middle; }
+	  .size { font-size: .78px; text-anchor: middle; fill: #52645c; }
+	  .tiny { font-size: .64px; text-anchor: middle; fill: #52645c; }
+	  .wall { fill: none; stroke: #45534d; stroke-width: .35; stroke-linecap: butt; stroke-linejoin: miter; }
+	  .window { fill: none; stroke: #6f9fb1; stroke-width: .12; }
+	  .door { fill: none; stroke: #9b9c93; stroke-width: .055; }
+	  .floor { fill: #dceee4; }
+	  .bedroom { fill: #e9ddc7; }
+	  .bath { fill: #e0e9ee; }
+	  .utility { fill: #e9e3d7; }
+	  .garage { fill: #ece8f0; }
+	  .porch { fill: #f1ece2; }
+	  .cabinet { fill: #d8c4a3; stroke: #9e8a6d; stroke-width: .06; }
+	  .fixture { fill: #fffdfa; stroke: #819596; stroke-width: .06; }
+	  .appliance { fill: #d9e1e3; stroke: #697b80; stroke-width: .06; }
+	  .dim { fill: none; stroke: #7a8b81; stroke-width: .055; }
+	</style>
+  </defs>
+  <rect width="1600" height="1100" fill="#faf8f2"/>
+  <text x="55" y="50" class="heading">Version I: two-floor study</text>
+  <text id="combined-area" x="55" y="80" class="sub" data-square-feet="4104.002558">Combined: ~4,104.00 sq ft | stairs counted once, downstairs | upstairs 3D remains Version H</text>
+  <text x="55" y="108" class="small">North / rear at top. Both panels: 12 pixels = 1 foot. Upstairs trace and area are approximate, not certified.</text>
+  <text x="60" y="151" class="panel-heading">DOWNSTAIRS | current 3D layout</text>
+  <text id="ground-area" x="60" y="175" class="small" data-square-feet="1966.442708">1,966.44 sq ft | includes stairs | kids 144.59 sq ft</text>
+  <text x="830" y="151" class="panel-heading">UPSTAIRS | new image study</text>
+  <text id="upstairs-area" x="830" y="175" class="small" data-square-feet="2137.559850" data-stair-deduction="92.739234">~2,137.56 sq ft | excludes 92.74 sq ft stair block</text>
+  <metadata id="area-basis" data-wall-thickness-feet=".35" data-stairs-counted-on="downstairs" data-upstairs-outline="0,7.4 43.869048,7.4 43.869048,19.775 55.916667,19.775 55.916667,41.578571 32.017857,41.578571 32.017857,55.066667 0,55.066667">Owner comparison estimate: exterior faces including internal walls; upstairs outline offset by half the drawn wall thickness, less its stair block. Ground uses the shared model area helper including stairs. Garage, porch and basement excluded. Upstairs conditioning, headroom, structure and raster calibration unverified; not certified appraisal area.</metadata>
+  <g id="ground-plan" transform="translate(60 190) scale(12)">
+	<g id="ground-floors">
+	  <rect data-floor="0" data-room="Living room" x="0" y="8" width="13.2" height="17.7" class="floor"/>
+	  <rect data-floor="1" data-room="Dining room" x="13.2" y="-0.1" width="13.675" height="8.1" class="floor"/>
+	  <rect data-floor="2" data-room="Hall" x="13.2" y="8" width="5.8" height="17.7" class="floor"/>
+	  <rect data-floor="3" data-room="Hall" x="19" y="8" width="7.5" height="16.736667" class="floor"/>
+	  <rect data-floor="4" data-room="Kitchen" x="26.875" y="7" width="10.625" height="1" class="floor"/>
+	  <rect data-floor="5" data-room="Kitchen" x="26.5" y="8" width="11" height="16.736667" class="floor"/>
+	  <rect data-floor="6" data-room="Kitchen" x="27.75" y="24.736667" width="9.75" height="2.163333" class="floor"/>
+	  <rect data-floor="7" data-room="Prep kitchen" x="37.5" y="7" width="7.9" height="8" class="floor"/>
+	  <rect data-floor="8" data-room="Prep kitchen" x="45.4" y="7" width="10.1" height="8" class="floor"/>
+	  <rect data-floor="9" data-room="Mudroom" x="37.5" y="15" width="6.733333" height="11.9" class="utility"/>
+	  <rect data-floor="10" data-room="Hall" x="0" y="25.7" width="12.2" height="1.316667" class="floor"/>
+	  <rect data-floor="11" data-room="Hall" x="0" y="27.016667" width="0.175" height="7.825" class="floor"/>
+	  <rect data-floor="12" data-room="Hall" x="10.008333" y="27.016667" width="2.191667" height="7.825" class="floor"/>
+	  <rect data-floor="13" data-room="Hall" x="0" y="34.841667" width="12.2" height="0.258333" class="floor"/>
+	  <rect data-floor="14" data-room="Hall" x="12.2" y="25.7" width="6.8" height="8.9" class="floor"/>
+	  <rect data-floor="15" data-room="Kids room" x="19" y="24.736667" width="8.75" height="12.463333" class="bedroom"/>
+	  <rect data-floor="16" data-room="Kids room" x="27.75" y="26.9" width="3.45" height="10.3" class="bedroom"/>
+	  <rect data-floor="17" data-room="Entry hall" x="12.2" y="34.6" width="6.8" height="20.079167" class="floor"/>
+	  <rect data-floor="18" data-room="Powder room" x="0" y="35.1" width="7.1" height="5.9" class="bath"/>
+	  <rect data-floor="19" data-room="Guest entry alcove" x="7.1" y="37.5" width="5.1" height="3.5" class="floor"/>
+	  <rect data-floor="20" data-room="Office" x="0" y="41" width="12.2" height="13.679167" class="bedroom"/>
+	  <rect data-floor="21" data-room="Closet" x="19" y="42" width="12.2" height="2.4" class="utility"/>
+	  <rect data-floor="22" data-room="Bathroom" x="19" y="37.2" width="12.2" height="4.8" class="bath"/>
+	  <rect data-floor="23" data-room="Guest room" x="19" y="44.4" width="12.2" height="10.279167" class="bedroom"/>
+	  <rect data-floor="24" data-room="Guest coat closet" x="7.1" y="35.1" width="5.1" height="2.4" class="floor"/>
+	  <rect data-floor="25" data-room="Garage" x="44.233333" y="15" width="11.266667" height="11.9" class="garage"/>
+	  <rect data-floor="26" data-room="Garage" x="31.2" y="26.9" width="24.3" height="7.7" class="garage"/>
+	  <rect data-floor="27" data-room="Garage" x="31.2" y="34.6" width="24.3" height="14.4" class="garage"/>
+	  <rect data-floor="28" data-room="Front porch" x="0" y="54.679167" width="31.2" height="7" class="porch"/>
+	</g>
+	<g id="ground-walls">
+	  <path data-wall="Living north" d="M0 8L2.85 8M10.35 8L13.2 8" class="wall"/>
+	  <path data-window="Living north" d="M2.85 8L10.35 8" class="window"/>
+	  <path data-wall="Dining west" d="M13.2 -0.1L13.2 2.45M13.2 5.45L13.2 8" class="wall"/>
+	  <path data-wall="Dining north" d="M13.2 -0.1L17.0375 -0.1M23.0375 -0.1L26.875 -0.1" class="wall"/>
+	  <path data-window="Dining north" d="M17.0375 -0.1L23.0375 -0.1" class="window"/>
+	  <path data-wall="Dining east" d="M26.875 -0.1L26.875 0.5M26.875 6.5L26.875 7" class="wall"/>
+	  <path data-window="Dining east" d="M26.875 0.5L26.875 6.5" class="window"/>
+	  <path data-wall="Kitchen north" d="M26.875 7L28.25 7M35.75 7L37.5 7" class="wall"/>
+	  <path data-window="Kitchen north" d="M28.25 7L35.75 7" class="window"/>
+	  <path data-wall="Prep north" d="M37.5 7L42.941667 7M51.858333 7L55.5 7" class="wall"/>
+	  <path data-window="Prep north" d="M42.941667 7L51.858333 7" class="window"/>
+	  <path data-wall="Prep east" d="M55.5 7L55.5 10.55M55.5 12.55L55.5 15" class="wall"/>
+	  <path data-window="Prep east" d="M55.5 10.55L55.5 12.55" class="window"/>
+	  <path data-wall="Garage east" d="M55.5 15L55.5 16.5M55.5 22.5L55.5 26.5M55.5 32.5L55.5 36.5M55.5 42.5L55.5 44M55.5 47L55.5 49" class="wall"/>
+	  <path data-window="Garage east" d="M55.5 16.5L55.5 22.5" class="window"/>
+	  <path data-window="Garage east" d="M55.5 26.5L55.5 32.5" class="window"/>
+	  <path data-window="Garage east" d="M55.5 36.5L55.5 42.5" class="window"/>
+	  <path data-wall="Garage south" d="M31.2 49L32.5 49M41.5 49L44 49M53 49L55.5 49" class="wall"/>
+	  <path data-wall="Guest east" d="M31.2 49L31.2 54.679167" class="wall"/>
+	  <path data-wall="Porch east" d="M31.2 54.679167L31.2 61.679167" class="wall"/>
+	  <path data-wall="Porch south" d="M0 61.679167L31.2 61.679167" class="wall"/>
+	  <path data-wall="Porch west" d="M0 54.679167L0 61.679167" class="wall"/>
+	  <path data-wall="Office west" d="M0 26.775L0 36.8M0 39.3L0 47M0 51L0 54.679167" class="wall"/>
+	  <path data-window="Office west" d="M0 36.8L0 39.3" class="window"/>
+	  <path data-window="Office west" d="M0 47L0 51" class="window"/>
+	  <path data-wall="Living west" d="M0 8L0 9.675M0 13.675L0 21.275M0 25.275L0 26.775" class="wall"/>
+	  <path data-window="Living west" d="M0 9.675L0 13.675" class="window"/>
+	  <path data-window="Living west" d="M0 21.275L0 25.275" class="window"/>
+	  <path data-wall="Kids north" d="M19 24.736667L27.75 24.736667" class="wall"/>
+	  <path data-wall="Kids west" d="M19 24.736667L19 27M19 31.5L19 37.2" class="wall"/>
+	  <path data-wall="Kids east return" d="M27.75 24.736667L27.75 26.9" class="wall"/>
+	  <path data-wall="Powder north" d="M0 35.1L12.2 35.1" class="wall"/>
+	  <path data-wall="Powder east" d="M7.1 35.1L7.1 38M7.1 40.5L7.1 41" class="wall"/>
+	  <path data-wall="Guest coat closet front" d="M7.1 37.5L7.65 37.5M11.65 37.5L12.2 37.5" class="wall"/>
+	  <path data-wall="Guest coat closet east" d="M12.2 35.1L12.2 37.5" class="wall"/>
+	  <path data-wall="Office east" d="M12.2 41L12.2 42.75M12.2 47.75L12.2 54.679167" class="wall"/>
+	  <path data-wall="Office north" d="M0 41L12.2 41" class="wall"/>
+	  <path data-wall="House south" d="M0 54.679167L2.2 54.679167M9.8 54.679167L13.1 54.679167M18.1 54.679167L21.2 54.679167M28.8 54.679167L31.2 54.679167" class="wall"/>
+	  <path data-window="House south" d="M2.2 54.679167L9.8 54.679167" class="window"/>
+	  <path data-window="House south" d="M21.2 54.679167L28.8 54.679167" class="window"/>
+	  <path data-wall="Kids south" d="M19 37.2L31.2 37.2" class="wall"/>
+	  <path data-wall="Guest west" d="M19 37.2L19 44.8M19 47.8L19 54.679167" class="wall"/>
+	  <path data-wall="Closet south" d="M19 44.4L19.95 44.4M22.45 44.4L23.35 44.4M27.35 44.4L27.7 44.4" class="wall"/>
+	  <path data-wall="Guest closet divider" d="M22.9 42L22.9 44.4" class="wall"/>
+	  <path data-wall="Bathroom south" d="M19 42L27.95 42M30.45 42L31.2 42" class="wall"/>
+	  <path data-wall="Bathroom recess west" d="M28.9 37.2L28.9 39.2" class="wall"/>
+	  <path data-wall="Bathroom recess south" d="M28.9 39.2L31.2 39.2" class="wall"/>
+	  <path data-wall="Garage west" d="M31.2 34.6L31.2 49" class="wall"/>
+	  <path data-wall="Garage west return" d="M31.2 26.9L31.2 34.6" class="wall"/>
+	  <path data-wall="Kitchen south left" d="M27.75 26.9L27.9375 26.9" class="wall"/>
+	  <path data-wall="Kids kitchen return" d="M27.9375 26.9L31.2 26.9" class="wall"/>
+	  <path data-wall="Kitchen south" d="M31.2 26.9L37.3 26.9" class="wall"/>
+	  <path data-wall="Kitchen south right" d="M37.3 26.9L37.5 26.9" class="wall"/>
+	  <path data-wall="Kitchen east" d="M37.5 7L37.5 9.725M37.5 12.225L37.5 21.675M37.5 24.175L37.5 25.3" class="wall"/>
+	  <path data-wall="Kitchen east return" d="M37.5 25.3L37.5 26.9" class="wall"/>
+	  <path data-wall="Mudroom north" d="M37.5 15L44.233333 15" class="wall"/>
+	  <path data-wall="Garage north" d="M44.233333 15L55.5 15" class="wall"/>
+	  <path data-wall="Mudroom east" d="M44.233333 15L44.233333 26.9" class="wall"/>
+	  <path data-wall="Mudroom south" d="M37.5 26.9L38 26.9M41 26.9L44.233333 26.9" class="wall"/>
+	</g>
+	<rect id="ground-stairs" x=".175" y="27.016667" width="9.833333" height="7.825" fill="url(#stairHatch)" stroke="#9c9b94" stroke-width=".08"/>
+	<text x="5.1" y="30.8" class="room">STAIRS</text>
+	<g id="ground-refrigeration" data-run-left="27.9375" data-run-right="37.3" data-stop-degrees="90">
+	  <rect id="fridge-filler" x="27.9375" y="25.3" width=".25" height="1.4" class="cabinet"/>
+	  <rect id="fridge" data-model="CL3650R/S/T/R" x="28.25" y="24.5375" width="3" height="2.182292" class="appliance"/>
+	  <rect id="oven-tower" x="31.3125" y="24.641667" width="2.625" height="2.083333" class="cabinet"/>
+	  <rect id="oven" data-height-inches="24" data-bottom-inches="30" x="31.375" y="24.601667" width="2.5" height="2" class="appliance"/>
+	  <rect id="freezer" data-model="CL3650F/S/T/L" x="34" y="24.5375" width="3" height="2.182292" class="appliance"/>
+	  <rect id="freezer-filler" x="37.0625" y="25.3" width=".2375" height="1.4" class="cabinet"/>
+	  <path id="column-panels" d="M28.21875 24.735417V26.725M31.28125 24.735417V26.725M33.96875 24.735417V26.725M37.03125 24.735417V26.725" stroke="#9e8a6d" stroke-width=".0625"/>
+	  <path d="M30.98 24.370833H30.67M34.22 24.370833H34.53" stroke="#697b80" stroke-width=".07"/>
+	  <text x="29.75" y="25.57" class="tiny">FRIDGE 36</text>
+	  <text x="32.625" y="25.57" class="tiny">OVEN 30</text>
+	  <text x="35.5" y="25.57" class="tiny">FREEZER 36</text>
+	  <path d="M27.9375 23.7H37.3M27.9375 23.5V23.9M37.3 23.5V23.9" class="dim"/>
+	  <text x="32.61875" y="23.35" class="tiny">112.35-in bank | 90-degree stops required</text>
+	</g>
+	<rect id="ground-island" x="26.9" y="12.95" width="3.5" height="8" class="cabinet"/>
+	<text x="28.65" y="16.95" class="tiny" transform="rotate(-90 28.65 16.95)">ISLAND 42 x 96 in</text>
+	<rect id="kids-trofast" x="24.15" y="25.086667" width="3.25" height="1.447917" class="cabinet"/>
+	<text x="25.775" y="26.03" class="tiny">TROFAST</text>
+	<rect id="family-board" x="19.875" y="24.35" width="7" height=".2" class="cabinet"/>
+	<path d="M22.875 24.18H23.875" stroke="#b99758" stroke-width=".1"/>
+	<use href="#toilet" x="1.65" y="36.45"/>
+	<rect id="powder-vanity" x="3" y="35.35" width="3.5" height="1.75" class="cabinet"/>
+	<ellipse cx="4.75" cy="36.225" rx=".6" ry=".35" class="fixture"/>
+	<rect id="guest-shower" x="19.375" y="37.375" width="3.2" height="4.45" fill="#cfdee2" stroke="#719ba4" stroke-width=".06"/>
+	<use href="#toilet" x="24.5" y="38.475"/>
+	<rect id="guest-vanity" x="25.8" y="37.4" width="2.5" height="1.5" class="cabinet"/>
+	<ellipse cx="27.05" cy="38.15" rx=".5" ry=".3" class="fixture"/>
+	<text x="30" y="38.35" class="tiny">RECESS</text>
+	<text x="6.6" y="16.2" class="room">LIVING</text><text x="6.6" y="17.4" class="size">13 ft 2 in x 17 ft 8 in</text>
+	<text x="20" y="3.3" class="room">DINING</text><text x="20" y="4.5" class="size">13 ft 8.1 in x 8 ft 1.2 in</text>
+	<text x="33.3" y="16" class="room">KITCHEN</text><text x="33.3" y="17.2" class="size">L-shaped return</text>
+	<text x="46.5" y="10.6" class="room">PREP</text><text x="46.5" y="11.8" class="size">18 ft x 8 ft</text>
+	<text x="40.8" y="20.3" class="room">MUDROOM</text>
+	<text x="23.8" y="31.5" class="room">KIDS</text><text x="23.8" y="32.8" class="size">144.59 sq ft | L-shaped</text>
+	<text x="23.8" y="34.1" class="tiny">Short return moved 15 in west</text>
+	<text x="3.55" y="39.2" class="room">POWDER</text>
+	<text x="9.65" y="36.6" class="tiny">COATS</text><text x="9.65" y="39.5" class="tiny">ALCOVE</text>
+	<text x="25.1" y="40.8" class="room">GUEST BATH</text><text x="23.5" y="43.5" class="tiny">CLOSETS</text>
+	<text x="6.1" y="47.2" class="room">OFFICE</text><text x="6.1" y="48.5" class="size">12 ft 2.4 in x 13 ft 8.15 in</text>
+	<text x="25.1" y="49.2" class="room">GUEST</text><text x="25.1" y="50.5" class="size">12 ft 2.4 in x 10 ft 3.35 in</text>
+	<text x="15.6" y="46.2" class="room" transform="rotate(-90 15.6 46.2)">ENTRY HALL</text>
+	<text x="43.5" y="38" class="room">GARAGE</text><text x="43.5" y="39.3" class="size">Excluded from finished area</text>
+	<text x="15.6" y="58.2" class="room">PORCH</text>
+  </g>
+  <g id="upstairs-plan" transform="translate(830 190) scale(12)" data-source-pixels-per-foot="15.272727272727273" data-model-adopted="false">
+	<g id="upstairs-floors">
+	  <rect data-room="Primary" x="0" y="7.4" width="15.059524" height="20.363095" class="bedroom"/>
+	  <rect data-room="Primary bath" x="15.059524" y="7.4" width="14.208333" height="12.375" class="bath"/>
+	  <rect data-room="Primary closet" x="15.059524" y="19.775" width="14.208333" height="7.988095" class="utility"/>
+	  <rect data-room="Closet 2" x="29.267857" y="7.4" width="5.172619" height="8.511905" class="utility"/>
+	  <rect data-room="Bath 2" x="34.440476" y="7.4" width="9.428572" height="4.452381" class="bath"/>
+	  <rect data-room="Bedroom 2" x="34.440476" y="11.852381" width="9.428572" height="15.910714" class="bedroom"/>
+	  <rect data-room="Bedroom 2" x="29.267857" y="15.911905" width="5.172619" height="11.85119" class="bedroom"/>
+	  <rect data-room="Loft" x="43.869048" y="19.775" width="12.047619" height="13.684524" class="floor"/>
+	  <rect data-room="Hallway" x="11.065476" y="27.763095" width="32.803572" height="8.380953" class="floor"/>
+	  <rect data-room="Hallway" x="13.160714" y="36.144048" width="5.892857" height="10.017857" class="floor"/>
+	  <rect data-room="Stairs" x="0" y="27.763095" width="11.065476" height="8.380953" fill="url(#stairHatch)"/>
+	  <rect data-room="Bath 3" x="0" y="36.144048" width="10.541667" height="5.434523" class="bath"/>
+	  <rect data-room="Linen" x="10.541667" y="36.144048" width="2.619047" height="5.434523" class="utility"/>
+	  <rect data-room="Bedroom 3" x="0" y="41.578571" width="13.160714" height="13.488096" class="bedroom"/>
+	  <rect data-room="Closet 4" x="13.160714" y="46.161905" width="5.892857" height="8.904762" class="utility"/>
+	  <rect data-room="Bedroom 4" x="19.053571" y="41.578571" width="12.964286" height="13.488096" class="bedroom"/>
+	  <rect data-room="Closet 3" x="19.053571" y="36.144048" width="8.119048" height="5.434523" class="utility"/>
+	  <rect data-room="Bath 4" x="27.172619" y="36.144048" width="10.410714" height="5.434523" class="bath"/>
+	  <rect data-room="Furnace" x="37.583333" y="36.144048" width="4.976191" height="5.434523" class="utility"/>
+	  <rect data-room="Laundry" x="42.559524" y="36.144048" width="13.357143" height="5.434523" class="utility"/>
+	  <rect data-room="Laundry" x="43.869048" y="33.459524" width="12.047619" height="2.684524" class="utility"/>
+	</g>
+	<g id="upstairs-walls">
+	  <path id="upstairs-envelope" d="M0 7.4H5M10 7.4H19.65M24.65 7.4H30.604167M33.104167 7.4H37.65M40.15 7.4H43.869048V13.5M43.869048 18.5V19.775H47.4M52.4 19.775H55.916667V25M55.916667 30V36.3M55.916667 39.3V41.578571H50.738095M47.738095 41.578571H36.050595M33.550595 41.578571H32.017857V55.066667H28.035714M23.035714 55.066667H17.357143M14.857143 55.066667H9.080357M4.080357 55.066667H0V51M0 46V40M0 37.5V32M0 29.5V25M0 20V14.5M0 9.5V7.4" class="wall"/>
+	  <path id="primary-divider" d="M15.059524 7.4V12.572619M15.059524 15.072619V27.763095" class="wall"/>
+	  <path id="primary-gallery-wall" d="M0 27.763095H12.559524M15.059524 27.763095H29.267857" class="wall"/>
+	  <path id="primary-bath-closet-wall" d="M15.059524 19.775H21.154762M23.654762 19.775H29.267857" class="wall"/>
+	  <path id="suite-divider" d="M29.267857 7.4V27.763095" class="wall"/>
+	  <path id="bed2-service-walls" d="M34.440476 7.4V15.911905M29.267857 15.911905H31.940476M34.440476 11.852381H41.369048M43.869048 19.775V27.763095" class="wall"/>
+	  <path id="bed2-gallery-wall" d="M31.767857 27.763095H43.869048" class="wall"/>
+	  <path id="loft-laundry-wall" d="M43.869048 33.459524H44.219048M46.719048 33.459524H55.916667" class="wall"/>
+	  <path id="stairs-east" d="M11.065476 27.763095V36.144048" class="wall"/>
+	  <path id="south-service-north" d="M0 36.144048H13.160714V37.911905M19.053571 36.144048H42.559524" class="wall"/>
+	  <path id="south-service-south" d="M2.75 41.578571H13.160714M19.053571 41.578571H24.672619M27.172619 41.578571H27.522619M30.022619 41.578571H33.550595M36.050595 41.578571H47.738095M50.738095 41.578571H55.916667" class="wall"/>
+	  <path id="linen-west" d="M10.541667 36.144048V41.578571" class="wall"/>
+	  <path id="south-hall-west" d="M13.160714 40.411905V41.578571M13.160714 44.078571V52.566667" class="wall"/>
+	  <path id="south-hall-east" d="M19.053571 36.144048V41.578571M19.053571 44.078571V55.066667" class="wall"/>
+	  <path id="central-closet-north" d="M13.160714 46.161905H19.053571" class="wall"/>
+	  <path id="south-closet-bath-divider" d="M27.172619 36.144048V41.578571" class="wall"/>
+	  <path id="furnace-west" d="M37.583333 36.144048V41.578571" class="wall"/>
+	  <path id="furnace-east" d="M42.559524 36.144048V41.578571" class="wall"/>
+	  <path id="laundry-entry-step" d="M43.869048 33.459524V36.144048H42.559524" class="wall"/>
+	</g>
+	<g id="upstairs-windows" data-status="provisional-svg-only" data-sill-inches="36" data-head-inches="96">
+	  <path data-window="Primary west north" data-room="Primary" data-width-inches="60" data-units="2" d="M0 9.5V14.5" class="window"/>
+	  <path data-window="Primary west south" data-room="Primary" data-width-inches="60" data-units="2" d="M0 20V25" class="window"/>
+	  <path data-window="Primary bath north" data-room="Primary bath" data-width-inches="60" data-units="2" data-privacy="review-required" d="M19.65 7.4H24.65" class="window"/>
+	  <path data-window="Bath 2 north" data-room="Bath 2" data-width-inches="30" data-units="1" data-privacy="review-required" d="M37.65 7.4H40.15" class="window"/>
+	  <path data-window="Bedroom 2 east north" data-room="Bedroom 2" data-width-inches="60" data-units="2" d="M43.869048 13.5V18.5" class="window"/>
+	  <path data-window="Primary north" data-room="Primary" data-width-inches="60" data-units="2" d="M5 7.4H10" class="window"/>
+	  <path data-window="Loft north" data-room="Loft" data-width-inches="60" data-units="2" d="M47.4 19.775H52.4" class="window"/>
+	  <path data-window="Loft east" data-room="Loft" data-width-inches="60" data-units="2" d="M55.916667 25V30" class="window"/>
+	  <path data-window="Laundry east" data-room="Laundry" data-width-inches="36" data-units="1" d="M55.916667 36.3V39.3" class="window"/>
+	  <path data-window="Bedroom 3 west" data-room="Bedroom 3" data-width-inches="60" data-units="2" d="M0 46V51" class="window"/>
+	  <path data-window="Bedroom 3 front" data-room="Bedroom 3" data-width-inches="60" data-units="2" d="M4.080357 55.066667H9.080357" class="window"/>
+	  <path data-window="Bedroom 4 front" data-room="Bedroom 4" data-width-inches="60" data-units="2" d="M23.035714 55.066667H28.035714" class="window"/>
+	  <path data-window="Bath 3 west" data-room="Bath 3" data-width-inches="30" data-units="1" data-privacy="review-required" d="M0 37.5V40" class="window"/>
+	  <path data-window="Stairs west" data-room="Stairs" data-width-inches="30" data-units="1" d="M0 29.5V32" class="window"/>
+	  <path data-window="Closet 2 north" data-room="Closet 2" data-width-inches="30" data-units="1" d="M30.604167 7.4H33.104167" class="window"/>
+	  <path data-window="Closet 4 front" data-room="Closet 4" data-width-inches="30" data-units="1" d="M14.857143 55.066667H17.357143" class="window"/>
+	  <path data-window="Bath 4 south" data-room="Bath 4" data-width-inches="30" data-units="1" data-privacy="review-required" d="M33.550595 41.578571H36.050595" class="window"/>
+	  <path data-window="Laundry south" data-room="Laundry" data-width-inches="36" data-units="1" d="M47.738095 41.578571H50.738095" class="window"/>
+	  <path id="upstairs-window-divisions" d="M-.12 12H.12M-.12 22.5H.12M22.15 7.28V7.52M43.749048 16H43.989048M7.5 7.28V7.52M49.9 19.655V19.895M55.796667 27.5H56.036667M-.12 48.5H.12M6.580357 54.946667V55.186667M25.535714 54.946667V55.186667" stroke="#6f9fb1" stroke-width=".08"/>
+	</g>
+	<g id="upstairs-doors" data-height-inches="96">
+	  <path data-door="Primary entry" data-width-inches="30" d="M15.059524 27.763095V25.263095A2.5 2.5 0 0 0 12.559524 27.763095" class="door"/>
+	  <path data-door="Primary bath" data-width-inches="30" d="M15.059524 12.572619H17.559524A2.5 2.5 0 0 1 15.059524 15.072619" class="door"/>
+	  <path data-door="Primary closet" data-width-inches="30" d="M23.654762 19.775V22.275A2.5 2.5 0 0 1 21.154762 19.775" class="door"/>
+	  <path data-door="Bedroom 2 entry" data-width-inches="30" d="M29.267857 27.763095V25.263095A2.5 2.5 0 0 1 31.767857 27.763095" class="door"/>
+	  <path data-door="Closet 2" data-width-inches="30" d="M34.440476 15.911905V13.411905A2.5 2.5 0 0 0 31.940476 15.911905" class="door"/>
+	  <path data-door="Bath 2" data-width-inches="30" d="M43.869048 11.852381V9.352381A2.5 2.5 0 0 0 41.369048 11.852381" class="door"/>
+	  <path data-door="Linen" data-width-inches="30" d="M13.160714 37.911905H15.660714A2.5 2.5 0 0 1 13.160714 40.411905" class="door"/>
+	  <path data-door="Bath 3" data-width-inches="30" d="M.25 41.578571V39.078571A2.5 2.5 0 0 1 2.75 41.578571" class="door"/>
+	  <path data-door="Bedroom 3 entry" data-width-inches="30" d="M13.160714 41.578571H10.660714A2.5 2.5 0 0 0 13.160714 44.078571" class="door"/>
+	  <path data-door="Closet 4" data-width-inches="30" d="M13.160714 55.066667H15.660714A2.5 2.5 0 0 0 13.160714 52.566667" class="door"/>
+	  <path data-door="Bedroom 4 entry" data-width-inches="30" d="M19.053571 41.578571H21.553571A2.5 2.5 0 0 1 19.053571 44.078571" class="door"/>
+	  <path data-door="Closet 3" data-width-inches="30" d="M27.172619 41.578571V39.078571A2.5 2.5 0 0 0 24.672619 41.578571" class="door"/>
+	  <path data-door="Bath 4" data-width-inches="30" d="M27.522619 41.578571V39.078571A2.5 2.5 0 0 1 30.022619 41.578571" class="door"/>
+	  <path data-door="Laundry" data-width-inches="30" d="M44.219048 33.459524V35.959524A2.5 2.5 0 0 0 46.719048 33.459524" class="door"/>
+	</g>
+	<g id="upstairs-labels" data-dimensions="source-image-not-measured-clearances">
+	  <text x="7.5" y="16.4" class="room">PRIMARY</text><text x="7.5" y="17.7" class="size">14 ft 8 in x 19 ft 8 5/16 in</text>
+	  <text x="22.15" y="13.2" class="room">PRIMARY BATH</text><text x="22.15" y="14.5" class="size">13 ft 6 in x 11 ft 10 3/8 in</text>
+	  <text x="22.15" y="23.4" class="room">PRIMARY CLOSET</text><text x="22.15" y="24.7" class="size">13 ft 6 in x 7 ft 6 11/16 in</text>
+	  <text x="31.85" y="11.1" class="room">CLOSET</text><text x="31.85" y="12.4" class="size">5 ft x 8 ft</text>
+	  <text x="39.15" y="9.1" class="room">BATH</text><text x="39.15" y="10.35" class="size">9 ft x 4 ft 1/4 in</text>
+	  <text x="36.8" y="21" class="room">BEDROOM 2</text><text x="36.8" y="22.3" class="size">14 ft x 15 ft 4 1/8 in</text>
+	  <text x="5.4" y="31.2" class="room">STAIRS</text><text x="5.4" y="32.5" class="size">10 ft 6 in x 8 ft</text>
+	  <text x="27.2" y="31.8" class="room">HALLWAY</text><text x="27.2" y="33.1" class="size">32 ft 1 7/8 in upper span</text>
+	  <text x="49.9" y="25.7" class="room">LOFT</text><text x="49.9" y="27" class="size">11 ft 7 15/16 in x 13 ft 1 7/8 in</text>
+	  <text x="5.2" y="38.7" class="room">BATH</text><text x="5.2" y="39.9" class="size">10 ft wide</text>
+	  <text x="11.85" y="38.95" class="tiny" transform="rotate(-90 11.85 38.95)">LINEN</text>
+	  <text x="23.1" y="38.5" class="room">CLOSET</text><text x="23.1" y="39.7" class="size">7 ft 8 3/8 in</text>
+	  <text x="32.4" y="38.5" class="room">BATH</text><text x="32.4" y="39.7" class="size">10 ft x 5 ft</text>
+	  <text x="40.05" y="38.4" class="tiny">FURNACE</text><text x="40.05" y="39.55" class="tiny">4 ft 6 in x 5 ft</text>
+	  <text x="49.3" y="37.4" class="room">LAUNDRY</text><text x="49.3" y="38.7" class="size">12 ft 9 7/16 in x 7 ft 8 1/16 in</text>
+	  <text x="6.5" y="48.1" class="room">BEDROOM 3</text><text x="6.5" y="49.4" class="size">12 ft 6 in x 13 ft</text>
+	  <text x="16.1" y="50.1" class="room">CLOSET</text><text x="16.1" y="51.4" class="tiny">5 ft 6 1/4 in x 8 ft 6 in</text>
+	  <text x="25.5" y="48.1" class="room">BEDROOM 4</text><text x="25.5" y="49.4" class="size">12 ft 6 in x 13 ft</text>
+	</g>
+  </g>
+  <path d="M830 900H950M830 895V905M890 895V905M950 895V905" stroke="#45534d" stroke-width="2"/>
+  <text x="830" y="925" class="small">0</text><text x="883" y="925" class="small">5</text><text x="935" y="925" class="small">10 ft</text>
+  <text x="55" y="974" class="small">Downstairs bank facing south: freezer left / fridge right. North-up page order is fridge / oven / freezer.</text>
+  <text x="55" y="1002" class="small">Upstairs SVG only: Bedroom 3 doors turn toward bath/exterior; laundry enters from loft through its north wall.</text>
+  <text x="55" y="1030" class="small">18 provisional window openings / 28 units. Product, privacy, egress, headers, stair/loft support and access need review.</text>
+  <text x="55" y="1058" class="small">Approximate exterior-face areas, stairs once. Garage/porch/basement excluded; Version H and model/layout files unchanged.</text>
+</svg>

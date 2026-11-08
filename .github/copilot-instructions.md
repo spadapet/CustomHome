@@ -68,8 +68,9 @@ into complete design studies while preserving the recorded constraints.
   an agent exists.
 - File-scoped guidance covers [geometry](instructions/model-geometry.instructions.md),
   [viewer behavior](instructions/viewer-behavior.instructions.md),
-  [tests](instructions/model-tests.instructions.md) and
-  [design notes](instructions/design-documentation.instructions.md).
+  [tests](instructions/model-tests.instructions.md),
+  [design notes](instructions/design-documentation.instructions.md) and
+  [SVG plans](instructions/svg-plan.instructions.md).
   Keep detailed procedures there rather than expanding always-on guidance.
 
 Use Node.js 20 or newer and the existing dependency-free validation runner.

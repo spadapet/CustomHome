@@ -122,7 +122,8 @@ test('file instructions are scoped, linked and cover the intended repository sur
     ['model-geometry.instructions.md', 'assets/js/floor-plan-ground.js'],
     ['viewer-behavior.instructions.md', 'assets/js/floor-plan-3d.js'],
     ['model-tests.instructions.md', 'tests/**/*.cjs'],
-    ['design-documentation.instructions.md', '**/*.html']
+    ['design-documentation.instructions.md', '**/*.html'],
+    ['svg-plan.instructions.md', 'assets/images/plans/**/*.svg']
   ]);
   const files = fs.readdirSync(directory).filter(name => name.endsWith('.instructions.md'));
   for (const file of expected.keys()) assert.ok(files.includes(file), `Required scoped instructions: ${file}`);

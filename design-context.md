@@ -1,5 +1,61 @@
 # Ground-floor design context
 
+## November 8 - Version I image study only; preserve Version H upstairs model
+
+Owner supplies a new upstairs image and requests a new SVG version before
+any upstairs 3D adoption. Create
+[Version I](assets/images/plans/upstairs-2000/version-i.svg); preserve H
+byte-for-byte and leave all model scripts/saved layout JSON unchanged.
+The organizing move is the image's central hallway with an eastern loft
+above stepped laundry and an inset south hall/central closet between front
+bedrooms. Retain the pictured north primary suite and Bedroom 2 bath/closet
+and southern bath/closet/linen/furnace row. The central closet extends to the
+front line rather than H's recess. Do not add unpictured upstairs furniture,
+sanitary fixtures or a speculative stair/furnace access repair.
+
+Owner follow-up edits Version I in place: Bedroom 3 entry hinges at the
+north/bath-wall jamb and opens west alongside the bath wall; its bath entry
+opens north into the bath alongside the west exterior wall. Laundry entry
+moves to the north loft-facing wall; close the former west-side aperture.
+Latest follow-up adds centered 30-inch windows to exterior Closet 2 north
+and Closet 4 front, and a 30-inch Bath 4 south window on its exposed section
+east of Bedroom 4. Bath 4 does have an exterior south segment; the previous
+note claiming otherwise was incorrect. Primary closet, Closet 3 and linen
+remain interior; furnace and roof stay unglazed. Latest request adds a centered
+36-inch laundry south window on the bottom exterior wall, retaining its east
+window. Total is 18 provisional exterior openings /28 units: ten 60-inch pairs,
+six 30-inch singles and two 36-inch laundry singles. Sill/head intent is 36/96
+inches. These are SVG-only concepts, not selected products or a revised 3D
+takeoff. Verify sizes,
+combinations, privacy/safety glazing, closet storage, reach/egress,
+operation, headers/flashing and structure before adoption.
+
+The image is normalized to feet from its 14-ft-8-in primary width; both SVG
+panels use 12 pixels/ft. Its printed dimensions are reference labels, not
+measured vector clear sizes: raster dimensions do not all reconcile exactly.
+Per owner request, display downstairs 1,966.44 sq ft, upstairs approximately
+2,137.56 sq ft and combined approximately 4,104.00 sq ft. Count stairs once
+on the ground floor, deducting the 92.739234-sq-ft upstairs stair block from
+its 2,230.299084-sq-ft traced exterior-face gross. Upstairs uses the drawn
+0.35-ft wall thickness; downstairs uses the shared model area helper including
+stairs. Internal walls count; garage, porch and basement are excluded. These
+are comparison estimates, not certified finished area or occupied/structural
+approval; conditioning/headroom and stair alignment remain unverified.
+Preserve the per-floor/combined and one-stair-count rule in scoped SVG guidance.
+Resolve stair arrival, furnace service access, loft support/headroom, bearing
+and roof alignment, egress, products and door operation before adoption.
+
+For this new file only, replace H's downstairs alternative with the actual
+current ground floors, walls and openings. Include both 36-inch Classic units,
+retained oven/tower, short return x27.75, kids floor 144.589167 sq ft and
+moved full-size TROFAST/board. Ground gross remains 1966.442708 sq ft; no
+3D geometry changes are authorized by this request. Ground guest bath,
+closet and northeast recess follow the current model, not H's SVG-only stack
+niche/partition. Freezer remains view-left facing the bank, fridge view-right;
+north-up SVG page order is reversed. Existing 90-degree-stop/installation
+holds remain. Link the study from [upstairs notes](upstairs.html); the adopted
+upstairs 3D schedule below remains Version H.
+
 ## November 8 - Approved Sub-Zero Classic refrigeration and short-wall revision
 
 Owner authorizes wall adjustments for two 36-inch Classic units, freezer
