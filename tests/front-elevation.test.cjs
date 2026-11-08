@@ -342,12 +342,12 @@ test('four balanced exterior upper-front windows match furnished upstairs wall o
   assert.equal(cuts.length, 4);
   for (const name of ['Bedroom 3', 'Bedroom 4']) {
     const room = plan.rooms.find(r => r.name === name);
-    assert.ok(Math.abs(room.w - .35 - (name === 'Bedroom 3' ? 12.5 : 12.15)) < 1e-8);
-    assert.ok(Math.abs(room.d - .35 - 11.5) < 1e-8);
+    assert.ok(Math.abs(room.w - .35 - 12) < 1e-8);
+    assert.ok(Math.abs(room.d - .35 - 13) < 1e-8);
     const pair = frames.filter(f => f[0].startsWith(name));
     assert.ok(Math.abs((pair[0][1] + pair[1][1])/2 - (room.x + room.w/2)) < 1e-8);
   }
-  for (const closet of plan.rooms.filter(r => /Bedroom [34] closet/.test(r.name))) assert.ok(Math.abs(closet.w - .35 - 5.5) < 1e-8);
+  for (const closet of plan.rooms.filter(r => /Bedroom [34] closet/.test(r.name))) assert.ok(Math.abs(closet.w - .35 - 6.15) < 1e-8);
   for (const [index, frame] of frames.entries()) {
     const opening = exteriorOpenings[index];
     assert.ok(Math.abs(frame[1] - opening.center) < 1e-8);

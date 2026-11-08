@@ -3,6 +3,9 @@
   <desc id="desc">
     Version H preliminary two-floor diagram: about 3,805.89 square feet, 5.89 over 3,800 (ground 1,955.31, upstairs 1,850.59).
     Ground floor gives some area back: kitchen and prep kitchen rear walls return to the original line y7 (kitchen 11 by 19 ft 11 in, prep 15 by 8 ft); the living room top wall aligns with them (13 ft 2 in by 18 ft 8 in); the dining room extends 1 ft right and becomes 14 by 7 ft, with its depth reduced to sit north of the kitchen line.
+    Ground powder and guest bathroom each have a toilet and standard 36-inch single-sink vanity. Guest shower is a generic 36 by 60-inch footprint at the west wall; all upstairs fixtures remain unchanged.
+    The northeast guest-bath recess is for a stackable washer/dryer, not linen. Its former 24.6 by 21-inch interior cannot fit the generic 27-inch-wide by 32-inch-deep stack footprint. The recess west wall moves from x28.9 to x28.2 and its south edge from y36.7367 to y37.7367, giving 33 by 33 inches inside drawn 3-inch walls, with an open south front. The stack faces south; its front-to-bath-south-wall gap is about 30.45 inches. These are unselected plan proxies: installed depth including hoses, height, stacking kit, venting, utilities and service/operating clearances remain unverified. Close machine fronts before passing.
+    Guest closet right partition is x27.7 from y40.2792 to y42.6792. The east bathroom-approach hall is 39 inches wide between drawn wall faces, separate from both retained closet openings. The existing 30 by 96-inch bathroom opening stays x27.95 to x30.45 and swings south into this hall, not into the laundry stack. Its full-open leaf projects 1.2 inches beyond the shallow hall into the guest room. Door casing/hardware, occupied use and simultaneous closet/laundry access require review. Exterior area and the 3D model are unchanged.
     Laundry retains an 11 by 8-foot maximum envelope between drawn wall faces, now with a 1-foot-wide by 3.05-foot-deep northwest notch for Bedroom 2's bottom entry approach. The upper west wall is x32.233333 until y29.8, stepping to x31.233333 below; east wall stays x42.583333 and north/south walls stay y26.75 and y35.1. This adds 3.05 square feet of nominal gallery floor without changing exterior gross.
     Attic access remains direct: gallery to laundry central aisle to attic, without passing through the mechanical room. Laundry retains an 11 by 8-foot maximum envelope with the northwest entry notch. Primary closet south wall aligns with the bedroom bottom wall line y26.75, and both bedroom gallery entries stay on that wall. The lower gallery remains open; stairs, baths and bedroom sizes stay fixed.
     Full-size 2.8 by 2.8-foot washer and dryer stay side by side on the laundry north wall, facing south at x36.55 and x39.45, y26.925. A standard 24/24-inch north base run occupies x32.5 to 36.5; south 36/24/24-inch bases stay x31.5 to 38.5. One former attic 24-inch base swaps with the north 36-inch base to fit the notch. All seven originally labelled standard boxes remain: five in laundry and 36/24-inch bases in attic at x49.8 to 54.8, y35.3 to 37.3, labelled storage-only and support/placement approval required. No compressed or odd-width boxes are used. The original 4-foot and 6-foot overhead runs remain above the north/south bases, preserving their footprint and staying off passage and appliances; mounting/reach need product review.
@@ -113,7 +116,8 @@
     <rect x="0.0000" y="40.6792" width="12.0000" height="14.0000" fill="#e9ddc7"/>
     <rect x="12.0000" y="40.6792" width="0.2000" height="14.0000" fill="#dceee4"/>
     <rect x="12.2000" y="34.6000" width="7.0000" height="20.0792" fill="#dceee4"/>
-    <rect x="19.2000" y="40.2792" width="12.0000" height="2.4000" fill="#e9e3d7"/>
+    <rect x="19.2000" y="40.2792" width="8.5000" height="2.4000" fill="#e9e3d7"/>
+    <rect id="guest-bath-hall-floor" x="27.7" y="40.2792" width="3.5" height="2.4" fill="#dceee4"/>
     <rect x="19.2000" y="34.7367" width="12.0000" height="5.5425" fill="#e0e9ee"/>
     <rect x="19.2000" y="42.6792" width="12.0000" height="12.0000" fill="#e9ddc7"/>
     <path d="M44.233333 15H55.5V49H31.2V26.9H44.233333Z" fill="#ece8f0"/><path d="M44.233333 15H55.5V49H31.2V26.9H44.233333Z" fill="url(#stairHatch)" opacity=".35"/>
@@ -124,7 +128,9 @@
     <rect x="0.175" y="27.016667" width="9.833333" height="7.825000" fill="#efefea" stroke="#9c9b94" stroke-width="0.08"/>
     <rect x="0.175" y="27.016667" width="9.833333" height="7.825000" fill="url(#stairHatch)"/>
     <path d="M0.0000 7.0000L13.2000 7.0000M13.2000 0.0000L13.2000 2.4500M13.2000 5.4500L13.2000 7.0000M13.2000 0.0000L27.2000 0.0000M27.2000 0.0000L27.2000 7.0000M27.2000 7.0000L52.5000 7.0000M52.5000 7.0000L52.5000 15.0000M55.5000 15.0000L55.5000 44.0000M55.5000 47.0000L55.5000 49.0000M31.2000 49.0000L32.5000 49.0000M41.5000 49.0000L44.0000 49.0000M53.0000 49.0000L55.5000 49.0000M31.2000 49.0000L31.2000 54.6792M0.0000 8.0000L0.0000 54.6792M0.0000 54.6792L13.1000 54.6792M18.1000 54.6792L31.2000 54.6792" fill="none" stroke="#45534d" stroke-width=".45" stroke-linecap="square"/>
-    <path d="M19.2000 26.9000L37.5000 26.9000M19.2000 26.9000L19.2000 27.0000M19.2000 31.5000L19.2000 34.7367M0.0000 35.1000L12.2000 35.1000M7.1000 35.1000L7.1000 38.0000M7.1000 40.5000L7.1000 40.6792M7.1000 37.5000L7.6500 37.5000M11.6500 37.5000L12.2000 37.5000M12.2000 35.1000L12.2000 37.5000M12.0000 40.6792L12.0000 42.7500M12.0000 47.7500L12.0000 54.6792M0.0000 40.6792L12.0000 40.6792M19.2000 34.7367L31.2000 34.7367M19.2000 34.7367L19.2000 44.8000M19.2000 47.8000L19.2000 54.6792M19.2000 42.6792L19.9500 42.6792M22.4500 42.6792L23.3500 42.6792M27.3500 42.6792L27.7000 42.6792M22.9000 40.2792L22.9000 42.6792M19.2000 40.2792L27.9500 40.2792M30.4500 40.2792L31.2000 40.2792M28.9000 34.7367L28.9000 36.7367M28.9000 36.7367L31.2000 36.7367M31.2000 34.6000L31.2000 49.0000M31.2000 26.9000L31.2000 34.6000M37.5000 7.0000L37.5000 9.7250M37.5000 12.2250L37.5000 21.6750M37.5000 24.1750L37.5000 25.3000M37.5000 25.3000L37.5000 26.9000M37.5000 15.0000L44.2333 15.0000M44.2333 15.0000L55.5000 15.0000M44.2333 15.0000L44.2333 26.9000M37.5000 26.9000L38.0000 26.9000M41.0000 26.9000L44.2333 26.9000M52.5000 15.0000L55.5000 15.0000" fill="none" stroke="#45534d" stroke-width=".25" stroke-linecap="square"/>
+    <path d="M19.2000 26.9000L37.5000 26.9000M19.2000 26.9000L19.2000 27.0000M19.2000 31.5000L19.2000 34.7367M0.0000 35.1000L12.2000 35.1000M7.1000 35.1000L7.1000 38.0000M7.1000 40.5000L7.1000 40.6792M7.1000 37.5000L7.6500 37.5000M11.6500 37.5000L12.2000 37.5000M12.2000 35.1000L12.2000 37.5000M12.0000 40.6792L12.0000 42.7500M12.0000 47.7500L12.0000 54.6792M0.0000 40.6792L12.0000 40.6792M19.2000 34.7367L31.2000 34.7367M19.2000 34.7367L19.2000 44.8000M19.2000 47.8000L19.2000 54.6792M19.2000 42.6792L19.9500 42.6792M22.4500 42.6792L23.3500 42.6792M27.3500 42.6792L27.7000 42.6792M22.9000 40.2792L22.9000 42.6792M19.2000 40.2792L27.9500 40.2792M30.4500 40.2792L31.2000 40.2792M31.2000 34.6000L31.2000 49.0000M31.2000 26.9000L31.2000 34.6000M37.5000 7.0000L37.5000 9.7250M37.5000 12.2250L37.5000 21.6750M37.5000 24.1750L37.5000 25.3000M37.5000 25.3000L37.5000 26.9000M37.5000 15.0000L44.2333 15.0000M44.2333 15.0000L55.5000 15.0000M44.2333 15.0000L44.2333 26.9000M37.5000 26.9000L38.0000 26.9000M41.0000 26.9000L44.2333 26.9000M52.5000 15.0000L55.5000 15.0000" fill="none" stroke="#45534d" stroke-width=".25" stroke-linecap="square"/>
+    <path id="guest-closet-right-wall" d="M27.7 40.2792V42.6792" fill="none" stroke="#45534d" stroke-width=".25"/>
+    <path id="guest-laundry-walls" d="M28.2 34.7367V37.7367H28.35M30.95 37.7367H31.2" fill="none" stroke="#45534d" stroke-width=".25"/>
     <path d="M3.6000 7.0000L11.1000 7.0000M17.2000 0.0000L23.2000 0.0000M27.2000 0.5000L27.2000 6.5000M28.2500 7.0000L35.7500 7.0000M42.9417 7.0000L51.8583 7.0000M52.5000 10.0000L52.5000 12.0000M55.5000 16.5000L55.5000 22.5000M55.5000 26.5000L55.5000 32.5000M55.5000 36.5000L55.5000 42.5000M0.0000 36.8000L0.0000 39.3000M0.0000 47.0000L0.0000 51.0000M0.0000 9.6750L0.0000 13.6750M0.0000 21.2750L0.0000 25.2750M2.2000 54.6792L9.8000 54.6792M21.2000 54.6792L28.8000 54.6792" fill="none" stroke="#f6fbfd" stroke-width=".22"/>
     <path d="M3.6000 7.0000L11.1000 7.0000M17.2000 0.0000L23.2000 0.0000M27.2000 0.5000L27.2000 6.5000M28.2500 7.0000L35.7500 7.0000M42.9417 7.0000L51.8583 7.0000M52.5000 10.0000L52.5000 12.0000M55.5000 16.5000L55.5000 22.5000M55.5000 26.5000L55.5000 32.5000M55.5000 36.5000L55.5000 42.5000M0.0000 36.8000L0.0000 39.3000M0.0000 47.0000L0.0000 51.0000M0.0000 9.6750L0.0000 13.6750M0.0000 21.2750L0.0000 25.2750M2.2000 54.6792L9.8000 54.6792M21.2000 54.6792L28.8000 54.6792" fill="none" stroke="#6f9fb1" stroke-width=".08"/>
     <text x="6.600" y="16.650" class="room">LIVING</text>
@@ -138,18 +144,42 @@
     <text x="45.000" y="12.400" class="size">15 ft x 8 ft</text>
     <text x="40.867" y="20.750" class="room">MUDROOM</text>
     <text x="40.867" y="21.850" class="tiny">6′9″ x 11′11″</text>
+    <g id="ground-bath-fixtures">
+      <g data-room="powder" data-item="Toilet"><use href="#toilet" x=".8" y="35.35"/></g>
+      <g data-room="powder" data-item="36-inch vanity"><use href="#vanity" x="3.7" y="35.35"/></g>
+      <g data-room="guestBath" data-item="36 by 60 inch shower">
+        <rect x="19.45" y="34.95" width="3" height="5" class="shower"/>
+        <circle cx="20.95" cy="37.45" r=".12" fill="#719ba4"/>
+        <text x="20.95" y="36.5" class="furniture-note">SHOWER</text>
+      </g>
+      <g data-room="guestBath" data-item="36-inch vanity"><use href="#vanity" x="22.7" y="34.95"/></g>
+      <g data-room="guestBath" data-item="Toilet"><use href="#toilet" x="26.1" y="34.95"/></g>
+      <g data-room="guestLaundry" data-item="27 by 32 inch washer dryer stack" data-approval-required="true">
+        <rect x="28.575" y="34.95" width="2.25" height="2.666667" rx=".08" class="fixture"/>
+        <path d="M28.825 37.45H30.575" stroke="#6f8182" stroke-width=".1"/>
+        <text x="29.7" y="35.8" class="furniture-note" style="font-size:.52px">STACK</text>
+        <text x="29.7" y="36.5" class="furniture-note">W/D</text>
+        <text x="29.7" y="37.15" class="furniture-note" style="font-size:.4px">FIT TBD</text>
+      </g>
+    </g>
+    <g id="ground-bath-door-sweeps">
+      <path id="powder-door-sweep" data-width-inches="30" data-height-inches="96" d="M7.1 40.5H4.6A2.5 2.5 0 0 1 7.1 38" class="operation"/>
+      <path id="guest-bath-door-sweep" data-width-inches="30" data-height-inches="96" d="M30.45 40.2792V42.7792A2.5 2.5 0 0 1 27.95 40.2792" class="operation"/>
+    </g>
     <text x="24.200" y="30.200" class="room">KIDS ROOM</text>
     <text x="24.200" y="31.300" class="size">12 ft x 7 ft 10 in</text>
-    <text x="3.550" y="37.690" class="room">POWDER</text>
-    <text x="3.550" y="38.790" class="tiny">7′1″ x 5′7″</text>
+    <text x="3.1" y="39.1" class="room">POWDER</text>
+    <text x="3.1" y="40" class="tiny">7′1″ x 5′7″</text>
     <text x="6.000" y="47.640" class="room">OFFICE</text>
     <text x="6.000" y="48.740" class="size">12 ft x 14 ft</text>
     <text x="15.600" y="47.800" class="room">ENTRY</text>
-    <text x="24.000" y="37.408" class="room">GUEST BATH</text>
-    <text x="24.000" y="38.508" class="size">12 ft x 5 ft 6.5 in</text>
+    <text x="25" y="38.6" class="room" style="font-size:.75px">GUEST BATH</text>
+    <text x="25" y="39.5" class="size" style="font-size:.65px">12 ft x 5 ft 6.5 in</text>
     <text x="25.200" y="48.579" class="room">GUEST ROOM</text>
     <text x="25.200" y="49.679" class="size">12 ft x 12 ft</text>
-    <text x="9.65" y="36.6" class="tiny">COAT</text><text x="9.65" y="39.4" class="tiny">ALCOVE</text><text x="25.1" y="41.758" class="tiny">CLOSETS</text>
+    <text x="9.65" y="36.6" class="tiny">COAT</text><text x="9.65" y="39.4" class="tiny">ALCOVE</text>
+    <text x="21.05" y="41.758" class="tiny">CLOSET</text><text x="25.3" y="41.758" class="tiny">CLOSET</text>
+    <text x="29.2" y="41.7" class="furniture-note" style="font-size:.5px">HALL</text>
     <text x="5.1" y="30.6" class="room">STAIR</text>
     <text x="43.4" y="34" class="room" style="fill:#79618b">GARAGE</text><text x="43.4" y="35.2" class="tiny">Not counted</text>
     <text x="15.6" y="58.6" class="room" style="fill:#7a6e5c">FRONT PORCH</text><text x="15.6" y="59.8" class="tiny">Not counted</text>
@@ -232,7 +262,7 @@
       <g data-room="bed3" data-item="Writing desk"><use href="#desk" x="8" y="51.45"/></g>
       <g data-room="bed3" data-item="Desk chair"><use href="#desk-chair" x="9.2" y="49.45"/></g>
       <g data-room="bed4" data-item="Writing desk" transform="translate(19.2 48.9) rotate(-90)"><use href="#desk"/></g>
-      <g data-room="bed4" data-item="Desk chair"><use href="#desk-chair" x="21.3" y="46.2"/></g>
+      <g data-room="bed4" data-item="Desk chair"><use href="#desk-chair" x="21.05" y="46.2"/></g>
       <g data-room="primary" data-item="Sitting chair 1"><use href="#lounge" x="2.7" y="24.1"/></g>
       <g data-room="primary" data-item="Sitting chair 2"><use href="#lounge" x="7.9" y="24.1"/></g>
       <g data-room="primary" data-item="Side table"><rect x="6.325" y="24.95" width="1.4" height="1.4" class="cabinet"/></g>
@@ -278,10 +308,10 @@
       <g data-room="bath4" data-item="Toilet"><use href="#toilet" x="32.125" y="35.4"/></g>
 
       <g data-room="primaryCloset" data-item="Long hang" transform="translate(18.35 26.45) rotate(-90)"><rect width="5" height="2" fill="url(#hanging)" stroke="#9e8a6d" stroke-width=".07"/></g>
-      <g data-room="primaryCloset" data-item="Double hang" transform="translate(25.65 21.45) rotate(90)"><rect width="5" height="2" fill="url(#hanging)" stroke="#9e8a6d" stroke-width=".07"/></g>
+      <g data-room="primaryCloset" data-item="Double hang" transform="translate(24.15 21.45) rotate(90)"><rect width="5" height="2" fill="url(#hanging)" stroke="#9e8a6d" stroke-width=".07"/></g>
       <g data-room="primaryCloset" data-item="Drawer bank"><rect x="24.45" y="19.35" width="4" height="1.4" class="cabinet"/><path d="M25.45 19.35V20.75M26.45 19.35V20.75M27.45 19.35V20.75" stroke="#9e8a6d" stroke-width=".07"/></g>
-      <g data-room="primaryCloset" data-item="Return hanging"><rect x="26.3" y="21.05" width="2" height="2.05" fill="url(#hanging)" stroke="#9e8a6d" stroke-width=".07"/></g>
-      <g data-room="primaryCloset" data-item="Wraparound shelves"><path d="M15.5 19.35H21.1V20.65H17.5V22.05H15.5Z" class="cabinet"/></g>
+      <g data-room="primaryCloset" data-item="Return hanging"><rect x="26.3" y="23.575" width="2" height="2" fill="url(#hanging)" stroke="#9e8a6d" stroke-width=".07"/></g>
+      <g data-room="primaryCloset" data-item="Wraparound shelves"><rect x="15.85" y="19.35" width="4" height="1.3" class="cabinet"/><rect x="15.525" y="20.75" width=".75" height="1.2" class="cabinet"/></g>
       <g data-room="closet2" data-item="Single-sided double hang"><rect x="32.15" y="9.15" width="2" height="4.25" fill="url(#hanging)" stroke="#9e8a6d" stroke-width=".07"/></g>
       <g data-room="closet2" data-item="North shelves and drawers"><rect x="29.35" y="7.7" width="4.6" height="1.3" class="cabinet"/></g>
       </g>
@@ -307,7 +337,7 @@
       <g transform="translate(-.75 0)">
       <rect x="37.3" y="29.725" width="2.8" height="1.5" class="operation"/>
       <rect x="40.2" y="29.725" width="2.8" height="1.5" class="operation"/>
-      <path id="bath2-door-sweep" d="M35.65 13.4V16.4A3 3 0 0 0 38.65 13.4" class="operation"/>
+      <path id="bath2-door-sweep" d="M35.65 13.4V10.4A3 3 0 0 1 38.65 13.4" class="operation"/>
       <path id="closet2-door-sweep" d="M29.6 14.4V16.9A2.5 2.5 0 0 0 32.1 14.4" class="operation"/>
       <path id="laundry-door-sweep" data-width-inches="36" data-height-inches="96" d="M31.983333 32.8H28.983333A3 3 0 0 1 31.983333 29.8" class="operation"/>
       <path id="primary-closet-door-sweep" d="M23.95 19V16.5A2.5 2.5 0 0 0 21.45 19" class="operation"/>
@@ -317,6 +347,7 @@
       <path id="primary-bedroom-door-sweep" data-width-inches="36" data-height-inches="96" d="M13.85 26.75V23.75A3 3 0 0 1 10.85 26.75" class="operation"/>
       <path id="bedroom2-door-sweep" data-width-inches="36" data-height-inches="96" d="M28.85 26.75V23.75A3 3 0 0 0 31.85 26.75" class="operation"/>
       <path d="M.8 40.45V37.95A2.5 2.5 0 0 1 3.3 40.45M31.1 40.45V37.95A2.5 2.5 0 0 0 28.6 40.45" class="operation"/>
+      <path id="closet3-door-sweep" d="M12.35 41.05H14.85A2.5 2.5 0 0 1 12.35 43.55" class="operation"/>
       <path id="closet4-door-sweep" d="M18.85 51.45H21.35A2.5 2.5 0 0 0 18.85 48.95" class="operation"/>
     </g>
     <rect x="1.261" y="13.65" width="6.667" height="5" rx="0.12" class="bed"/>
@@ -333,10 +364,10 @@
     <g transform="translate(-.75 0)">
     <text x="20.6" y="14.25" class="room">PRIMARY BATH</text>
     <text x="20.6" y="15.15" class="size">13 ft 7 in x 11 ft 3 in</text>
-    <text x="21.95" y="22.2" class="room" style="font-size:.7px">PRIMARY</text>
-    <text x="21.95" y="23.1" class="room" style="font-size:.7px">CLOSET</text>
-    <text x="21.95" y="24.1" class="furniture-note" style="font-size:.5px">39-in model aisle</text>
-    <text x="21.95" y="25.4" class="furniture-note" style="font-size:.45px">13'7" x 7'5"</text>
+    <text x="20.25" y="22.2" class="room" style="font-size:.7px">PRIMARY</text>
+    <text x="20.25" y="23.1" class="room" style="font-size:.7px">CLOSET</text>
+    <text x="20.25" y="24.1" class="furniture-note" style="font-size:.45px">45.6-in body aisle</text>
+    <text x="20.25" y="25.4" class="furniture-note" style="font-size:.45px">13'7" x 7'5"</text>
     <text x="37.65" y="11.15" class="room">BATH 2</text>
     <text x="37.65" y="12.15" class="furniture-note">8 ft 8 in x 5 ft 8 in</text>
     <text x="30.65" y="11.05" class="furniture-note" style="font-size:.6px">CLOSET 2</text>
@@ -367,10 +398,15 @@
 
     <path class="sightline" d="M20 29.1L12.35 26.75M20 29.1L30.35 26.75M20 29.1L10.85 40.45M20 29.1L20.55 40.45"/>
     <circle cx="20" cy="29.1" r="0.48" fill="#258373"/>
-    <text x="21.4" y="30.8" class="room">OPEN GALLERY</text>
-    <text x="21.4" y="31.9" class="tiny">One shared landing</text>
-    <text x="19.8" y="37.3" class="tiny">Wider south connection</text>
-    <text x="21.4" y="33.1" class="tiny">Open center retained</text>
+    <g id="gallery-lounge">
+      <g data-room="gallery" data-item="84 by 36 inch couch"><rect x="18" y="30" width="7" height="3" rx=".12" fill="#e5e0d6" stroke="#9e8a6d" stroke-width=".07"/><path d="M18.5 30V33M24.5 30V33M18.5 30.6H24.5M20.5 30.6V33M22.5 30.6V33" fill="none" stroke="#9e8a6d" stroke-width=".07"/></g>
+      <g data-room="gallery" data-item="48 by 24 inch coffee table"><rect x="19.5" y="34.35" width="4" height="2" rx=".1" class="cabinet"/></g>
+      <g data-room="gallery" data-item="Armchair" transform="translate(25.2 35.3) rotate(-90)"><use href="#lounge" x="-1.175" y="-1.125"/></g>
+      <g data-room="gallery" data-item="18-inch side table"><rect x="16.05" y="31.25" width="1.5" height="1.5" class="cabinet"/></g>
+    </g>
+    <text x="24.75" y="28.25" class="tiny">36.15-in north route</text>
+    <text x="21.4" y="37.5" class="room" style="font-size:.75px">GALLERY LOUNGE</text>
+    <text x="21.4" y="38.5" class="tiny">Keep bedroom routes clear</text>
     <g fill="#258373">
       <circle cx="12.35" cy="26.75" r="0.7"/>
       <circle cx="30.35" cy="26.75" r="0.7"/>
@@ -434,14 +470,15 @@
     <text x="25" y="244" class="body">Kids room 12' x 7'10": north wall straight with kitchen; guest 12' x 12', bath 12' x 5'6.5".</text>
     <text x="25" y="271" class="body">Office 12' x 14'; powder room and alcove about 4 in shallower.</text>
     <text x="25" y="298" class="body">Living 13'2" x 18'8": top wall aligned with the kitchen; front wall unchanged.</text>
-    <text x="25" y="339" class="small">Laundry entry notch clears Bedroom 2; standard cabinet sizes retained.</text>
-    <text x="25" y="362" class="small">Direct attic route: aligned doors across laundry; no passage through mechanical.</text>
-    <text x="25" y="385" class="small">Bedrooms 3 / 4, Closets 3 / 4 and Baths 3 / 4; attic remains unfinished.</text>
+    <text x="25" y="330" class="small">Bath fixtures added; guest shower 36 x 60 in; closet wall leaves a 39-in hall.</text>
+    <text x="25" y="352" class="small">Guest W/D: 27 x 32-in stack proxy in enlarged 33 x 33-in recess; fit TBD.</text>
+    <text x="25" y="374" class="small">Close machine fronts before passing; installation and occupied use unverified.</text>
+    <text x="25" y="396" class="small">Upstairs adopted in 3D with gallery lounge; attic storage needs approval.</text>
   </g>
   <g transform="translate(830 1035)">
     <rect width="710" height="420" rx="12" fill="#f0e8d9"/>
-    <text x="25" y="38" class="panel-heading">Area check against 3,800 sq ft gross</text>
-    <text x="25" y="76" class="body">Current: ground 1,966.44 + Version G upstairs 1,992.63 = 3,959.07</text>
+    <text x="25" y="38" class="panel-heading">SVG whole-house alternative area check</text>
+    <text x="25" y="76" class="body">Previous baseline: ground 1,966.44 + Version G 1,992.63 = 3,959.07</text>
     <text x="25" y="111" class="body">Upstairs primary bath/closet lined up</text><text x="685" y="111" class="body" text-anchor="end">-104.04</text>
     <text x="25" y="138" class="body">Upstairs Bath 2 / Bedroom 2 block lined up</text><text x="685" y="138" class="body" text-anchor="end">-11.25</text>
     <text x="25" y="165" class="body">Ground prep kitchen 15 x 8 (3-ft east cut)</text><text x="685" y="165" class="body" text-anchor="end">-25.20</text>
@@ -458,5 +495,5 @@
   </g>
   <path d="M55 1485H1540" stroke="#d5d8ce"/>
   <text x="55" y="1514" class="small">Exterior steps need roof / trim review: rear dining bump, 3-ft east prep step, straight upstairs rear wall.</text>
-  <text x="55" y="1540" class="small">Generic footprints, not selected products. Structure, over-garage floor, roofs, fire separation, HVAC and plumbing need professional review; the 3D model is unchanged.</text>
+  <text x="55" y="1540" class="small">3D: upstairs Version H / gallery lounge adopted; ground alternative not adopted. Model gross 3,817.03 sq ft. Products, structure, roofs and services unapproved.</text>
 </svg>

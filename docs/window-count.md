@@ -8,10 +8,10 @@ exterior duplicates are excluded.
 
 ## Current product intent / ordering hold
 
-All 30 vertical wall-window openings /53 modeled units are Andersen 100 Series
-intent, White Fibrex inside/outside. Front house windows have conceptual six-light
-colonial grilles (2 wide × 3 high per unit), eight openings / fourteen units
-including loft south. Side/rear windows and door glazing stay clear, including
+Version H: 27 vertical wall-window openings /47 modeled units are Andersen
+100 Series intent, White Fibrex inside/outside. Front house windows retain
+conceptual six-light colonial grilles (2 wide x 3 high per unit); loft windows
+are removed. Side/rear windows and door glazing stay clear, including
 the living return's casement / fixed picture / casement bank.
 The two proposed fixed laundry roof windows have been removed. The East rear
 wing roof is continuous across their former locations, with no openings or
@@ -26,7 +26,12 @@ Do not order from the modeled count or nominal study codes.
 
 Current count includes hidden room groups and the matching porch banks.
 
-**30 window openings containing 53 individual modeled units: 45 casements and 8 vertical fixed picture windows; no roof windows.**
+**27 window openings containing 47 individual modeled units: 39 casements and 8 vertical fixed picture windows; no roof windows.**
+
+Actual HTTP Three.js r170 takeoff: ground 15 openings /30 units unchanged;
+Version H upstairs 12 openings /17 units. Count openings separately from
+units. Laundry east window is replaced by its attic door; unfinished attic
+has no facade-only glazing and no loft-window units are retained.
 
 The X-marked office porch bank now matches the circled guest bank: both
 91.2 x 60 in, three equal bays, casement / fixed picture / casement, white
@@ -36,8 +41,9 @@ not an opening or casement. All 18 grouped openings have full-depth white joint 
 (23 divisions), shared headers and continuous sills. Single pictures,
 single casements, garage clerestories and door glazing are unchanged.
 
-Includes two new 48 x 60-inch paired-casement openings on the loft south wall,
-centered at x = 40.75 / 47.75 ft with 36-inch sills.
+Historical loft south paired-casement openings at x40.75/47.75 are removed.
+Version H front bedroom pair centers are x6.175/25.025 on z53.8; rear wall
+z7.4. Existing sill/head and product-review holds remain.
 
 The upper front has four equal 36 x 60 inch single-casement concept
 openings, two centered on each bedroom, coordinated with the exterior. Bedroom 3 retains its west paired
@@ -70,14 +76,13 @@ An **opening** is one window group; a **unit** is one casement, single-hung or f
 | **Ground-floor subtotal** | **15** | **22** | **8** | **0** | **30** |
 | Upstairs / primary bedroom | 2 | 4 | 0 | 0 | 4 |
 | Upstairs / primary bath | 1 | 1 | 0 | 0 | 1 |
-| Upstairs / bedroom 2 | 1 | 2 | 0 | 0 | 2 |
+| Upstairs / bedroom 2 | 2 | 4 | 0 | 0 | 4 |
 | Upstairs / bedroom 2 bath | 1 | 1 | 0 | 0 | 1 |
-| Upstairs / loft | 4 | 8 | 0 | 0 | 8 |
 | Upstairs / stairwell | 1 | 1 | 0 | 0 | 1 |
 | Upstairs / bedroom 3 | 3 | 4 | 0 | 0 | 4 |
 | Upstairs / bedroom 4 | 2 | 2 | 0 | 0 | 2 |
-| **Upstairs subtotal** | **15** | **23** | **0** | **0** | **23** |
-| **Whole house** | **30** | **45** | **8** | **0** | **53** |
+| **Upstairs subtotal** | **12** | **17** | **0** | **0** | **17** |
+| **Whole house** | **27** | **39** | **8** | **0** | **47** |
 
 ## Scope and sources
 

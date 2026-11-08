@@ -117,10 +117,10 @@ test('current house uses exterior faces, includes descending stairs on both floo
   close(first - getLivableFloorArea(ground), stairArea - gap, 'First-floor stairs descend to basement');
   close(second - getLivableFloorArea(upstairs), stairArea - gap, 'Second-floor stairs descend to first floor');
   close(first, 1966.4427083333333);
-  close(second, 1892.5041666666667);
+  close(second, 1850.5858333333333);
   assert.ok(second < 2000);
-  close(first + second, 3858.946875);
-  close((upper.rooms.find(r => r.name === 'Bedroom 4 closet').w) * .5, 2.925, 'Closet 4 inset removes only the half-foot strip');
+  close(first + second, 3817.0285416666666);
+  close((upper.rooms.find(r => r.name === 'Bedroom 4 closet').w) * 2, 13, 'Version H Closet 4 removes the two-foot front strip');
   for (const plan of [ground, upstairs]) {
     const before = JSON.stringify(plan);
     getLivableFloorArea(plan, { includeStairs: true });
@@ -176,14 +176,14 @@ test('both floors use resolved floor geometry and changes recalculate the displa
   assert.match(output.title, new RegExp(`upstairs: ~${Math.round(upstairsArea).toLocaleString('en-US')} sq ft`));
   assert.match(windowOutput.title, /2 casements, 3 single-hung, 1 fixed pictures/);
   assert.match(windowOutput.title, /Includes hidden windows; excludes door glazing and duplicate exterior representations/);
-  assert.match(output.title, /Excludes garage, open porch and basement/);
+  assert.match(output.title, /Excludes garage, open porch, unfinished attic and basement/);
   assert.match(output.title, /first-floor basement stairs and second-floor stairs included; open stair gaps excluded/);
   assert.match(output.title, /ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls/);
   assert.match(output.title, /Shared garage walls measured to the garage-side finish/);
   assert.match(output.title, /including the mechanical closet, are finished and conditioned/);
   assert.match(output.title, /Not a certified appraisal/);
-  assert.equal(output.textContent, 'Area: ~3,859 sq ft');
-  assertFloorOutputs(1966.4427083333333, 1892.5041666666667);
+  assert.equal(output.textContent, 'Area: ~3,817 sq ft');
+  assertFloorOutputs(1966.4427083333333, 1850.5858333333333);
   context.groundLayoutPreview = { plan: layout.resolve(ground, layout.empty()) };
   context.updateLivableArea();
   assertFloorOutputs(groundArea, upstairsArea);

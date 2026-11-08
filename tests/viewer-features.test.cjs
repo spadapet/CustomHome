@@ -217,6 +217,13 @@ test('model refresh reloads fresh files into Whole floor and Rotate by default',
   assert.doesNotMatch(source, /floor-caption|ADAPTED STUDY/);
 });
 
+test('attic approval warning stays in optional room notes, not clipped onto the exterior facade', () => {
+  const html = read('floor-plan-3d.html');
+  const source = read('assets/js/floor-plan-3d.js');
+  assert.match(html, /<strong>Attic: storage only \/ approval required<\/strong>/);
+  assert.doesNotMatch(source, /mudroomLabel\([^\n]*ATTIC: STORAGE ONLY/);
+});
+
 test('reference sections below the viewer live in markdown, not on the page', () => {
   const html = read('floor-plan-3d.html');
   const source = read('assets/js/floor-plan-3d.js');
@@ -292,7 +299,7 @@ test('floor-plan archive preserves both revisions and marks the shower option as
         : `${context.feet(clear.w)} x ${context.feet(clear.d)}${maxExtent ? ' max' : ''}`.replace(/' /g, "'").replace(/'0"/g, "'");
       assert.equal(label.children[1].textContent, compact);
       if (floor === 'upstairs' && room.name === 'Bedroom 2') {
-        assert.equal(label.children[1].textContent, '14\'8" x 14\'5"', 'Compact stepped Bedroom 2 dimensions use actual paint faces');
+        assert.equal(label.children[1].textContent, "14' x 13'", 'Version H stepped Bedroom 2 dimensions use actual paint faces');
       }
     });
   }

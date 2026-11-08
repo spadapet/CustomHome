@@ -6,6 +6,7 @@ const roof = require('../assets/js/floor-plan-roof.js');
 const upper = require('../assets/js/floor-plan-upstairs.js');
 const layout = require('../assets/js/upstairs-layout.js');
 const plan = layout.resolve(upper.getUpstairsDefaultPlan(layout.stairOpening()), layout.empty());
+const g = upper.getUpstairsMeasuredGeometry();
 const overlaps = (r, x, z, w, d) => Math.min(r.x+r.w,x+w)>Math.max(r.x,x)+1e-8 &&
   Math.min(r.z+r.d,z+d)>Math.max(r.z,z)+1e-8;
 const garage = [[44.233333333333,15,11.266666666667,11.9],[31.2,26.9,24.3,22.1]];
@@ -33,10 +34,10 @@ test('all compact exterior opening projections agree with furnished window hosts
     });
     assert.equal(hosts.length,1,name);
   }
-  assert.equal(segments.length,14,'Aligned rear removes the two zero-length bath projection returns');
+  assert.equal(segments.length,13,'Version H perimeter segments follow its straight rear and stepped attic outline');
   for(const [,x1,z1,x2,z2] of segments)assert.ok(Math.hypot(x2-x1,z2-z1)>0);
   for(const name of ['Primary bedroom','Primary bath','Primary toilet','Bedroom 2 bath','Bedroom 2 closet'])
-    assert.equal(plan.rooms.find(r=>r.name===name).z,6.65);
+    assert.equal(plan.rooms.find(r=>r.name===name).z,g.north);
 });
 
 test('actual roof envelope reserves nine-foot walls and 18-inch framing above every upstairs floor', () => {
@@ -52,4 +53,22 @@ test('actual roof envelope reserves nine-foot walls and 18-inch framing above ev
   assert.ok(count>3000);
   assert.ok(!roof.getConnectedRoofDefinitions().some(d=>/Loft/.test(d.id)));
   assert.ok(roof.getLowerRoofDefinitions().some(d=>d.id==='Garage service return'));
+});
+
+test('unfinished attic keeps an 8-ft-6-in modeled underside along its direct access route', () => {
+  const definitions=roof.getConnectedRoofDefinitions();
+  const envelope=roof.buildRoofEnvelope(definitions);
+  const attic=definitions.find(d=>d.id==='Garage attic storage roof');
+  assert.ok(attic);
+  assert.deepEqual(attic.bounds,[g.east+.75,g.atticEast+.7,g.atticNorth-.75,g.atticSouth+.225]);
+  const routeZ=(29.8+32.8)/2;
+  let minimum=Infinity;
+  for(let x=g.east;x<=g.atticEast;x+=.25){
+    const faces=envelope.faces.filter(f=>roof.contains(f.polygon,[x,routeZ]));
+    assert.ok(faces.length,`Roof covers the access path at ${x}`);
+    const underside=Math.max(...faces.map(f=>roof.heightAt(f.plane,[x,routeZ])))-.16;
+    minimum=Math.min(minimum,underside-10);
+  }
+  assert.ok(minimum>=8.5-1e-7,`Access-path headroom is ${minimum} ft`);
+  assert.ok(roof.getLowerRoofDefinitions().some(d=>d.id==='Garage attic storage roof'));
 });

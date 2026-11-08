@@ -25,9 +25,13 @@ test('paired cross-gables center on fixed bedroom banks with measured rise and s
     close(rear,40.5);
   });
   const garage = defs.find(d => d.id === 'Garage hip');
+  const measured = upper.getUpstairsMeasuredGeometry();
+  const attic = defs.find(d => d.id === 'Garage attic storage roof');
   close(height([garage],43.25,42.7),9.65);
   assert.ok(height(defs,43.25,39)>20.6,'Shared upper wing roofs the actual full-height service rooms');
-  assert.ok(height(defs,45,30.7)<13,'Outside the upper footprint, garage roof stays below the laundry sill');
+  close(attic.bounds[0]-measured.east,.75);
+  assert.ok(attic.bounds[0]>measured.east+.225,'Attic roof stays beyond the east window host and exterior face');
+  assert.ok(height(defs,attic.bounds[0],30.7)-.16>18,'Attic eave remains above the 8-ft laundry window head');
 });
 
 test('cross-gable union never reduces the accepted headroom envelope and leaves rear solar surfaces unchanged', () => {

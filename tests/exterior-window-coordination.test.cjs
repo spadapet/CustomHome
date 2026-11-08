@@ -1,12 +1,14 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { getUpstairsDefaultPlan, getUpstairsExteriorOpenings, getUpstairsExteriorSegments, getUpstairsMeasuredGeometry } = require('../assets/js/floor-plan-upstairs.js');
+const { getUpstairsDefaultPlan, getUpstairsExteriorOpenings, getUpstairsExteriorSegments, getUpstairsFrontWindows, getUpstairsMeasuredGeometry } = require('../assets/js/floor-plan-upstairs.js');
+const { stairOpening } = require('../assets/js/upstairs-layout.js');
+const roof = require('../assets/js/floor-plan-roof.js');
 const g = getUpstairsMeasuredGeometry();
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 
 test('every side/rear exterior upper opening projects from the furnished frame and cut wall', () => {
-  const plan = getUpstairsDefaultPlan({ x: 4, z: 28, width: 4, depth: 8 });
+  const plan = getUpstairsDefaultPlan(stairOpening());
   const segments = getUpstairsExteriorSegments().filter(([name]) => name !== 'front bedrooms').map(([, ...s]) => s);
   let count = 0;
   for (const [x1, z1, x2, z2] of segments) {
@@ -28,27 +30,44 @@ test('every side/rear exterior upper opening projects from the furnished frame a
           z: az + (bz - az) * (h[0] + h[1]) / 2 / l, width: h[1] - h[0]
         }));
       });
-      assert.ok(cuts.some(c => Math.hypot(c.x - x, c.z - z) < 1e-8 && c.width === opening.width),
+      assert.ok(cuts.some(c => Math.hypot(c.x - x, c.z - z) < 1e-8 && Math.abs(c.width - opening.width) < 1e-8),
         `${opening.name}: exterior glass must align with a real furnished wall opening`);
     }
   }
-  assert.equal(count, 9);
+  assert.equal(count, 8);
 });
 
-test('removed loft has no facade-only window; laundry east has its coordinated wall opening', () => {
-  const openings = getUpstairsExteriorOpenings(g.east,g.laundryNorth,g.east,g.serviceSouth);
-  assert.equal(openings.length,1);
-  close(openings[0].center,30.7-g.laundryNorth);
-  assert.equal(openings[0].width,3);
-  assert.ok(!getUpstairsDefaultPlan(require('../assets/js/upstairs-layout.js').stairOpening()).windows.some(w=>/Loft/.test(w[0])));
+test('Version H front window pairs retain their measured centers and clear the attic roof', () => {
+  const plan = getUpstairsDefaultPlan(stairOpening());
+  const windows = getUpstairsFrontWindows();
+  assert.equal(windows.length,4);
+  for(const window of windows){
+    assert.equal(window.width,3);
+    assert.equal(window.sill,3);
+    assert.equal(window.sill+window.height,8);
+    assert.ok(plan.windows.some(frame=>frame[0]===window.name));
+  }
+  close((windows[0].center+windows[1].center)/2,6.175);
+  close((windows[2].center+windows[3].center)/2,25.025);
+  close(g.south,53.8);
+  const definitions=roof.getConnectedRoofDefinitions();
+  const attic=definitions.find(d=>d.id==='Garage attic storage roof');
+  assert.ok(attic);
+  assert.ok(attic.bounds[3]<g.south,'Attic roof stops well before the front bedroom windows');
+  assert.equal(definitions.find(d=>d.id==='East rear wing').bounds[1],attic.bounds[0]);
+  assert.ok(!plan.windows.some(w=>/Loft/i.test(w[0])));
+});
+
+test('east-side window hosts remain outside the attic roof projection and above its eave', () => {
+  const eastWindows=getUpstairsExteriorOpenings(g.east,g.bedroom2North,g.east,g.laundryNorth);
+  assert.ok(eastWindows.length>=2);
+  const attic=roof.getConnectedRoofDefinitions().find(d=>d.id==='Garage attic storage roof');
+  close(attic.bounds[0]-g.east,.75);
+  for(const window of eastWindows){
+    const head=window.sill+window.height;
+    assert.ok(roof.heightAt(attic.planes[0],[attic.bounds[0],window.center+g.bedroom2North])-.16>=head,
+      `${window.name}: attic eave underside remains above the 8-ft window head`);
+  }
   const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'assets/js/floor-plan-exterior.js'), 'utf8');
   assert.ok(source.includes('getUpstairsExteriorSegments()'), 'Exterior uses the same measured perimeter');
-});
-
-test('previous closet-facing loft window and displaced west windows are eliminated', () => {
-  const east = getUpstairsExteriorOpenings(g.east, g.loftNorth, g.east, g.serviceSouth);
-  assert.equal(east.length,1);
-  close(east[0].center,30.7-g.loftNorth);
-  const west = getUpstairsExteriorOpenings(0, g.north, 0, g.south);
-  west.forEach((o, i) => close(g.north + o.center, [g.north + 5, g.north + 14, 31.1, g.bedNorth + 6][i]));
 });

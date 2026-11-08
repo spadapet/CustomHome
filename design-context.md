@@ -1,7 +1,74 @@
 # Ground-floor design context
 
-## October 31 rear alignment — implemented retained-program replan
+## November 6 - Version H upstairs adopted with central lounge
 
+Owner follow-up adopts the upstairs portion of Version H in the 3D model and
+requests a couch and furniture in its central open area. The single organizing
+move is a south-facing lounge in the middle of the gallery, leaving the fixed
+stairs and four bedroom-entry routes around it. The H ground-floor alternative
+is not adopted; previous guest bathroom/stack/hall edits remain SVG-only.
+Ground geometry and both saved layout JSON files stay unchanged.
+
+Use Version H rear z7.4, front z53.8, rectangular 13.55 x 7.4-ft primary
+closet (no old linen extension), north-facing primary vanities, east-west tub,
+stepped Bedroom 2, 12 x 13-ft southern bedrooms and two-foot Closet 4 recess.
+Laundry's 11 x 8-ft maximum envelope has the northwest entry notch and a
+direct 36 x 96-inch east attic doorway. Sixteen 96-inch door leaves start
+closed. Full-size beds, desks/chairs, nightstands, reading seats, media and
+standard vanity/cabinet widths remain; see the coordinated
+[active plan schedule](floor-plan-reference.md#current-upstairs-model---version-h-november-6).
+
+Gallery proxies: 84 x 36-inch linen/oak couch at (21.5,31.5), facing south;
+48 x 24-inch oak coffee table at (21.5,35.35); west-facing full armchair at
+(25.2,35.3); 18-inch-square side table at (16.8,32). North route beyond
+baseboard is 36.15 inches; the 16.2-inch coffee gap is for reach, not passing.
+No new rugs, dressers, television or persistent help UI. Tour arrival moves to
+unobstructed (14.625,33.125), not behind the side-table envelope.
+
+H's original closet symbols contain overlapping storage/extended drawers.
+Retain both 5-ft main bays, 2-ft return and four-drawer 48-inch bank; move the
+double bay 18 inches west, shorten north shelf run to 4 ft, use a shallower
+northwest return and move short east bay 30 inches south. Resulting main
+hanging aisle is 45.6 inches. Bedroom 4's full-size chair tucks three inches
+west; Bath 2 opens inward and Closet 3 into its closet to avoid mutually
+blocking open leaves. These reversible operation corrections preserve wall
+openings/default poses and are reflected in the SVG and current room notes.
+
+Model finished gross upstairs 1,850.5858333 sq ft; ground 1,966.4427083;
+combined 3,817.0285417. Attic is unfinished, excluded from counted floors and
+tour access, with storage-only/support/headroom approval tags and viewer label.
+Laundry retains five standard bases; two 36/24-inch bases are storage-only in
+the attic. A generic floor/roof reservation is not engineered support or
+usable attic/headroom approval. Room-door sweeps and individual fronts are
+sampled and restored; routes with open room doors/closed cabinet fronts do not
+approve occupied or simultaneous use. Resolve selected products, ventilation,
+utilities, sanitary clearances, waterproofing, support, garage fire separation,
+roof/flashing/drainage, guards/handrails/headroom and egress professionally.
+Older Version A dimensions and validation below are historical, not proof of
+this adopted Version H model. No commit or push is requested.
+
+## November 6 - owner-directed Version H SVG fixtures and guest access
+
+For this request, the owner identifies Version H SVG as the current floor plan.
+Add missing ground powder/guest toilets and standard 36-inch sink vanities,
+a west 36 x 60-inch guest shower, and a northeast stackable washer/dryer.
+Retain all existing upstairs fixtures. Separate the guest closet from its east
+bathroom approach with a right-side wall, preserving both closet openings.
+The resulting hall is 39 inches between drawn wall faces; the 30 x 96-inch bath
+leaf opens south, projecting 1.2 inches beyond the hall at full opening.
+The old northeast recess is only 24.6 x 21 inches clear, so expand its west
+edge 8.4 inches and south edge 12 inches within the bathroom. The resulting
+33 x 33-inch drawn interior holds a generic 27 x 32-inch south-facing stack
+footprint; there is 30.45 inches from its body front to the bathroom south wall.
+No product is selected: installed hoses/depth, height, stacking kit, venting,
+utilities, service and occupied/door operation remain unverified. Close machine
+fronts before passing. Exterior gross is unchanged. This earlier ground-floor
+update remains SVG-only; ground Three.js geometry and saved layouts are not
+changed. It is not construction, product, accessibility or code approval.
+
+## Historical October 31 rear alignment - superseded by Version H upstairs
+
+The following dimensions and verification apply only to the previous model.
 The owner authorized primary bathroom/closet boundary and suite-entry replanning.
 The actual rear wall centerline is now **z6.65 ft** continuously across primary
 bedroom, bathroom/WC, Closet 2 and Bath 2; masonry rear face is **z6.425 ft**.

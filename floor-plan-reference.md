@@ -1,7 +1,92 @@
 # Ground-floor plan reference
 
-## Rear alignment — implemented primary suite replan
+## Current upstairs model - Version H, November 6
 
+The owner now adopts the upstairs portion of
+`assets/images/plans/upstairs-2000/version-h.svg` in the furnished Three.js
+viewer. The ground-floor alternative in that SVG is **not adopted in 3D**;
+the prior ground bathroom/guest-hall edits remain diagram-only. Both saved
+layout JSON files and shared ground-floor geometry remain unchanged.
+This supersedes the Version A upstairs and rear-alignment studies below.
+
+Version H rear wall is z7.4 ft, front bedroom wall z53.8, and Closet 4 front
+wall z51.8 (two-foot recess). Paint-face sizes: primary bedroom 14 x 19 ft,
+bath 13.55 x 11.25, rectangular closet 13.55 x 7.4; Bedroom 2 stepped main
+envelope 13.9833 x 13 ft, Bath 2 8.6333 x 5.65, Closet 2 5 x 6.65;
+Bedrooms 3/4 each 12 x 13, Closets 3/4 6.15 x 5.65 / 6.15 x 5;
+Baths 3/4 each 9 x 5, mechanical 5.4833 x 5, laundry 11 x 8 maximum
+minus its northwest entry notch. Sixteen operable doors default closed at
+96-inch heads. Laundry now connects directly to the east unfinished attic.
+The fixed stair and 44 x 46.9-inch arrival retain only the exposed east guard.
+
+The central gallery becomes a lounge without moving room entries: one generic
+84 x 36 x 33.6-inch linen/oak sofa at (21.5,31.5), facing south; a 48 x 24-inch
+oak coffee table at (21.5,35.35), west-facing armchair at (25.2,35.3), and
+18-inch-square side table at (16.8,32). Actual north baseboard-to-sofa route
+is **36.15 inches**; sofa-to-table gap **16.2 inches** is a reach gap, not an
+additional passing aisle. Stair/gallery routes remain outside the grouping.
+No rugs, freestanding dressers, new media wall or extra viewer panel is added.
+
+Full-size queen/three full beds, five nightstands, four desks/chairs, five
+reading seats and primary media remain. Minor reversible deviations from the
+original H symbols resolve actual constituent conflicts: Bath 2 swings inward
+and Closet 3 into its closet, leaving apertures and closed poses fixed;
+Bedroom 4 chair tucks three inches west. Primary closet retains 5-ft long and
+5-ft double bays plus its 2-ft return and 48-inch four-drawer bank: move the
+double bay 18 inches west, shorten north shelves to 4 ft, use a shallower
+northwest return, and move the short east bay 30 inches south. Actual hanging
+body aisle is **45.6 inches**, with independently operable drawers. These
+small storage adjustments replace the original H shelf/hanging overlap.
+Tub remains 33.6 x 62.4 inches, now east-west; primary shower 42 x 72,
+vanities 60/48 inches. Tub-body to vanity-front gap is **71.1 inches**;
+selected sanitary-use, cleaning and enclosure clearances remain unverified.
+Laundry retains standard north 24/24-inch and south 36/24/24-inch bases,
+south-facing washer/dryer and 45.3-inch counter aisle before hardware.
+Two bases (36/24 inches) are reserved in the unfinished attic, storage-only.
+
+Finished exterior-face gross: upstairs **1,850.5858333 sq ft**, unchanged
+ground **1,966.4427083**, combined **3,817.0285417**. The attic reservation
+x42.8083-55.5/z15-40.45 is excluded from area and walk/tour routes, labeled
+**storage only / approval required** in the viewer's optional upstairs room
+notes, not on the exterior facade. Framing/support, loads, headroom, access,
+garage fire separation, roof/weatherproofing, HVAC service,
+window egress/reach, occupied chair/cabinet/appliance use, plumbing, wet
+electrical, glazing, guards and waterproofing remain unapproved. Model
+measurements are not construction, appraisal or compliance certification.
+
+Verification: 429 tests in 68 suites plus 12 JavaScript syntax files passed.
+Actual HTTP-served Three.js r170 bounds confirm the full-size four-piece
+lounge, 36.15-inch north route, 16.2-inch reach gap, sixteen closed room
+leaves and four full-size beds. Gallery/closet, upstairs 2D, ground and all
+four elevations/roof controls were exercised through Night/floor/grid changes;
+production reloaded without the temporary hook, one render canvas, Day and
+no application exceptions/failed requests. SVG XML parses with four lounge
+items. Screenshot visual review was unavailable; do not treat these measured
+browser/control checks as visual, occupied-use or construction approval.
+
+## Version H SVG bathroom / guest-hall update - November 6
+
+The owner identifies `assets/images/plans/upstairs-2000/version-h.svg` as the
+current floor-plan reference for these edits. This earlier ground-floor update
+is SVG-only; ground Three.js geometry and saved layouts remain unchanged.
+Ground powder and guest bath now show toilets and standard 36-inch single-sink
+vanities; the guest bath has a west 36 x 60-inch shower proxy. Existing upstairs
+bath fixtures remain. The northeast guest recess is for a stackable washer/dryer,
+not linen: the original 24.6 x 21-inch drawn interior is too small. Its west
+partition moves x28.9 to x28.2 and its south edge y36.7367 to y37.7367, giving
+33 x 33 inches between 3-inch drawn walls for a generic 27 x 32-inch stack,
+facing south through an open front. Body-front-to-south-wall gap is 30.45 inches.
+Installed depth/hoses, height, stacking kit, utilities, venting and service remain
+unverified; close machine fronts before passing. Exterior gross is unchanged.
+Guest closet right wall x27.7/y40.2792-42.6792 separates a **39-inch hall**
+(31.2 - 27.7 - 0.25 = 3.25 ft) from the retained closet openings. The existing
+30 x 96-inch bath entry swings south into the hall; at 90 degrees it projects
+1.2 inches into the guest room. Dimensions exclude casing/hardware and do not
+approve occupied/simultaneous use, accessibility, products or construction.
+
+## Historical Version A rear alignment - superseded by Version H upstairs
+
+The following dimensions and verification apply only to the previous model.
 Actual Version A rear centerline is **z6.65 ft**, rear masonry face z6.425,
 now continuous across primary bedroom, bathroom/WC, Closet 2 and Bath 2.
 The bath rear moves **6.5 ft**, not H's 5-ft alternative. H and its red
@@ -65,9 +150,9 @@ measurement hook and Day/closed defaults; no application runtime errors.
 The direct SVG preview's Electron preload diagnostic is a browser-host
 limitation, not a model error. Git whitespace passes; saved JSON unchanged.
 
-## Current implemented under-2000 upstairs — October 31
+## Historical under-2000 upstairs - October 31, superseded
 
-Approved exact-coordinate reference: `assets/images/plans/upstairs-2000/version-a.svg`.
+Previous exact-coordinate reference:
 Unimplemented diagram alternatives in the same folder: `version-b.svg`
 (unfinished attic over the garage), `version-c.svg` (finished wing,
 1,988.83 sq ft), `version-d.svg` (Version B with a finished family loft
@@ -3055,7 +3140,7 @@ Room requirements: [kids/living](foyer/living-room.html#connected-kids-room), [o
 
 ## Window schedule
 
-**Current whole-house count:** 30 openings / 53 units: 45 wall casements and 8 vertical fixed pictures, with no roof windows. Ground floor: 15 openings / 30 units (22 casements + 8 pictures). Upstairs: 15 openings / 23 casements. Main kitchen and prep each have three units in one joined opening. Exterior duplicates and door glazing are excluded. See the [counting rules](docs/window-count.md); not an approved procurement schedule.
+**Current Version H whole-house count:** 27 openings / 47 units: 39 wall casements and 8 vertical fixed pictures, with no roof windows. Ground floor unchanged: 15 openings /30 units (22 casements +8 pictures). Upstairs: 12 openings /17 casements. Main kitchen and prep each have three units in one joined opening. Laundry east window becomes the attic door; no loft or attic glazing is counted. Exterior duplicates and door glazing are excluded. Actual HTTP Three.js r170 takeoff; see [current room totals and counting rules](docs/window-count.md). This is not an approved procurement schedule.
 
 The detailed wall-window rows below are an October 27 snapshot, superseded where they conflict with the current measured upstairs plan. The roof-window row is a removed concept, not part of the current takeoff. All sizes are **provisional opening/group envelopes**, not confirmed catalog units, rough openings or clear glass, except where a verified standard frame is identified. Sill/head heights are inches above house datum unless explicitly labeled otherwise; the powder-window row uses feet and garage-relative heights are labeled separately. Coordinates identify the opening wall, not small frame insets.
 

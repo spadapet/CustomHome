@@ -4638,7 +4638,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const format = (area) => Math.round(area).toLocaleString('en-US');
     const output = document.getElementById('livable-area');
     output.textContent = `Area: ~${format(groundArea + upstairsArea)} sq ft`;
-    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs count on the floor from which they descend: first-floor basement stairs and second-floor stairs included; open stair gaps excluded. Assumes modeled indoor rooms, including the mechanical closet, are finished and conditioned. Excludes garage, open porch and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
+    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs count on the floor from which they descend: first-floor basement stairs and second-floor stairs included; open stair gaps excluded. Assumes modeled indoor rooms, including the mechanical closet, are finished and conditioned. Excludes garage, open porch, unfinished attic and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
     const firstFloorOutput = document.getElementById('first-floor-area');
     firstFloorOutput.textContent = `1st: ~${format(groundArea)} sq ft`;
     firstFloorOutput.title = output.title;
@@ -5238,12 +5238,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     const upperDimensions = getUpstairsMeasuredGeometry();
     for (const [x, z] of [
-      [(upperDimensions.primaryEast + upperDimensions.closetTailWest) / 2, (upperDimensions.loftNorth + upperDimensions.laundryNorth) / 2],
-      [(upperDimensions.closetTailEast + upperDimensions.closetEast) / 2, (upperDimensions.loftNorth + upperDimensions.laundryNorth) / 2],
-      [17, 33], [15.5, (upperDimensions.serviceSouth + upperDimensions.bedNorth) / 2]
+      [12.3, 29], [17, 33], [21.5, 37.5],
+      [29.5, (upperDimensions.primarySouth + upperDimensions.laundryNotchSouth) / 2]
     ]) fixture(upstairs.group, 'Upstairs hall', x, upstairs.group.userData.ceilingHeightFeet, z, 2 / 12, 14, 'upstairs');
-    fixture(upstairs.group, 'Primary closet linen extension', (upperDimensions.closetTailWest + upperDimensions.closetTailEast) / 2,
-      upstairs.group.userData.ceilingHeightFeet, 24.3, 2 / 12, 9, 'upstairs');
     fixture(piano, 'Piano music', 0, 3.6, 0.25, 0.24, 3, 'ground', true);
     box(piano, 0, 3.27, -0.45, 0.04, 0.66, 0.04, rosewood).name = 'Piano lamp support';
     return rigs;
@@ -5440,9 +5437,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     'exterior-security': { target: [exterior.userData.lot.centerX, 0, (exterior.userData.lot.rear + exterior.userData.lot.front) / 2], offset: [0, 160, 0.01], span: 150 },
     upstairs: { target: [22, stairFloorToFloor + 1, 26], offset: [30, 68, 43], span: 65 },
     'upstairs-top': { target: [22, stairFloorToFloor, 26], offset: [0, 110, 0], span: 61 },
-    'upstairs-arrival-gallery': { target: [22, stairFloorToFloor + 3, 29.5], offset: [-8, 11, 12], span: 25 },
-    'upstairs-gallery': { target: [22, stairFloorToFloor + 2, 29], offset: [0, 13, 4], span: 28 },
-    'upstairs-primary-closet': { target: [22.05, stairFloorToFloor + 1, 21.7], offset: [4, 34, 4], span: 18.9 },
+    'upstairs-arrival-gallery': { target: [20.5, stairFloorToFloor + 2, 33], offset: [-10, 15, 13], span: 27 },
+    'upstairs-gallery': { target: [21.5, stairFloorToFloor + 2, 33.5], offset: [0, 18, 7], span: 26 },
+    'upstairs-primary-closet': { target: [21.3, stairFloorToFloor + 1, 22.8], offset: [4, 34, 4], span: 18.9 },
     social: { target: [19, 2, 12], offset: [27, 55, 32], span: 43 },
     living: { target: [12.5, 1.5, livingCenterZ], offset: [28, 27, 7], span: 32 },
     kids: { target: [24, 1, 30.15], offset: [-12, 30, 18], span: 17 },
@@ -5507,10 +5504,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     status.textContent = upstairs.coordinationWarnings.join(' ');
     status.hidden = !status.textContent;
     if (!edits.rooms.length && !edits.walls.length) {
-      presets.upstairs.target = [27, stairFloorToFloor + 1, 28];
+      presets.upstairs.target = [27, stairFloorToFloor + 1, 30.6];
       presets.upstairs.span = 74;
-      presets['upstairs-top'].target = [22, stairFloorToFloor, 26];
-      presets['upstairs-top'].span = 61;
+      presets['upstairs-top'].target = [27, stairFloorToFloor, 30.6];
+      presets['upstairs-top'].span = 65;
       return;
     }
     const minX = Math.min(...upstairs.rooms.map((room) => room.x), ...upstairs.plan.walls.map((wall) => wall.x1));

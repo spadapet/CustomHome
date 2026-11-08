@@ -16,19 +16,38 @@ finished-area estimate; 1st and 2nd show each story in sq ft. Include wall
 footprints, measuring exterior masonry to its outer face and shared garage
 walls to their garage-side finish. Count basement stairs on 1st and upstairs
 stairs on 2nd; exclude each actual open inter-flight gap. Include the mechanical
-closet provisionally as finished/conditioned; exclude garage, open porch and
-basement rooms. Current default: 1st 1,966 / 2nd 2,313 / Area 4,279 sq ft.
-The owner's latest standard-measurement preference supersedes the earlier
-inside-wall and once-only stair rules; the layout is unchanged.
+closet provisionally as finished/conditioned; exclude garage, open porch,
+unfinished attic and basement rooms. Current Version H default:
+1st 1,966 / 2nd 1,851 / Area 3,817 sq ft (exact combined 3,817.0285417).
+The owner's exterior-measurement preference supersedes the earlier
+inside-wall and once-only stair rules; ground layout is unchanged.
 Tooltips retain assumptions: this is not certified appraisal GLA, and actual
 finishes, conditioning, grade and ceiling heights still require verification.
 Size gives maximum modeled plan bounds, not zoning/buildable
 limits. Controls use short labels; the detailed Sizes list is closed by
 default while 2D room labels remain on. Preserve essential warnings.
 
+## Version H upstairs lounge - November 6
+
+Upstairs follows Version H, not the previous Version A linen-extension plan.
+One south-facing 84 x 36-inch couch, 48 x 24-inch coffee table, west-facing
+armchair and 18-inch side table furnish the central gallery. North finished
+route is 36.15 inches; coffee reach gap is 16.2 inches, not a passage.
+Fixed stair and four bedroom entries remain. Sixteen 96-inch doors start
+closed; Bath 2/Closet 3 swing corrections keep open leaves from severing entry
+routes. Cabinet fronts must close before passing. Minor closet/desk-chair
+corrections and current room sizes are in [upstairs notes](upstairs.html#model-study).
+The attic is storage-only, area-excluded, not a tour floor, and approval-required
+for support, loads, access and headroom. Keep this warning in the existing
+optional upstairs room notes, not as text on the exterior facade.
+No loft/rugs/dressers or extra help panel is added.
+camera/floor and grid choices retain their normal restoration behavior.
+Ground fixtures and saved JSON stay unchanged. Occupied/simultaneous use,
+products, egress, roof weatherproofing and engineering remain unverified.
+
 ## Viewer defaults - October 31
 
-The October 30 front extension carries the hall floor, front-door light,
+The October 30 front extension
 and front approach with the front wall. The garage uses a separate full-width
 front gable; the old garage brow and canopy return are removed. The porch
 canopy remains.

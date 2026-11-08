@@ -87,11 +87,13 @@
     const eaves = floorToFloor + 9;
     // 18-inch provisional framing zone above full 9-ft room walls.
     const upperBase = eaves + 1.6;
-    // Outside the upper footprint, stay below east bedroom/laundry sills.
-    // Full upper headroom comes from the main/east-wing roofs, not a
-    // garage lean-to raised in front of the windows.
-    const garageReturnHead = floorToFloor + 2;
     const g = upperGeometry();
+    const atticWest = g.east + 0.75;
+    const atticEast = (g.atticEast ?? 55.5) + 0.7;
+    const atticRear = (g.atticNorth ?? 15) - 0.75;
+    const atticFront = (g.atticSouth ?? g.bedNorth) + 0.225;
+    const atticEave = floorToFloor + 8.66;
+    const atticSlope = (upperBase - atticEave) / (atticEast - atticWest);
     const mainRear = g.north - 0.75, mainFront = g.south + 0.75, mainRight = g.southEast + 0.75;
     const garage = { id: 'Garage hip', bounds: [30.3, 56.2, g.bedNorth + .75, 49.85],
       planes: [[0.5, 0, 8.9 - 0.5 * 30.3], [-0.5, 0, 8.9 + 0.5 * 56.2],
@@ -128,20 +130,20 @@
           [-.25, 0, upperBase + .25 * (g.east + .75)],
           [0, .25, upperBase - .25 * (g.north - .75)],
           [0, -.25, upperBase + .25 * (g.bedNorth + .75)]] },
-      // Low returns outside upper rooms keep east windows exposed.
-      // Actual service wall heads remain under the main/east-wing roofs.
-      { id: 'Garage north lean-to', bounds: [g.east + .225, 56.2, 14.25, g.bedNorth + .75],
-        planes: [[-(garageReturnHead - 8.9) / (56.2 - g.east - .225), 0,
-          garageReturnHead + (garageReturnHead - 8.9) / (56.2 - g.east - .225) * (g.east + .225)]] },
+      // Unfinished attic storage remains outside the conditioned upper rooms.
+      // Its 8-ft-6-in minimum underside clears the 96-in access and a generic
+      // full-height path; framing, floor loads and storage use are unverified.
+      { id: 'Garage attic storage roof', bounds: [atticWest, atticEast, atticRear, atticFront],
+        planes: [[-atticSlope, 0, upperBase + atticSlope * atticWest]] },
+      // The service return shares the attic roof's east-falling north edge,
+      // then hips down to the existing garage front without a floating seam.
       { id: 'Garage service return', bounds: [g.southEast + .225, 56.2, g.bedNorth + .225, 49.85],
         planes: [[0, -(upperBase - 8.9) / (49.85 - g.bedNorth - .225),
           upperBase + (upperBase - 8.9) / (49.85 - g.bedNorth - .225) * (g.bedNorth + .225)],
-          // Hip down east as well as front: do not extend a high unsupported
-          // transverse crown across the uncovered east garage bay.
-          [-(garageReturnHead - 8.9) / (56.2 - g.east - .225), 0,
-            garageReturnHead + (garageReturnHead - 8.9) / (56.2 - g.east - .225) * (g.east + .225)]] },
-      // Stop at the actual garage/service junction. The old z=23 rear reach
-      // put a low garage eave across the east upstairs window elevation.
+          [-(upperBase - atticEave) / (56.2 - atticWest), 0,
+            upperBase + (upperBase - atticEave) / (56.2 - atticWest) * atticWest]] },
+      // Stop at the actual garage/service junction; the attic shed joins the
+      // East rear wing at its eave and starts well beyond the side glazing.
       garage,
       garageGable,
       // The west edge abuts the canopy at the wall, not an overlapping eave
@@ -153,7 +155,7 @@
 
   function getSetbackRoofDefinitions() {
     const g = upperGeometry();
-    // No orphan low loft transition roof: new garage returns share the envelope.
+    // No separate transition roof: the storage roof and garage returns share the envelope.
     return [];
   }
 

@@ -552,9 +552,10 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       : getUpstairsExteriorOpenings(x1, z1, x2, z2, upper);
     wall(`upper ${name}`, x1, z1, x2, z2, 9, eaves, openings);
   }
-  // Compact service rooms cover only part of the garage, never bedrooms.
+  // Compact service rooms cover the conditioned garage portion; the attic
+  // remains unfinished and storage-only, not a new finished loft.
   const garageFacadeEaves = 9;
-  group.userData.garageUpperVolume = 'Partial laundry, Bath 4 and mechanical coverage only; no bedroom above garage. Floor structure, fire separation and roof framing require professional review.';
+  group.userData.garageUpperVolume = 'Laundry, Bath 4 and mechanical only are full-height rooms; adjacent unfinished attic is storage-only with an 8-ft-6-in roof underside at its low edge. Access headroom is a model proxy, not approval of attic flooring, framing, loads or occupied use.';
 
   function renderRoofEnvelope(name, definitions, material, metal = false, metalFinish = null) {
     const plan = HomeRoof.buildRoofEnvelope(definitions);
@@ -759,7 +760,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       closure.userData.cladding = 'brick';
     }
   }
-  setbackRoofs.userData.drainageIntent = 'Garage north lean-to drains east; service return falls toward garage front valleys. Size collectors, flashing, overflow and lawful outlets professionally.';
+  setbackRoofs.userData.drainageIntent = 'Attic storage shed roof drains east and joins the service return, which falls toward garage front valleys. Roof framing, collectors, flashing, overflow and lawful outlets require professional review.';
   // The upper bathroom projects beyond the lower living wall. A closed
   // finish underside is not a designed floor/cantilever or a load path.
   const projectionWest = measuredUpper.bathWest - 0.225;
@@ -800,7 +801,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       houseRoof.add(closure);
     }
   }
-  houseRoof.userData.drainageIntent = 'Compact upper hips reserve 18-inch provisional framing above nine-foot walls; paired front gables remain. No loft roof. Low garage returns outside upper rooms preserve east window exposure. Bracketed upper-corner collector drop follows lower roof fall to east perimeter; supports, sealed mounts, hydraulics and ice/overflow unverified. Engineer floors, garage headers/bearing, fire separation, valleys, flashing, snow/ice and drainage. Veneer carries no roof loads. Reassess solar surfaces; upper rear water stays separate from patio canopy.';
+  houseRoof.userData.drainageIntent = 'Compact upper hips reserve 18-inch provisional framing above nine-foot walls; paired front gables remain. The unfinished attic is storage-only beneath an east-falling shed roof, with an 8-ft-6-in minimum modeled underside; roof, attic-floor structure, loads and occupied use are unverified. The shed joins the east-wing eave and service return, stays beyond side-window hosts and does not create a finished loft. Bracketed upper-corner collector drop follows lower roof fall to east perimeter; supports, sealed mounts, hydraulics and ice/overflow unverified. Engineer floors, garage headers/bearing, fire separation, valleys, flashing, snow/ice and drainage. Veneer carries no roof loads. Reassess solar surfaces; upper rear water stays separate from patio canopy.';
   houseRoof.userData.framingAllowanceInches = 18;
   houseRoof.userData.framingAllowanceVerified = false;
 
@@ -821,20 +822,23 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     for (const [a, b] of brackets) segment(a, b, 0.055, 'Wall-fixed rainwater bracket', dark);
     return route;
   }
-  // Concept enclosed collector follows the east-falling roof surface,
-  // then exits beyond x56.2. Never suspend a level pipe across the garage
-  // void or dump upper water on shingles. Collector supports, weatherproof
-  // mounts, ice/overflow and capacity remain professional decisions.
-  drainageRoute(group, 'Compact service eave to east wall leader - capacity unverified', [
-    [measuredUpper.east + .75, 20.5, measuredUpper.bedNorth + .75],
-    [measuredUpper.east + .975, 20.3, measuredUpper.bedNorth + .85],
-    [measuredUpper.east + .975, 11.9, measuredUpper.bedNorth + .85],
-    [56.2, 9, measuredUpper.bedNorth + .85],
-    [56.5, 8.8, measuredUpper.bedNorth + .85],
-    [56.5, -1.35, measuredUpper.bedNorth + .85], [56.5, -1.6, measuredUpper.bedNorth + 1.2]
-  ], [...[1, 4, 7].map(y => [[55.725, y, measuredUpper.bedNorth + .85], [56.5, y, measuredUpper.bedNorth + .85]]),
-    ...[13,17].map(y=>[[measuredUpper.serviceEast+.225,y,measuredUpper.bedNorth+.225],
-      [measuredUpper.east+.975,y,measuredUpper.bedNorth+.85]])], dark);
+  // Follow the attic shed's east-falling edge, then drop beyond the garage
+  // wall. Pipe support, flashing, ice/overflow and capacity remain unverified.
+  const atticRoofEast = (measuredUpper.atticEast ?? 55.5) + 0.7;
+  const atticRoofSouth = (measuredUpper.atticSouth ?? measuredUpper.bedNorth) + 0.225;
+  const atticRoofWest = measuredUpper.east + 0.75;
+  const atticRoofLow = floorToFloor + 8.66;
+  const atticRoofHigh = floorToFloor + 10.6;
+  const atticRoofAt = x => atticRoofHigh - (atticRoofHigh - atticRoofLow) * (x - atticRoofWest) / (atticRoofEast - atticRoofWest);
+  drainageRoute(group, 'Attic storage eave to east wall leader - capacity unverified', [
+    [atticRoofWest, atticRoofAt(atticRoofWest) + 0.1, atticRoofSouth],
+    [atticRoofEast, atticRoofAt(atticRoofEast) + 0.1, atticRoofSouth],
+    [56.5, atticRoofLow - 0.15, atticRoofSouth],
+    [56.5, 15, measuredUpper.bedNorth + 0.85],
+    [56.5, 9, measuredUpper.bedNorth + 0.85],
+    [56.5, -1.35, measuredUpper.bedNorth + 0.85], [56.5, -1.6, measuredUpper.bedNorth + 1.2]
+  ], [...[13, 17].map(y => [[55.725, y, measuredUpper.bedNorth + 0.85], [56.5, y, measuredUpper.bedNorth + 0.85]]),
+    [[atticRoofEast, atticRoofLow + 0.1, atticRoofSouth], [56.5, atticRoofLow - 0.15, atticRoofSouth]]], dark);
   drainageRoute(group, 'Garage east shoulder gutter outlet - capacity unverified', [
     [56.2, 8.8, 49.85], [55.85, 8.1, 49.35],
     [55.85, -1.35, 49.35], [55.85, -1.6, 49.7]

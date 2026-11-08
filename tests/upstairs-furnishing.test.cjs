@@ -54,24 +54,24 @@ function overlap(a,b,t=.015){
   }return true;
 }
 test('bed mattress and actual frame sizes stay full size at all four approved placement tuples',()=>{
-  for(const [n,x,z,r,w,d] of [['Primary',3.844166666666667,16.15,Math.PI/2,5,80/12],
-    ['Bedroom 2',38.85,18.475,0,4.5,6.25],['Bedroom 3',3.6358333333333333,45.75,Math.PI/2,4.5,6.25],
-    ['Bedroom 4',27.214166666666667,46.95,-Math.PI/2,4.5,6.25]]){
+  for(const [n,x,z,r,w,d] of [['Primary',4.594333333333333,16.15,Math.PI/2,5,80/12],
+    ['Bedroom 2',39.88333333333333,19.325,0,4.5,6.25],['Bedroom 3',3.636,46.5,Math.PI/2,4.5,6.25],
+    ['Bedroom 4',27.214,47.7,-Math.PI/2,4.5,6.25]]){
     const bed=item(`${n} bed`),m=bed.children.find(m=>m.name==='Bed mattress');
     close(bed.position.x,x);close(bed.position.z,z);close(bed.rotation.y,r);close(m.geometry.w,w);close(m.geometry.d,d);
     assert.ok(bed.children.some(m=>m.geometry.w===w+.2&&m.geometry.d===d+.2));
   }
 });
 test('all five independent full-size nightstands remain at the approved SVG locations',()=>{
-  for(const [n,x,z] of [['Primary nightstand 1',1.375,12.3],['Primary nightstand 2',1.375,19.95],
-    ['Bedroom 2 nightstand',42.275,16.25],['Bedroom 3 nightstand',1.375,49.1],['Bedroom 4 nightstand',29.275,50.5]]){
+  for(const [n,x,z] of [['Primary nightstand 1',2.125,12.3],['Primary nightstand 2',2.125,19.95],
+    ['Bedroom 2 nightstand',36.65833333333333,17.35],['Bedroom 3 nightstand',1.375,49.85],['Bedroom 4 nightstand',29.275,51.25]]){
     const o=item(n);close(o.position.x,x);close(o.position.z,z);
     assert.ok(o.children.some(m=>m.geometry.w===1.55&&m.geometry.h===1.9&&m.geometry.d===1.5));
   }
 });
 test('four desks and chairs match full-size SVG footprints rather than shrinking for compact bedrooms',()=>{
-  for(const [n,x,z,r,cx,cz] of [['Primary',8.8,7.85,0,8.8,9.9],['Bedroom 2',38.25,25.45,Math.PI,38.25,23.3],
-    ['Bedroom 3',10.5,50.85,Math.PI,10.5,48.8],['Bedroom 4',19.9,46.9,Math.PI/2,21.9,47.05]]){
+  for(const [n,x,z,r,cx,cz] of [['Primary',8.8,8.6,0,8.8,10.65],['Bedroom 2',37.5,25.45,Math.PI,37.5,23.65],
+    ['Bedroom 3',10,52.35,Math.PI,10,50.3],['Bedroom 4',20.1,46.9,Math.PI/2,21.85,47.05]]){
     const d=item(`${n} writing desk`),chair=item(`${n} desk chair`);
     close(d.position.x,x);close(d.position.z,z);close(d.rotation.y,r);
     close(chair.position.x,cx);close(chair.position.z,cz);
@@ -86,22 +86,42 @@ test('five full-size reading seats and primary media composition remain; no loft
   item('Primary sitting side table');item('Primary media console');item('Primary wall TV');
   assert.ok(!model.group.children.some(o=>/Loft|rug|dresser/i.test(o.name)));
 });
-test('primary closet retains every full-size storage unit with a bedroom entry and separate bath entry',()=>{
-  for(const [n,width] of [['Primary closet long hanging',5],['Primary closet double hanging',5],['Primary closet return hanging',5]]){
+test('central gallery has one full-size sofa and a cohesive four-piece lounge clear of walls and stair routes',()=>{
+  const sofa=item('Gallery sofa'),coffee=item('Gallery coffee table'),chair=item('Gallery armchair'),side=item('Gallery side table');
+  const s=bounds(sofa),c=bounds(coffee),a=bounds(chair),t=bounds(side);
+  close(s.maxX-s.minX,7);close(s.maxZ-s.minZ,3);close(sofa.rotation.y,Math.PI);
+  const sofaParts=meshes(sofa).map(constituent);
+  close(Math.min(...sofaParts.map(p=>p.low)),10);
+  close(Math.max(...sofaParts.map(p=>p.high))-10,2.8);
+  close(c.maxX-c.minX,4);close(c.maxZ-c.minZ,2);
+  close(a.maxX-a.minX,2.25);close(a.maxZ-a.minZ,2.35);close(chair.rotation.y,Math.PI/2);
+  close(t.maxX-t.minX,1.5);close(t.maxZ-t.minZ,1.5);
+  close((c.minZ-s.maxZ)*12,16.2,'Coffee-table reach gap, not a passing aisle');
+  close((s.minZ-26.9875)*12,36.15,'Continuous straight north route beyond wall/baseboard finish');
+  const parts=[sofa,coffee,chair,side].map(meshes);
+  for(let i=0;i<parts.length;i++)for(let j=i+1;j<parts.length;j++)for(const m of parts[i])for(const n of parts[j])
+    assert.ok(!overlap(constituent(m),constituent(n)),`${m.name} intersects ${n.name}`);
+  const walls=model.group.children.filter(o=>o.name.startsWith('Upstairs wall:')).flatMap(meshes);
+  for(const m of parts.flat())for(const w of walls)assert.ok(!overlap(constituent(m),constituent(w)),'Lounge must not enter a wall');
+  assert.equal(model.group.children.filter(o=>o.name==='Upstairs Gallery sofa').length,1);
+});
+test('Version H rectangular primary closet retains its two full bays, short return and drawer bank',()=>{
+  for(const [n,width] of [['Primary closet long hanging',5],['Primary closet double hanging',5],['Primary closet return hanging',2]]){
     const o=item(n);assert.ok(o.children.some(m=>m.geometry.w===width&&m.geometry.d===2));
   }
   item('Primary closet east return shelves');item('Primary closet folded clothes');item('Primary closet drawers');
   const door=model.plan.walls.find(w=>w.name==='Bath south');assert.equal(door.openings.length,1);
   assert.equal(model.plan.walls.find(w=>w.name==='Primary closet south').openings.length,0);
 });
-test('child closets retain 5-ft hanging runs and full shelf runs in the reduced front envelope',()=>{
-  for(const n of ['Bedroom 3','Bedroom 4'])assert.ok(item(`${n} closet hanging`).children.some(m=>m.geometry.w===5&&m.geometry.d===2));
-  assert.ok(item('Bedroom 4 closet shelves').children.some(m=>m.geometry.w===3.3&&m.geometry.d===1.3));
+test('child closets retain the Version H hanging and shelf footprints',()=>{
+  assert.ok(item('Bedroom 3 closet hanging').children.some(m=>m.geometry.w===5&&m.geometry.d===2));
+  assert.ok(item('Bedroom 4 closet hanging').children.some(m=>m.geometry.w===5.6&&m.geometry.d===2));
+  assert.ok(item('Bedroom 4 closet shelves').children.some(m=>m.geometry.w===4.5&&m.geometry.d===1.3));
   const b=bounds(item('Bedroom 4 closet shelves'));assert.ok(b.maxZ<51.8-.175);
 });
 test('four bathrooms retain standard vanity widths and full shower/tub dimensions',()=>{
-  for(const [n,width,x,z] of [['Primary north vanity',5,22.45,15.65],['Primary south vanity',4,17.75,15.65],
-    ['Bedroom 2 vanity',3,36.5,7.9],['West bath vanity',3,1.85,36.35],['East bath vanity',3,30,36.35]]){
+  for(const [n,width,x,z] of [['Primary north vanity',5,17.35,17.875],['Primary south vanity',4,25.85,17.875],
+    ['Bedroom 2 vanity',3,35.35,8.65],['West bath vanity',3,1.85,36.35],['East bath vanity',3,29.25,36.35]]){
     const o=item(n);close(o.position.x,x);close(o.position.z,z);assert.ok(o.children.some(m=>m.userData.cabinetBody&&m.geometry.w===width));
   }
   for(const [n,w,d] of [['Primary shower',3.5,6],['Bedroom 2 shower',3,5],['West bath shower',3,5],['East bath shower',3,5]]){
@@ -109,38 +129,34 @@ test('four bathrooms retain standard vanity widths and full shower/tub dimension
   }
   assert.ok(item('Primary freestanding tub').children.some(m=>m.geometry.w===2.8&&m.geometry.d===5.2));
 });
-test('owner rear datum is implemented with full-size side-by-side wet fixtures inside the new bath',()=>{
+test('Version H rear plane, east-west tub and full-size shower match actual constituent bounds',()=>{
   const g=upper.getUpstairsMeasuredGeometry();
-  close(g.north,6.65);
+  close(g.north,7.4);
   const bath=model.plan.rooms.find(r=>r.name==='Primary bath');
   const alignedNorth=g.north+g.t/2, south=bath.z+bath.d-g.t/2;
-  close(south-alignedNorth,9.8);
-  close(g.north-.15,6.5);
+  close(south-alignedNorth,11.25);
   const entry=model.plan.walls.find(w=>w.name==='Primary suite entry').openings[0];
-  close(g.bathNorth,g.north);
-  close(g.north+entry[0],18.85);
-  for(const name of ['Bedroom 2 bath','Bedroom 2 closet']){
-    close(model.plan.rooms.find(r=>r.name===name).z,g.north);
-  }
-  // Constituent world transforms, not a fixture label or whole-group empty
-  // volume. Keeping the tub where it is loses it outside the proposed shell.
+  close(g.bathNorth,g.north);close(g.north+entry[0],13.5);
+  for(const name of ['Bedroom 2 bath','Bedroom 2 closet'])close(model.plan.rooms.find(r=>r.name===name).z,g.north);
   const tub=item('Primary freestanding tub'), b=bounds(tub);
   assert.ok(b.minZ>=alignedNorth&&b.maxZ<south&&b.minX>g.toiletEast);
   const shower=bounds(item('Primary shower'));
-  close(tub.position.x,21.025);
-  close((shower.minX-b.maxX)*12,4.5);
-  close((b.minX-(g.toiletEast+g.t/2))*12,4.5);
-  for(const m of meshes(tub))for(const s of meshes(item('Primary shower')))
-    assert.ok(!overlap(constituent(m),constituent(s)));
+  close(tub.position.x,21.19);close(tub.position.z,9.15);close(tub.rotation.y,Math.PI/2);
+  close((shower.minX-b.maxX)*12,7.32);
+  close((b.minX-(g.toiletEast+g.t/2))*12,5.28);
+  for(const m of meshes(tub))for(const s of meshes(item('Primary shower')))assert.ok(!overlap(constituent(m),constituent(s)));
 });
-test('implemented rear alignment measures its area without applying unrelated Version H changes',()=>{
+test('Version H finished area excludes unfinished attic and keeps the ground plan unchanged',()=>{
   const {getLivableFloorArea,getGroundFloorDefaultPlan}=require('../assets/js/floor-plan-ground.js');
-  const g=upper.getUpstairsMeasuredGeometry(), before=JSON.stringify(model.plan);
+  const before=JSON.stringify(model.plan);
   const gross=p=>getLivableFloorArea({...p,floors:[...p.floors,model.baseline.arrival],stairs:model.baseline.stairs},{includeStairs:true});
-  close(gross(model.plan),1892.5041666666667);
-  close(1985.7791666666667-gross(model.plan),93.275);
-  close(gross(model.plan)+getLivableFloorArea(getGroundFloorDefaultPlan(),{includeStairs:true}),3858.946875);
+  close(gross(model.plan),1850.5858333333333);
+  close(gross(model.plan)+getLivableFloorArea(getGroundFloorDefaultPlan(),{includeStairs:true}),3817.0285416666666);
   assert.equal(JSON.stringify(model.plan),before);
+  assert.ok(!model.areas.some(a=>a.x>42.6));
+  const attic=model.group.children.find(o=>o.userData.areaCounted===false);
+  assert.ok(attic&&attic.userData.storageOnly&&!attic.userData.walkOnApproved);
+  assert.ok(!attic.children.some(o=>o.userData.walkSurface));
 });
 test('replanned suite constituents clear walls trim handles and one another without hiding retained contents',()=>{
   const fixtures=model.group.children.filter(o=>/^Upstairs Primary (closet|freestanding|shower|toilet|north vanity|south vanity)/.test(o.name));
@@ -149,17 +165,11 @@ test('replanned suite constituents clear walls trim handles and one another with
     assert.ok(!overlap(constituent(m),constituent(w),.001),`${o.name} hits ${w.parent.name}/${w.name}`);
   for(let i=0;i<fixtures.length;i++)for(let j=0;j<i;j++)for(const a of meshes(fixtures[i]))for(const b of meshes(fixtures[j]))
     assert.ok(!overlap(constituent(a),constituent(b),.001),`${fixtures[i].name} hits ${fixtures[j].name}`);
-  // Includes faucet projections, hanging side panels, drawer handles and baseboard.
-  close((bounds(item('Primary north vanity')).minZ-bounds(item('Primary freestanding tub')).maxZ)*12,30.6);
-  const wcWall=model.group.children.find(o=>o.name==='Upstairs wall: Toilet south');
-  const wcCasing=wcWall.children.find(o=>o.userData.side===1);
-  const wcLeg=wcCasing.children.find(o=>o.name==='White casing side board');
-  close((bounds(item('Primary south vanity')).minZ-bounds(wcLeg).maxZ)*12,29.25);
-  close((bounds(item('Primary closet return hanging')).minZ-bounds(item('Primary closet double hanging')).maxZ)*12,26.4);
-  close((bounds(item('Primary closet return hanging')).minX-bounds(item('Primary closet drawers')).maxX)*12,40.56);
-  close((18.45-.175-(15.1+.175)-2*.0625)*12,34.5);
+  // Include faucet projections and actual hanging side panels, not symbol boxes.
+  close((bounds(item('Primary north vanity')).minZ-bounds(item('Primary freestanding tub')).maxZ)*12,71.1);
+  close((bounds(item('Primary closet double hanging')).minX-bounds(item('Primary closet long hanging')).maxX)*12,45.6);
 });
-test('all room leaves including WC bath and relocated suite entry clear the full retained suite through 465 poses',()=>{
+test('all sixteen room leaves clear the full retained suite through 496 poses',()=>{
   const doors=[];model.group.traverse(o=>{if(o.userData.interactiveHouseDoor)doors.push(o);});
   const retained=model.group.children.filter(o=>/^Upstairs Primary /.test(o.name)).flatMap(meshes);
   const conflicts=new Set();
@@ -198,28 +208,30 @@ test('retained vanity fronts and closet drawers operate individually without fix
   }
   assert.equal(poses,341,'Seven vanity leaves and four drawers, 31 samples each');
   // Closed routes above are not simultaneous open-front passing approval.
-  close((bounds(item('Primary closet double hanging')).maxZ),18.975);
+  close((bounds(item('Primary closet double hanging')).maxZ),26.495);
 });
 test('swapped Bath 2 and Closet 2 fixtures stay in their actual distinct rooms and do not overlap',()=>{
   const t=bounds(item('Bedroom 2 toilet')),v=bounds(item('Bedroom 2 vanity'));
   assert.ok(t.minX>v.maxX,'Side-by-side north fixtures, not old opposing layout');
   for(const n of ['Bedroom 2 toilet','Bedroom 2 vanity','Bedroom 2 shower']){
-    const b=bounds(item(n));assert.ok(b.minX>=34.65+.175-1e-8&&b.maxX<=44-.175+.001&&b.minZ>=6.65+.175-1e-8&&b.maxZ<=12-.175+.001,n);
+    const b=bounds(item(n));assert.ok(b.minX>=33.6+.175-1e-8&&b.maxX<=42.58333333333333-.175+.001&&b.minZ>=7.4+.175-1e-8&&b.maxZ<=13.4-.175+.001,n);
   }
 });
-test('laundry machines face west and retained standard bases have separate continuous countertops',()=>{
-  for(const [n,z] of [['Washer',30.55],['Dryer',33.425]]){
-    const o=item(n);close(o.position.x,42.2);close(o.position.z,z);close(o.rotation.y,-Math.PI/2);
+test('Version H side-by-side laundry machines face south with all seven standard base boxes retained',()=>{
+  for(const [n,x] of [['Washer',37.95],['Dryer',40.85]]){
+    const o=item(n);close(o.position.x,x);close(o.position.z,28.325);close(o.rotation.y,0);
     assert.ok(o.children.some(m=>m.geometry.w===2.8&&m.geometry.d===2.8));
   }
   const north=item('Laundry folding counter'),south=item('Laundry south bases');
   const bases=o=>o.children.filter(m=>m.userData.cabinetBody).map(m=>m.geometry.w);
-  assert.deepEqual(bases(north),[2,3,3,2]);assert.deepEqual(bases(south),[2,2,2]);
-  const n=bounds(north.children.find(m=>m.name==='North laundry countertop to west wall'));
-  const s=bounds(south.children.find(m=>m.name==='South laundry countertop to west wall'));
-  close(n.minX,30.4);close(s.minX,30.4);close((s.minZ-n.maxZ)*12,45.3);
-  item('Laundry wall cupboards');
-  const mech=item('Mechanical equipment reservation');close(mech.position.x,39.3);close(mech.position.z,38.9);
+  assert.deepEqual(bases(north),[2,2]);assert.deepEqual(bases(south),[2,2,3]);
+  const n=bounds(north.children.find(m=>m.name==='North laundry countertop'));
+  const s=bounds(south.children.find(m=>m.name==='South laundry countertop'));
+  close(n.minX,32.45);close(s.minX,31.45);close((s.minZ-n.maxZ)*12,45.3);
+  const attic=item('Attic storage-only bases - support approval required');
+  assert.deepEqual(bases(attic),[3,2]);assert.equal(attic.userData.supportApproved,false);
+  item('Laundry wall cupboards');item('Laundry north cupboards');
+  const mech=item('Mechanical equipment reservation');close(mech.position.x,38.4);close(mech.position.z,39.25);
 });
 test('wall lamps are backed by solid paint faces clear of all windows and doors',()=>{
   for(const lamp of model.group.children.filter(o=>o.userData.wallMounted)){
@@ -246,9 +258,9 @@ test('fixed stair retains only exposed east guard and a single flush 44-inch arr
   close(model.group.position.y+arrival[0].position.y+arrival[0].geometry.h/2,10);
   const g=bounds(guards[0]);close(g.minX,layout.stairOpening().x+layout.stairOpening().width-.04);
 });
-test('all 15 door leaves start closed at eight-foot openings and retain single recessed fields',()=>{
+test('all sixteen door leaves start closed at eight-foot openings and retain single recessed fields',()=>{
   const leaves=[];model.group.traverse(o=>{if(o.userData.doorStyle==='Single recessed panel')leaves.push(o);});
-  assert.equal(leaves.length,15);
+  assert.equal(leaves.length,16);
   for(const o of leaves){assert.equal(o.userData.height,7.96);assert.equal(o.parent.userData.interactiveHouseDoor.openAngleDegrees,0);
     assert.equal(o.parent.userData.interactiveHouseDoor.maxAngleDegrees,90);
     assert.equal(o.children.filter(m=>m.name==='Interior door single recessed field').length,1);}
@@ -267,7 +279,7 @@ test('door motion sampling restores every approved closed pose and exposes opera
     }
     d.rotation.y=closed;close(d.rotation.y,d.userData.interactiveHouseDoor.closedRotationY);
   }
-  assert.equal(samples,465);
+  assert.equal(samples,496);
   // The SVG is explicitly a reversible fit study, not an all-open operating
   // approval. Keep exact doors/furniture; assert the viewer carries that limit.
   const html=fs.readFileSync(require.resolve('../floor-plan-3d.html'),'utf8');
@@ -314,7 +326,7 @@ test('real door click handler invalidates tour collisions after operation',()=>{
 });
 test('one gallery viewing position has uninterrupted sightlines to all four approved bedroom entries',()=>{
   const walls=model.group.children.filter(o=>o.name.startsWith('Upstairs wall:')).flatMap(o=>o.children.filter(m=>m.name==='Upstairs partition'));
-  for(const [tx,tz] of [[15.1,25.1],[29,25.05],[11.175,40.45],[20.475,40.45]]){
+  for(const [tx,tz] of [[12.35,26.75],[30.35,26.75],[10.85,40.45],[20.55,40.45]]){
     for(let i=0;i<99;i++){
       const x=22+(tx-22)*i/100,z=29+(tz-29)*i/100;
       for(const w of walls){
@@ -352,7 +364,7 @@ test('12-inch avatar reaches all rooms and a continuous 24-inch disk reaches the
   const inside=(x,z)=>floors.some(f=>x>=f.x&&x<=f.x+f.w&&z>=f.z&&z<=f.z+f.d);
   const can=(x,z)=>[[-radius,-radius],[-radius,radius],[radius,-radius],[radius,radius]].every(([dx,dz])=>inside(x+dx,z+dz))&&
     !obstacles.some(b=>blocked(x,z,b));
-  function flood(start=[16.625,33.125]){
+  function flood(start=[14.625,33.125]){
   const queue=[start],visited=new Set([`${start[0]*4},${start[1]*4}`]);
   for(let i=0;i<queue.length;i++){
     const [x,z]=queue[i];
@@ -365,17 +377,18 @@ test('12-inch avatar reaches all rooms and a continuous 24-inch disk reaches the
   return queue;
   }
   const queue=flood();
-  const destinations={'primary bedroom':[11,22.5],'primary bath':[24.25,12],'primary WC':[17,10.5],
-    'primary closet':[22,20],'bedroom 2':[35,18],'Bath 2':[39,10.5],'Closet 2':[31,10.5],
-    'bedroom 3':[8,45],'Closet 3':[15,43],'bedroom 4':[22.5,42.5],'Closet 4':[17.75,50],
-    'Bath 3 approach':[4.75,39],'Bath 4 approach':[29,39.5],laundry:[38,30.75],mechanical:[41.5,37]};
+  const destinations={'primary bedroom':[11,22.5],'primary bath':[21.5,14.5],'primary WC':[16.5,11],
+    'primary closet':[19.5,23],'bedroom 2':[35,18],'Bath 2':[37.5,11.25],'Closet 2':[30,11.25],
+    'bedroom 3':[8,44],'Closet 3':[15,43],'bedroom 4':[22.5,42.5],'Closet 4':[18,49.5],
+    'Bath 3 approach':[4,39],'Bath 4 approach':[29,39.5],laundry:[38,31.25],mechanical:[41.5,37],
+    'gallery sofa approach':[20.5,33.75],'gallery chair approach':[23.5,37.5]};
   const missing=Object.entries(destinations).filter(([,p])=>!queue.some(([x,z])=>Math.hypot(x-p[0],z-p[1])<.2)).map(([n])=>n);
   try{
     assert.deepEqual(missing,[],'Model-avatar connectivity is not occupied or simultaneous-use approval');
     assert.ok(queue.length>3000);
     radius=1;
     const wider=flood();
-    for(const [name,p] of Object.entries({'primary bedroom':[11,22.5],'primary closet':[22,20],'primary bath':[24.25,12.5],'WC approach':[16.875,10.5],'linen retrieval':[23.125,24.125]}))
+    for(const [name,p] of Object.entries({'primary bedroom':[11,22.5],'primary closet':[19.5,23],'primary bath':[21.5,14.5],'WC approach':[16.5,11.25],'gallery north route':[21.5,28.25],'laundry approach':[29.5,31.25]}))
       assert.ok(wider.some(([x,z])=>Math.hypot(x-p[0],z-p[1])<.2),`Continuous 24-inch disk route to ${name}, not a code/person standard`);
   }finally{for(const d of doors)d.rotation.y=d.userData.interactiveHouseDoor.closedRotationY;}
 });
