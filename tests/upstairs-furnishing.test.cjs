@@ -7,19 +7,19 @@ const layout=require('../assets/js/upstairs-layout.js');
 const upper=require('../assets/js/floor-plan-upstairs.js');
 class Group{
   constructor(){this.children=[];this.position={x:0,y:0,z:0,set(x,y,z){Object.assign(this,{x,y,z});}};this.rotation={x:0,y:0,z:0};this.userData={};}
-  add(c){this.children.push(c);c.parent=this;}
+  add(...children){for(const c of children){this.children.push(c);c.parent=this;}}
   updateMatrixWorld(){}
   getWorldPosition(v){v.y=0;for(let n=this;n;n=n.parent)v.y+=n.position.y;return v;}
   traverse(fn){fn(this);this.children.forEach(c=>c.traverse(fn));}
 }
 class Mesh extends Group{constructor(geometry,material){super();this.geometry=geometry;this.material=material;}}
-class BufferGeometry{constructor(){this.attributes={};}setAttribute(k,v){this.attributes[k]=v;}setIndex(i){this.index=i;}computeVertexNormals(){}}
+class BufferGeometry{constructor(){this.attributes={};}setAttribute(k,v){this.attributes[k]=v;}setIndex(i){this.index=i;}computeVertexNormals(){}dispose(){}}
 class Float32BufferAttribute{constructor(array,itemSize){Object.assign(this,{array,itemSize});}}
-function build(edits=layout.empty()){
+function build(edits=layout.empty(), operational=false){
   const context={UpstairsLayout:layout,HomeRoof:require('../assets/js/floor-plan-roof.js')};
   vm.runInNewContext(fs.readFileSync(require.resolve('../assets/js/floor-plan-upstairs.js'),'utf8'),context);
   const material={clone(){return {...this};}};
-  const helpers={box(parent,x,y,z,w,h,d){const m=new Mesh({w,h,d},material);m.position.set(x,y,z);parent.add(m);return m;},
+  const helpers={box(parent,x,y,z,w,h,d){const m=new Mesh({w,h,d,parameters:{width:w,height:h,depth:d},dispose(){}},material);m.position.set(x,y,z);parent.add(m);return m;},
     mat:()=>material,wood:material,wallMaterial:material,windowTrim:material,oak:material,cream:material,black:material,steel:material,linen:material,windowFrame(){},openingCasing(){}};
   const source=fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'),'utf8');
   const doors={THREE:{Group},box:helpers.box,windowTrim:material};
@@ -28,8 +28,27 @@ function build(edits=layout.empty()){
   const casing={THREE:{Group,Vector3:class{}},box:helpers.box,windowTrim:material,walls:[],casingSideWidth:3.5/12,casingReveal:.125/12};
   vm.runInNewContext(source.slice(source.indexOf('  function openingCasing('),source.indexOf('  const baseTrimSections')),casing);
   helpers.openingCasing=casing.openingCasing;
-  return context.buildUpstairsModel({Group,Mesh,BufferGeometry,Float32BufferAttribute,DoubleSide:2,
+  const result=context.buildUpstairsModel({Group,Mesh,BufferGeometry,Float32BufferAttribute,DoubleSide:2,
     CylinderGeometry:class{constructor(top,bottom,length){this.length=length;}}},helpers,layout.stairOpening(),10,edits);
+  if(operational){
+    const runtime={THREE:{BufferGeometry},box:helpers.box,cabinetRailFinish:material,cabinetFinish:material};
+    const start=source.indexOf('  function toggleCabinet('),end=source.indexOf('  function singlePanelDoor(');
+    assert.ok(start>0&&end>start,'Execute the actual production cabinet preparation and operation');
+    vm.runInNewContext(source.slice(start,end),runtime);
+    runtime.prepareCabinetInteractions(result.group);
+    result.toggleCabinet=runtime.toggleCabinet;
+    // Include actual production low-level fixture bodies in operating
+    // obstacles; a vanity-mounted source must not silently collide with doors.
+    const lighting={...helpers,HomeRoof:context.HomeRoof,rosewood:material,upstairs:result,scene:new Group(),piano:new Group(),ceilingHeight:9,garageFloorY:-1.25,
+      getGroundFloorDefaultPlan:()=>({rooms:[]}),getUpstairsMeasuredGeometry:upper.getUpstairsMeasuredGeometry,
+      THREE:{Group,Mesh,DoubleSide:2,MeshStandardMaterial:class{constructor(p){Object.assign(this,p);}},
+        TorusGeometry:class{},CylinderGeometry:class{},
+        SpotLight:class extends Group{constructor(){super();this.target=new Group();this.shadow={mapSize:{set(){}},camera:{}};}}},
+      cylinder(parent,x,y,z,r,h,m){return helpers.box(parent,x,y,z,r*2,h,r*2,m);}};
+    vm.runInNewContext(source.slice(source.indexOf('  function buildHomeLighting()'),source.indexOf('  function updateHomeLighting()')),lighting);
+    result.lighting=lighting.buildHomeLighting();
+  }
+  return result;
 }
 const model=build();
 const item=n=>{const o=model.group.children.find(o=>o.name===`Upstairs ${n}`);assert.ok(o,`${n} exists`);return o;};
@@ -47,31 +66,33 @@ function bounds(o){
 }
 function overlap(a,b,t=.015){
   if(Math.min(a.high,b.high)-Math.max(a.low,b.low)<=t)return false;
+  for(const axis of [0,1])if(Math.min(Math.max(...a.vertices.map(v=>v[axis])),Math.max(...b.vertices.map(v=>v[axis])))-
+    Math.max(Math.min(...a.vertices.map(v=>v[axis])),Math.min(...b.vertices.map(v=>v[axis])))<=t)return false;
   for(const v of [a.vertices,b.vertices])for(let i=0;i<4;i++){
     const p=v[i],q=v[(i+1)%4],ax=-(q[1]-p[1]),az=q[0]-p[0];
     const aa=a.vertices.map(([x,z])=>x*ax+z*az),bb=b.vertices.map(([x,z])=>x*ax+z*az);
     if(Math.min(Math.max(...aa),Math.max(...bb))-Math.max(Math.min(...aa),Math.min(...bb))<=t*Math.hypot(ax,az))return false;
   }return true;
 }
-test('bed mattress and actual frame sizes stay full size at all four approved placement tuples',()=>{
-  for(const [n,x,z,r,w,d] of [['Primary',4.594333333333333,16.15,Math.PI/2,5,80/12],
-    ['Bedroom 2',39.88333333333333,19.325,0,4.5,6.25],['Bedroom 3',3.636,46.5,Math.PI/2,4.5,6.25],
-    ['Bedroom 4',27.214,47.7,-Math.PI/2,4.5,6.25]]){
+test('full-size beds follow the coordinated November 9 bedroom zones',()=>{
+  for(const [n,x,z,r,w,d] of [['Primary',3.8,16.15,Math.PI/2,5,80/12],
+    ['Bedroom 2',38,19.325,0,4.5,6.25],['Bedroom 3',5.5,49.9,Math.PI,4.5,6.25],
+    ['Bedroom 4',26.5,49.9,Math.PI,4.5,6.25]]){
     const bed=item(`${n} bed`),m=bed.children.find(m=>m.name==='Bed mattress');
     close(bed.position.x,x);close(bed.position.z,z);close(bed.rotation.y,r);close(m.geometry.w,w);close(m.geometry.d,d);
     assert.ok(bed.children.some(m=>m.geometry.w===w+.2&&m.geometry.d===d+.2));
   }
 });
-test('all five independent full-size nightstands remain at the approved SVG locations',()=>{
-  for(const [n,x,z] of [['Primary nightstand 1',2.125,12.3],['Primary nightstand 2',2.125,19.95],
-    ['Bedroom 2 nightstand',36.65833333333333,17.35],['Bedroom 3 nightstand',1.375,49.85],['Bedroom 4 nightstand',29.275,51.25]]){
-    const o=item(n);close(o.position.x,x);close(o.position.z,z);
+test('five independent nightstands face bed-foot retrieval, never across a mattress',()=>{
+  for(const [n,x,z,r] of [['Primary nightstand 1',1.2,12.6,Math.PI/2],['Primary nightstand 2',1.2,19.7,Math.PI/2],
+    ['Bedroom 2 nightstand',34.7,17.35,0],['Bedroom 3 nightstand',2.2,52,Math.PI],['Bedroom 4 nightstand',29.8,52,Math.PI]]){
+    const o=item(n);close(o.position.x,x);close(o.position.z,z);close(o.rotation.y,r);
     assert.ok(o.children.some(m=>m.geometry.w===1.55&&m.geometry.h===1.9&&m.geometry.d===1.5));
   }
 });
 test('four desks and chairs match full-size SVG footprints rather than shrinking for compact bedrooms',()=>{
-  for(const [n,x,z,r,cx,cz] of [['Primary',8.8,8.6,0,8.8,10.65],['Bedroom 2',37.5,25.45,Math.PI,37.5,23.65],
-    ['Bedroom 3',10,52.35,Math.PI,10,50.3],['Bedroom 4',20.1,46.9,Math.PI/2,21.85,47.05]]){
+  for(const [n,x,z,r,cx,cz] of [['Primary',8.8,8.6,0,8.8,10.65],['Bedroom 2',34,25.45,Math.PI,34,23.4],
+    ['Bedroom 3',6.4,41.6,0,6.4,43.65],['Bedroom 4',25.1,41.6,0,25.1,43.65]]){
     const d=item(`${n} writing desk`),chair=item(`${n} desk chair`);
     close(d.position.x,x);close(d.position.z,z);close(d.rotation.y,r);
     close(chair.position.x,cx);close(chair.position.z,cz);
@@ -81,10 +102,11 @@ test('four desks and chairs match full-size SVG footprints rather than shrinking
 });
 test('five full-size reading seats and primary media composition remain; no loft rugs or bedroom dressers',()=>{
   for(const n of ['Primary sitting chair 1','Primary sitting chair 2','Bedroom 2 reading chair','Bedroom 3 reading chair','Bedroom 4 reading chair']){
-    const o=item(n),b=bounds(o);close(b.maxX-b.minX,2.35);close(b.maxZ-b.minZ,2.25);
+    const o=item(n),b=bounds(o),rotated=Math.abs(Math.sin(o.rotation.y))>.5;
+    close(b.maxX-b.minX,rotated?2.25:2.35);close(b.maxZ-b.minZ,rotated?2.35:2.25);
   }
   item('Primary sitting side table');item('Primary media console');item('Primary wall TV');
-  assert.ok(!model.group.children.some(o=>/Loft|rug|dresser/i.test(o.name)));
+  assert.ok(!model.group.children.some(o=>/rug|dresser/i.test(o.name)));
 });
 test('central gallery has one full-size sofa and a cohesive four-piece lounge clear of walls and stair routes',()=>{
   const sofa=item('Gallery sofa'),coffee=item('Gallery coffee table'),chair=item('Gallery armchair'),side=item('Gallery side table');
@@ -109,7 +131,7 @@ test('Version H rectangular primary closet retains its two full bays, short retu
   for(const [n,width] of [['Primary closet long hanging',5],['Primary closet double hanging',5],['Primary closet return hanging',2]]){
     const o=item(n);assert.ok(o.children.some(m=>m.geometry.w===width&&m.geometry.d===2));
   }
-  item('Primary closet east return shelves');item('Primary closet folded clothes');item('Primary closet drawers');
+  item('Primary closet north return shelves');item('Primary closet folded clothes');item('Primary closet drawers');
   const door=model.plan.walls.find(w=>w.name==='Bath south');assert.equal(door.openings.length,1);
   assert.equal(model.plan.walls.find(w=>w.name==='Primary closet south').openings.length,0);
 });
@@ -150,10 +172,10 @@ test('Version H finished area excludes unfinished attic and keeps the ground pla
   const {getLivableFloorArea,getGroundFloorDefaultPlan}=require('../assets/js/floor-plan-ground.js');
   const before=JSON.stringify(model.plan);
   const gross=p=>getLivableFloorArea({...p,floors:[...p.floors,model.baseline.arrival],stairs:model.baseline.stairs},{includeStairs:true});
-  close(gross(model.plan),1850.5858333333333);
-  close(gross(model.plan)+getLivableFloorArea(getGroundFloorDefaultPlan(),{includeStairs:true}),3774.918541666667);
+  close(gross(model.plan),2020.7629166666663);
+  close(gross(model.plan)+getLivableFloorArea(getGroundFloorDefaultPlan(),{includeStairs:true}),3945.095625);
   assert.equal(JSON.stringify(model.plan),before);
-  assert.ok(!model.areas.some(a=>a.x>42.6));
+  assert.equal(model.areas.filter(a=>a.x>42.6).length,1);
   const attic=model.group.children.find(o=>o.userData.areaCounted===false);
   assert.ok(attic&&attic.userData.storageOnly&&!attic.userData.walkOnApproved);
   assert.ok(!attic.children.some(o=>o.userData.walkSurface));
@@ -167,7 +189,7 @@ test('replanned suite constituents clear walls trim handles and one another with
     assert.ok(!overlap(constituent(a),constituent(b),.001),`${fixtures[i].name} hits ${fixtures[j].name}`);
   // Include faucet projections and actual hanging side panels, not symbol boxes.
   close((bounds(item('Primary north vanity')).minZ-bounds(item('Primary freestanding tub')).maxZ)*12,71.1);
-  close((bounds(item('Primary closet double hanging')).minX-bounds(item('Primary closet long hanging')).maxX)*12,45.6);
+  close((bounds(item('Primary closet long hanging')).minZ-bounds(item('Primary closet folded clothes')).maxZ)*12,47.4);
 });
 test('all sixteen room leaves clear the full retained suite through 496 poses',()=>{
   const doors=[];model.group.traverse(o=>{if(o.userData.interactiveHouseDoor)doors.push(o);});
@@ -208,7 +230,7 @@ test('retained vanity fronts and closet drawers operate individually without fix
   }
   assert.equal(poses,341,'Seven vanity leaves and four drawers, 31 samples each');
   // Closed routes above are not simultaneous open-front passing approval.
-  close((bounds(item('Primary closet double hanging')).maxZ),26.495);
+  close((bounds(item('Primary closet double hanging')).maxZ),26.5);
 });
 test('swapped Bath 2 and Closet 2 fixtures stay in their actual distinct rooms and do not overlap',()=>{
   const t=bounds(item('Bedroom 2 toilet')),v=bounds(item('Bedroom 2 vanity'));
@@ -227,8 +249,11 @@ test('Version H side-by-side laundry machines face south with all seven standard
   assert.deepEqual(bases(north),[2,2]);assert.deepEqual(bases(south),[2,2,3]);
   const n=bounds(north.children.find(m=>m.name==='North laundry countertop'));
   const s=bounds(south.children.find(m=>m.name==='South laundry countertop'));
-  close(n.minX,32.45);close(s.minX,31.45);close((s.minZ-n.maxZ)*12,45.3);
-  const attic=item('Attic storage-only bases - support approval required');
+  close(n.minX,32.45);close(s.minX,31.55);close((s.minZ-n.maxZ)*12,45.3);
+  const filler=model.group.children.find(o=>o.name==='Laundry west separate trim-side filler');
+  assert.ok(filler);close(filler.geometry.w*12,1.43);
+  close(bounds(filler).maxX,31.6,'Separate fitted filler meets standard west base, not an odd-width box');
+  const attic=item('Finished loft retained standard bases');
   assert.deepEqual(bases(attic),[3,2]);assert.equal(attic.userData.supportApproved,false);
   item('Laundry wall cupboards');item('Laundry north cupboards');
   const mech=item('Mechanical equipment reservation');close(mech.position.x,38.4);close(mech.position.z,39.25);
@@ -378,7 +403,7 @@ test('12-inch avatar reaches all rooms and a continuous 24-inch disk reaches the
   }
   const queue=flood();
   const destinations={'primary bedroom':[11,22.5],'primary bath':[21.5,14.5],'primary WC':[16.5,11],
-    'primary closet':[19.5,23],'bedroom 2':[35,18],'Bath 2':[37.5,11.25],'Closet 2':[30,11.25],
+    'primary closet':[19.5,23],'bedroom 2':[33,20],'Bath 2':[37.5,11.25],'Closet 2':[30,11.25],
     'bedroom 3':[8,44],'Closet 3':[15,43],'bedroom 4':[22.5,42.5],'Closet 4':[18,49.5],
     'Bath 3 approach':[4,39],'Bath 4 approach':[29,39.5],laundry:[38,31.25],mechanical:[41.5,37],
     'gallery sofa approach':[20.5,33.75],'gallery chair approach':[23.5,37.5]};
@@ -390,5 +415,231 @@ test('12-inch avatar reaches all rooms and a continuous 24-inch disk reaches the
     const wider=flood();
     for(const [name,p] of Object.entries({'primary bedroom':[11,22.5],'primary closet':[19.5,23],'primary bath':[21.5,14.5],'WC approach':[16.5,11.25],'gallery north route':[21.5,28.25],'laundry approach':[29.5,31.25]}))
       assert.ok(wider.some(([x,z])=>Math.hypot(x-p[0],z-p[1])<.2),`Continuous 24-inch disk route to ${name}, not a code/person standard`);
+    // Sample the usable length of EVERY rod front, not one destination at
+    // an aisle's end. 24-inch model disk is a design probe, not a person/code.
+    const fronts=[
+      ...[15.75,16.75,17.75,18.75,20.75,21.75,22.75,23.75,25.9].map(x=>[x,23.25]),
+      ...[9.5,10.5,11.5,12].map(z=>[30.125,z]),
+      ...[41.9,42.9,43.9,44.9].map(z=>[15.375,z]),
+      ...[13.75,14.75,15.75,16.75,17.75].map(x=>[x,49.875]),
+      ...[15.8,16.8,17.8,18.3].map(x=>[x,21.8]),
+      [19.65,21.575],...[24.5,25.5,26.5].map(x=>[x,22.05]),
+      ...[18.5,19.5,20.5,21.5].map(z=>[31.05,z]),
+      ...[46.1,47,47.9].map(z=>[9.5,z]),
+      ...[44.2,45.2,46.2,47.2].map(z=>[21.7,z])
+    ];
+    for(const [x,z] of fronts)assert.ok(wider.some(([a,b])=>Math.hypot(a-x,b-z)<.26),`Continuous full hanging/shelf/drawer-front access at ${x},${z}`);
   }finally{for(const d of doors)d.rotation.y=d.userData.interactiveHouseDoor.closedRotationY;}
+});
+
+test('all sixteen leaves clear their own jambs, adjacent walls, casings and baseboards at 31 poses',()=>{
+  const doors=[];model.group.traverse(o=>{if(o.userData.interactiveHouseDoor)doors.push(o);});
+  const isDoor=m=>{for(let p=m;p;p=p.parent)if(p.userData.interactiveHouseDoor)return true;return false;};
+  const obstacles=model.group.children.filter(o=>o.name.startsWith('Upstairs wall:')).flatMap(meshes).filter(m=>!isDoor(m))
+    .map(m=>({m,shape:constituent(m)}));
+  const conflicts=new Set();let poses=0;
+  for(const d of doors){
+    const closed=d.rotation.y;
+    try{for(let a=0;a<=90;a+=3){
+      d.rotation.y=closed+a*Math.PI/180*d.userData.interactiveHouseDoor.openRotationSign;
+      model.group.updateMatrixWorld(true);
+      for(const m of meshes(d))for(const o of obstacles)if(overlap(constituent(m),o.shape,.001))
+        conflicts.add(`${d.name} / ${o.m.parent.name} / ${o.m.name}`);
+      poses++;
+    }}finally{d.rotation.y=closed;}
+  }
+  assert.equal(poses,496);assert.deepEqual([...conflicts],[]);
+  for(const d of doors){
+    const host=d.parent;
+    assert.equal(host.children.filter(m=>m.name==='Upstairs painted door jamb lining').length,host.children.filter(m=>m.userData.interactiveHouseDoor).length*2);
+  }
+});
+
+test('tight corner casing constituents clear perpendicular returns, including projecting head caps',()=>{
+  for(const [name,adjacent] of [['Laundry west','Laundry notch return'],['Bedroom 4 north','Bedroom 4 east'],['Laundry south','Service east']]){
+    const host=item(`wall: ${name}`),target=meshes(item(`wall: ${adjacent}`)).filter(m=>m.name==='Upstairs partition');
+    const casing=host.children.filter(o=>o.name==='Craftsman opening casing').flatMap(meshes);
+    for(const m of casing)for(const w of target)assert.ok(!overlap(constituent(m),constituent(w),.001),`${name} ${m.name} crosses ${adjacent}`);
+  }
+});
+
+test('wet trays and relocated storage clear dry trim while the adjacent bedroom finish survives',()=>{
+  const walls=model.group.children.filter(o=>o.name.startsWith('Upstairs wall:')).flatMap(meshes);
+  const retained=['West bath shower','East bath shower','Bedroom 2 closet hanging','Bedroom 4 closet hanging',
+    'Bedroom 2 closet shelves','Bedroom 3 closet shelves','Bedroom 4 closet shelves','Laundry south bases'];
+  for(const name of retained)for(const m of meshes(item(name)))for(const w of walls)
+    assert.ok(!overlap(constituent(m),constituent(w),.001),`${name} / ${w.parent.name} / ${w.name}`);
+  const wall=item('wall: Bedroom 3 north');
+  assert.ok(wall.children.some(m=>m.name==='Upstairs white baseboard'&&m.position.z>0&&
+    bounds(m).minX<=6.175&&bounds(m).maxX>=9.175),'Bedroom side of wet interface retains its own dry finish');
+});
+
+test('production hollow cabinets, real handles and complete drawer boxes operate through full travel',()=>{
+  const runtime=build(layout.empty(),true),fronts=[];
+  assert.equal(runtime.lighting.filter(r=>r.lowLevel).length,5);
+  runtime.group.traverse(o=>{if(o.userData.interactiveCabinet)fronts.push(o);});
+  assert.ok(fronts.length>40);assert.ok(meshes(runtime.group).some(m=>m.name==='Pull-out drawer floor'));
+  const conflicts=new Set();let poses=0;
+  for(const f of fronts){
+    const moving=new Set(meshes(f)),op=f.userData.interactiveCabinet,c=op.closed;
+    // Include actual hollow carcass panels, other fronts, pulls, room leaves,
+    // partition bodies, casing and baseboard, not an empty body's group bounds.
+    const obstacles=meshes(runtime.group).filter(m=>!moving.has(m)&&!m.userData.walkSurface).map(m=>({m,shape:constituent(m)}));
+    try{for(let i=0;i<=30;i++){
+      const t=i/30;
+      f.position.set(c.x,c.y,c.z);f.rotation.y=c.rotation;
+      if(op.kind==='drawer'){
+        f.position.x+=Math.sin(c.rotation)*op.travel*t;f.position.z+=Math.cos(c.rotation)*op.travel*t;
+      }else{
+        const a=op.hingeSide*Math.PI/2*t,h=op.hingeSide*f.userData.width/2;
+        f.rotation.y+=a;
+        f.position.x+=h*(Math.cos(c.rotation)-Math.cos(c.rotation+a));
+        f.position.z+=h*(-Math.sin(c.rotation)+Math.sin(c.rotation+a));
+      }
+      runtime.group.updateMatrixWorld(true);
+      for(const m of moving)for(const o of obstacles)if(overlap(constituent(m),o.shape,.001))
+        conflicts.add(`${f.parent.name} / ${m.name} vs ${o.m.parent.name} / ${o.m.name}`);
+      poses++;
+    }}finally{f.position.set(c.x,c.y,c.z);f.rotation.y=c.rotation;}
+    runtime.toggleCabinet(f);assert.equal(op.open,true);runtime.toggleCabinet(f);assert.equal(op.open,false);
+    close(f.position.x,c.x);close(f.position.z,c.z);close(f.rotation.y,c.rotation);
+  }
+  assert.equal(poses,fronts.length*31);assert.deepEqual([...conflicts],[]);
+});
+
+test('closet access sections retain full storage, with folded bays deliberately relocated rather than shrunk',()=>{
+  const primaryFront=bounds(item('Primary closet long hanging')).minZ;
+  close((primaryFront-bounds(item('Primary closet folded clothes')).maxZ)*12,47.4);
+  close((primaryFront-bounds(item('Primary closet drawers')).maxZ)*12,44.4);
+  // 36-inch nominal single-sided wardrobe goals; paint/trim and panel
+  // allowances produce the actual minimum below, not an accessibility claim.
+  const c2=bounds(item('Bedroom 2 closet hanging'));
+  close((c2.minX-(28.25+.175+.0625))*12,34.95);
+  const c3=bounds(item('Bedroom 3 closet hanging'));
+  close((c3.minX-(12.35+.175+.0625))*12,48.15);
+  const c4=bounds(item('Bedroom 4 closet hanging'));
+  close(((51.8-.175-.0625)-c4.maxZ)*12,34.35);
+  for(const [name,x,z,w] of [['Bedroom 2',29.15,20,4.6],['Bedroom 3',11.4,47,3.1],['Bedroom 4',19.8,45.7,4.5]]){
+    const s=item(`${name} closet shelves`);close(s.position.x,x);close(s.position.z,z);
+    assert.equal(s.children.filter(m=>m.geometry?.w===w&&m.geometry?.d===1.3).length,6);
+  }
+});
+
+test('all four desk chairs can pull nine inches away from their desks without entering retained furniture or shell',()=>{
+  const desks=['Primary','Bedroom 2','Bedroom 3','Bedroom 4'];
+  for(const name of desks){
+    const c=item(`${name} desk chair`),{x,z}=c.position;
+    const obstacles=model.group.children.filter(o=>o!==c&&o.name!==`Upstairs ${name} writing desk`).flatMap(meshes);
+    try{
+      c.position.x+=Math.sin(c.rotation.y)*.75;c.position.z+=Math.cos(c.rotation.y)*.75;
+      model.group.updateMatrixWorld(true);
+      for(const m of meshes(c))for(const o of obstacles)assert.ok(!overlap(constituent(m),constituent(o),.001),`${name} occupied chair / ${o.parent.name}`);
+    }finally{c.position.x=x;c.position.z=z;}
+  }
+});
+
+test('door sweeps include every retained hanging and shelving bay, including the bedroom-side folded storage',()=>{
+  const doors=[];model.group.traverse(o=>{if(o.userData.interactiveHouseDoor)doors.push(o);});
+  const storage=model.group.children.filter(o=>/closet (shelves|drawers|.*hanging|folded clothes|north return shelves)$/.test(o.name)).flatMap(meshes).map(constituent);
+  const conflicts=new Set();
+  for(const d of doors){const r=d.rotation.y;
+    try{for(let a=0;a<=90;a+=3){d.rotation.y=r+a*Math.PI/180*d.userData.interactiveHouseDoor.openRotationSign;
+      for(const m of meshes(d))for(const s of storage)if(overlap(constituent(m),s,.001))conflicts.add(d.name);
+    }}finally{d.rotation.y=r;}
+  }
+  assert.deepEqual([...conflicts],[]);
+});
+
+test('finished loft threshold is a continuous modeled walking surface with support still unapproved',()=>{
+  const threshold=model.group.children.find(o=>o.name==='Upstairs floor: Finished loft doorway');
+  const t=bounds(threshold),reservation=bounds(model.group.children.find(o=>o.name==='Upstairs floor: Finished loft'));
+  close(t.minX,42+7/12);close(t.maxX,reservation.minX);close((t.maxX-t.minX)*12,2.7);
+  close(t.minZ,29.8);close(t.maxZ,32.8);
+  assert.ok(threshold.userData.walkSurface);
+  const loft=model.group.children.find(o=>o.userData.finishedIntent&&o.userData.areaCounted);
+  assert.equal(loft.userData.walkOnApproved,false);assert.equal(loft.userData.supportApproved,false);
+  const floorParts=[threshold,model.group.children.find(o=>o.name==='Upstairs floor: Finished loft')];
+  for(const f of floorParts){const m=constituent(f);close(m.high,10);close(m.low,9.76);}
+});
+
+test('Bath 2 toilet is centred between the actual counter and shower, with no product/code approval implied',()=>{
+  const x=item('Bedroom 2 toilet').position.x,v=bounds(item('Bedroom 2 vanity')),s=bounds(item('Bedroom 2 shower'));
+  close((x-v.maxX)*12,15.2);close((s.minX-x)*12,15.2);
+});
+
+test('finished eastern loft is exactly the southern half, with one floor and northern excluded void',()=>{
+  const g=upper.getUpstairsMeasuredGeometry(),r=model.rooms.find(r=>r.name==='Finished loft');
+  close(r.x,g.east+.225);close(r.z,27.725);close(r.z+r.d,g.atticSouth);
+  close(r.w,12.691666666666663);close(r.d,12.725);
+  close(r.w*r.d,161.5014583333333);
+  close(r.w*r.d/((g.atticEast-r.x)*(g.atticSouth-g.atticNorth)),.5);
+  assert.equal(model.plan.floors.filter(f=>f.name==='Finished loft').length,1);
+  assert.equal(model.mapLabels.filter(([n])=>n==='Finished loft').length,1);
+  const north=model.group.children.find(o=>o.userData.storageOnly);
+  close(north.userData.bounds.z,g.atticNorth);close(north.userData.bounds.d,r.d);
+  assert.ok(!north.userData.areaCounted&&!north.userData.walkOnApproved);
+  assert.equal(north.children.length,0);
+  assert.ok(!model.areas.some(a=>a.x>g.east&&a.z<r.z));
+  const clear=upper.getUpstairsRoomClearDimensions(r,model.plan.walls);
+  close(clear.w,12.516666666666662);close(clear.d,12.375);
+  const gallery=model.rooms.find(r=>r.name==='Gallery');
+  close(gallery.x,14.35);close(gallery.z,26.75);close(gallery.d,8.35);
+});
+
+test('loft actual panel vertices provide a flat nine-foot ceiling and keep the laundry door approach clear',()=>{
+  const roof=require('../assets/js/floor-plan-roof.js'),section=roof.getFinishedLoftSection();
+  const loft=model.group.children.find(o=>o.userData.finishedIntent&&o.userData.areaCounted);
+  const ceiling=loft.children.find(o=>o.userData.tourCeiling);
+  assert.equal(ceiling.visible,false);
+  const vertices=ceiling.geometry.attributes.position.array;
+  for(let i=0;i<12;i+=3)close(vertices[i+1],9);
+  for(let i=12;i<vertices.length;i+=3)close(vertices[i+1],9.05);
+  close(section.heightAt(55.5)*12,108);
+  close(section.framingReserveFeet,1.5);
+  close(loft.userData.minimumModeledHeadroomFeet,9);
+  for(const key of ['supportApproved','walkOnApproved','headroomApproved','conditioningApproved'])assert.equal(loft.userData[key],false);
+  const custom=loft.children.filter(o=>o.geometry?.attributes?.position&&!o.userData.tourCeiling).map(m=>{
+    const v=m.geometry.attributes.position.array,x=[],y=[],z=[];
+    for(let i=0;i<v.length;i+=3){x.push(v[i]);y.push(v[i+1]+10);z.push(v[i+2]);}
+    return {vertices:[[Math.min(...x),Math.min(...z)],[Math.max(...x),Math.min(...z)],
+      [Math.max(...x),Math.max(...z)],[Math.min(...x),Math.max(...z)]],low:Math.min(...y),high:Math.max(...y)};
+  });
+
+  test('production navigation restores the loft ceiling only during upstairs tours',()=>{
+    const source=fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'),'utf8');
+    const context={upstairs:model,activeFloor:'upstairs',groundLayoutPreview:null,navigationMode:'rotate',
+      currentView:'upstairs-finished-loft',startWalking:()=>true,stopWalking(){},
+      controls:{mouseButtons:{},touches:{}},THREE:{MOUSE:{},TOUCH:{}},navigationButtons:[],
+      walkControls:{querySelector:()=>({})},viewport:{classList:{toggle(){}},setAttribute(){},focus(){}},setTourStatus(){}};
+    const start=source.indexOf('  function setNavigationMode('),end=source.indexOf('  navigationButtons.forEach((button) => {',source.indexOf('    if (walking) viewport.focus',start));
+    assert.ok(start>0&&end>start);
+    vm.runInNewContext(source.slice(start,end),context);
+    let ceiling;model.group.traverse(o=>{if(o.userData.tourCeiling)ceiling=o;});
+    for(const [floor,mode,visible] of [['upstairs','walk',true],['upstairs','rotate',false],
+      ['ground','walk',false],['ground','rotate',false],['upstairs','walk',true],['upstairs','move',false]]){
+      context.activeFloor=floor;context.setNavigationMode(mode);assert.equal(ceiling.visible,visible);
+    }
+  });
+  const boxes=meshes(loft).map(constituent),bases=meshes(item('Finished loft retained standard bases')).map(constituent);
+  const door=item('wall: Laundry east').children.find(o=>o.userData.interactiveHouseDoor),closed=door.rotation.y;
+  try{
+    for(let a=0;a<=90;a+=3){
+      door.rotation.y=closed+a*Math.PI/180*door.userData.interactiveHouseDoor.openRotationSign;
+      for(const m of meshes(door))for(const wall of [...custom,...boxes,...bases])
+        assert.ok(!overlap(constituent(m),wall,.001),`Laundry door versus new loft at ${a} degrees`);
+    }
+  }finally{door.rotation.y=closed;}
+  // Continuous 24-inch model disk along direct entry and across the room,
+  // plus a southward approach to the retained cabinet fronts. Not a code probe.
+  for(const [a,b] of [[[42.81,31.3],[48.5,31.3]],[[48.5,31.3],[48.5,39]]]){
+    const n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/.1);
+    for(let i=0;i<=n;i++){
+      const x=a[0]+(b[0]-a[0])*i/n,z=a[1]+(b[1]-a[1])*i/n;
+      for(const p of [...custom,...boxes,...bases].filter(p=>p.low<16&&p.high>10.1)){
+        const xs=p.vertices.map(v=>v[0]),zs=p.vertices.map(v=>v[1]);
+        const dx=Math.max(Math.min(...xs)-x,0,x-Math.max(...xs)),dz=Math.max(Math.min(...zs)-z,0,z-Math.max(...zs));
+        assert.ok(Math.hypot(dx,dz)>=1-1e-7,`24-inch loft route ${x},${z}`);
+      }
+    }
+  }
 });

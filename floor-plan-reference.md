@@ -149,27 +149,98 @@ the current live H combined estimate after both moves is 3,774.92 sq ft.
 Version I downstairs SVG reflects the move (its upstairs study stays intact).
 Earlier wall, clearance and area values below are superseded.
 
-## Active upstairs model - Version H restoration, November 9
+## Active upstairs model - Version H interiors, November 9
 
-The normal viewer uses historical H production source from `ec82799`, not a
-separate preview. Four bedrooms, central gallery lounge, notched laundry and
-compact service rooms return; garage attic remains unfinished storage only.
+The normal viewer uses the restored H shell from `ec82799` with the coordinated
+November 9 interior repairs, not a separate preview. Four bedrooms, central gallery lounge, notched laundry and
+compact service rooms remain; the southern half of the eastern garage attic
+is now a finished loft, not a reduction of the central gallery.
 H exterior wall centerlines: north z7.4, east x42.583333, front z53.8,
 front closet recess z51.8; service row z35.1–40.45. The canonical staircase,
 44-inch arrival, latest stepped stringers and full upper-flight guard remain.
 Keep all sixteen 96-inch doors in their restored closed default poses.
 
-Current exterior-measured estimate: 1st 1,924.33 /2nd 1,850.59 /total 3,774.92
-sq ft, including descending stairs on their respective floors and excluding
+Current exterior-measured estimate: 1st 1,924.33 /2nd 2,020.76 /total 3,945.10
+sq ft, including the finished loft intent, subject to conditioning/headroom
+eligibility review (not certified ANSI area), descending stairs on their respective floors and excluding
 stair gaps, garage, unfinished attic, porch and basement. Upstairs has 12
 openings /17 casements; whole house 27 openings /47 units. Shared/furnished
 openings, H front gables, east attic shed and drainage concept agree.
 The central lounge north route is 36.15 inches; its 16.2-inch coffee reach
-gap is not a route. See current room notes for restored furniture/access checks.
+gap is not a route. Primary queen (3.8,16.15) retains west headboard/east media;
+its two nightstands now open east with full 15.6-inch travel. Bedroom 2 full
+bed is (38,19.325), desk (34,25.45), preserving the north bath approach.
+Front full beds at (5.5,49.9)/(26.5,49.9) have south headboards, north desks
+at (6.4,41.6)/(25.1,41.6) and opposite north reading corners. All five
+nightstands, four 48 x 21.6-inch desks/chairs and five reading seats remain.
+Nine-inch chair pull-out clears modeled furnishings; no rugs/new TV/dressers.
+
+Primary closet: continuous south 60/60/24-inch hanging bays; north 48-inch
+folded shelves, 14.4-inch shallow shelf bay and 48-inch four-drawer bank.
+Measured front sections: 47.4 inches to shelves, 44.4 to closed drawer hardware,
+30 with a drawer fully extended. Closets 2/3/4 retain full 51/60/67.2-inch
+double-hanging bays with 34.95/48.15/34.35-inch minimum front sections.
+Their complete six-level 55.2/37.2/54-inch, 15.6-inch-deep folded-storage bays
+move to their own bedroom walls at (29.15,20)/(11.4,47)/(19.8,45.7), respectively.
+This explicit bedroom-side storage trade-off preserves contents and depths
+instead of squeezing opposing runs into walk-ins. Bedrooms 3/4 shelf-to-bed
+aisles are 34.8/44.4 inches. Continuous 24-inch model-disk routes sample every
+hanging front; not a person/accessibility/code standard.
+
+All sixteen 96-inch-head doors retain closed defaults and 90-degree travel.
+Axes offset 3.755 inches toward the swing side beyond paint/casing/half leaf.
+Only three necessary interior corner corrections move apertures, without
+changing widths: laundry west 3 inches south to z30.05–33.05; Bath 4's eastern
+door in Bedroom 4 north 3 inches west to x28.35–30.85; laundry/mechanical
+1.5 inches west to x39.225–42.225. Slim casing clears perpendicular returns.
+Actual jamb/stop/hinge and rated-assembly detailing remain supplier/professional
+holds. Wet baseboards clip at trays on the wet face only; adjacent dry finish
+survives. Laundry south counter/run shifts 1.2 inches east, retaining standard
+24/24/36-inch boxes and the 45.3-inch counter aisle before hardware.
+Bath 2 toilet centre (38.141667,8.6) is 15.2 inches from counter/shower each
+side, not sanitary/product approval. Its partition-side vanity leaf reverses
+handing so its actual pull clears.
+
+Four bathrooms plus enclosed WC each have independent 2700 K downward-wash
+nightlight faceplate centres at +10.8 inches, actual emitters +9.84 inches,
+on clear wall piers away from cabinet motion.
+Real light and diffuser restore through Night/Day, plans and floors independently
+of ceiling-can display; products, wet listing/GFCI/circuit/control approval
+remain unresolved. Loft doorway has a flush 2.7-inch modeled walking threshold;
+real support, conditioning, headroom eligibility, garage separation and
+electrical approval remain required reviews. See current bedroom/bath and
+[upstairs notes](upstairs.html#model-study) for placements and operating limits.
 Latest downstairs shifts, z18 fireplace/seating, kitchen/prep and straight
 kids wall/piano bay are preserved. Saved layout JSON and I SVG remain intact.
-Structural support, guards/headroom, egress, attic access/loads, garage fire
-separation, selected products and simultaneous occupied use need review.
+
+Finished eastern loft, November 9: old slab x42.808333–55.5,
+z15–40.45, 12.691667 × 25.45 ft = 323.002917 sq ft. New north partition
+is exactly z27.725; retain SOUTHERN z27.725–40.45, full width,
+12.691667 × 12.725 ft = 161.501458 sq ft, exactly half. Northern half is an
+unfinished excluded roof void with no tan floor reservation or tour surface.
+New white painted nine-foot walls and flat ceiling, white baseboards and matching
+hardwood coordinate with the laundry's retained 36 × 96-inch east doorway.
+Both standard 36/24-inch base boxes remain, shifted 3 inches north to
+(49.8,36.05) so full cupboard travel clears the new south baseboard; no new TV/seating.
+Plan room/dimensions, room camera, actual warm light and model tour include
+the finished half once. Ceiling is cut away for plans/inspection and restored
+in tours. The owner's full nine-foot ceiling requirement supersedes the
+earlier sloped lining: finished floor to ceiling underside is exactly
+9 ft /108 inches throughout the room. Raise the east-falling shed 24 inches,
+retaining its approximately 1.81:12 pitch, and extend its west edge to
+x42.358333 to overlap the wing wall. Coordinate the service return, wall-head
+closures, fascia, soffits and rainwater leader with that shared roof.
+The assembly reserves .16-ft roof skin, 1.5-ft provisional vertical framing/services
+and .05-ft lining above the flat ceiling. The half-loft footprint, floor area,
+exterior openings and other room layouts are unchanged. Actual rafter, insulation,
+fire-rated separation, floor loads/connections, egress, HVAC/conditioning,
+electrical and northern maintenance access need professional design approval.
+Regression and production-mesh checks include 496 room-leaf poses against
+own/adjacent walls, casings, baseboards and furniture, and 1,519 poses across
+49 cabinet fronts including hollow panels, drawer boxes and actual handles.
+Close fronts before passing. Structural support, guards/headroom, egress,
+attic access/loads, garage fire separation, selected products, waterproofing,
+electrical certification and simultaneous occupied use need review.
 
 ## Historical upstairs model - Version I adoption, November 8 (superseded)
 
@@ -368,7 +439,10 @@ review or occupied-use approval is claimed. Verify selected handles, stopped
 drawer withdrawal, grille/service ventilation, cutouts/finished returns,
 anti-tip anchorage, floor loads, structure and services before installation.
 
-## Restored active upstairs arrangement - Version H, November 6 source
+## Historical H restoration baseline - November 6 source, interiors superseded November 9
+
+Historical record only: retain its H shell, but use the active November 9
+interior schedule above for furniture, storage, door detailing and validation.
 
 At that review, the owner adopted the upstairs portion of
 `assets/images/plans/upstairs-2000/version-h.svg` in the furnished Three.js

@@ -201,8 +201,8 @@ test('wall lights have correctly oriented mounting plates and porch housings mee
     !['Garage hip', 'Garage front gable', 'Dining rear projection'].includes(d.id)));
   for (const fixture of upper.slice(-2)) {
     const { x, y, z } = fixture.position;
-    close(x, context.measuredUpper.east + .45);
-    assert.ok(x > context.measuredUpper.east + .225, 'Lens is beyond finished upper wall, not in attic');
+    close(x, context.measuredUpper.atticEast + .45);
+    assert.ok(x > context.measuredUpper.atticEast + .225, 'Lens is outside the actual loft/attic wall, not above its ceiling');
     const face = plan.faces.find(f => roof.contains(f.polygon, [x, z]));
     close(y, roof.heightAt(face.plane, [x, z]) - .16);
   }

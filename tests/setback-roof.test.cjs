@@ -6,14 +6,29 @@ const upper=require('../assets/js/floor-plan-upstairs.js');
 test('old loft transition is removed and roof abutments follow the Version H service edge',()=>{
   assert.deepEqual(roof.getSetbackRoofDefinitions(),[]);
   const g=upper.getUpstairsMeasuredGeometry();
-  const expected=[g.east+.225,15,g.east+.225,g.bedNorth+.225,
+  const expected=[g.east-.225,15,g.east-.225,g.bedNorth+.225,
     g.southEast+.225,g.bedNorth+.225,g.serviceEast+.225,g.bedNorth+.225];
   roof.getSetbackAbutments().flat().forEach((v,i)=>assert.ok(Math.abs(v-expected[i])<1e-8));
   for(const d of roof.getLowerRoofDefinitions().filter(d=>d.id.startsWith('Garage')&&!/gable|hip/.test(d.id))){
     for(const r of upper.getUpstairsDefaultPlan(require('../assets/js/upstairs-layout.js').stairOpening()).rooms){
       const [l,right,n,s]=d.bounds;
-      assert.ok(Math.min(right,r.x+r.w-.175)<=Math.max(l,r.x+.175) ||
-        Math.min(s,r.z+r.d-.175)<=Math.max(n,r.z+.175),`${d.id} does not penetrate ${r.name}`);
+      if(r.ceilingProfile==='garage-loft'){
+        const section=roof.getFinishedLoftSection();
+        const left=Math.max(l,r.x),east=Math.min(right,r.x+r.w),north=Math.max(n,r.z),south=Math.min(s,r.z+r.d);
+        if(east>left&&south>north)for(const x of [left,east])for(const z of [north,south]){
+          const skin=Math.min(...d.planes.map(p=>roof.heightAt(p,[x,z])));
+          assert.ok(skin<=9.76||skin-.16-section.framingReserveFeet-section.liningDepthFeet>=10+section.heightAt(x)-1e-7,
+            `${d.id} clears the actual flat nine-foot finished-loft assembly at ${x},${z}`);
+        }
+        continue;
+      }
+      const west=Math.max(l,r.x+.175),east=Math.min(right,r.x+r.w-.175);
+      const north=Math.max(n,r.z+.175),south=Math.min(s,r.z+r.d-.175);
+      if(east>west&&south>north)for(const x of [west,east])for(const z of [north,south]){
+        const skin=Math.min(...d.planes.map(p=>roof.heightAt(p,[x,z])));
+        assert.ok(skin<=9.76||skin-.16-1.5>=19-1e-7,
+          `${d.id} stays below the floor or above the nine-foot room and framing at ${r.name}/${x},${z}`);
+      }
     }
   }
 });

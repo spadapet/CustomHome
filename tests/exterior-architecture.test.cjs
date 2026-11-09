@@ -29,8 +29,9 @@ test('paired cross-gables center on fixed bedroom banks with measured rise and s
   const attic = defs.find(d => d.id === 'Garage attic storage roof');
   close(height([garage],43.25,42.7),9.65);
   assert.ok(height(defs,43.25,39)>20.6,'Shared upper wing roofs the actual full-height service rooms');
-  close(attic.bounds[0]-measured.east,.75);
-  assert.ok(attic.bounds[0]>measured.east+.225,'Attic roof stays beyond the east window host and exterior face');
+  close(attic.bounds[0]-measured.east,-.225);
+  assert.ok(height([attic],measured.east,30.7)-.16>19+1.5,
+    'Raised shed overlaps the wing wall above its window heads and full loft assembly');
   assert.ok(height(defs,attic.bounds[0],30.7)-.16>18,'Attic eave remains above the 8-ft laundry window head');
 });
 

@@ -220,7 +220,11 @@ test('model refresh reloads fresh files into Whole floor and Rotate by default',
 test('attic approval warning stays in optional room notes, not clipped onto the exterior facade', () => {
   const html = read('floor-plan-3d.html');
   const source = read('assets/js/floor-plan-3d.js');
-  assert.match(html, /<strong>Unfinished attic storage is excluded from area, not a tour floor or approved walk-on storage; framing, loads, access and headroom require review\.<\/strong>/);
+  const optional=html.slice(html.indexOf('<aside class="design-notes"'),html.indexOf('</aside>'));
+  assert.match(optional, /<strong>Finished eastern loft is exactly the southern half:/);
+  assert.match(optional, /Northern unfinished roof void stays area-excluded and not a tour floor/);
+  assert.match(optional, /Floor loads\/support, roof support, garage fire separation/);
+  assert.match(optional, /flat 9-ft \/108-inch ceiling throughout/);
   assert.doesNotMatch(source, /mudroomLabel\([^\n]*ATTIC: STORAGE ONLY/);
 });
 
@@ -264,11 +268,12 @@ test('floor-plan archive preserves both revisions and marks the shower option as
     getUpstairsRoomClearDimensions: scope.getUpstairsRoomClearDimensions,
     upstairs: { rooms: upstairsPlan.rooms, plan: upstairsPlan },
     viewport: { clientWidth: 960, clientHeight: 720 },
-    camera: { left: -36, right: 36, top: 36, bottom: -36, zoom: 1 },
+    camera: { left: -36, right: 36, top: 36, bottom: -36, zoom: 1,
+      updateMatrixWorld() { this.worldUpdated = true; } },
     stairFloorToFloor: 10,
     THREE: { Vector3: class {
       constructor(x = 0, y = 0, z = 0) { this.x = x; this.y = y; this.z = z; }
-      project() { return this; }
+      project(camera) { assert.equal(camera.worldUpdated,true,'Plan labels project the updated camera, not its preceding room pose');return this; }
     } }
   };
   const start = source.indexOf('  let groundLayoutPreview = null;');
@@ -282,6 +287,7 @@ test('floor-plan archive preserves both revisions and marks the shower option as
     assert.equal(elements['plan-dimensions'].hidden, false);
     assert.equal(elements['plan-dimension-labels'].children.length, rooms.length);
     assert.equal(elements['plan-dimension-list'].children.length, rooms.length);
+    context.camera.worldUpdated=false;
     context.positionPlanDimensions();
     rooms.forEach((room, index) => {
       const label = elements['plan-dimension-labels'].children[index];

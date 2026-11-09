@@ -8,7 +8,7 @@ const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior
 const upperPlan = require('../assets/js/floor-plan-upstairs.js');
 function drawMeasuredUpper(context) {
   const start = source.indexOf('  const measuredUpper =');
-  const end = source.indexOf('  // Compact service rooms cover', start);
+  const end = source.indexOf('  const garageFacadeEaves =', start);
   assert.ok(start > 0 && end > start);
   vm.runInNewContext(source.slice(start, end), { ...upperPlan, upper: 10, eaves: 19, ...context });
 }

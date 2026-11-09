@@ -86,9 +86,11 @@ test('paired true cross-gables articulate the front while the garage remains sub
     assert.ok(Math.abs(api.signedArea(api.intersectPolygons(face.polygon,footprint)))<1e-7,
       'Lower visible garage gable never overlaps the full-height service interiors');
   }
-  const wingAtAbutment = roof.faces.filter((face) => face.roof === 'East rear wing');
-  assert.ok(wingAtAbutment.some((face) => face.polygon.some((point) => Math.abs(point[1] - (g.bedNorth + .75)) < 1e-6)),
-    'Upper wing keeps its eave over the new service south wall');
+  const abutment=[g.serviceEast-.5,g.bedNorth+.75];
+  const wingAtAbutment=roof.faces.filter(face=>api.contains(face.polygon,abutment));
+  assert.ok(wingAtAbutment.some(face=>['East rear wing','Garage service return'].includes(face.roof)
+    &&heightAt(face.plane,abutment)-.16>=19+1.5),
+  'Wing or coordinated raised return covers the service south abutment above full room framing');
 });
 
 test('compact main and wing have 3:12 hips with a framing allowance; garage retains its low 6:12 minimum hip', () => {

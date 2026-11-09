@@ -31,8 +31,17 @@ function getUpstairsFrontWindows() {
   }));
 }
 
+// Exact half of the former garage-attic floor reservation, not the gallery.
+function getUpstairsLoftGeometry() {
+  const g = getUpstairsMeasuredGeometry();
+  const x = g.east + .225, z = (g.atticNorth + g.atticSouth) / 2;
+  return { x, z, w: g.atticEast - x, d: g.atticSouth - z };
+}
+
 function getUpstairsRoomClearDimensions(room, walls) {
   const allowance = (axis, coordinate) => {
+    // Loft west bound is already the finished lining face, not a centerline.
+    if (room.ceilingProfile === 'garage-loft' && axis === 'x' && Math.abs(coordinate-room.x)<.001) return 0;
     const along = axis === 'x' ? ['z1', 'z2', room.z, room.z + room.d] : ['x1', 'x2', room.x, room.x + room.w];
     const candidates = walls.filter(w => Math.abs(w[`${axis}1`] - coordinate) < .001
       && Math.abs(w[`${axis}2`] - coordinate) < .001)
@@ -113,6 +122,8 @@ function getUpstairsDefaultPlan(stairOpening) {
     room('Bedroom 4', ce, sn, se, s),
     room('Bedroom 4 closet', cw, g.southClosetDivider, ce, g.southClosetSouth),
     room('Mechanical (relocated)', fw, ss, g.serviceEast, sn),
+    { name: 'Finished loft', ...getUpstairsLoftGeometry(), ceilingProfile: 'garage-loft',
+      finishedIntent: true, conditioningApproved: false, headroomApproved: false },
     { ...room('Gallery', p, ps, g.laundryWest, ss), circulationOnly: true }
   ];
   const floors = [];
@@ -134,6 +145,7 @@ function getUpstairsDefaultPlan(stairOpening) {
   }
   slab('Central gallery', p, ps, g.laundryWest - p, ss - ps);
   slab('Bedroom 2 entry notch', g.laundryWest, ln, g.laundryNotchEast - g.laundryWest, g.laundryNotchSouth - ln);
+  slab('Finished loft doorway', e, 29.8, .225, 3, 'Finished loft');
   const arrivalLeft = stairOpening.x + stairOpening.width;
   const arrivalDepth = stairOpening.depth - 44 / 12 - 0.25;
   const arrival = { x: arrivalLeft, z: stairOpening.z + stairOpening.depth - arrivalDepth, w: 44 / 12, d: arrivalDepth };
@@ -168,9 +180,9 @@ function getUpstairsDefaultPlan(stairOpening) {
     ['Laundry north', g.laundryNotchEast, ln, le, ln],
     ['Laundry notch west', g.laundryNotchEast, ln, g.laundryNotchEast, g.laundryNotchSouth],
     ['Laundry notch return', g.laundryWest, g.laundryNotchSouth, g.laundryNotchEast, g.laundryNotchSouth],
-    ['Laundry west', g.laundryWest, g.laundryNotchSouth, g.laundryWest, ss, [door(0)]],
+    ['Laundry west', g.laundryWest, g.laundryNotchSouth, g.laundryWest, ss, [door(.25)]],
     ['Laundry east', le, ln, le, ss, [door(3.05)]],
-    ['Laundry south', g.bath4West, ss, g.serviceEast, ss, [door(11.95)]],
+    ['Laundry south', g.bath4West, ss, g.serviceEast, ss, [door(11.825)]],
     ['West bath north', 0, ss, 9.35, ss],
     ['West bath entry', 9.35, ss, 9.35, sn],
     ['East bath entry', g.bath4West, ss, g.bath4West, sn],
@@ -184,11 +196,14 @@ function getUpstairsDefaultPlan(stairOpening) {
     ['Closet divider', cw, g.southClosetDivider, ce, g.southClosetDivider],
     ['Bedroom 4 closet', ce, sn, ce, g.southClosetSouth, [door(8.5, 2.5)]],
     ['Closet 4 east return', ce, g.southClosetSouth, ce, s, [], [-1]],
-    ['Bedroom 4 north', cw, sn, se, sn, [door(6.95, 2.5), door(16.25, 2.5)]],
+    ['Bedroom 4 north', cw, sn, se, sn, [door(6.95, 2.5), door(16, 2.5)]],
     ['Bedroom 4 east', se, sn, se, s, [], [1]],
     ['Linen furnace divider', fw, ss, fw, sn],
     ['Service east', g.serviceEast, ss, g.serviceEast, sn, [], [1]],
-    ['Service south', se, sn, g.serviceEast, sn, [], [-1]]
+    ['Service south', se, sn, g.serviceEast, sn, [], [-1]],
+    ['Finished loft north', g.east + .225, (g.atticNorth + g.atticSouth) / 2, g.atticEast, (g.atticNorth + g.atticSouth) / 2],
+    ['Finished loft south', g.east + .225, g.atticSouth, g.atticEast, g.atticSouth],
+    ['Finished loft east', g.atticEast, (g.atticNorth + g.atticSouth) / 2, g.atticEast, g.atticSouth]
   ];
   const windows = [
     ...getUpstairsSideWindows(),
@@ -225,6 +240,7 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   areas.push({ ...arrival, elevation });
   const wallHeight = 9;
   for (const wall of plan.walls) {
+    if (wall.name.startsWith('Finished loft ')) continue; // Roof-fitted shell below.
     const { name, x1, z1, x2, z2, openings, sides, thickness } = wall;
     const length = Math.hypot(x2 - x1, z2 - z1);
     const parent = new THREE.Group();
@@ -251,7 +267,16 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
         // Bedroom 2 finish on the other side and gallery-return baseboards.
         if (name === 'Primary closet east' && side === 1 && from === 0) continue;
         if (name === 'Primary closet linen west' && side === -1) continue;
-        box(parent, (start + end) / 2, 1 / 3, side * (thickness / 2 + 0.03125), end - start, 2 / 3, 0.0625, windowTrim).name = 'Upstairs white baseboard';
+        // Clip only the affected finish face at wet trays / fitted wardrobe
+        // backs. In particular retain the Bedroom 3 face of its bath wall.
+        const exclusions = name === 'West bath north' && side === 1 ? [[6.175, 9.175]]
+          : name === 'Bedroom 3 north' && side === -1 ? [[6.175, 9.175]]
+          : name === 'Linen furnace divider' && side === 1 ? [[.175, 5.175]]
+          : name === 'Closet 2 east' && side === 1 ? [[1.05, 5.5]]
+          : [];
+        let spans = [[start, end]];
+        for (const [a, b] of exclusions) spans = spans.flatMap(([l, r]) => r <= a || l >= b ? [[l, r]] : [[l, Math.min(r, a)], [Math.max(l, b), r]].filter(([u, v]) => v > u));
+        for (const [a, b] of spans) box(parent, (a + b) / 2, 1 / 3, side * (thickness / 2 + 0.03125), b - a, 2 / 3, 0.0625, windowTrim).name = 'Upstairs white baseboard';
       }
     }
     let cursor = 0;
@@ -262,8 +287,8 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
       if (bottom === 0) for (const side of sides) {
         // Slim side boards at the two front entries keep the projecting head
         // caps clear of the perpendicular bathroom/closet wall returns.
-        const sideWidth = ['Bedroom 3 north', 'Bedroom 4 north', 'Primary suite entry', 'Bath south'].includes(name) ? 0.75 / 12 : 3.5 / 12;
-        openingCasing(parent, (start + end) / 2, 0, end - start, top, thickness / 2, side, false, { sideWidth });
+        const sideWidth = ['Bedroom 3 north', 'Bedroom 4 north', 'Primary suite entry', 'Bath south', 'Laundry west', 'Laundry south'].includes(name) ? 0.75 / 12 : 3.5 / 12;
+        openingCasing(parent, (start + end) / 2, 0, end - start, top, thickness / 2, side, false, { sideWidth, flushHeadEnds: name === 'Laundry west' });
       }
       if (bottom === 0 && end - start <= 3.05) {
         // Deliberate 90-degree operating envelopes, not a 180-degree fold-back
@@ -275,7 +300,24 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
         const closedRotationY = rightHinge ? Math.PI : 0;
         const hinge = new THREE.Group();
         hinge.name = name === 'Toilet partition' && start > 5 ? 'Upstairs Primary bath linen closet door hinge' : `Upstairs ${name} interior door hinge`;
-        hinge.position.set(closedRotationY ? end - 0.02 : start + 0.02, 0, 0);
+        // Surface hinge axis lies beyond paint + casing + half leaf thickness.
+        // Centerline pivots cut their own jamb at intermediate angles. This
+        // rebated/offset-hinge concept retains the aperture and full 90° motion.
+        const openingSide = -(rightHinge ? -1 : 1) * swingSign;
+        const hingeOffset = thickness / 2 + .0625 + .13 / 2 + 1 / 96;
+        // Painted aperture lining and stops complete the offset-leaf concept;
+        // these sit behind its closing face, not across the operating sweep.
+        // Lining/wall contact is intentional joinery, not a second partition.
+        const jambDepth = thickness + .125;
+        for (const [edge, direction] of [[start, -1], [end, 1]]) {
+          box(parent, edge + direction * .02, top / 2, 0, .04, top, jambDepth, windowTrim).name = 'Upstairs painted door jamb lining';
+          box(parent, edge + direction * .005, top / 2, openingSide * (jambDepth / 2 + .005),
+            .05, top, .01, windowTrim).name = 'Upstairs door jamb stop';
+        }
+        box(parent, (start + end) / 2, top + .02, 0, end - start, .04, jambDepth, windowTrim).name = 'Upstairs painted door head lining';
+        box(parent, (start + end) / 2, top + .005, openingSide * (jambDepth / 2 + .005),
+          end - start, .05, .01, windowTrim).name = 'Upstairs door head stop';
+        hinge.position.set(closedRotationY ? end - 0.02 : start + 0.02, 0, openingSide * hingeOffset);
         hinge.rotation.y = closedRotationY;
         hinge.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: swingSign, closedRotationY }, nominalOpeningFeet: end - start };
         parent.add(hinge);
@@ -393,12 +435,12 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   }
   const primaryCenterX = g.primaryEast / 2;
   const primaryWestWall = plan.walls.find(wall => wall.name === 'Primary west');
-  const primaryBedX = 1.161 + (80 / 12 + 0.2) / 2;
+  const primaryBedX = 3.8;
   for (const [name, x, z, mattressWidth, mattressLength, rotation, bedsideSide] of [
     ['Primary bed', primaryBedX, 16.15, 5, 80 / 12, Math.PI / 2, -1],
-    ['Bedroom 2 bed', 39.88333333333333, 19.325, 4.5, 6.25, 0, -1],
-    ['Bedroom 3 bed', .411 + 6.45 / 2, 46.5, 4.5, 6.25, Math.PI / 2, -1],
-    ['Bedroom 4 bed', 23.989 + 6.45 / 2, 47.7, 4.5, 6.25, -Math.PI / 2, 1]
+    ['Bedroom 2 bed', 38, 19.325, 4.5, 6.25, 0, -1],
+    ['Bedroom 3 bed', 5.5, 49.9, 4.5, 6.25, Math.PI, 1],
+    ['Bedroom 4 bed', 26.5, 49.9, 4.5, 6.25, Math.PI, -1]
   ]) {
     const bed = furniture(name, x, z, rotation, true);
     const width = mattressWidth + 0.2, length = mattressLength + 0.2;
@@ -415,32 +457,32 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
       const lampMount = name === 'Primary bed'
         ? { x: primaryWestWall.x1 + primaryWestWall.thickness / 2 + 0.04, z: side < 0 ? 18.8 : 14.95, rotation: Math.PI / 2 }
         : name === 'Bedroom 2 bed'
-          ? { x: g.bedEast - 0.215, z: 19.75, rotation: -Math.PI / 2 }
+          ? { x: g.bedEast - .215, z: 19.75, rotation: -Math.PI / 2 }
           : name === 'Bedroom 3 bed'
-            ? { x: 0.215, z: z - dx, rotation: Math.PI / 2 }
-            : { x: g.southEast - 0.215, z: z + dx, rotation: -Math.PI / 2 };
+            ? { x: 2.2, z: g.south - .215, rotation: Math.PI }
+            : { x: 29.8, z: g.south - .215, rotation: Math.PI };
       wallLamp(`${name} bedside wall lamp ${side < 0 ? 'left' : 'right'}`, lampMount.x, lampMount.z, lampMount.rotation);
     }
   }
-  // Full-size independent cabinets at the SVG coordinates.
-  for (const [name, x, z] of [
-    ['Primary nightstand 1', 2.125, 12.3], ['Primary nightstand 2', 2.125, 19.95],
-    ['Bedroom 2 nightstand', 36.65833333333333, 17.35], ['Bedroom 3 nightstand', 1.375, 49.85],
-    ['Bedroom 4 nightstand', 29.275, 51.25]
-  ]) cabinet(furniture(name, x, z, 0, true), 0, 0, 1.55, 1.9, 1.5, 2);
+  // Drawer fronts face the bed-foot direction, never across the mattress.
+  for (const [name, x, z, rotation] of [
+    ['Primary nightstand 1', 1.2, 12.6, Math.PI / 2], ['Primary nightstand 2', 1.2, 19.7, Math.PI / 2],
+    ['Bedroom 2 nightstand', 34.7, 17.35, 0], ['Bedroom 3 nightstand', 2.2, 52, Math.PI],
+    ['Bedroom 4 nightstand', 29.8, 52, Math.PI]
+  ]) cabinet(furniture(name, x, z, rotation, true), 0, 0, 1.55, 1.9, 1.5, 2);
   const primaryDeskSeat = desk('Primary', 8.8, 8.6, 0);
   primaryDeskSeat.position.set(8.8, 0, 10.65);
-  const bed2DeskSeat = desk('Bedroom 2', 37.5, 25.45, Math.PI);
-  bed2DeskSeat.position.set(37.5, 0, 23.65);
-  const bed3DeskSeat = desk('Bedroom 3', 10, 52.35, Math.PI);
-  bed3DeskSeat.position.set(10, 0, 50.3);
-  const bed4DeskSeat = desk('Bedroom 4', 20.1, 46.9, Math.PI / 2);
-  bed4DeskSeat.position.set(21.85, 0, 47.05);
+  const bed2DeskSeat = desk('Bedroom 2', 34, 25.45, Math.PI);
+  bed2DeskSeat.position.set(34, 0, 23.4);
+  const bed3DeskSeat = desk('Bedroom 3', 6.4, 41.6, 0);
+  bed3DeskSeat.position.set(6.4, 0, 43.65);
+  const bed4DeskSeat = desk('Bedroom 4', 25.1, 41.6, 0);
+  bed4DeskSeat.position.set(25.1, 0, 43.65);
   // Exact desk footprints remain; mount task lights on paint, not at a
   // guessed offset or through the closet/bedroom opening.
   for (const [name, x, z] of [
-    ['Primary', 8.8, g.north + .215], ['Bedroom 2', 37.5, g.primarySouth - .215],
-    ['Bedroom 3', 10, g.south - .215], ['Bedroom 4', g.southClosetEast + .215, 46.9]
+    ['Primary', 8.8, g.north + .215], ['Bedroom 2', 34, g.primarySouth - .215],
+    ['Bedroom 3', 6.4, g.bedNorth + .215], ['Bedroom 4', 25.1, g.bedNorth + .215]
   ]) {
     const light = group.children.find(o => o.name === `Upstairs ${name} desk wall lamp`);
     light.position.set(x, 0, z);
@@ -456,8 +498,8 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   const primaryTV = furniture('Primary wall TV', g.primaryEast - 0.235, 19.6, -Math.PI / 2);
   box(primaryTV, 0, 4.7, 0, 4, 2.3, 0.12, black).name = 'Primary TV screen';
   loungeChair('Bedroom 2 reading chair', 40.825, 24.725);
-  loungeChair('Bedroom 3 reading chair', 5.125, 51.675);
-  loungeChair('Bedroom 4 reading chair', 26.975, 52.275);
+  loungeChair('Bedroom 3 reading chair', 1.6, 44.3, -Math.PI / 2);
+  loungeChair('Bedroom 4 reading chair', 29.7, 44.3, Math.PI / 2);
   function vanity(name, x, z, width, rotation = 0) {
     const item = furniture(name, x, z, rotation);
     box(item, 0, 1.3, 0, width, 2.6, 1.8, oak).userData.cabinetBody = 'z+';
@@ -474,6 +516,9 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
       const front = box(item, -width / 2 + (index + 0.5) * width / doors, 1.3, 0.935, doorWidth, 2.4, 0.07, oak);
       front.name = 'Upstairs vanity cabinet door';
       front.userData = { cabinetFront: true, width: doorWidth, height: 2.4, hingeSide: index % 2 === 0 ? -1 : 1 };
+      // Bath 2's partition-side door hinges toward the centre of its box,
+      // keeping the real pull projection away from the closet partition.
+      if (name === 'Bedroom 2 vanity' && index === 0) front.userData.hingeSide = 1;
       box(front, 0, 0.2, 0.075, 0.5, 0.06, 0.08, black).name = 'Upstairs vanity handle';
     }
     box(item, 0, 4.7, -0.85, width - 0.1, 2.5, 0.08, steel);
@@ -490,7 +535,7 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   vanity('West bath vanity', 1.85, 36.35, 3);
   vanity('East bath vanity', 29.25, 36.35, 3);
   toilet('Primary toilet', 16.25, 8.65);
-  toilet('Bedroom 2 toilet', 37.95833333333333, 8.6);
+  toilet('Bedroom 2 toilet', 38.141666666666666, 8.6);
   toilet('West bath toilet', 4.725, 36.3);
   toilet('East bath toilet', 32.175, 36.3);
   for (const [name, x, z, w, d, rotation = 0] of [
@@ -529,28 +574,37 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   const laundryCounter = furniture('Laundry folding counter', 32.5, 27.95);
   for (const x of [1, 3]) cabinet(laundryCounter, x, 0, 2, 2.8, 2, 2, true);
   box(laundryCounter, 2, 2.95, .05, 4.1, .15, 2.1, cream).name = 'North laundry countertop';
-  const southCounter = furniture('Laundry south bases', 38.5, 33.925, Math.PI);
+  const southCounter = furniture('Laundry south bases', 38.6, 33.925, Math.PI);
   let baseStart = 0;
   for (const width of [2, 2, 3]) {
     cabinet(southCounter, baseStart + width / 2, 0, width, 2.8, 2, 2, true);
     baseStart += width;
   }
+  const fillerStart = g.laundryWest + g.t / 2 + .0625 + .01;
+  const fillerEnd = 38.6 - 7;
+  box(group, (fillerStart + fillerEnd) / 2, 1.4, 33.925,
+    fillerEnd - fillerStart, 2.8, 2, oak).name = 'Laundry west separate trim-side filler';
   box(southCounter, 3.5, 2.95, .05, 7.1, .15, 2.1, cream).name = 'South laundry countertop';
   const furnace = furniture('Mechanical equipment reservation', 38.4, 39.25);
   box(furnace, 0, 3, 0, 2.5, 6, 2, steel);
-  hangingBay('Primary closet long hanging', 16.6, 23.95, 5, Math.PI / 2);
-  hangingBay('Primary closet double hanging', 22.4, 23.95, 5, -Math.PI / 2, true);
-  shelving('Primary closet folded clothes', 17.1, 20, 4);
-  shelving('Primary closet east return shelves', 15.15, 21.35, 1.2, -Math.PI / 2, .75);
-  hangingBay('Primary closet return hanging', 26.55, 24.575, 2, 0, true);
-  const closetDresser = furniture('Primary closet drawers', 25.7, 20.05);
+  hangingBay('Primary closet long hanging', 17.2, 25.5, 5, Math.PI);
+  hangingBay('Primary closet double hanging', 22.3, 25.5, 5, Math.PI, true);
+  shelving('Primary closet folded clothes', 16.9, 19.9, 4);
+  shelving('Primary closet north return shelves', 19.65, 19.9, 1.2, 0, .75);
+  hangingBay('Primary closet return hanging', 25.9, 25.5, 2, Math.PI, true);
+  const closetDresser = furniture('Primary closet drawers', 25.65, 19.95);
   cabinet(closetDresser, 0, 0, 4, 2.9, 1.4, 4);
-  hangingBay('Bedroom 2 closet hanging', 32.4, 11.275, 4.25, -Math.PI / 2, true);
-  shelving('Bedroom 2 closet shelves', 30.9, 8.35, 4.6);
-  hangingBay('Bedroom 3 closet hanging', 15.4, 45.1, 5, Math.PI, true);
-  shelving('Bedroom 3 closet shelves', 17.85, 42.35, 3.1, -Math.PI / 2);
-  hangingBay('Bedroom 4 closet hanging', 15.55, 47.8, 5.6, 0, true);
-  shelving('Bedroom 4 closet shelves', 15, 50.8, 4.5, Math.PI);
+  hangingBay('Bedroom 2 closet hanging', 32.4, 10.675, 4.25, -Math.PI / 2, true);
+  // This five-foot closet cannot hold opposing 24 / 15.6-inch runs with
+  // a useful aisle. Retain the intact folded-storage bay on the bedroom's
+  // solid west wall, immediately outside the wardrobe approach.
+  shelving('Bedroom 2 closet shelves', 29.15, 20, 4.6, Math.PI / 2);
+  hangingBay('Bedroom 3 closet hanging', 17.6, 43.45, 5, -Math.PI / 2, true);
+  shelving('Bedroom 3 closet shelves', 11.4, 47, 3.1, -Math.PI / 2);
+  hangingBay('Bedroom 4 closet hanging', 15.55, 47.7, 5.6, 0, true);
+  // Preserve the complete shelf bay/contents in its bedroom, not a shallow
+  // substitute across Closet 4's unusable 16-inch aisle.
+  shelving('Bedroom 4 closet shelves', 19.8, 45.7, 4.5, Math.PI / 2);
 
   const sofa = furniture('Gallery sofa', 21.5, 31.5, Math.PI, true);
   sofa.userData = { viewerFurniture: true, widthFeet: 7, depthFeet: 3, heightFeet: 2.8, productSelected: false };
@@ -568,17 +622,61 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   box(endTable, 0, 1.8, 0, 1.5, .15, 1.5, oak, true);
   for (const x of [-.6, .6]) for (const z of [-.6, .6]) box(endTable, x, .85, z, .1, 1.7, .1, black);
 
+  const loft = new THREE.Group();
+  loft.name = 'Upstairs Finished loft - professional approval required';
+  const section = HomeRoof.getFinishedLoftSection(elevation);
+  loft.userData = { finishedIntent: true, areaCounted: true, supportApproved: false,
+    walkOnApproved: false, headroomApproved: false, conditioningApproved: false,
+    minimumModeledHeadroomFeet: section.heightAt(g.atticEast),
+    framingReserveFeet: section.framingReserveFeet };
+  group.add(loft);
+  const footprint = getUpstairsLoftGeometry();
+  // Northern half is an unmodeled, unfinished roof void, not another tan floor.
   const attic = new THREE.Group();
-  attic.name = 'Upstairs Attic storage - support and access approval required';
-  attic.userData = { storageOnly: true, areaCounted: false, walkOnApproved: false, supportApproved: false, headroomApproved: false };
+  attic.name = 'Upstairs Northern unfinished attic - excluded roof void';
+  attic.userData = { storageOnly: true, areaCounted: false, walkOnApproved: false,
+    supportApproved: false, headroomApproved: false,
+    bounds: { ...footprint, z: g.atticNorth, d: footprint.z - g.atticNorth } };
   group.add(attic);
-  const atticWest = g.east + .225;
-  box(attic, (atticWest + g.atticEast) / 2, -.12, (g.atticNorth + g.atticSouth) / 2,
-    g.atticEast - atticWest, .24, g.atticSouth - g.atticNorth, oak).name = 'Attic storage floor reservation - not a walk surface';
-  for (const z of [g.atticNorth, g.atticSouth]) box(attic, (atticWest + g.atticEast) / 2, 4, z, g.atticEast - atticWest, 8, .22, wallMaterial);
-  box(attic, g.atticEast, 4, (g.atticNorth + g.atticSouth) / 2, .22, 8, g.atticSouth - g.atticNorth, wallMaterial);
-  const atticBases = furniture('Attic storage-only bases - support approval required', 49.8, 36.3);
-  atticBases.userData = { storageOnly: true, supportApproved: false };
+  function finishedPanel(name, x1, x2, z1, z2, bottom, ceiling = false) {
+    const points = [];
+    for (const [x, z] of [[x1,z1],[x2,z1],[x2,z2],[x1,z2]]) points.push([x, ceiling ? section.heightAt(x) : bottom, z]);
+    for (const [x, z] of [[x1,z1],[x2,z1],[x2,z2],[x1,z2]]) points.push([x, section.heightAt(x) + (ceiling ? .05 : 0), z]);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(points.flat(), 3));
+    geometry.setIndex([0,2,1,0,3,2,4,5,6,4,6,7,0,1,5,0,5,4,1,2,6,1,6,5,2,3,7,2,7,6,3,0,4,3,4,7]);
+    geometry.computeVertexNormals();
+    const mesh = new THREE.Mesh(geometry, wallMaterial);
+    mesh.name = name;
+    mesh.userData.tourObstacle = !ceiling;
+    loft.add(mesh);
+    return mesh;
+  }
+  for (const wall of plan.walls.filter(w => w.name.startsWith('Finished loft '))) {
+    const vertical = wall.x1 === wall.x2, half = wall.thickness / 2;
+    finishedPanel(`Upstairs wall: ${wall.name}`, wall.x1 - (vertical ? half : 0),
+      wall.x2 + (vertical ? half : 0), wall.z1 - (vertical ? 0 : half),
+      wall.z2 + (vertical ? 0 : half), 0);
+    box(loft, (wall.x1 + wall.x2) / 2 - (vertical ? half + .03125 : 0), 1 / 3,
+      (wall.z1 + wall.z2) / 2 + (vertical ? 0 : wall.name.endsWith('north') ? half + .03125 : -half - .03125),
+      vertical ? .0625 : wall.x2 - wall.x1, 2 / 3,
+      vertical ? wall.z2 - wall.z1 : .0625, windowTrim).name = 'Finished loft white baseboard';
+  }
+  // Finish the former exterior face continuously to the exact slab edge.
+  // Retain the existing 36 x 96-inch laundry aperture and its actual casing.
+  for (const [a,b] of [[footprint.z,29.8],[32.8,g.atticSouth]]) {
+    box(loft, g.east + .2, 4.5, (a+b)/2, .05, 9, b-a, wallMaterial).name = 'Finished loft west painted lining';
+    const start=a===32.8?a+.3020833333:a, end=b===29.8?b-.3020833333:b;
+    box(loft, footprint.x+.03125, 1/3, (start+end)/2, .0625, 2/3, end-start, windowTrim).name = 'Finished loft west white baseboard';
+  }
+  box(loft, g.east+.2, 8.5, 31.3, .05, 1, 3, wallMaterial).name = 'Finished loft retained doorway head lining';
+  const ceiling = finishedPanel('Finished loft flat nine-foot painted ceiling', footprint.x, g.atticEast,
+    footprint.z, g.atticSouth, 0, true);
+  ceiling.userData.tourCeiling = true;
+  ceiling.visible = false; // Cutaway views; restored for the actual room tour.
+  // Three inches north clears the new south baseboard at full 36-in leaf travel.
+  const atticBases = furniture('Finished loft retained standard bases', 49.8, 36.05);
+  atticBases.userData = { finishedIntent: true, supportApproved: false };
   cabinet(atticBases, 1.5, 0, 3, 2.8, 2, 2, true);
   cabinet(atticBases, 4, 0, 2, 2.8, 2, 2, true);
   // Owner correction: north/west/south already have walls, not perimeter guards.
@@ -616,4 +714,4 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   return { group, rooms, areas, plan, baseline, dispose, coordinationWarnings, start: [14.625, 33.125], mapLabels: rooms.map((room) => [room.name, room.x + room.w / 2, room.z + room.d / 2]) };
 }
 
-if (typeof module !== 'undefined' && module.exports) module.exports = { getUpstairsRoomClearDimensions, getUpstairsMeasuredGeometry, getUpstairsExteriorSegments, getUpstairsDefaultPlan, getUpstairsFrontWindows, getUpstairsSideWindows, getUpstairsExteriorOpenings };
+if (typeof module !== 'undefined' && module.exports) module.exports = { getUpstairsLoftGeometry, getUpstairsRoomClearDimensions, getUpstairsMeasuredGeometry, getUpstairsExteriorSegments, getUpstairsDefaultPlan, getUpstairsFrontWindows, getUpstairsSideWindows, getUpstairsExteriorOpenings };

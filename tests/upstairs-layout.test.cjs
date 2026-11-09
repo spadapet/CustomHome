@@ -58,7 +58,8 @@ test('gallery is continuous unique floor coverage around the stair without orpha
   for(const [x,z] of [[11,33],[14,33],[16.5,33],[22,33],[26,30],[20,38],[26.5,25]]){
     assert.equal([...plan.floors,baseline.arrival].filter(f=>x>=f.x&&x<=f.x+f.w&&z>=f.z&&z<=f.z+f.d).length,1,`${x},${z}`);
   }
-  assert.ok(!plan.floors.some(f=>/loft/i.test(f.name)));
+  assert.equal(plan.floors.filter(f=>f.name==='Finished loft').length,1);
+  assert.ok(!plan.floors.some(f=>/loft/i.test(f.name)&&f.x<42));
 });
 test('Version H suite enters the bathroom then closet and all bedroom entries face the gallery',()=>{
   assert.deepEqual(wall(plan,'Bath south').openings,[[6.35,8.85,0,8]]);
@@ -75,10 +76,10 @@ test('laundry notch, attic route and mechanical entry match exact Version H open
   close(wall(plan,'Laundry west').x1,31.23333333333333);
   for(const name of ['Laundry west','Laundry east']){
     const w=wall(plan,name),o=w.openings[0];
-    close(w.z1+o[0],29.8);close(w.z1+o[1],32.8);
+    close(w.z1+o[0],name==='Laundry west'?30.05:29.8);close(w.z1+o[1],name==='Laundry west'?33.05:32.8);
   }
   const w=wall(plan,'Laundry south'),o=w.openings[0];
-  close(w.x1+o[0],39.35);close(w.x1+o[1],42.35);
+  close(w.x1+o[0],39.225);close(w.x1+o[1],42.225);
   assert.ok(plan.floors.some(f=>f.name==='Bedroom 2 entry notch'&&f.w===1));
   assert.ok(!plan.floors.some(f=>/attic|linen extension/i.test(f.name)));
 });

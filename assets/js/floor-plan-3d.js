@@ -345,6 +345,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     navigationMode = mode;
     if (wasWalking && mode !== 'walk') stopWalking();
     const walking = mode === 'walk';
+    upstairs.group.traverse(part => {
+      if (part.userData.tourCeiling) part.visible = walking && activeFloor === 'upstairs';
+    });
     const moving = mode === 'move' || currentView === 'top' || currentView === 'upstairs-top';
     controls.enableRotate = currentView !== 'top' && currentView !== 'upstairs-top';
     controls.enabled = !walking;
@@ -772,8 +775,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       part('White casing side board', edge * (width / 2 + reveal + sideWidth / 2), (height + reveal + legBottom) / 2, 0.03125, sideWidth, height + reveal - legBottom, 0.0625);
     }
     part('White casing header', 0, height + reveal + 5.5 / 24, 0.03125, outerWidth, 5.5 / 12, 0.0625);
-    part('White casing header bead', 0, height + reveal + 0.03125, 0.05, outerWidth + 0.0625, 0.0625, 0.1);
-    part('White casing projecting cap', 0, height + reveal + 5.5 / 12 + 0.0416667, 0.0625, outerWidth + 0.125, 1 / 12, 0.125);
+    const headOverhang = sillOptions.flushHeadEnds ? 0 : .0625;
+    part('White casing header bead', 0, height + reveal + 0.03125, 0.05, outerWidth + headOverhang, 0.0625, 0.1);
+    part('White casing projecting cap', 0, height + reveal + 5.5 / 12 + 0.0416667, 0.0625, outerWidth + 2 * headOverhang, 1 / 12, 0.125);
   }
 
   const baseTrimSections = [];
@@ -4723,7 +4727,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const format = (area) => Math.round(area).toLocaleString('en-US');
     const output = document.getElementById('livable-area');
     output.textContent = `Area: ~${format(groundArea + upstairsArea)} sq ft`;
-    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs count on the floor from which they descend: first-floor basement stairs and second-floor stairs included; open stair gaps excluded. Active Version H; assumes modeled indoor rooms, including the mechanical closet, are finished and conditioned. Excludes garage, open porch, unfinished attic and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
+    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs count on the floor from which they descend: first-floor basement stairs and second-floor stairs included; open stair gaps excluded. Active Version H; assumes modeled indoor rooms, including the mechanical closet, are finished and conditioned. Includes southern finished loft intent once with a flat nine-foot ceiling, subject to conditioning and finished-area eligibility review; northern unfinished roof void excluded. Excludes garage, open porch, unfinished attic and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
     const firstFloorOutput = document.getElementById('first-floor-area');
     firstFloorOutput.textContent = `1st: ~${format(groundArea)} sq ft`;
     firstFloorOutput.title = output.title;
@@ -4795,6 +4799,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const width = viewport.clientWidth;
     const height = viewport.clientHeight;
     if (planDimensionLabels.hidden) return;
+    // Event-driven view changes project labels before renderer.render updates
+    // the camera inverse; use the actual new plan camera, not its last pose.
+    camera.updateMatrixWorld(true);
     dimensionRooms.forEach((room, index) => {
       const center = new THREE.Vector3(room.x + room.w / 2, activeFloor === 'upstairs' ? stairFloorToFloor : 0, room.z + room.d / 2).project(camera);
       const roomWidth = room.w * width / (camera.right - camera.left) * camera.zoom;
@@ -5324,9 +5331,43 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     // Use actual garage floor pieces rather than its overlapping room envelope.
     for (const [x, z] of [[49.8, 21], [42, 30.5], [42, 41.5]]) fixture(scene, 'Garage', x, ceilingHeight + garageFloorY, z, 2 / 12, 30, 'ground');
     for (const room of upstairs.rooms) {
-      fixture(upstairs.group, room.name, room.x + room.w / 2, upstairs.group.userData.ceilingHeightFeet, room.z + room.d / 2, 2 / 12, /closet|toilet|Linen/.test(room.name) ? 9 : 22, 'upstairs');
+      const x = room.x + room.w / 2;
+      const loftSection = room.ceilingProfile === 'garage-loft' ? HomeRoof.getFinishedLoftSection(upstairs.group.userData.elevationFeet) : null;
+      fixture(upstairs.group, room.name, x, loftSection ? loftSection.heightAt(x) : upstairs.group.userData.ceilingHeightFeet, room.z + room.d / 2, 2 / 12, /closet|toilet|Linen/.test(room.name) ? 9 : 22, 'upstairs');
     }
     const upperDimensions = getUpstairsMeasuredGeometry();
+    // Independent low-level bathroom circuits, separate from ceiling cans.
+    // Generic 2700 K downward-wash intent only, not a selected wet-rated
+    // electrical product. Faceplate centres are +10.8 inches; actual emitters
+    // are +9.84 inches. Shielded downward cones stay inside the room.
+    for (const [name, x, z, rotation] of [
+      ['Primary bath', 28.06, 15, -Math.PI / 2],
+      ['Primary WC', 14.54, 10.5, Math.PI / 2],
+      ['Bath 2', 34.1, 13.21, Math.PI],
+      ['Bath 3', .19, 39, Math.PI / 2],
+      ['Bath 4', 27.59, 39.25, Math.PI / 2]
+    ]) {
+      const group = new THREE.Group();
+      group.name = `${name} independent low-level nightlight`;
+      group.position.set(x, .9, z);
+      group.rotation.y = rotation;
+      group.userData = { colorTemperatureKelvin: 2700, independentNightlight: true, productApproved: false, wetRatingApproved: false, controlIntent: 'Independent dusk/motion circuit; electrician review', glareVerified: false };
+      upstairs.group.add(group);
+      const diffuser = new THREE.MeshStandardMaterial({ color: '#fff1db', emissive: '#ffcf91', emissiveIntensity: 0 });
+      box(group, 0, 0, 0, .22, .3, .025, windowTrim).name = 'Low-level nightlight faceplate';
+      box(group, 0, -.07, .018, .14, .04, .02, diffuser).name = 'Shielded low-level nightlight aperture';
+      const lamp = new THREE.SpotLight('#ffdeb0', 0, 4, Math.PI / 6, 1, 2);
+      lamp.name = 'Bathroom low-level real warm wash';
+      lamp.position.set(0, -.08, .04);
+      lamp.target.position.set(0, -.85, .45);
+      lamp.castShadow = true;
+      lamp.shadow.mapSize.set(256, 256);
+      lamp.shadow.camera.near = .04;
+      lamp.shadow.camera.far = 4;
+      lamp.shadow.bias = -.0001;
+      group.add(lamp, lamp.target);
+      rigs.push({ group, lamp, diffuser, floor: 'upstairs', intensity: 1.2, task: false, lowLevel: true });
+    }
     for (const [x, z] of [
       [12.3, 29], [17, 33], [21.5, 37.5],
       [29.5, (upperDimensions.primarySouth + upperDimensions.laundryNotchSouth) / 2]
@@ -5349,7 +5390,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const rig of homeLighting) {
       const visible = activeFloor === rig.floor && !plan && !(rig.floor === 'ground' && groundLayoutPreview);
       rig.group.visible = visible && (!inspection || rig.task);
-      if (!rig.task) {
+      if (!rig.task && !rig.lowLevel) {
         for (const part of rig.group.children) {
           if (part !== rig.lamp && part !== rig.lamp.target) part.visible = canLightsInput.checked;
         }

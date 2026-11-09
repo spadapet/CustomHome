@@ -117,9 +117,9 @@ test('current house uses exterior faces, includes descending stairs on both floo
   close(first - getLivableFloorArea(ground), stairArea - gap, 'First-floor stairs descend to basement');
   close(second - getLivableFloorArea(upstairs), stairArea - gap, 'Second-floor stairs descend to first floor');
   close(first, 1924.3327083333343);
-  close(second, 1850.5858333333333);
-  assert.ok(second < 2000);
-  close(first + second, 3774.918541666667);
+  close(second, 2020.7629166666663);
+  assert.ok(second > 2000);
+  close(first + second, 3945.095625);
   close((upper.rooms.find(r => r.name === 'Bedroom 4 closet').w) * 2, 13, 'Version H Closet 4 removes the two-foot front strip');
   for (const plan of [ground, upstairs]) {
     const before = JSON.stringify(plan);
@@ -182,8 +182,8 @@ test('both floors use resolved floor geometry and changes recalculate the displa
   assert.match(output.title, /Shared garage walls measured to the garage-side finish/);
   assert.match(output.title, /including the mechanical closet, are finished and conditioned/);
   assert.match(output.title, /Not a certified appraisal/);
-  assert.equal(output.textContent, 'Area: ~3,775 sq ft');
-  assertFloorOutputs(1924.3327083333343, 1850.5858333333333);
+  assert.equal(output.textContent, 'Area: ~3,945 sq ft');
+  assertFloorOutputs(1924.3327083333343, 2020.7629166666663);
   context.groundLayoutPreview = { plan: layout.resolve(ground, layout.empty()) };
   context.updateLivableArea();
   assertFloorOutputs(groundArea, upstairsArea);

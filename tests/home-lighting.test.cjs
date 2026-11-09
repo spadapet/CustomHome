@@ -10,7 +10,7 @@ class Group {
   constructor() {
     this.children = [];
     this.userData = {};
-    this.rotation = {};
+    this.rotation = { x: 0, y: 0, z: 0 };
     this.position = { x: 0, y: 0, z: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } };
   }
   add(...children) { children.forEach((child) => { child.parent = this; this.children.push(child); }); }
@@ -29,13 +29,17 @@ function build() {
         constructor(color, intensity, distance, angle, penumbra, decay) {
           super();
           Object.assign(this, { color, intensity, distance, angle, penumbra, decay, target: new Group() });
+          this.shadow = { mapSize: { set() {} }, camera: {} };
         }
       }
     },
     scene: new Group(), piano: new Group(),
     guestVanity: { children: [{ name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }, { name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }] },
     powderGlow: { emissiveIntensity: 0.45 },
-    upstairs: { group: Object.assign(new Group(), { userData: { ceilingHeightFeet: 9 } }), rooms: [{ name: 'Bedroom 2', x: 31, z: 10, w: 13, d: 12 }] },
+    upstairs: { group: Object.assign(new Group(), { userData: { ceilingHeightFeet: 9, elevationFeet: 10 } }),
+      rooms: [{ name: 'Bedroom 2', x: 31, z: 10, w: 13, d: 12 },
+        { name: 'Finished loft', ...require('../assets/js/floor-plan-upstairs.js').getUpstairsLoftGeometry(), ceilingProfile: 'garage-loft' }] },
+    HomeRoof: require('../assets/js/floor-plan-roof.js'),
     getGroundFloorDefaultPlan: require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan,
     getUpstairsMeasuredGeometry: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry,
     cream: {}, brass: {}, rosewood: {}, windowTrim: {}, black: { clone() { return {}; } }, ceilingHeight: 9, garageFloorY: -1.25,
@@ -75,6 +79,58 @@ test('guest vanity real lights and night glow restore across Day/Night, plans an
   }
 });
 
+test('finished loft real fixture is level at nine feet and restores through plans and floors',()=>{
+  const m=build(),r=m.homeLighting.find(r=>r.group.name.startsWith('Finished loft '));
+  const section=m.HomeRoof.getFinishedLoftSection();
+  assert.ok(r&&!r.group.userData.slopedCeiling);
+  assert.equal(r.group.position.y,9);
+  assert.equal(r.group.rotation.z,0);
+  assert.equal(section.ceilingHeightFeet,9);
+  assert.ok(2/12+.015<section.framingReserveFeet,'Actual regressed body stays within provisional reserve');
+  for(const [floor,view,night,on] of [
+    ['upstairs','upstairs-finished-loft',true,true],['upstairs','upstairs-finished-loft',false,false],
+    ['upstairs','upstairs-top',true,false],['ground','whole',true,false],
+    ['exterior','exterior-east',true,false],['upstairs','upstairs-finished-loft',true,true]]){
+    Object.assign(m,{activeFloor:floor,currentView:view,nightLighting:night});m.updateHomeLighting();
+    assert.equal(r.lamp.visible,on);assert.equal(r.lamp.intensity,on?r.intensity:0);
+    assert.equal(r.diffuser.emissiveIntensity,on?.4:0);
+  }
+});
+
+test('five independent upstairs bathroom nightlights sit low and restore actual illumination separately from ceiling display', () => {
+  const model = build(), lights = model.homeLighting.filter(r => r.lowLevel);
+  assert.equal(lights.length, 5, 'Four bathrooms plus separately enclosed primary WC');
+  for (const r of lights) {
+    assert.equal(r.group.position.y, .9);
+    assert.equal(r.group.userData.independentNightlight, true);
+    assert.equal(r.group.userData.colorTemperatureKelvin, 2700);
+    assert.equal(r.group.userData.wetRatingApproved, false);
+    assert.equal(r.lamp.target.parent, r.group);
+    assert.ok(r.lamp.target.position.y < r.lamp.position.y);
+    assert.ok(r.lamp.distance > 0 && r.intensity > 0);
+    assert.ok(Math.abs(r.group.position.y+r.lamp.position.y-.82)<1e-8);
+    assert.equal(r.lamp.castShadow,true);
+    assert.equal(r.lamp.angle,Math.PI/6,'Narrow low downward wash, not a room-leaking 120-degree cone');
+  }
+  for (const [floor,view,night,on] of [
+    ['upstairs','upstairs-primary-bath',true,true],['upstairs','upstairs',false,false],
+    ['upstairs','upstairs-top',true,false],['ground','whole',true,false],
+    ['exterior','exterior-front',true,false],['upstairs','upstairs-bedroom-2-bath',true,true],
+    ['upstairs','upstairs',true,true]
+  ]) {
+    Object.assign(model,{activeFloor:floor,currentView:view,nightLighting:night});
+    for (const checked of [false,true]) {
+      model.canLightsInput.checked=checked;model.updateHomeLighting();
+      for (const r of lights) {
+        assert.equal(r.lamp.visible,on);assert.equal(r.lamp.intensity,on?1.2:0);
+        assert.equal(r.diffuser.emissiveIntensity,on?.4:0);
+        assert.ok(r.group.children.filter(p=>p!==r.lamp&&p!==r.lamp.target).every(p=>p.visible!==false),
+          'Turning ceiling can display off must not remove low-level sources');
+      }
+    }
+  }
+});
+
 test('warm deep-regressed cans cover both floors with separate unchanged low-output task lamps', () => {
   const model = build();
   const rigs = model.homeLighting;
@@ -91,11 +147,13 @@ test('warm deep-regressed cans cover both floors with separate unchanged low-out
     if (rig.task) {
       assert.ok(rig.group.children.some((part) => part.name === 'Opaque shielding shade'));
       assert.ok(rig.group.children.some((part) => part.name === 'Recessed frosted underside'));
-    } else {
+    } else if (!rig.lowLevel) {
       assert.equal(rig.group.userData.apertureInches, 4);
       assert.equal(rig.group.userData.regressedLensInches, 2);
       assert.equal(rig.group.userData.purpose, 'Whole-room ambient only');
-      assert.equal(rig.group.position.y, rig.group.name.startsWith('Garage') ? 7.75 : 9);
+      assert.equal(rig.group.position.y, rig.group.userData.slopedCeiling
+        ? model.HomeRoof.getFinishedLoftSection().heightAt(rig.group.position.x)
+        : rig.group.name.startsWith('Garage') ? 7.75 : 9);
       const baffle = rig.group.children.find((part) => part.name === 'Deep recessed dark shielding baffle');
       const lens = rig.group.children.find((part) => part.name === 'Deep-regressed frosted lens');
       assert.ok(baffle && lens);
@@ -152,7 +210,7 @@ test('can fixture display is independent of illumination and task lamps across f
             assert.equal(rig.group.visible, visible);
             assert.equal(rig.lamp.visible, visible && night, 'Display toggle must not switch off the beam');
             for (const part of rig.group.children) {
-              if (!rig.task && part !== rig.lamp && part !== rig.lamp.target) {
+              if (!rig.task && !rig.lowLevel && part !== rig.lamp && part !== rig.lamp.target) {
                 assert.equal(part.visible, checked, 'Every trim, baffle and lens follows the display toggle');
               }
             }

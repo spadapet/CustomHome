@@ -10,19 +10,37 @@ const baseline = upper.getUpstairsDefaultPlan(layout.stairOpening());
 const plan = layout.resolve(baseline, layout.empty());
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 
-test('active production upstairs is the verified historical H blob, not the retained I SVG', () => {
-  const bytes = Buffer.from(fs.readFileSync(require.resolve('../assets/js/floor-plan-upstairs.js'), 'utf8').replace(/\r\n/g, '\n'));
-  const hash = crypto.createHash('sha1').update(`blob ${bytes.length}\0`).update(bytes).digest('hex');
-  assert.equal(hash, 'b16b81ffc3ce2ed65ce6ec928953a25d7daba57b');
+test('active H shell data is unchanged except three measured corner repairs, independent of furnishing implementation', () => {
+  // Fingerprint the historical H PLAN DATA, not the entire JS text: the owner
+  // now requests new furnishings/operation. This digest was measured from
+  // 72474b1's getUpstairsDefaultPlan using the same fixed stair, not the redesign.
+  const shell=JSON.parse(JSON.stringify(baseline));
+  // Only the newly authorized eastern half-loft is removed for the historical
+  // shell fingerprint. The entire November 9 furnished interior stays current.
+  shell.rooms=shell.rooms.filter(r=>r.name!=='Finished loft');
+  shell.floors=shell.floors.filter(f=>f.room!=='Finished loft');
+  shell.walls=shell.walls.filter(w=>!w[0].startsWith('Finished loft '));
+  for(const [name,current,original] of [
+    ['Laundry west',[[.25,3.25,0,8]],[[0,3,0,8]]],
+    ['Laundry south',[[11.825,14.825,0,8]],[[11.95,14.95,0,8]]],
+    ['Bedroom 4 north',[[6.95,9.45,0,8],[16,18.5,0,8]],[[6.95,9.45,0,8],[16.25,18.75,0,8]]]
+  ]){
+    const w=shell.walls.find(w=>w[0]===name);
+    w[5].forEach((o,i)=>o.forEach((v,j)=>close(v,current[i][j])));
+    w[5]=original;
+  }
+  assert.equal(crypto.createHash('sha256').update(JSON.stringify(shell)).digest('hex'),
+    '9d6ee15fbc0a0e00ab5d5cc1494925ca59baf0c9292083ebd2f494cf80a3c72b');
   assert.ok(fs.existsSync(require.resolve('../assets/images/plans/upstairs-2000/version-i.svg')));
   const g = upper.getUpstairsMeasuredGeometry();
   close(g.east, 42 + 7 / 12); close(g.north, 7.4); close(g.south, 53.8);
   close(g.southClosetSouth, 51.8);
   assert.equal(g.atticEast, 55.5);
-  assert.equal(plan.rooms.length, 16);
+  assert.equal(plan.rooms.length, 17);
   assert.equal(plan.rooms.filter(r => /^Bedroom [234]$|^Primary bedroom$/.test(r.name)).length, 4);
   assert.ok(plan.rooms.some(r => r.name === 'Gallery'));
-  assert.ok(!plan.rooms.some(r => /Loft|Hallway/.test(r.name)));
+  assert.equal(plan.rooms.filter(r => r.name==='Finished loft').length,1);
+  assert.ok(!plan.rooms.some(r => /Hallway/.test(r.name)));
 });
 
 test('H furnished openings and exterior cuts coordinate without new attic or loft glazing', () => {
@@ -47,7 +65,7 @@ test('H furnished openings and exterior cuts coordinate without new attic or lof
 });
 
 test('H area keeps the current ground plan and stair assembly without counting unfinished attic', () => {
-  close(ground.getLivableFloorArea({...plan, stairs: baseline.stairs, floors: [...plan.floors, baseline.arrival]}, {includeStairs: true}), 1850.5858333333333);
+  close(ground.getLivableFloorArea({...plan, stairs: baseline.stairs, floors: [...plan.floors, baseline.arrival]}, {includeStairs: true}), 2020.7629166666663);
   close(ground.getLivableFloorArea(ground.getGroundFloorDefaultPlan(), {includeStairs: true}), 1924.3327083333343);
   close(baseline.arrival.w * 12, 44);
   assert.equal(plan.walls.flatMap(w => w.openings.filter(o => o[2] === 0)).length, 16);

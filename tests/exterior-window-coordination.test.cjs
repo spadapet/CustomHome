@@ -54,15 +54,15 @@ test('Version H front window pairs retain their measured centers and clear the a
   const attic=definitions.find(d=>d.id==='Garage attic storage roof');
   assert.ok(attic);
   assert.ok(attic.bounds[3]<g.south,'Attic roof stops well before the front bedroom windows');
-  assert.equal(definitions.find(d=>d.id==='East rear wing').bounds[1],attic.bounds[0]);
+  close(definitions.find(d=>d.id==='East rear wing').bounds[1]-attic.bounds[0],.975);
   assert.ok(!plan.windows.some(w=>/Loft/i.test(w[0])));
 });
 
-test('east-side window hosts remain outside the attic roof projection and above its eave', () => {
+test('raised attic roof overlaps the wing wall above, not through, the unchanged side-window heads', () => {
   const eastWindows=getUpstairsExteriorOpenings(g.east,g.bedroom2North,g.east,g.laundryNorth);
   assert.ok(eastWindows.length>=2);
   const attic=roof.getConnectedRoofDefinitions().find(d=>d.id==='Garage attic storage roof');
-  close(attic.bounds[0]-g.east,.75);
+  close(attic.bounds[0]-g.east,-.225);
   for(const window of eastWindows){
     const head=window.sill+window.height;
     assert.ok(roof.heightAt(attic.planes[0],[attic.bounds[0],window.center+g.bedroom2North])-.16>=head,

@@ -19,7 +19,7 @@ test('no bedroom paint-face interior overlaps either actual stepped garage bay',
   for (const name of ['Laundry (relocated)','Shared bath east','Mechanical (relocated)']) {
     assert.ok(garage.some(b=>overlaps(plan.rooms.find(r=>r.name===name),...b)), name);
   }
-  assert.ok(!plan.rooms.some(r=>/Loft/.test(r.name)));
+  assert.equal(plan.rooms.filter(r=>r.name==='Finished loft').length,1);
   assert.deepEqual(JSON.parse(fs.readFileSync(require.resolve('../assets/data/upstairs-layout.json'),'utf8')),layout.empty());
 });
 
@@ -47,7 +47,16 @@ test('actual roof envelope reserves nine-foot walls and 18-inch framing above ev
     const faces=envelope.faces.filter(f=>roof.contains(f.polygon,[x,z]));
     assert.ok(faces.length,`Roof missing at ${x},${z}`);
     const skin=Math.max(...faces.map(f=>roof.heightAt(f.plane,[x,z])));
-    assert.ok(skin-.16-1.5>=19-1e-7,`Nine-foot wall/framing clearance at ${x},${z}: ${skin}`);
+    if(r.room==='Finished loft'){
+      const section=roof.getFinishedLoftSection();
+      const lining=10+section.heightAt(x);
+      assert.ok(skin-section.skinDepthFeet-section.framingReserveFeet-section.liningDepthFeet>=lining-1e-7,
+        `Loft flat lining and full provisional framing reserve at ${x},${z}`);
+      assert.equal(lining,19,`Nine-foot loft ceiling at ${x},${z}`);
+      assert.equal(section.framingReserveFeet,1.5);
+    }else{
+      assert.ok(skin-.16-1.5>=19-1e-7,`Nine-foot wall/framing clearance at ${x},${z}: ${skin}`);
+    }
     count++;
   }
   assert.ok(count>3000);
@@ -55,12 +64,12 @@ test('actual roof envelope reserves nine-foot walls and 18-inch framing above ev
   assert.ok(roof.getLowerRoofDefinitions().some(d=>d.id==='Garage service return'));
 });
 
-test('unfinished attic keeps an 8-ft-6-in modeled underside along its direct access route', () => {
+test('raised shed covers every loft edge with nine-foot ceiling, lining and 18-inch framing', () => {
   const definitions=roof.getConnectedRoofDefinitions();
   const envelope=roof.buildRoofEnvelope(definitions);
   const attic=definitions.find(d=>d.id==='Garage attic storage roof');
   assert.ok(attic);
-  assert.deepEqual(attic.bounds,[g.east+.75,g.atticEast+.7,g.atticNorth-.75,g.atticSouth+.225]);
+  assert.deepEqual(attic.bounds,[g.east-.225,g.atticEast+.7,g.atticNorth-.75,g.atticSouth+.225]);
   const routeZ=(29.8+32.8)/2;
   let minimum=Infinity;
   for(let x=g.east;x<=g.atticEast;x+=.25){
@@ -69,6 +78,21 @@ test('unfinished attic keeps an 8-ft-6-in modeled underside along its direct acc
     const underside=Math.max(...faces.map(f=>roof.heightAt(f.plane,[x,routeZ])))-.16;
     minimum=Math.min(minimum,underside-10);
   }
-  assert.ok(minimum>=8.5-1e-7,`Access-path headroom is ${minimum} ft`);
+  assert.ok(minimum>=9+1.5+.05-1e-7,`Access-path assembly height is ${minimum} ft`);
+  const loft=upper.getUpstairsLoftGeometry(),section=roof.getFinishedLoftSection();
+  for(const x of [loft.x,g.atticEast,g.atticEast+.175])for(const z of [loft.z-.175,loft.z+loft.d+.175]){
+    const faces=envelope.faces.filter(f=>roof.contains(f.polygon,[x,z]));
+    assert.ok(faces.length,`Roof covers finished loft wall at ${x},${z}`);
+    const skin=Math.max(...faces.map(f=>roof.heightAt(f.plane,[x,z])));
+    assert.ok(skin-section.skinDepthFeet-section.framingReserveFeet-section.liningDepthFeet>=19-1e-7,
+      `Full loft assembly clears actual envelope at ${x},${z}: ${skin}`);
+    assert.equal(section.heightAt(x),9);
+  }
+  const service=definitions.find(d=>d.id==='Garage service return');
+  for(let x=attic.bounds[0];x<=attic.bounds[1];x+=.25){
+    const p=[x,attic.bounds[3]];
+    const a=roof.heightAt(attic.planes[0],p),b=Math.min(...service.planes.map(plane=>roof.heightAt(plane,p)));
+    assert.ok(Math.abs(a-b)<1e-7,`Continuous shed/service return at ${x}`);
+  }
   assert.ok(roof.getLowerRoofDefinitions().some(d=>d.id==='Garage attic storage roof'));
 });

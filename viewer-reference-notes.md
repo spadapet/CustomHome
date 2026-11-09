@@ -18,7 +18,9 @@ walls to their garage-side finish. Count basement stairs on 1st and upstairs
 stairs on 2nd; exclude each actual open inter-flight gap. Include the mechanical
 closet provisionally as finished/conditioned; exclude garage, open porch,
 unfinished attic and basement rooms. Current Version H default:
-1st 1,924 / 2nd 1,851 / Area 3,775 sq ft (exact combined 3,774.9185417).
+1st 1,924 / 2nd 2,021 / Area 3,945 sq ft (exact combined 3,945.095625),
+including southern finished-loft intent with a flat nine-foot ceiling, subject
+to conditioning and finished-area eligibility review. The northern unfinished half stays excluded.
 The owner's exterior-measurement preference supersedes the earlier
 inside-wall and once-only stair rules. Latest downstairs wall shifts, z18
 fireplace/seating, kitchen/prep and straight kids wall/piano bay remain.
@@ -31,20 +33,46 @@ Size gives maximum modeled plan bounds, not zoning/buildable
 limits. Controls use short labels; the detailed Sizes list is closed by
 default while 2D room labels remain on. Preserve essential warnings.
 
-## Version H upstairs lounge - November 6
+## Version H coordinated interiors - November 9
 
 Upstairs follows Version H, not the previous Version A linen-extension plan.
 One south-facing 84 x 36-inch couch, 48 x 24-inch coffee table, west-facing
 armchair and 18-inch side table furnish the central gallery. North finished
 route is 36.15 inches; coffee reach gap is 16.2 inches, not a passage.
 Fixed stair and four bedroom entries remain. Sixteen 96-inch doors start
-closed; Bath 2/Closet 3 swing corrections keep open leaves from severing entry
-routes. Cabinet fronts must close before passing. Minor closet/desk-chair
-corrections and current room sizes are in [upstairs notes](upstairs.html#model-study).
-The attic is storage-only, area-excluded, not a tour floor, and approval-required
-for support, loads, access and headroom. Keep this warning in the existing
-optional upstairs room notes, not as text on the exterior facade.
-No loft/rugs/dressers or extra help panel is added.
+closed; offset hinge axes clear casing through full 90-degree motion.
+Three necessary internal corner shifts preserve door widths: laundry west
+3 inches south, eastern Bath 4 entry 3 inches west, laundry/mechanical
+1.5 inches west. Exterior apertures, all other room boundaries and stairs stay.
+Primary bedside drawers face east; front beds face north from south headboards,
+with north desks and opposite reading corners. Full beds, five nightstands,
+four desks/chairs, five reading seats and media stay. Walk-ins are single-sided:
+Closets 2/3/4 front sections 34.95/48.15/34.35 inches; their intact folded bays
+move onto bedroom walls, not out of the model. Primary retains 60/60/24-inch
+hanging, 48-inch four-drawer bank and all shelves; front sections
+47.4 inches to shelves /44.4 to closed pulls /30 at full drawer extension.
+See [upstairs notes](upstairs.html#model-study) for placements and full-front routes.
+Cabinet fronts must close before passing. Five real low-level 2700 K bathroom
+nightlights restore separately from ceiling-can display; wet/electrical/control
+approval is unresolved. The southern eastern-attic half is now a finished loft,
+with a flush 2.7-inch modeled walking threshold. Its 161.501458-sq-ft nominal
+slab is exactly half the original 323.002917-sq-ft reservation; north moves
+from z15 to midpoint z27.725, south remains z40.45. Matching hardwood, white
+painted nine-foot walls/baseboards and flat ceiling; both standard
+36/24-inch bases remain, shifted 3 inches north to z36.05 for full leaf travel
+clear of the new south baseboard. No new seating, rug or TV. Ceiling underside
+is exactly 9 ft /108 inches above the finished floor across the entire room,
+superseding the sloped lining. The shed rises 24 inches at its retained pitch
+and overlaps the wing wall; the service return, closures and rainwater leader
+follow. Above the flat ceiling, reserve .05-ft lining, 1.5-ft provisional
+vertical framing/services and .16-ft roof skin. Ceiling hides in cutaways
+and restores in tours. Room camera,
+dimensions, real warm lighting, area and modeled walking include this half once.
+The northern half is an unfinished roof void, excluded with no exposed tan
+reservation floor or habitable tour. Support, floor loads, garage fire separation,
+insulation/framing, conditioning, egress, headroom eligibility, northern
+maintenance access and electrical work remain professional holds. Keep these
+in optional upstairs room notes, not exterior facade text or extra panels.
 camera/floor and grid choices retain their normal restoration behavior.
 Ground fixtures and saved JSON stay unchanged. Occupied/simultaneous use,
 products, egress, roof weatherproofing and engineering remain unverified.

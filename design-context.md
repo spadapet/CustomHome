@@ -152,18 +152,90 @@ Ground gross estimate decreases 13.86 sq ft to 1,952.58 sq ft.
 Version I's downstairs panel/takeoff follow this move. Incoming Version I
 downstairs comparison is preserved; Version H is now active upstairs. Preserve saved JSON.
 
-## November 9 - Active second floor restored to Version H
+## November 9 - Active Version H shell and coordinated interiors
 
-Restore the verified `ec82799` production upstairs geometry and furnishings.
+Retain the restored `ec82799` Version H shell; furniture is now purposefully
+rearranged following the owner's request to repair the audited interiors.
 H has four bedrooms, primary bath/WC/closet, Bedroom 2 bath/closet, two shared
 baths, two front closets, notched laundry, mechanical room and central gallery.
 The gallery retains its 84 x 36-inch couch, 48 x 24-inch coffee table,
 armchair and 18-inch side table. Its north finished route is 36.15 inches;
 the 16.2-inch coffee reach gap is not a passage. Sixteen 96-inch doors default
-closed. Unfinished garage attic storage is excluded from area and is not a loft.
+closed. The eastern garage attic now has a finished southern half-loft;
+its northern half remains unfinished and excluded. The central gallery is unchanged.
 
-Measured current estimates: ground 1,924.33 / upstairs 1,850.59 / combined
-3,774.92 sq ft. Count descending stairs on their respective floors, exclude
+Loft revision, November 9: move the old north edge z15 to the exact midpoint
+z27.725, retaining south z40.45 and x42.808333–55.5. Old nominal slab
+12.691667 × 25.45 ft = 323.002917 sq ft; finished half
+12.691667 × 12.725 ft = 161.501458 sq ft (exactly 50%). White painted
+white nine-foot walls, white baseboards, matching hardwood and flat painted
+ceiling replace the tan storage reservation. The north partition bounds the
+room; the northern roof void has no exposed reservation floor, area or tour.
+Keep the existing 36 × 96-inch laundry east doorway and flush 2.7-inch
+modeled walking threshold. Both retained 36/24-inch standard base boxes stay
+at (49.8,36.05), shifted 3 inches north so full cupboard travel clears the new
+south baseboard, with no new lounge furniture. Room navigation, plan dimensions,
+warm real lighting and walking model include the finished half exactly once.
+The owner's ceiling correction supersedes the sloped lining: exactly
+9 ft /108 inches from finished floor to flat ceiling underside everywhere.
+Raise the east-falling shed 24 inches at its retained approximately 1.81:12
+pitch, extend its west edge to x42.358333 over the wing wall, and coordinate
+the service-return roof, wall-head closures, fascia/soffits and leader heights.
+The shared envelope clears .16 ft roof skin, 1.5 ft provisional vertical
+framing/services and .05 ft lining above the ceiling, including the outer
+wall heads. No footprint, floor-area, glazing or other room-layout changes.
+This is not a specified insulation,
+rafter or rated assembly. Ceiling hides in cutaways and restores in tours.
+Finished/conditioned intent is owner-authorized, not structural/walk-on,
+headroom, fire-separation, egress, HVAC or electrical approval. Northern access
+for maintenance remains a professional design decision; no new door is assumed.
+
+Spatial thesis: bed/work/reading zones, with single-sided walk-ins and folded
+storage on bedroom walls where opposed runs cannot work. Keep the queen/three
+full beds, five independent nightstands, four full-size desks/chairs, five
+reading seats, primary media and complete gallery grouping. Primary bed shifts
+west to (3.8,16.15), bedside drawers face east with full travel. Bedroom 2 bed
+shifts west to (38,19.325), desk to (34,25.45), preserving the north bathroom
+approach. Front beds at (5.5,49.9)/(26.5,49.9) have south headboards, north
+desks and opposing reading corners; no rugs, new TV, dressers or extra UI.
+
+Primary closet retains both 5-ft bays, 2-ft double-hang return, 48-inch four-drawer
+bank and all shelves: continuous south hanging faces north storage. Front
+sections are 47.4 inches to shelves /44.4 to closed drawer pulls /30 at full
+drawer extension. Closets 2/3/4 single-sided hanging fronts have
+34.95/48.15/34.35 inches. Preserve the intact 55.2/37.2/54-inch six-level,
+15.6-inch-deep shelf bays on the respective bedroom west/east/west walls,
+centres (29.15,20)/(11.4,47)/(19.8,45.7). This bedroom-side storage is a stated
+trade-off, not omitted contents or a reduced proxy. Bedrooms 3/4 retain
+34.8/44.4-inch shelf-to-bed sections. Nine-inch chair pull-out clears model
+geometry; continuous 24-inch model-disk routes sample every hanging front,
+not just aisle endpoints. These are design probes, not person/code approval.
+
+Repair every upstairs leaf's jamb penetration with a 3.755-inch swing-side
+offset hinge axis beyond casing/half leaf; keep full 90-degree travel and
+closed defaults at 96-inch nominal heads. Three necessary interior corner
+aperture corrections retain widths: laundry west 3 inches south, Bath 4's
+eastern door in Bedroom 4 north 3 inches west, laundry/mechanical 1.5 inches
+west. No shell, room-boundary, exterior-aperture or roof changes. Use narrow
+casing at tight returns; actual jamb/stops/hinges/rated assemblies need review.
+Precisely terminate wet-side baseboards at trays, preserving adjacent dry
+finish. Shift laundry south standard-box run/counter 1.2 inches east clear
+of entry casing. Bath 2 toilet moves 2.2 inches east to 15.2-inch model centreline
+separations from counter and shower; reverse partition-side vanity leaf handing.
+All standard boxes, retained attic boxes and machine footprints stay.
+
+Add five independent shielded 2700 K low-level bathroom fixtures (including
+enclosed primary WC), faceplate centres +10.8 inches /emitters +9.84 inches,
+real downward lights on clear wall piers,
+separate from ceiling-can display and with floor/view/Day/Night restoration.
+Dusk/motion intent, products, wet listing/GFCI, circuits, controls and electrical
+approval remain unresolved. The loft doorway now has a continuous flush
+modeled walk surface; actual floor support and garage separation remain
+unapproved. Only the northern unfinished roof void retains storage-only exclusion.
+
+Measured current estimates: ground 1,924.33 / upstairs 2,020.76 / combined
+3,945.10 sq ft, including the finished loft intent subject to conditioning
+and ceiling-height eligibility review, not certified ANSI area. Count descending stairs on their respective floors, exclude
 open stair gaps and unfinished attic. H has 12 upstairs openings /17 casements;
 whole house 27 openings /47 units, including 8 fixed pictures downstairs.
 Restore H exterior openings, paired front gables and attic shed/drainage concept.
@@ -172,6 +244,10 @@ straight kids wall/piano bay, and main actual stairs, stepped stringers and
 upper-flight guard. Saved layout JSON and Version I SVG are unchanged.
 Products, occupied/simultaneous use, stair/guard/headroom, garage separation,
 attic loads/access, roof support and waterproofing remain unapproved.
+The expanded checks cover 496 leaf poses against actual own/adjacent walls,
+casings, baseboards and furnishings, plus 1,519 poses of 49 production cabinet
+fronts with real handles, hollow carcasses and full drawer boxes. Close fronts
+before passing; measured geometry is not construction or compliance approval.
 
 ## Historical November 8 - Version I adoption (superseded by H restoration)
 
@@ -368,7 +444,10 @@ Clean reload restores Day, no debug hook, one render canvas and no runtime or
 network errors; keyboard Night toggle also checked. Image inspection is
 unavailable, so this is measured browser evidence, not visual/occupied approval.
 
-## November 6 - Version H upstairs adopted with central lounge
+## Historical November 6 - Version H adoption baseline, interiors superseded November 9
+
+Historical record only: the H shell remains current, but the November 9
+coordinated interiors above supersede these furniture/storage placements and checks.
 
 Owner follow-up adopts the upstairs portion of Version H in the 3D model and
 requests a couch and furniture in its central open area. The single organizing
@@ -384,7 +463,7 @@ Laundry's 11 x 8-ft maximum envelope has the northwest entry notch and a
 direct 36 x 96-inch east attic doorway. Sixteen 96-inch door leaves start
 closed. Full-size beds, desks/chairs, nightstands, reading seats, media and
 standard vanity/cabinet widths remain; see the coordinated
-[active plan schedule](floor-plan-reference.md#current-upstairs-model---version-h-november-6).
+[current plan schedule](upstairs.html#model-study).
 
 Gallery proxies: 84 x 36-inch linen/oak couch at (21.5,31.5), facing south;
 48 x 24-inch oak coffee table at (21.5,35.35); west-facing full armchair at
