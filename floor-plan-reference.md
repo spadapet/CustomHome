@@ -1,5 +1,91 @@
 # Ground-floor plan reference
 
+## Family shelves: stained wood finish - November 9
+
+Both existing 18 x 12 in family-board towers are now natural stained white
+oak on sides, shelves, backs, plinths, cornices and fitted scribe. Finish-only
+change: preserve 108 in top, open compartments, flush edge alignment, contents
+and lighting. White wall panelling, board and stair-side piano stay unchanged.
+This supersedes off-white shelf-case notes; approve stain/protective finish
+with physical samples before fabrication.
+
+## Off-white shelving retained; piano stays beside stairs - November 9
+
+Two off-white towers now sit flush to the west wall edge x18.825 and
+adjacent kitchen cabinetry x27.9375, centers (19.575,26.183333) and
+(27.1875,26.183333) ft. Standard 18 × 12-inch boxes stack 84/24-inch
+modules. Natural oak backs meet wall panels; a separate 0.5-inch-deep
+rear scribe closes the unpanelled kitchen-wall continuation. Unintended
+side/rear reveal gaps are zero. No oversized cap overhang or front spacer.
+The upper module is a real open shelf, with 22.2-inch clear height under
+the 1.8-inch cap, 16.5-inch internal width and 11.25-inch support depth.
+Total top is exactly the
+adjacent refrigeration cornice world top: 108 inches, not an assumed datum.
+Each tower has six supported open compartments, removable purchased woven
+baskets, books and saucered trailing greenery. Twelve shielded task beams
+follow kitchen Night/Day. No extra UI.
+The 84-inch board plus two 18-inch towers would need 120 inches in the
+100.8-inch panel span. Narrow only the board to 60 × 48 inches; keep
+bottom/top 30/78 inches, black tempered dry-erase glass, cork/clipped papers
+and the original 45-inch gold light at 85.2 inches. Board-to-box gaps are
+6.6/6.75 inches, intentional separation from the board, not wall reveals.
+Piano/bench/lamp stay at the restored stair-side pose below.
+Straight wall, kitchen appliances, doors and the clear 65.4-inch hall strip
+stay fixed. Shelf anchorage/load, safe upper reach, glass and electrical
+installation remain unapproved; never stand on the piano bench.
+This supersedes only the empty-wall direction below.
+
+## Prior empty-wall redirect (shelving superseded above; piano retained)
+
+Abandon the shelf photo: no towers, shelf contents or shelf lighting.
+Keep the straight z26.9 kids wall, warm-white panels and the original
+84 × 48-inch oak-framed black tempered dry-erase/cork board, bottom/top
+30/78 inches. Retain clipped papers, marker tray and 45-inch gold light,
+restored to 85.2 inches. No furniture stands under this board.
+Restore the one Yamaha/bench/attached lamp to the exact pre-straight-wall
+source pose: center (3.758333,26.259121) ft, keys north, stair enclosure
+rear gap one inch, 16-inch west shift from the stair-opening midpoint.
+Full 1350 × 411 × 849 mm console and 24 × 12-inch provisional bench remain.
+The straight wall and all other room boundaries/openings stay unchanged.
+This supersedes only the kitchen-wall piano/raised-board placement below.
+World meshes leave 18.11 inches from tucked bench to the current sectional.
+An 18-inch pullout with a 30-inch-wide occupied proxy has no positive mesh
+overlap but leaves only 0.11 inch to the sectional: not a passing aisle or
+comfortable operating approval. Use sequentially; do not force the bench
+against seating. West console-to-window-wall baseboard gap is 15.68 inches.
+The separate 65.4-inch hall strip x13.2–18.65/z20.95–31.5 stays unobstructed.
+Occupied playing comfort, ventilation/power and installation remain unapproved.
+
+## Straight kids wall - November 9 (piano bay superseded above)
+
+Straighten the pictured north boundary at z = 26.9 ft, from x19 to the
+existing refrigeration-wall continuation; remove the x27.75 north/south jog.
+The x19-27.75 segment moves south 25.96 inches. Shared/furnished floors,
+panelling and trim follow. Kids floor becomes rectangular, 12.2 x 10.3 ft
+(125.66 sq ft); 18.929167 sq ft transfers to hall/kitchen. Exterior, roof,
+total house area, stairs, kitchen cabinets and 54 x 96-inch west doors stay fixed.
+The doorway's short north return still needs framing/casing review.
+
+Relocate the single retained Yamaha CLP-825 to center (23.375,25.925787) ft,
+keyboard north: 1350 x 411 x 849 mm, raised rest 1003 mm. Keep its rosewood
+finish, 24 x 12-inch provisional bench and attached task lamp. Console rear
+gap is 1 inch to warm-white panelling. Raise the retained 84 x 48-inch board
+14 inches: bottom/top 44/92 inches, picture light about 99.2 inches.
+Upper writing/paper access is now adult-oriented and requires reaching over
+the piano; do not stand on the bench. No new rug, clutter or furniture.
+
+An 18-inch bench pullout and 30-inch-wide occupied proxy clear constituent
+meshes; its north edge is z23.175787, 26.71 inches south of the island end
+(not the through route). The west hall has a verified empty 65.4-inch-wide
+strip x13.2-18.65 through z20.95-31.5, connected to the open hall above.
+Kids toy storage follows the north wall; desk/storage front gap is 68.425
+inches. A 30-inch chair allowance and 17.375-inch bin withdrawal leave
+21.05 inches, not a passing aisle: use sequentially. Paired-door sweeps clear
+retained furniture and edge trim in 5-degree samples; restore closed defaults.
+Structural/header, acoustics, fire separation, power, anchorage, actual
+occupied comfort and selected-product installation remain unapproved.
+Earlier stair-side piano, flush-cabinet wall and stepped kids notes are historical.
+
 ## Fireplace symmetry correction - November 8
 
 Current finished fireplace-wall span is z = 9.225-26.775 ft.
@@ -34,8 +120,8 @@ closed by default; sampled swing clears chairs. No cabinet or stair moves.
 Fixed parcel boundaries remain z = -32.325 / 97.675; moved rear masonry
 z = 1.675 gives a 34 ft model gap, not approved setback. Patio/garden
 extents remain fixed; rear wall light follows. House bounding depth becomes
-60 ft 0.05 in; ground gross area 1,924.33 sq ft. With incoming adopted Version I
-upstairs (2,153.35 sq ft), live combined area is 4,077.69 sq ft.
+60 ft 0.05 in; ground gross area 1,924.33 sq ft. With restored Version H
+upstairs (1,850.59 sq ft), live combined area is 3,774.92 sq ft.
 Version I combined study becomes 4,061.89 sq ft with its separate upstairs.
 Final framing/roof, narrow end piers, standard products, flashing,
 occupied access and setbacks remain unverified. Older dining dimensions
@@ -58,12 +144,34 @@ roof slope/yard edge, patio furniture, landing and stairs stay fixed.
 The west fireplace-window end return is now only 5.4 in to the finished
 interior corner; framing/header, structure, roof attachment and waterproofing
 require professional review. Ground gross estimate drops 13.86 sq ft to
-1,952.58 before the later dining move. Incoming Version I upstairs is preserved;
-the current live combined estimate after both moves is 4,077.69 sq ft.
+1,952.58 before the later dining move. Version I SVG is preserved as comparison;
+the current live H combined estimate after both moves is 3,774.92 sq ft.
 Version I downstairs SVG reflects the move (its upstairs study stays intact).
 Earlier wall, clearance and area values below are superseded.
 
-## Current upstairs model - Version I adoption, November 8
+## Active upstairs model - Version H restoration, November 9
+
+The normal viewer uses historical H production source from `ec82799`, not a
+separate preview. Four bedrooms, central gallery lounge, notched laundry and
+compact service rooms return; garage attic remains unfinished storage only.
+H exterior wall centerlines: north z7.4, east x42.583333, front z53.8,
+front closet recess z51.8; service row z35.1–40.45. The canonical staircase,
+44-inch arrival, latest stepped stringers and full upper-flight guard remain.
+Keep all sixteen 96-inch doors in their restored closed default poses.
+
+Current exterior-measured estimate: 1st 1,924.33 /2nd 1,850.59 /total 3,774.92
+sq ft, including descending stairs on their respective floors and excluding
+stair gaps, garage, unfinished attic, porch and basement. Upstairs has 12
+openings /17 casements; whole house 27 openings /47 units. Shared/furnished
+openings, H front gables, east attic shed and drainage concept agree.
+The central lounge north route is 36.15 inches; its 16.2-inch coffee reach
+gap is not a route. See current room notes for restored furniture/access checks.
+Latest downstairs shifts, z18 fireplace/seating, kitchen/prep and straight
+kids wall/piano bay are preserved. Saved layout JSON and I SVG remain intact.
+Structural support, guards/headroom, egress, attic access/loads, garage fire
+separation, selected products and simultaneous occupied use need review.
+
+## Historical upstairs model - Version I adoption, November 8 (superseded)
 
 Owner now approves adopting [Version I](assets/images/plans/upstairs-2000/version-i.svg)
 into 3D. Its north suites, central hall, east loft above stepped laundry, south
@@ -260,7 +368,7 @@ review or occupied-use approval is claimed. Verify selected handles, stopped
 drawer withdrawal, grille/service ventilation, cutouts/finished returns,
 anti-tip anchorage, floor loads, structure and services before installation.
 
-## Historical upstairs model - Version H, November 6
+## Restored active upstairs arrangement - Version H, November 6 source
 
 At that review, the owner adopted the upstairs portion of
 `assets/images/plans/upstairs-2000/version-h.svg` in the furnished Three.js
@@ -2565,13 +2673,12 @@ closet is included **assuming it is finished and conditioned**; this is a
 model assumption requiring confirmation, not approval of any utility space.
 Exclude the garage, open porch and below-grade basement rooms.
 
-Current live floor-union estimate: first floor **1,966.4427 sq ft**, second
-floor **2,153.3533 sq ft**, combined **4,119.7960 sq ft**. Display **1,966 /
-2,153 / 4,120** in 1st / 2nd / Area. Stairs count once downstairs; the
-upstairs uses the registered Version I floor union with nominal 0.35 ft walls.
-The earlier exterior-face polygon takeoff and centerline/inside-wall estimates
-use different measurement bases and do not describe the live footer. Saved
-layout JSON and the exterior Size bounds stay unchanged.
+Current live H floor-union estimate: first floor **1,924.3327 sq ft**, second
+floor **1,850.5858 sq ft**, combined **3,774.9185 sq ft**. Display **1,924 /
+1,851 / 3,775** in 1st / 2nd / Area. Descending stairs count on their respective
+floors; actual open gaps and unfinished attic are excluded. Earlier I and
+centerline/inside-wall estimates do not describe the active footer. Saved
+layout JSON remains unchanged; retained ground masonry controls Size.
 
 The tooltip states the counting scope. View/layout changes recalculate from
 resolved floors and walls; source geometry changes update on reload. Round
@@ -3406,7 +3513,7 @@ Room requirements: [kids/living](foyer/living-room.html#connected-kids-room), [o
 
 ## Window schedule
 
-**Current Version I whole-house count:** 33 openings /58 units: 50 wall casements and 8 vertical fixed pictures, with no roof windows. Ground floor unchanged: 15 openings /30 units (22 casements +8 pictures). Upstairs: 18 openings /28 casements, including loft, exterior closets, Bath 4 and both laundry windows. Main kitchen and prep each have three units in one joined opening. Exterior duplicates and door glazing are excluded; see [current room totals and counting rules](docs/window-count.md). This is not an approved procurement schedule.
+**Current Version H whole-house count:** 27 openings /47 units: 39 wall casements and 8 vertical fixed pictures, with no roof windows. Ground: 15 openings /30 units (22 casements +8 pictures). Upstairs: 12 openings /17 casements, with no loft, laundry, closet or attic glazing. Main kitchen and prep each have three units in one joined opening. Exterior duplicates and door glazing are excluded; see [current room totals and counting rules](docs/window-count.md). This is not an approved procurement schedule.
 
 The detailed wall-window rows below are an October 27 snapshot, superseded where they conflict with the current measured upstairs plan. The roof-window row is a removed concept, not part of the current takeoff. All sizes are **provisional opening/group envelopes**, not confirmed catalog units, rough openings or clear glass, except where a verified standard frame is identified. Sill/head heights are inches above house datum unless explicitly labeled otherwise; the powder-window row uses feet and garage-relative heights are labeled separately. Coordinates identify the opening wall, not small frame insets.
 

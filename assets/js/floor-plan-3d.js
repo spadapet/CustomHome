@@ -1023,7 +1023,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   function roomDimensions(text, width, depth, irregular = false) {
-    const kidsArea = text === 'Kids room (L-shaped)' ? getGroundFloorDefaultPlan().floors.filter(({ room }) => /^Kids room/.test(room ?? '')).reduce((sum, { w, d }) => sum + w * d, 0) : 0;
+    const kidsArea = text === 'Kids room' ? getGroundFloorDefaultPlan().floors.filter(({ room }) => /^Kids room/.test(room ?? '')).reduce((sum, { w, d }) => sum + w * d, 0) : 0;
     const dimensions = kidsArea ? `${kidsArea.toFixed(2)} sq ft, stepped boundary` : `~ ${feet(width)} x ${feet(depth)}${irregular ? ' max' : ''}`;
     const item = document.createElement('li');
     item.textContent = `${text}: ${dimensions}`;
@@ -1056,7 +1056,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const prepEndWindow = prepWindows.find((window) => window.x === 55.5);
   const guestSuite = getGuestSuiteLayout();
   const kitchenRefrigeration = getKitchenRefrigerationLayout();
-  const kidsRoomNorthZ = 26.725 - 25 / 12 - 0.08 + 0.175;
+  const kidsRoomNorthZ = getGroundFloorDefaultPlan().walls.find(([name]) => name === 'Kids north')[2];
   const kidsRoom = { x: 19, z: kidsRoomNorthZ, width: kitchenRefrigeration.returnX - 19, southWidth: 12.2, depth: guestSuite.kidsSouthZ - kidsRoomNorthZ };
   const kidsDoorway = { x: kidsRoom.x, z: 27, width: 4.5, height: 8 };
   const officeEntry = { x: 12.2, z: 45.25, width: 5, height: 8 };
@@ -1101,7 +1101,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   floor(19, 8, 7.5, kidsRoom.z - 8, true, scene);
   floor(26.875, kitchenWindowWallZ, 10.625, 8 - kitchenWindowWallZ, true, scene);
   floor(26.5, 8, 11, kidsRoom.z - 8, true, scene);
-  floor(kitchenRefrigeration.returnX, kidsRoom.z, kitchenWallRight - kitchenRefrigeration.returnX, 26.9 - kidsRoom.z, true, scene);
   floor(37.5, kitchenWindowWallZ, 7.9, 15 - kitchenWindowWallZ, true, scene);
   floor(45.4, kitchenWindowWallZ, 10.1, 15 - kitchenWindowWallZ, true, scene);
   for (const { x, z, w, d } of garageFloorAreas) floor(x, z, w, d, false, shell, false, garageFloorY);
@@ -1141,7 +1140,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     [0, livingFeatureWall.wallEndZ, 0, livingFeatureWall.returnWallZ, true, [...livingWindowCenters].reverse().map((z) => [livingFeatureWall.wallEndZ - z - livingWindowWidth / 2, livingFeatureWall.wallEndZ - z + livingWindowWidth / 2, livingWindowSill, livingWindowHead])],
     [kidsRoom.x, kidsRoom.z, kidsRoom.x + kidsRoom.width, kidsRoom.z, true],
     [kidsDoorway.x, kidsRoom.z, kidsDoorway.x, guestSuite.kidsSouthZ, true, [[kidsDoorway.z - kidsRoom.z, kidsDoorway.z - kidsRoom.z + kidsDoorway.width, 0, kidsDoorway.height]]],
-    [kitchenRefrigeration.returnX, kidsRoom.z, kitchenRefrigeration.returnX, 26.9, true, [], ceilingHeight, [1]], [0, powderNorthZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderNorthZ],
+    [0, powderNorthZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderNorthZ],
     [7.1, powderNorthZ, 7.1, officeNorthZ, false, [[guestEntry.powderDoor.z - powderNorthZ, guestEntry.powderDoor.z - powderNorthZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
     [7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, false, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
     [12.2, guestEntry.coatCloset.z, 12.2, guestEntry.coatCloset.z + guestEntry.coatCloset.d],
@@ -1169,7 +1168,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   [
     ['Living room', 13.2, 25.7 - livingFeatureWall.returnWallZ], ['Dining room', 13.675, 8 - livingFeatureWall.diningRearZ], ['Kitchen', 11, 26.9 - kitchenWindowWallZ],
     ['Hall', 13.3, kidsRoom.z - 8], ['Prep kitchen', 18, 15 - kitchenWindowWallZ, true], ['Mudroom', 7.4 - 8 / 12, 11.9],
-    ['Garage', 26.5, 34, true], ['Kids room (L-shaped)', kidsRoom.southWidth, kidsRoom.depth, true],
+    ['Garage', 26.5, 34, true], ['Kids room', kidsRoom.southWidth, kidsRoom.depth, true],
     ['Powder room', 7.1, guestEntry.powder.d], ['Guest coat closet', 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 5.1, guestEntry.alcove.d], ['Office', 12.2, groundFrontWallZ - officeNorthZ],
     ['Guest closet strip (overall)', guestSuite.closet.w, guestSuite.closet.d], ['Guest shower bathroom', guestSuite.bathroom.w, guestSuite.bathroom.d],
     ['Bedroom', guestSuite.bedroom.w, guestSuite.bedroom.d], ['Porch', 31.2, groundFrontLayout.porchDepth]
@@ -2479,7 +2478,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       cabinetPull(front, side * (width / 4 - 0.12), upperStorageBottom + 0.45 - centerY, 0.09, 0.55, true);
     }
   }
-  box(bottomRun, bottomRunCenterX, upperStorageTop + 0.075, 25.65, bottomRunWidth, 0.15, 2.15, cabinetRailFinish).name = 'Continuous refrigeration cabinet cornice';
+  const refrigerationCorniceTop = upperStorageTop + 0.15;
+  box(bottomRun, bottomRunCenterX, refrigerationCorniceTop - 0.075, 25.65, bottomRunWidth, 0.15, 2.15, cabinetRailFinish).name = 'Continuous refrigeration cabinet cornice';
   for (const [name, model, x, handleX] of [
     ['Column freezer', 'CL3650F/S/T/L', freezerRight - columnWidth / 2, 1.3],
     ['Column fridge', 'CL3650R/S/T/R', fridgeLeft + columnWidth / 2, -1.3]
@@ -2581,7 +2581,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   piano.userData.viewerFurniture = true;
   piano.position.set((piano.userData.wallRun.minX + piano.userData.wallRun.maxX) / 2 - piano.userData.wallRun.windowShiftInches / 12, 0, stairOpening.z - 1 / 12 - pianoDepth / 2);
   piano.rotation.y = Math.PI;
-  piano.userData.location = 'Living side of stair enclosure, 16 inches west toward fireplace windows, keyboard facing north; fireplace built-ins removed, west end 15.68 in to continuous window-wall baseboard (16.43 in to paint); verify occupied bench access, ventilation and power routing';
+  piano.userData.location = 'Restored pre-straight-wall living side of stair enclosure, 16 inches west toward fireplace windows, keyboard facing north; verify occupied bench access, ventilation and power routing';
   rest.name = 'Remaining ground-floor furnishings';
   shell.add(rest);
   const tile = mat('#c5c2b6');
@@ -3961,8 +3961,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     hallPanelPart('Hall vertical wall panel', start + 0.0075, Math.min(start + hallPanelPitch - 0.0075, hallPanelLength), 3 * familyPanelDepth / 4, familyPanelDepth / 2, familyPanelFinish);
   }
   const familyBoard = furnishing('Family glass dry-erase and cork board', kidsRoom.x + kidsRoom.width / 2, kidsRoom.z - 0.21 - familyPanelDepth, Math.PI);
-  familyBoard.userData = { widthInches: 84, heightInches: 48, bottomInches: 30, maxProjectionInches: 3.5, face: 'Kitchen / hall side of kids north wall', finish: 'White oak frame, charcoal tempered dry-erase glass, natural cork', writingMedium: 'Opaque light-coloured dry-erase markers approved for black glass; no chalk or chalk markers', wallAnchorageRequired: true, safetyGlazingRequired: true, provisional: true };
-  const glassBoardFinish = mat('#263531');
+  familyBoard.scale.x = 60 / 84;
+  familyBoard.userData = { widthInches: 60, heightInches: 48, bottomInches: 30, maxProjectionInches: 3.5, face: 'Kitchen / hall side of straight kids north wall between off-white shelves; piano remains beside stairs', finish: 'White oak frame, charcoal tempered dry-erase glass, natural cork', writingMedium: 'Opaque light-coloured dry-erase markers approved for black glass; no chalk or chalk markers', wallAnchorageRequired: true, safetyGlazingRequired: true, provisional: true };
+  const glassBoardFinish = mat('#171c1b');
   glassBoardFinish.roughness = 0.18;
   const corkFinish = mat('#b79367');
   box(familyBoard, 0, 4.5, 0, 7, 4, 0.06, cabinetFinish).name = 'Family board backing';
@@ -3984,6 +3985,63 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   for (const [x, y, width] of [[-2.25, 3.9, 1.3], [-2.1, 3.65, 1.6], [0.1, 3.4, 0.9]]) {
     box(familyBoard, x, y, 0.058, width, 0.025, 0.008, cream).name = 'Dry-erase drawing stroke';
+  }
+  const familyShelfTowers = [];
+  const familyShelfFinish = cabinetFinish;
+  const familyShelfOuterEdges = [kidsRoom.x - 0.175, bottomRunLeft];
+  for (const [index, edge] of familyShelfOuterEdges.entries()) {
+    const x = edge + (index ? -0.75 : 0.75);
+    const tower = furnishing('Family off-white open shelf tower', x, kidsRoom.z - 0.175 - familyPanelDepth - 0.5, Math.PI);
+    tower.userData = { widthInches: 18, depthInches: 12, moduleHeightsInches: [84, 24], heightInches: refrigerationCorniceTop * 12, outerEdgeX: edge, rearContactZ: kidsRoom.z - 0.175 - familyPanelDepth, finish: 'Natural stained white oak cases, shelves and backs', standardBox: true, wallAnchorageRequired: true, loadCapacityVerified: false, upperStorageAdultOnly: true, productSelected: false };
+    familyShelfTowers.push(tower);
+    for (const [bottom, height] of [[0, 7], [7, 2]]) {
+      for (const side of [-1, 1]) box(tower, side * 0.71875, bottom + height / 2, 0, 0.0625, height, 1, familyShelfFinish).name = 'Family shelf standard module side';
+      box(tower, 0, bottom + height / 2, -0.484375, 1.375, height, 0.03125, cabinetFinish).name = 'Family shelf natural oak module backing';
+    }
+    box(tower, 0, 0.1875, 0, 1.5, 0.375, 1, familyShelfFinish).name = 'Family shelf compact plinth';
+    box(tower, 0, refrigerationCorniceTop - 0.075, 0, 1.5, 0.15, 1, familyShelfFinish).name = 'Family shelf aligned cornice';
+    if (index) {
+      const panelRight = kidsRoom.x + kidsRoom.width - 0.175;
+      const rearScribeWidth = bottomRunLeft - panelRight;
+      box(tower, x - (panelRight + bottomRunLeft) / 2, refrigerationCorniceTop / 2, -0.5 - familyPanelDepth / 2, rearScribeWidth, refrigerationCorniceTop, familyPanelDepth, familyShelfFinish).name = 'Family shelf fitted rear wall scribe';
+    }
+    for (const [level, surface] of [0.4375, 1.5, 3, 4.5, 6, 7].entries()) {
+      box(tower, 0, surface - 0.03125, 0, 1.375, 0.0625, 0.9375, familyShelfFinish).name = 'Family open compartment support shelf';
+      if (level === 0 || level === 2) {
+        const basket = new THREE.Group();
+        basket.name = 'Family removable purchased woven basket';
+        basket.position.set(0, surface, 0);
+        basket.userData = { removable: true, builtIn: false, supportSurface: surface };
+        tower.add(basket);
+        box(basket, 0, 0.03125, 0, 1, 0.0625, 0.75, wovenShadeMaterial).name = 'Woven basket base';
+        for (const side of [-1, 1]) {
+          box(basket, side * 0.475, 0.40625, 0, 0.05, 0.6875, 0.75, wovenShadeMaterial).name = 'Woven basket side';
+          box(basket, 0, 0.40625, side * 0.35, 0.9, 0.6875, 0.05, wovenShadeMaterial).name = 'Woven basket front and back';
+        }
+      } else if (level === 4) {
+        const plant = sillFlowers.children[0].clone(true);
+        plant.name = 'Family shelf potted trailing greenery';
+        plant.position.set(0, surface, 0);
+        plant.scale.setScalar(0.85);
+        plant.userData = { removable: true, supportSurface: surface, dripSaucerRequired: true };
+        tower.add(plant);
+        for (let leafIndex = 0; leafIndex < 8; leafIndex++) {
+          const leaf = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 6), leafGreen);
+          leaf.scale.set(0.09, 0.13, 0.035);
+          leaf.position.set(Math.sin(leafIndex * 1.8) * 0.13, 0.45 - leafIndex * 0.12, 0.65);
+          plant.add(leaf);
+        }
+      } else {
+        for (let bookIndex = 0; bookIndex < 4; bookIndex++) {
+          const book = readingBook.clone(true);
+          book.name = 'Family shelf supported book';
+          book.rotation.set(0, 0, Math.PI / 2);
+          book.position.set(-0.4 + bookIndex * 0.2, surface + 0.275, 0);
+          book.userData = { removable: true, supportSurface: surface };
+          tower.add(book);
+        }
+      }
+    }
   }
   const trofastWidth = 39 / 12;
   const trofastDepth = 17.375 / 12;
@@ -4661,11 +4719,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   let groundLayoutPreview = null;
   function updateLivableArea() {
     const groundArea = getLivableFloorArea({ ...groundBaseline, ...groundLayoutPreview?.plan }, { includeStairs: true });
-    const upstairsArea = getLivableFloorArea({ ...upstairs.plan, floors: [...upstairs.plan.floors, upstairs.baseline.arrival] }, { exteriorWallThickness: 0.35 });
+    const upstairsArea = getLivableFloorArea({ ...upstairs.plan, stairs: upstairs.baseline.stairs, floors: [...upstairs.plan.floors, upstairs.baseline.arrival] }, { includeStairs: true });
     const format = (area) => Math.round(area).toLocaleString('en-US');
     const output = document.getElementById('livable-area');
     output.textContent = `Area: ~${format(groundArea + upstairsArea)} sq ft`;
-    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. Owner comparison estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs counted once downstairs; upstairs excludes the fixed stair opening and includes its arrival landing. Upstairs uses nominal 4.2-inch walls and image-derived Version I geometry with a local fixed-stair registration exception, not exact SVG area parity. Assumes modeled indoor rooms, including the furnace room, are finished and conditioned. Excludes garage, open porch and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
+    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs count on the floor from which they descend: first-floor basement stairs and second-floor stairs included; open stair gaps excluded. Active Version H; assumes modeled indoor rooms, including the mechanical closet, are finished and conditioned. Excludes garage, open porch, unfinished attic and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
     const firstFloorOutput = document.getElementById('first-floor-area');
     firstFloorOutput.textContent = `1st: ~${format(groundArea)} sq ft`;
     firstFloorOutput.title = output.title;
@@ -5181,6 +5239,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     const pictureLight = new THREE.Group();
     pictureLight.name = 'Family message-board shielded picture light';
+    pictureLight.scale.x = 84 / 60;
     pictureLight.userData = { colorTemperatureKelvin: 3000, mountingHeightInches: 85.2, glareMockupRequired: true, productSelected: false };
     familyBoard.add(pictureLight);
     for (const x of [-1.25, 1.25]) {
@@ -5191,6 +5250,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(pictureLight, 0, 7.052, 0.55, 3.6, 0.015, 0.1, kitchenTaskDiffuser).name = 'Board-light underside diffuser';
     for (const x of [-1.25, 1.25]) {
       spot(pictureLight, 'Family board soft wash beam', [x, 7.03, 0.55], [x, 4.7, 0.07], 18, 8, Math.PI / 6);
+    }
+    for (const tower of familyShelfTowers) for (const y of [1.5, 3, 4.5, 6, 7, refrigerationCorniceTop - 0.15]) {
+      box(tower, 0, y - 0.08, 0.25, 0.75, 0.03, 0.08, kitchenTaskDiffuser).name = 'Family shelf shielded task diffuser';
+      spot(tower, 'Family shelf task beam', [0, y - 0.1, 0.25], [0, y - 0.8, 0], 2, 1.6, Math.PI / 3);
     }
     return { group, ceilingFixtures, lights };
   }
@@ -5263,9 +5326,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const room of upstairs.rooms) {
       fixture(upstairs.group, room.name, room.x + room.w / 2, upstairs.group.userData.ceilingHeightFeet, room.z + room.d / 2, 2 / 12, /closet|toilet|Linen/.test(room.name) ? 9 : 22, 'upstairs');
     }
-    for (const room of upstairs.rooms.filter(room => room.name === 'Hallway')) {
-      for (const ratio of [.25, .75]) fixture(upstairs.group, 'Upstairs hall', room.x + room.w * ratio, upstairs.group.userData.ceilingHeightFeet, room.z + room.d / 2, 2 / 12, 14, 'upstairs');
-    }
+    const upperDimensions = getUpstairsMeasuredGeometry();
+    for (const [x, z] of [
+      [12.3, 29], [17, 33], [21.5, 37.5],
+      [29.5, (upperDimensions.primarySouth + upperDimensions.laundryNotchSouth) / 2]
+    ]) fixture(upstairs.group, 'Upstairs hall', x, upstairs.group.userData.ceilingHeightFeet, z, 2 / 12, 14, 'upstairs');
     fixture(piano, 'Piano music', 0, 3.6, 0.25, 0.24, 3, 'ground', true);
     box(piano, 0, 3.27, -0.45, 0.04, 0.66, 0.04, rosewood).name = 'Piano lamp support';
     return rigs;

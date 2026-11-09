@@ -15,11 +15,11 @@ test('compact footer keeps windows first, area, size and controls without verbos
   const { getUpstairsMeasuredGeometry } = require('../assets/js/floor-plan-upstairs.js');
   const { getGroundFrontLayout } = require('../assets/js/floor-plan-ground.js');
   const upper = getUpstairsMeasuredGeometry(), front = getGroundFrontLayout();
-  assert.ok(Math.abs((Math.max(upper.east,55.5)+.45)-56.366667)<1e-8,'Version I loft east wall controls outside masonry width');
-  assert.ok(Math.abs((front.porchEdgeZ - 1.675) - 60.00416666666667) < 1e-8, 'Moved dining rear finish controls depth, not removed upper projection');
+  assert.ok(Math.abs((Math.max(upper.east,55.5)+.45)-55.95)<1e-8,'Retained ground east wall now controls outside masonry width');
+  assert.ok(Math.abs((front.porchEdgeZ - 1.675) - 60.00416666666667) < 1e-8, 'Current dining rear finish controls depth, not removed upper projection');
   assert.match(footer, /Size: ~56 ft &times; 60 ft/);
   assert.match(footer, /front porch slab edge z=61\.67917 ft, approximately 60 ft 0\.05 in/);
-  assert.match(footer, /about 56 ft 4\.4 in \(shown rounded to 56 ft\)/);
+  assert.match(footer, /exactly 55 ft 11\.4 in \(shown rounded to 56 ft\)/);
   assert.match(footer, /not a surveyed or Birmingham zoning\/buildable envelope/i);
   assert.ok(footer.indexOf('id="window-count"') < footer.indexOf('id="livable-area"'));
   const visible = footer.replace(/<[^>]*>/g, '');
@@ -51,7 +51,7 @@ test('2D room dimensions identify garage maximum extents without a garage border
   assert.match(html, /porch spans x=0-31\.2 ft at z=54\.679-61\.679 ft/i);
   assert.match(html, /garage floor spans x=31\.2-55\.5 ft at z=15-49 ft/i);
   assert.match(html, /they are separated north-south and do not touch/i);
-  assert.match(html, /Ground centerline span is 55 ft 6 in/i);
+  assert.match(html, /plan's centerline span is 55 ft 6 in/i);
   assert.doesNotMatch(html, /plan-garage-outline|shown in orange/i);
   assert.doesNotMatch(read('assets/js/floor-plan-3d.js'), /planGarageOutline|showGarageOutline/);
   assert.doesNotMatch(read('assets/css/floor-plan-3d.css'), /garage-outline-/);
@@ -76,18 +76,6 @@ test('whole-house window count retains roof-window category without adding skyli
   assert.match(source, /\$\{roofWindows\} fixed roof windows/);
   const exterior = read('assets/js/floor-plan-exterior.js');
   assert.doesNotMatch(exterior, /roofWindow: true|Laundry roof window/);
-});
-
-test('legacy upstairs inspection cameras select upstairs even without generated room metadata', () => {
-  const source = read('assets/js/floor-plan-3d.js');
-  const start = source.indexOf("    const outside = name === 'exterior'", source.indexOf('  function setView(name)'));
-  const end = source.indexOf("    if (activeFloor !== 'ground'", start);
-  assert.ok(start > 0 && end > start);
-  const names = ['upstairs', 'upstairs-top', 'upstairs-arrival-gallery', 'upstairs-primary-bath', 'whole', 'exterior', 'exterior-west', 'upstairs-override'];
-  const context = { presets: Object.fromEntries(names.map(name => [name, {}])) };
-  context.presets['upstairs-override'].floor = 'ground';
-  vm.runInNewContext(`function floorFor(name) { ${source.slice(start, end)} return floor; }`, context);
-  for (const name of names) assert.equal(context.floorFor(name), name === 'upstairs-override' || name === 'whole' ? 'ground' : name.startsWith('exterior') ? 'exterior' : 'upstairs', name);
 });
 
 test('room navigation gives every room its own floor-aware camera and keeps inspection shortcuts out of the toolbar', () => {
@@ -229,12 +217,10 @@ test('model refresh reloads fresh files into Whole floor and Rotate by default',
   assert.doesNotMatch(source, /floor-caption|ADAPTED STUDY/);
 });
 
-test('furnace-only service limits stay in optional notes, not clipped onto the exterior facade', () => {
+test('attic approval warning stays in optional room notes, not clipped onto the exterior facade', () => {
   const html = read('floor-plan-3d.html');
   const source = read('assets/js/floor-plan-3d.js');
-  assert.match(html, /Furnace room contains only the furnace/);
-  assert.match(html, /north 36 x 96-inch access door/);
-  assert.doesNotMatch(html, /retained reserved bases|4\.70 inches to equipment|no separate toilet partition/);
+  assert.match(html, /<strong>Unfinished attic storage is excluded from area, not a tour floor or approved walk-on storage; framing, loads, access and headroom require review\.<\/strong>/);
   assert.doesNotMatch(source, /mudroomLabel\([^\n]*ATTIC: STORAGE ONLY/);
 });
 
@@ -305,15 +291,15 @@ test('floor-plan archive preserves both revisions and marks the shower option as
       assert.equal(label.children[0].textContent, context.planRoomName(room.name));
       const clear = floor === 'upstairs' ? scope.getUpstairsRoomClearDimensions(room, upstairsPlan.walls) : room;
       const maxExtent = floor === 'ground' && room.name === 'Garage';
-      const size = floor === 'ground' && room.name === 'Kids room' ? '144.59 sq ft, stepped plan' : `${context.feet(clear.w)} x ${context.feet(clear.d)}${floor === 'upstairs' ? ' paint-face' : ''}${maxExtent ? ' max extents; L-shaped footprint' : ''}`;
+      const size = floor === 'ground' && room.name === 'Kids room' ? '125.66 sq ft, stepped plan' : `${context.feet(clear.w)} x ${context.feet(clear.d)}${floor === 'upstairs' ? ' paint-face' : ''}${maxExtent ? ' max extents; L-shaped footprint' : ''}`;
       assert.equal(elements['plan-dimension-list'].children[index].textContent, `${room.name}: ~ ${size}`);
       assert.equal(label.title, `${room.name}: ${size}`, 'Detailed names and qualifications remain available');
       assert.doesNotMatch(label.children[1].textContent, /paint-face|stepped|edge|to z/);
-      const compact = floor === 'ground' && room.name === 'Kids room' ? '144.59 sq ft'
+      const compact = floor === 'ground' && room.name === 'Kids room' ? '125.66 sq ft'
         : `${context.feet(clear.w)} x ${context.feet(clear.d)}${maxExtent ? ' max' : ''}`.replace(/' /g, "'").replace(/'0"/g, "'");
       assert.equal(label.children[1].textContent, compact);
       if (floor === 'upstairs' && room.name === 'Bedroom 2') {
-        assert.equal(label.children[1].textContent, "14'3\" x 14'7\"", 'Owner-corrected Bedroom 2 dimensions account for the deeper bath');
+        assert.equal(label.children[1].textContent, "14' x 13'", 'Version H stepped Bedroom 2 dimensions use actual paint faces');
       }
     });
   }

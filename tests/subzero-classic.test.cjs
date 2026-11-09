@@ -156,8 +156,8 @@ test('stopped door and pull sweeps stay inside side-wall reserves and ahead of t
 test('interior floor transfer preserves total area and all passage, stair and garage boundaries', () => {
   const plan = ground.getGroundFloorDefaultPlan();
   const kidsArea = plan.floors.filter(part => part.room === 'Kids room').reduce((sum, part) => sum + part.w * part.d, 0);
-  close(kidsArea, 144.58916666666667);
-  close(147.29333333333332 - kidsArea, 2.7041666666666666);
+  close(kidsArea, 125.66);
+  close(plan.rooms.find(room => room.name === 'Kids room').z, 26.9, 'Latest north wall stays aligned with the refrigerator-wall return');
   close(ground.getLivableFloorArea(plan, { includeStairs: true }), 1924.3327083333334);
   assert.equal(ground.getKitchenPassageLayout().wallX, 37.5);
   assert.equal(ground.getKitchenPassageLayout().clearWidth, 2.5);

@@ -133,10 +133,9 @@ test('lower mixed roof renders clipped metal ribs and opaque undersides on the d
     }
   }
   assert.ok(!model.children.some(p => p.name === 'Clipped standing-seam roof rib'), 'Orphan metal loft transition has been removed');
-  const g=require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry();
-  const returnPerimeter = model.children.filter(p => /Connected roof .*fascia/.test(p.name) &&
-    p.position.x > g.east && p.position.z > g.bedNorth && p.position.z < 49.85);
-  assert.ok(returnPerimeter.length >= 1, 'The Version I south garage return receives actual perimeter fascia');
+  const metalPerimeter = model.children.filter(p => /Connected roof .*fascia/.test(p.name) &&
+    p.position.x > 55.7 && p.position.z < 35.55);
+  assert.ok(metalPerimeter.length >= 1, 'The replacement slate lean-to now receives actual perimeter fascia');
 });
 
 test('metal ribs follow clipped porch/entry polygons with one shared finish and no standalone intersecting panels', () => {

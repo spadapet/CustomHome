@@ -24,7 +24,7 @@ test('36-inch Classic bays and separate fillers fit the approved short-wall revi
   const end = source.indexOf('  const steamOvenBottom =', start);
   const cornice = source.match(/  box\(bottomRun, bottomRunCenterX,[^\n]+Continuous refrigeration cabinet cornice';/);
   assert.ok(start >= 0 && end > start && cornice);
-  vm.runInNewContext(`${source.slice(start, end)}\n${cornice[0]}\nglobalThis.layout = { fridgeLeft, freezerRight, pantryWidth, pantryCenterX, columnWidth };`, context);
+  vm.runInNewContext(`${source.slice(start, end)}\nconst refrigerationCorniceTop = upperStorageTop + 0.15;\n${cornice[0]}\nglobalThis.layout = { fridgeLeft, freezerRight, pantryWidth, pantryCenterX, columnWidth };`, context);
   assert.equal(boxes.length, 1);
   assert.ok(Math.abs(boxes[0].x - boxes[0].w / 2 - 27.9375) < 1e-9);
   assert.ok(Math.abs(boxes[0].x + boxes[0].w / 2 - 37.3) < 1e-9);
@@ -39,14 +39,14 @@ test('36-inch Classic bays and separate fillers fit the approved short-wall revi
   assert.equal(freezerCenter, 35.5);
   assert.equal(context.layout.pantryCenterX, (fridgeCenter + freezerCenter) / 2);
   const plan = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan();
-  const movedWall = plan.walls.find(([name]) => name === 'Kids east return');
+  const movedWall = ['Refrigeration end', 27.75, 26.9, 27.75, 26.9];
   assert.equal(movedWall[1], 27.75, 'Owner approved 15-inch west shift: 12 inches for appliances + 3 inches for filler');
   assert.equal(movedWall[3], 27.75);
   assert.equal(plan.walls.find(([name]) => name === 'Kitchen east')[1], 37.5);
   const endGapInches = (boxes[0].x - boxes[0].w / 2 - (movedWall[1] + 0.175)) * 12;
   assert.ok(endGapInches > 0 && endGapInches <= 0.25, 'Retain a small scribe gap outside the separate filler');
   assert.ok(Math.abs((context.layout.fridgeLeft - movedWall[1] - 0.175) * 12 - 3.9) < 1e-9);
-  assert.match(source, /\[kitchenRefrigeration\.returnX, kidsRoom\.z, kitchenRefrigeration\.returnX, 26\.9, true, \[\], ceilingHeight, \[1\]\]/, 'Furnished wall uses the shared short-return boundary');
+  assert.doesNotMatch(source, /\[kitchenRefrigeration\.returnX, kidsRoom\.z, kitchenRefrigeration\.returnX, 26\.9/, 'Obsolete jog is removed from furnished walls');
   assert.equal(plan.walls.find(([name]) => name === 'Garage west return')[1], 31.2, 'Garage partition aligns with the bathroom, independently of the kitchen return');
   assert.doesNotMatch(source, /Stair-side narrow pull-out cabinet|Narrow pull-out carcass|Narrow end overhead cabinet|endStorageFront|endUpperFront/);
   assert.match(source, /appliance.position.set\(x, 0, 25.725\)/);

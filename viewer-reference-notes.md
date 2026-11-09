@@ -11,66 +11,29 @@ and exterior footprint stay unchanged. Door/cabinet operation, occupied coat
 retrieval, wall support and stair-head enclosure still require review.
 
 Windows shows the live whole-house unit count; its tooltip explains openings
-and unit types. Area gives the combined owner-comparison exterior-measured
-estimate; 1st and 2nd show each story in sq ft. Include wall footprints,
-measuring exterior masonry to its outer face and shared garage walls to their
-garage-side finish. Count stairs only downstairs, excluding the actual open
-inter-flight gap; upstairs includes its arrival but excludes the stair opening.
-Include the furnace room provisionally as finished/conditioned; exclude garage,
-open porch and basement rooms. Version I replaces H upstairs; its full-height
-loft replaces the unfinished attic. Ground geometry was unchanged by the
-upstairs adoption; the kitchen/prep wall remains at z = 7. Actual model area
-differs from the SVG's 4,104.00-sq-ft traced chart because of room geometry and
-stair/arrival registration. Current model: 1st 1,966.44 /2nd 2,153.35
-/combined 4,119.80 sq ft.
-The loft keeps the 84 x 36-inch couch, 48 x 24-inch coffee table, armchair and
-18-inch side table. Fifteen 30-inch doors plus one 36-inch furnace door have
-96-inch heads and default closed, including the new enclosed primary WC.
-Bath 2 is deeper at 9.08 x 5.08 ft paint-face, with
-its 36 x 60-inch shower north/south and outward entry clear of fixtures.
-Straighten primary south wall at the unchanged stair's north edge; the old
-bedroom return becomes hall. Remove both traced east stair-wall stubs. Bring
-west bath/linen's north wall 13.53 inches north to the actual stair south edge,
-closing the leftover bottom strip; west bath/linen become 10.19 x 6.21 /2.27 x
-6.21 ft paint-face. Fixtures move with the wall, retaining full sizes/windows;
-refine local door returns, not their required swing directions. Replace floating
-thin stringers with stepped finish proxies touching every tread underside.
-Extend the outer guard over the whole upper flight on its nosing pitch, still
-inset 0.96 inch for 0.24 inch to wall paint. Hall guard posts now sit on deck
-and clear the north baseboard. Omit stair-void baseboard. Guards, headroom and
-structural support remain unapproved; stringer shapes are not engineered.
-Laundry machines face west from east-wall
-positions, clear of cabinet footprints. Folding bases move north and the south
-run west, leaving 33.60 inches between its end and the dryer front. Furnace
-room contains only furnace and gains a north 36 x 96-inch outward access door.
-Door leaves recess behind face-mounted hinges, with closed faces 1/8 inch
-proud of paint; actual casing caps clear adjoining walls after corner-return
-corrections. Laundry entry stays north. All 45 cabinet fronts clear sampled
-motion. Back headboards/nightstands one inch beyond baseboard; Bedroom 2
-backs east facing west. All desks meet paint; Bedroom 3's desk/chair/task light
-move east, freeing Closet 4's approach. Keep full sizes and chair pull checks.
-Center the primary sitting group. Correct closet fronts and wall backing;
-primary drawers face north from the south wall, Closet 4 hanging/shelves swap
-east/west. Linen becomes two end banks, retaining shelf area and freeing the
-middle. Vanity counters/mirrors meet paint. Bath 2's unchanged 36-inch vanity
-backs west facing east, clear of the north window; its solid north pier is too
-narrow. Bedroom 2 desk moves clear of door casing. Laundry south counter
-stays 1/8 inch clear of window trim, not through its bottom board. A 12-inch
-disk reaches every room; 24-inch disks reach linen, Closet 4 storage, primary
-storage groups, hall, loft and machine fronts.
-Selected products, occupied/simultaneous use and HVAC service/removal remain
-unapproved. Reference I SVG remains unchanged by these model corrections.
+and unit types. Area gives the combined ANSI-style exterior-measured gross
+finished-area estimate; 1st and 2nd show each story in sq ft. Include wall
+footprints, measuring exterior masonry to its outer face and shared garage
+walls to their garage-side finish. Count basement stairs on 1st and upstairs
+stairs on 2nd; exclude each actual open inter-flight gap. Include the mechanical
+closet provisionally as finished/conditioned; exclude garage, open porch,
+unfinished attic and basement rooms. Current Version H default:
+1st 1,924 / 2nd 1,851 / Area 3,775 sq ft (exact combined 3,774.9185417).
+The owner's exterior-measurement preference supersedes the earlier
+inside-wall and once-only stair rules. Latest downstairs wall shifts, z18
+fireplace/seating, kitchen/prep and straight kids wall/piano bay remain.
+H is active in the normal viewer; I SVG and saved JSON remain comparisons.
+Whole house: 27 openings /47 units; upstairs: 12 openings /17 casements.
+The current actual stairs, stepped stringers and full upper-flight guard stay.
 Tooltips retain assumptions: this is not certified appraisal GLA, and actual
 finishes, conditioning, grade and ceiling heights still require verification.
 Size gives maximum modeled plan bounds, not zoning/buildable
 limits. Controls use short labels; the detailed Sizes list is closed by
 default while 2D room labels remain on. Preserve essential warnings.
 
-## Historical Version H upstairs lounge - November 6
+## Version H upstairs lounge - November 6
 
-Version I supersedes the following arrangement; the retained four-piece lounge
-now belongs in the east loft, not the hall. At that review upstairs followed
-Version H, not the previous Version A linen-extension plan.
+Upstairs follows Version H, not the previous Version A linen-extension plan.
 One south-facing 84 x 36-inch couch, 48 x 24-inch coffee table, west-facing
 armchair and 18-inch side table furnish the central gallery. North finished
 route is 36.15 inches; coffee reach gap is 16.2 inches, not a passage.
@@ -160,7 +123,7 @@ lids in mudroom-side bottom, and two stockpots below the low steam oven.
 Keep existing cutting board, utensils, dishes, cups/mugs, spices and platters.
 Eight reassigned drawers retain 18 in travel. Minimum front/back item
 allowances 0.30/0.34 in. Open cooking/sink drawer gaps to island are
-39.14/13.16 in, not occupied passing approval; use one drawer at a time
+39.14/25.16 in, not occupied passing approval; use one drawer at a time
 and close sink drawers before passing. Store goods dry and lift upper nested
 goods to reach lower ones. Generic dimensions and nesting are assumptions;
 verify real items, hand access, hinges, rack/shelf/slide loads and cooktop
@@ -269,7 +232,7 @@ Remove the living-facing full-height stair partition and its two sconces. A 42-i
 
 Living-room window update: retain the two 48 × 64.8-inch fireplace openings. Join three 30 × 60-inch return-wall units at x = 4.1 / 6.6 / 9.1 ft, z = 8 ft: casement / fixed picture / casement, one 90 × 60-inch opening. The middle pane is uninterrupted, without crank/lock hardware. Sills remain 36 inches and heads 96 inches high. Units touch at 30-inch centers with no wall piers; one outer Craftsman casing, continuous header, sill and apron replace the separate trims. Opening-to-corner returns are 34.2 inches to wall centerlines. The two sconces stay at x = 0.95 / 12.25 ft. Trim tops remain approximately 102.625 inches under the 108-inch ceiling. Both oatmeal chairs now back toward this bank at (4.25,10.2) / (8.45,10.2), facing south, with their end table/lamp at (6.35,10.2); the piano and tucked bench remain on the stair side. See the [updated schedule](windows.html#living-room-window-schedule); manufacturer mullions, continuous structural header/bracing, flashing, window reach and occupied access remain unverified.
 
-Counter-to-island gap is 44.7 in; open sink drawers leave 25.16 in. Prep counter-to-pantry aisle is 50.6 in. Earlier dishwasher-door clearance notes differ (18.6 / 22.6 in); do not treat either as approval for a passing route. These are model measurements, not operating approvals. Source-plan images remain unchanged; structure, casing, services and occupied use require review.
+The exterior window wall behind the main kitchen/prep sinks stays z = 7 ft. Main kitchen remains approximately 11 ft x 19 ft 11 in, prep 18 ft x 8 ft. At shared wall x = 37.5, both doorless passages now provide 36-inch finished clear widths and nominal 8-foot heads: prep z = 9.725-12.725, mudroom z = 21.175-24.175. Casing stays outside the clear width; actual rough framing needs separate finish/lining allowances. Oven tower remains 31.5 inches wide and island stays fixed. Source-plan images remain unchanged; structure, services and occupied use require review.
 
 The widened openings shorten the cooking run from 106.15 to 94.15 inches. Cooktop, hood, island and pendants retain z = 16.95 ft. Hood margins to the openings are equal at 26.7 inches. Cooktop wall inspection hides island, foreground tree and accessories. The live 2D plan and 3D model share the same widened-opening geometry; dated images/video remain snapshots.
 
@@ -287,13 +250,13 @@ Remove the upper flight's powder-room-side outer oak handrail, dark guard bars, 
 
 November 8 approved refrigeration: two 36-inch Sub-Zero Classic stainless units with individual top grilles, freezer view-left CL3650F/S/T/L and fridge view-right CL3650R/S/T/R. Handles face the unchanged center oven tower. Shift only the short kids return 15 inches west to x27.75, coordinating floor, panelling, centered board/light and retained full-size TROFAST; keep cooking wall, passages, kids entry, stairs, island and garage partition fixed. Run x27.9375-37.3 is 112.35 inches wide, with four 0.75-inch panels and separate fridge/freezer fillers 3 / 2.85 inches. Appliance overheads are standard 36-inch boxes. Centers: fridge29.75, tower32.625, freezer35.5. Tower remains 31.5 inches wide / 30 clear / 25 deep; oven remains 30 x 24 x 24 inches with bottom30 inches, not raised. Both doors start closed; click toggles conceptual 90-degree stopped swings. Sub-Zero provides 90-degree stops for the factory110-degree doors; both stops are required here. Closed door/assumed-handle gaps to island are 43.05 / 41.05 inches; front edges have3.9 inches to side paint. Verify selected handles, stopped drawer access, openings/finished returns, ventilation/grille service, anti-tip anchorage, floor loads, structure, services and occupied mudroom approach. No installation approval; handles/grilles/hinges are proxies. See [current appliance facts](appliances.html) and [steam-oven options](appliances.html#steam-and-combi-steam-models); no oven model is selected.
 
-The mudroom passage remains z = 21.675-24.175 ft, 30 inches finished clear and doorless. Its outer jamb stays fixed beside refrigeration. West basket tower and return are removed. North storage is one 61.5 × 24-inch enclosed closet with a nominal 48 × 96-inch solid off-white French pair, closed by default. No open basket bay remains. East cubbies, south shoe tower, garage entry and refrigeration stay fixed. Verify headers, services, trim, occupied circulation and freezer operation.
+The mudroom passage spans z = 21.175-24.175 ft, 36 inches finished clear and doorless. Its outer jamb stays fixed beside refrigeration. West basket tower and return are removed. North storage is one 61.5 × 24-inch enclosed closet with a nominal 48 × 96-inch solid off-white French pair, closed by default. No open basket bay remains. East cubbies, south shoe tower, garage entry and refrigeration stay fixed. Verify headers, services, trim, occupied circulation and freezer operation.
 
 Room windows use simplified Andersen 100 Series casement concepts with Black exterior frames, White interior frames and sashes, white crank/lock hardware, and matching white craftsman casing; the center living return-wall unit is fixed picture glass. Wide openings use grouped casements; the tall dining patio-side bay uses two stacked casements. These are not manufacturer CAD or verified standard sizes. Entry sidelights are removed. Keep the White dining patio door shown closed, retaining its inward hinging and dimensions. The dining set is rotated 90 degrees and centered at (19.35, 3.95), 6 inches farther from the door, to clear its swing with pulled-out chairs. Actual occupied passage still needs verification. See [window selections and manufacturer BIM resources](windows.html). Verify catalog sizes, combinations, handing, egress, safety glazing, structure, hardware, and door clearance before ordering.
 
 Historical (superseded) J used a 90 × 39-inch mushroom main sofa at (10.8, 17.475), facing west, and a 66 × 39-inch brown-gray two-seat loveseat at (6.8, 10.8), facing south. Two 30 × 33-inch oatmeal chairs at (4.25, 24.1) and (8.45, 24.1) face north. Their 16 × 16 × 22-inch oak end table centers at (6.35, 24.1), leaving 2.2 inches each side. No coffee table, cart, lamp or rug. The 36-inch hall strip stays clear; local gaps are 15.6 inches between sofa/loveseat ends along z, 18 inches from main sofa end to chair fronts and 32.04 inches from loveseat end to closed cabinets. Chair backs end at z = 25.475, only 2.7 inches inside the nominal room end; stair/guard access requires review. Seven positions are not verified comfort. Earlier studies remain recorded. Switching restores furnishings and collision meshes. Verify products, table stability/reach, occupied access, cabinet/window operation and fireplace heat clearances.
 
-The prep passage remains z = 9.725-12.225 ft, 30 inches finished clear and doorless within the wall at z = 7. The mudroom passage stays z = 21.675-24.175 ft, also 30 inches clear. Both remain centered about z = 16.95 ft.
+The prep passage now spans z = 9.725-12.725 ft, 36 inches finished clear and doorless. Widen both inner jambs toward cooking while protecting the sink/prep counters and refrigeration at the unchanged outer jambs. The cabinet schedule below preserves symmetry about z = 16.95 ft.
 
 The8-foot island keeps its cooking alignment and2-foot living-room shift. Fridge inspection hides island, pendants and foreground hood; other views restore them. Both Classic doors start closed and are clickable to90-degree stopped poses, without a separate swing toolbar. Night/Day and Visibility retain their existing behavior. Use [Sub-Zero installation guidance](appliances.html) for actual hinges, stopped drawer withdrawal and selected handles; model motion is not occupied circulation or installation approval.
 
@@ -317,7 +280,7 @@ Use Menu for room navigation, tours, grid and visibility. In 2D floor plan, Room
 
 Every hardwood surface uses 7-inch-wide plank spacing at model scale, with the grain and joints aligned across adjacent rooms. The hall and prep kitchen share the main kitchen's matte honey-oak finish: varied 4-to-8-foot board lengths, restrained color variation, flowing grain, and occasional small knots reduce the repeated-strip appearance. Mudroom, bathrooms, porch, and garage retain their separate finishes. New living-room side glazing, the dining-room rear window, and the side patio door are proposed openings, not confirmed features of the source plan. The stone fireplace follows your [living-room design notes](foyer/living-room.html). Door openings, windows, furniture clearances, and dimensions require architectural verification. This is a design study, not a construction or purchasing plan.
 
-The kitchen follows the [October 28 open sink-wall decision](kitchen.html#joined-kitchen-windows). Remove both raised cabinet stacks and all trial doors/shelves/fillers/ceiling trim/sample dishes; the earlier counter-mounted trial stays rejected. Restore the 90 x 54 in bank, 18 / 54 / 18 in casement / picture / casement at x29/32/35 ft, z7, sill/head 42/96 in, opening x28.25-35.75. Keep white side/top trim, flush 90 x 6 x 1 in sill, three pots and no applied bottom board or grilles. Restore two matching ivory fabric-shade/brass sconces at x27.311458/36.688542, z7.205 ft, 75.6 in mounting datum; accent lights and shade glow follow Night/Day and floor restoration. Sink/prep wall-mounted runs, joined banks and trim remain at z7. Island, cooktop, refrigeration, pantry shelves, prep east end-wall window, passage positions and saved layouts stay fixed. Sink-storage inspection is straight-on. No sink under-cabinet strips return. Actual window SKUs/mulling, structure, flashing, crank/faucet reach, listed fixture suitability, wiring and task illumination remain unapproved. Rendering is not daylight or photometric evidence.
+The kitchen follows the [October 28 open sink-wall decision](kitchen.html#joined-kitchen-windows). Remove both raised cabinet stacks and all trial doors/shelves/fillers/ceiling trim/sample dishes; the earlier counter-mounted trial stays rejected. Restore the 90 x 54 in bank, 18 / 54 / 18 in casement / picture / casement at x29/32/35 ft, z7, sill/head 42/96 in, opening x28.25-35.75. Keep white side/top trim, flush 90 x 6 x 1 in sill, three pots and no applied bottom board or grilles. Restore two matching ivory fabric-shade/brass sconces at x27.311458/36.688542, z7.205 ft, 75.6 in mounting datum; accent lights and shade glow follow Night/Day and floor restoration. Sink-storage inspection is straight-on. Existing island/prep dishes, sink/fixtures, rack, bases, cooking storage, appliances, island, passages and saved layouts stay. No sink under-cabinet strips return. Actual window SKUs/mulling, structure, flashing, crank/faucet reach, listed fixture suitability, wiring and task illumination remain unapproved. Rendering is not daylight or photometric evidence.
 
 Click modeled cabinet doors, drawers or attached handles on either floor to open/close them. Doors swing outward 90 degrees; drawer boxes move with their fronts. Storage starts closed, keeps its pose across views and resets on reload. Existing tray, closet and refrigerator operations are preserved. These are conceptual display poses, not verified clearance or hardware limits; close fronts for circulation and check actual products, plumbing and adjacent door/appliance operation.
 

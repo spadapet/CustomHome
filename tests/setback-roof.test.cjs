@@ -3,10 +3,10 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const roof=require('../assets/js/floor-plan-roof.js');
 const upper=require('../assets/js/floor-plan-upstairs.js');
-test('roof abutments follow the Version I full-height loft and service edges',()=>{
+test('old loft transition is removed and roof abutments follow the Version H service edge',()=>{
   assert.deepEqual(roof.getSetbackRoofDefinitions(),[]);
   const g=upper.getUpstairsMeasuredGeometry();
-  const expected=[g.east+.225,g.loftNorth,g.east+.225,g.bedNorth+.225,
+  const expected=[g.east+.225,15,g.east+.225,g.bedNorth+.225,
     g.southEast+.225,g.bedNorth+.225,g.serviceEast+.225,g.bedNorth+.225];
   roof.getSetbackAbutments().flat().forEach((v,i)=>assert.ok(Math.abs(v-expected[i])<1e-8));
   for(const d of roof.getLowerRoofDefinitions().filter(d=>d.id.startsWith('Garage')&&!/gable|hip/.test(d.id))){

@@ -41,7 +41,7 @@ test('image-scaled kids, bathroom, shallow-closet and bedroom bands meet without
   assert.equal(kids.length, 2, 'The NE kitchen return creates a two-rectangle kids floor');
   close(kids[0].x, 19); close(kids[0].w, 8.75); close(kids[0].z, baseline.rooms.find(({ name }) => name === 'Kids room').z);
   close(kids[1].x, 27.75); close(kids[1].w, 3.45); close(kids[1].z, 26.9);
-  close(kids.reduce((sum, { w, d }) => sum + w * d, 0), 144.58916666666667);
+  close(kids.reduce((sum, { w, d }) => sum + w * d, 0), 125.66);
   const zones = baseline.floors.filter(({ room }) => /^(Kids room|Closet$|Bathroom$|Guest room$)/.test(room ?? ''));
   for (const f of zones) assert.ok(f.w > 0 && f.d > 0);
   for (let i = 0; i < zones.length; i++) for (let j = i + 1; j < zones.length; j++) {
@@ -729,12 +729,11 @@ test('original wall-backed rail omissions preserve stringers and unrelated expos
   }
 });
 
-test('kitchen-facing kids-room wall is flush with the tall cabinet fronts without moving the doorway', () => {
+test('kitchen-facing kids-room wall continues straight behind the tall cabinets without moving the doorway', () => {
   const wall = baseline.walls.find(([name]) => name === 'Kids north');
   const room = baseline.rooms.find((room) => room.name === 'Kids room');
-  const cabinetFrontZ = 26.725 - 25 / 12 - 0.08;
-  assert.ok(Math.abs(wall[2] - 0.175 - cabinetFrontZ) < 1e-9);
-  assert.ok(Math.abs((25.7 - wall[2]) * 12 - 11.56) < 1e-9);
+  assert.equal(wall[2], 26.9);
+  assert.equal(wall[4], 26.9);
   assert.ok(Math.abs(room.z + room.d - 37.2) < 1e-9);
   const west = baseline.walls.find(([name]) => name === 'Kids west');
   assert.ok(Math.abs(west[2] + west[5][0][0] - 27) < 1e-9);
@@ -755,7 +754,7 @@ test('kids-room kitchen return and garage partition stay aligned around the full
   assert.ok(!baseline.walls.some(([name]) => name === 'Garage southwest return'));
   const floors = baseline.floors.filter((floor) => floor.room === 'Kids room');
   const area = floors.reduce((sum, floor) => sum + floor.w * floor.d, 0);
-  assert.ok(Math.abs(area - 144.58916666666667) < 1e-9);
+  assert.ok(Math.abs(area - 125.66) < 1e-9);
   assert.ok(Math.abs(floors.find(({ x }) => x === 27.75).w * floors.find(({ x }) => x === 27.75).d - 35.535) < 1e-9);
   for (const kids of floors) for (const garage of baseline.floors.filter((floor) => floor.room === 'Garage')) {
     assert.ok(Math.min(kids.x + kids.w, garage.x + garage.w) - Math.max(kids.x, garage.x) < 1e-9 ||
@@ -1025,10 +1024,10 @@ test('first-floor room edits move shared edges and preserve immutable baseline a
 });
 
 test('first-floor walls move in both axes, change thickness and keep joins', () => {
-  const edits = layout.editWall(baseline, layout.empty(), 'Kids north', { z1: 25.2, z2: 25.2, thickness: 0.5 });
+  const edits = layout.editWall(baseline, layout.empty(), 'Kids north', { z1: 27.2, z2: 27.2, thickness: 0.5 });
   const plan = layout.resolve(baseline, edits);
-  assert.equal(plan.walls.find((wall) => wall.name === 'Kids west').z1, 25.2);
-  assert.equal(plan.rooms.find((room) => room.name === 'Kids room').z, 25.2);
+  assert.equal(plan.walls.find((wall) => wall.name === 'Kids west').z1, 27.2);
+  assert.equal(plan.rooms.find((room) => room.name === 'Kids room').z, 27.2);
   assert.equal(plan.walls.find((wall) => wall.name === 'Kids north').thickness, 0.5);
   const horizontalMove = layout.editWall(baseline, layout.empty(), 'Office north', { x1: 0.25, x2: 12.45 });
   assert.equal(layout.resolve(baseline, horizontalMove).walls.find((wall) => wall.name === 'Office north').x1, 0.25);

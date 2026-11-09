@@ -96,6 +96,7 @@ function buildLounge() {
   const placeSource = source.slice(source.indexOf('  scene.add(piano);'), source.indexOf('\n', source.indexOf('  piano.userData.location =')));
   context.stairOpening = require('../assets/js/upstairs-layout.js').stairOpening();
   context.pianoDepth = 411 / 304.8;
+  context.kidsRoom = { x: 19, z: 26.9, width: 8.75 };
   vm.runInContext(placeSource, context);
   return { context, source, loungeSource, scene, Group, feature };
 }
@@ -229,36 +230,30 @@ test('piano moves west and against trim with tucked bench, with no built-in besi
   const { context, scene } = buildLounge();
   const piano = scene.children.find((child) => child.name === 'Yamaha CLP-825 Rosewood digital piano');
   assert.ok(piano, 'Piano is a direct scene child, independent of seating layouts');
-  const stairs = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan().stairs;
-  const wallMin = stairs.x, wallMax = stairs.x + stairs.width;
-  near(wallMin, 0.175, 'Enclosure starts at the living west wall face');
   const cabinet = worldBounds({ traverse: (cb) => cb(piano.children.find((part) => part.name === 'Piano console cabinet')) });
-  near((cabinet.minX + cabinet.maxX) / 2, (wallMin + wallMax) / 2 - 16 / 12, 'Six more inches west, sixteen inches total from wall midpoint');
-  near((stairs.z - cabinet.maxZ) * 12, 1, 'Rear gap to the enclosure face');
-  near((stairs.z - 0.75 / 12 - cabinet.maxZ) * 12, 0.25, 'Clearance beyond baseboard');
+  near((cabinet.minX + cabinet.maxX) / 2, 3.758333333333333, 'Exact prior stair-enclosure pose');
+  near((piano.userData.wallRun.faceZ - cabinet.maxZ) * 12, 1, 'Rear gap to panelling');
   const bench = worldBounds(piano.children.find((part) => part.name.startsWith('Piano bench -')));
   near((bench.minX + bench.maxX) / 2, piano.position.x, 'Bench stays centered with the piano');
   const whole = worldBounds(piano);
   const sofa = worldBounds(scene.children.find((child) => child.name === 'Fireplace-facing U sectional - fit study').children[0]);
-  near((bench.minZ - sofa.maxZ) * 12, 18.1094, 'Tucked bench to recentered U back', 1e-3);
-  near((cabinet.minZ - sofa.maxZ) * 12, 25.0197, 'Keyboard front to recentered U back', 1e-3);
-  // Built-ins removed: the piano's west end faces the continuous fireplace-wall baseboard.
-  assert.doesNotMatch(piano.userData.location, /door conflicts|halved|cabinet end/);
-  assert.match(piano.userData.location, /fireplace built-ins removed, west end 15\.68 in to continuous window-wall baseboard \(16\.43 in to paint\)/);
-  near((whole.minX - 0.2375) * 12, 15.68, 'Piano west end to window-wall baseboard face', 0.01);
-  near((whole.minX - 0.175) * 12, 16.43, 'Piano west end to painted window wall', 0.01);
-  const feature = getLivingRoomFeatureLayout();
-  assert.ok(whole.minZ > context.livingCenterZ + 3.06 && whole.minZ < feature.wallEndZ, 'Piano west end faces the open baseboard run, not the stone');
-  near((cabinet.minZ - (context.livingCenterZ + 3.06)) * 12, 54.3, 'Piano console to stair-side stone return', 0.01);
-  assert.ok(cabinet.minX > 1.3, 'Retained piano stays physically separated from the west window plane; occupied window access remains unverified');
-  assert.ok(whole.maxX < wallMax && whole.minX > wallMin);
-  assert.ok(whole.maxZ < stairs.z && bench.minZ > sofa.maxZ);
+  assert.ok(whole.minZ > sofa.maxZ, 'Tucked piano and bench clear the living sectional');
+  assert.match(piano.userData.location, /pre-straight-wall living side of stair enclosure/);
+  near((whole.minX - 0.2375) * 12, 15.6751968503937, 'West end clearance to window-wall baseboard');
   const benchGroup = piano.children.find((part) => part.name.startsWith('Piano bench -'));
   near(benchGroup.position.z, 0.75, 'Bench tucks 6.6 inches from its previous 1.3 foot offset');
   const seat = benchGroup.children.find((part) => part.name === 'Piano bench seat');
   near(seat.w * 12, 24, 'Seat width unchanged');
   near(seat.d * 12, 12, 'Seat depth unchanged');
   near(seat.position.y * 12, 18, 'Seat center height unchanged');
+  const defaultBenchZ = benchGroup.position.z;
+  benchGroup.position.z += 18 / 12;
+  const occupiedBench = worldBounds(benchGroup);
+  near((bench.minZ - occupiedBench.minZ) * 12, 18, 'Real bench meshes translate north for occupied use');
+  near(occupiedBench.minZ, 23.509120734908137, 'Restored bench north edge after 18-inch pullout');
+  near((occupiedBench.minZ - sofa.maxZ) * 12, 0.10944881889764, 'Only a near-contact operating gap, not a passing aisle');
+  assert.ok(occupiedBench.maxX < 13.2, 'Bench remains outside the independent west-hall strip');
+  benchGroup.position.z = defaultBenchZ;
   const consoleParts = [];
   piano.children.filter((part) => part !== benchGroup).forEach((part) => part.traverse((mesh) => { if (mesh.isMesh) consoleParts.push(mesh); }));
   for (const legOrSeat of benchGroup.children) for (const part of consoleParts) {

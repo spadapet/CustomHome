@@ -47,7 +47,7 @@ function fixture() {
   const actualWall=c.wall;
   c.wall=(...args)=>{openings.push(args);return actualWall(...args);};
   c.buildArchedFrontEntry=()=>{}; // Door assembly is unchanged; retain its opening cut.
-  run(source,'  const win =','  const garageFacadeEaves =');
+  run(source,'  const win =','  // Compact service rooms cover');
   for(const name of ['patioBounds','livingPatioBounds']){
     const line=source.split('\n').find(line=>line.startsWith(`  const ${name} =`));
     assert.ok(line);vm.runInContext(line,c);

@@ -13,6 +13,7 @@ class Group {
     this.visible = true;
     this.position = { x: 0, y: 0, z: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } };
     this.rotation = { x: 0, y: 0, z: 0 };
+    this.scale = { x: 1 };
   }
   add(...children) { for (const child of children) { child.parent = this; this.children.push(child); } }
   traverse(callback) { callback(this); this.children.forEach((child) => child.traverse(callback)); }
@@ -33,6 +34,8 @@ function build() {
     THREE: { Group, Mesh, SpotLight, CylinderGeometry: class {}, TorusGeometry: class {}, DoubleSide: 2 },
     ...Object.fromEntries(['scene', 'cooktopUppers', 'cooktopHood', 'islandPendants', 'familyBoard', 'kitchenSconces'].map((name) => [name, new Group()])),
     kitchenTaskDiffuser: { emissiveIntensity: 0 }, black: material, windowTrim: material, brass: material,
+    familyShelfTowers: [new Group(), new Group()],
+    refrigerationCorniceTop: 9,
     cooktopUpperBottom: 4.55, hoodBottom: 6.3, cooktopCenterZ: 16.95, kitchenCenterZ: 16.95, ceilingHeight: 9,
     activeFloor: 'ground', groundLayoutPreview: null, nightLighting: true, currentView: 'kitchen', islandLightsInput: { checked: true }, canLightsInput: { checked: true },
     box(parent, x, y, z, width, height, depth, material) {
@@ -69,7 +72,9 @@ test('four small regressed downlights supplement under-cabinet, hood, pendant an
   const model = build();
   const rig = model.kitchenPracticalLights;
   assert.equal(rig.ceilingFixtures.children.length, 4);
-  assert.equal(rig.lights.length, 11);
+  assert.equal(rig.lights.length, 23);
+  assert.equal(model.familyShelfTowers.reduce((count, tower) => count + find(tower, /Family shelf task beam/).length, 0), 12);
+  assert.equal(find(model.familyBoard, /shielded picture light/)[0].userData.mountingHeightInches, 85.2);
   assert.equal(rig.group.userData.apertureInches, 4);
   assert.equal(rig.group.userData.photometryVerified, false);
   assert.equal(find(model.cooktopUppers, /under-cabinet task beam/).length, 2);

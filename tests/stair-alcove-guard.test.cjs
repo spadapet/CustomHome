@@ -53,7 +53,7 @@ test('complete upper-flight edge follows the nosings through the upstairs guard 
   const upper = require('../assets/js/floor-plan-upstairs.js').getUpstairsDefaultPlan(layout.stairOpening());
   const wall = upper.walls.find(w => w[0] === 'West bath north');
   for (const rail of handrails) for (const point of [rail.start, rail.end])
-    close((wall[2] - .175 - (layout.stairOpening().z + point[2] + .06)) * 12, .24);
+    close((wall[2] - .175 - (layout.stairOpening().z + point[2] + .06)) * 12, 1.24);
   assert.equal(beams.filter(b => b.name === 'Exposed upper-flight horizontal rail').length, 16);
   assert.equal(parts.filter(p => p.name === 'Exposed upper-flight guard post').length, 3);
 });

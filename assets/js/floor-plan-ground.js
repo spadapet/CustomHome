@@ -391,7 +391,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     const front = getGroundFrontLayout();
     const powderZ = guestEntry.powder.z;
     const entryZ = guestEntry.alcove.z, officeZ = guestEntry.officeNorthZ;
-    const kidsNorthZ = 26.725 - 25 / 12 - 0.08 + 0.175;
+    const kidsNorthZ = 26.9;
     const refrigeration = getKitchenRefrigerationLayout();
     const garageNorthWestX = 44.9 - 8 / 12, garageWestX = 31.2, garageEastX = 55.5;
     const garageNorthZ = 15, garageStepZ = 26.9, garageSouthZ = 49;
@@ -409,7 +409,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     const floors = [
       [0, livingFeatureWall.returnWallZ, 13.2, 25.7 - livingFeatureWall.returnWallZ, 'Living room'], [13.2, livingFeatureWall.diningRearZ, 13.675, 8 - livingFeatureWall.diningRearZ, 'Dining room'],
       [13.2, 8, 5.8, 17.7, 'Hall'], [19, 8, 7.5, kidsNorthZ - 8, 'Hall'],
-      [26.875, 7, 10.625, 1, 'Kitchen'], [26.5, 8, 11, kidsNorthZ - 8, 'Kitchen'], [refrigeration.returnX, kidsNorthZ, 37.5 - refrigeration.returnX, 26.9 - kidsNorthZ, 'Kitchen'],
+      [26.875, 7, 10.625, 1, 'Kitchen'], [26.5, 8, 11, kidsNorthZ - 8, 'Kitchen'],
       [37.5, 7, 7.9, 8, 'Prep kitchen'], [45.4, 7, 10.1, 8, 'Prep kitchen'], [37.5, 15, 7.4 - 8 / 12, 11.9, 'Mudroom'],
       [0, 25.7, 12.2, stairs.z - 25.7], [0, stairs.z, stairs.x, stairs.depth],
       [stairs.x + stairs.width, stairs.z, 12.2 - stairs.x - stairs.width, stairs.depth],
@@ -445,7 +445,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       ]],
       ['Living west', 0, livingFeatureWall.returnWallZ, 0, livingFeatureWall.wallEndZ, livingFeatureWall.windowCenters.map((z) => [z - livingFeatureWall.returnWallZ - livingFeatureWall.fireplaceWindows.width / 2, z - livingFeatureWall.returnWallZ + livingFeatureWall.fireplaceWindows.width / 2, livingFeatureWall.fireplaceWindows.sill, livingFeatureWall.fireplaceWindows.head])],
       ['Kids north', 19, kidsNorthZ, refrigeration.returnX, kidsNorthZ], ['Kids west', 19, kidsNorthZ, 19, guestSuite.kidsSouthZ, [[27 - kidsNorthZ, 31.5 - kidsNorthZ, 0, 8]]],
-      ['Kids east return', refrigeration.returnX, kidsNorthZ, refrigeration.returnX, 26.9], ['Powder north', 0, powderZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderZ],
+      ['Powder north', 0, powderZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderZ],
       ['Powder east', 7.1, powderZ, 7.1, officeZ, [[guestEntry.powderDoor.z - powderZ, guestEntry.powderDoor.z - powderZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
       ['Guest coat closet front', 7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
       ['Guest coat closet east', 12.2, guestEntry.coatCloset.z, 12.2, guestEntry.coatCloset.z + guestEntry.coatCloset.d],

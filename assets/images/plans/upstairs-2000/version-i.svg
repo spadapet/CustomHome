@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2200" viewBox="0 0 1600 2200" style="width:100%;height:auto;display:block" role="img" aria-labelledby="title desc">
   <title id="title">Version I: new upstairs image study and current downstairs model</title>
-  <desc id="desc">November 8, 2026. Editable Version I trace, adopted upstairs with a fixed-stair registration exception; Version H remains historical. Both panels use feet at 12 pixels per foot. Raster calibration is 224 pixels for the labelled 14 feet 8 inches primary width; source-image-not-measured-clearances do not fully reconcile. Downstairs follows shared geometry: living return z9.05 aligns its room face with kitchen counter z9.225; fireplace centers at z18; dining rear moves two feet to z1.9, retaining full height. Its side window narrows to four feet. Downstairs estimate is 1924.33 square feet including stairs; upstairs trace estimate is 2137.56 excluding its 92.74-square-foot stair block; combined trace estimate is 4061.89. These are arithmetic studies, not certified finished areas. Actual adopted upstairs retains the canonical stairs/44-inch arrival rather than the unregistered image stair outline, so its live area is 2153.35 and live combined area is 4077.69 square feet. The upstairs trace retains the pictured rooms, 96-inch door proxies and eighteen provisional openings /28 units. Main appliances, kids floor, ground guest suite and actual stairs are unchanged. No furniture or sanitary symbols are added to the SVG. Structure, roof alignment, fire separation, products, glazing, privacy, HVAC access, egress and occupied operation require professional review. Saved layout JSON is unchanged.</desc>
+  <desc id="desc">Version I upstairs trace is retained for comparison; Version H is restored as the active second floor on November 9. Both panels use feet at 12 pixels per foot. Upstairs raster calibration is 224 pixels for the labelled 14 feet 8 inches primary width; source-image-not-measured-clearances do not fully reconcile. Downstairs follows current shared geometry, including the living return, centered fireplace, dining wall move and updated kids wall/floor. Downstairs is 1924.33 square feet including stairs; the retained upstairs trace is 2137.56 excluding its 92.74-square-foot stair block; combined comparison trace is 4061.89. These are arithmetic studies, not certified finished areas. Active Version H upstairs is 1850.59 square feet, with live combined model area 3774.92. The Version I upstairs trace, door/window proxies and room allocations remain unchanged. Main appliances, ground guest suite, actual stairs and saved layout JSON are preserved. Structure, roof alignment, fire separation, products, glazing, privacy, HVAC access, egress and occupied operation require professional review.</desc>
   <defs>
 	<pattern id="stairHatch" width="0.7" height="0.7" patternUnits="userSpaceOnUse"><path d="M0 0H0.7" stroke="#aaa99f" stroke-width="0.05"/></pattern>
 	<g id="toilet"><rect x="-.7" y="-.85" width="1.4" height=".6" rx=".08" class="fixture"/><ellipse cx="0" cy=".25" rx=".65" ry=".85" class="fixture"/><ellipse cx="0" cy=".25" rx=".4" ry=".5" fill="#e6eff1"/></g>
@@ -30,10 +30,10 @@
   </defs>
   <rect width="1600" height="2200" fill="#faf8f2"/>
   <text x="55" y="50" class="heading">Version I: two-floor study</text>
-  <text id="combined-area" x="55" y="80" class="sub" data-square-feet="4061.892558">Combined trace: ~4,061.89 sq ft | stairs once downstairs | 3D adopts I with fixed-stair exception</text>
+  <text id="combined-area" x="55" y="80" class="sub" data-square-feet="4061.892558">Combined comparison trace: ~4,061.89 sq ft | active upstairs 3D restored to H</text>
   <text x="55" y="108" class="small">North / rear at top. Both panels: 12 pixels = 1 foot. Upstairs trace and area are approximate, not certified.</text>
   <text x="60" y="151" class="panel-heading">DOWNSTAIRS | current 3D layout</text>
-  <text id="ground-area" x="60" y="175" class="small" data-square-feet="1924.332708">1,924.33 sq ft | includes stairs | kids 144.59 sq ft</text>
+  <text id="ground-area" x="60" y="175" class="small" data-square-feet="1924.332708">1,924.33 sq ft | includes stairs | kids 125.66 sq ft</text>
   <text x="830" y="151" class="panel-heading">UPSTAIRS | new image study</text>
   <text id="upstairs-area" x="830" y="175" class="small" data-square-feet="2137.559850" data-stair-deduction="92.739234">~2,137.56 sq ft | excludes 92.74 sq ft stair block</text>
   <metadata id="area-basis" data-wall-thickness-feet=".35" data-stairs-counted-on="downstairs" data-upstairs-outline="0,7.4 43.869048,7.4 43.869048,19.775 55.916667,19.775 55.916667,41.578571 32.017857,41.578571 32.017857,55.066667 0,55.066667">Owner comparison estimate: exterior faces including internal walls; upstairs outline offset by half the drawn wall thickness, less its stair block. Ground uses the shared model area helper including stairs. Garage, porch and basement excluded. Upstairs conditioning, headroom, structure and raster calibration unverified; not certified appraisal area.</metadata>
@@ -42,32 +42,31 @@
 	  <rect data-floor="0" data-room="Living room" x="0" y="9.05" width="13.2" height="16.65" class="floor"/>
 	  <rect data-floor="1" data-room="Dining room" x="13.2" y="1.9" width="13.675" height="6.1" class="floor"/>
 	  <rect data-floor="2" data-room="Hall" x="13.2" y="8" width="5.8" height="17.7" class="floor"/>
-	  <rect data-floor="3" data-room="Hall" x="19" y="8" width="7.5" height="16.736667" class="floor"/>
+	  <rect data-floor="3" data-room="Hall" x="19" y="8" width="7.5" height="18.9" class="floor"/>
 	  <rect data-floor="4" data-room="Kitchen" x="26.875" y="7" width="10.625" height="1" class="floor"/>
-	  <rect data-floor="5" data-room="Kitchen" x="26.5" y="8" width="11" height="16.736667" class="floor"/>
-	  <rect data-floor="6" data-room="Kitchen" x="27.75" y="24.736667" width="9.75" height="2.163333" class="floor"/>
-	  <rect data-floor="7" data-room="Prep kitchen" x="37.5" y="7" width="7.9" height="8" class="floor"/>
-	  <rect data-floor="8" data-room="Prep kitchen" x="45.4" y="7" width="10.1" height="8" class="floor"/>
-	  <rect data-floor="9" data-room="Mudroom" x="37.5" y="15" width="6.733333" height="11.9" class="utility"/>
-	  <rect data-floor="10" data-room="Hall" x="0" y="25.7" width="12.2" height="1.316667" class="floor"/>
-	  <rect data-floor="11" data-room="Hall" x="0" y="27.016667" width="0.175" height="7.825" class="floor"/>
-	  <rect data-floor="12" data-room="Hall" x="10.008333" y="27.016667" width="2.191667" height="7.825" class="floor"/>
-	  <rect data-floor="13" data-room="Hall" x="0" y="34.841667" width="12.2" height="0.258333" class="floor"/>
-	  <rect data-floor="14" data-room="Hall" x="12.2" y="25.7" width="6.8" height="8.9" class="floor"/>
-	  <rect data-floor="15" data-room="Kids room" x="19" y="24.736667" width="8.75" height="12.463333" class="bedroom"/>
-	  <rect data-floor="16" data-room="Kids room" x="27.75" y="26.9" width="3.45" height="10.3" class="bedroom"/>
-	  <rect data-floor="17" data-room="Entry hall" x="12.2" y="34.6" width="6.8" height="20.079167" class="floor"/>
-	  <rect data-floor="18" data-room="Powder room" x="0" y="35.1" width="7.1" height="5.9" class="bath"/>
-	  <rect data-floor="19" data-room="Guest entry alcove" x="7.1" y="37.5" width="5.1" height="3.5" class="floor"/>
-	  <rect data-floor="20" data-room="Office" x="0" y="41" width="12.2" height="13.679167" class="bedroom"/>
-	  <rect data-floor="21" data-room="Closet" x="19" y="42" width="12.2" height="2.4" class="utility"/>
-	  <rect data-floor="22" data-room="Bathroom" x="19" y="37.2" width="12.2" height="4.8" class="bath"/>
-	  <rect data-floor="23" data-room="Guest room" x="19" y="44.4" width="12.2" height="10.279167" class="bedroom"/>
-	  <rect data-floor="24" data-room="Guest coat closet" x="7.1" y="35.1" width="5.1" height="2.4" class="floor"/>
-	  <rect data-floor="25" data-room="Garage" x="44.233333" y="15" width="11.266667" height="11.9" class="garage"/>
-	  <rect data-floor="26" data-room="Garage" x="31.2" y="26.9" width="24.3" height="7.7" class="garage"/>
-	  <rect data-floor="27" data-room="Garage" x="31.2" y="34.6" width="24.3" height="14.4" class="garage"/>
-	  <rect data-floor="28" data-room="Front porch" x="0" y="54.679167" width="31.2" height="7" class="porch"/>
+	  <rect data-floor="5" data-room="Kitchen" x="26.5" y="8" width="11" height="18.9" class="floor"/>
+	  <rect data-floor="6" data-room="Prep kitchen" x="37.5" y="7" width="7.9" height="8" class="floor"/>
+	  <rect data-floor="7" data-room="Prep kitchen" x="45.4" y="7" width="10.1" height="8" class="floor"/>
+	  <rect data-floor="8" data-room="Mudroom" x="37.5" y="15" width="6.733333" height="11.9" class="utility"/>
+	  <rect data-floor="9" data-room="Hall" x="0" y="25.7" width="12.2" height="1.316667" class="floor"/>
+	  <rect data-floor="10" data-room="Hall" x="0" y="27.016667" width="0.175" height="7.825" class="floor"/>
+	  <rect data-floor="11" data-room="Hall" x="10.008333" y="27.016667" width="2.191667" height="7.825" class="floor"/>
+	  <rect data-floor="12" data-room="Hall" x="0" y="34.841667" width="12.2" height="0.258333" class="floor"/>
+	  <rect data-floor="13" data-room="Hall" x="12.2" y="25.7" width="6.8" height="8.9" class="floor"/>
+	  <rect data-floor="14" data-room="Kids room" x="19" y="26.9" width="8.75" height="10.3" class="bedroom"/>
+	  <rect data-floor="15" data-room="Kids room" x="27.75" y="26.9" width="3.45" height="10.3" class="bedroom"/>
+	  <rect data-floor="16" data-room="Entry hall" x="12.2" y="34.6" width="6.8" height="20.079167" class="floor"/>
+	  <rect data-floor="17" data-room="Powder room" x="0" y="35.1" width="7.1" height="5.9" class="bath"/>
+	  <rect data-floor="18" data-room="Guest entry alcove" x="7.1" y="37.5" width="5.1" height="3.5" class="floor"/>
+	  <rect data-floor="19" data-room="Office" x="0" y="41" width="12.2" height="13.679167" class="bedroom"/>
+	  <rect data-floor="20" data-room="Closet" x="19" y="42" width="12.2" height="2.4" class="utility"/>
+	  <rect data-floor="21" data-room="Bathroom" x="19" y="37.2" width="12.2" height="4.8" class="bath"/>
+	  <rect data-floor="22" data-room="Guest room" x="19" y="44.4" width="12.2" height="10.279167" class="bedroom"/>
+	  <rect data-floor="23" data-room="Guest coat closet" x="7.1" y="35.1" width="5.1" height="2.4" class="floor"/>
+	  <rect data-floor="24" data-room="Garage" x="44.233333" y="15" width="11.266667" height="11.9" class="garage"/>
+	  <rect data-floor="25" data-room="Garage" x="31.2" y="26.9" width="24.3" height="7.7" class="garage"/>
+	  <rect data-floor="26" data-room="Garage" x="31.2" y="34.6" width="24.3" height="14.4" class="garage"/>
+	  <rect data-floor="27" data-room="Front porch" x="0" y="54.679167" width="31.2" height="7" class="porch"/>
 	</g>
 	<g id="ground-walls">
 	  <path data-wall="Living north" d="M0 9.05L2.85 9.05M10.35 9.05L13.2 9.05" class="wall"/>
@@ -98,9 +97,8 @@
 	  <path data-wall="Living west" d="M0 9.05L0 10.2M0 14.2L0 21.8M0 25.8L0 26.775" class="wall"/>
 	  <path data-window="Living west" d="M0 10.2L0 14.2" class="window"/>
 	  <path data-window="Living west" d="M0 21.8L0 25.8" class="window"/>
-	  <path data-wall="Kids north" d="M19 24.736667L27.75 24.736667" class="wall"/>
-	  <path data-wall="Kids west" d="M19 24.736667L19 27M19 31.5L19 37.2" class="wall"/>
-	  <path data-wall="Kids east return" d="M27.75 24.736667L27.75 26.9" class="wall"/>
+	  <path data-wall="Kids north" d="M19 26.9L27.75 26.9" class="wall"/>
+	  <path data-wall="Kids west" d="M19 26.9L19 27M19 31.5L19 37.2" class="wall"/>
 	  <path data-wall="Powder north" d="M0 35.1L12.2 35.1" class="wall"/>
 	  <path data-wall="Powder east" d="M7.1 35.1L7.1 38M7.1 40.5L7.1 41" class="wall"/>
 	  <path data-wall="Guest coat closet front" d="M7.1 37.5L7.65 37.5M11.65 37.5L12.2 37.5" class="wall"/>
@@ -166,7 +164,7 @@
 	<text x="33.3" y="16" class="room">KITCHEN</text><text x="33.3" y="17.2" class="size">L-shaped return</text>
 	<text x="46.5" y="10.6" class="room">PREP</text><text x="46.5" y="11.8" class="size">18 ft x 8 ft</text>
 	<text x="40.8" y="20.3" class="room">MUDROOM</text>
-	<text x="23.8" y="31.5" class="room">KIDS</text><text x="23.8" y="32.8" class="size">144.59 sq ft | L-shaped</text>
+	<text x="23.8" y="31.5" class="room">KIDS</text><text x="23.8" y="32.8" class="size">125.66 sq ft | current ground model</text>
 	<text x="23.8" y="34.1" class="tiny">Short return moved 15 in west</text>
 	<text x="3.55" y="39.2" class="room">POWDER</text>
 	<text x="9.65" y="36.6" class="tiny">COATS</text><text x="9.65" y="39.5" class="tiny">ALCOVE</text>
@@ -295,12 +293,12 @@
       <path d="M0 1238H660M500 1238V1810M0 1810H660" fill="none" stroke="#b9c3ba"/>
       <g data-area-room="Living room"><text y="1264">Living room</text><text x="650" y="1264" text-anchor="end">219.78</text></g>
       <g data-area-room="Dining room"><text y="1290">Dining room</text><text x="650" y="1290" text-anchor="end">83.42</text></g>
-      <g data-area-room="Hall"><text y="1316">Hall</text><text x="650" y="1316" text-anchor="end">228.19</text></g>
-      <g data-area-room="Kitchen"><text y="1342">Kitchen</text><text x="650" y="1342" text-anchor="end">215.82</text></g>
+      <g data-area-room="Hall"><text y="1316">Hall</text><text x="650" y="1316" text-anchor="end">244.41</text></g>
+      <g data-area-room="Kitchen"><text y="1342">Kitchen</text><text x="650" y="1342" text-anchor="end">218.52</text></g>
       <g data-area-room="Prep kitchen"><text y="1368">Prep kitchen</text><text x="650" y="1368" text-anchor="end">144.00</text></g>
       <g data-area-room="Mudroom"><text y="1394">Mudroom</text><text x="650" y="1394" text-anchor="end">80.13</text></g>
       <g data-area-room="Circulation"><text y="1420">Stair-surround / connecting circulation</text><text x="650" y="1420" text-anchor="end">98.25</text></g>
-      <g data-area-room="Kids room"><text y="1446">Kids room</text><text x="650" y="1446" text-anchor="end">144.59</text></g>
+      <g data-area-room="Kids room"><text y="1446">Kids room</text><text x="650" y="1446" text-anchor="end">125.66</text></g>
       <g data-area-room="Entry hall"><text y="1472">Entry hall</text><text x="650" y="1472" text-anchor="end">136.54</text></g>
       <g data-area-room="Powder room"><text y="1498">Powder room</text><text x="650" y="1498" text-anchor="end">41.89</text></g>
       <g data-area-room="Guest entry alcove"><text y="1524">Guest entry alcove</text><text x="650" y="1524" text-anchor="end">17.85</text></g>

@@ -3,28 +3,38 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const ground = require('../assets/js/floor-plan-ground.js');
 
-test('piano shifts six more inches toward west windows while preserving its rear gap', () => {
+test('straight kids boundary retains refrigeration and coordinated nonzero floor strips', () => {
+  const plan = ground.getGroundFloorDefaultPlan();
+  const north = plan.walls.find(([name]) => name === 'Kids north');
+  assert.deepEqual(north.slice(1, 5), [19, 26.9, 27.75, 26.9]);
+  assert.equal(plan.walls.some(([name]) => name === 'Kids east return'), false);
+  for (const name of ['Kitchen south left', 'Kids kitchen return']) {
+    const wall = plan.walls.find(([n]) => n === name);
+    assert.equal(wall[2], north[2]);
+    assert.equal(wall[4], north[2]);
+  }
+  const floors = plan.floors.filter(({room}) => room === 'Kids room');
+  assert.ok(floors.every(({z,d}) => z === 26.9 && Math.abs(z+d-37.2)<1e-9));
+  assert.ok(Math.abs(floors.reduce((sum,{w,d})=>sum+w*d,0)-125.66)<1e-9);
+  assert.ok(plan.floors.every(({w,d})=>w>0&&d>0));
+});
+
+test('redirect restores the single unchanged piano to the pre-straight-wall stair pose', () => {
   const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
-  let parent;
-  const piano = { position: { set(x, y, z) { Object.assign(this, { x, y, z }); } }, rotation: {}, userData: {} };
+  const piano = { position: { set(x,y,z) { Object.assign(this,{x,y,z}); } }, rotation: {}, userData: {} };
   const start = source.indexOf('  scene.add(piano);');
   const end = source.indexOf('\n', source.indexOf('  piano.userData.location =', start));
-  assert.ok(start >= 0 && end > start);
-  const stairOpening = require('../assets/js/upstairs-layout.js').stairOpening();
-  vm.runInNewContext(source.slice(start, end), { piano, scene: { add(object) { parent = object; } }, stairOpening, pianoDepth: 411 / 304.8 });
-  assert.equal(parent, piano);
-  assert.equal(piano.rotation.y, Math.PI);
-  const halfWidth = 1350 / 304.8 / 2;
-  const wall = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan().stairs;
-  assert.deepEqual([piano.userData.wallRun.minX, piano.userData.wallRun.maxX], [wall.x, wall.x + wall.width]);
-  const previousX = (wall.x + wall.x + wall.width) / 2 - 10 / 12;
-  assert.ok(Math.abs((previousX - piano.position.x) * 12 - 6) < 1e-9, 'Actual cabinet midpoint shifts another six inches west');
-  assert.ok(piano.position.x - halfWidth > 0.2375, 'Console clears west wall and base trim');
-  assert.ok(Math.abs(stairOpening.z - piano.position.z - 411 / 304.8 / 2 - 1 / 12) < 1e-9, 'Rear gap is one inch to stair wall');
-  assert.ok(piano.position.z + 411 / 304.8 / 2 < 35.1, 'Whole piano is outside office and powder room');
-  assert.equal(piano.userData.wallRun.windowShiftInches, 16);
-  assert.doesNotMatch(piano.userData.location, /door conflicts|halved|cabinet end/, 'No stale cabinet references; the fireplace built-ins are removed');
-  assert.match(piano.userData.location, /fireplace built-ins removed/);
-  assert.ok(Math.abs((piano.position.x - halfWidth - 0.2375) * 12 - 15.68) < 0.01, 'West end to window-wall baseboard face');
+  const stairOpening = require('../assets/js/upstairs-layout.js').stairOpening(10);
+  vm.runInNewContext(source.slice(start,end), {piano, stairOpening, scene:{add(){}}, pianoDepth:411/304.8});
+  assert.equal((source.match(/const piano = new THREE.Group/g)||[]).length,1);
+  assert.ok(Math.abs(piano.position.x-3.758333333333333)<1e-9);
+  assert.ok(Math.abs(piano.position.z-26.259120734908137)<1e-9);
+  assert.equal(piano.rotation.y,Math.PI);
+  assert.ok(Math.abs((piano.userData.wallRun.faceZ-piano.position.z-411/304.8/2)*12-1)<1e-9);
+  assert.equal(piano.userData.wallRun.windowShiftInches,16);
+  assert.doesNotMatch(source,/familyBoard.position.y = 14 \/ 12/);
+  assert.match(source,/bottomInches: 30/);
+  assert.match(source,/pianoBench.position.set\(0, 0, 0.75\)/);
 });

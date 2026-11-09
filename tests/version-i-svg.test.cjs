@@ -214,7 +214,7 @@ test('every downstairs floor strip and its actual kids area match the shared 3D 
     for (const [a, b] of [['x', 'x'], ['y', 'z'], ['width', 'w'], ['height', 'd']]) near(floor[a], expected[b]);
   });
   const kids = floors.filter(floor => floor['data-room'] === 'Kids room');
-  near(kids.reduce((sum, floor) => sum + Number(floor.width) * Number(floor.height), 0), 144.5891666667, .00001);
+  near(kids.reduce((sum, floor) => sum + Number(floor.width) * Number(floor.height), 0), 125.66, .00001);
   near(ground.getLivableFloorArea(plan, { includeStairs: true }), 1924.3327083333);
   for (const [a, b] of [['x', 'x'], ['y', 'z'], ['width', 'width'], ['height', 'depth']]) near(element('ground-stairs')[a], plan.stairs[b]);
 });
@@ -403,7 +403,7 @@ test('the inset south hallway and west-open loft stay connected rather than clos
   for (const filename of ['upstairs.html', 'floor-plan-reference.md', 'design-context.md']) {
     const notes = fs.readFileSync(path.join(root, filename), 'utf8');
     assert.match(notes, /version-i\.svg/);
-    assert.match(notes, /Version I.*(?:adopt|model)|(?:adopt|model).*Version I/i);
-    assert.match(notes, /stair.*(?:exception|registration)|(?:exception|registration).*stair/i);
+    assert.match(notes, /Version I/);
+    assert.match(notes, /(?:Active|active|restored|restores).*Version H|Version H.*(?:active|restoration)/);
   }
 });

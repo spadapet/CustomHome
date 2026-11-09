@@ -177,7 +177,7 @@ test('only visible envelope surfaces are rendered, with a persistent roof-plan c
   assert.match(exterior, /renderRoofEnvelope\('Connected standing-seam porch and entry roof', HomeRoof\.getPorchRoofDefinitions/);
   assert.match(exterior, /Clipped standing-seam roof rib/);
   assert.doesNotMatch(exterior, /panel\.name = entryPediment \? 'Entry standing-seam metal roof panel' : 'Brown-shingle pitched roof'/);
-  assert.match(exterior, /Fitted upper wall-head closure/);
+  assert.match(exterior, /Fitted upper attic wall-head closure/);
   assert.ok(html.indexOf('assets/js/floor-plan-roof.js') < html.indexOf('assets/js/floor-plan-exterior.js'));
   assert.match(html, /data-view="exterior-roof"[^>]*>Roof plan/);
   assert.match(viewer, /'exterior-roof': \{ target: \[27\.75, 12, 31\]/);

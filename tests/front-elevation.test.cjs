@@ -8,7 +8,7 @@ const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior
 const upperPlan = require('../assets/js/floor-plan-upstairs.js');
 function drawMeasuredUpper(context) {
   const start = source.indexOf('  const measuredUpper =');
-  const end = source.indexOf('  const garageFacadeEaves =', start);
+  const end = source.indexOf('  // Compact service rooms cover', start);
   assert.ok(start > 0 && end > start);
   vm.runInNewContext(source.slice(start, end), { ...upperPlan, upper: 10, eaves: 19, ...context });
 }
@@ -232,22 +232,19 @@ test('slim paired masonry bays create 2.4-inch pockets without occupying fixed a
   };
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  function articulateUpperMasonry('), source.indexOf('  const win =')), context);
-  const units=upperPlan.getUpstairsFrontWindows();
-  context.frontOpenings = [0,2].map(index=>({center:(units[index].center+units[index+1].center)/2,width:5,sill:13,height:5}));
-  vm.runInContext("articulateUpperMasonry({name:'Exterior brick wall: upper front bedrooms',userData:{}},32.017857,19,frontOpenings)", context);
+  context.frontOpenings = upperPlan.getUpstairsFrontWindows();
+  vm.runInContext("articulateUpperMasonry({name:'Exterior brick wall: upper front bedrooms',userData:{}},31.570833333333,19,frontOpenings)", context);
   const piers = meshes.filter(m => m.name === 'Upper bay projecting masonry pier');
-  const centers = context.frontOpenings.map(w=>w.center);
-  assert.equal(piers.length,4);
-  assert.ok(piers.every((p, i) => Math.abs(p.x - [centers[0]-4.75, centers[0]+4.75, centers[1]-4.75, centers[1]+4.75][i]) < 1e-8));
+  const centers = upperPlan.getUpstairsFrontWindows().map(w => w.center);
+  assert.ok(piers.every((p, i) => Math.abs(p.x - [centers[0]-3.75, centers[1]+3.75, centers[2]-3.75, centers[3]+3.75][i]) < 1e-8));
   for (const pier of piers) {
     assert.equal(pier.w, 1);
     assert.ok(Math.abs((pier.z + pier.d / 2 - 0.225) * 12 - 2.4) < 1e-8);
   }
   const sills = meshes.filter(m => m.name === 'Paired window continuous stone sill');
-  assert.equal(sills.length,2);
-  assert.ok(sills.every((m, i) => Math.abs(m.x - centers[i]) < 1e-8 && Math.abs(m.w-8)<1e-8));
+  assert.ok(sills.every((m, i) => Math.abs(m.x - (centers[i*2]+centers[i*2+1])/2) < 1e-8 && m.w === 10));
   for (const m of meshes) for (const x of centers) {
-    assert.ok(m.x + m.w / 2 <= x - 2.5 || m.x - m.w / 2 >= x + 2.5 ||
+    assert.ok(m.x + m.w / 2 <= x - 1.5 || m.x - m.w / 2 >= x + 1.5 ||
       m.y + m.h / 2 <= 13 || m.y - m.h / 2 >= 18, `${m.name} crosses glazing`);
   }
 });
@@ -316,8 +313,7 @@ test('hipped exterior removes applied front gables and retains fixed openings wi
   const ground = walls.find((wall) => wall.name === 'front ground floor').args.at(-1);
   assert.deepEqual(JSON.parse(JSON.stringify(ground.filter((opening) => !opening.door))), require('../assets/js/floor-plan-ground.js').getGroundFrontWindows());
   const upper = walls.filter(wall => ['upper front bedrooms', 'upper front bedroom 4'].includes(wall.name)).flatMap(wall => wall.args.at(-1));
-  assert.equal(upper.length, 2);
-  assert.ok(upper.every(opening=>opening.width===5));
+  assert.equal(upper.length, 4);
   assert.ok(!walls.some((wall) => /Garage.*upper/.test(wall.name)));
   context.gable = (...args) => gables.push(args);
   context.hipRoof = (...args) => gables.push(args);
@@ -328,38 +324,33 @@ test('hipped exterior removes applied front gables and retains fixed openings wi
   assert.doesNotMatch(source, /gable\('Entry farmhouse pediment'/);
 });
 
-test('four balanced exterior upper-front units share two actual Version I apertures and frame groups', () => {
-  const plan = upperPlan.getUpstairsDefaultPlan(require('../assets/js/upstairs-layout.js').stairOpening());
+test('four balanced exterior upper-front windows match furnished upstairs wall openings and frames', () => {
+  const plan = require('../assets/js/floor-plan-upstairs.js').getUpstairsDefaultPlan(require('../assets/js/upstairs-layout.js').stairOpening());
   const walls = plan.walls.filter(([name]) => ['Bedrooms south', 'Bedroom 4 south'].includes(name));
   const cuts = walls.flatMap(([, x, , , , holes]) => holes.map(([a, b, low, high]) => [x + a, x + b, low, high]));
-  const frames = plan.windows.filter(([name]) => /Bedroom [34] front/.test(name));
-  const units=upperPlan.getUpstairsFrontWindows();
+  const frames = plan.windows.filter(([name]) => /Bedroom [34] south/.test(name));
   const exteriorOpenings = [];
   drawMeasuredUpper({
+    win: (center, width, sill, height = 5) => ({ center, width, sill, height }),
     wall(...args) {
       if (['upper front bedrooms', 'upper front bedroom 4'].includes(args[0])) {
         exteriorOpenings.push(...args[7].map(o => ({ ...o, center: args[1] + o.center })));
       }
     }
   });
-  assert.equal(frames.length, 2);
-  assert.equal(cuts.length, 2);
-  assert.equal(units.length,4);
+  assert.equal(frames.length, 4);
+  assert.equal(cuts.length, 4);
   for (const name of ['Bedroom 3', 'Bedroom 4']) {
     const room = plan.rooms.find(r => r.name === name);
-    const frame=frames.find(f=>f[0].startsWith(name));
-    const pair=units.filter(unit=>unit.openingId===frame[0]);
-    assert.equal(pair.length,2);
-    assert.ok(pair.every(unit=>unit.width===2.5));
-    assert.ok(Math.abs(frame[1]-(room.x+room.w/2))<1e-8);
-    assert.ok(Math.abs((pair[0].center+pair[1].center)/2-frame[1])<1e-8);
+    assert.ok(Math.abs(room.w - .35 - 12) < 1e-8);
+    assert.ok(Math.abs(room.d - .35 - 13) < 1e-8);
+    const pair = frames.filter(f => f[0].startsWith(name));
+    assert.ok(Math.abs((pair[0][1] + pair[1][1])/2 - (room.x + room.w/2)) < 1e-8);
   }
-  const g=upperPlan.getUpstairsMeasuredGeometry();
-  assert.ok(Math.abs(plan.rooms.find(r=>r.name==='Bedroom 4 closet').z+plan.rooms.find(r=>r.name==='Bedroom 4 closet').d-g.south)<1e-8);
+  for (const closet of plan.rooms.filter(r => /Bedroom [34] closet/.test(r.name))) assert.ok(Math.abs(closet.w - .35 - 6.15) < 1e-8);
   for (const [index, frame] of frames.entries()) {
     const opening = exteriorOpenings[index];
     assert.ok(Math.abs(frame[1] - opening.center) < 1e-8);
-    assert.equal(frame[3],5);
     assert.equal(frame[3], opening.width);
     assert.ok(Math.abs((cuts[index][0] + cuts[index][1]) / 2 - opening.center) < 1e-8);
     assert.deepEqual(cuts[index].slice(2), [3, 8]);
