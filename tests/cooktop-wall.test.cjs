@@ -37,9 +37,9 @@ function buildCookingWall() {
     }
   }
   const context = {
-    THREE: { Group, Mesh, CylinderGeometry }, kitchen: new Group(), ceilingHeight: 9, cookingWallShiftX: -0.5,
-    cooktopRunWidth: 21.675 - 12.225 - 2 * (3.625 / 12), cooktopFrontReveal: 0.125 / 12, cooktopCenterZ: 16.95,
-    ...Object.fromEntries(['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish', 'brass', 'black', 'light', 'kitchenTaskDiffuser'].map((name) => [name, { name }])),
+    THREE: { Group, Mesh, CylinderGeometry }, kitchen: new Group(), ceilingHeight: 9, cookingWallShiftX: -0.5, kitchenWallRight: 37.5,
+    casingSideWidth: 3.625 / 12, casingReveal: 0, cooktopRunStartZ: 12.225, cooktopRunEndZ: 21.675, cooktopCenterZ: 16.95,
+    ...Object.fromEntries(['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish', 'brass', 'black', 'light', 'kitchenTaskDiffuser', 'countertop'].map((name) => [name, { name }])),
     mat: (color) => ({ color }),
     box(parent, x, y, z, w, h, d, material) {
       assert.ok(material, 'Every part has a defined finish');
@@ -49,9 +49,17 @@ function buildCookingWall() {
       return mesh;
     }
   };
+  context.drawerFront = (x, z, width, rotation, parent, height, rows) => {
+    for (const [bottom, top] of rows) {
+      const front = context.box(parent, x, (bottom + top) / 2, z, 0.04, top - bottom, width, context.cabinetFinish);
+      front.rotation.y = rotation;
+      front.name = 'Cooktop drawer front';
+    }
+  };
   vm.createContext(context);
   const helpers = source.slice(source.indexOf('  function shakerFront('), source.indexOf('  function cabinetCupPull('));
   vm.runInContext(helpers, context);
+  vm.runInContext(source.slice(source.indexOf('  const kitchenCenterZ ='), source.indexOf('  const cooktop =')), context);
   vm.runInContext(source.slice(source.indexOf('  const cooktopHood ='), source.indexOf('  const cookingDetails =')), context);
   const descendants = (node) => [node, ...node.children.flatMap(descendants)];
   const all = descendants(context.kitchen);
@@ -86,6 +94,23 @@ function bounds(root) {
 }
 
 function close(actual, expected) { assert.ok(Math.abs(actual - expected) < 0.000001, `${actual} should equal ${expected}`); }
+
+test('cooktop base uses three matching 36-inch drawer banks and a 108-inch counter', () => {
+  const model = buildCookingWall();
+  const cabinetry = model.find('Extended cooktop base cabinetry')[0];
+  assert.deepEqual(Array.from(cabinetry.userData.nominalBaseWidthsInches), [36, 36, 36]);
+  assert.equal(cabinetry.userData.widthInches, 108);
+  close(cabinetry.userData.availableRunWidthInches, 106.15);
+  close(cabinetry.userData.casingOverlapInchesPerEnd, 0.925);
+  assert.equal(cabinetry.userData.endFitVerified, false);
+  const carcasses = model.find('Standard cooking base cabinet carcass');
+  assert.equal(carcasses.length, 3);
+  assert.deepEqual(carcasses.map(part => part.userData.nominalWidthInches), [36, 36, 36]);
+  const counter = model.find('Extended cooktop quartz counter')[0];
+  close(counter.geometry.d * 12, 108);
+  assert.equal(model.find('Six-inch spice pull-out front').length, 0);
+  assert.equal(model.find('Six-inch board pull-out front').length, 0);
+});
 
 test('hood stays 48 inches wide, tapers only in depth and keeps a flush rear plane', () => {
   const model = buildCookingWall();

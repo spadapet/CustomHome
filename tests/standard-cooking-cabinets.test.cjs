@@ -61,20 +61,21 @@ const find = (root, predicate) => {
   return parts;
 };
 
-test('five common-size boxes and equal end fillers exactly fill the fixed cooking run', () => {
+test('three equal 36-inch drawer bases form the provisional 108-inch cooking run', () => {
   const { run } = build();
   const bodies = find(run, (part) => part.name === 'Standard cooking base cabinet carcass');
-  assert.deepEqual(bodies.map((part) => part.userData.nominalWidthInches), [6, 27, 36, 27, 6]);
-  close(run.userData.widthInches, 106.15);
-  close(run.userData.endFillerWidthInches, 2.075);
-  close(102 + 2 * run.userData.endFillerWidthInches, run.userData.widthInches);
+  assert.deepEqual(bodies.map((part) => part.userData.nominalWidthInches), [36, 36, 36]);
+  close(run.userData.widthInches, 108);
+  close(run.userData.availableRunWidthInches, 106.15);
+  close(run.userData.casingOverlapInchesPerEnd, 0.925);
+  assert.equal(run.userData.endFitVerified, false);
   bodies.forEach((body, index) => {
     close(body.geometry.w * 12, 24);
     close(body.userData.nominalHeightInches, 34.5);
     close(body.position.y + body.geometry.h / 2, 34.5 / 12);
     if (index) close(bodies[index - 1].position.z + bodies[index - 1].geometry.d / 2, body.position.z - body.geometry.d / 2);
   });
-  close(bodies[2].position.z, 16.95);
+  close(bodies[1].position.z, 16.95);
 });
 
 test('stock-size fronts close the former gaps with one-eighth-inch reveals and useful drawer heights', () => {
@@ -86,15 +87,14 @@ test('stock-size fronts close the former gaps with one-eighth-inch reveals and u
   for (const bank of banks) {
     const rows = bank.children.filter((part) => part.userData.kitchenDrawerRow !== undefined);
     rows.forEach((row, index) => {
-      const nominal = Math.abs(bank.position.z - 16.95) < 0.001 ? 36 : 27;
-      close(row.userData.width * 12, nominal - 0.125);
+      close(row.userData.width * 12, 35.875);
       close(row.userData.height * 12, index === 2 ? 5.5 : 12.25);
       if (index) close((row.position.y - row.userData.height / 2 - (rows[index - 1].position.y + rows[index - 1].userData.height / 2)) * 12, 0.125);
       for (const pull of row.children) assert.ok(pull.position.y + 1.125 / 24 < row.userData.height / 2, 'Cup pull fits within the shallow front');
     });
   }
   assert.equal(find(run, (part) => part.name === 'Drawer-bank fixed upper rail').length, 0, 'No broad strip masks custom-size gaps');
-  assert.equal(find(run, (part) => part.userData.narrowStorageRole).length, 2);
+  assert.equal(find(run, (part) => part.userData.narrowStorageRole).length, 0, 'No spice or cutting-board pull-outs remain');
   const lowerFronts = find(run, (part) => part.userData.narrowStorageRole || part.userData.kitchenDrawerRow === 0);
   const edges = lowerFronts.map((part) => {
     const center = part.userData.narrowStorageRole ? part.position.z : part.parent.position.z;
@@ -112,5 +112,7 @@ test('true 24-inch boxes meet the finished wall and keep the countertop top and 
   close(run.position.x + counter.position.x - counter.geometry.w / 2, 35.2);
   close(counter.position.y + counter.geometry.h / 2, 3.05);
   close(counter.position.y - counter.geometry.h / 2, 34.5 / 12);
-  close(counter.geometry.d * 12, 106.15);
+  close(counter.geometry.d * 12, 108);
+  close(run.userData.availableRunWidthInches, 106.15);
+  close(run.userData.casingOverlapInchesPerEnd, 0.925);
 });

@@ -333,6 +333,25 @@ Full-height loft/laundry roof and masonry replace H's attic shed, with all
 garage support/fire separation,
 structure, load, roof/drainage and service/egress approvals still open.
 
+## November 9 - Version J upstairs image trace, SVG-only
+
+Owner supplies a new upstairs plan image after Version I. Create
+[Version J](assets/images/plans/upstairs-2000/version-j.svg) as a two-floor
+composition, retaining Version I's full downstairs panel/chart and replacing
+only its upstairs panel with an editable image trace. Version H remains the
+active upstairs 3D layout. The source shows a rear primary suite, Bedroom 3 and bath,
+central hall/stair, front Bedrooms 1/2, closets and a south-side bath/laundry/
+service row. No furniture, fixtures or unpictured openings are invented.
+
+Calibrate from the source's labelled 14 ft 8 in span (216 pixels, about 14.73
+source pixels per foot). Other printed dimensions do not fully reconcile. The
+upstairs room subtotal is approximately 1,947.50 sq ft; with a 35.27-sq-ft
+outward wall allowance its estimate is 1,982.77 sq ft, excluding the pictured
+89.60-sq-ft stair block. These are not finished-area or clear-usable-area
+measures. Labels are source-image dimensions, not measured SVG clear sizes.
+This SVG-only request changes no model geometry, room schedule or saved layout
+JSON. Structure, access, egress, products and operation remain unverified.
+
 ## Historical November 8 - Version I SVG-only review before adoption
 
 Owner supplies a new upstairs image and requests a new SVG version before
@@ -414,23 +433,28 @@ center (25.775,25.810625), board/light x23.375. The previous fixed x29
 return requirement is superseded only for this short corner revision.
 
 Bank x27.9375-37.3, 112.35 inches total: 72 inches refrigeration + 31.5 tower
-+ 3 inches framing + 3 / 2.85-inch fridge/freezer fillers. Centers fridge29.75,
-tower32.625, freezer35.5, z25.725 appliance datum. Tower shifts 6 inches west
-without resizing: 31.5 wide / 30 clear / 25 deep; oven 30 x 24 x 24 inches with
-bottom 30 inches, unchanged. Standard 36-inch appliance overheads and oak
-Shaker/gold cabinetry remain; no end pull-out or bookcase returns. Plywood
-appliance sides recess to 23.875-inch depth behind the thick Classic doors;
-this fixes an actual initial-opening corner collision, not a cabinet resizing.
++ 3 inches framing + 3 / 2.85-inch fridge/freezer fillers. The current model
+moves both units 0.75 inch toward the tower (centers 29.8125 / 35.4375), with a
+1.5-inch wall setback (z25.85 appliance datum); tower remains at x32.625 and
+unaltered in size: 31.5 wide / 30 clear / 25 deep; oven 30 x 24 x 24 inches,
+bottom 30 inches. The body-to-wall gap is 0.66 inch and needs product/install
+review. Standard 36-inch overheads and oak Shaker/gold cabinetry remain.
 
 Manufacturer facts from official product, design and installation guides,
 accessed November 8, 2026: nominal 36 x 84 x 24 inches, standard opening 35.5
 x 83.75 x 24, 3.5-inch finished returns. Stainless diagram body-depth 23.875 /
-door-depth 26.1875 inches. Factory doors open 110 degrees; provided 90-degree
-stops are required at both close side walls. Model side reserves 3.9 inches
-and closed front/assumed-handle gaps to island 43.05 / 41.05 inches are not
-installation or occupied-use approval. Grilles/pulls/hinges are proxies;
-verify selected handles, stopped drawer access, ventilation/service openings,
-anti-tip anchors, floor/support loads, structure, services and circulation.
+door-depth 26.1875 inches. Both modeled leaves are 36 inches and reproduce the
+manufacturer's 37.25-inch door-clearance dimension and 2.625-inch hinge-side
+allowance at the 90-degree stops. Body-to-paint clearance is
+4.65 inches; the sampled sweeps clear modeled return planes, recessed panels,
+island and cooktop counter. Closed face/assumed-handle gaps to island are
+44.55 / 42.55 inches. These geometry results do not approve selected hardware,
+finished returns, drawer access, ventilation, anchorage, loads, structure,
+services or circulation. Both doors animate through 300 ms transitions.
+Retain the direct source links: Sub-Zero [Classic Series Design Guide](https://ca.subzero-wolf.com/-/media/files/united-states/product-downloads/sub-zero-wolf/design-guides/subzero-design-guide.pdf),
+pages 6 and 10, and [Classic Series Installation Guide](https://ca.subzero-wolf.com/-/media/files/united-states/product-downloads/sub-zero-wolf/installation-guides/sub-zero/classic_series_ig.pdf),
+page 19. These guides do not publish the concealed hinge's complete kinematic
+path, so the model cannot claim exact intermediate motion.
 See [current appliance sources](appliances.html) and the
 [active bank schedule](floor-plan-reference.md#refrigeration-and-steam-oven-wall).
 Prior 30-inch Fisher & Paykel package prices remain labeled historical.
@@ -4362,7 +4386,7 @@ Important audit findings: the patio leaf is shown closed with the higher-z hinge
 | Refrigeration upper storage | Standard36 in appliance boxes, retained31.5 in tower upper; all25 in deep, y7.15-8.85, continuous cornice y8.85-9 |
 | Oven/storage tower | Unchanged31.5 in width,30 clear,25 depth; center32.625. Oven30 x24 x24 in, y2.5-4.5, bottom30 inches; storage above/below. Not a verified vendor cabinet/cutout |
 | Island countertop center | (28.65, 16.95); x = 26.9-30.4, z = 12.95-20.95; 8 ft long, 3.5 ft wide. Extends 12 in toward prep while refrigerator-side end stays fixed. Base, drawers, waterfalls, toe-kick, stools, pendant centerline, and camera follow |
-| Counter clearances | Sink counter-to-island gap 44.7 in; open sink drawer leaves 25.16 in. Closed Classic face / assumed handle to island 43.05 / 41.05 in. Unoccupied model measurements, not seating or operation approval |
+| Counter clearances | Sink counter-to-island gap 44.7 in; open sink drawer leaves 25.16 in. Closed Classic face / assumed handle to island 44.55 / 42.55 in. Unoccupied model measurements, not seating or operation approval |
 | Cooktop / hood center | Cooktop (36.325, 16.95), hood z = 16.95, midpoint of doorway edges z = 12.225 / 21.675. Counter z = 12.527083-21.372917, width 106.15 in. Common 6 + 27 + 36 + 27 + 6 in boxes, equal 2.075 in end fillers, 1/8 in front reveals |
 | Cooktop alignment inspection | Orthographic preset targets (37, 5.3, 16.95). Hood margins to openings equal 26.7 in. Hides island, pendants, and accessories for inspection |
 | Reference-style cooktop hood | October 19 reference: warm off-white plaster, constant 48 in width, depth taper 24 to 13 in, rear x = 37.8, center z = 16.95. Plain plaster lower edge replaces walnut band at y = 6.3-6.5; cornice aligns with cabinets at 9 ft. Concealed 46 in insert allowance remains; verify liner fit, adjacent combustible cabinets, heat clearances, ducting, and service access |
@@ -4383,7 +4407,7 @@ Camera toolbar now uses room-by-room navigation, superseding the earlier compact
 
 Virtual tour: Tour toggles third-person exploration on/off; clicking an open floor area in an overview also enters there. Click destinations to travel automatically around obstacles at 4 ft/sec. The camera follows a simple avatar with obstruction protection. First person, the wide control bar, Stop/Exit buttons, and visible instruction/arrival text are removed. Retain only a small expandable Floor plan button for destinations out of sight; routine announcements and map keyboard instructions are screen-reader-only. Invalid destinations show a short notice. Toggling Tour off or pressing Escape restores the previous view and navigation mode; room buttons, Reset, and Home also exit. Dragging, focus loss, or moving the freezer pauses travel. Routes use a 6-inch grid with collision-checked smoothing. The tour stays on the ground floor and excludes the stairwell; boundaries are conceptual, not construction-clearance certification.
 
-Preview controls: both interactive floor designers remain removed; retain camera views, tours, grid and saved layout JSON. Keep both Classic refrigeration units closed by default and operable by clicking/tapping their leaves to the modeled 90-degree stop; no separate freezer state/swing button is used. Retain full-height walls, no dining pendant, and island lights hidden by default, independently toggled through Visibility and preserved during the page visit. The current [Sub-Zero design and installation guides](appliances.html) govern actual appliance operation. Fit the supplied 90-degree stops at both close side walls; measured sweeps do not approve selected hinges, handles, drawer withdrawal, ventilation, anchorage or occupied circulation.
+Preview controls: both interactive floor designers remain removed; retain camera views, tours, grid and saved layout JSON. Keep both Classic refrigeration units closed by default and operable by clicking/tapping their leaves to the modeled 90-degree stop; both animate open/closed over 300 ms, with no separate refrigeration state/swing buttons. Retain full-height walls, no dining pendant, and island lights hidden by default, independently toggled through Visibility and preserved during the page visit. The current [Sub-Zero design and installation guides](appliances.html) govern actual appliance operation. Sampled model sweeps clear current geometry, but do not approve selected hinges, handles, the body-to-wall gap, drawer withdrawal, ventilation, anchorage or occupied circulation.
 
 Doorway trim visibility: retain the exposed 3.5-inch side boards on both faces and the standard casing profile, without the earlier mudroom build-out. Both openings have 2.5 ft modeled widths and 8 ft heights. Move both mudroom jambs 6 in toward the oven tower, not just one jamb. Keep the prep opening and tower fixed; recenter and widen the cooking run into the reclaimed wall space. Appliance operation and final trim clearances remain subject to detailed coordination.
 
@@ -4479,7 +4503,9 @@ Four-foot landing resize: browser mesh bounds confirmed both turning platforms a
 
 Island white-oak finish: browser checks confirmed textured stained-oak materials on all 48 island wood meshes, including drawer fronts, panels, rails, posts, moldings, and aprons. Panel/post grain is vertical; rail/apron/drawer grain is horizontal. All 116 island meshes, bounds, 7 x 3.5 ft slab, four stools, and shared quartz material are unchanged. The floor texture pixel hash matches the pre-change value, confirming the reused grain helper preserves the flooring. Startup, syntax, and whitespace passed. Stain color and protective finish remain sample-dependent.
 
-Cooktop symmetry inspection: browser checks confirmed mirrored cabinet boxes, doors, pulls, and outer drawer banks about z = 17.45, with the hood, cooktop, backsplash, and central drawers on that centerline. The new Cooktop wall view projects the side banks symmetrically within 0.05 px and keeps the ceiling clear of the toolbar. Island, pendants, and countertop accessories are hidden only for inspection; view-switch restoration and the Fridge wall hood visibility rule passed. Startup, syntax, and whitespace passed. No cabinet dimensions or placements changed for this inspection.
+Earlier cooktop symmetry inspection (superseded by the equal-width drawer trial): browser checks confirmed mirrored banks about z = 17.45; at that stage no cabinet dimensions or placements changed.
+
+Current cooktop/refrigeration trial: three 36-inch drawer bases and a matching 108-inch counter replace both narrow pull-outs. The available casing-to-casing length is 106.15 inches, so each end overlaps the casing by 0.925 inch and needs fit revision; no cutting-board pull-out is included. Both Classic leaves remain 36 inches and use Sub-Zero's 37.25-inch door-clearance envelope and 2.625-inch hinge-side allowance at 90 degrees; the bank moves 1.5 inches deeper and appliances 0.75 inch toward the tower. Source-level tests sample 901 poses through 90 degrees and clear the modeled side walls, recessed panels, island and counter. Both doors animate open and closed. The concealed hinge path and handles remain simplified rather than manufacturer CAD; casing fit, drawer withdrawal and occupied access remain unverified.
 
 Earlier reference-style hood update (superseded by the October 19 adjoining-cabinet reference): browser vertex measurements confirmed a 48 x 24 in base tapering to 36 x 18 in at the 9 ft ceiling, with a constant rear plane and walnut band at y = 6.3-6.5. The former side stacks measured 12 in wide with 3 in gaps; bridge cabinets and the exposed chimney were removed. Those dimensions and the walnut band are historical, not the current cooking-wall design.
 

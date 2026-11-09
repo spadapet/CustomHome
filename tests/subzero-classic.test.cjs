@@ -66,20 +66,38 @@ test('Classic units have full 36 x 84 fronts, separate top grilles, mirrored hin
   const bank = buildBank();
   const freezer = bank.find('Column freezer')[0], fridge = bank.find('Column fridge')[0];
   assert.ok(freezer.position.x > fridge.position.x, 'Freezer is view-left looking south from kitchen');
-  close(freezer.position.x, 35.5); close(fridge.position.x, 29.75);
+  close(freezer.position.x, 35.5 - 0.75 / 12); close(fridge.position.x, 29.75 + 0.75 / 12);
   assert.equal(freezer.userData.model, 'CL3650F/S/T/L');
   assert.equal(fridge.userData.model, 'CL3650R/S/T/R');
   for (const unit of [freezer, fridge]) {
     assert.equal(unit.userData.manufacturer, 'Sub-Zero');
     assert.equal(unit.userData.productWidthInches, 36);
+    assert.equal(unit.userData.wallSetbackInches, 1.5);
+    close(unit.position.z, 25.725 + 1.5 / 12);
     assert.equal(unit.userData.heightInches, 84);
     assert.equal(unit.userData.openingWidthInches, 35.5);
     assert.equal(unit.userData.openingHeightInches, 83.75);
+    assert.equal(unit.userData.doorClearanceAt90Inches, 37.25);
+    assert.equal(unit.userData.hingeSideClearanceAt90Inches, 2.625);
     const b = bounds(unit);
     close((b.maxX - b.minX) * 12, 36); close(b.maxY * 12, 84);
+    const sideWallFace = unit.name === 'Column freezer' ? 37.5 - 0.175 : ground.getKitchenRefrigerationLayout().returnX + 0.175;
+    const sideReserveInches = (unit.name === 'Column freezer' ? sideWallFace - b.maxX : b.minX - sideWallFace) * 12;
+    close(sideReserveInches, 4.65);
+    const cavity = unit.children.find(part => part.name === 'Sub-Zero Classic cavity envelope');
+    const wallGapInches = (26.9 - bounds(cavity).maxZ) * 12;
+    assert.ok(wallGapInches > 0 && wallGapInches < 1, `Body remains inside the wall plane with ${wallGapInches} inches modeled clearance`);
     const door = unit.children.find(part => part.userData.interactiveHouseDoor);
+    const leaf = door.children.find(part => part.name === 'Sub-Zero Classic stainless door');
     assert.equal(door.rotation.y, 0);
+    assert.equal(leaf.w * 12, 36, 'The physical leaf remains 36 inches wide');
+    close(door.userData.hingeInsetInches, 1.0625);
+    assert.equal(door.userData.hingeDepthOffsetInches, 0);
+    assert.equal(door.userData.doorClearanceAt90Inches, 37.25);
+    assert.equal(door.userData.hingeSideClearanceAt90Inches, 2.625);
     assert.equal(door.userData.interactiveHouseDoor.maxAngleDegrees, 90);
+    assert.equal(door.userData.interactiveHouseDoor.animateOpenClose, true);
+    assert.equal(door.userData.interactiveHouseDoor.animationDurationMs, 300);
     assert.equal(unit.userData.factoryMaxAngleDegrees, 110);
     const handle = bank.find('Sub-Zero tower-facing tubular handle').find(part => part.parent === door);
     assert.ok(handle.position.x * door.position.x < 0, 'Handle is opposite its outer hinge');
@@ -132,6 +150,7 @@ test('stopped door and pull sweeps stay inside side-wall reserves and ahead of t
     }
     return true;
   };
+  const cooktopCounter = { w: 25.5 / 12, d: 108 / 12, position: { x: 37.5 - 0.175 - 25.5 / 24, z: 16.95 }, rotation: { y: 0 }, parent: null };
   for (const name of ['Column fridge', 'Column freezer']) {
     const unit = bank.find(name)[0];
     const door = unit.children.find(part => part.userData.interactiveHouseDoor);
@@ -144,13 +163,18 @@ test('stopped door and pull sweeps stay inside side-wall reserves and ahead of t
       assert.ok(b.minX > returnFace && b.maxX < eastFace, `${name} at ${degrees} degrees stays between finished side walls`);
       assert.ok(b.minZ > 20.95, `${name} at ${degrees} degrees stays beyond island end, including pull`);
       for (const panel of panels) assert.ok(!overlaps(leaf, panel), `${name} at ${degrees} degrees clears recessed appliance framing`);
+      for (const part of door.children.filter(item => item.w && item.d)) {
+        assert.ok(!overlaps(part, cooktopCounter), `${name} leaf/handle at ${degrees} degrees clears the 108-inch cooktop counter`);
+      }
     }
+    const body = unit.children.find(part => part.name === 'Sub-Zero Classic cavity envelope');
+    close((bounds(body).minZ - bounds(door).minZ) * 12, 37.25);
     door.rotation.y = 0;
   }
   const fridgeDoor = bank.find('Sub-Zero Classic stainless door')[1];
-  close((bounds(fridgeDoor).minZ - 20.95) * 12, 43.05);
+  close((bounds(fridgeDoor).minZ - 20.95) * 12, 44.55);
   const handle = bank.find('Sub-Zero tower-facing tubular handle')[1];
-  close((bounds(handle).minZ - 20.95) * 12, 41.05);
+  close((bounds(handle).minZ - 20.95) * 12, 42.55);
 });
 
 test('interior floor transfer preserves total area and all passage, stair and garage boundaries', () => {

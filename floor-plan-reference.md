@@ -149,6 +149,26 @@ the current live H combined estimate after both moves is 3,774.92 sq ft.
 Version I downstairs SVG reflects the move (its upstairs study stays intact).
 Earlier wall, clearance and area values below are superseded.
 
+## New upstairs image study - Version J SVG-only, November 9
+
+[Version J](assets/images/plans/upstairs-2000/version-j.svg) is an editable
+two-floor composition: it preserves Version I's complete downstairs drawing
+and chart, replacing only the upstairs panel with a trace of the newly supplied
+image. It depicts the rear primary suite, Bedroom 3 and bath, central hall and
+stair, two front bedrooms, closets and service rooms. No furniture, fixtures or
+unpictured openings are added.
+
+Calibration uses 216 image pixels for the labelled 14 ft 8 in primary-bedroom
+span (about 14.73 source pixels per foot). Other source labels do not all
+reconcile with that scale. The upstairs room subtotal is approximately
+1,947.50 sq ft; adding a 35.27-sq-ft outward wall allowance gives an estimated
+1,982.77 sq ft total, excluding the pictured 89.60-sq-ft stair block. These are
+image-trace arithmetic, not finished-area or usable-clear measurements. Room
+dimensions are transcribed source labels, not measured SVG clear sizes. Version
+J is SVG-only: Version H remains the active upstairs 3D layout; model geometry
+and saved JSON are unchanged. Structure, egress, access, products and operation
+remain unverified.
+
 ## Active upstairs model - Version H interiors, November 9
 
 The normal viewer uses the restored H shell from `ec82799` with the coordinated
@@ -423,21 +443,12 @@ Closed defaults and supplied 90-degree stops replace the old 115-degree
 Fisher & Paykel swing. Factory Classic range is 110 degrees. See the active
 [refrigeration schedule](#refrigeration-and-steam-oven-wall) and
 [manufacturer facts/holds](appliances.html), accessed November 8, 2026.
+Source documents: Sub-Zero [Classic Series Design Guide](https://ca.subzero-wolf.com/-/media/files/united-states/product-downloads/sub-zero-wolf/design-guides/subzero-design-guide.pdf),
+pages 6 and 10, and [Classic Series Installation Guide](https://ca.subzero-wolf.com/-/media/files/united-states/product-downloads/sub-zero-wolf/installation-guides/sub-zero/classic_series_ig.pdf),
+page 19. They document dimensions, clearances and stops, not the concealed
+hinge's complete movement path.
 
-Verification: full runner reports 434 tests in 69 suites and 12 syntax checks.
-Actual HTTP-served Three.js r170 measures 36 x 84-inch fronts, retained oven,
-43.05 inches door-face to island and 41.05 inches including assumed 2-inch
-handles. Both front edges have 3.9 inches to side paint. Each stopped sweep
-was sampled at 901 poses (0-90 degrees in 0.1-degree increments), including
-pulls and recessed framing: no positive-volume interference with 218 nearby
-static meshes; minimum door-end/island gap 7.05 inches, not a passing route.
-Actual pointer open/close, desktop/narrow framing, floor/view/Grid/Night
-restoration and keyboard Night toggle passed. Clean production reload has
-one render canvas (plus the existing tour map), no debug hook, runtime errors
-or failed requests. Image-byte inspection is unavailable: no visual screenshot
-review or occupied-use approval is claimed. Verify selected handles, stopped
-drawer withdrawal, grille/service ventilation, cutouts/finished returns,
-anti-tip anchorage, floor loads, structure and services before installation.
+Targeted source-geometry regression samples each 36-inch leaf and handle at 901 poses from 0 to 90 degrees in 0.1-degree increments. Both sweeps reproduce Sub-Zero's 37.25-inch door-clearance envelope and 2.625-inch hinge-side allowance at 90 degrees and clear the modeled side-wall planes, recessed refrigeration panels, island and 108-inch cooktop counter; fridge/freezer-to-island gaps are 44.55 inches at the door face and 42.55 inches at the assumed 2-inch handle. Both 300 ms open/close animations are separately interaction-tested. The appliances move 0.75 inch inboard; the full refrigeration bank is set back 1.5 inches, leaving 0.66 inch between the modeled body and wall plane. This is not a browser visual review, manufacturer-CAD hinge simulation or installation approval. The cooktop run has 106.15 inches between casing faces, so the 108-inch base/counter trial overlaps each casing by 0.925 inch and needs fit revision. Verify the selected handle, casing returns, drawer withdrawal, ventilation, anchorage, loads, structure and services before installation.
 
 ## Historical H restoration baseline - November 6 source, interiors superseded November 9
 
@@ -3371,7 +3382,7 @@ See [kitchen requirements](kitchen.html), [sink candidate and dispensers](kitche
 | Fixture deck | z = 7.175-7.495; fixtures at z = 7.36 | Main faucet x = 32, hot/cold filtered dispenser x = 30.95, soap x = 33.05 |
 | Trash / dishwasher | Trash x = 29.75; dishwasher x = 34.5, both z = 8.2 | Same appliance sizes and immediate-left/right relationships to sink |
 | Dish rack | 16 x 14 in pan, center (34.35, 8.3), base y = 3.05 | Same removable catch pan, no drain/spout |
-| Cooktop run | Cooktop center (36.325, 16.95); z = 13.027083-20.872917 | 94.15 in counter length; common 6 + 21 + 36 + 21 + 6 in boxes plus equal 2.075 in end fillers. True 24 in bases meet wall face; 25.5 in counter depth |
+| Cooktop run | Cooktop center (36.325, 16.95); 3 x 36 in drawer bases; 108 in counter length, z = 12.45-21.45 | 25.5 in counter depth. Available casing-to-casing run is 106.15 in; this equal-width trial overlaps each casing by 0.925 in and requires fit revision. No cooktop-side spice/board pull-outs; cutting-board pull-out not included |
 | Induction cooktop | 36 in wide along z, 21 in deep along x | Centered between the two passages; central drawer bank below |
 | Hood | 48 in wide throughout; depth tapers from 24 to 13 in | Warm-white plaster, plain lower edge at y = 6.3-6.5, cornice aligned with cabinets at 9 ft; no walnut band |
 | Hood-side uppers | Two 21 in-wide x 12 in-deep stacks; 36 + 15 in-high boxes; bottoms at 54.6 in | Directly adjoin hood; single oak Shaker door per tier, gold pulls, task lights and ceiling closures. Outer ends inset 2.075 in from counter ends |
@@ -3388,18 +3399,18 @@ Both columns face decreasing z into the kitchen. From the kitchen, view-left to 
 | Element | Current model |
 |---|---|
 | Complete cabinet run | x =27.9375-37.3;112.35 inches, no end pull-out |
-| Freezer | Sub-Zero Classic CL3650F/S/T/L, center (35.5,25.725), view-left/left hinge |
-| Refrigerator | Sub-Zero Classic CL3650R/S/T/R, center (29.75,25.725), view-right/right hinge |
-| Each unit | Manufacturer nominal36 x84 x24 in; standard opening35.5 x83.75 x24 in. Model front36 in, body-depth23.875 /door-depth26.1875 in;25 in cabinetry reservation, not a cutout |
+| Freezer | Sub-Zero Classic CL3650F/S/T/L, model center (35.4375,25.85), view-left/left hinge |
+| Refrigerator | Sub-Zero Classic CL3650R/S/T/R, model center (29.8125,25.85), view-right/right hinge |
+| Each unit | Manufacturer nominal 36 x 84 x 24 in; standard opening 35.5 x 83.75 x 24 in. Model leaf 36 in with the manufacturer's 37.25 in door-clearance envelope and 2.625 in hinge-side allowance at 90 degrees; body depth 23.875 / door depth 26.1875 in; 25 in cabinetry reservation, not a cutout. Model body-to-wall gap is 0.66 in |
 | Fridge / freezer bays | x =28.25-31.25 /34-37 |
 | Tower | x =31.3125-33.9375, center32.625; retained31.5 in bay,30 clear,25 deep |
 | Steam oven | Generic 30 x 24 x 24 in W/H/D envelope, bottom lowered to 30 in above floor; no model selected |
 | Storage | Original-width Shaker storage below/above oven; separate overhead cabinets above columns/tower; no end pull-out |
 | Full-depth upper storage | y = 7.15-8.85; cornice y = 8.85-9; stained oak, not the earlier cream-front trial |
 | Panels / fillers | Four 0.75 in plywood sides, recessed to 23.875 in depth behind the Classic door backs; separate 3 in fridge-side and 2.85 in freezer-side fillers |
-| Return-side end | Gray return now x27.75; bank begins27.9375,0.15 in beyond side paint. Both appliance front edges have3.9 in to adjacent paint; finish/hinge installation unapproved |
+| Return-side end | Gray return x27.75; bank begins x27.9375, 0.15 in beyond side paint. Each appliance shifts 0.75 in toward the tower, leaving 4.65 in body-to-paint; this exceeds the manufacturer's 2.625 in hinge-side allowance at the 90-degree stop |
 
-No counter niche or end pull-out remains. Only the short kids return and its adjoining floor/backing move; cooking wall, kitchen passages, stairs, island, garage and exterior footprint stay fixed. Both appliance overheads are standard36-inch boxes; tower/storage/oven size and mounting stay. Tubular pulls, grille louvers and hinge motion are display proxies, not selected-product CAD. Check manufacturer openings/finished returns, grille/service ventilation, anti-tip anchorage, floor/support loads, services, stopped drawer withdrawal and occupied circulation.
+The full refrigeration bank is set back 1.5 in while keeping the oven/tower aligned; the model leaves 0.66 in from the appliance body to the wall plane. No counter niche or refrigeration-end pull-out remains. Cooking wall, passages, stairs, island, garage and exterior footprint stay fixed. Both appliance overheads are standard 36-inch boxes; tower/storage/oven size and mounting stay. Tubular pulls, grilles and the concealed hinge path are simplified geometry, but the stopped door envelope uses the manufacturer dimensions. Check manufacturer opening/depth requirements, finished returns, grille/service ventilation, anti-tip anchorage, floor/support loads, services, stopped drawer withdrawal and occupied circulation.
 
 ### Island, seating and measured aisles
 
@@ -3413,11 +3424,11 @@ No counter niche or end pull-out remains. Only the short kids return and its adj
 |---|---|---|
 | Cooktop counter to island | 60.9 in | Counter edges; island size/position unchanged |
 | Sink counter to island | 44.7 in | Counter edges; excludes dishwasher projection; model gap only, not operating approval |
-| Closed Classic door face /assumed handle to island |43.05 /41.05 in | Handle projection2 in is provisional; not open-door, drawer or occupied approval |
+| Closed Classic door face / assumed handle to island | 44.55 / 42.55 in | After 1.5 in refrigeration-bank setback; assumed 2 in handle remains provisional; not open-door, drawer or occupied approval |
 | Prep opening relative to main sink counter front | Counter stops 6 in short of opening start | Opening starts at z = 9.725; counter front ends at z = 9.225. Verify finish and casing fit |
 | Mudroom casing cap to refrigeration panel | About 1.225 in | Trim-to-panel geometry, not appliance hinge clearance |
 
-Both Classic doors start closed; click toggles to the conceptual90-degree stopped pose and back. The manufacturer's factory range is110 degrees, with provided90-degree stops required at both close walls in this study. Side reserves3.9 inches exceed the guide's2 5/8-inch90-degree allowance, not its14 1/8-inch full-opening allowance. Verify actual hinge/handle envelope, stopped drawer withdrawal and occupied access; an open freezer can obstruct the mudroom approach.
+Both Classic leaves start closed, click to the conceptual 90-degree stop and animate through matching 300 ms open/close transitions. The modeled leaves are 36 inches and reproduce the 37.25-inch door-clearance envelope and 2.625-inch hinge-side allowance at 90 degrees. Each full sweep was sampled at 901 poses; the current model clears the side-wall planes, recessed panels, island and cooktop counter. Appliances move 0.75 inch inboard and the complete wall bank sits 1.5 inches deeper. These are geometric model results, not approval of the simplified concealed hinge path, selected handles, 0.66-inch body-to-wall gap, casing fit, drawer withdrawal or occupied access. An open freezer can still obstruct the mudroom approach.
 
 ## Prep kitchen and mudroom
 

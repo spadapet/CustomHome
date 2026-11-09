@@ -49,7 +49,8 @@ test('36-inch Classic bays and separate fillers fit the approved short-wall revi
   assert.doesNotMatch(source, /\[kitchenRefrigeration\.returnX, kidsRoom\.z, kitchenRefrigeration\.returnX, 26\.9/, 'Obsolete jog is removed from furnished walls');
   assert.equal(plan.walls.find(([name]) => name === 'Garage west return')[1], 31.2, 'Garage partition aligns with the bathroom, independently of the kitchen return');
   assert.doesNotMatch(source, /Stair-side narrow pull-out cabinet|Narrow pull-out carcass|Narrow end overhead cabinet|endStorageFront|endUpperFront/);
-  assert.match(source, /appliance.position.set\(x, 0, 25.725\)/);
+  assert.match(source, /appliance\.position\.set\(x, 0, 25\.725 \+ refrigerationWallSetback\)/);
+  assert.match(source, /wallSetbackInches: refrigerationWallSetback \* 12/);
 });
 
 test('sink/window bank stays centered and actual side counters fit the relocated cooking wall', () => {
@@ -128,9 +129,15 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
   assert.ok(start >= 0 && end > start);
   const door = { userData: { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 115, openRotationSign: -1 } }, rotation: {}, visible: true };
   const panel = { parent: door, visible: true, userData: {} };
+  let now = 0;
+  let nextFrameId = 0;
+  const frames = [];
   const context = {
     activeFloor: 'ground',
     groundLayoutPreview: false,
+    requestAnimationFrame(callback) { const frame = { id: ++nextFrameId, callback }; frames.push(frame); return frame.id; },
+    cancelAnimationFrame(id) { const index = frames.findIndex(frame => frame.id === id); if (index >= 0) frames.splice(index, 1); },
+    performance: { now: () => now },
     renderer: { domElement: { getBoundingClientRect: () => ({ left: 10, top: 20, width: 100, height: 80 }) } },
     camera: { updateMatrixWorld() {} },
     scene: { children: [], updateMatrixWorld() {} },
@@ -197,12 +204,34 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
   context.activeFloor = 'upstairs';
   assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), true);
   assert.equal(context.collisionRefreshCount, 1, 'Only the upstairs operation refreshes its tour collision cache');
+  const advance = (time) => { now = time; const frame = frames.shift(); assert.ok(frame, `animation frame at ${time} ms`); frame.callback(time); };
+  context.activeFloor = 'ground';
+  for (const [label, sign] of [['Freezer', -1], ['Refrigerator', 1]]) {
+    const applianceDoor = { userData: { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: sign, animateOpenClose: true, animationDurationMs: 300 } }, rotation: { y: 0 }, visible: true };
+    context.intersections = [{ object: { parent: applianceDoor, visible: true } }];
+    const startTime = now;
+    assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), true);
+    assert.equal(applianceDoor.userData.interactiveHouseDoor.openAngleDegrees, 90);
+    assert.equal(applianceDoor.rotation.y, 0, `${label} starts moving on the next animation frame`);
+    advance(startTime);
+    advance(startTime + 150);
+    assert.ok(Math.abs(applianceDoor.rotation.y - sign * Math.PI / 4) < 1e-9, `${label} eases smoothly through its midpoint`);
+    advance(startTime + 300);
+    assert.ok(Math.abs(applianceDoor.rotation.y - sign * Math.PI / 2) < 1e-9, `${label} reaches its 90-degree stop`);
+    assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), true);
+    advance(startTime + 300);
+    advance(startTime + 450);
+    assert.ok(Math.abs(applianceDoor.rotation.y - sign * Math.PI / 4) < 1e-9, `${label} eases back through its midpoint`);
+    advance(startTime + 600);
+    assert.equal(applianceDoor.rotation.y, 0, `${label} closes to its default pose`);
+  }
+
   context.activeFloor = 'basement';
   assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), false);
 });
 
 test('modeled room doors, cabinet pullouts and exterior overhead leaves carry click-operation metadata', () => {
-  assert.match(source, /doorStopDegrees: 90, factoryMaxAngleDegrees: 110/);
+  assert.match(source, /doorStopDegrees: 90, doorClearanceAt90Inches: 37\.25, hingeSideClearanceAt90Inches: 2\.625, factoryMaxAngleDegrees: 110/);
   assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90/);
   assert.match(source, /interactiveHouseDoor: \{ operation: 'sliding', axis: 'z', open: false, closedCenterX: 0, openCenterX: 1\.75 \}/);
   assert.match(source, /powderLeaf\.userData = \{ interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 90, openRotationSign: 1 \}/);
