@@ -15,7 +15,7 @@ test('viewer footer retains its area outputs and required reset and refresh cont
     assert.match(footer, new RegExp(`<${tag}\\b[^>]*\\bid="${id}"[^>]*>[\\s\\S]*?<\\/${tag}>`));
     assert.equal((html.match(new RegExp(`\\bid="${id}"`, 'g')) ?? []).length, 1, `${id} is unique`);
   }
-  assert.match(footer, /ANSI-style above-grade gross finished-area estimate/);
+  assert.match(footer, /Owner comparison estimate/);
   assert.match(footer, /including interior walls/);
 });
 
@@ -103,27 +103,30 @@ test('invalid wall dimensions and stair voids fail explicitly instead of produci
   assert.throws(() => getLivableFloorArea({ floors: [], stairs }, { includeStairs: true }), /invalid floor geometry/);
 });
 
-test('current house uses exterior faces, includes descending stairs on both floors and excludes only actual stair gaps', () => {
+test('Version I live area counts stairs only downstairs and uses the actual registered upstairs floor geometry', () => {
   const ground = getGroundFloorDefaultPlan();
   const upper = require('../assets/js/floor-plan-upstairs.js').getUpstairsDefaultPlan(layout.stairOpening());
-  const upstairs = { ...layout.resolve(upper, layout.empty()), floors: [...upper.floors, upper.arrival], stairs: upper.stairs };
+  const resolved = layout.resolve(upper, layout.empty());
+  const upstairs = { ...resolved, floors: [...resolved.floors, upper.arrival], stairs: upper.stairs };
   const close = (actual, expected, message = '') => assert.ok(Math.abs(actual - expected) < 1e-8, `${message}: ${actual} != ${expected} sq ft`);
   const stairArea = ground.stairs.width * ground.stairs.depth;
   const first = getLivableFloorArea(ground, { includeStairs: true });
-  const second = getLivableFloorArea(upstairs, { includeStairs: true });
+  const second = getLivableFloorArea(upstairs, { exteriorWallThickness: .35 });
   close(stairArea, 76.94583333333333);
   const gap = ground.stairs.voids.reduce((sum, rect) => sum + rect.w * rect.d, 0);
   close(gap, 1.4583333333333335);
-  close(first - getLivableFloorArea(ground), stairArea - gap, 'First-floor stairs descend to basement');
-  close(second - getLivableFloorArea(upstairs), stairArea - gap, 'Second-floor stairs descend to first floor');
+  close(first - getLivableFloorArea(ground), stairArea - gap, 'Downstairs stair footprint counted once');
   close(first, 1924.3327083333334);
-  close(second, 1850.5858333333333);
-  assert.ok(second < 2000);
-  close(first + second, 3774.9185416666664);
-  close((upper.rooms.find(r => r.name === 'Bedroom 4 closet').w) * 2, 13, 'Version H Closet 4 removes the two-foot front strip');
+  close(second,2153.3532505147955,'Registered Version I floor union with nominal upstairs walls');
+  close(first+second,4077.685958848129,'Combined model area, stair counted once');
+  close(getLivableFloorArea(upstairs, { includeStairs: true, exteriorWallThickness: .35 })-second,stairArea-gap,'Excluded upstairs stair footprint');
+  close(getLivableFloorArea({ floors: [{ x: 0, z: 0, w: 10, d: 10 }] }, { exteriorWallThickness: .35 }), 10.35 ** 2, 'Physical exterior wall allowance');
+  for (const value of [NaN, Infinity, 0, -.35]) assert.throws(() => getLivableFloorArea(ground, { exteriorWallThickness: value }), /invalid exterior wall thickness/);
+  const closet = upper.rooms.find(r => r.name === 'Bedroom 4 closet');
+  close(closet.z + closet.d, 55.066667, 'Version I Closet 4 meets the front line');
   for (const plan of [ground, upstairs]) {
     const before = JSON.stringify(plan);
-    getLivableFloorArea(plan, { includeStairs: true });
+    getLivableFloorArea(plan, { exteriorWallThickness: .35 });
     assert.equal(JSON.stringify(plan), before, 'Gross measurement does not modify the layout');
   }
 });
@@ -156,7 +159,8 @@ test('both floors use resolved floor geometry and changes recalculate the displa
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext(source.slice(start, end), context);
   const groundArea = getLivableFloorArea(ground, { includeStairs: true });
-  const upstairsArea = getLivableFloorArea({ ...upstairs.plan, stairs: upper.stairs, floors: [...upstairs.plan.floors, upper.arrival] }, { includeStairs: true });
+  const upstairsArea = getLivableFloorArea({ ...upstairs.plan, floors: [...upstairs.plan.floors, upper.arrival] }, { exteriorWallThickness: .35 });
+  const upperAddition = getLivableFloorArea({ floors: [{ x: -20, z: 0, w: 10, d: 5 }] }, { exteriorWallThickness: .35 });
   const expectedText = (first, second) => {
     const format = (area) => Math.round(area).toLocaleString('en-US');
     return `Area: ~${format(first + second)} sq ft`;
@@ -176,14 +180,15 @@ test('both floors use resolved floor geometry and changes recalculate the displa
   assert.match(output.title, new RegExp(`upstairs: ~${Math.round(upstairsArea).toLocaleString('en-US')} sq ft`));
   assert.match(windowOutput.title, /2 casements, 3 single-hung, 1 fixed pictures/);
   assert.match(windowOutput.title, /Includes hidden windows; excludes door glazing and duplicate exterior representations/);
-  assert.match(output.title, /Excludes garage, open porch, unfinished attic and basement/);
-  assert.match(output.title, /first-floor basement stairs and second-floor stairs included; open stair gaps excluded/);
-  assert.match(output.title, /ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls/);
+  assert.match(output.title, /Excludes garage, open porch and basement/);
+  assert.match(output.title, /Stairs counted once downstairs; upstairs excludes the fixed stair opening and includes its arrival landing/);
+  assert.match(output.title, /Owner comparison estimate to modeled exterior finished faces, including interior walls/);
   assert.match(output.title, /Shared garage walls measured to the garage-side finish/);
-  assert.match(output.title, /including the mechanical closet, are finished and conditioned/);
+  assert.match(output.title, /including the furnace room, are finished and conditioned/);
+  assert.match(output.title, /fixed-stair registration exception, not exact SVG area parity/);
   assert.match(output.title, /Not a certified appraisal/);
-  assert.equal(output.textContent, 'Area: ~3,775 sq ft');
-  assertFloorOutputs(1924.3327083333334, 1850.5858333333333);
+  assert.equal(output.textContent, 'Area: ~4,078 sq ft');
+  assertFloorOutputs(groundArea, upstairsArea);
   context.groundLayoutPreview = { plan: layout.resolve(ground, layout.empty()) };
   context.updateLivableArea();
   assertFloorOutputs(groundArea, upstairsArea);
@@ -194,8 +199,8 @@ test('both floors use resolved floor geometry and changes recalculate the displa
   context.groundLayoutPreview = null;
   upstairs.plan = { ...upstairs.plan, floors: [...upstairs.plan.floors, { x: -20, z: 0, w: 10, d: 5, room: 'Bedroom' }] };
   context.updateLivableArea();
-  assert.equal(output.textContent, expectedText(groundArea, upstairsArea + 56.9525));
-  assertFloorOutputs(groundArea, upstairsArea + 56.9525);
+  assert.equal(output.textContent, expectedText(groundArea, upstairsArea + upperAddition));
+  assertFloorOutputs(groundArea, upstairsArea + upperAddition);
   assert.equal(windowOutput.textContent, 'Windows: 6');
   windowInstallations.push({ openingId: 'new-window', units: 2, picture: false });
   context.updateLivableArea();
@@ -207,9 +212,9 @@ test('both floors use resolved floor geometry and changes recalculate the displa
     walls: [{ x1: 0, z1: 5, x2: 10, z2: 5, thickness: .35 }]
   };
   context.updateLivableArea();
-  assertFloorOutputs(109.2025, upstairsArea + 56.9525);
+  assertFloorOutputs(109.2025, upstairsArea + upperAddition);
   context.groundBaseline.walls[0].thickness = .8;
   context.updateLivableArea();
-  assertFloorOutputs(109.2025, upstairsArea + 56.9525);
+  assertFloorOutputs(109.2025, upstairsArea + upperAddition);
   assert.match(source, /updateFloorGrid\(\);\s+updateLivableArea\(\);\s+updatePlanDimensions\(\);/);
 });

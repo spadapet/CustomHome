@@ -13,12 +13,13 @@ const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 function build() {
   const parts = [], beams = [];
   class Group { constructor() { this.userData = {}; } add() {} }
-  const start = source.indexOf('  const guard = guestEntry.stairGuard;');
+  const start = source.indexOf('  const exposedUpperGuard = new THREE.Group();');
   const end = source.indexOf('  for (const upper of [false, true])', start);
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext(source.slice(start, end), {
     guestEntry: entry, black: {},
     THREE: { Group }, stairs: new Group(), stairOpening: layout.stairOpening(), stairDepth: layout.stairOpening().depth,
+    outerStairRailZ: layout.stairOpening().depth - .08,
     stairFloorToFloor: 10, stairRise: 7.5 / 12, stairGoing: 10 / 12, stairRun: 70 / 12, landingHeight: 5, oak: {},
     stairBeam(name, start, end) { beams.push({ name, start, end }); },
     furnishing(name, x, z, rotation, elevation) { close(elevation, 0.005); return { name }; },
@@ -40,13 +41,19 @@ test('October 31 closet closes the north wall and moves powder access to the sou
   assert.ok(plan.floors.some(f => f.room === 'Guest entry alcove' && f.x === 7.1 && f.z === 37.5 && f.w === 5.1 && f.d === 3.5));
 });
 
-test('newly exposed upper-flight edge is guarded through the upstairs guard junction', () => {
+test('complete upper-flight edge follows the nosings through the upstairs guard junction', () => {
   const parts = build(), beams = parts.beams;
   const handrails = beams.filter(b => b.name === 'Exposed upper-flight handrail');
   assert.equal(handrails.length, 2);
-  close(layout.stairOpening().x + layout.stairOpening().width - handrails[0].start[0], entry.stairGuard.x);
+  close(handrails[0].start[0],70/12);
+  close(handrails[0].start[1],5+7.5/12+3);
   assert.deepEqual(handrails[0].end, handrails[1].start);
-  assert.deepEqual(Array.from(handrails[1].end), [0, 13, layout.stairOpening().depth]);
+  for(const beam of handrails)for(const [x,y] of [beam.start,beam.end])close(y,13-x*.75);
+  assert.deepEqual(Array.from(handrails[1].end), [0, 13, layout.stairOpening().depth - .08]);
+  const upper = require('../assets/js/floor-plan-upstairs.js').getUpstairsDefaultPlan(layout.stairOpening());
+  const wall = upper.walls.find(w => w[0] === 'West bath north');
+  for (const rail of handrails) for (const point of [rail.start, rail.end])
+    close((wall[2] - .175 - (layout.stairOpening().z + point[2] + .06)) * 12, .24);
   assert.equal(beams.filter(b => b.name === 'Exposed upper-flight horizontal rail').length, 16);
   assert.equal(parts.filter(p => p.name === 'Exposed upper-flight guard post').length, 3);
 });

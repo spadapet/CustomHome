@@ -688,12 +688,15 @@ test('original wall-backed rail omissions preserve stringers and unrelated expos
   class Group {
     add() {}
   }
+  class Shape {moveTo(){}lineTo(){}closePath(){}}
+  class ExtrudeGeometry {}
+  class Mesh {constructor(){this.position={};parts.push(this);}}
   const stairWidth = 44 / 12;
   const stairGap = 0.25;
   const stairDepth = baseline.stairs.depth;
   const stairRun = 70 / 12;
   const context = {
-    THREE: { Group, PointLight: class { constructor() { this.position = { set() {} }; } } }, stairs: new Group(),
+    THREE: { Group, Shape, ExtrudeGeometry, Mesh, PointLight: class { constructor() { this.position = { set() {} }; } } }, stairs: new Group(),
     stairWidth, stairGap, stairDepth, stairRun, wallSideStairWidth: stairDepth - stairWidth - stairGap,
     stairRisers: 8, stairRise: 7.5 / 12, stairGoing: 10 / 12, landingHeight: 5, landingEndX: stairRun + 4,
     stairEnclosureDepth: 11 / 12,

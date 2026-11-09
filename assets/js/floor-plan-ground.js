@@ -297,7 +297,8 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     };
   }
 
-  function getLivableFloorArea(plan, { includeStairs = false } = {}) {
+  function getLivableFloorArea(plan, { includeStairs = false, exteriorWallThickness = 0.45 } = {}) {
+    if (!Number.isFinite(exteriorWallThickness) || exteriorWallThickness <= 0) throw new Error('Cannot calculate livable area from invalid exterior wall thickness.');
     const floors = plan.floors.filter((floor) => !/^(Garage|Front porch)/.test(floor.room ?? floor.name ?? ''));
     const garage = plan.floors.filter((floor) => /^Garage/.test(floor.room ?? floor.name ?? ''));
     const voids = [];
@@ -354,7 +355,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       }
     }
     function wallAllowance(x, z, dx, dz) {
-      if (!garage.some(rect => contains(rect, x + dx * 0.001, z + dz * 0.001))) return 0.45 / 2;
+      if (!garage.some(rect => contains(rect, x + dx * 0.001, z + dz * 0.001))) return exteriorWallThickness / 2;
       const wall = walls.find(wall => Math.abs(dx ? wall.x1 - x : wall.z1 - z) < 1e-8 &&
         Math.abs(dx ? wall.x2 - x : wall.z2 - z) < 1e-8 &&
         (dx ? z >= Math.min(wall.z1, wall.z2) && z <= Math.max(wall.z1, wall.z2) : x >= Math.min(wall.x1, wall.x2) && x <= Math.max(wall.x1, wall.x2)));

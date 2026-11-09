@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="2200" viewBox="0 0 1600 2200" style="width:100%;height:auto;display:block" role="img" aria-labelledby="title desc">
   <title id="title">Version I: new upstairs image study and current downstairs model</title>
-  <desc id="desc">November 8, 2026. Editable upstairs image study; Version H and the upstairs 3D model remain unchanged. Both panels use feet at 12 pixels per foot. Upstairs raster calibration is 224 pixels for the labelled 14 feet 8 inches primary width; dimensions do not fully reconcile. Downstairs follows current shared geometry: living return z9.05 aligns its room face with the kitchen counter at z9.225; dining rear wall moves two feet to z1.9, retaining full height. The dining side window narrows to four feet to fit the shortened wall. Downstairs estimate is 1924.33 square feet including stairs; upstairs estimate is 2137.56 excluding its 92.74-square-foot stair block; combined estimate is 4061.89 square feet. These are arithmetic studies, not certified finished areas. Upstairs retains the pictured rooms, 96-inch door proxies and 18 provisional window openings /28 units. Main appliances, kids floor, ground guest suite and stairs remain unchanged. No unpictured upstairs furniture or sanitary fixtures are added. Structure, roof alignment, product installation, glazing, privacy, egress and occupied operation require professional review. Saved layout JSON is unchanged.</desc>
+  <desc id="desc">November 8, 2026. Editable Version I trace, adopted upstairs with a fixed-stair registration exception; Version H remains historical. Both panels use feet at 12 pixels per foot. Raster calibration is 224 pixels for the labelled 14 feet 8 inches primary width; source-image-not-measured-clearances do not fully reconcile. Downstairs follows shared geometry: living return z9.05 aligns its room face with kitchen counter z9.225; fireplace centers at z18; dining rear moves two feet to z1.9, retaining full height. Its side window narrows to four feet. Downstairs estimate is 1924.33 square feet including stairs; upstairs trace estimate is 2137.56 excluding its 92.74-square-foot stair block; combined trace estimate is 4061.89. These are arithmetic studies, not certified finished areas. Actual adopted upstairs retains the canonical stairs/44-inch arrival rather than the unregistered image stair outline, so its live area is 2153.35 and live combined area is 4077.69 square feet. The upstairs trace retains the pictured rooms, 96-inch door proxies and eighteen provisional openings /28 units. Main appliances, kids floor, ground guest suite and actual stairs are unchanged. No furniture or sanitary symbols are added to the SVG. Structure, roof alignment, fire separation, products, glazing, privacy, HVAC access, egress and occupied operation require professional review. Saved layout JSON is unchanged.</desc>
   <defs>
 	<pattern id="stairHatch" width="0.7" height="0.7" patternUnits="userSpaceOnUse"><path d="M0 0H0.7" stroke="#aaa99f" stroke-width="0.05"/></pattern>
 	<g id="toilet"><rect x="-.7" y="-.85" width="1.4" height=".6" rx=".08" class="fixture"/><ellipse cx="0" cy=".25" rx=".65" ry=".85" class="fixture"/><ellipse cx="0" cy=".25" rx=".4" ry=".5" fill="#e6eff1"/></g>
@@ -30,7 +30,7 @@
   </defs>
   <rect width="1600" height="2200" fill="#faf8f2"/>
   <text x="55" y="50" class="heading">Version I: two-floor study</text>
-  <text id="combined-area" x="55" y="80" class="sub" data-square-feet="4061.892558">Combined: ~4,061.89 sq ft | stairs counted once, downstairs | upstairs 3D remains Version H</text>
+  <text id="combined-area" x="55" y="80" class="sub" data-square-feet="4061.892558">Combined trace: ~4,061.89 sq ft | stairs once downstairs | 3D adopts I with fixed-stair exception</text>
   <text x="55" y="108" class="small">North / rear at top. Both panels: 12 pixels = 1 foot. Upstairs trace and area are approximate, not certified.</text>
   <text x="60" y="151" class="panel-heading">DOWNSTAIRS | current 3D layout</text>
   <text id="ground-area" x="60" y="175" class="small" data-square-feet="1924.332708">1,924.33 sq ft | includes stairs | kids 144.59 sq ft</text>
@@ -177,7 +177,7 @@
 	<text x="43.5" y="38" class="room">GARAGE</text><text x="43.5" y="39.3" class="size">Excluded from finished area</text>
 	<text x="15.6" y="58.2" class="room">PORCH</text>
   </g>
-  <g id="upstairs-plan" transform="translate(830 190) scale(12)" data-source-pixels-per-foot="15.272727272727273" data-model-adopted="false">
+  <g id="upstairs-plan" transform="translate(830 190) scale(12)" data-source-pixels-per-foot="15.272727272727273" data-model-adopted="true">
 	<g id="upstairs-floors">
 	  <rect data-room="Primary" x="0" y="7.4" width="15.059524" height="20.363095" class="bedroom"/>
 	  <rect data-room="Primary bath" x="15.059524" y="7.4" width="14.208333" height="12.375" class="bath"/>
@@ -222,7 +222,7 @@
 	  <path id="furnace-east" d="M42.559524 36.144048V41.578571" class="wall"/>
 	  <path id="laundry-entry-step" d="M43.869048 33.459524V36.144048H42.559524" class="wall"/>
 	</g>
-	<g id="upstairs-windows" data-status="provisional-svg-only" data-sill-inches="36" data-head-inches="96">
+	<g id="upstairs-windows" data-status="provisional-design" data-sill-inches="36" data-head-inches="96">
 	  <path data-window="Primary west north" data-room="Primary" data-width-inches="60" data-units="2" d="M0 9.5V14.5" class="window"/>
 	  <path data-window="Primary west south" data-room="Primary" data-width-inches="60" data-units="2" d="M0 20V25" class="window"/>
 	  <path data-window="Primary bath north" data-room="Primary bath" data-width-inches="60" data-units="2" data-privacy="review-required" d="M19.65 7.4H24.65" class="window"/>
@@ -283,9 +283,9 @@
   <path d="M830 900H950M830 895V905M890 895V905M950 895V905" stroke="#45534d" stroke-width="2"/>
   <text x="830" y="925" class="small">0</text><text x="883" y="925" class="small">5</text><text x="935" y="925" class="small">10 ft</text>
   <text x="55" y="974" class="small">Downstairs bank facing south: freezer left / fridge right. North-up page order is fridge / oven / freezer.</text>
-  <text x="55" y="1002" class="small">Upstairs SVG only: Bedroom 3 doors turn toward bath/exterior; laundry enters from loft through its north wall.</text>
+  <text x="55" y="1002" class="small">Version I adopted in 3D with fixed-stair registration exception; this traced geometry/chart stays unchanged.</text>
   <text x="55" y="1030" class="small">18 provisional window openings / 28 units. Product, privacy, egress, headers, stair/loft support and access need review.</text>
-  <text x="55" y="1058" class="small">Approximate exterior-face areas, stairs once. Garage/porch/basement excluded; Version H and model/layout files unchanged.</text>
+  <text x="55" y="1058" class="small">Approximate exterior-face trace areas, stairs once. Garage/porch/basement excluded; Version H and saved layouts preserved.</text>
   <g id="area-chart" role="group" aria-labelledby="area-chart-title area-chart-desc">
     <text id="area-chart-title" x="55" y="1130" class="heading">Square footage breakdown</text>
     <text id="area-chart-desc" x="55" y="1160" class="sub">Room-boundary / centerline areas, not clear usable floor area. Upstairs values are image-trace estimates.</text>
@@ -353,6 +353,6 @@
     <text x="60" y="2058" class="small">Wall assemblies are assumptions. Upstairs raster dimensions do not fully reconcile; hundredths are arithmetic precision only.</text>
     <text x="60" y="2084" class="small">Stairs count downstairs only: 75.49 sq ft net. Upstairs's 92.74-sq-ft block is excluded; alignment remains unresolved.</text>
     <text x="60" y="2110" class="small">Garage, porch and basement excluded. Conditioning, headroom and structure unverified; not certified finished/appraisal area.</text>
-    <text x="60" y="2136" class="small">Totals use unrounded geometry; displayed rows may differ slightly when summed. Version H and the upstairs 3D model remain unchanged.</text>
+    <text x="60" y="2136" class="small">Totals use unrounded trace geometry. Version H preserved; I adopted in 3D with fixed-stair exception and separately measured area.</text>
   </g>
 </svg>

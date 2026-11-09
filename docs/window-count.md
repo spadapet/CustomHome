@@ -8,11 +8,11 @@ exterior duplicates are excluded.
 
 ## Current product intent / ordering hold
 
-Version H: 27 vertical wall-window openings /47 modeled units are Andersen
+Version I: 33 vertical wall-window openings /58 modeled units are Andersen
 100 Series intent, White Fibrex inside/outside. Front house windows retain
-conceptual six-light colonial grilles (2 wide x 3 high per unit); loft windows
-are removed. Side/rear windows and door glazing stay clear, including
-the living return's casement / fixed picture / casement bank.
+conceptual six-light colonial grilles (2 wide x 3 high per unit), including
+Closet 4 front. Loft north/east and laundry east/south windows follow I.
+Side/rear windows and door glazing stay clear, including the living return bank.
 The two proposed fixed laundry roof windows have been removed. The East rear
 wing roof is continuous across their former locations, with no openings or
 interior shafts. The October 28, 2026 VELUX FS C06 size study is historical
@@ -26,29 +26,28 @@ Do not order from the modeled count or nominal study codes.
 
 Current count includes hidden room groups and the matching porch banks.
 
-**27 window openings containing 47 individual modeled units: 39 casements and 8 vertical fixed picture windows; no roof windows.**
+**33 window openings containing 58 modeled units: 50 casements and 8 vertical fixed pictures; no roof windows.**
 
-Actual HTTP Three.js r170 takeoff: ground 15 openings /30 units unchanged;
-Version H upstairs 12 openings /17 units. Count openings separately from
-units. Laundry east window is replaced by its attic door; unfinished attic
-has no facade-only glazing and no loft-window units are retained.
+Ground 15 openings /30 units unchanged; Version I upstairs 18 openings /28
+units. Count openings separately from units: ten upstairs 60-inch pairs of
+30-inch units, six 30-inch singles and two 36-inch laundry singles. H's attic
+door/shed are superseded by full-height loft/laundry; no attic glazing remains.
 
 The X-marked office porch bank now matches the circled guest bank: both
 91.2 x 60 in, three equal bays, casement / fixed picture / casement, white
 with six-light colonial grilles. Office center and 36/96 in sill/head stay
 fixed; its opening widens 9.6 in per side. This adds one fixed picture unit,
-not an opening or casement. All 18 grouped openings have full-depth white joint trim
-(23 divisions), shared headers and continuous sills. Single pictures,
-single casements, garage clerestories and door glazing are unchanged.
+not an opening or casement. Grouped openings have full-depth white joint trim,
+shared headers and continuous sills. Ground single pictures/casements,
+garage clerestories and door glazing are unchanged.
 
-Historical loft south paired-casement openings at x40.75/47.75 are removed.
-Version H front bedroom pair centers are x6.175/25.025 on z53.8; rear wall
-z7.4. Existing sill/head and product-review holds remain.
+Historical loft south openings at x40.75/47.75 remain removed; I's loft has
+north/east windows. Front bedroom pair centers are x6.580357/25.535714 on
+z55.066667, rear wall z7.4. Sill/head and product-review holds remain.
 
-The upper front has four equal 36 x 60 inch single-casement concept
-openings, two centered on each bedroom, coordinated with the exterior. Bedroom 3 retains its west paired
-window. Exterior-only garage attic windows remain excluded: no room/floor
-has been established behind that facade.
+The upper front has two 60 x60-inch paired openings, each with two 30-inch
+concept casements, plus Closet 4's 30-inch single. Bedroom 3 retains its west
+pair. No exterior-only or roof glazing is added.
 
 The circled dining west paired-casement window is replaced by a 36 x 96 in
 glazed patio door, excluded from the window count. The living return bank
@@ -74,15 +73,18 @@ An **opening** is one window group; a **unit** is one casement, single-hung or f
 | Ground / bedroom | 1 | 2 | 1 | 0 | 3 |
 | Ground / garage | 3 | 0 | 3 | 0 | 3 |
 | **Ground-floor subtotal** | **15** | **22** | **8** | **0** | **30** |
-| Upstairs / primary bedroom | 2 | 4 | 0 | 0 | 4 |
-| Upstairs / primary bath | 1 | 1 | 0 | 0 | 1 |
-| Upstairs / bedroom 2 | 2 | 4 | 0 | 0 | 4 |
-| Upstairs / bedroom 2 bath | 1 | 1 | 0 | 0 | 1 |
+| Upstairs / primary bedroom | 3 | 6 | 0 | 0 | 6 |
+| Upstairs / primary bath | 1 | 2 | 0 | 0 | 2 |
+| Upstairs / bedroom 2 | 1 | 2 | 0 | 0 | 2 |
+| Upstairs / Bath 2 and Closet 2 | 2 | 2 | 0 | 0 | 2 |
 | Upstairs / stairwell | 1 | 1 | 0 | 0 | 1 |
-| Upstairs / bedroom 3 | 3 | 4 | 0 | 0 | 4 |
-| Upstairs / bedroom 4 | 2 | 2 | 0 | 0 | 2 |
-| **Upstairs subtotal** | **12** | **17** | **0** | **0** | **17** |
-| **Whole house** | **27** | **39** | **8** | **0** | **47** |
+| Upstairs / bedroom 3 | 2 | 4 | 0 | 0 | 4 |
+| Upstairs / bedroom 4 | 1 | 2 | 0 | 0 | 2 |
+| Upstairs / Bath 3, Bath 4 and Closet 4 | 3 | 3 | 0 | 0 | 3 |
+| Upstairs / loft | 2 | 4 | 0 | 0 | 4 |
+| Upstairs / laundry | 2 | 2 | 0 | 0 | 2 |
+| **Upstairs subtotal** | **18** | **28** | **0** | **0** | **28** |
+| **Whole house** | **33** | **50** | **8** | **0** | **58** |
 
 ## Scope and sources
 

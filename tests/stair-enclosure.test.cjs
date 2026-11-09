@@ -18,9 +18,17 @@ function build() {
     add(part) { this.children.push(part); }
   }
   const meshes = [], beams = [], stairs = new Group();
+  class Shape {
+    constructor(){this.points=[];}
+    moveTo(x,y){this.points.push([x,y]);}
+    lineTo(x,y){this.points.push([x,y]);}
+    closePath(){}
+  }
+  class ExtrudeGeometry {constructor(shape,options){Object.assign(this,{shape,options});}}
+  class Mesh {constructor(geometry){this.geometry=geometry;this.position={};this.userData={};meshes.push(this);}}
   const opening = layout.stairOpening();
   const context = {
-    THREE: { Group, PointLight: Group }, stairs, stairOpening: opening,
+    THREE: { Group, PointLight: Group, Shape, ExtrudeGeometry, Mesh }, stairs, stairOpening: opening,
     stairWidth: 44 / 12, wallSideStairWidth: opening.depth - 44 / 12 - 0.25,
     stairGap: 0.25, stairDepth: opening.depth, stairRun: 70 / 12,
     stairGoing: 10 / 12, stairRise: 7.5 / 12, stairRisers: 8,
@@ -83,7 +91,15 @@ test('treads, platforms, guards and flat trim remain with no projecting casework
   close(landing.w, 4); close(landing.y + landing.h / 2, 5);
   assert.equal(meshes.filter(m => m.name === 'Upper stair arrival landing').length, 0,
     'No tan upper platform remains in the always-visible stair assembly');
-  assert.equal(beams.filter(b => b.name === 'Stair stringer').length, 4);
+  assert.equal(meshes.filter(b => b.name === 'Stair stringer').length, 4);
+  for(const [index,stringer] of meshes.filter(b=>b.name==='Stair stringer').entries()){
+    const upper=index>=2,direction=upper?-1:1,start=upper?70/12:0,base=upper?5:0;
+    close(stringer.geometry.options.depth*12,1.5);
+    for(let step=0;step<7;step++){
+      const x=start+direction*(step+1)*10/12,y=base+(step+1)*7.5/12-.1;
+      assert.ok(stringer.geometry.shape.points.some(p=>Math.abs(p[0]-x)<1e-8&&Math.abs(p[1]-y)<1e-8),'Stepped support meets each actual tread underside');
+    }
+  }
   assert.equal(beams.filter(b => b.name === 'Sloped stair handrail').length, 3);
   assert.equal(beams.filter(b => b.name === 'Horizontal stair guard rail').length, 24);
   assert.equal(beams.filter(b => b.name === 'Turning landing side handrail').length, 1);
