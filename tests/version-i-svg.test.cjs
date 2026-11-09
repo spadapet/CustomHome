@@ -200,7 +200,8 @@ test('Version I is standalone accessible vector SVG and preserves Version H byte
   for (const match of svg.matchAll(/href="#([^"]+)"/g)) assert.ok(ids.includes(match[1]), match[1]);
   assert.match(element('ground-plan').transform, /scale\(12\)/);
   assert.match(element('upstairs-plan').transform, /scale\(12\)/);
-  assert.equal(element('upstairs-plan')['data-model-adopted'], 'false');
+  assert.equal(element('upstairs-plan')['data-model-adopted'], 'true');
+  assert.match(svg, /fixed-stair registration exception/);
 });
 
 test('every downstairs floor strip and its actual kids area match the shared 3D plan', () => {
@@ -287,7 +288,7 @@ test('upstairs traces the new image shell, east loft, inset hall, service row an
   }
   assert.equal(segments(element('loft-laundry-wall').d).length, 2);
   assert.match(svg, /source-image-not-measured-clearances/);
-  assert.match(svg, /upstairs and combined areas are approximate, not certified finished area/);
+  assert.match(svg, /Upstairs and combined areas are approximate, not certified finished area/);
   assert.doesNotMatch(group('upstairs-floors'), /data-item|<use|<image/);
 });
 
@@ -325,7 +326,7 @@ test('provisional upstairs windows cut exterior walls and cover requested habita
   const windows = tags(group('upstairs-windows'), 'path').filter(window => window['data-window']);
   assert.equal(windows.length, 18);
   assert.equal(windows.reduce((sum, window) => sum + Number(window['data-units']), 0), 28);
-  assert.equal(element('upstairs-windows')['data-status'], 'provisional-svg-only');
+  assert.equal(element('upstairs-windows')['data-status'], 'provisional-design');
   assert.equal(element('upstairs-windows')['data-sill-inches'], '36');
   assert.equal(element('upstairs-windows')['data-head-inches'], '96');
   const inside = (x, y, room) => upstairsFloors.some(floor => (!room || floor['data-room'] === room) && x > Number(floor.x) && x < Number(floor.x) + Number(floor.width) && y > Number(floor.y) && y < Number(floor.y) + Number(floor.height));
@@ -402,6 +403,7 @@ test('the inset south hallway and west-open loft stay connected rather than clos
   for (const filename of ['upstairs.html', 'floor-plan-reference.md', 'design-context.md']) {
     const notes = fs.readFileSync(path.join(root, filename), 'utf8');
     assert.match(notes, /version-i\.svg/);
-    assert.match(notes, /upstairs (?:3D )?model (?:still\s+uses|still\nuses|remains) Version H|upstairs 3D schedule below remains Version H/);
+    assert.match(notes, /Version I.*(?:adopt|model)|(?:adopt|model).*Version I/i);
+    assert.match(notes, /stair.*(?:exception|registration)|(?:exception|registration).*stair/i);
   }
 });

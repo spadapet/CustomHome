@@ -88,12 +88,7 @@
     // 18-inch provisional framing zone above full 9-ft room walls.
     const upperBase = eaves + 1.6;
     const g = upperGeometry();
-    const atticWest = g.east + 0.75;
-    const atticEast = (g.atticEast ?? 55.5) + 0.7;
-    const atticRear = (g.atticNorth ?? 15) - 0.75;
-    const atticFront = (g.atticSouth ?? g.bedNorth) + 0.225;
-    const atticEave = floorToFloor + 8.66;
-    const atticSlope = (upperBase - atticEave) / (atticEast - atticWest);
+    const loftRight = g.east + 0.75;
     const mainRear = g.north - 0.75, mainFront = g.south + 0.75, mainRight = g.southEast + 0.75;
     const garage = { id: 'Garage hip', bounds: [30.3, 56.2, g.bedNorth + .75, 49.85],
       planes: [[0.5, 0, 8.9 - 0.5 * 30.3], [-0.5, 0, 8.9 + 0.5 * 56.2],
@@ -125,25 +120,21 @@
       ...[g.southClosetWest / 2, (g.southClosetEast + g.southEast) / 2].map((center, index) =>
         gableRoof(`${index ? 'East' : 'West'} front gable`, center - 7.175, center + 7.175,
           40.5, mainFront, eaves + 0.2, 6.2, true)),
-      { id: 'East rear wing', bounds: [g.bathEast - .75, g.east + .75, g.north - .75, g.bedNorth + .75],
+      { id: 'East rear wing', bounds: [g.bathEast - .75, g.bedEast + .75, g.north - .75, g.bedNorth + .75],
         planes: [[.25, 0, upperBase - .25 * (g.bathEast - .75)],
-          [-.25, 0, upperBase + .25 * (g.east + .75)],
+          [-.25, 0, upperBase + .25 * (g.bedEast + .75)],
           [0, .25, upperBase - .25 * (g.north - .75)],
           [0, -.25, upperBase + .25 * (g.bedNorth + .75)]] },
-      // Unfinished attic storage remains outside the conditioned upper rooms.
-      // Its 8-ft-6-in minimum underside clears the 96-in access and a generic
-      // full-height path; framing, floor loads and storage use are unverified.
-      { id: 'Garage attic storage roof', bounds: [atticWest, atticEast, atticRear, atticFront],
-        planes: [[-atticSlope, 0, upperBase + atticSlope * atticWest]] },
-      // The service return shares the attic roof's east-falling north edge,
-      // then hips down to the existing garage front without a floating seam.
-      { id: 'Garage service return', bounds: [g.southEast + .225, 56.2, g.bedNorth + .225, 49.85],
+      { id: 'East loft wing', bounds: [g.loftWest - .75, loftRight, g.loftNorth - .75, g.bedNorth + .75],
+        planes: [[.25, 0, upperBase - .25 * (g.loftWest - .75)],
+          [-.25, 0, upperBase + .25 * loftRight],
+          [0, .25, upperBase - .25 * (g.loftNorth - .75)],
+          [0, -.25, upperBase + .25 * (g.bedNorth + .75)]] },
+      // The expanded full-height loft/laundry wing replaces H's attic shed.
+      // Keep the lower return south of its finished rooms; support is unverified.
+      { id: 'Garage service return', bounds: [g.southEast + .225, loftRight, g.bedNorth + .225, 49.85],
         planes: [[0, -(upperBase - 8.9) / (49.85 - g.bedNorth - .225),
-          upperBase + (upperBase - 8.9) / (49.85 - g.bedNorth - .225) * (g.bedNorth + .225)],
-          [-(upperBase - atticEave) / (56.2 - atticWest), 0,
-            upperBase + (upperBase - atticEave) / (56.2 - atticWest) * atticWest]] },
-      // Stop at the actual garage/service junction; the attic shed joins the
-      // East rear wing at its eave and starts well beyond the side glazing.
+          upperBase + (upperBase - 8.9) / (49.85 - g.bedNorth - .225) * (g.bedNorth + .225)]] },
       garage,
       garageGable,
       // The west edge abuts the canopy at the wall, not an overlapping eave
@@ -155,7 +146,7 @@
 
   function getSetbackRoofDefinitions() {
     const g = upperGeometry();
-    // No separate transition roof: the storage roof and garage returns share the envelope.
+    // The full-height loft wing and garage returns share the connected envelope.
     return [];
   }
 
@@ -165,7 +156,7 @@
 
   function getSetbackAbutments() {
     const g = upperGeometry();
-    return [[g.east + .225, 15, g.east + .225, g.bedNorth + .225],
+    return [[g.east + .225, g.loftNorth, g.east + .225, g.bedNorth + .225],
       [g.southEast + .225, g.bedNorth + .225, g.serviceEast + .225, g.bedNorth + .225]];
   }
 

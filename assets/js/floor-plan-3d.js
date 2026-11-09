@@ -2634,26 +2634,24 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
 
   const stairStepGlow = new THREE.MeshStandardMaterial({ color: '#fff0d7', emissive: '#ffd5a0', emissiveIntensity: 0, roughness: 0.6 });
-  const guard = guestEntry.stairGuard;
   // Retain protection above the restored wall's nine-foot head.
   const exposedUpperGuard = new THREE.Group();
   exposedUpperGuard.name = 'Newly exposed upper-flight outer guard';
-  exposedUpperGuard.userData = { provisional: true, approvalRequired: true, note: 'Retained upper-flight guard above the restored powder/coat wall; wall-head enclosure and handrail continuity still require review.' };
+  exposedUpperGuard.userData = { provisional: true, approvalRequired: true, note: 'Full upper-flight outer guard follows the tread nosings to the arrival; wall-head enclosure and handrail continuity still require review.' };
   stairs.add(exposedUpperGuard);
-  const exposedRun = stairOpening.x + stairOpening.width - guard.x;
   const exposedPitch = [
-    [exposedRun, stairFloorToFloor - stairRise / 2 - exposedRun * stairRise / stairGoing],
-    [stairGoing / 2, stairFloorToFloor - stairRise],
+    [stairRun, landingHeight + stairRise],
+    [stairRun / 2, stairFloorToFloor - stairRun / 2 * stairRise / stairGoing],
     [0, stairFloorToFloor]
   ];
   for (let segment = 1; segment < exposedPitch.length; segment++) {
     const [x1, y1] = exposedPitch[segment - 1], [x2, y2] = exposedPitch[segment];
-    stairBeam('Exposed upper-flight handrail', [x1, y1 + 3, stairDepth], [x2, y2 + 3, stairDepth], 0.12, 0.12, oak, exposedUpperGuard);
-    for (let rail = 1; rail <= 8; rail++) stairBeam('Exposed upper-flight horizontal rail', [x1, y1 + rail / 3, stairDepth], [x2, y2 + rail / 3, stairDepth], 0.045, 0.045, black, exposedUpperGuard);
+    stairBeam('Exposed upper-flight handrail', [x1, y1 + 3, outerStairRailZ], [x2, y2 + 3, outerStairRailZ], 0.12, 0.12, oak, exposedUpperGuard);
+    for (let rail = 1; rail <= 8; rail++) stairBeam('Exposed upper-flight horizontal rail', [x1, y1 + rail / 3, outerStairRailZ], [x2, y2 + rail / 3, outerStairRailZ], 0.045, 0.045, black, exposedUpperGuard);
   }
   for (const [x, y] of exposedPitch) {
     const treadY = x === 0 ? stairFloorToFloor : landingHeight + Math.floor((stairRun - x) / stairGoing + 1e-8 + 1) * stairRise;
-    box(exposedUpperGuard, x, (treadY + y + 3) / 2, stairDepth, 0.09, y + 3 - treadY, 0.09, black).name = 'Exposed upper-flight guard post';
+    box(exposedUpperGuard, x, (treadY + y + 3) / 2, outerStairRailZ, 0.09, y + 3 - treadY, 0.09, black).name = 'Exposed upper-flight guard post';
   }
   for (const upper of [false, true]) {
     const flight = new THREE.Group();
@@ -2694,8 +2692,26 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(flight, endX - direction * 0.04, endHeight - (stairRise + 0.2) / 2, centerZ, 0.08, stairRise - 0.2, flightWidth, cream).name = 'Landing riser';
     for (const side of [-1, 1]) {
       const stringerZ = centerZ + side * (flightWidth / 2 - 0.12);
-      stairBeam('Stair stringer', [startX, baseHeight - 0.2, stringerZ], [endX, endHeight - stairRise - 0.2, stringerZ], 0.12, 0.3, oak);
-      // Retained powder wall backs the rest; the newly exposed outer segment is guarded above.
+      // Stepped tops meet every tread underside; the old thin pitch beams
+      // floated below the flight. This is a finish proxy, not a structural detail.
+      const profile = new THREE.Shape();
+      profile.moveTo(startX, baseHeight + stairRise - .1);
+      for (let step = 0; step < stairRisers - 1; step++) {
+        const x = startX + direction * (step + 1) * stairGoing;
+        const y = baseHeight + (step + 1) * stairRise - .1;
+        profile.lineTo(x, y);
+        if (step < stairRisers - 2) profile.lineTo(x, y + stairRise);
+      }
+      profile.lineTo(endX, endHeight - stairRise - .85);
+      profile.lineTo(startX, baseHeight + stairRise - .85);
+      profile.closePath();
+      const stringer = new THREE.Mesh(new THREE.ExtrudeGeometry(profile, { depth: .125, bevelEnabled: false }), oak);
+      stringer.name = 'Stair stringer';
+      stringer.position.z = stringerZ - .0625;
+      stringer.castShadow = true;
+      stringer.receiveShadow = true;
+      flight.add(stringer);
+      // The separate inset outer guard covers the complete upper flight.
       if (upper && side === 1) continue;
       const railZ = centerZ + side * (flightWidth / 2 + 0.08);
       const firstX = startX + direction * stairGoing / 2;
@@ -4645,11 +4661,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   let groundLayoutPreview = null;
   function updateLivableArea() {
     const groundArea = getLivableFloorArea({ ...groundBaseline, ...groundLayoutPreview?.plan }, { includeStairs: true });
-    const upstairsArea = getLivableFloorArea({ ...upstairs.plan, stairs: upstairs.baseline.stairs, floors: [...upstairs.plan.floors, upstairs.baseline.arrival] }, { includeStairs: true });
+    const upstairsArea = getLivableFloorArea({ ...upstairs.plan, floors: [...upstairs.plan.floors, upstairs.baseline.arrival] }, { exteriorWallThickness: 0.35 });
     const format = (area) => Math.round(area).toLocaleString('en-US');
     const output = document.getElementById('livable-area');
     output.textContent = `Area: ~${format(groundArea + upstairsArea)} sq ft`;
-    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs count on the floor from which they descend: first-floor basement stairs and second-floor stairs included; open stair gaps excluded. Assumes modeled indoor rooms, including the mechanical closet, are finished and conditioned. Excludes garage, open porch, unfinished attic and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
+    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. Owner comparison estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs counted once downstairs; upstairs excludes the fixed stair opening and includes its arrival landing. Upstairs uses nominal 4.2-inch walls and image-derived Version I geometry with a local fixed-stair registration exception, not exact SVG area parity. Assumes modeled indoor rooms, including the furnace room, are finished and conditioned. Excludes garage, open porch and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
     const firstFloorOutput = document.getElementById('first-floor-area');
     firstFloorOutput.textContent = `1st: ~${format(groundArea)} sq ft`;
     firstFloorOutput.title = output.title;
@@ -5247,11 +5263,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     for (const room of upstairs.rooms) {
       fixture(upstairs.group, room.name, room.x + room.w / 2, upstairs.group.userData.ceilingHeightFeet, room.z + room.d / 2, 2 / 12, /closet|toilet|Linen/.test(room.name) ? 9 : 22, 'upstairs');
     }
-    const upperDimensions = getUpstairsMeasuredGeometry();
-    for (const [x, z] of [
-      [12.3, 29], [17, 33], [21.5, 37.5],
-      [29.5, (upperDimensions.primarySouth + upperDimensions.laundryNotchSouth) / 2]
-    ]) fixture(upstairs.group, 'Upstairs hall', x, upstairs.group.userData.ceilingHeightFeet, z, 2 / 12, 14, 'upstairs');
+    for (const room of upstairs.rooms.filter(room => room.name === 'Hallway')) {
+      for (const ratio of [.25, .75]) fixture(upstairs.group, 'Upstairs hall', room.x + room.w * ratio, upstairs.group.userData.ceilingHeightFeet, room.z + room.d / 2, 2 / 12, 14, 'upstairs');
+    }
     fixture(piano, 'Piano music', 0, 3.6, 0.25, 0.24, 3, 'ground', true);
     box(piano, 0, 3.27, -0.45, 0.04, 0.66, 0.04, rosewood).name = 'Piano lamp support';
     return rigs;
@@ -5449,8 +5463,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     upstairs: { target: [22, stairFloorToFloor + 1, 26], offset: [30, 68, 43], span: 65 },
     'upstairs-top': { target: [22, stairFloorToFloor, 26], offset: [0, 110, 0], span: 61 },
     'upstairs-arrival-gallery': { target: [20.5, stairFloorToFloor + 2, 33], offset: [-10, 15, 13], span: 27 },
-    'upstairs-gallery': { target: [21.5, stairFloorToFloor + 2, 33.5], offset: [0, 18, 7], span: 26 },
-    'upstairs-primary-closet': { target: [21.3, stairFloorToFloor + 1, 22.8], offset: [4, 34, 4], span: 18.9 },
     social: { target: [19, 2, 12], offset: [27, 55, 32], span: 43 },
     living: { target: [12.5, 1.5, livingCenterZ], offset: [28, 27, 7], span: 32 },
     kids: { target: [24, 1, 30.15], offset: [-12, 30, 18], span: 17 },
@@ -5510,17 +5522,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   viewButtons = document.querySelectorAll('[data-view]');
 
-  function fitEditedUpstairs(edits) {
+  function fitEditedUpstairs() {
     const status = document.getElementById('upstairs-preview-status');
     status.textContent = upstairs.coordinationWarnings.join(' ');
     status.hidden = !status.textContent;
-    if (!edits.rooms.length && !edits.walls.length) {
-      presets.upstairs.target = [27, stairFloorToFloor + 1, 30.6];
-      presets.upstairs.span = 74;
-      presets['upstairs-top'].target = [27, stairFloorToFloor, 30.6];
-      presets['upstairs-top'].span = 65;
-      return;
-    }
     const minX = Math.min(...upstairs.rooms.map((room) => room.x), ...upstairs.plan.walls.map((wall) => wall.x1));
     const maxX = Math.max(...upstairs.rooms.map((room) => room.x + room.w), ...upstairs.plan.walls.map((wall) => wall.x2));
     const minZ = Math.min(...upstairs.rooms.map((room) => room.z), ...upstairs.plan.walls.map((wall) => wall.z1));
@@ -5530,7 +5535,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       presets[name].span = Math.max(maxX - minX, maxZ - minZ) + 10;
     }
   }
-  fitEditedUpstairs(savedUpstairsLayout);
+  fitEditedUpstairs();
   let currentView = 'whole';
   const walkHeight = 5.4;
   const walkRadius = 0.5;
@@ -6111,7 +6116,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (navigationMode === 'walk') setNavigationMode('rotate');
     if (name !== currentView) setPatioDoorOpen(false);
     const outside = name === 'exterior' || name.startsWith('exterior-');
-    const floor = outside ? 'exterior' : presets[name].floor ?? (name === 'upstairs' || name === 'upstairs-top' ? 'upstairs' : 'ground');
+    const floor = outside ? 'exterior' : presets[name].floor ?? (name === 'upstairs' || name.startsWith('upstairs-') ? 'upstairs' : 'ground');
     if (activeFloor !== 'ground' && floor !== activeFloor) selectFloor('ground');
     selectFloor(floor);
     currentView = name;

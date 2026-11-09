@@ -59,8 +59,10 @@ test('joined counter banks retain their unequal section boundaries and fixed cen
 test('only triple operable groups gain a center picture; pictures and singles remain single', () => {
   assert.deepEqual(getWindowProductIntent(getGroundFrontWindows()[1].width, 5).pictureColumns, [1]);
   for (const [, , , width] of getUpstairsSideWindows()) {
-    assert.ok(width <= 4);
-    assert.deepEqual(getWindowProductIntent(width, 5).pictureColumns, []);
+    assert.ok([2.5,3,5].includes(width));
+    const intent=getWindowProductIntent(width,5);
+    assert.equal(intent.columns,width===5?2:1);
+    assert.deepEqual(intent.pictureColumns, []);
   }
   for (const [width, height] of [[6, 1.5], [4.5, 4.5], [3, 5]]) {
     const picture = getWindowProductIntent(width, height, true);
