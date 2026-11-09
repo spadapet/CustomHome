@@ -1053,7 +1053,7 @@ test('all three mudroom views have tour starts clear of the actual enclosure par
   const end = source.indexOf('\n    };', start);
   assert.ok(start >= 0 && end > start);
   const starts = vm.runInNewContext(`(() => { ${source.slice(start, end + 7)} return starts; })()`, {
-    upstairs: { start: [16, 23] }, cooktopCenterZ: 16.95, kitchenCenterZ: 16.95, prepCounterZ: 9
+    upstairs: { start: [16, 23] }, cooktopCenterZ: 16.95, kitchenCenterZ: 16.95, prepCounterZ: 9, tableZ: 5.95
   });
   const model = buildMudroom();
   const parts = model.all.filter((part) => part.w !== undefined).map(bounds).filter((b) => b.max[1] > 0.5 && b.min[1] < 5.4);

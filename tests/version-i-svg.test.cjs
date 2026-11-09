@@ -214,7 +214,7 @@ test('every downstairs floor strip and its actual kids area match the shared 3D 
   });
   const kids = floors.filter(floor => floor['data-room'] === 'Kids room');
   near(kids.reduce((sum, floor) => sum + Number(floor.width) * Number(floor.height), 0), 144.5891666667, .00001);
-  near(ground.getLivableFloorArea(plan, { includeStairs: true }), 1966.4427083333);
+  near(ground.getLivableFloorArea(plan, { includeStairs: true }), 1924.3327083333);
   for (const [a, b] of [['x', 'x'], ['y', 'z'], ['width', 'width'], ['height', 'depth']]) near(element('ground-stairs')[a], plan.stairs[b]);
 });
 
@@ -287,7 +287,7 @@ test('upstairs traces the new image shell, east loft, inset hall, service row an
   }
   assert.equal(segments(element('loft-laundry-wall').d).length, 2);
   assert.match(svg, /source-image-not-measured-clearances/);
-  assert.match(svg, /upstairs and combined areas are approximate, not certified finished area/);
+  assert.match(svg, /arithmetic studies, not certified finished areas/);
   assert.doesNotMatch(group('upstairs-floors'), /data-item|<use|<image/);
 });
 

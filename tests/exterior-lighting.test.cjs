@@ -85,6 +85,7 @@ class Mesh extends Group {
 function buildLighting() {
   const group = new Group();
   const context = {
+    livingFeatureWall: require('../assets/js/floor-plan-ground.js').getLivingRoomFeatureLayout(),
     HomeRoof: require('../assets/js/floor-plan-roof.js'), floorToFloor: 10, garageFloorY: -1.25, wallThickness: 0.45, white: {},
     measuredUpper: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry(),
     frontShift: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().extension,
@@ -181,7 +182,7 @@ test('wall lights have correctly oriented mounting plates and porch housings mee
     else if (fixture.name.startsWith('Dining patio')) close(wallX, 12.975);
     else if (fixture.name.startsWith('Front door')) close(wallZ, context.frontWallZ + 0.425);
     else if (fixture.name.startsWith('Driveway')) close(wallZ, 49.225);
-    else if (fixture.name.startsWith('Rear dining')) close(wallZ, -0.325);
+    else if (fixture.name.startsWith('Rear dining')) close(wallZ, 1.675);
     else close(wallZ, 6.775);
   }
   for (const fixture of fixtures.filter((part) => part.name === 'Front porch approach ceiling light')) {

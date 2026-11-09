@@ -1095,8 +1095,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const officeNorthZ = guestEntry.officeNorthZ;
 
   // Stepped footprint and room adjacencies follow the user's attached plan.
-  floor(0, 8, 13.2, 17.7, true, scene);
-  floor(13.2, -0.1, 13.675, 8.1, true, scene);
+  floor(0, livingFeatureWall.returnWallZ, 13.2, 25.7 - livingFeatureWall.returnWallZ, true, scene);
+  floor(13.2, livingFeatureWall.diningRearZ, 13.675, 8 - livingFeatureWall.diningRearZ, true, scene);
   floor(13.2, 8, 5.8, 17.7, true, scene);
   floor(19, 8, 7.5, kidsRoom.z - 8, true, scene);
   floor(26.875, kitchenWindowWallZ, 10.625, 8 - kitchenWindowWallZ, true, scene);
@@ -1124,10 +1124,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   ].forEach(([x, z, w, d, hardwood = false, interior = true]) => floor(x, z, w, d, hardwood, shell, interior));
 
   [
-    [0, 8, 13.2, 8, true, [[livingSideWindowBank.x - livingSideWindowBank.width / 2, livingSideWindowBank.x + livingSideWindowBank.width / 2, livingSideWindowSill, livingWindowHead]]],
-    [13.2, -0.1, 13.2, 8, true, [[livingFeatureWall.patioDoor.z - 1.5 + 0.1, livingFeatureWall.patioDoor.z + 1.5 + 0.1, 0, 8]]],
-    [13.2, -0.1, 26.875, -0.1, true, [[3.8375, 9.8375, 3, 8]]],
-    [26.875, -0.1, 26.875, kitchenWindowWallZ, true, [[0.6, 6.6, 3, 8]], ceilingHeight, [1]],
+    [0, livingFeatureWall.returnWallZ, 13.2, livingFeatureWall.returnWallZ, true, [[livingSideWindowBank.x - livingSideWindowBank.width / 2, livingSideWindowBank.x + livingSideWindowBank.width / 2, livingSideWindowSill, livingWindowHead]]],
+    [13.2, livingFeatureWall.diningRearZ, 13.2, livingFeatureWall.returnWallZ, true, [[livingFeatureWall.patioDoor.z - 1.5 - livingFeatureWall.diningRearZ, livingFeatureWall.patioDoor.z + 1.5 - livingFeatureWall.diningRearZ, 0, 8]]],
+    [13.2, livingFeatureWall.diningRearZ, 26.875, livingFeatureWall.diningRearZ, true, [[3.8375, 9.8375, 3, 8]]],
+    [26.875, livingFeatureWall.diningRearZ, 26.875, kitchenWindowWallZ, true, [[livingFeatureWall.diningSideWindow.z - 2 - livingFeatureWall.diningRearZ, livingFeatureWall.diningSideWindow.z + 2 - livingFeatureWall.diningRearZ, 3, 8]], ceilingHeight, [1]],
     [26.875, kitchenWindowWallZ, kitchenWallRight, kitchenWindowWallZ, true, [[kitchenCounterWindowBank.x - kitchenCounterWindowBank.width / 2 - 26.875, kitchenCounterWindowBank.x + kitchenCounterWindowBank.width / 2 - 26.875, kitchenSinkWindowSill, kitchenSinkWindowSill + kitchenSinkWindowHeight]], ceilingHeight, [-1, 1], 1],
     [37.5, kitchenWindowWallZ, 55.5, kitchenWindowWallZ, false, [prepCounterWindowBank].map(({ x, openingWidth, openingSill, openingHeight }) => [x - openingWidth / 2 - 37.5, x + openingWidth / 2 - 37.5, openingSill, openingSill + openingHeight])],
     [55.5, kitchenWindowWallZ, 55.5, 15, false, [[prepEndWindow.z - prepEndWindow.openingWidth / 2 - kitchenWindowWallZ, prepEndWindow.z + prepEndWindow.openingWidth / 2 - kitchenWindowWallZ, prepEndWindow.openingSill, prepEndWindow.openingSill + prepEndWindow.openingHeight]], ceilingHeight, [1]],
@@ -1138,7 +1138,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       [groundFrontWallZ - 49 - 2, groundFrontWallZ - 49 + 2, 3, 8],
       ...[...guestEntry.windows].reverse().map(({ z, openingWidth, openingSill, openingHeight }) => [groundFrontWallZ - z - openingWidth / 2, groundFrontWallZ - z + openingWidth / 2, openingSill, openingSill + openingHeight])
     ]],
-    [0, livingFeatureWall.wallEndZ, 0, 8, true, [...livingWindowCenters].reverse().map((z) => [livingFeatureWall.wallEndZ - z - livingWindowWidth / 2, livingFeatureWall.wallEndZ - z + livingWindowWidth / 2, livingWindowSill, livingWindowHead])],
+    [0, livingFeatureWall.wallEndZ, 0, livingFeatureWall.returnWallZ, true, [...livingWindowCenters].reverse().map((z) => [livingFeatureWall.wallEndZ - z - livingWindowWidth / 2, livingFeatureWall.wallEndZ - z + livingWindowWidth / 2, livingWindowSill, livingWindowHead])],
     [kidsRoom.x, kidsRoom.z, kidsRoom.x + kidsRoom.width, kidsRoom.z, true],
     [kidsDoorway.x, kidsRoom.z, kidsDoorway.x, guestSuite.kidsSouthZ, true, [[kidsDoorway.z - kidsRoom.z, kidsDoorway.z - kidsRoom.z + kidsDoorway.width, 0, kidsDoorway.height]]],
     [kitchenRefrigeration.returnX, kidsRoom.z, kitchenRefrigeration.returnX, 26.9, true, [], ceilingHeight, [1]], [0, powderNorthZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderNorthZ],
@@ -1167,7 +1167,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   buildBaseTrim();
 
   [
-    ['Living room', 13.2, 17.7], ['Dining room', 13.675, 8.1], ['Kitchen', 11, 26.9 - kitchenWindowWallZ],
+    ['Living room', 13.2, 25.7 - livingFeatureWall.returnWallZ], ['Dining room', 13.675, 8 - livingFeatureWall.diningRearZ], ['Kitchen', 11, 26.9 - kitchenWindowWallZ],
     ['Hall', 13.3, kidsRoom.z - 8], ['Prep kitchen', 18, 15 - kitchenWindowWallZ, true], ['Mudroom', 7.4 - 8 / 12, 11.9],
     ['Garage', 26.5, 34, true], ['Kids room (L-shaped)', kidsRoom.southWidth, kidsRoom.depth, true],
     ['Powder room', 7.1, guestEntry.powder.d], ['Guest coat closet', 5.1, guestEntry.coatCloset.d], ['Guest entry alcove', 5.1, guestEntry.alcove.d], ['Office', 12.2, groundFrontWallZ - officeNorthZ],
@@ -1292,14 +1292,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     accentLight.position.set(fabricShade ? 0.2 : 0.35, fabricShade ? 0.05 : 0, 0);
     sconce.add(accentLight);
   }
-  for (const [x, z, rotation] of livingSideSconceCenters.map((x) => [x, 8.205, -Math.PI / 2])) {
+  for (const [x, z, rotation] of livingSideSconceCenters.map((x) => [x, livingFeatureWall.returnWallZ + 0.205, -Math.PI / 2])) {
     wallSconce(livingSconces, x, z, rotation, true);
   }
   const diningSconces = new THREE.Group();
   diningSconces.name = 'Dining-room wall sconces';
   diningSconces.userData = { fixtures: 2, placement: 'Flanking the rear dining window', finish: 'Ivory wall-backed fabric shades and rounded brass backplates', chandelier: false, provisional: true };
   scene.add(diningSconces);
-  for (const x of [15.4875, 24.5875]) wallSconce(diningSconces, x, 0.105, -Math.PI / 2);
+  for (const x of [15.4875, 24.5875]) wallSconce(diningSconces, x, livingFeatureWall.diningRearZ + 0.205, -Math.PI / 2);
   const kitchenSconces = new THREE.Group();
   kitchenSconces.name = 'Kitchen sink-wall end sconces';
   kitchenSconces.userData = { fixtures: 2, placement: 'Outside the kitchen window-bank ends', finish: 'Ivory wall-backed fabric shades and rounded brass backplates', provisional: true, productSelected: false };
@@ -1416,7 +1416,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const livingRevealFace = windowFaceDepth(livingWindowBank, 0, livingSideWindowBank.sill, 0, 1);
   addWindowShadeDivisions(livingWindowBank, box, windowTrim, [-1.25, 1.25], livingSideWindowBank.sill,
     livingSideWindowBank.height, livingRevealFace, 1, 'Living full-depth white shade-bay division');
-  windowFrame('Dining rear window', 20.0375, 0, 6, 5, 3);
+  windowFrame('Dining rear window', 20.0375, livingFeatureWall.diningRearZ + 0.1, 6, 5, 3);
   const livingPatioDoor = new THREE.Group();
   livingPatioDoor.name = 'Dining west glazed patio door, 36 by 96 inches';
   livingPatioDoor.position.set(livingFeatureWall.patioDoor.x, 0, livingFeatureWall.patioDoor.z);
@@ -1438,7 +1438,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     part.position.x -= 1.44;
     livingPatioHinge.add(part);
   }
-  windowFrame('Dining garden-facing casements', 26.875, 3.5, 6, 5, 3, -Math.PI / 2, scene, 1);
+  windowFrame('Dining garden-facing casements', 26.875, livingFeatureWall.diningSideWindow.z, livingFeatureWall.diningSideWindow.width, 5, 3, -Math.PI / 2, scene, 1);
   const doorLeaf = livingPatioHinge;
   doorLeaf.rotation.y = 0;
   for (const [index, z] of livingWindowCenters.entries()) {
@@ -1578,7 +1578,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(chair, 0, 1.9, -1.25, 34 / 12, 1.533, 0.375, tanLeatherCushion, true);
     return chair;
   }
-  const loungeChairs = [loungeChair(3.6, 10.9, Math.PI / 3), loungeChair(2.9, livingFeatureWall.wallEndZ - 2.175, 2 * Math.PI / 3)];
+  const loungeChairs = [loungeChair(3.6, 10.9 + livingFeatureWall.returnWallZ - 8, Math.PI / 3), loungeChair(2.9, livingFeatureWall.wallEndZ - 2.175, 2 * Math.PI / 3)];
   loungeChairs[0].userData = { seats: 1, use: 'Window-corner lounge chair with matching ottoman', provisional: true, viewerFurniture: true };
   loungeChairs[1].userData = { seats: 1, use: 'Corner reading chair beside painted stair enclosure', provisional: true, viewerFurniture: true };
   function loungeOttoman(chair) {
@@ -1859,7 +1859,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const livingLayouts = [
     {
       id: 'reference-lounge', title: 'J / U sectional facing fireplace', recommended: true, referenceLounge: true,
-      note: 'A 132 in main run faces the fireplace with two backed 99 in returns reaching toward it: continuous main, corner and return backs, end arms, mirrored cushions and pillows. Overall x 4.5-12.75, z 11.975-22.975 ft, centered on the fireplace axis so the 54 x 60 in open well frames the firebox; the tucked piano bench keeps 24.4 in. Six provisional seats (two main, two per return) exclude both corners. The reading chair, end table and its lamp are removed. 9 x 12 ft rug centered under the U at (8.625,17.475). Both fireplace-side built-ins are removed; equipment/charging storage location is undecided. Flat 8 in base trim runs continuously along the fireplace wall from each wall end (z 8.175 and 26.775 ft) to the stone side return (z 14.415 and 20.535 ft), 74.88 in per side. Return ends sit 51.15 in from that baseboard (51.9 in to paint) and 37.44 in from the stone face; the back stops 6 in before the 36 in main hall; 45.6 in remains to the north window wall. Piano, bench and attached lamp move another 6 in west toward fireplace windows, 16 in total from the stair-wall midpoint, center (3.7583,26.2592), keyboard north. Rear gap stays 1 in to paint, 0.25 in beyond baseboard; ventilation and cord fit are unverified. Bench keeps its tucked pose and unchanged size/height. Piano west end faces the fireplace wall: 15.68 in to baseboard (16.43 in to paint), not an aisle; no cabinet or door sweep remains beside it. With no built-in media storage, equipment, charging and ventilation location is undecided. Occupied bench pullout, playing access and power routing require review; keep cords off circulation routes. No coffee table, cart or footstools. Joined living window bank remains. All four stair bookcases are removed; the former recess zone is closed with painted enclosure to the current flight/landing soffits and flat base trim. No new doors/storage. Keep the full 48 in living-side landing guard: oak top 36 in above the +5 ft landing, eight black bars and both posts. Owner follow-up removes only the short cap/bar connecting pieces to the lower-flight rails, retaining a junction break. Endpoint centerlines differ by 5 in horizontally and 7.5 in vertically, not verified clear-opening dimensions. Guard openings and graspable handrail continuity require professional review; this gap is not safety approval. The enclosure below is not edge protection. Actual anchorage, openings/climbability, graspability and remaining wall-backed/basement handrail omissions require professional review; restored geometry is not safety certification. Preserve flight rails/stringers, living stairwell guard, upstairs guards, basement rails/access, steps and enclosure. Enclosure framing, structural support, underside protection, fire separation and headroom require professional review. Verify products, equipment storage/ventilation, power, window access and fireplace heat clearances. Dining west patio door stays closed by default; verify its sweep and occupied access before use. Patio landing, stair, roof, guards and foundations remain approval-required.',
+      note: 'The fireplace, stone, firebox, flames, mantel, TV and flanking windows center at z = 18 ft, halfway between finished wall ends z = 9.225 and 26.775 ft. Equal stone-side baseboard runs are 68.58 in; window opening end returns are 11.7 in. The unchanged 132 x 99 in U sectional and 9 x 12 ft rug follow the axis 6.3 in toward the stairs: sectional x = 4.5-12.75, z = 12.5-23.5; rug center (8.625,18). Six planning seats exclude corners. Both wall-end gaps are 39.3 in to paint, not occupied-route approval. Return ends retain 51.15 in to west baseboard and 37.44 in to stone; main back remains 6 in before the 36 in hall strip. Piano, tucked bench and lamp stay fixed: bench-to-U gap reduces to 18.1 in, keyboard-front gap 25 in. Playing access, bench pullout and window reach beside the piano remain unverified. Fireplace built-ins, separate reading chair/table/lamp and stair bookcases remain removed; equipment storage/ventilation is undecided. Keep the closed under-stair enclosure and existing guards/handrails, including their recorded unresolved junction break and basement omissions. No new doors or storage. Structure, framing, anchorage, guard openings/continuity, fire separation, headroom, fireplace heat clearances, power and actual product access require professional review. Dining patio door stays closed by default; patio roof, landing and stair remain approval-required.',
       sofa: null, chairs: [null, null]
     },
     {
@@ -1877,18 +1877,18 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       id: 'real-sofa', title: 'G / Earlier textured product sofa',
       note: 'Downloaded Wayfair Glam velvet sofa, 86 in display width, with two textured armchairs. Earlier corner-chair poses predate removal of the fireplace built-ins (halved/paired versions are historical); comparison only, not a usable layout. Licensed product visualization, not a comfort-tested selection or manufacturer CAD. No sofa-bed opening is modeled.',
       downloadedSofa: [11.25, livingCenterZ, -Math.PI / 2], sofa: null, chairs: [null, null],
-      armchairs: [[2.7, 10.45, Math.PI / 3], [2.7, 2 * livingCenterZ - 10.45, 2 * Math.PI / 3]]
+      armchairs: [[2.7, livingFeatureWall.wallStartZ + 2.275, Math.PI / 3], [2.7, livingFeatureWall.wallEndZ - 2.275, 2 * Math.PI / 3]]
     },
     {
       id: 'double-chaise', title: 'F / Earlier double-chaise sectional',
       note: 'Double-chaise sectional plus two textured Poly Haven armchairs in the window corners, angled inward. Earlier corner-chair poses predate removal of the fireplace built-ins (halved/paired versions are historical); comparison only, not a usable layout. Uniformly scaled to 32.25 in wide; generic visual assets, not verified product sizes. Occupied access and heat clearances remain unverified.',
       sectional: [11.25, livingCenterZ, -Math.PI / 2], sofa: null, chairs: [null, null],
-      armchairs: [[2.7, 10.45, Math.PI / 3], [2.7, 2 * livingCenterZ - 10.45, 2 * Math.PI / 3]]
+      armchairs: [[2.7, livingFeatureWall.wallStartZ + 2.275, Math.PI / 3], [2.7, livingFeatureWall.wallEndZ - 2.275, 2 * Math.PI / 3]]
     },
     {
       id: 'centered', title: 'E / Earlier corner-chair layout',
       note: 'Earlier corner-chair comparison predating removal of the fireplace built-ins (halved/paired versions are historical). Original furniture poses are preserved for comparison only, not a usable layout.',
-      sofa: [11.6, livingCenterZ, -Math.PI / 2], chairs: [[3.6, 10.9, Math.PI / 3], [2.9, livingFeatureWall.wallEndZ - 2.175, 2 * Math.PI / 3]],
+      sofa: [11.6, livingCenterZ, -Math.PI / 2], chairs: [[3.6, 10.9 + livingFeatureWall.returnWallZ - 8, Math.PI / 3], [2.9, livingFeatureWall.wallEndZ - 2.175, 2 * Math.PI / 3]],
     },
     {
       id: 'airy', title: 'A / Airy holiday',
@@ -1913,14 +1913,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   ];
 
   const tableX = (13.2 + 26.875) / 2;
-  const tableZ = (-0.1 + 8) / 2;
+  const tableZ = livingFeatureWall.diningTableZ;
   const tableLength = 84 / 12;
   const tableDepth = 38 / 12;
   const diningSet = new THREE.Group();
   diningSet.name = 'Dining table and six side chairs';
   diningSet.position.set(tableX, 0, tableZ);
   diningSet.rotation.y = 0;
-  diningSet.userData = { rotationDegrees: 0, longAxis: 'x', seats: 6, endChairs: 0, centeredInDiningRoom: true, patioEndChairMustBeTuckedForDoor: false, patioEndChairMustBeMovedForDoor: false, provisional: true };
+  diningSet.userData = { rotationDegrees: 0, longAxis: 'x', seats: 6, endChairs: 0, centeredInDiningRoom: false, centeredAcrossRoom: true, rearWallOffsetPreserved: true, patioEndChairMustBeTuckedForDoor: false, patioEndChairMustBeMovedForDoor: false, provisional: true };
   diningSet.userData.viewerFurniture = true;
   scene.add(diningSet);
   const diningWalnut = mat('#60412e', 0.6);
@@ -5454,7 +5454,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     social: { target: [19, 2, 12], offset: [27, 55, 32], span: 43 },
     living: { target: [12.5, 1.5, livingCenterZ], offset: [28, 27, 7], span: 32 },
     kids: { target: [24, 1, 30.15], offset: [-12, 30, 18], span: 17 },
-    dining: { target: [20.0375, 1, 3.95], offset: [16, 19, 23], span: 20 },
+    dining: { target: [20.0375, 1, tableZ], offset: [16, 19, 23], span: 20 },
     kitchen: { target: [32.2, 2, kitchenCenterZ], offset: [-22, 35, 27], span: 26 },
     'sink-storage': { target: [32, 4.65, 7.8], offset: [0, 0, 12], span: 9.8 },
     cooktop: { target: [36.5, 5.3, cooktopCenterZ], offset: [-18, 0, 0], span: 11 },
@@ -5881,7 +5881,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const starts = {
       upstairs: [...upstairs.start, 16.5, 23], 'upstairs-top': [...upstairs.start, 16.5, 23],
       whole: [15.6, 50, 15.6, 42], top: [15.6, 50, 15.6, 42], social: [20, 18, 20, 3],
-      living: [14.8, 23.9, 5, 16], kids: [20.1, 30, 24, 26], dining: [23, 7, 20.0375, 3.95], kitchen: [33, 19.5, 32.25, 8],
+      living: [14.8, 23.9, 5, 16], kids: [20.1, 30, 24, 26], dining: [23, 9, 20.0375, tableZ], kitchen: [33, 19.5, 32.25, 8],
       cooktop: [33, cooktopCenterZ, 36.5, cooktopCenterZ], fridge: [33, 23, 33, 26.9], island: [33, kitchenCenterZ, 28.65, kitchenCenterZ],
       prep: [43, 12, 48, prepCounterZ], pantry: [47, 12, 47, 14.325], 'prep-counter': [47, 12, 47, prepCounterZ],
       mudroom: [41.7, 23, 41.7, 17.5], 'mudroom-cubbies': [41.7, 23, 44.3, 23], 'mudroom-storage': [41.7, 23, 41.7, 17.5],

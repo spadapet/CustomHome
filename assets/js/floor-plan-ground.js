@@ -77,23 +77,24 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
   const UpstairsLayout = typeof module !== 'undefined' && module.exports ? require('./upstairs-layout.js') : root.UpstairsLayout;
 
   function getLivingRoomFeatureLayout(stairs = UpstairsLayout.stairOpening()) {
-    const wallStartZ = 8 + 0.35 / 2;
-    // Keep the approved fireplace/window/furniture composition fixed when
-    // closing the stair's powder-side gap; this is its original design datum.
+    const returnWallZ = 7 + 1.2 + 2.05 / 2 - 0.35 / 2;
+    const wallStartZ = returnWallZ + 0.35 / 2;
     const wallEndZ = 26.775;
     const centerZ = (wallStartZ + wallEndZ) / 2;
     const sideWindowBank = {
-      name: 'Living joined return window bank', x: 6.6, z: 8, width: 7.5, height: 5, sill: 3,
+      name: 'Living joined return window bank', x: 6.6, z: returnWallZ, width: 7.5, height: 5, sill: 3,
       openingWidth: 7.5, openingHeight: 5, openingSill: 3, trimLabel: 'Living',
       divisionWidth: 3.5 / 12, divisionDepth: 6 / 12, shadeMountingVerified: false,
       units: [-1, 0, 1].map((side) => ({
         name: side < 0 ? 'Living left side window' : side > 0 ? 'Living right side window' : 'Living side window',
-        x: 6.6 + side * 2.5, z: 8, width: 2.5, height: 5, sill: 3, picture: side === 0, singleHung: false
+        x: 6.6 + side * 2.5, z: returnWallZ, width: 2.5, height: 5, sill: 3, picture: side === 0, singleHung: false
       }))
     };
     const patioDoor = { x: 13.2, z: 3.95, width: 3, height: 8 };
     const fireplaceWindows = { width: 4, sill: 2.6, height: 5.4, head: 8 };
-    return { wallStartZ, wallEndZ, centerZ, windowCenters: [centerZ - 5.8, centerZ + 5.8], fireplaceWindows, sideWindowBank, patioDoor };
+    const diningRearZ = -0.1 + 2;
+    return { returnWallZ, wallStartZ, wallEndZ, centerZ, windowCenters: [centerZ - 5.8, centerZ + 5.8], fireplaceWindows, sideWindowBank, patioDoor,
+      diningRearZ, diningTableZ: 3.95 + 2, diningSideWindow: { z: (diningRearZ + 7) / 2, width: 4 } };
   }
 
   function getFrontEntryLayout() {
@@ -394,7 +395,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     const garageNorthWestX = 44.9 - 8 / 12, garageWestX = 31.2, garageEastX = 55.5;
     const garageNorthZ = 15, garageStepZ = 26.9, garageSouthZ = 49;
     const rooms = [
-      ['Living room', 0, 8, 13.2, 17.7], ['Dining room', 13.2, -0.1, 13.675, 8.1],
+      ['Living room', 0, livingFeatureWall.returnWallZ, 13.2, 25.7 - livingFeatureWall.returnWallZ], ['Dining room', 13.2, livingFeatureWall.diningRearZ, 13.675, 8 - livingFeatureWall.diningRearZ],
       ['Hall', 13.2, 8, 13.3, kidsNorthZ - 8], ['Kitchen', 26.5, 7, 11, 19.9],
       ['Prep kitchen', 37.5, 7, 18, 8], ['Mudroom', 37.5, 15, 7.4 - 8 / 12, 11.9],
       ['Kids room', 19, kidsNorthZ, 12.2, guestSuite.kidsSouthZ - kidsNorthZ], ['Powder room', 0, powderZ, 7.1, guestEntry.powder.d],
@@ -405,7 +406,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       ['Garage', garageWestX, garageNorthZ, garageEastX - garageWestX, garageSouthZ - garageNorthZ], ['Front porch', 0, front.wallZ, 31.2, front.porchDepth]
     ].map(([name, x, z, w, d]) => ({ name, x, z, w, d }));
     const floors = [
-      [0, 8, 13.2, 17.7, 'Living room'], [13.2, -0.1, 13.675, 8.1, 'Dining room'],
+      [0, livingFeatureWall.returnWallZ, 13.2, 25.7 - livingFeatureWall.returnWallZ, 'Living room'], [13.2, livingFeatureWall.diningRearZ, 13.675, 8 - livingFeatureWall.diningRearZ, 'Dining room'],
       [13.2, 8, 5.8, 17.7, 'Hall'], [19, 8, 7.5, kidsNorthZ - 8, 'Hall'],
       [26.875, 7, 10.625, 1, 'Kitchen'], [26.5, 8, 11, kidsNorthZ - 8, 'Kitchen'], [refrigeration.returnX, kidsNorthZ, 37.5 - refrigeration.returnX, 26.9 - kidsNorthZ, 'Kitchen'],
       [37.5, 7, 7.9, 8, 'Prep kitchen'], [45.4, 7, 10.1, 8, 'Prep kitchen'], [37.5, 15, 7.4 - 8 / 12, 11.9, 'Mudroom'],
@@ -425,10 +426,10 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     ].map(([x, z, w, d, room, elevation = 0]) => ({ x, z, w, d, room: room ?? null, elevation }));
     const sideWindows = [livingFeatureWall.sideWindowBank].map(({ x, openingWidth, openingSill, openingHeight }) => [x - openingWidth / 2, x + openingWidth / 2, openingSill, openingSill + openingHeight]);
     const segments = [
-      ['Living north', 0, 8, 13.2, 8, sideWindows],
-      ['Dining west', 13.2, -0.1, 13.2, 8, [[livingFeatureWall.patioDoor.z - 1.5 + 0.1, livingFeatureWall.patioDoor.z + 1.5 + 0.1, 0, 8]]],
-      ['Dining north', 13.2, -0.1, 26.875, -0.1, [[3.8375, 9.8375, 3, 8]]],
-      ['Dining east', 26.875, -0.1, 26.875, 7, [[0.6, 6.6, 3, 8]]],
+      ['Living north', 0, livingFeatureWall.returnWallZ, 13.2, livingFeatureWall.returnWallZ, sideWindows],
+      ['Dining west', 13.2, livingFeatureWall.diningRearZ, 13.2, livingFeatureWall.returnWallZ, [[livingFeatureWall.patioDoor.z - 1.5 - livingFeatureWall.diningRearZ, livingFeatureWall.patioDoor.z + 1.5 - livingFeatureWall.diningRearZ, 0, 8]]],
+      ['Dining north', 13.2, livingFeatureWall.diningRearZ, 26.875, livingFeatureWall.diningRearZ, [[3.8375, 9.8375, 3, 8]]],
+      ['Dining east', 26.875, livingFeatureWall.diningRearZ, 26.875, 7, [[livingFeatureWall.diningSideWindow.z - 2 - livingFeatureWall.diningRearZ, livingFeatureWall.diningSideWindow.z + 2 - livingFeatureWall.diningRearZ, 3, 8]]],
       ['Kitchen north', 26.875, 7, 37.5, 7, [getKitchenWindowBankLayout()].map(({ x, openingWidth, openingSill, openingHeight }) => [x - openingWidth / 2 - 26.875, x + openingWidth / 2 - 26.875, openingSill, openingSill + openingHeight])],
       ['Prep north', 37.5, 7, 55.5, 7, [getPrepWindowBankLayout()].map(({ x, openingWidth, openingSill, openingHeight }) => [x - openingWidth / 2 - 37.5, x + openingWidth / 2 - 37.5, openingSill, openingSill + openingHeight])],
       ['Prep east', 55.5, 7, 55.5, 15, getPrepWindowLayout().filter((window) => window.x === 55.5).map(({ z, openingWidth, openingSill, openingHeight }) => [z - openingWidth / 2 - 7, z + openingWidth / 2 - 7, openingSill, openingSill + openingHeight])],
@@ -441,7 +442,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
         ...guestEntry.windows.map(({ z, openingWidth, openingSill, openingHeight }) => [z - openingWidth / 2 - livingFeatureWall.wallEndZ, z + openingWidth / 2 - livingFeatureWall.wallEndZ, openingSill, openingSill + openingHeight]),
         [21.3 - (livingFeatureWall.wallEndZ - 25.7), 25.3 - (livingFeatureWall.wallEndZ - 25.7), 3, 8]
       ]],
-      ['Living west', 0, 8, 0, livingFeatureWall.wallEndZ, livingFeatureWall.windowCenters.map((z) => [z - 8 - livingFeatureWall.fireplaceWindows.width / 2, z - 8 + livingFeatureWall.fireplaceWindows.width / 2, livingFeatureWall.fireplaceWindows.sill, livingFeatureWall.fireplaceWindows.head])],
+      ['Living west', 0, livingFeatureWall.returnWallZ, 0, livingFeatureWall.wallEndZ, livingFeatureWall.windowCenters.map((z) => [z - livingFeatureWall.returnWallZ - livingFeatureWall.fireplaceWindows.width / 2, z - livingFeatureWall.returnWallZ + livingFeatureWall.fireplaceWindows.width / 2, livingFeatureWall.fireplaceWindows.sill, livingFeatureWall.fireplaceWindows.head])],
       ['Kids north', 19, kidsNorthZ, refrigeration.returnX, kidsNorthZ], ['Kids west', 19, kidsNorthZ, 19, guestSuite.kidsSouthZ, [[27 - kidsNorthZ, 31.5 - kidsNorthZ, 0, 8]]],
       ['Kids east return', refrigeration.returnX, kidsNorthZ, refrigeration.returnX, 26.9], ['Powder north', 0, powderZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderZ],
       ['Powder east', 7.1, powderZ, 7.1, officeZ, [[guestEntry.powderDoor.z - powderZ, guestEntry.powderDoor.z - powderZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],

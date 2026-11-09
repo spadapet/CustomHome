@@ -1,5 +1,79 @@
 # Ground-floor design context
 
+## November 8 - fireplace centered on the current wall
+
+Replace the old fixed z = 17.475 axis with the actual finished-span midpoint:
+(9.225 + 26.775) / 2 = 18 ft. Move stone, firebox, flames, mantel, TV and
+the flanking window pair +0.525 ft (6.3 in), without changing their sizes.
+Window centers become z = 12.2 / 23.8; opening end returns are equal
+11.7 in to the finished span ends. Continuous baseboard-to-stone lengths
+are 68.58 in at both ends, rather than unequal 62.28 /74.88 in.
+Shared openings, furnished frames, exterior masonry and Version I's downstairs
+window positions follow the same helper. Room boundaries and areas stay fixed.
+
+The full-size U sectional and rug follow the fireplace axis: sectional
+z = 12.5-23.5, rug center (8.625,18); both end gaps are 39.3 in to paint.
+Keep piano, bench and stairs fixed. The tucked bench-to-sectional gap is
+now 18.1 in (keyboard-front gap 25 in), not approved occupied piano access.
+The piano overlaps the side window's along-wall range slightly but remains
+physically away from its wall plane; crank reach/cleaning and playing
+access need product/owner review. Historical corner-chair comparisons use
+actual wall ends to avoid crossing the stair guard. No furniture shrinks.
+Fireplace heat clearances, revised framing, glazing and occupied circulation
+remain unverified. This supersedes earlier instructions to keep the axis fixed.
+
+## November 8 - dining rear wall moved two feet toward the room
+
+Interpret the owner's repeated plan-view request as a 2 ft +Z translation,
+not a 2 ft-high wall: rear centerline -0.1 -> 1.9, retaining the 9 ft wall
+and 36/96 in window sill/head. Translate its 72 x 60 in window and two
+sconces together. Shorten both side walls/floor and the dining roof projection.
+The garden-facing side casement group narrows from 72 to 48 in, centered
+at z = 4.45, so it fits the shortened 5.1 ft side wall; retain two units.
+Exact standard product/rough-opening/combination approval remains outstanding.
+
+Move the unchanged 84 x 38 in table and six side chairs 2 ft south to
+(20.0375,5.95), preserving their rear-wall offset and lateral centering.
+Do not recenter front/back into the smaller envelope: the south edge is open
+to the hall, which accommodates chair pullout. The 21 in full-depth rear
+chair allowance leaves 22.2 in to paint tucked, 4.2 in pulled out 18 in,
+and 3.45 in to baseboard at that pose; not a passing route. Patio door stays
+fixed and closed by default; its full sweep still clears the chair envelopes.
+Keep the main hall's west-side approach and kitchen cabinet positions.
+
+Parcel/fence, gardens, patio terrace/roof and steps stay fixed. Dining rear
+masonry face moves to z = 1.675, increasing its modeled rear-boundary gap
+from 32 to 34 ft, not surveyed setbacks. Rear path light moves with the wall.
+Overall house bounding depth becomes about 60 ft. Ground gross estimate is
+1,924.33 sq ft; combined with retained Version H upstairs, 3,774.92 sq ft.
+Version I's downstairs geometry/takeoff follows; upstairs is untouched.
+Verify narrow door/window end piers, framing/header/roof support, flashing,
+occupied seating and circulation professionally. Saved JSON remains intact.
+
+## November 8 - living return aligned with kitchen countertop
+
+Move the living room's joined-window return wall 12.6 in toward the room
+(+Z in the north-up plan), from z = 8 to 9.05. Its room-side paint face is
+z = 9.225, exactly matching the kitchen sink-counter front
+(7 + 1.2 + 2.05/2 ft). This interprets the owner's pictured alignment as
+countertop edge, not the recessed cabinet-box face.
+Move the joined windows, trim and end sconces with the wall, shorten the
+west wall and living floor, and extend the dining-west wall to the new corner.
+Keep the fireplace axis/windows, selected U sectional, kitchen cabinets,
+patio door and stairs fixed. The U's north gap reduces from 45.6 to 33 in
+to paint (32.25 in to baseboard); occupied use remains unverified.
+The seasonal tree follows the corner to (2.175, 11.225), retaining its size.
+Historical centered-chair option's north chair follows the wall.
+
+Extend patio paving, canopy, soffit, headwall and house flashing to meet
+the relocated exterior face; preserve the roof plane, yard-edge elevation,
+patio furniture, landing and stair. Structural attachment, the shorter
+fireplace-window end pier (5.4 in to interior corner), roof/wall bearing,
+window framing, glazing and occupied circulation need architectural review.
+Ground gross estimate decreases 13.86 sq ft to 1,952.58 sq ft.
+Version I's downstairs panel/takeoff follow this move; its upstairs image
+study and Version H model remain unchanged. Preserve saved layout JSON.
+
 ## November 8 - Version I image study only; preserve Version H upstairs model
 
 Owner supplies a new upstairs image and requests a new SVG version before

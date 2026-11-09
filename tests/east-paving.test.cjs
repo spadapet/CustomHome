@@ -7,7 +7,7 @@ const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior
 const frontLayout = require('../assets/js/floor-plan-ground.js').getGroundFrontLayout();
 function fixture(old = false) {
   class Group { constructor() { this.children = []; this.userData = {}; } add(o) { this.children.push(o); } }
-  const c = { THREE: { Group }, group: new Group(), frontWallZ: frontLayout.wallZ, frontShift: frontLayout.extension, paving(parent, name, x, z, width, depth, top = -1.35) {
+  const c = { getLivingRoomFeatureLayout: require('../assets/js/floor-plan-ground.js').getLivingRoomFeatureLayout, THREE: { Group }, group: new Group(), frontWallZ: frontLayout.wallZ, frontShift: frontLayout.extension, paving(parent, name, x, z, width, depth, top = -1.35) {
     const m = { name, x, z, width, depth, top }; parent.add(m); return m;
   }};
   vm.createContext(c);

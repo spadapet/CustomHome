@@ -84,6 +84,8 @@
   }
 
   function getConnectedRoofDefinitions(floorToFloor = 10) {
+    const diningRearZ = typeof getLivingRoomFeatureLayout === 'function' ? getLivingRoomFeatureLayout().diningRearZ
+      : require('./floor-plan-ground.js').getLivingRoomFeatureLayout().diningRearZ;
     const eaves = floorToFloor + 9;
     // 18-inch provisional framing zone above full 9-ft room walls.
     const upperBase = eaves + 1.6;
@@ -148,8 +150,8 @@
       garageGable,
       // The west edge abuts the canopy at the wall, not an overlapping eave
       // projecting through its fascia. Keep the dining ridge and east eave.
-      { ...gableRoof('Dining rear projection', 12.55, 27.525, -0.75, 7.5, 8.68, 5.82, true),
-        bounds: [13.2, 27.525, -0.75, 7.5] }
+      { ...gableRoof('Dining rear projection', 12.55, 27.525, diningRearZ - 0.65, 7.5, 8.68, 5.82, true),
+        bounds: [13.2, 27.525, diningRearZ - 0.65, 7.5] }
     ];
   }
 

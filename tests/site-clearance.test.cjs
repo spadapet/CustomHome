@@ -21,7 +21,7 @@ function fixture() {
     o.vertices = [-1, 1].flatMap(a => [-1, 1].flatMap(b => [-1, 1].map(c => [a*w/2,b*h/2,c*d/2])));
     o.position.set(x,y,z); parent.add(o); return o;
   }
-  const context = { group, box, brickBox: box, trim: {}, mat: () => ({}),
+  const context = { getLivingRoomFeatureLayout: require('../assets/js/floor-plan-ground.js').getLivingRoomFeatureLayout, group, box, brickBox: box, trim: {}, mat: () => ({}),
     THREE: { Group, BoxGeometry: class {}, InstancedMesh: class extends Group {
       constructor() { super(); this.instanceMatrix = {}; } setMatrixAt() {}
     }, Matrix4: class { makeTranslation() {} } } };
@@ -67,7 +67,7 @@ test('finished east masonry to innermost fence constituent is six feet with fixe
   assert.match(html, /ground east wall-to-fence: 6 ft/);
   close(lot.right-eastWall.maxX,6.67); close(westWall.minX-lot.left,12.38);
   close(lot.right-lot.left,75); close(lot.front-lot.rear,130);
-  close(lot.rearWallZ-lot.rear,32);
+  close(lot.rearWallZ-lot.rear,34);
   close(eastFence.minX-(lot.right-.5-.75),.58);
   close((lot.left+.5+.75)-westFence.maxX,.625);
 });

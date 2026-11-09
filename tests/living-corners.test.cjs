@@ -66,7 +66,7 @@ test('Christmas tree stays in the actual northwest living corner for every seati
   assert.equal(roots.length, 1);
   assert.equal(tree.name, 'Living northwest-corner Christmas tree');
   assert.equal(tree.position.x, 2.175);
-  assert.equal(tree.position.z, 10.175);
+  assert.ok(Math.abs(tree.position.z - 11.225) < 1e-9);
   assert.equal(tree.position.y, 0);
   assert.equal(tree.userData.heightInches, 84);
   assert.equal(tree.userData.diameterInches, 36);
@@ -120,7 +120,7 @@ test('seasonal move preserves all branches, stand, lights, ornaments and seven-f
   assert.equal(cross.position.y + cross.children[0].dimensions[1] / 2, 7);
   // Full nominal branch envelope: finished faces plus six inches on both axes.
   assert.ok(Math.abs(tree.position.x - branches[0].dimensions[0] / 2 - 0.175 - 0.5) < 1e-9);
-  assert.ok(Math.abs(tree.position.z - branches[0].dimensions[2] / 2 - 8.175 - 0.5) < 1e-9);
+  assert.ok(Math.abs(tree.position.z - branches[0].dimensions[2] / 2 - getLivingRoomFeatureLayout().wallStartZ - 0.5) < 1e-9);
 });
 
 test('textured armchairs retain corner centers and inward angles with uniformly scaled asset proportions', async (t) => {
@@ -248,7 +248,7 @@ test('textured armchairs retain corner centers and inward angles with uniformly 
     assert.match(source, /place\(familyLiving, layout\.familyZone \? \[0, 0, 0\] : null\)/);
     assert.match(source, /familyOttoman\.traverse\(\(part\) => \{ if \(part\.isMesh\) part\.userData\.tourObstacle = true/);
   });
-  assert.ok((bounds[0].minZ - 8.175) * 12 >= 3 && (bounds[0].minZ - 8.175) * 12 < 5, 'Dining-end chair tucks toward the window return');
+  assert.ok((bounds[0].minZ - getLivingRoomFeatureLayout().wallStartZ) * 12 >= 3 && (bounds[0].minZ - getLivingRoomFeatureLayout().wallStartZ) * 12 < 5, 'Dining-end chair tucks toward the window return');
   assert.ok((getLivingRoomFeatureLayout().wallEndZ - bounds[1].maxZ) * 12 >= 3 && (getLivingRoomFeatureLayout().wallEndZ - bounds[1].maxZ) * 12 < 5, 'Stair-end chair tucks toward its corner without crossing the guard');
   assert.match(source, /model\.traverse\(\(part\) => \{\s+if \(part\.isMesh\) part\.userData\.tourObstacle = true;/);
   assert.match(source, /armchairTemplate\.scale\.setScalar\(\(32\.25 \/ 12\) \/ armchairSize\.x\)/);

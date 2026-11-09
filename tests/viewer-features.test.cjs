@@ -16,9 +16,9 @@ test('compact footer keeps windows first, area, size and controls without verbos
   const { getGroundFrontLayout } = require('../assets/js/floor-plan-ground.js');
   const upper = getUpstairsMeasuredGeometry(), front = getGroundFrontLayout();
   assert.ok(Math.abs((Math.max(upper.east,55.5)+.45)-55.95)<1e-8,'Retained ground east wall now controls outside masonry width');
-  assert.ok(Math.abs((front.porchEdgeZ - (-.325)) - 62.00416666666667) < 1e-8, 'Retained dining rear finish controls depth, not removed upper projection');
-  assert.match(footer, /Size: ~56 ft &times; 62 ft/);
-  assert.match(footer, /front porch slab edge z=61\.67917 ft, approximately 62 ft 0\.05 in/);
+  assert.ok(Math.abs((front.porchEdgeZ - 1.675) - 60.00416666666667) < 1e-8, 'Moved dining rear finish controls depth, not removed upper projection');
+  assert.match(footer, /Size: ~56 ft &times; 60 ft/);
+  assert.match(footer, /front porch slab edge z=61\.67917 ft, approximately 60 ft 0\.05 in/);
   assert.match(footer, /exactly 55 ft 11\.4 in \(shown rounded to 56 ft\)/);
   assert.match(footer, /not a surveyed or Birmingham zoning\/buildable envelope/i);
   assert.ok(footer.indexOf('id="window-count"') < footer.indexOf('id="livable-area"'));
@@ -88,7 +88,7 @@ test('room navigation gives every room its own floor-aware camera and keeps insp
   const containers = Object.fromEntries(['ground', 'upstairs'].map((floor) => [`${floor}-room-views`, { children: [], append(button) { this.children.push(button); } }]));
   const context = {
     getGroundFloorDefaultPlan, upstairs, stairOpening, stairFloorToFloor: 10, presets: {}, viewButtons: [],
-    cooktopCenterZ: 16.95, kitchenCenterZ: 16.95, prepCounterZ: 8.25,
+    cooktopCenterZ: 16.95, kitchenCenterZ: 16.95, prepCounterZ: 8.25, tableZ: 5.95,
     document: {
       getElementById(id) { return containers[id]; },
       createElement() { return { dataset: {}, attributes: {}, setAttribute(name, value) { this.attributes[name] = value; } }; },

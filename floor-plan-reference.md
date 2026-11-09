@@ -1,5 +1,66 @@
 # Ground-floor plan reference
 
+## Fireplace symmetry correction - November 8
+
+Current finished fireplace-wall span is z = 9.225-26.775 ft.
+Center stone, firebox/flames, mantel, TV, window pair and U/rug at its
+true midpoint z = 18 ft, a 6.3 in +Z move from the old axis.
+Stone-side baseboard runs are equal 68.58 in. Flanking 48 in openings
+center at z = 12.2 /23.8, leaving equal 11.7 in end returns.
+Furnished/shared/exterior openings and Version I downstairs agree.
+No wall boundary, floor area, unit size or saved layout changes.
+
+U bounds become x = 4.5-12.75, z = 12.5-23.5; rug center (8.625,18).
+Both wall-end gaps are 39.3 in to paint. Piano/stair position stays fixed:
+tucked bench-to-U gap 18.1 in, keyboard-front gap 25 in. Playing access,
+bench withdrawal, nearby window reach, fireplace heat/ventilation and
+new opening/header details require review; static symmetry is not approval.
+Earlier fixed-axis and clearance figures below are superseded.
+
+## Dining rear wall reduced projection - November 8
+
+The dining rear wall is moved 24 in down the plan (+Z), to centerline
+z = 1.9 from -0.1. It stays full 9 ft height. The rear window and sconces
+follow. Side walls, floor, exterior masonry and roof projection shorten;
+the side window group becomes 48 x 60 in at (26.875,4.45), retaining
+two casements and 36/96 in sill/head. Rear window stays 72 x 60 in.
+Dining floor allocation is 13.675 x 6.1 ft, open south to the existing hall.
+The 84 x 38 in table/six chairs translate 2 ft to center (20.0375,5.95),
+preserving rear seating room rather than front/back centering.
+Rear full-depth chair-to-paint gap: 22.2 in tucked / 4.2 in at 18 in pullout
+(3.45 in to baseboard), not a passing route. West patio door remains fixed,
+closed by default; sampled swing clears chairs. No cabinet or stair moves.
+
+Fixed parcel boundaries remain z = -32.325 / 97.675; moved rear masonry
+z = 1.675 gives a 34 ft model gap, not approved setback. Patio/garden
+extents remain fixed; rear wall light follows. House bounding depth becomes
+60 ft 0.05 in; ground gross area 1,924.33 sq ft, Version H combined 3,774.92.
+Version I combined study becomes 4,061.89 sq ft with its separate upstairs.
+Final framing/roof, narrow end piers, standard products, flashing,
+occupied access and setbacks remain unverified. Older dining dimensions
+and takeoffs below are historical.
+
+## Living window-return alignment - November 8
+
+Current living return centerline is z = 9.05, moved +1.05 ft (12.6 in).
+Its 0.175 ft room-side wall face lands at z = 9.225, equal to the kitchen
+countertop front, not the recessed cabinet-box face. Window bank and
+sconces follow; west wall/floor terminate at the new return, dining-west
+wall extends to it. Living floor allocation is 13.2 x 16.65 ft.
+Fireplace/window axes, active U sectional, kitchen, stairs and dining patio
+door remain fixed. U-to-return gap: 33 in to paint / 32.25 in to baseboard.
+Seasonal tree center becomes (2.175, 11.225), retaining 6 in to paint.
+These are static clearances, not occupied or window-operation approval.
+
+Exterior wall, terrace and canopy house edge follow the new corner;
+roof slope/yard edge, patio furniture, landing and stairs stay fixed.
+The west fireplace-window end return is now only 5.4 in to the finished
+interior corner; framing/header, structure, roof attachment and waterproofing
+require professional review. Ground gross estimate drops 13.86 sq ft to
+1,952.58; with retained Version H upstairs, combined estimate is 3,803.17.
+Version I downstairs SVG reflects the move (its upstairs study stays intact).
+Earlier wall, clearance and area values below are superseded.
+
 ## Latest SVG study - Version I, November 8 (not adopted upstairs)
 
 [Version I](assets/images/plans/upstairs-2000/version-i.svg) is a new file;
@@ -3160,7 +3221,7 @@ Select Upstairs, then Top view or Tour. Ground camera buttons return downstairs;
 | Ottomans | Hidden in J, which uses a square oak coffee table. I/H retain their central soft ottoman; E retains its older chair pair. No footrest counts as a family seat |
 | Tables | J has a 38 in square oak table and one textured end table/lamp. H retains two side tables; I/G/F omit them. No floor lamp or glass coffee table |
 | Seating clearance | Current J measurements are above. Earlier I/H/G/F dimensions remain comparison-only. Static gaps do not approve occupied access, product fit, cabinet/window operation or fireplace clearances |
-| Fireplace | Taupe-brown stacked-stone concept, 72 in wide x 108 in high, centered z = 17.475 on the 18.6 ft visible wall span; stone, TV, mantel, firebox and flames move together, 8.1 in toward stairs from former center. Finished face approximately x = 1.38 |
+| Fireplace | Taupe-brown stacked-stone concept, 72 in wide x 108 in high, centered z = 18 on current finished span z = 9.225-26.775; stone, TV, mantel, firebox/flames move together 6.3 in from prior axis. Equal 68.58 in stone-side margins; finished face x = 1.38 |
 | Fireplace details | Low-set dark firebox, 55.2 in wide x 15 in high, bottom 12 in and top 27 in above finished floor (previous bottom 21.3 in); ember bed and 17 static flame shapes lowered together. Provisional approximation of the owner's low-set photo, not photo-measured dimensions. Stone, mantel, TV and room layout unchanged; appliance floor/mantel/furniture clearances, TV heat exposure and venting remain unverified |
 | Mantel | White oak, 74.4 in wide x 3.6 in thick; underside 48 in high; approximately 6.9 in projection beyond stone |
 | Media/charging cabinets | None (October 27): both fireplace-side built-ins removed; equipment/charging storage location undecided. Flat 8 in baseboard runs continuously from each wall end (z = 8.175 / 26.775) to the stone side return (z = 14.415 / 20.535), 74.88 in per side. Halved and paired full-length runs are historical |
@@ -3246,10 +3307,10 @@ The detailed wall-window rows below are an October 27 snapshot, superseded where
 
 | Location / quantity | Opening W x H (in) | Sill / head (in) | Opening centers (x, z), ft | Concept grouping |
 |---|---|---|---|---|
-| Living fireplace side, 2 | 48 x 64.8 | 31.2 / 96 | (0, 11.675), (0, 23.275) | Two casement bays each; centers 5.8 ft either side of fireplace; equal 18 in opening-to-end returns |
+| Living fireplace side, 2 | 48 x 64.8 | 31.2 / 96 | (0, 12.2), (0, 23.8) | Two casement bays each; centers 5.8 ft either side of fireplace at z = 18; equal 11.7 in opening-to-end returns |
 | Living return wall, 1 opening / 3 units | 90 x 60 combined; 30 x 60 each | 36 / 96 | (4.1, 8), (6.6, 8), (9.1, 8) | Joined casement / single fixed picture / casement, one outer trim, no wall piers |
-| Dining rear, 1 | 72 x 60 | 36 / 96 | (19.85, -2.1) | Two bays |
-| Dining west, 1 | 72 x 60 | 36 / 96 | (13.2, 2.95) | Two bays |
+| Dining rear, 1 | 72 x 60 | 36 / 96 | (20.0375, 1.9) | Two bays; translated 24 in with rear wall |
+| Dining garden/east, 1 | 48 x 60 | 36 / 96 | (26.875, 4.45) | Two casements; narrowed to fit shortened wall |
 | Dining patio-side window bay, 1 | 33.84 x 93.12 frame envelope within 72 x 96 assembly | 1.44 / 94.56 | (26.5, 1.53) | Two stacked casements; not a fixed picture pane |
 | Kitchen sink bank, 1 opening / 3 units | Restored 18 / 54 / 18 x 54; 90 total | 42 / 96 | (29 / 32 / 35, 7) | Joined casement / picture / casement; no sink-wall uppers; standard-product reconciliation and assembly approval required |
 | Prep joined counter bank, 1 opening / 3 units | Standard 2050 / 5050 / 2050 frames total 106.5 x 59.5; provisional combined opening 107 x 60 | Frame 41.25 / 100.75; opening 41 / 101 | Bank (47.4, 7); unit x = 43.941667 / 47.4 / 50.858333 | One outer trim/sill, no wall piers; factory mull/header approval required |

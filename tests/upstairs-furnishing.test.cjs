@@ -151,7 +151,7 @@ test('Version H finished area excludes unfinished attic and keeps the ground pla
   const before=JSON.stringify(model.plan);
   const gross=p=>getLivableFloorArea({...p,floors:[...p.floors,model.baseline.arrival],stairs:model.baseline.stairs},{includeStairs:true});
   close(gross(model.plan),1850.5858333333333);
-  close(gross(model.plan)+getLivableFloorArea(getGroundFloorDefaultPlan(),{includeStairs:true}),3817.0285416666666);
+  close(gross(model.plan)+getLivableFloorArea(getGroundFloorDefaultPlan(),{includeStairs:true}),3774.9185416666664);
   assert.equal(JSON.stringify(model.plan),before);
   assert.ok(!model.areas.some(a=>a.x>42.6));
   const attic=model.group.children.find(o=>o.userData.areaCounted===false);

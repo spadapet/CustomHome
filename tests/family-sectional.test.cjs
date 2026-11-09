@@ -51,8 +51,8 @@ test('family L sectional has five full cushions without counting its corner and 
   };
   assert.ok(Math.abs((bounds.maxX - bounds.minX) * 12 - 104) < 0.001);
   assert.ok(Math.abs((bounds.maxZ - bounds.minZ) * 12 - 144) < 0.001);
-  assert.ok((bounds.minZ - feature.wallStartZ) * 12 >= 39.5);
-  assert.ok((feature.wallEndZ - bounds.maxZ) * 12 >= 39.5);
+  assert.ok((bounds.minZ - feature.wallStartZ) * 12 >= 26.9, 'Historical L option loses 12.6 inches at the moved wall');
+  assert.ok((feature.wallEndZ - bounds.maxZ) * 12 >= 33.2, 'Historical L option follows the recentered axis');
   // Built-ins removed: the L return end faces both the continuous baseboard and the stone face.
   const familyReturn = sectional.children.filter((part) => part.name === 'L sectional upholstered base').sort((a, b) => a.x - b.x)[0];
   assert.ok(familyReturn.z - familyReturn.d / 2 < feature.centerZ - 3.06 && familyReturn.z + familyReturn.d / 2 > feature.centerZ - 3.06, 'Return spans the stone return and the baseboard run');
@@ -146,8 +146,8 @@ test('default living layout is a true mirrored U sectional with continuous backs
   const measured = worldBounds(sofa);
   near(measured.minX, 4.5, 'Return ends');
   near(measured.maxX, 12.75, 'Main back');
-  near(measured.minZ, 11.975, 'North return back');
-  near(measured.maxZ, 22.975, 'South return back');
+  near(measured.minZ, 12.5, 'North return back');
+  near(measured.maxZ, 23.5, 'South return back');
   near((measured.maxZ - measured.minZ) * 12, 132, 'Main run length');
   near((measured.maxX - measured.minX) * 12, 99, 'Return length');
   near((13.25 - measured.maxX) * 12, 6, 'Stops 6 in before the 36 in main hall strip');
@@ -163,7 +163,8 @@ test('default living layout is a true mirrored U sectional with continuous backs
   }
   near((measured.minZ - (context.livingCenterZ - 3.06)) * 12, -29.28, 'North return back extends past the dining-side stone return', 1e-3);
   near((context.livingCenterZ + 3.06 - measured.maxZ) * 12, -29.28, 'South return back extends past the stair-side stone return', 1e-3);
-  near((measured.minZ - 8.175) * 12, 45.6, 'North window-wall clearance');
+  near((measured.minZ - getLivingRoomFeatureLayout().wallStartZ) * 12, 39.3, 'North window-wall clearance');
+  near((getLivingRoomFeatureLayout().wallEndZ - measured.maxZ) * 12, 39.3, 'Equal south wall clearance');
   near((measured.minZ + measured.maxZ) / 2, context.livingCenterZ, 'U centers on the fireplace axis');
   // Both returns: base, back, corner back and end arm exist on each side, mirrored about the U centerline.
   for (const name of ['U sectional return base', 'U sectional return back', 'U sectional continuous corner back', 'U sectional return end arm', 'U sectional return recessed plinth']) {
@@ -239,8 +240,8 @@ test('piano moves west and against trim with tucked bench, with no built-in besi
   near((bench.minX + bench.maxX) / 2, piano.position.x, 'Bench stays centered with the piano');
   const whole = worldBounds(piano);
   const sofa = worldBounds(scene.children.find((child) => child.name === 'Fireplace-facing U sectional - fit study').children[0]);
-  near((bench.minZ - sofa.maxZ) * 12, 24.4094, 'Tucked bench to U back', 1e-3);
-  near((cabinet.minZ - sofa.maxZ) * 12, 31.3197, 'Keyboard front to U back', 1e-3);
+  near((bench.minZ - sofa.maxZ) * 12, 18.1094, 'Tucked bench to recentered U back', 1e-3);
+  near((cabinet.minZ - sofa.maxZ) * 12, 25.0197, 'Keyboard front to recentered U back', 1e-3);
   // Built-ins removed: the piano's west end faces the continuous fireplace-wall baseboard.
   assert.doesNotMatch(piano.userData.location, /door conflicts|halved|cabinet end/);
   assert.match(piano.userData.location, /fireplace built-ins removed, west end 15\.68 in to continuous window-wall baseboard \(16\.43 in to paint\)/);
@@ -248,8 +249,8 @@ test('piano moves west and against trim with tucked bench, with no built-in besi
   near((whole.minX - 0.175) * 12, 16.43, 'Piano west end to painted window wall', 0.01);
   const feature = getLivingRoomFeatureLayout();
   assert.ok(whole.minZ > context.livingCenterZ + 3.06 && whole.minZ < feature.wallEndZ, 'Piano west end faces the open baseboard run, not the stone');
-  near((cabinet.minZ - (context.livingCenterZ + 3.06)) * 12, 22.41 + 38.19, 'Piano console to stair-side stone return', 0.01);
-  assert.ok(cabinet.minZ > getLivingRoomFeatureLayout().windowCenters[1] + 2, 'Piano console stays south of the stair-side window opening');
+  near((cabinet.minZ - (context.livingCenterZ + 3.06)) * 12, 54.3, 'Piano console to stair-side stone return', 0.01);
+  assert.ok(cabinet.minX > 1.3, 'Retained piano stays physically separated from the west window plane; occupied window access remains unverified');
   assert.ok(whole.maxX < wallMax && whole.minX > wallMin);
   assert.ok(whole.maxZ < stairs.z && bench.minZ > sofa.maxZ);
   const benchGroup = piano.children.find((part) => part.name.startsWith('Piano bench -'));
@@ -296,7 +297,7 @@ test('U layout placement tuple restores after switching living layouts', () => {
   assert.deepEqual([lounge.position.x, lounge.position.z, lounge.rotation.y], [...lounge.userData.centerOffset]);
   const sofa = worldBounds(lounge.children[0]);
   near(sofa.maxX, 12.75, 'Restored U back');
-  near(sofa.minZ, 11.975, 'Restored U north edge');
+  near(sofa.minZ, 12.5, 'Restored U north edge');
 });
 
 test('both fireplace built-ins are removed with no constituent meshes, group or userData', () => {

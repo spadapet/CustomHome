@@ -101,19 +101,20 @@ test('walnut study keeps three chairs on each long side and no end chairs', () =
   assert.equal(root.children.filter((part) => part.name === 'Dining table leg').length, 4);
 });
 
-test('centered table and stowed chairs stay inside the room with equal opposite tabletop margins', () => {
+test('table shifts with the rear wall, preserving rear seating space and lateral centering', () => {
   const { root, table, chairs } = buildDining();
-  assert.equal(root.userData.centeredInDiningRoom, true);
+  assert.equal(root.userData.centeredInDiningRoom, false);
+  assert.equal(root.userData.rearWallOffsetPreserved, true);
   assert.ok(Math.abs(root.position.x - (13.2 + 26.875) / 2) < 1e-9);
-  assert.ok(Math.abs(root.position.z - (-0.1 + 8) / 2) < 1e-9);
+  assert.ok(Math.abs(root.position.z - 5.95) < 1e-9);
   const west = root.position.x - table.w / 2 - 13.375;
   const east = 26.7 - root.position.x - table.w / 2;
   assert.ok(Math.abs(west - east) < 1e-9, 'Centered on finished side walls as well as nominal room boundaries');
-  assert.ok(Math.abs((root.position.z - table.d / 2 + 0.1) - (8 - root.position.z - table.d / 2)) < 1e-9);
+  assert.ok(Math.abs((root.position.z - table.d / 2 - 1.9) - (3.95 - table.d / 2 + 0.1)) < 1e-9);
   for (const chair of chairs) {
     const r = rectangle(root, chair);
     assert.ok(r.x - r.halfX > 13.5 && r.x + r.halfX < 26.575);
-    assert.ok(r.z - r.halfZ > 0.2 && r.z + r.halfZ < 8);
+    assert.ok(r.z - r.halfZ > 2.2 && r.z + r.halfZ < 8);
   }
 });
 
@@ -123,7 +124,7 @@ test('full side-chair envelopes clear each other and walls through 18-inch pull-
     const boxes = chairs.map((chair) => rectangle(root, chair, travel));
     for (const box of boxes) {
       assert.ok(box.x - box.halfX > 13.5 && box.x + box.halfX < 26.575, 'Clear side-wall trim');
-      assert.ok(box.z - box.halfZ > 0.2, 'Clear moved rear baseboard with full-depth chair allowance');
+      assert.ok(box.z - box.halfZ > 2.2, 'Clear moved rear baseboard with full-depth chair allowance');
     }
     for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
       const a = boxes[i], b = boxes[j];
@@ -154,24 +155,25 @@ test('patio door starts closed and leaves the centered table and tucked chairs u
   assert.equal(door.rotation.y, 0);
   assert.equal(door.userData.openAngleDegrees, 0);
   assert.equal(door.userData.outswing, false);
-  assert.ok(Math.abs(root.position.x - 20.0375) < 1e-9 && Math.abs(root.position.z - 3.95) < 1e-9);
+  assert.ok(Math.abs(root.position.x - 20.0375) < 1e-9 && Math.abs(root.position.z - 5.95) < 1e-9);
   for (const chair of chairs) for (const part of door.children) assert.equal(intersectsDoor(rectangle(root, chair), patio, door, part), false);
 });
 
-test('dining side wall aligns with kitchen base cabinets without moving the backyard wall', () => {
+test('dining rear wall moves exactly two feet with coordinated side walls, floor and smaller side casements', () => {
   const plan = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan();
   const room = plan.rooms.find((item) => item.name === 'Dining room');
-  assert.deepEqual(room, { name: 'Dining room', x: 13.2, z: -0.1, w: 13.675, d: 8.1 });
+  assert.deepEqual(room, { name: 'Dining room', x: 13.2, z: 1.9, w: 13.675, d: 6.1 });
   const rear = plan.walls.find(([name]) => name === 'Dining north');
-  assert.deepEqual(rear.slice(1), [13.2, -0.1, 26.875, -0.1, [[3.8375, 9.8375, 3, 8]]]);
+  assert.deepEqual(rear.slice(1), [13.2, 1.9, 26.875, 1.9, [[3.8375, 9.8375, 3, 8]]]);
   const east = plan.walls.find(([name]) => name === 'Dining east');
   assert.equal(east[1], 26.875);
   assert.equal(east[3], east[1]);
   const cabinetSideX = 32 - 3.4 - 3.8 / 2;
   assert.ok(Math.abs(east[1] - 0.35 / 2 - cabinetSideX) < 1e-9, 'Dining wall face aligns with the sink-run base-cabinet end, not its centerline');
-  assert.ok(Math.abs(east[2] + east[5][0][0] - 0.5) < 1e-9, 'Patio opening retains its z position');
+  assert.ok(Math.abs(east[2] + east[5][0][0] - 2.45) < 1e-9, 'Narrower side window fits the shortened wall');
+  assert.ok(Math.abs(east[5][0][1] - east[5][0][0] - 4) < 1e-9);
   const floor = plan.floors.find((item) => item.room === 'Dining room');
-  assert.ok(Math.abs(floor.w * floor.d - 110.7675) < 1e-8, 'Adds only the 4.5-inch side strip, not a backyard extension');
+  assert.ok(Math.abs(floor.w * floor.d - 83.4175) < 1e-8, 'Two-foot strip is removed from dining floor');
   for (const kitchenFloor of plan.floors.filter((item) => item.room === 'Kitchen')) {
     const overlapX = Math.min(floor.x + floor.w, kitchenFloor.x + kitchenFloor.w) - Math.max(floor.x, kitchenFloor.x);
     const overlapZ = Math.min(floor.z + floor.d, kitchenFloor.z + kitchenFloor.d) - Math.max(floor.z, kitchenFloor.z);
@@ -182,10 +184,10 @@ test('dining side wall aligns with kitchen base cabinets without moving the back
   const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const diningRoof = require('../assets/js/floor-plan-roof.js').getConnectedRoofDefinitions().find((roof) => roof.id === 'Dining rear projection');
   assert.equal(diningRoof.bounds[0], 13.2, 'Dining west roof stops at the shared canopy wall');
-  assert.equal(diningRoof.bounds[2], -0.75);
+  assert.equal(diningRoof.bounds[2], 1.25);
   assert.doesNotMatch(exterior, /gable\('Dining rear projection roof'/, 'Hipped dining roof has no obsolete triangle piercing its surface');
   const lot = exterior.match(/const lot = (\{[^\n]+\});/);
-  const data = vm.runInNewContext(`(${lot[1]})`, { wallThickness: 0.45 });
+  const data = vm.runInNewContext(`(${lot[1]})`, { wallThickness: 0.45, getLivingRoomFeatureLayout: require('../assets/js/floor-plan-ground.js').getLivingRoomFeatureLayout });
   assert.ok(Math.abs(data.rearWallZ - data.rearSetbackFeet - (-32.325)) < 1e-9, 'Property boundary is not moved to fake the old setback');
-  assert.equal(data.rearSetbackFeet, 32);
+  assert.equal(data.rearSetbackFeet, 34);
 });

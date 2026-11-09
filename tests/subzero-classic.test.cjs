@@ -158,7 +158,7 @@ test('interior floor transfer preserves total area and all passage, stair and ga
   const kidsArea = plan.floors.filter(part => part.room === 'Kids room').reduce((sum, part) => sum + part.w * part.d, 0);
   close(kidsArea, 144.58916666666667);
   close(147.29333333333332 - kidsArea, 2.7041666666666666);
-  close(ground.getLivableFloorArea(plan, { includeStairs: true }), 1966.4427083333333);
+  close(ground.getLivableFloorArea(plan, { includeStairs: true }), 1924.3327083333334);
   assert.equal(ground.getKitchenPassageLayout().wallX, 37.5);
   assert.equal(ground.getKitchenPassageLayout().clearWidth, 2.5);
   assert.equal(plan.walls.find(([name]) => name === 'Garage west return')[1], 31.2);

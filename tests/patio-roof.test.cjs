@@ -76,12 +76,12 @@ test('sloping cover relocates behind living room and leaves both kitchen frontag
   const roof = meshes.find((mesh) => mesh.name === 'Graphite-gray shingle covered patio roof');
   assert.equal(roof.userData.pitch, 3 / 16);
   assert.equal(roof.userData.limits.rear, -0.325);
-  assert.equal(roof.userData.limits.front, 8.225);
+  assert.ok(Math.abs(roof.userData.limits.front - 9.275) < 1e-9);
   assert.equal(roof.userData.limits.left, 0);
   assert.equal(roof.userData.limits.right, 13.2);
   assert.equal(roof.geometry.parameters.width, 13.2);
   assert.equal(roof.position.x, 6.6);
-  assert.equal(roof.position.y, 9.5);
+  assert.ok(Math.abs(roof.position.y - (9.5 + 1.05 * roof.userData.pitch / 2)) < 1e-9, 'Extended roof preserves the existing plane and yard-edge height');
   assert.ok(underside(0.625) > 8.35, 'Roof clears the dining west-window head trim including its projection beyond the opening');
   assert.equal(roof.userData.kitchenAndPrepFrontageOpen, true);
   assert.equal(roof.userData.coversDiningLanding, false);
@@ -90,7 +90,7 @@ test('sloping cover relocates behind living room and leaves both kitchen frontag
   const headwall = walls.find((wall) => wall.name === 'Patio roof raised headwall');
   assert.equal(headwall.x1, 13.2);
   assert.equal(headwall.x2, 0);
-  assert.equal(headwall.z1, 8);
+  assert.ok(Math.abs(headwall.z1 - 9.05) < 1e-9);
   assert.equal(headwall.bottom, 9);
   assert.ok(headwall.top >= underside(8 + 0.225), 'Wall reaches the underside across its full thickness');
   assert.ok(!walls.some((wall) => wall.name === 'Patio roof upper-wall return'), 'No obsolete prep-side upper return remains');
@@ -118,7 +118,7 @@ test('canopy finishes share exact slope, closed endpoints and nine-inch vertical
   const soffit = meshes.find((m) => m.name?.startsWith('Post-free canopy warm-white'));
   const vertices = worldVertices(soffit);
   close(Math.min(...vertices.map((p) => p.z)), -0.325);
-  close(Math.max(...vertices.map((p) => p.z)), 8.225);
+  close(Math.max(...vertices.map((p) => p.z)), 9.275);
   for (const p of vertices) {
     const gap = underside(p.z) - p.y;
     assert.ok(Math.abs(gap - 0.75) < 1e-8 || Math.abs(gap - 0.69) < 1e-8);
@@ -214,7 +214,7 @@ test('post-free canopy has finished soffit and fascia while patio furniture stay
   assert.equal(terrace.userData.topFeet, -1.625);
   assert.ok(Math.abs(terrace.userData.x + 4.855) < 1e-9);
   assert.ok(Math.abs(terrace.userData.widthFeet - 17.805) < 1e-9);
-  assert.ok(Math.abs(terrace.userData.depthFeet - 12.1) < 1e-9);
+  assert.ok(Math.abs(terrace.userData.depthFeet - 13.15) < 1e-9);
   assert.equal(terrace.userData.z, -4.325);
   const roof = meshes.find((mesh) => mesh.name === 'Graphite-gray shingle covered patio roof');
   assert.equal(roof.userData.limits.rear - terrace.userData.z, 4, 'Four-foot yard extension is beyond the unchanged roof');

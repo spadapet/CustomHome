@@ -791,9 +791,9 @@ test('fireplace built-ins are removed entirely and baseboard runs continuously f
   assert.ok(Math.abs(Math.max(a.y, b.y) - (feature.centerZ + 3.06)) < 1e-9, 'Stair-side baseboard runs to the stone return');
   assert.match(source, /for \(const z of \[livingCenterZ - 3\.03, livingCenterZ \+ 3\.03\]\)/, 'Stone return positions match the baseboard stop');
   // Continuous run per side from the wall end to the stone: 74.88 in.
-  assert.ok(Math.abs((feature.centerZ - 3.06 - feature.wallStartZ) * 12 - 74.88) < 0.01, 'Dining-side continuous baseboard length');
-  assert.ok(Math.abs((feature.wallEndZ - feature.centerZ - 3.06) * 12 - 74.88) < 0.01, 'Stair-side continuous baseboard length');
-  const livingWall = source.match(/\[0, livingFeatureWall\.wallEndZ, 0, 8, true, \[\.\.\.livingWindowCenters\]\.reverse\(\)\.map\(\(z\) => \[[^\]]*livingWindowSill, livingWindowHead\]\)\]/);
+  assert.ok(Math.abs((feature.centerZ - 3.06 - feature.wallStartZ) * 12 - 68.58) < 0.01, 'Dining-side continuous baseboard matches the opposite side');
+  assert.ok(Math.abs((feature.wallEndZ - feature.centerZ - 3.06) * 12 - 68.58) < 0.01, 'Stair-side continuous baseboard matches the opposite side');
+  const livingWall = source.match(/\[0, livingFeatureWall\.wallEndZ, 0, livingFeatureWall\.returnWallZ, true, \[\.\.\.livingWindowCenters\]\.reverse\(\)\.map\(\(z\) => \[[^\]]*livingWindowSill, livingWindowHead\]\)\]/);
   assert.ok(livingWall, 'Living window wall keeps only sill-height openings, so base trim is not split by them');
 });
 
@@ -910,15 +910,15 @@ test('earlier corner-chair comparison preserves centered fireplace and sofa', ()
   const layout = context.layouts.find((option) => option.id === 'centered');
   assert.equal(layout.id, 'centered');
   assert.ok(!layout.recommended);
-  assert.equal(feature.wallStartZ, 8.175);
+  assert.ok(Math.abs(feature.wallStartZ - 9.225) < 1e-9);
   assert.equal(feature.wallEndZ, 26.775, 'Approved living composition remains fixed independently of stair gap closure');
   assert.equal(baseline.walls.find(([name]) => name === 'Living west')[4], feature.wallEndZ);
-  assert.ok(Math.abs(midpoint - (feature.wallStartZ + feature.wallEndZ) / 2) < 1e-9);
-  assert.ok(Math.abs(midpoint - 17.475) < 1e-9);
-  assert.ok(Math.abs(feature.windowCenters[0] - 2 - feature.wallStartZ - 1.5) < 1e-9);
-  assert.ok(Math.abs(feature.wallEndZ - feature.windowCenters[1] - 2 - 1.5) < 1e-9);
+  assert.ok(Math.abs(midpoint - feature.centerZ) < 1e-9, 'Fireplace composition stays on its approved axis');
+  assert.ok(Math.abs(midpoint - 18) < 1e-9);
+  assert.ok(Math.abs(feature.windowCenters[0] - 2 - feature.wallStartZ - 0.975) < 1e-9);
+  assert.ok(Math.abs(feature.wallEndZ - feature.windowCenters[1] - 2 - 0.975) < 1e-9);
   assert.ok(Math.abs(layout.sofa[1] - midpoint) < 1e-9);
-  assert.equal(layout.chairs[0][1], 10.9);
+  assert.ok(Math.abs(layout.chairs[0][1] - 11.95) < 1e-9);
   assert.ok(Math.abs(layout.chairs[1][1] - (feature.wallEndZ - 2.175)) < 1e-9);
   assert.equal(layout.chairs[1][0], 2.9);
   assert.equal(layout.chairs[0][0], 3.6);

@@ -49,8 +49,8 @@ test('living return restores three joined windows with the patio door on the per
   close(openings[0][1], 10.35);
   const diningOpenings = getGroundFloorDefaultPlan().walls.find(([name]) => name === 'Dining west')[5];
   assert.equal(diningOpenings.length, 1);
-  close(diningOpenings[0][0], 2.55);
-  close(diningOpenings[0][1], 5.55);
+  close(diningOpenings[0][0], 0.55);
+  close(diningOpenings[0][1], 3.55);
   assert.deepEqual(diningOpenings[0].slice(2), [0, 8]);
   assert.deepEqual(getLivingRoomFeatureLayout().patioDoor, { x: 13.2, z: 3.95, width: 3, height: 8 });
   assert.deepEqual(openings[0].slice(2), [3, 8]);
@@ -73,7 +73,7 @@ test('living return restores three joined windows with the patio door on the per
   });
   const exteriorDoor = calls[1][7][0];
   assert.equal(exteriorDoor.door, true);
-  close(exteriorDoor.center, 4.05);
+  close(exteriorDoor.center, 2.05);
   assert.equal(exteriorDoor.width, 3);
   assert.equal(exteriorDoor.height, 8);
   assert.equal(exteriorDoor.sill, 0);

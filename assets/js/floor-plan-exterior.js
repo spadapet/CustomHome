@@ -76,7 +76,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const wallThickness = 0.45;
   const fenceBoundaryInset = 0.5, fenceRailOffset = 0.1, fenceRailDepth = 0.14;
   const eastWallFaceX = 55.5 + wallThickness / 2;
-  const lot = { widthFeet: 75, depthFeet: 130, rearSetbackFeet: 32, eastFenceClearanceFeet: 6, rearWallZ: -0.1 - wallThickness / 2 };
+  const lot = { widthFeet: 75, depthFeet: 130, rearSetbackFeet: 34, eastFenceClearanceFeet: 6, rearWallZ: getLivingRoomFeatureLayout().diningRearZ - wallThickness / 2 };
   // Owner clearance: finished garage wall to nearest inward fence rail face,
   // not the fence centerline or a surveyed/legal property-line setback.
   // Coordinates stay house-local; offset the parcel to reposition the house within it.
@@ -503,18 +503,18 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   }
   const livingFeatureWall = getLivingRoomFeatureLayout();
   const guestEntry = getGuestEntryLayout();
-  wall('west ground floor', 0, 8, 0, frontWallZ, -0.4, 9, [
-    ...livingFeatureWall.windowCenters.map((z) => win(z - 8, livingFeatureWall.fireplaceWindows.width, livingFeatureWall.fireplaceWindows.sill, livingFeatureWall.fireplaceWindows.height)),
-    ...guestEntry.windows.map(({ z, width, height, sill, openingWidth, openingHeight, openingSill, privacyLowerHalf }) => ({ center: z - 8, width: openingWidth, height: openingHeight, sill: openingSill, frameWidth: width, frameHeight: height, frameSill: sill, privacyLowerHalf })),
-    win(westFrontWindowCenterZ - 8, westFrontWindowWidth)
+  wall('west ground floor', 0, livingFeatureWall.returnWallZ, 0, frontWallZ, -0.4, 9, [
+    ...livingFeatureWall.windowCenters.map((z) => win(z - livingFeatureWall.returnWallZ, livingFeatureWall.fireplaceWindows.width, livingFeatureWall.fireplaceWindows.sill, livingFeatureWall.fireplaceWindows.height)),
+    ...guestEntry.windows.map(({ z, width, height, sill, openingWidth, openingHeight, openingSill, privacyLowerHalf }) => ({ center: z - livingFeatureWall.returnWallZ, width: openingWidth, height: openingHeight, sill: openingSill, frameWidth: width, frameHeight: height, frameSill: sill, privacyLowerHalf })),
+    win(westFrontWindowCenterZ - livingFeatureWall.returnWallZ, westFrontWindowWidth)
   ]);
-  wall('living rear return', 13.2, 8, 0, 8, -0.4, 9, [livingFeatureWall.sideWindowBank].map((bank) => ({
+  wall('living rear return', 13.2, livingFeatureWall.returnWallZ, 0, livingFeatureWall.returnWallZ, -0.4, 9, [livingFeatureWall.sideWindowBank].map((bank) => ({
     ...win(13.2 - bank.x, bank.openingWidth, bank.openingSill, bank.openingHeight),
     bankX: bank.x, frameWidth: bank.width, frameHeight: bank.height, frameSill: bank.sill, units: bank.units, trimLabel: bank.trimLabel
   })));
-  wall('dining west', 13.2, -0.1, 13.2, 8, -0.4, 9, [{ center: livingFeatureWall.patioDoor.z + 0.1, width: 3, sill: 0, height: 8, door: true }]);
-  wall('dining rear', 26.875, -0.1, 13.2, -0.1, -0.4, 9, [win(6.8375, 6)]);
-  wall('dining patio', 26.875, 7, 26.875, -0.1, -0.4, 9, [win(3.5, 6, 3, 5)]);
+  wall('dining west', 13.2, livingFeatureWall.diningRearZ, 13.2, livingFeatureWall.returnWallZ, -0.4, 9, [{ center: livingFeatureWall.patioDoor.z - livingFeatureWall.diningRearZ, width: 3, sill: 0, height: 8, door: true }]);
+  wall('dining rear', 26.875, livingFeatureWall.diningRearZ, 13.2, livingFeatureWall.diningRearZ, -0.4, 9, [win(6.8375, 6)]);
+  wall('dining patio', 26.875, 7, 26.875, livingFeatureWall.diningRearZ, -0.4, 9, [win(7 - livingFeatureWall.diningSideWindow.z, livingFeatureWall.diningSideWindow.width, 3, 5)]);
   wall('kitchen and prep rear', 55.5, 7, 26.875, 7, -0.4, 9, [getPrepWindowBankLayout(), getKitchenWindowBankLayout()].map((bank) => ({ ...win(55.5 - bank.x, bank.openingWidth, bank.openingSill, bank.openingHeight), bankX: bank.x, frameWidth: bank.width, frameHeight: bank.height, frameSill: bank.sill, units: bank.units, trimLabel: bank.trimLabel })));
   const garageSideWall = wall('east ground floor', 55.5, 49, 55.5, 7, garageFloorY - 0.3, 9, [
     { center: 49 - garageSideDoorCenterZ, width: garageSideDoorWidth, sill: garageFloorY, height: 8, door: true },
@@ -932,13 +932,13 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   }
   const livingPatio = new THREE.Group();
   livingPatio.name = 'Living-room patio with covered seating and open yard extension';
-  const livingPatioBounds = { left: 0, right: 13.2, rear: patioBounds.rear, front: 8 };
+  const livingPatioBounds = { left: 0, right: 13.2, rear: patioBounds.rear, front: livingFeatureWall.returnWallZ };
   const livingTerraceLeft = westPaverEdgeX + pathWidth;
   const livingTerraceFlatLeft = livingTerraceLeft + 3;
   const livingTerraceRight = livingPatioBounds.right - 0.25;
   const livingTerraceRear = livingPatioBounds.rear - 4;
   const livingTerraceFront = livingPatioBounds.front - wallThickness / 2;
-  const livingPatioCenterZ = (livingPatioBounds.rear + livingTerraceFront) / 2;
+  const livingPatioCenterZ = (livingPatioBounds.rear + 8 - wallThickness / 2) / 2;
   const diningPatioStairWidth = 4;
   const diningLandingRear = livingFeatureWall.patioDoor.z - 2;
   const diningLandingLeft = livingTerraceRight - diningPatioStairWidth;
@@ -975,7 +975,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const patioRoofCenterZ = (livingPatioBounds.rear + patioRoofFront) / 2;
   // Lift only the canopy, not the openings: the deeper soffit must clear the
   // eight-foot dining door and its head trim at the low end of the opening.
-  const patioRoofY = 9.5;
+  const patioRoofY = 9.5 + (livingFeatureWall.returnWallZ - 8) * patioRoofPitch / 2;
   const patioRoofLength = patioRoofFront - livingPatioBounds.rear;
   const patioRoof = texturedBox(livingPatio, patioRoofCenterX, patioRoofY, patioRoofCenterZ, patioRoofWidth, patioRoofThickness, patioRoofLength, true);
   patioRoof.name = 'Graphite-gray shingle covered patio roof';
@@ -989,7 +989,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   function patioRoofUndersideAt(z) {
     return patioRoofY + (z - patioRoofCenterZ) * patioRoofPitch - patioRoofThickness / (2 * Math.cos(patioRoofAngle));
   }
-  wall('Patio roof raised headwall', patioRoofRight, 8, patioRoofLeft, 8, 9, patioRoofUndersideAt(patioRoofFront) + 0.02);
+  wall('Patio roof raised headwall', patioRoofRight, livingFeatureWall.returnWallZ, patioRoofLeft, livingFeatureWall.returnWallZ, 9, patioRoofUndersideAt(patioRoofFront) + 0.02);
   const patioSideClosureStart = patioRoofCenterZ + (9 - patioRoofY + patioRoofThickness / (2 * Math.cos(patioRoofAngle))) / patioRoofPitch;
   for (const { x, rear, name } of [
     { x: patioRoofRight, rear: patioSideClosureStart, name: 'Patio roof east tapered closure' }
@@ -1047,13 +1047,13 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   canopySection('Cantilever canopy outer fascia', patioRoofLeft, patioRoofRight,
     livingPatioBounds.rear, livingPatioBounds.rear + 0.1, canopySoffitBottomAt, patioRoofUndersideAt);
   canopySection('Canopy closed house abutment', patioRoofLeft, patioRoofRight,
-    7.98, 8.08, canopySoffitBottomAt, patioRoofUndersideAt);
+    livingFeatureWall.returnWallZ - 0.02, livingFeatureWall.returnWallZ + 0.08, canopySoffitBottomAt, patioRoofUndersideAt);
   canopySection('Canopy dining-wall stepped abutment flashing', patioRoofRight - 0.02, patioRoofRight + 0.04,
     livingPatioBounds.rear, 7.5,
     (z) => Math.min(patioRoofUndersideAt(z) + 0.16, 9.2),
     (z) => Math.max(patioRoofUndersideAt(z) + 0.2, 9.2) + 0.15, dark);
   canopySection('Canopy house counterflashing - waterproofing concept', patioRoofLeft, patioRoofRight,
-    7.94, 8.02, (z) => patioRoofUndersideAt(z) + 0.16,
+    livingFeatureWall.returnWallZ - 0.06, livingFeatureWall.returnWallZ + 0.02, (z) => patioRoofUndersideAt(z) + 0.16,
     (z) => patioRoofUndersideAt(z) + 0.55, dark);
   // Open trough, falling east to a wall-mounted leader, not a new patio post.
   const gutterRear = livingPatioBounds.rear - 0.3;
@@ -1580,12 +1580,12 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     new THREE.Vector3(-7, -1, lot.rearWallZ), new THREE.Vector3(-3, -1, lot.rearWallZ),
     new THREE.Vector3(-5, -1, lot.rearWallZ), new THREE.Vector3(13.2, -1, lot.rearWallZ)
   ]), boundaryMaterial);
-  dimension.name = '32 ft dining rear-wall setback dimension';
+  dimension.name = '34 ft dining rear-wall setback dimension';
   annotations.add(dimension);
   label('REAR / BACK', lot.centerX, lot.rear - 5, 22);
   label('75 ft lot width', lot.centerX, lot.front + 5);
   label('130 ft lot depth', lot.right + 9, 66, 30);
-  label('32 ft dining rear wall setback', lot.centerX, lot.rear + 16, 36);
+  label('34 ft dining rear wall setback', lot.centerX, lot.rear + 17, 36);
   label('FRONT / STREET', lot.centerX, lot.front - 5);
   const lighting = new THREE.Group();
   lighting.name = 'Outdoor lighting additions';
@@ -1673,7 +1673,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   for (const z of [18, 31]) wallDownlight('East side-path wall downlight', 55.975, 8.6, z, Math.PI / 2, 58.25, z, 26);
   wallDownlight('East side-entry downlight', 55.975, 8.6, garageSideDoorCenterZ, Math.PI / 2, 58.25, eastFenceReturnZ, 26);
   wallDownlight('Dining patio steps wall downlight', 12.725, 8.2, 1, -Math.PI / 2, 10.95, 0.85, 26, -1.1);
-  wallDownlight('Rear dining path wall downlight', 20.0375, 8.6, -0.575, Math.PI, 20.0375, -3, 22, patioGrade);
+  wallDownlight('Rear dining path wall downlight', 20.0375, 8.6, livingFeatureWall.diningRearZ - 0.475, Math.PI, 20.0375, -3, 22, patioGrade);
   wallDownlight('Rear kitchen garden wall downlight', 38.75, 8.6, 6.525, Math.PI, 32, -1.75, 24, patioGrade);
   wallDownlight('Rear prep garden wall downlight', 53.5, 8.6, 6.525, Math.PI, 47.4, -1.75, 24, patioGrade);
   // Mount in the actual closed upper-roof underside, not at a guessed eave Y.
