@@ -630,7 +630,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     return leaf;
   }
 
-  function shakerFront(parent, x, y, z, width, height, rotation = 0) {
+  function shakerFront(parent, x, y, z, width, height, rotation = 0, depth = 0.08) {
     const front = new THREE.Group();
     front.name = 'Full-overlay Shaker cabinet front';
     front.userData = { construction: 'Frameless', style: 'Shaker', finish: 'Stained white oak', width, height, cabinetFront: true };
@@ -638,10 +638,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     front.rotation.y = rotation;
     parent.add(front);
     const rail = Math.min(2.25 / 12, width / 4, height / 4);
-    box(front, 0, 0, -0.015, width - 2 * rail, height - 2 * rail, 0.05, cabinetPanelFinish).name = 'Shaker recessed center panel';
+    const panelDepth = depth * 0.625;
+    box(front, 0, 0, -(depth - panelDepth) / 2, width - 2 * rail, height - 2 * rail, panelDepth, cabinetPanelFinish).name = 'Shaker recessed center panel';
     for (const side of [-1, 1]) {
-      box(front, side * (width - rail) / 2, 0, 0, rail, height, 0.08, cabinetFinish).name = 'Shaker vertical stile';
-      box(front, 0, side * (height - rail) / 2, 0, width - 2 * rail, rail, 0.08, cabinetRailFinish).name = 'Shaker horizontal rail';
+      box(front, side * (width - rail) / 2, 0, 0, rail, height, depth, cabinetFinish).name = 'Shaker vertical stile';
+      box(front, 0, side * (height - rail) / 2, 0, width - 2 * rail, rail, depth, cabinetRailFinish).name = 'Shaker horizontal rail';
     }
     return front;
   }
@@ -2239,6 +2240,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const cooktopBaseWidths = [36, 36, 36].map((inches) => inches / 12);
   const cooktopBaseTotalWidth = cooktopBaseWidths.reduce((sum, width) => sum + width, 0);
   const cooktopCasingOverlapInches = Math.max(0, cooktopBaseTotalWidth - cooktopRunWidth) * 6;
+  const cooktopCasingClearanceInches = Math.max(0, cooktopRunWidth - cooktopBaseTotalWidth) * 6;
   const cooktopFrontReveal = 0.125 / 12;
   const cooktopBaseHeight = 34.5 / 12;
   const cooktopToeHeight = 4 / 12;
@@ -2248,14 +2250,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const cooktopCabinetry = new THREE.Group();
   cooktopCabinetry.name = 'Extended cooktop base cabinetry';
   cooktopCabinetry.position.x = cookingWallShiftX;
-  cooktopCabinetry.userData = { widthInches: cooktopBaseTotalWidth * 12, availableRunWidthInches: cooktopRunWidth * 12, nominalBaseWidthsInches: [36, 36, 36], casingOverlapInchesPerEnd: cooktopCasingOverlapInches, depthInches: 24, heightInches: 34.5, frontRevealInches: 0.125, manufacturerSelected: false, endFitVerified: false, provisional: true };
+  cooktopCabinetry.userData = { widthInches: cooktopBaseTotalWidth * 12, availableRunWidthInches: cooktopRunWidth * 12, nominalBaseWidthsInches: [36, 36, 36], casingOverlapInchesPerEnd: cooktopCasingOverlapInches, casingClearanceInchesPerEnd: cooktopCasingClearanceInches, depthInches: 24, heightInches: 34.5, frontRevealInches: 0.125, manufacturerSelected: false, endFitVerified: cooktopCasingClearanceInches > 0, provisional: true };
   kitchen.add(cooktopCabinetry);
   let cooktopModuleZ = cooktopCenterZ - cooktopBaseTotalWidth / 2;
   for (const [index, width] of cooktopBaseWidths.entries()) {
     const centerZ = cooktopModuleZ + width / 2;
     const body = box(cooktopCabinetry, cooktopBackX - 1, (cooktopToeHeight + cooktopBaseHeight) / 2, centerZ, 2, cooktopBaseHeight - cooktopToeHeight, width, cabinetFinish);
     body.name = 'Standard cooking base cabinet carcass';
-    body.userData = { cabinetBody: 'x-', nominalWidthInches: width * 12, nominalHeightInches: 34.5, nominalDepthInches: 24, cooktopBase: index === 2 };
+    body.userData = { cabinetBody: 'x-', nominalWidthInches: width * 12, nominalHeightInches: 34.5, nominalDepthInches: 24, cooktopBase: index === 1 };
     box(cooktopCabinetry, cooktopBackX - 1.75 / 2, cooktopToeHeight / 2, centerZ, 1.75, cooktopToeHeight, width, cabinetFinish).name = 'Cooking base recessed toe-kick';
     drawerFront(cooktopBaseFrontX - 0.04, centerZ, width - cooktopFrontReveal, -Math.PI / 2, cooktopCabinetry, cooktopBaseHeight, cooktopDrawerRows);
     cooktopModuleZ += width;
@@ -2331,7 +2333,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       const mainDoors = bottom === cooktopUpperBottom;
       for (const door of [-1, 1]) {
         const front = shakerFront(upper, door * cooktopUpperWidth / 4, centerY, cooktopUpperDepth / 2 + 0.04, cooktopUpperWidth / 2 - cooktopFrontReveal, top - bottom - cooktopFrontReveal);
-        cabinetPull(front, -door * (cooktopUpperWidth / 4 - 0.2), bottom + 0.45 - centerY, 0.09, mainDoors ? 0.55 : 0.32, mainDoors);
+        cabinetPull(front, -door * (cooktopUpperWidth / 4 - 0.2), bottom + 0.45 - centerY, 0.09, mainDoors ? 0.55 : 0.32, true);
       }
     }
     box(upper, 0, (cooktopUpperBottom + 4.25 + cooktopCorniceBottom) / 2, 0, cooktopUpperWidth, cooktopCorniceBottom - cooktopUpperBottom - 4.25, cooktopUpperDepth, cabinetFinish).name = 'Cooking upper ceiling scribe';
@@ -2384,7 +2386,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   cylinder(seasoningTray, 0.36, 0.23, 0, 0.125, 0.04, oak);
   const bottomRun = new THREE.Group();
   bottomRun.name = 'Bottom kitchen cabinet run';
-  const applianceInboardShift = 0.75 / 12;
+  const freezerInboardShift = 0.75 / 12;
+  const fridgeInboardShift = 0;
   const refrigerationWallSetback = 1.5 / 12;
   bottomRun.position.z = refrigerationWallSetback;
   bottomRun.userData.wallSetbackInches = refrigerationWallSetback * 12;
@@ -2400,6 +2403,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const wallFillerWidth = 2.85 / 12;
   const fridgeFillerWidth = kitchenRefrigeration.fridgeFillerWidth;
   const fridgeLeft = bottomRunLeft + fridgeFillerWidth + columnPanel;
+  const fridgeCabinetOuterFaceX = fridgeLeft - columnPanel;
   const freezerRight = bottomRunRight - wallFillerWidth - columnPanel;
   const pantryLeft = fridgeLeft + columnWidth + columnPanel;
   const pantryRight = freezerRight - columnWidth - columnPanel;
@@ -2446,8 +2450,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(steamOven, 0, 0.76, 0.06, 2.2, 0.28, 0.02, black).name = 'Steam-oven control panel';
   box(steamOven, 0, 0.47, 0.14, 2.1, 0.07, 0.1, steel).name = 'Steam-oven handle';
   box(bottomRun, bottomRunRight - wallFillerWidth / 2, upperStorageTop / 2, 26, wallFillerWidth, upperStorageTop, 1.4, cabinetFinish).name = 'Recessed freezer wall-clearance filler';
-  box(bottomRun, bottomRunLeft + fridgeFillerWidth / 2, upperStorageTop / 2, 26, fridgeFillerWidth, upperStorageTop, 1.4, cabinetFinish).name = 'Recessed fridge wall-clearance filler';
-  const columnFrameDepth = 23.875 / 12;
+  const columnFrameDepth = 24 / 12;
   for (const x of [fridgeLeft - columnPanel / 2, fridgeLeft + columnWidth + columnPanel / 2, pantryRight + columnPanel / 2, freezerRight + columnPanel / 2]) {
     box(bottomRun, x, upperStorageTop / 2, 26.725 - columnFrameDepth / 2, columnPanel, upperStorageTop, columnFrameDepth, cabinetFinish).name = 'Full-height refrigeration side panel';
   }
@@ -2474,41 +2477,48 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
   }
   const refrigerationCorniceTop = upperStorageTop + 0.15;
-  box(bottomRun, bottomRunCenterX, refrigerationCorniceTop - 0.075, 25.65, bottomRunWidth, 0.15, 2.15, cabinetRailFinish).name = 'Continuous refrigeration cabinet cornice';
-  for (const [name, model, x, handleX] of [
-    ['Column freezer', 'CL3650F/S/T/L', freezerRight - columnWidth / 2 - applianceInboardShift, 1.3],
-    ['Column fridge', 'CL3650R/S/T/R', fridgeLeft + columnWidth / 2 + applianceInboardShift, -1.3]
+  const refrigerationCorniceWidth = bottomRunRight - fridgeCabinetOuterFaceX;
+  box(bottomRun, fridgeCabinetOuterFaceX + refrigerationCorniceWidth / 2, refrigerationCorniceTop - 0.075, 25.65, refrigerationCorniceWidth, 0.15, 2.15, cabinetRailFinish).name = 'Continuous refrigeration cabinet cornice';
+  for (const [name, model, x, inboardShift] of [
+    ['Column freezer', 'DEC3650FI/L', freezerRight - columnWidth / 2 - freezerInboardShift, freezerInboardShift],
+    ['Column fridge', 'DEC3650R/R', fridgeLeft + columnWidth / 2 + fridgeInboardShift, fridgeInboardShift]
   ]) {
     const appliance = new THREE.Group();
     appliance.name = name;
-    appliance.userData = { manufacturer: 'Sub-Zero', series: 'Classic', model, nominalWidthInches: 36, productWidthInches: 36, inboardShiftInches: applianceInboardShift * 12, wallSetbackInches: refrigerationWallSetback * 12, heightInches: 84, bodyDepthInches: 23.875, depthWithDoorInches: 26.1875, openingWidthInches: 35.5, openingHeightInches: 83.75, openingDepthInches: 24, cavityDepthInches: 25, finish: 'Stainless steel / tubular handle concept', doorStopDegrees: 90, doorClearanceAt90Inches: 37.25, hingeSideClearanceAt90Inches: 2.625, factoryMaxAngleDegrees: 110, handleProjectionVerified: false, installationApproved: false, provisional: true };
+    appliance.userData = { manufacturer: 'Sub-Zero', series: 'Designer', model, nominalWidthInches: 36, productWidthInches: 36, inboardShiftInches: inboardShift * 12, wallSetbackInches: refrigerationWallSetback * 12, heightInches: 84, bodyDepthInches: 24, depthWithCustomPanelInches: 24.75, cavityDepthInches: 25, finish: 'Custom stained white oak Shaker panel / satin-gold tubular handle', panelStyle: 'Shaker with recessed center field', panelWidthInches: 35.75, panelHeightInches: 79.875, panelDepthInches: 0.75, panelMinimumThicknessInches: 0.625, panelMaximumWeightPounds: 75, panelRevealInches: 0.125, panelFinishAllSidesRequired: true, panelWeightVerified: false, handleFinish: 'Satin gold', handleLengthInches: 50.125, handleDiameterInches: 0.75, handleProjectionInches: 1.75, doorStopDegrees: 90, doorClearanceAt105Inches: 34.5, hingeSideClearanceAt105Inches: 7.25, factoryMaxAngleDegrees: 105, hingePath: 'Fixed-axis proxy calibrated to the published 105-degree endpoint', installationApproved: false, provisional: true };
     appliance.position.set(x, 0, 25.725 + refrigerationWallSetback);
     appliance.rotation.y = Math.PI;
     kitchen.add(appliance);
-    const bodyDepth = 23.875 / 12;
-    const doorDepth = (26.1875 - 23.875) / 12;
-    const frontZ = bodyDepth / 2 + doorDepth;
-    box(appliance, 0, 83.75 / 24, 0, 35.5 / 12, 83.75 / 12, bodyDepth, steel).name = 'Sub-Zero Classic cavity envelope';
-    // The concealed hinge remains a proxy, but its pivot reproduces Sub-Zero's 90-degree clearance envelope.
+    const bodyDepth = 24 / 12;
+    const bodyFrontZ = bodyDepth / 2;
+    const panelWidth = 35.75 / 12;
+    const panelHeight = 79.875 / 12;
+    const panelDepth = 0.75 / 12;
+    const panelBottom = 4 / 12;
+    box(appliance, 0, columnHeight / 2, 0, 35.5 / 12, columnHeight, bodyDepth, steel).name = 'Sub-Zero Designer chassis envelope';
     const hingeSide = name === 'Column freezer' ? -1 : 1;
-    const doorClearanceAt90 = 37.25 / 12;
-    const hingeInset = columnWidth + doorDepth - doorClearanceAt90;
-    const hingeDepthOffset = 0;
+    // Effective axis solves the guide's 105-degree A/B endpoint for the selected custom panel.
+    const hingeInset = 1.438331642221335 / 12;
+    const hingeProjection = 0.982454679790221 / 12;
     const hingeX = hingeSide * (columnWidth / 2 - hingeInset);
-    const hingeZ = frontZ;
+    const hingeZ = bodyFrontZ + hingeProjection;
     const door = new THREE.Group();
-    door.name = `${name} conceptual hinged door`;
-    door.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: hingeSide, animateOpenClose: true, animationDurationMs: 300 }, leafWidthInches: columnWidth * 12, hingeInsetInches: hingeInset * 12, hingeDepthOffsetInches: hingeDepthOffset * 12, doorClearanceAt90Inches: doorClearanceAt90 * 12, hingeSideClearanceAt90Inches: 2.625, conceptualHinge: true, doorStopRequired: true };
+    door.name = `${name} calibrated hinged door`;
+    door.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: hingeSide, animateOpenClose: true, animationDurationMs: 300 }, leafWidthInches: panelWidth * 12, hingeInsetInches: hingeInset * 12, hingeProjectionInches: hingeProjection * 12, doorClearanceAt105Inches: 34.5, hingeSideClearanceAt105Inches: 7.25, calibratedEndpointDegrees: 105, conceptualHinge: true, doorStopRequired: true };
     door.position.set(hingeX, 0, hingeZ);
     appliance.add(door);
-    box(door, -hingeX, (75.25 + 4) / 24, -doorDepth / 2 + hingeDepthOffset, columnWidth, 71.25 / 12, doorDepth, steel).name = 'Sub-Zero Classic stainless door';
-    const handleDepth = 2 / 12;
-    cylinder(door, handleX - hingeX, 3.9, handleDepth - 0.375 / 24 + hingeDepthOffset, 0.375 / 24, 32 / 12, steel).name = 'Sub-Zero tower-facing tubular handle';
-    for (const y of [3.9 - 15 / 12, 3.9 + 15 / 12]) box(door, handleX - hingeX, y, handleDepth / 2 + hingeDepthOffset, 0.375 / 12, 0.375 / 12, handleDepth, steel).name = 'Sub-Zero handle mounting post';
-    box(appliance, 0, 2 / 12, bodyDepth / 2, 35.5 / 12, 4 / 12, 0.04, black).name = 'Sub-Zero removable kickplate';
-    box(appliance, 0, (75.25 + 84) / 24, frontZ - 0.04, columnWidth, (84 - 75.25) / 12, 0.08, steel).name = 'Sub-Zero Classic top grille frame';
-    box(appliance, 0, (76 + 83.25) / 24, frontZ + 0.005, 34.5 / 12, 7.25 / 12, 0.02, black).name = 'Sub-Zero Classic upper ventilation';
-    for (let slat = 0; slat < 8; slat++) box(appliance, 0, (76.35 + slat * 0.9) / 12, frontZ + 0.035, 34.5 / 12, 0.4 / 12, 0.035, steel).name = 'Sub-Zero Classic top grille louver';
+    const panelCenterZ = bodyFrontZ + panelDepth / 2;
+    const panelCenterY = panelBottom + panelHeight / 2;
+    const customPanel = shakerFront(door, -hingeX, panelCenterY, panelCenterZ - hingeZ, panelWidth, panelHeight, 0, panelDepth);
+    customPanel.name = 'Sub-Zero Designer custom white-oak Shaker panel';
+    const handleX = (name === 'Column freezer' ? 1 : -1) * (panelWidth / 2 - 1.5 / 12);
+    const handleRadius = 0.375 / 12;
+    const handleProjection = 1.75 / 12;
+    const handleCenterZ = bodyFrontZ + panelDepth + handleProjection - handleRadius;
+    cylinder(door, handleX - hingeX, panelCenterY, handleCenterZ - hingeZ, handleRadius, 50.125 / 12, brass).name = 'Sub-Zero tower-facing satin-gold tubular handle';
+    const handlePostDepth = 1 / 12;
+    for (const y of [panelCenterY - 47.125 / 24, panelCenterY + 47.125 / 24]) box(door, handleX - hingeX, y, bodyFrontZ + panelDepth + handlePostDepth / 2 - hingeZ, 0.25 / 12, 0.25 / 12, handlePostDepth, brass).name = 'Sub-Zero satin-gold handle mounting post';
+    box(appliance, 0, 2 / 12, bodyFrontZ + 0.02, 35.5 / 12, 4 / 12, 0.04, black).name = 'Sub-Zero removable kickplate';
   }
 
   const island = new THREE.Group();
@@ -4004,7 +4014,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   }
   const familyShelfTowers = [];
   const familyShelfFinish = cabinetFinish;
-  const familyShelfOuterEdges = [kidsRoom.x - 0.175, bottomRunLeft];
+  const familyShelfOuterEdges = [kidsRoom.x - 0.175, fridgeCabinetOuterFaceX];
   for (const [index, edge] of familyShelfOuterEdges.entries()) {
     const x = edge + (index ? -0.75 : 0.75);
     const tower = furnishing('Family off-white open shelf tower', x, kidsRoom.z - 0.175 - familyPanelDepth - 0.5, Math.PI);
@@ -4018,8 +4028,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     box(tower, 0, refrigerationCorniceTop - 0.075, 0, 1.5, 0.15, 1, familyShelfFinish).name = 'Family shelf aligned cornice';
     if (index) {
       const panelRight = kidsRoom.x + kidsRoom.width - 0.175;
-      const rearScribeWidth = bottomRunLeft - panelRight;
-      box(tower, x - (panelRight + bottomRunLeft) / 2, refrigerationCorniceTop / 2, -0.5 - familyPanelDepth / 2, rearScribeWidth, refrigerationCorniceTop, familyPanelDepth, familyShelfFinish).name = 'Family shelf fitted rear wall scribe';
+      const rearScribeWidth = edge - panelRight;
+      box(tower, x - (panelRight + edge) / 2, refrigerationCorniceTop / 2, -0.5 - familyPanelDepth / 2, rearScribeWidth, refrigerationCorniceTop, familyPanelDepth, familyShelfFinish).name = 'Family shelf fitted rear wall scribe';
     }
     for (const [level, surface] of [0.4375, 1.5, 3, 4.5, 6, 7].entries()) {
       box(tower, 0, surface - 0.03125, 0, 1.375, 0.0625, 0.9375, familyShelfFinish).name = 'Family open compartment support shelf';

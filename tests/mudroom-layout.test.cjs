@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
+const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-8, `${actual} should equal ${expected}`);
 
 test('mudroom and kitchen lighting stay scoped and restore other floor/view settings', () => {
   class Light {
@@ -662,13 +663,15 @@ test('basket bay is removed and French leaves and garage door sweep clear of ret
   assert.equal(model.find('Mudroom closet head jamb reserve')[0].position.x, -4 / 12);
 });
 
-test('kitchen opening stays fixed while garage entry shifts eighteen inches west', () => {
+test('kitchen passage shifts slightly while garage entry remains eighteen inches west', () => {
   assert.ok(source.includes('const garageEntry = { x: 38, z: 26.725, width: 3, treadWidth: 4, going: 11 / 12, height: 8, thresholdDepth: 0.35 }'));
   assert.match(source, /const kitchenSideOpenings = kitchenPassages\.openings/);
   const plan = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan();
   const kitchen = plan.walls.find((wall) => wall[0] === 'Kitchen east');
   const garage = plan.walls.find((wall) => wall[0] === 'Mudroom south');
-  assert.deepEqual(kitchen[5][1], [14.675, 17.175, 0, 8]);
+  close(kitchen[5][1][0], 14.7625);
+  close(kitchen[5][1][1], 17.2625);
+  assert.deepEqual(kitchen[5][1].slice(2), [0, 8]);
   assert.equal(kitchen[1], 37.5);
   assert.equal(kitchen[3], 37.5);
   assert.deepEqual(garage[5], [[0.5, 3.5, 0, 8]]);
@@ -692,7 +695,7 @@ test('east blind corner remains enclosed and is not counted as storage', () => {
   }
 });
 
-test('prep/mudroom divider aligns with the garage wall while kitchen openings and garage entry stay fixed', () => {
+test('prep/mudroom divider aligns with the garage wall while shifted kitchen openings preserve their widths', () => {
   const plan = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan();
   assert.deepEqual(plan.walls.find(([name]) => name === 'Mudroom north').slice(1), [37.5, 15, 44.9 - 8 / 12, 15]);
   assert.deepEqual(plan.walls.find(([name]) => name === 'Mudroom east').slice(1), [44.9 - 8 / 12, 15, 44.9 - 8 / 12, 26.9]);
@@ -707,7 +710,12 @@ test('prep/mudroom divider aligns with the garage wall while kitchen openings an
   assert.ok(Math.abs(prepFloors.reduce((area, floor) => area + floor.w * floor.d, 0) - 18 * 8) < 1e-9);
   assert.equal(plan.walls.find(([name]) => name === 'Mudroom south')[2], 26.9);
   assert.equal(plan.walls.find(([name]) => name === 'Kitchen north')[2], 7);
-  assert.deepEqual(plan.walls.find(([name]) => name === 'Kitchen east')[5], [[2.725, 5.225, 0, 8], [14.675, 17.175, 0, 8]]);
+  const kitchenOpenings = plan.walls.find(([name]) => name === 'Kitchen east')[5];
+  [[2.6375, 5.1375], [14.7625, 17.2625]].forEach(([start, end], index) => {
+    close(kitchenOpenings[index][0], start);
+    close(kitchenOpenings[index][1], end);
+    assert.deepEqual(kitchenOpenings[index].slice(2), [0, 8]);
+  });
   const model = buildMudroom();
   assert.equal(model.find('Mudroom hanging coat closet')[0].position.z, 16.4);
   assert.equal(model.find('Five-cubby mudroom bench')[0].position.z, 21.29);

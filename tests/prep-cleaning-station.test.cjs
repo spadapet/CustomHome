@@ -145,7 +145,7 @@ test('pantry and vacuum bay meet the continuous wall without reducing their dept
   const model = buildPrepShelves();
   const station = bounds(model.find('Prep cleaning station')[0]);
   assert.ok(Math.abs(station.minX - (37.675 + 0.75 / 12)) < 1e-9, 'End scribe meets the existing pantry upright');
-  assert.ok(station.minZ > 12.225 + 0.365, 'Bay clears the prep-entry casing');
+  assert.ok(station.minZ > 12.1375 + 0.365, 'Bay clears the shifted prep-entry casing');
   assert.ok(station.maxY <= 9 + 1e-9);
   const originalFront = 14.825 - 16 / 12;
   const projection = originalFront - station.minZ;

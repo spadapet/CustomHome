@@ -121,7 +121,7 @@
 	  <path data-wall="Kids kitchen return" d="M27.9375 26.9L31.2 26.9" class="wall"/>
 	  <path data-wall="Kitchen south" d="M31.2 26.9L37.3 26.9" class="wall"/>
 	  <path data-wall="Kitchen south right" d="M37.3 26.9L37.5 26.9" class="wall"/>
-	  <path data-wall="Kitchen east" d="M37.5 7L37.5 9.725M37.5 12.225L37.5 21.675M37.5 24.175L37.5 25.3" class="wall"/>
+	  <path data-wall="Kitchen east" d="M37.5 7L37.5 9.6375M37.5 12.1375L37.5 21.7625M37.5 24.2625L37.5 25.3" class="wall"/>
 	  <path data-wall="Kitchen east return" d="M37.5 25.3L37.5 26.9" class="wall"/>
 	  <path data-wall="Mudroom north" d="M37.5 15L44.233333 15" class="wall"/>
 	  <path data-wall="Garage north" d="M44.233333 15L55.5 15" class="wall"/>
@@ -130,15 +130,15 @@
 	</g>
 	<rect id="ground-stairs" x=".175" y="27.016667" width="9.833333" height="7.825" fill="url(#stairHatch)" stroke="#9c9b94" stroke-width=".08"/>
 	<text x="5.1" y="30.8" class="room">STAIRS</text>
-	<g id="ground-refrigeration" data-run-left="27.9375" data-run-right="37.3" data-stop-degrees="90">
+	<g id="ground-refrigeration" data-run-left="27.9375" data-run-right="37.3" data-stop-degrees="90" data-factory-degrees="105" data-clearance-inches="34.5" data-side-clearance-inches="7.25">
 	  <rect id="fridge-filler" x="27.9375" y="25.3" width=".25" height="1.4" class="cabinet"/>
-	  <rect id="fridge" data-model="CL3650R/S/T/R" x="28.25" y="24.5375" width="3" height="2.182292" class="appliance"/>
+	  <rect id="fridge" data-model="DEC3650R/R" data-product-width-inches="36" x="28.322917" y="24.7875" width="2.979167" height="2.0625" class="appliance"/>
 	  <rect id="oven-tower" x="31.3125" y="24.641667" width="2.625" height="2.083333" class="cabinet"/>
 	  <rect id="oven" data-height-inches="24" data-bottom-inches="30" x="31.375" y="24.601667" width="2.5" height="2" class="appliance"/>
-	  <rect id="freezer" data-model="CL3650F/S/T/L" x="34" y="24.5375" width="3" height="2.182292" class="appliance"/>
+	  <rect id="freezer" data-model="DEC3650FI/L" data-product-width-inches="36" x="33.947917" y="24.7875" width="2.979167" height="2.0625" class="appliance"/>
 	  <rect id="freezer-filler" x="37.0625" y="25.3" width=".2375" height="1.4" class="cabinet"/>
-	  <path id="column-panels" d="M28.21875 24.735417V26.725M31.28125 24.735417V26.725M33.96875 24.735417V26.725M37.03125 24.735417V26.725" stroke="#9e8a6d" stroke-width=".0625"/>
-	  <path d="M30.98 24.370833H30.67M34.22 24.370833H34.53" stroke="#697b80" stroke-width=".07"/>
+	  <path id="column-panels" d="M28.21875 24.85V26.85M31.28125 24.85V26.85M33.96875 24.85V26.85M37.03125 24.85V26.85" stroke="#9e8a6d" stroke-width=".0625"/>
+	  <path d="M31.177083 24.641667H30.864583M34.072917 24.641667H34.385417" stroke="#697b80" stroke-width=".0625"/>
 	  <text x="29.75" y="25.57" class="tiny">FRIDGE 36</text>
 	  <text x="32.625" y="25.57" class="tiny">OVEN 30</text>
 	  <text x="35.5" y="25.57" class="tiny">FREEZER 36</text>

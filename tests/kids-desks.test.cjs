@@ -32,6 +32,8 @@ function buildKidsRoom() {
     ...Object.fromEntries(['linen', 'cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish', 'brass', 'oak', 'cream', 'porcelain', 'black'].map((name) => [name, { name }])),
     refrigerationCorniceTop: 9,
     bottomRunLeft: require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout().runLeft,
+    fridgeCabinetOuterFaceX: require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout().runLeft
+      + require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout().fridgeFillerWidth,
     wovenShadeMaterial: {},
     leafGreen: {},
     readingBook: new Group(),
@@ -314,10 +316,12 @@ test('stained oak standard shelf modules match kitchen cornice height while pian
   assert.match(source, /const refrigerationCorniceTop = upperStorageTop \+ 0.15/);
   assert.match(source, /pre-straight-wall living side of stair enclosure/);
   assert.equal(towers[0].userData.outerEdgeX, 18.825);
-  assert.equal(towers[1].userData.outerEdgeX, require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout().runLeft);
+  const refrigeration = require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout();
+  assert.equal(towers[1].userData.outerEdgeX, refrigeration.runLeft + refrigeration.fridgeFillerWidth);
+  assert.equal(bounds(towers[1]).maxX, refrigeration.runLeft + refrigeration.fridgeFillerWidth, 'Shelf side touches the refrigerator cabinet outer panel');
   const rearScribe = towers[1].children.find(p => p.name === 'Family shelf fitted rear wall scribe');
   assert.ok(rearScribe);
-  assert.ok(Math.abs(rearScribe.w * 12 - 4.35) < 1e-9);
+  assert.ok(Math.abs(rearScribe.w * 12 - 7.35) < 1e-9);
   assert.equal(rearScribe.d * 12, 0.5);
   assert.equal(rearScribe.h * 12, 108);
   assert.equal(towers[0].children.some(p => p.name === 'Family shelf fitted rear wall scribe'), false);

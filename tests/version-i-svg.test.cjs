@@ -241,16 +241,17 @@ test('every drawn downstairs wall and window opening matches current shared coor
   });
 });
 
-test('Classic pair, retained oven/tower and separate fillers use full-size actual model envelopes', () => {
+test('Designer pair, retained oven/tower and separate fillers use current model envelopes', () => {
   const layout = ground.getKitchenRefrigerationLayout();
   near(element('ground-refrigeration')['data-run-left'], layout.runLeft);
   near(element('ground-refrigeration')['data-run-right'], layout.runRight);
   near((layout.runRight - layout.runLeft) * 12, 112.35);
-  for (const [id, x, model] of [['fridge', 28.25, 'CL3650R/S/T/R'], ['freezer', 34, 'CL3650F/S/T/L']]) {
+  for (const [id, x, model] of [['fridge', 28.322917, 'DEC3650R/R'], ['freezer', 33.947917, 'DEC3650FI/L']]) {
     const unit = element(id);
-    near(unit.x, x); near(Number(unit.width) * 12, 36);
-    near(unit.y, 24.5375); near(Number(unit.height) * 12, 26.1875, .00001);
+    near(unit.x, x); near(Number(unit.width) * 12, 35.75, .00001);
+    near(unit.y, 24.7875); near(Number(unit.height) * 12, 24.75, .00001);
     assert.equal(unit['data-model'], model);
+    assert.equal(unit['data-product-width-inches'], '36');
   }
   near(Number(element('oven-tower').width) * 12, 31.5);
   near(Number(element('oven-tower').height) * 12, 25, .00001);
@@ -260,11 +261,14 @@ test('Classic pair, retained oven/tower and separate fillers use full-size actua
   assert.equal(element('oven')['data-bottom-inches'], '30');
   near(Number(element('fridge-filler').width) * 12, 3);
   near(Number(element('freezer-filler').width) * 12, 2.85);
-  for (const panel of segments(element('column-panels').d)) near((panel[3] - panel[1]) * 12, 23.875, .00001);
+  for (const panel of segments(element('column-panels').d)) near((panel[3] - panel[1]) * 12, 24, .00001);
   near(Number(element('kids-trofast').x) + Number(element('kids-trofast').width) / 2, 25.775);
   near(Number(element('kids-trofast').y) + Number(element('kids-trofast').height) / 2, 25.810625, .000001);
   near(Number(element('family-board').x) + Number(element('family-board').width) / 2, 23.375);
   assert.equal(element('ground-refrigeration')['data-stop-degrees'], '90');
+  assert.equal(element('ground-refrigeration')['data-factory-degrees'], '105');
+  assert.equal(element('ground-refrigeration')['data-clearance-inches'], '34.5');
+  assert.equal(element('ground-refrigeration')['data-side-clearance-inches'], '7.25');
 });
 
 test('upstairs traces the new image shell, east loft, inset hall, service row and flush front closet', () => {

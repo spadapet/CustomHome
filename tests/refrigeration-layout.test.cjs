@@ -5,8 +5,9 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 const exteriorSource = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
+const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-8, `${actual} should equal ${expected}`);
 
-test('36-inch Classic bays and separate fillers fit the approved short-wall revision without widening the oven tower', () => {
+test('36-inch Designer bays and separate fillers fit the approved short-wall revision without widening the oven tower', () => {
   class Group {
     constructor() { this.children = []; this.userData = {}; this.position = {}; }
     add(child) { this.children.push(child); }
@@ -114,7 +115,11 @@ test('kids-room expansion preserves kitchen return and all opening widths', () =
   assert.equal(north[3], 27.75);
   const shared = plan.walls.find(([name]) => name === 'Kitchen east');
   assert.deepEqual(shared.slice(1, 5), [37.5, 7, 37.5, 25.3]);
-  assert.deepEqual(shared[5], [[2.725, 5.225, 0, 8], [14.675, 17.175, 0, 8]]);
+  [[2.6375, 5.1375], [14.7625, 17.2625]].forEach(([start, end], index) => {
+    close(shared[5][index][0], start);
+    close(shared[5][index][1], end);
+    assert.deepEqual(shared[5][index].slice(2), [0, 8]);
+  });
   assert.equal(plan.rooms.find((room) => room.name === 'Kitchen').w, 11);
   assert.equal(plan.rooms.find((room) => room.name === 'Prep kitchen').w, 18);
   assert.equal(plan.rooms.find((room) => room.name === 'Mudroom').w, 7.4 - 8 / 12);
@@ -231,7 +236,7 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
 });
 
 test('modeled room doors, cabinet pullouts and exterior overhead leaves carry click-operation metadata', () => {
-  assert.match(source, /doorStopDegrees: 90, doorClearanceAt90Inches: 37\.25, hingeSideClearanceAt90Inches: 2\.625, factoryMaxAngleDegrees: 110/);
+  assert.match(source, /doorStopDegrees: 90, doorClearanceAt105Inches: 34\.5, hingeSideClearanceAt105Inches: 7\.25, factoryMaxAngleDegrees: 105/);
   assert.match(source, /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90/);
   assert.match(source, /interactiveHouseDoor: \{ operation: 'sliding', axis: 'z', open: false, closedCenterX: 0, openCenterX: 1\.75 \}/);
   assert.match(source, /powderLeaf\.userData = \{ interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 90, openRotationSign: 1 \}/);

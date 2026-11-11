@@ -213,9 +213,10 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
 
   function getKitchenPassageLayout() {
     const wallZ = 7;
-    const openings = [2.725, 14.675].map((start) => [start, start + 2.5, 0, 8]);
+    const cookingSideJambShift = 1.05 / 12;
+    const openings = [2.725 - cookingSideJambShift, 14.675 + cookingSideJambShift].map((start) => [start, start + 2.5, 0, 8]);
     const passages = ['Kitchen to prep', 'Kitchen to mudroom'].map((name, index) => ({ name, startZ: wallZ + openings[index][0], endZ: wallZ + openings[index][1] }));
-    return { wallX: 37.5, wallZ, clearWidth: 2.5, clearHeight: 8, doorless: true, passages, openings };
+    return { wallX: 37.5, wallZ, clearWidth: 2.5, clearHeight: 8, doorless: true, cookingSideJambShiftInches: cookingSideJambShift * 12, counterCasingGapInches: 0.125, passages, openings };
   }
 
   function getKitchenRefrigerationLayout() {

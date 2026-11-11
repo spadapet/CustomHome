@@ -8,12 +8,17 @@ const { getKitchenPassageLayout, getGroundFloorDefaultPlan } = require('../asset
 const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
 const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} should equal ${b}`);
 
-test('shared floor plan provides two owner-selected doorless 30-inch clear openings with unchanged outer edges', () => {
+test('shared floor plan shifts both 30-inch passages outward enough to clear the cooktop counter casing', () => {
   const layout = getKitchenPassageLayout();
   assert.equal(layout.doorless, true);
   assert.equal(layout.clearWidth * 12, 30);
   assert.equal(layout.clearHeight * 12, 96);
-  assert.deepEqual(layout.passages.map(({ startZ, endZ }) => [startZ, endZ]), [[9.725, 12.225], [21.675, 24.175]]);
+  [[9.6375, 12.1375], [21.7625, 24.2625]].forEach(([expectedStart, expectedEnd], index) => {
+    close(layout.passages[index].startZ, expectedStart);
+    close(layout.passages[index].endZ, expectedEnd);
+  });
+  assert.equal(layout.cookingSideJambShiftInches, 1.05);
+  assert.equal(layout.counterCasingGapInches, 0.125);
   const wall = getGroundFloorDefaultPlan().walls.find(([name]) => name === 'Kitchen east');
   assert.deepEqual(wall.slice(1, 5), [37.5, 7, 37.5, 25.3]);
   assert.deepEqual(wall[5], layout.openings);
@@ -23,7 +28,7 @@ test('shared floor plan provides two owner-selected doorless 30-inch clear openi
     assert.equal(high, 8);
   }
   close((layout.passages[0].endZ + layout.passages[1].startZ) / 2, 16.95);
-  close((layout.passages[1].startZ - layout.passages[0].endZ - 2 * 3.625 / 12) * 12, 106.15);
+  close((layout.passages[1].startZ - layout.passages[0].endZ - 2 * 3.625 / 12) * 12, 108.25);
   assert.match(source, /const kitchenPassages = getKitchenPassageLayout\(\)/);
   assert.match(source, /const kitchenSideOpenings = kitchenPassages\.openings/);
 });

@@ -24,7 +24,7 @@ function build() {
   const context = {
     THREE: { Group, Mesh, TorusGeometry: class {} }, kitchen: new Group(),
     kitchenWallRight: 37.5, cookingWallShiftX: -0.5, cooktopCenterZ: 16.95,
-    cooktopRunStartZ: 12.225, cooktopRunEndZ: 21.675, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
+    cooktopRunStartZ: 12.1375, cooktopRunEndZ: 21.7625, casingSideWidth: 3.5 / 12, casingReveal: 0.125 / 12,
     ...Object.fromEntries(['cabinetFinish', 'countertop', 'black', 'steel'].map((name) => [name, {}])),
     box(parent, x, y, z, w, h, d, material) {
       const part = new Mesh({ w, h, d }, material);
@@ -66,9 +66,10 @@ test('three equal 36-inch drawer bases form the provisional 108-inch cooking run
   const bodies = find(run, (part) => part.name === 'Standard cooking base cabinet carcass');
   assert.deepEqual(bodies.map((part) => part.userData.nominalWidthInches), [36, 36, 36]);
   close(run.userData.widthInches, 108);
-  close(run.userData.availableRunWidthInches, 106.15);
-  close(run.userData.casingOverlapInchesPerEnd, 0.925);
-  assert.equal(run.userData.endFitVerified, false);
+  close(run.userData.availableRunWidthInches, 108.25);
+  close(run.userData.casingOverlapInchesPerEnd, 0);
+  close(run.userData.casingClearanceInchesPerEnd, 0.125);
+  assert.equal(run.userData.endFitVerified, true);
   bodies.forEach((body, index) => {
     close(body.geometry.w * 12, 24);
     close(body.userData.nominalHeightInches, 34.5);
@@ -113,6 +114,7 @@ test('true 24-inch boxes meet the finished wall and keep the countertop top and 
   close(counter.position.y + counter.geometry.h / 2, 3.05);
   close(counter.position.y - counter.geometry.h / 2, 34.5 / 12);
   close(counter.geometry.d * 12, 108);
-  close(run.userData.availableRunWidthInches, 106.15);
-  close(run.userData.casingOverlapInchesPerEnd, 0.925);
+  close(run.userData.availableRunWidthInches, 108.25);
+  close(run.userData.casingOverlapInchesPerEnd, 0);
+  close(run.userData.casingClearanceInchesPerEnd, 0.125);
 });

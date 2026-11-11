@@ -38,7 +38,7 @@ function buildCookingWall() {
   }
   const context = {
     THREE: { Group, Mesh, CylinderGeometry }, kitchen: new Group(), ceilingHeight: 9, cookingWallShiftX: -0.5, kitchenWallRight: 37.5,
-    casingSideWidth: 3.625 / 12, casingReveal: 0, cooktopRunStartZ: 12.225, cooktopRunEndZ: 21.675, cooktopCenterZ: 16.95,
+    casingSideWidth: 3.625 / 12, casingReveal: 0, cooktopRunStartZ: 12.1375, cooktopRunEndZ: 21.7625, cooktopCenterZ: 16.95,
     ...Object.fromEntries(['cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish', 'brass', 'black', 'light', 'kitchenTaskDiffuser', 'countertop'].map((name) => [name, { name }])),
     mat: (color) => ({ color }),
     box(parent, x, y, z, w, h, d, material) {
@@ -100,9 +100,10 @@ test('cooktop base uses three matching 36-inch drawer banks and a 108-inch count
   const cabinetry = model.find('Extended cooktop base cabinetry')[0];
   assert.deepEqual(Array.from(cabinetry.userData.nominalBaseWidthsInches), [36, 36, 36]);
   assert.equal(cabinetry.userData.widthInches, 108);
-  close(cabinetry.userData.availableRunWidthInches, 106.15);
-  close(cabinetry.userData.casingOverlapInchesPerEnd, 0.925);
-  assert.equal(cabinetry.userData.endFitVerified, false);
+  close(cabinetry.userData.availableRunWidthInches, 108.25);
+  close(cabinetry.userData.casingOverlapInchesPerEnd, 0);
+  close(cabinetry.userData.casingClearanceInchesPerEnd, 0.125);
+  assert.equal(cabinetry.userData.endFitVerified, true);
   const carcasses = model.find('Standard cooking base cabinet carcass');
   assert.equal(carcasses.length, 3);
   assert.deepEqual(carcasses.map(part => part.userData.nominalWidthInches), [36, 36, 36]);
@@ -136,7 +137,12 @@ test('two standard-width oak stacks have two tiers, eight Shaker doors and gold 
   const stacks = model.all.filter((item) => item.name?.endsWith('upper stack'));
   assert.equal(stacks.length, 2);
   assert.equal(model.find('Full-overlay Shaker cabinet front').length, 8);
-  assert.equal(model.find('Gold cabinet pull').length, 8);
+  const pulls = model.find('Gold cabinet pull');
+  assert.equal(pulls.length, 8);
+  for (const pull of pulls) {
+    const bar = pull.children[0].geometry;
+    assert.ok(bar.h > bar.w, 'Every cooktop upper pull is vertical');
+  }
   for (const stack of stacks) {
     close(stack.userData.widthInches, 27);
     assert.equal(stack.userData.construction, 'Frameless');
