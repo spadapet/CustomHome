@@ -370,7 +370,7 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     }
     return undefined;
   }
-  for (const [name, x, z, width, rotation, side] of plan.windows) windowFrame(`Upstairs ${name} window`, x, z, width, 5, 3, rotation, group, side, { installationWalls: plan.walls, frontGrid: rotation === 0 && side === -1, wetEdge: showerWetEdge(name, x, z, width, rotation, side) });
+  for (const [name, x, z, width, rotation, side] of plan.windows) windowFrame(`Upstairs ${name} window`, x, z, width, 5, 3, rotation, group, side, { installationWalls: plan.walls, wetEdge: showerWetEdge(name, x, z, width, rotation, side) });
   const furnitureAnchors = [];
   function furniture(name, x, z, rotation = 0, viewerFurniture = false) {
     const item = new THREE.Group();

@@ -117,6 +117,8 @@ function buildLighting() {
     }
   };
   vm.createContext(context);
+  vm.runInContext(exteriorSource.slice(0, exteriorSource.indexOf('function buildExteriorModel')) + '\nconst finishes = getExteriorMaterialConfig();', context);
+  Object.assign(context, { lanternBronze: { name: 'bronze' }, trim: { name: 'trim' } });
   vm.runInContext(exteriorSource.match(/  const canopyLightXs = .*;/)[0], context);
   vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const canopyDepth ='), exteriorSource.indexOf('  function canopySection(')), context);
   vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const porchCanopyHeight ='), exteriorSource.indexOf('  const porchMetal =')), context);

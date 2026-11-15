@@ -48,6 +48,7 @@ function buildRoof() {
   };
   context.box = context.texturedBox;
   context.trim = {};
+  context.gutterFinish = {};
   context.paving = (parent, name, x, z, w, d, top = -1.35, thickness = 0.3) => {
     const mesh = context.box(parent, x + w / 2, top - thickness / 2, z + d / 2, w, thickness, d);
     mesh.name = name;
@@ -73,7 +74,7 @@ function buildRoof() {
 
 test('sloping cover relocates behind living room and leaves both kitchen frontages open', () => {
   const { walls, meshes, underside } = buildRoof();
-  const roof = meshes.find((mesh) => mesh.name === 'Graphite-gray shingle covered patio roof');
+  const roof = meshes.find((mesh) => mesh.name === 'Charcoal shingle covered patio roof');
   assert.equal(roof.userData.pitch, 3 / 16);
   assert.equal(roof.userData.limits.rear, -0.325);
   assert.ok(Math.abs(roof.userData.limits.front - 9.275) < 1e-9);
@@ -115,7 +116,7 @@ function worldVertices(mesh) {
 test('canopy finishes share exact slope, closed endpoints and nine-inch vertical section', () => {
   const { meshes, underside } = buildRoof();
   const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
-  const soffit = meshes.find((m) => m.name?.startsWith('Post-free canopy warm-white'));
+  const soffit = meshes.find((m) => m.name?.startsWith('Post-free canopy warm cream'));
   const vertices = worldVertices(soffit);
   close(Math.min(...vertices.map((p) => p.z)), -0.325);
   close(Math.max(...vertices.map((p) => p.z)), 9.275);
@@ -177,7 +178,7 @@ test('post-free canopy has finished soffit and fascia while patio furniture stay
   const feet = meshes.filter((mesh) => mesh.name === 'Patio post stone foot');
   assert.equal(posts.length, 0);
   assert.equal(feet.length, 0);
-  const soffit = meshes.find((mesh) => mesh.name === 'Post-free canopy warm-white soffit - engineering required');
+  const soffit = meshes.find((mesh) => mesh.name === 'Post-free canopy warm cream soffit - engineering required');
   assert.ok(soffit);
   assert.equal(soffit.userData.structuralApproval, false);
   assert.equal(meshes.filter((mesh) => mesh.name?.includes('canopy side fascia')).length, 2);
@@ -216,7 +217,7 @@ test('post-free canopy has finished soffit and fascia while patio furniture stay
   assert.ok(Math.abs(terrace.userData.widthFeet - 17.805) < 1e-9);
   assert.ok(Math.abs(terrace.userData.depthFeet - 13.15) < 1e-9);
   assert.equal(terrace.userData.z, -4.325);
-  const roof = meshes.find((mesh) => mesh.name === 'Graphite-gray shingle covered patio roof');
+  const roof = meshes.find((mesh) => mesh.name === 'Charcoal shingle covered patio roof');
   assert.equal(roof.userData.limits.rear - terrace.userData.z, 4, 'Four-foot yard extension is beyond the unchanged roof');
   assert.equal(roof.userData.limits.left, 0, 'No roof enlargement over the new side extension');
   const transition = meshes.find((mesh) => mesh.name === 'Patio to west fence-path grade transition');

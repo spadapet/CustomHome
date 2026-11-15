@@ -48,36 +48,22 @@ test('cross-gable union never reduces the accepted headroom envelope and leaves 
   assert.ok(samples > 8000);
 });
 
-test('entry barrel has a real 19.2-inch rise, falling rear return and no added porch footprint', () => {
-  const defs = roof.getPorchRoofDefinitions(), main = defs[0], barrel = defs[1];
-  const z = main.bounds[3], center = 15.6;
-  close(height(defs,center,z)-height([main],center,z),1.6);
-  for (const x of [barrel.bounds[0],barrel.bounds[1]]) close(height(defs,x,z),height([main],x,z));
-  close(height(defs,center,barrel.bounds[2]),height([main],center,barrel.bounds[2]));
-  assert.ok(barrel.bounds[0] > main.bounds[0] && barrel.bounds[1] < main.bounds[1]);
-  close(barrel.bounds[3],main.bounds[3]);
-  assert.ok(roof.buildRoofEnvelope(defs).joins.some(j => j.type === 'valley'));
+test('porch roof is one straight coplanar low-slope plane with no raised entry hump or added footprint', () => {
+  const defs = roof.getPorchRoofDefinitions(), main = defs[0];
+  assert.deepEqual(defs.map(d => d.id), ['Porch metal', 'Porch recess metal']);
+  assert.ok(defs.every(d => d.planes.length === 1 && d.planes[0].every((v, i) => Math.abs(v - main.planes[0][i]) < 1e-12)), 'one shared plane');
+  const g = upper.getUpstairsMeasuredGeometry();
+  close(main.bounds[2], g.south);
+  assert.deepEqual(defs[1].bounds, [g.southClosetWest, g.southClosetEast, g.southClosetSouth, g.south]);
+  close(main.bounds[3], 62.25 + front.extension);
+  // Constant eave height across every bay: no arch rise over the entry.
+  for (const x of [0, 5, 11, 12.5, 15.6, 18.7, 20, 26, 31]) close(height(defs, x, main.bounds[3]), height(defs, 0, main.bounds[3]));
+  assert.equal(roof.buildRoofEnvelope(defs).joins.length, 0);
 });
 
-test('production arch trim is an open, dimensioned extruded curved band, not a blocking rectangle', () => {
+test('entry bay keeps a straight beam and continuous fascia with no arch closure, curved infill or separate entry ceiling', () => {
   const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'),'utf8');
-  class Shape {
-    constructor(){this.points=[];}
-    moveTo(x,y){this.points.push([x,y]);}
-    lineTo(x,y){this.points.push([x,y]);}
-    closePath(){}
-  }
-  const c = { THREE:{Shape,ExtrudeGeometry:class{constructor(shape,options){Object.assign(this,{shape,options});}},
-    Mesh:class{constructor(geometry){this.geometry=geometry;this.position={set(){}};}}},
-    porchFasciaZ:62.15+front.extension,trim:{},entryPortal:{add(o){c.arch=o;}},
-    porchCanopyUndersideAt:z=>10.5-(z-57.5-front.extension)*Math.tan(.13)-.11/Math.cos(.13),
-    porchRoof:{userData:{}} };
-  vm.runInNewContext(source.slice(source.indexOf('  const archProfile ='),
-    source.indexOf('  for (const center of [37, 48.5])')),c);
-  const points=c.arch.geometry.shape.points;
-  close(Math.max(...points.map(p=>p[0]))-Math.min(...points.map(p=>p[0])),9.15);
-  close(c.arch.geometry.options.depth,.65);
-  close(points[8][1]-points[0][1],1.6);
-  close(points[8][1]-points[25][1],.7);
-  assert.ok(points[25][1]>10.5,'Open center clears the 96-inch door crown, no flat lintel across it');
+  assert.doesNotMatch(source, /closureProfile|barrelTopAt|Entry barrel metal|entry roof end closure|entry-bay porch ceiling|Straight entry fascia|Porch side fascia/);
+  assert.doesNotMatch(source,/archProfile|Segmental entry canopy arch/);
+  assert.match(source, /box\(group, 15\.6, porchFasciaTop - porchFasciaHeight \/ 2, porchFasciaZ,\s+31\.85 \+ 0\.65, porchFasciaHeight, porchFasciaDepth, trim\);\s+porchFascia\.name = 'Continuous straight porch fascia';/);
 });

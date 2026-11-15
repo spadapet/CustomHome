@@ -340,7 +340,7 @@ test('exterior prep openings match the furnished windows and the picture pane ha
   vm.runInNewContext(exterior.slice(helperStart, helperEnd) + '\nwindowUnit(new THREE.Group(), 8.1, 4.25, 5, 3.5, false, true);', {
     getWindowProductIntent: require('../assets/js/floor-plan-ground.js').getWindowProductIntent,
     windowInstallations: [], wallThickness: 0.45,
-    THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, glass: {}, privacyGlass: {}, windowBlack: {}, trim: {},
+    THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, glass: {}, privacyGlass: {}, windowBlack: {}, trim: {}, windowBronze: {}, finishes: { window: { frontGrilles: false } },
     box(parent, x, y, z, w, h, d) { const part = { x, y, z, w, h, d }; parts.push(part); return part; }
   });
   assert.equal(parts.filter(part => part.x === 0 && part.w === 0.1 && part.h === 3.5 && part.d === 0.08).length, 0, 'Exterior picture glazing is uninterrupted too');

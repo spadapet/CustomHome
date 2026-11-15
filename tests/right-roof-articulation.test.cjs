@@ -82,7 +82,7 @@ test('attic eave collector follows the raised roof and drops outside the garage 
   assert.ok(start>0&&end>start,'Actual shared roof-derived collector extraction');
   let points;
   vm.runInNewContext(source.slice(start,end),{group:{},HomeRoof:roof,measuredUpper:upper.getUpstairsMeasuredGeometry(),
-    floorToFloor:10,dark:{},drainageRoute:(parent,name,route)=>{points=route;}});
+    floorToFloor:10,dark:{},gutterFinish:{},drainageRoute:(parent,name,route)=>{points=route;}});
   assert.equal(points.length,7);
   assert.ok(points[0][1]>points[1][1],'The collector falls along the shed roof');
   assert.ok(points.slice(2).every(p=>p[0]>56.2),'The downpipe clears the lower roof edge');

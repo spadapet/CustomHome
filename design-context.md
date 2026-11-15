@@ -1,5 +1,73 @@
 # Ground-floor design context
 
+## English-French Transitional exterior — November 15
+
+Owner specification (sample image is reference only; geometry is not
+regenerated). Supersedes the October 30 Linen palette, the 24-in stone
+wainscot/coping, white windows and the October 27 front grilles.
+
+- Materials live in `getExteriorMaterialConfig()` (`floor-plan-exterior.js`):
+  warm ivory/cream brick with light cream mortar graded from
+  `brick_wall_001`; warm cream cast stone from `stone_wall`; charcoal
+  shingle from `roof_slates_03`; oak door and porch T&G ceiling from
+  `oak_veneer_01`. Display approximations only; no product selected.
+- Full brick from footing to eaves on all four elevations, both floors,
+  every gable and the garage. Stone wainscot and coping removed. Former
+  upper stone stools/lintels/jambs, the paired continuous sill, belt course
+  and frieze are brick rowlock/soldier/running courses; ground front
+  limestone lintels are brick soldier heads. Cornice crown/bed mold, bay
+  caps, sills, heads, fascia and soffits are warm cream trim (#e9ddc6).
+  The open north gable of the unfinished attic void (x42.8-55.7, z14.55-15,
+  y9 to roof underside) is closed in brick so the rear reads as masonry.
+- Cast stone only at the entrance: arched surround, outer molding, arch
+  closure, entry steps and landing nose. Porch foundation faces are brick.
+- Andersen 100 Series Fibrex intent, Dark Bronze exterior (#3f362e), White
+  interior (supplier to confirm). No grilles on any elevation; the owner's
+  October 27 front six-light grids are superseded by this newer
+  specification (conflict noted, newer spec followed).
+- Front doors keep the 5 x 8 ft arched double leaves; matte natural warm
+  medium oak. Garage doors keep 9 x 8 ft openings: warm taupe recessed-panel
+  carriage doors, minimal bronze pulls. Gutters, leaders, brackets and all
+  lanterns/downlights are Dark Bronze; light stays 2700 K.
+- Porch: 31 ft 2 in x 7 ft unchanged; four straight square warm cream
+  columns with simple square bases/caps; one straight beam and fascia line
+  (entry segmental arch band and portal piers/imposts removed). Low-slope
+  porch roof stays standing-seam (about 1.6:12 is below shingle minimums),
+  now charcoal to coordinate with the shingles. **Open conflict resolved:**
+  the retained raised segmental entry roof (curved standing-seam hump,
+  curved fascia/drip and cream closure above the beam) is removed. The
+  porch roof is one straight plane at the side-bay pitch and eave
+  (y = 18.08 - 0.1307 z; eave y9.879 at z62.729) across all bays; its
+  concealed rear edge moves to the upper wall line z53.8 and a coplanar
+  infill reaches the recessed closet-4 brick (z51.8), so it meets masonry
+  everywhere instead of stopping 1.2 ft short in the recess. One straight
+  fascia spans x-0.65-31.85 at y9.462-9.762. Charcoal counterflashing lines
+  the bedroom faces, bay piers and recess; seams end beneath it. The T&G
+  ceiling now continues uninterrupted over the entry bay. Column positions,
+  9.7-ft beam underside, door surround/leaves, lanterns and cans unchanged.
+  Two mirrored seating groups (chairs x3.2/8
+  and x23.2/28, tables x5.6/25.6) and two bronze planters flank the steps.
+- Landscaping: alternating boxwood/hydrangea shrubs, ornamental grass and
+  low flowering perennials, all below porch-floor level.
+- Evidence: window/door openings and main/lower roof faces equal the HEAD
+  1e61f87 baseline (`tests/fixtures/exterior-geometry-baseline.json`); the
+  porch roof is asserted as an explicit delta from that baseline (same
+  plane, sides and eave; barrel definition gone; no arched/curved parts).
+
+**Proposed, not implemented - front windows.** Bed 3/Bed 4 keep paired
+36 x 60 in casements centered on each gable (x6.175/25.025, sill 36 in,
+head 96 in above floor) - the recommended option. A taller 36 x 66 in pair
+(sill 30 in) would need the headboards/nightstands moved off the front wall
+and the bay sill/piers rebuilt. Office/guest keep 91.2 x 60 in banks at
+x6/25; an optional 2.1 in/0.3 in shift to x6.175/25.025 would align them
+under the gables. No change without owner approval. See the
+[front-window proposal](elevations.html#front-window-proposal).
+
+Remaining approvals: brick/cream-mortar/cast-stone sample panels in sun and
+shade, veneer support/ties/flashing, porch roof-to-wall flashing and
+drainage at the front eave, porch header/beam engineering, Andersen
+Dark Bronze/White availability, sizes and egress, and drainage design.
+
 ## Whole-model overlap audit — November 15
 
 Owner: "we cannot have overlap." A temporary browser audit measured every
@@ -247,7 +315,7 @@ Walk-in closet redesign, November 14 (owner: "can you do a better job at
 designing this walk in closet"): supersedes the 48 ×24 west carcass and the
 north-east 30 ×12 shelf module. Thesis: two built-in end runs on shared 84-inch
 shelf and 96-inch door-head datums; the straight pocket-to-pocket crossing
-(x24.3–26.8) stays open. Laundry is an owner requirement and is unchanged.
+(x23.55–26.05) stays open after both entries move 9 inches west. Laundry is an owner requirement and is unchanged.
 West wardrobe: standard 24 + 30-inch sections, 54 ×24 ×96 inches, centered on the
 59.4252-inch wall with separate 2.7126-inch end fillers (lower to 3/4-inch base
 trim, upper scribe from 8 1/8 inches to 1/8 inch of paint). North long hang rod
@@ -259,13 +327,13 @@ four inset full-extension drawers (21-inch travel), 36-inch folding top for the
 laundry, fixed shelves 48/60/72/84. 96-inch shelf continues over the stack and an
 84-inch shelf sits over the dryer: measured 15.44-inch top gap (Bosch 6.25),
 open shelf not a cabinet; supports are tower, east-wall cleats and south-wall
-cleats east of the pocket only (x29.783+). 20 ×62-inch oak-framed mirror on the
+cleats east of the pocket only (x29.7125+). 20 ×62-inch oak-framed mirror on the
 solid north wall east of the bath casing. Warm 2700K LED strips under the four
 84-inch shelves follow guest Night lighting; ceiling light retained. Stack/tower
 side gap4.1752 inches; stack south paint gap1 inch (1/4 beyond trim).
 Measured: west clothing face to stack front 66.35, to tower 70.6 inches; with all
 drawers and both laundry doors open 48.35 inches remain to drawer pulls and a
-door-centered 37.4-inch crossing band is clear. Drawers 0 → 4; shelving about
+door-centered 36-inch crossing band is clear. Drawers 0 → 4; shelving about
 297 → 444 linear inches incl. decks/folding top. LED product/wiring, shelf loads,
 anchorage and joinery remain professional-review items.
 
@@ -351,8 +419,8 @@ north-center standard **48 × 18-inch** oak vanity, separate rear scribe,
 36-inch mirror, sconces/night light; east private WC **36 × 60 inches clear**,
 toilet center (29.525,35.854167). Solid 30 × 96-inch inward WC door;
 sound isolation/seals/hardware unselected. Bedroom-to-closet pocket door
-retracts east into x26.8–29.7; closet-to-bath pocket door retracts west into
-x21.4–24.3. Both nominal 30 × 96-inch entries stay closed by default.
+retracts east into x26.05–28.95; closet-to-bath pocket door retracts west into
+x20.65–23.55. Both openings are x23.55–26.05, shifted 9 inches west, and both nominal 30 × 96-inch entries stay closed by default.
 Leaves and recessed pulls travel within 3-inch-deep modeled wall cavities,
 not on wall faces; exposed tracks are removed. Pocket framing, concealed
 headers/tracks, jambs, privacy hardware and wet-side finishes need supplier

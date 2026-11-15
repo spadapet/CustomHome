@@ -12,7 +12,9 @@ function planting() {
       this.geometry = geometry;
       this.scale = { x: 1, y: 1, z: 1, set(x,y,z) { Object.assign(this,{x,y,z}); } };
       this.position = { set(x,y,z) { Object.assign(this,{x,y,z}); } };
+      this.children = [];
     }
+    add(child) { this.children.push(child); }
   }
   const children = [];
   const group = { add(mesh) { children.push(mesh); } };
@@ -46,6 +48,15 @@ test('front evergreen constituents no longer overlap and stay within the unchang
       assert.ok(s.position.z-s.scale.z > shrubs[0].position.z+0.9);
       assert.equal(s.position.y-s.scale.y,bed.userData.topFeet);
     }
+    // Nov 15 palette: boxwood and hydrangea shrubs, ornamental grass and low flowering
+    // perennials; every plant top stays below the porch floor so windows/columns stay visible.
+    assert.deepEqual(shrubs.map(s => s.userData.species.split(' ')[0]), ['Boxwood', 'Hydrangea', 'Boxwood', 'Hydrangea', 'Boxwood']);
+    for (const s of shrubs.filter(s => /Hydrangea/.test(s.userData.species))) {
+      const bloom = s.children.find(o => o.name === 'Hydrangea bloom cap');
+      assert.ok(bloom && bloom.position.y + bloom.geometry.radius <= 0.85 * 1.05 + 1e-9, 'Bloom shell sits just proud of the shrub top');
+    }
+    assert.ok(low.some(s => s.userData.planting === 'Ornamental grass') && low.some(s => s.userData.planting === 'Low flowering perennial'));
+    for (const s of [...shrubs.map(o => ({ top: o.position.y + 0.85 })), ...low.map(o => ({ top: o.position.y + o.scale.y }))]) assert.ok(s.top <= 0.1 + 1e-9, 'At or below porch floor level, under every sill');
   }
 });
 test('stone edging remains inside existing soil, below the walk, and outside entry/driveway', () => {

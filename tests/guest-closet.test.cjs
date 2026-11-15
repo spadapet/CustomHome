@@ -311,9 +311,9 @@ test('straight pocket-to-pocket crossing keeps a centered 36-inch band clear wit
   }
   const westNearest = Math.max(...builtIns.flatMap(meshes).map(worldBounds).filter(b => b.maxX < crossingCenter).map(b => b.maxX));
   close(westNearest, westFront);
-  close((nearestEast - crossingCenter) * 12 * 2, (tower.x - 22.25 / 12 - crossingCenter) * 12 * 2, 'Open drawer pulls are the nearest east projection');
+  assert.ok((nearestEast - crossingCenter) * 2 * 12 > 36, 'East-side projections clear the centered crossing');
   assert.ok((nearestEast - westNearest) * 12 > 48, `Open-front clear width ${(nearestEast - westNearest) * 12}`);
-  assert.ok((nearestEast - crossingCenter) * 2 * 12 > 37, 'Centered crossing band stays wider than 36 inches with fronts open');
+  assert.ok((crossingCenter - westNearest) * 2 * 12 > 36, 'West-side projections clear the centered crossing');
   for (const drawer of drawers) drawer.position.x = 0;
   for (const hinge of hinges) hinge.rotation.y = 0;
 });
@@ -364,6 +364,11 @@ test('owner-authorized south-east laundry stack is retained and its doors sweep 
 test('bedroom and bath use 30 x 96 pocket entries retracting inside real wall cavities, default closed', () =>
 {
   const { roots, context } = build();
+  for (const opening of [suite.closetDoor, suite.bathroomDoor])
+  {
+    close(opening.x, 23.55, 'Both openings move 9 inches west and remain aligned');
+    assert.ok(opening.x - (3.5 + 0.125) / 12 > westRun.x + westRun.w, 'West casing clears the wardrobe footprint');
+  }
   const walls = buildPocketWalls(context);
   const wallBounds = walls.map(worldBounds);
   assert.equal(walls.filter(part => part.name === 'Guest pocket door wall skin').length, 4);

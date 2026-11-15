@@ -34,7 +34,7 @@ function render(metal = false, override = null) {
       Float32BufferAttribute: class { constructor(array) { this.array = array; } },
       Mesh: class extends Group { constructor(geometry, material) { super(); Object.assign(this, { geometry, material }); } }
     },
-    HomeRoof, group: new Group(), white: { clone: () => ({}) }, trim: {}, mat: () => ({}),
+    HomeRoof, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: { name: 'gutter' }, mat: () => ({}),
     box(parent, x, y, z, width, height, depth, material) {
       const mesh = new Group();
       Object.assign(mesh, { geometry: { width, height, depth }, material });
@@ -148,11 +148,9 @@ test('metal ribs follow clipped porch/entry polygons with one shared finish and 
   const ribs = model.children.filter((part) => part.name === 'Clipped standing-seam roof rib');
   assert.ok(ribs.length > 10);
   assert.ok(ribs.every((part) => part.material === finish && part.userData.noExteriorShadow));
-  const barrelRibs = ribs.filter(part => part.userData.roof === 'Entry barrel metal');
-  assert.ok(barrelRibs.length > 4);
-  assert.ok(barrelRibs.every(part => Math.abs(part.axis.x) < 1e-8), 'Barrel seams run longitudinally, not as sixteen diagonal grids');
-  assert.ok(!model.children.some(part => part.userData.roofJoin &&
-    part.userData.roofs.every(roof => roof === 'Entry barrel metal')), 'Curved approximation facets are not separate raised hip caps');
-  assert.ok(model.children.some((part) => part.name === 'Connected roof valley'), 'Barrel accent joins the porch through actual clipped valleys');
+  assert.ok(!ribs.some(part => /barrel|arch|curv/i.test(part.userData.roof)), 'No curved entry-roof seams remain');
+  assert.ok(!model.children.some(part => /barrel|arch|curv|segment|tympan/i.test(`${part.name} ${part.userData.roof ?? ''}`)), 'No arched/curved porch roof part is rendered');
+  assert.ok(ribs.every(part => Math.abs(part.axis.x) < 1e-8), 'Porch seams run straight down the single slope');
+  assert.ok(!model.children.some(part => part.userData.roofJoin), 'Straight coplanar porch roof has no ridge, hip or valley joins');
   assert.ok(!model.children.some((part) => /fascia|gutter/.test(part.name)), 'Preserve the corrected metal-roof perimeter trim rather than adding crossing white strips');
 });

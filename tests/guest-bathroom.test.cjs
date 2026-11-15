@@ -332,11 +332,12 @@ test('a continuous 24-inch route screen connects bedroom, closet, basin, shower 
     for (let i = 0; i <= steps; i++) points.push([a[0] + (b[0] - a[0]) * i / steps, a[1] + (b[1] - a[1]) * i / steps]);
   }
   const north = suite.bathroom.z;
-  segment([25.55, 45], [25.55, north + 3.120833333333333]);
+  const crossing = suite.closetDoor.x + suite.closetDoor.width / 2;
+  segment([crossing, 45], [crossing, north + 3.120833333333333]);
   // Shower branch follows the shifted east entry of the wall-to-wall shower.
-  segment([25.55, north + 3.35], [22.3, north + 3.35]);
+  segment([crossing, north + 3.35], [22.3, north + 3.35]);
   // Recenter this branch in the shortened WC entry, clear of its open leaf.
-  segment([25.55, north + 3.35], [29.5, north + 3.35]);
+  segment([crossing, north + 3.35], [29.5, north + 3.35]);
   for (const [x, z] of points) {
     const route = { minX: x - 1, maxX: x + 1, minZ: z - 1, maxZ: z + 1 };
     for (const b of obstacles) assert.equal(intersectsXZ(route, b), false, `24-in screening envelope at ${x},${z}; not a person/accessibility standard`);

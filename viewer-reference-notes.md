@@ -72,7 +72,8 @@ November 14: living-room CLP-825, bench and music lamp removed, not relocated.
 Guest YDP-145, bench, recess walls and lighting retained. Earlier living-piano
 retention/placement notes in this reference are superseded historical studies.
 
-Both nominal30 ×96 pocket entries remain real3-inch cavities, default closed,
+Both nominal30 ×96 pocket entries shift 9 inches west to x23.55–26.05;
+their pockets move with them. They remain real3-inch cavities, default closed,
 flush pulls/retractable edge pulls (0.66-inch projection into opening when open).
 No exposed tracks; keep services/fasteners out of cavities. Supplier framing,
 headers, jambs, acoustic/privacy hardware and wet-side finishes unresolved.

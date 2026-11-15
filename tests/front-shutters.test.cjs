@@ -36,7 +36,7 @@ test('six retained ground/compact upper front openings have no shutters; loft op
   };
   context.brickBox = context.box;
   const start = source.indexOf('  function wall(');
-  const end = source.indexOf('  // Applied stone', start);
+  const end = source.indexOf('  // Applied brick courses', start);
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext(source.slice(0, source.indexOf('function buildExteriorModel')) + '\nconst cladding = getExteriorCladdingStudy();\n' + source.slice(start, end), context);
   const g = getUpstairsMeasuredGeometry();

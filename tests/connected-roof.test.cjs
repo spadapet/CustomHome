@@ -53,8 +53,8 @@ for (const [label, definitions] of [['main house', getConnectedRoofDefinitions()
 
   test(`${label} ridges and valleys are shared geometric intersections, not applied crossing roof boxes`, () => {
     const roof = buildRoofEnvelope(definitions);
-    if (definitions.length > 1) assert.ok(roof.joins.some((join) => join.type === 'valley'));
-    else assert.equal(roof.joins.length, 0, 'Unbroken porch plane has no fabricated valleys');
+    if (label === 'main house') assert.ok(roof.joins.some((join) => join.type === 'valley'));
+    else assert.equal(roof.joins.length, 0, 'Straight coplanar porch plane and recess infill have no fabricated valleys, ridges or arch hips');
     if (label === 'main house') assert.ok(roof.joins.some((join) => join.type === 'ridge'));
     for (const join of roof.joins) {
       for (const point of [join.start, join.end]) {

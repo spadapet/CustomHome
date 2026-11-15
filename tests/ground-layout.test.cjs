@@ -33,8 +33,10 @@ test('open kids, straight bath, larger closet and rectangular bedroom floors mee
     for (const key of Object.keys(expected)) close(part[key], expected[key]);
   }
   assert.deepEqual(s.bedroomDoor, { x: 19, z: 44.8, width: 3, height: 8, hinge: 'south', inward: true, maxAngleDegrees: 90 });
-  assert.deepEqual(s.bathroomDoor, { x: 24.3, z: s.closet.z, width: 2.5, height: 8, slide: -2.7,
-    pocket: { x: 21.4, w: 2.9, leafWidth: 2.48, leafThickness: 1.375 / 12, clearDepth: 0.25, height: 8.3 } });
+  assert.deepEqual(s.bathroomDoor, { x: 23.55, z: s.closet.z, width: 2.5, height: 8, slide: -2.7,
+    pocket: { x: 20.65, w: 2.9, leafWidth: 2.48, leafThickness: 1.375 / 12, clearDepth: 0.25, height: 8.3 } });
+  assert.equal(s.closetDoor.x, 23.55);
+  assert.equal(s.closetDoor.pocket.x, 26.05);
   assert.equal(s.bedroom.z, s.closet.z + s.closet.d);
   close(s.bedroom.d - 0.175 - 0.225, 11);
   close(s.kidsSouthZ, s.bathroom.z);
@@ -581,7 +583,7 @@ test('one standard-size powder window cuts the west wall and retains half-froste
   const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   vm.runInNewContext(source.slice(source.indexOf('  function windowFrame('), source.indexOf('  const livingWindowBank =')), context);
   const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
-  const exteriorContext = { ...context, glass: {}, privacyGlass: {}, windowBlack: {}, trim: {} };
+  const exteriorContext = { ...context, glass: {}, privacyGlass: {}, windowBlack: {}, trim: {}, windowBronze: {}, finishes: { window: { frontGrilles: false } } };
   vm.runInNewContext(exterior.slice(exterior.indexOf('  function windowUnit('), exterior.indexOf('  function wall(')), exteriorContext);
   for (const window of entry.windows) {
     assert.deepEqual(westWall[5].find((opening) => Math.abs(westWall[2] + (opening[0] + opening[1]) / 2 - window.z) < 1e-9),

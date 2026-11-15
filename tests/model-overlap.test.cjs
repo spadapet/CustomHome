@@ -359,7 +359,7 @@ test('lower-roof gutters stop at the finished brick face with end caps and never
   function render(masonryFootprints, definitions) {
     const context = {
       THREE: { Group, Vector3: Vector, DoubleSide: 2, BufferGeometry: class { setAttribute() {} computeVertexNormals() {} }, Float32BufferAttribute: class {}, Mesh: class extends Group {} },
-      HomeRoof, group: new Group(), white: { clone: () => ({}) }, trim: {}, mat: () => ({}), masonryFootprints,
+      HomeRoof, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: {}, mat: () => ({}), masonryFootprints,
       box(parent, x, y, z, width, height, depth) { const mesh = new Group(); mesh.geometry = { width, height, depth }; Object.assign(mesh.position, { x, y, z }); parent.add(mesh); return mesh; }
     };
     vm.createContext(context);
@@ -548,10 +548,12 @@ test('low-roof fascia, rakes, soffits and skins stop at the finished brick/stone
   // Production wiring: every low roof, the canopy and the porch pass through the stop, and fitted
   // closures register exact solids.
   assert.match(exteriorSource, /for \(const root of \[setbackRoofs, porchRoof\]\)/);
-  assert.match(exteriorSource, /\^\(Graphite-gray shingle covered patio roof\|Post-free canopy\|Cantilever canopy\|Canopy \)/);
+  assert.match(exteriorSource, /\^\(Charcoal shingle covered patio roof\|Post-free canopy\|Cantilever canopy\|Canopy \)/);
   assert.match(exteriorSource, /masonrySolids\.push\(prismMasonrySolid\('Garage front gable fitted brick wall-head closure', polygon, garageFacadeEaves/);
   assert.match(exteriorSource, /masonrySolids\.push\(prismMasonrySolid\('Lower setback fitted wall-head closure'/);
-  assert.match(exteriorSource, /masonryStopSolids = \[\.\.\.masonrySolids, livingPatioCanopy\.closureSolid\]/);
+  assert.match(exteriorSource, /masonryStopSolids = \[\.\.\.masonrySolids, livingPatioCanopy\.closureSolid, \.\.\.porchFlashingStops\]/);
+  // Porch counterflashing stops clip standing-seam ribs only, never the skin or ceiling.
+  assert.match(exteriorSource, /if \(solid\.ribsOnly && part\.name !== 'Clipped standing-seam roof rib'\) continue;/);
   assert.match(exteriorSource, /Register the headwall as a masonry-stop solid before its notch clip/);
   assert.match(exteriorSource, /HomeRoof\.trianglesOutsideConvex\(triangles, solidMember \? fitMasonrySolidToMember\(triangles, solid\.planes\) : solid\.planes\)/);
   // The dining-side canopy flashing sits on the closure's east face and bears on the dining roof skin.
@@ -565,7 +567,7 @@ test('dining patio steps wall light backplate bears flush on the dining west bri
   const lines = exteriorSource.split(/\r?\n/);
   const call = lines.find((line) => line.includes("wallDownlight('Dining patio steps wall downlight'"));
   const [x, y, z] = call.match(/downlight', ([\d.]+), ([\d.]+), ([\d.]+), -Math\.PI \/ 2,/).slice(1).map(Number);
-  assert.match(exteriorSource, /box\(fixture, 0, 0, -0\.2, 0\.3, 0\.3, 0\.1, dark\)\.name = 'Exterior downlight wall backplate'/);
+  assert.match(exteriorSource, /box\(fixture, 0, 0, -0\.2, 0\.3, 0\.3, 0\.1, lanternBronze\)\.name = 'Exterior downlight wall backplate'/);
   // rotation -90 deg: local -z (backplate at -0.2, 0.1 deep) points to +x.
   const back = { minX: x + 0.15, maxX: x + 0.25, minY: y - 0.15, maxY: y + 0.15, minZ: z - 0.15, maxZ: z + 0.15 };
   const wallFace = 13.2 - 0.225;
@@ -575,10 +577,10 @@ test('dining patio steps wall light backplate bears flush on the dining west bri
   const canopy = frame(0.45, layout.returnWallZ);
   const soffitBottom = Math.min(canopy.undersideAt(back.minZ), canopy.undersideAt(back.maxZ)) - 0.75;
   assert.ok(back.maxY <= soffitBottom - 1 / 12, `Below the canopy soffit (${((soffitBottom - back.maxY) * 12).toFixed(2)} in clear)`);
-  assert.ok(back.minY >= 2.125, 'On brick above the stone and coping');
+  assert.ok(back.minY >= 0, 'On full-height brick (no stone or coping band)');
 });
 
-test('upper bay-head caps, stone sills/stools/lintels/jambs, window trim and cornice courses bear on (not in) the brick face and stop at adjoining faces', () => {
+test('upper bay-head caps, brick sills/heads/jambs, window trim and cornice courses bear on (not in) the brick face and stop at adjoining faces', () => {
   const upper = require('../assets/js/floor-plan-upstairs.js');
   const pieces = [];
   const context = {
@@ -586,6 +588,7 @@ test('upper bay-head caps, stone sills/stools/lintels/jambs, window trim and cor
     box(parent, x, y, z, w, h, d) { const m = { wall: parent.name, x, y, z, w, h, d, rotation: { x: 0 } }; pieces.push(m); return m; }
   };
   context.brickBox = context.box;
+  context.brickSoldierBox = context.box;
   vm.createContext(context);
   vm.runInContext(slice(exteriorSource, '  const upperCourseOnlyWalls', '  const win ='), context);
   const segments = upper.getUpstairsExteriorSegments();
@@ -653,18 +656,18 @@ test('upper bay-head caps, stone sills/stools/lintels/jambs, window trim and cor
   for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
     assert.ok(depth(boxes[i], boxes[j]) <= 1e-9, `${boxes[i].name} (${boxes[i].wall}) overlaps ${boxes[j].name} (${boxes[j].wall}) by ${(depth(boxes[i], boxes[j]) * 12).toFixed(2)} in`);
   }
-  // Rear/side lintels rise only to the frieze; the bed molding stops at each lintel end.
-  const lintels = pieces.filter((p) => /stone lintel/.test(p.name));
+  // Rear/side brick soldier heads rise only to the frieze; the bed molding stops at each head end.
+  const lintels = pieces.filter((p) => /brick soldier head/.test(p.name));
   assert.ok(lintels.length >= 8 && lintels.every((l) => Math.abs(l.y + l.h / 2 - (19 - 0.56)) < 1e-9));
   // Recessed closet-4 cornice: front courses run into the inside corners, the returns butt them.
   const closetFrontCrown = boxes.find((b) => b.wall.endsWith('closet 4 front') && b.name === 'Cornice projecting crown');
   assert.ok(Math.abs(closetFrontCrown.minX - (12.35 + face)) < 1e-9 && Math.abs(closetFrontCrown.maxX - (18.85 - face)) < 1e-9);
   for (const ret of boxes.filter((b) => /closet 4 (west|east) return/.test(b.wall) && b.name === 'Cornice projecting crown')) assert.ok(Math.abs(ret.minZ - closetFrontCrown.maxZ) < 1e-9);
-  // Production wiring: upper walls build their own trim; the ground front head trim stops under the limestone lintel.
+  // Production wiring: upper walls build their own trim; the ground front head trim stops under the brick soldier head.
   assert.match(exteriorSource, /opening\.picture, !name\.startsWith\('upper '\), front, false,\r?\n\s+name === 'front ground floor' \? groundFrontLintel\.y - groundFrontLintel\.height \/ 2 : Infinity\)/);
-  assert.match(exteriorSource, /box\(group, x, groundFrontLintel\.y, frontWallZ \+ 0\.34, width \+ 0\.65, groundFrontLintel\.height,/);
+  assert.match(exteriorSource, /brickSoldierBox\(group, x, groundFrontLintel\.y, frontWallZ \+ 0\.34, width \+ 0\.65, groundFrontLintel\.height,/);
   assert.match(exteriorSource, /articulateUpperMasonry\(wallGroup, length, top, openings, localUpperNeighbours\(name\.slice\('upper '\.length\)\)\)/);
-  // Ground front: white head trim (frame head + 0.05 ft) stops beneath the limestone lintel.
+  // Ground front: warm cream head trim (frame head + 0.05 ft) stops beneath the brick soldier head.
   const lintelBottom = 8.32 - 0.35 / 2;
   for (const w of ground.getGroundFrontWindows()) {
     const head = (w.frameSill ?? w.sill) + (w.frameHeight ?? w.height);

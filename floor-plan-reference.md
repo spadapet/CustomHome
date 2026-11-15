@@ -1,5 +1,37 @@
 # Ground-floor plan reference
 
+## English-French Transitional exterior — November 15
+
+Finish-only exterior update; plans, footprint, floor datums, all 27 window
+openings / 47 units, doors, garage, porch (31 ft 2 in x 7 ft at x0-31.2,
+z54.679-61.679) and every main/lower roof face match the HEAD 1e61f87
+baseline. The porch roof intentionally differs (straight-roof bullet below).
+
+- Full warm ivory brick, light cream mortar, footing to eaves on every
+  elevation, gable and garage wall; stone wainscot/coping removed. Upper
+  sills/heads/jambs/belt/frieze are brick; trim warm cream #e9ddc6.
+- Cast stone only at the arched entry surround, steps and landing nose.
+- Dark Bronze window exteriors (White interiors to confirm), no grilles
+  (supersedes October 27 front grids). Oak 5 x 8 ft arched doors unchanged.
+- Charcoal shingles; charcoal standing-seam porch roof; taupe garage doors;
+  Dark Bronze gutters/leaders/lanterns; 2700 K porch cans.
+- Porch: four straight square cream columns, one straight beam/fascia,
+  flat T&G ceiling; segmental arch band and portal piers removed. Seating
+  groups at x3.2/8 and x23.2/28 (tables x5.6/25.6, z56.629); planters
+  x10.3/20.9, z60.979; all clear of the x10.6-20.6 entry envelope.
+- Straight porch roof: the segmental entry barrel (9.15 ft, 19.2-in rise),
+  its curved fascia/drip and cream closure are removed. One plane at the
+  existing ~1.6:12 pitch (y = 18.08 - 0.1307 z) spans x-0.65-31.85 from the
+  upper wall line z53.8 to the eave z62.729 (y9.879); a coplanar infill
+  reaches the closet-4 recess wall (x12.35-18.85, z51.8-53.8). One straight
+  fascia x-0.65-31.85, y9.462-9.762, z62.479-62.779. Charcoal counterflashing
+  (4 in high, 0.6 in deep) lines the bedroom faces, bay piers and recess at
+  y10.99-11.61; seams end under it. Ceiling T&G is continuous over the entry.
+- New finish closure: brick north gable of the unfinished attic void,
+  x42.808-55.725, z14.55-15.0, y9 to the attic roof underside.
+- Front-window resizing is proposed only (see design context and
+  [elevations](elevations.html#front-window-proposal)).
+
 ## Living-room piano removal — November 14
 
 The living-room CLP-825, bench and music lamp are removed, not relocated.
@@ -69,7 +101,7 @@ Closet floorx20.841666667–31.2/z37.977066929–43.279166667:
 **Current walk-in closet redesign, November 14 (owner: "do a better job"):**
 owner-authorized south-east laundry stays; storage becomes two built-in end
 runs on shared 84-inch shelf and 96-inch door-head datums, with the straight
-pocket-to-pocket crossing x24.3–26.8 left open.
+pocket-to-pocket crossing x23.55–26.05 left open.
 West wardrobe: standard 24 + 30-inch sections (54 ×24 ×96 inches), centered on
 the 59.4252-inch wall with separate 2.7126-inch end fillers (lower piece stops at
 the 3/4-inch base trim; upper scribe from 8 1/8 inches leaves 1/8 inch to paint).
@@ -83,14 +115,14 @@ pulls), 36-inch folding top beside the laundry, fixed shelves 48/60/72/84.
 East 96-inch shelf continues over the stack; 84-inch shelf over the dryer leaves
 a measured 15.44-inch top gap (published 6.25; above the 74-inch reserve).
 Shelves over the stack bear on the tower, east-wall cleats and south-wall cleats
-only east of the pocket (from x29.783). Tower/stack side gap 4.1752 inches.
+only east of the pocket (from x29.7125). Tower/stack side gap 4.1752 inches.
 20 ×62-inch oak-framed dressing mirror on the solid north wall between the
 bath casing and tower. Warm 2700K LED strips under the four 84-inch shelves glow
 with guest-suite Night lighting only (no product selected; existing ceiling
 light retained). Walkway: west clothing face to stack front 66.35 inches, to
 tower front 70.6; with every drawer and both laundry doors open, 48.35 inches
-remain from clothing to drawer pulls and a door-centered 37.4-inch band is
-clear. Capacity: drawers 0 → 4; folding surface 0 → 30 ×24 inches; shelving
+remain from clothing to drawer pulls; a door-centered 36-inch band is
+clear in the model. Capacity: drawers 0 → 4; folding surface 0 → 30 ×24 inches; shelving
 about 297 → 444 linear inches including decks and folding top (most now 24\r
 inches deep, not 12).
 The Guest closets plan preset hides only the 84/96-inch shelves and LEDs for
@@ -119,8 +151,9 @@ laundry provision pending approval. Official sources/retrieval2026-11-14:
 [dryer technical/installation sheet9/26 pp1,3–4](https://media3.bosch-home.com/Documents/24375690_WQB245B0UC_Spec_Sheet.pdf).
 Dryer sheet lists supplied WTZPA20UC/NEMA14-30R adapter or individual208/240 V
 circuits per manuals; electrician must select. All installation holds remain.
-Both nominal30 ×96-inch
-pocket doors remain closed by default, with3-inch wall cavities, flush pulls
+Both nominal30 ×96-inch openings shift 9 inches west to x23.55–26.05;
+the bathroom pocket is x20.65–23.55 and bedroom pocket x26.05–28.95.
+Pocket doors remain closed by default, with3-inch wall cavities, flush pulls
 and retractable edge pulls (0.66-inch projection into nominal opening when open).
 Supplier framing/header/hardware review required; no services or fasteners in cavities.
 
@@ -1046,6 +1079,7 @@ pale paving/treads. Require stone/brick/mortar sample panels in sun/shade.
 
 The retained porch plane receives a9.15-ft-wide segmental entry barrel,
 19.2-in rise, sixteen sloping facets and a rear return clipped into the porch.
+(Historical; the barrel was removed November 15 - see the straight porch roof above.)
 Its open arch trim is8.4 in high/7.8 in deep. Retain four support centers,
 79.8-in foot passage, existing96-in arched door, matching office/guest
 triples, all other openings, shutter removal, furniture and saved JSON.
@@ -3937,8 +3971,8 @@ All house doors and doorless cased passages have nominal **8 ft / 96 in heads** 
 | Kitchen to kids | Nominal60 ×96-inch cased opening x20.875–25.875,z24.766667 | Assumed location2; no leaves/hinges/handles now; future30+30 double leaves require supplier frame/rough-opening/finished-passage approval |
 | Hall to office | Nominal 60 x 96 in envelope, x = 12.2, z = 42.75-47.75 | Two nominal 30 in white French leaves, each 2 columns x 5 rows of clear lites, white muntins, gold round knobs and dark hinges; white casing. Both start fully open inward at 90 degrees into the office, perpendicular to the opening. Click/tap toggles closed or to the 90-degree study stop, superseding 180 degrees to clear the east desk. Unit/jamb/rough opening, true/simulated divisions, safety glazing, handing, stop hardware and occupied use unapproved; see [office doors](office.html#doors) |
 | Hall to guest bedroom | 36 x 96 in opening, west wall x19, z44.8-47.8 | White single-panel leaf, closed default; modeled south-jamb inward swing into bedroom. Confirm actual handing and operation |
-| Guest bedroom to walk-through closet | 30 × 96-inch opening x24.3–26.8, z43.279167 | Pocket leaf retracts east into wall cavity x26.8–29.7; default closed, recessed pulls, no exposed track; framing/hardware unselected |
-| Guest bathroom entry | 30 × 96-inch opening x24.3–26.8, z37.977067 | Pocket leaf retracts west into cavityx21.4–24.3; real3-inch void/skins, flush/retractable edge pulls, default closed. Only track/wall move; wet-side framing/hardware unselected |
+| Guest bedroom to walk-through closet | 30 × 96-inch opening x23.55–26.05, z43.279167 | Pocket leaf retracts east into wall cavity x26.05–28.95; default closed, recessed pulls, no exposed track; framing/hardware unselected |
+| Guest bathroom entry | 30 × 96-inch opening x23.55–26.05, z37.977067 | Pocket leaf retracts west into cavity x20.65–23.55; real 3-inch void/skins, flush/retractable edge pulls, default closed. Wet-side framing/hardware unselected |
 | Guest private WC | 30 ×96 opening on west partitionx27.85,z35.127067–37.627067 | Opening/south hinge move4.2 inches north, same inward handing. Nineteen five-degree fixture/hardware/paint sweep samples through90; sound rating, actual casing/occupied use unapproved |
 | Guest shower | Built-in, wall to wall (north to south paint faces, 38.4 × 55.8 in outside); 36 × 53.4-inch curb-interior, west side; 30-inch east entry | Tiled west/north/south walls, fixed northeast glass, step-over curb, not accessible; glazing, containment and tight piano-return junction require review |
 | Front entry | 60 x 96 in, z = 54.679, x = 13.1-18.1 | Two oak/glass leaves shown closed; click/tap either leaf to the modeled 180-degree endpoint; no sidelights/transom; final door unit unselected |

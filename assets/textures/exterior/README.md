@@ -14,19 +14,21 @@ The viewer has no runtime dependency on Poly Haven.
 | Oak Veneer 01 | https://polyhaven.com/a/oak_veneer_01 | Jenelle van Heerden | diffuse, OpenGL normal, roughness |
 | Roof Slates 03 | https://polyhaven.com/a/roof_slates_03 | Rob Tuytel | diffuse, OpenGL normal, roughness |
 
-The October 30 study uses warm-gray modern queen brick above full lower-story
-light stone, superseding the white-brick/red-plinth study. Brick diffuse
-luminance L grades to V=min(229,164+0.255L), RGB(V+4,V+3,V-2), rounded
-to clamped bytes. Stone uses its own Stone Wall scan, not recolored brick:
-V=110+0.58L, RGB(V+8,V+6,V). Independent diffuse Sources retain original
-normal/roughness maps; brick relief strength0.18, stone0.3. No new assets
-or manufacturer photography; the repository's existing CC0 provenance above
-is retained, not a new manufacturer sourcing claim.
-Porch exposed foundation, support bases, landing nose and step risers use stone.
-Pale coping, porch paving and stone treads retain contrast; walking finishes
-require exterior slip/frost selection. Wall veneer is not approved paving.
+November 15 English-French Transitional study (supersedes the October 30
+Linen/low-stone grading): all grades come from `getExteriorMaterialConfig()`.
+Brick faces grade to warm ivory RGB(232,214,184) at scan luminance 128,
+shade 0.26 x (L-128) plus a bounded +/-6 warm variation from source chroma;
+the scan's pale low-chroma joints (chroma<24, L>115) become light cream
+mortar RGB(242,233,213). Stone Wall grades to warm cream cast stone
+RGB(224,214,192), used only at the front entrance. Roof Slates 03 grades to
+charcoal RGB(84,81,76) as a dimensional-shingle display proxy. The oak scan
+also supplies the porch tongue-and-groove ceiling with drawn board joints.
+Independent diffuse Sources retain original normal/roughness maps; no new
+assets or manufacturer photography; the CC0 provenance above is retained.
+Porch foundation faces are brick; landing nose and step risers cast stone.
+Walking finishes require exterior slip/frost selection.
 All diffuse Sources are sRGB with white material multipliers.
-White trim/portal stay pale. Physical brick/mortar/stone panels required.
+Physical brick/mortar/cast-stone sample panels are required.
 Original JPGs remain unchanged. Normal and roughness
 maps remain non-color data; they are not derived from the color map.
 Brick repeats are interpreted as five nominal8-inch modules across and

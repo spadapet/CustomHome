@@ -164,21 +164,15 @@
       ? getGroundFrontLayout() : require('./floor-plan-ground.js').getGroundFrontLayout();
     const angle = 0.13, centerHeight = 10.5, centerZ = 57.5 + front.extension;
     const porchPlane = [0, -Math.tan(angle), centerHeight + centerZ * Math.tan(angle)];
-    // Segmental barrel accent: sixteen true sloping facets, clipped into the
-    // porch plane with a rear falling return, not a floating applied arch.
-    const archHalf = 4.575, archRise = 1.6, archCenter = 15.6;
-    const points = Array.from({ length: 17 }, (_, i) => {
-      const dx = -archHalf + 2 * archHalf * i / 16;
-      return [archCenter + dx, archRise * (1 - (dx / archHalf) ** 2)];
-    });
-    const archPlanes = points.slice(1).map((b, i) => {
-      const a = points[i], slope = (b[1] - a[1]) / (b[0] - a[0]);
-      return [slope, porchPlane[1], porchPlane[2] + a[1] - slope * a[0]];
-    });
+    // November 15: one continuous straight low-slope plane across all three
+    // bays. The former segmental entry hump was removed (no porch arches).
+    // The plane stops at the upper bedroom wall centre line (z53.8) so no skin
+    // reaches inside the rooms, and a coplanar infill carries the same plane
+    // back to the recessed closet-4 wall (z51.8), so it meets brick everywhere.
+    const g = upperGeometry();
     return [
-      { id: 'Porch metal', finish: 'metal', bounds: [-0.65, 31.85, 52.75 + front.extension, 62.25 + front.extension], planes: [porchPlane] },
-      { id: 'Entry barrel metal', finish: 'metal', bounds: [archCenter - archHalf, archCenter + archHalf, 57.5 + front.extension, 62.25 + front.extension],
-        planes: [...archPlanes, [0, 1, centerHeight - (57.5 + front.extension)]] }
+      { id: 'Porch metal', finish: 'metal', bounds: [-0.65, 31.85, g.south, 62.25 + front.extension], planes: [porchPlane] },
+      { id: 'Porch recess metal', finish: 'metal', bounds: [g.southClosetWest, g.southClosetEast, g.southClosetSouth, g.south], planes: [porchPlane] }
     ];
   }
 

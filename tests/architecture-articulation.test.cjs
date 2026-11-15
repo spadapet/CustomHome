@@ -16,25 +16,27 @@ function harness() {
     }
   };
 }
-test('retained portal supports preserve the approach beneath the new segmental arch', () => {
+test('retained entry columns carry a straight entablature: no portal piers, imposts or curved members', () => {
   const c = harness();
   c.brickBox = c.box;
   vm.runInNewContext(source.slice(source.indexOf('  const entryPortal ='), source.indexOf('  const porchCanopyHeight =')), c);
-  const feet = c.meshes.filter(o => o.name === 'Entry portal stone foot');
-  const shafts = c.meshes.filter(o => o.name === 'Entry portal masonry pier jacket');
-  assert.ok(Math.abs((feet[1].min[0]-feet[0].max[0])*12-79.8)<1e-8);
-  assert.ok(Math.abs((shafts[1].min[0]-shafts[0].max[0])*12-82.8)<1e-8);
-  assert.ok(!c.meshes.some(o => o.name === 'Entry portal deep stone entablature'), 'No flat beam blocks the arched opening');
-  assert.ok(shafts.every(o=>o.d===1 && o.max[2]===61 + c.frontShift));
+  assert.equal(c.meshes.length, 0, 'Portal pier jackets, stone feet and imposts are removed');
+  const portal = c.group.children[0];
+  assert.equal(portal.name, 'Straight entry entablature - support concept');
+  assert.equal(portal.userData.straightBeam, true);
+  assert.equal(portal.userData.curvedMembers, false);
+  assert.doesNotMatch(source, /Entry portal (stone foot|masonry pier jacket|impost)|Segmental entry canopy arch/);
 });
-test('upper stone constituents border rather than fill actual glazing; cornice fits below wall head', () => {
+test('upper brick constituents border rather than fill actual glazing; cornice fits below wall head', () => {
   const c = harness();
+  c.brickBox = c.box;
+  c.brickSoldierBox = c.box;
   vm.createContext(c);
   vm.runInContext(source.slice(source.indexOf('  function articulateUpperMasonry('),source.indexOf('  const win =')),c);
   c.parent = new c.THREE.Group();
   vm.runInContext('articulateUpperMasonry(parent,31,19,[{center:4.8,width:2.4,sill:13,height:5}])',c);
-  // Courses (bed molding broken by the lintel), stool, lintel, two jambs and the
-  // white sill/head trim; every piece starts at the brick face (z 0.225).
+  // Courses (bed molding broken by the soldier head), rowlock sill, soldier head,
+  // two brick jamb returns and the warm cream sill/head trim; every piece starts at the brick face (z 0.225).
   assert.equal(c.meshes.length,11);
   for (const o of c.meshes) {
     assert.ok(o.max[0] <= 3.6+1e-8 || o.min[0] >= 6-1e-8 || o.max[1]<=13 || o.min[1]>=18,

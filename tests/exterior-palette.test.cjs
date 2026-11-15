@@ -1,4 +1,6 @@
 'use strict';
+// November 15 English-French Transitional exterior: the shared material configuration
+// and the actual diffuse grading for brick/mortar, entrance cast stone and shingles.
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -6,49 +8,85 @@ const vm = require('node:vm');
 const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
 const context = {};
 vm.runInNewContext(source.slice(0, source.indexOf('function buildExteriorModel')), context);
+const grade = (name, bytes) => { const data = new Uint8ClampedArray(bytes); context[name](data); return [...data]; };
+const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
 
-test('actual diffuse conversion produces light Linen brick without source chroma', () => {
-  const normal = new Uint8ClampedArray([128, 132, 254, 255]);
-  const roughness = new Uint8ClampedArray([190, 190, 190, 255]);
-  const before = [...normal, ...roughness];
-  const outputs = [];
-  for (const l of [0, 40, 80, 120, 160, 200, 255]) {
-    const data = new Uint8ClampedArray([l, l, l, 237]);
-    context.gradeExteriorBrickPixels(data);
-    const [r, g, b, a] = data;
-    assert.ok(r >= 187 && r <= 245);
-    assert.ok(g >= 176 && g <= 234);
-    assert.ok(b >= 158 && b <= 216);
-    assert.ok(r > g && g > b);
-    assert.ok(r - g === 11 && g - b === 18, 'selected Linen beige, no source red/pink chroma tails');
-    assert.equal(a, 237);
-    outputs.push(b);
+test('one exterior material configuration names every specified finish', () => {
+  const finishes = context.getExteriorMaterialConfig();
+  assert.equal(finishes.style, 'English-French Transitional');
+  assert.equal(finishes.productsApproved, false);
+  for (const key of ['brick', 'mortar', 'castStone', 'window', 'entryDoor', 'shingle', 'porchColumn', 'porchCeiling', 'garageDoor', 'trim', 'gutter', 'lantern', 'porchRoof'])
+    assert.ok(finishes[key]?.name || finishes[key]?.color, key);
+  assert.match(finishes.castStone.use, /entrance/i);
+  assert.match(finishes.castStone.use, /no foundation band/i);
+  assert.equal(finishes.window.grilles, 'none');
+  assert.equal(finishes.window.frontGrilles, false);
+  assert.match(finishes.window.name, /Andersen 100 Series Fibrex, Dark Bronze/);
+  assert.match(finishes.brick.coverage, /All four elevations, both floors, every gable and the garage/);
+  // Dark bronze, not pure black: warm, low but non-zero value.
+  for (const hex of [finishes.window.exterior, finishes.gutter.color, finishes.lantern.color]) {
+    const [r, g, b] = rgb(hex);
+    assert.ok(r > g && g > b, `${hex} is warm bronze`);
+    assert.ok(r >= 0x30 && r <= 0x50, `${hex} is dark but not black`);
   }
-  assert.ok(outputs[5] - outputs[0] >= 45, 'light Linen grading retains face/joint detail');
-  assert.deepEqual([...normal, ...roughness], before);
+  // Warm cream trim/columns (no bright white); warm taupe garage doors.
+  for (const hex of [finishes.trim.color, finishes.porchColumn.color]) {
+    const [r, g, b] = rgb(hex);
+    assert.ok(r > g && g > b && r < 245 && r - b >= 25, `${hex} is warm cream`);
+  }
+  const [tr, tg, tb] = rgb(finishes.garageDoor.color);
+  assert.ok(tr > tg && tg > tb && tr - tb < 40 && tr > 140 && tr < 190, 'muted warm taupe, not oak or white');
+  const [pr, pg, pb] = rgb(finishes.porchRoof.color);
+  assert.ok(Math.max(pr, pg, pb) < 90 && pr >= pb, 'charcoal porch roof coordinated with the shingles');
+  const study = context.getExteriorCladdingStudy();
+  assert.equal(study.stoneBand, false);
+  assert.equal(study.stoneTop, undefined);
+  assert.equal(study.copingTop, undefined);
+  assert.equal(study.trim, finishes.trim.color);
+  assert.equal(study.metal, finishes.gutter.color);
 });
 
-test('red-brown conversion is contrasting and independent from white diffuse bytes', () => {
-  const ivory = new Uint8ClampedArray([120, 100, 80, 255]);
-  const base = new Uint8ClampedArray(ivory);
-  context.gradeExteriorBrickPixels(ivory);
-  context.gradeExteriorBrickPixels(base, true);
-  assert.deepEqual([...base], [140, 72, 53, 255]);
-  assert.ok(ivory[1] > base[1] + 40);
-  assert.match(source, /const stoneColor = new THREE\.CanvasTexture\(stoneCanvas\)/,
-    'stone has an independent diffuse Source, not red brick');
+test('brick grading yields warm ivory faces with cream mortar and no source red/orange chroma', () => {
+  const normal = new Uint8ClampedArray([128, 132, 254, 255]);
+  const before = [...normal];
+  // Chromatic scan faces across the luminance range.
+  const faces = [0, 40, 80, 120, 160, 200, 255].map((l) => grade('gradeExteriorBrickPixels', [Math.min(255, l + 30), l, Math.max(0, l - 30), 237]));
+  for (const [r, g, b, a] of faces) {
+    assert.ok(r > g && g > b, 'warm, not cool gray');
+    assert.ok(r - g >= 10 && r - g <= 20 && g - b >= 18 && g - b <= 30, 'ivory/cream beige, not red/orange or pure white');
+    assert.equal(a, 237);
+  }
+  assert.ok(faces[5][2] - faces[0][2] >= 40, 'subtle variation and joint relief retained');
+  assert.deepEqual(grade('gradeExteriorBrickPixels', [168, 120, 96, 255]), [232, 214, 184, 255], 'warm ivory swatch at scan luminance 128');
+  // Strong red/blue/white source tails are pulled to the same ivory family.
+  for (const source of [[255, 0, 0], [200, 80, 60], [0, 255, 255], [70, 60, 200]]) {
+    const [r, g, b] = grade('gradeExteriorBrickPixels', [...source, 255]);
+    assert.ok(r > g && g > b && r - b <= 65 && r - b >= 30, `${source} graded to ivory`);
+  }
+  // Pale neutral scan joints become light warm cream mortar, lighter than the face.
+  const mortar = grade('gradeExteriorBrickPixels', [128, 128, 128, 237]);
+  assert.deepEqual(mortar, [242, 233, 213, 237]);
+  assert.ok(mortar[0] > 224 && mortar[0] - mortar[2] < 30, 'light warm cream, never dark mortar');
+  assert.deepEqual([...normal], before, 'normal/roughness bytes are never graded');
 });
 
-test('red-brown brick retains pale scan mortar and alpha without changing main grading', () => {
-  const mortar = new Uint8ClampedArray([180, 175, 168, 237]);
-  context.gradeExteriorBrickPixels(mortar, true);
-  assert.ok(mortar[0] - mortar[1] < 10);
-  assert.ok(mortar[1] > 180);
-  assert.equal(mortar[3], 237);
-  for (const rgb of [[100,60,30], [180,90,60], [220,130,80]]) {
-    const face = new Uint8ClampedArray([...rgb, 255]);
-    context.gradeExteriorBrickPixels(face, true);
-    assert.ok(face[0] > face[1] + 45 && face[1] > face[2] + 10);
+test('cast stone is a slightly different warm cream limestone and the roof is charcoal', () => {
+  const stone = grade('gradeExteriorStonePixels', [128, 128, 128, 237]);
+  assert.deepEqual(stone, [224, 214, 192, 237]);
+  const brick = grade('gradeExteriorBrickPixels', [168, 120, 96, 255]);
+  const delta = stone.slice(0, 3).map((value, i) => value - brick[i]);
+  assert.ok(delta.some((value) => Math.abs(value) >= 5) && delta.every((value) => Math.abs(value) <= 25), 'slightly, not strongly, contrasting');
+  const veined = grade('gradeExteriorStonePixels', [60, 30, 0, 237, 210, 180, 150, 255]);
+  assert.ok(veined[4] - veined[0] > 20, 'soft limestone relief retained');
+  assert.equal(veined[3], 237);
+  const roof = grade('gradeExteriorRoofPixels', [128, 128, 128, 237]);
+  assert.deepEqual(roof, [84, 81, 76, 237]);
+  for (const source of [[200, 80, 20], [20, 80, 200], [255, 0, 45]]) {
+    const [r, g, b, a] = grade('gradeExteriorRoofPixels', [...source, 255]);
+    assert.equal(r - g, 3);
+    assert.equal(g - b, 5, 'deep warm gray, no source hue');
+    assert.ok(r < 100);
+    assert.equal(a, 255);
   }
 });
 
@@ -64,11 +102,11 @@ test('box projection measures physical brick modules independently on front and 
   assert.equal(values[3][0], values[0][0], 'return uses actual depth, not wide face stretch');
 });
 
-test('actual brickBox selects independent base diffuse and clones matching relief at unit repeats', () => {
+test('brickBox keeps independent cast-stone diffuse and clones matching relief at unit repeats', () => {
   const texture = id => ({ id, repeat:{ values:[], set(...v){this.values=v;}, copy(r){this.values=[...r.values];} },
     clone(){return texture(id);} });
   const finish = id => ({map:texture(id),normalMap:texture(id+'-normal'),roughnessMap:texture(id+'-rough'),clone(){return {...this};}});
-  const frontBrick = finish('white'), baseBrick = finish('red');
+  const frontBrick = finish('ivory'), baseBrick = finish('cast');
   const c = {frontBrick,baseBrick,masonryMaps:{},brickTextureWidthFeet:10/3,brickTextureHeightFeet:175/48,
     mapBrickBoxUVs:context.mapBrickBoxUVs,
     box(parent,x,y,z,w,h,d,material){return {material,geometry:{attributes:{
@@ -77,66 +115,22 @@ test('actual brickBox selects independent base diffuse and clones matching relie
       uv:{setXY(i,u,v){this.value=[u,v];}}}}};}};
   const start = source.indexOf('  function brickBox(');
   vm.runInNewContext(source.slice(start,source.indexOf('  if (masonryMaps) {',start)),c);
-  const red = c.brickBox({},0,0,0,7/6,2.5,7/6,true);
-  const white = c.brickBox({},0,0,0,6,9,0.45);
-  assert.equal(red.material.map.id,'red');
-  assert.equal(white.material.map.id,'white');
+  const cast = c.brickBox({},0,0,0,10.8,0.3,0.15,true);
+  const brick = c.brickBox({},0,0,0,6,9,0.45);
+  assert.equal(cast.material.map.id,'cast');
+  assert.equal(cast.userData.cladding,'cast stone');
+  assert.equal(brick.material.map.id,'ivory');
+  assert.equal(brick.userData.cladding,'brick');
   for (const key of ['map','normalMap','roughnessMap']) {
-    assert.notEqual(red.material[key],baseBrick[key]);
-    assert.deepEqual(red.material[key].repeat.values,[1,1]);
+    assert.notEqual(cast.material[key],baseBrick[key]);
+    assert.deepEqual(cast.material[key].repeat.values,[1,1]);
   }
-  assert.equal(red.material.bumpMap,null);
-  assert.deepEqual(frontBrick.map.repeat.values,[]);
-  assert.deepEqual(baseBrick.map.repeat.values,[]);
-  assert.ok(Math.abs(red.geometry.attributes.uv.value[1]-1.25/8)<1e-10, 'Stone has its own eight-foot scan module');
-});
-
-test('stone grading neutralizes brown source faces, preserves joint contrast and never changes alpha', () => {
-  const data = new Uint8ClampedArray([60,30,0,237,210,180,150,255]);
-  context.gradeExteriorStonePixels(data);
-  assert.deepEqual([...data], [192,187,176,237,224,219,208,255]);
-  assert.ok(data[4]-data[0] > 30, 'pale stone still retains joint/face separation');
-  assert.match(source, /normalScale = new THREE\.Vector2\(0\.3, 0\.3\)/);
-});
-
-test('all source hue tails become the same Linen beige, not source pink or ochre', () => {
-  for (const rgb of [[255, 0, 0], [255, 150, 140], [0, 255, 255], [70, 60, 200], [255,255,255]]) {
-    const data = new Uint8ClampedArray([...rgb, 255]);
-    context.gradeExteriorBrickPixels(data);
-    assert.equal(data[0] - data[1], 11);
-    assert.equal(data[1] - data[2], 18);
-    assert.ok(data[1] > data[2], 'warm, not neutral grey');
-  }
-});
-
-test('actual grading and trim match palette 2 Linen swatches at scan luminance 128', () => {
-  const brick = new Uint8ClampedArray([128,128,128,237]);
-  const stone = new Uint8ClampedArray(brick), roof = new Uint8ClampedArray(brick);
-  context.gradeExteriorBrickPixels(brick);
-  context.gradeExteriorStonePixels(stone);
-  context.gradeExteriorRoofPixels(roof);
-  assert.deepEqual([...brick], [216,205,187,237]);
-  assert.deepEqual([...stone], [213,208,197,237]);
-  assert.deepEqual([...roof], [89,89,83,237]);
-  for (const rgb of [[200,80,20],[20,80,200],[255,0,45]]) {
-    const bytes = new Uint8ClampedArray([...rgb,255]);
-    context.gradeExteriorRoofPixels(bytes);
-    assert.equal(bytes[0],bytes[1]);
-    assert.equal(bytes[1]-bytes[2],6);
-    assert.equal(bytes[3],255);
-  }
-  const study = context.getExteriorCladdingStudy();
-  const board = fs.readFileSync(require.resolve('../assets/images/exterior/exterior-palette-options.svg'), 'utf8');
-  const start = board.indexOf('>2 Linen<'), end = board.indexOf('>3 Pebble<');
-  assert.ok(start >= 0 && end > start);
-  const swatches = [...board.slice(start, end).matchAll(/<rect[^>]+fill="(#[0-9a-f]{6})"/g)].map(match => match[1]);
-  assert.equal(swatches.length, 5);
-  const hex = bytes => '#' + [...bytes].slice(0, 3).map(byte => byte.toString(16).padStart(2, '0')).join('');
-  assert.equal(hex(brick), swatches[0]);
-  assert.equal(hex(stone), swatches[1]);
-  assert.equal(study.trim, swatches[2]);
-  assert.equal(study.metal, swatches[3]);
-  assert.equal(hex(roof), swatches[3]);
-  assert.equal(study.palette, 'Linen');
-  assert.equal(study.productsApproved, false);
+  assert.deepEqual(brick.material.map.repeat.values,[6/(10/3), 9/(175/48)], 'realistic 8 x 3.125 inch module');
+  // Soldier/rowlock courses turn the same brick 90 degrees rather than using stone.
+  const turned = [];
+  frontBrick.map.clone = () => ({ center:{set(...v){turned.push(['center',...v]);}}, repeat:{set(...v){turned.push(['repeat',...v]);}}, set rotation(v){turned.push(['rotation',v]);} });
+  frontBrick.normalMap = null; frontBrick.roughnessMap = null;
+  const soldier = c.brickSoldierBox({},0,0,0,8.25,0.35,0.24);
+  assert.equal(soldier.userData.bond,'soldier');
+  assert.deepEqual(turned.find(t=>t[0]==='rotation'),['rotation',Math.PI/2]);
 });

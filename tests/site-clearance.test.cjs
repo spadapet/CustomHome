@@ -29,7 +29,7 @@ function fixture() {
   vm.runInContext(source.slice(0, source.indexOf('function buildExteriorModel')) + '\nconst cladding = getExteriorCladdingStudy();', context);
   const run = (start, end) => vm.runInContext(source.slice(source.indexOf(start), source.indexOf(end, source.indexOf(start))), context);
   run('  const wallThickness =', '  const eaves =');
-  run('  function wall(', '  // Applied stone');
+  run('  function wall(', '  // Applied brick courses');
   vm.runInContext("wall('east ground floor',55.5,49,55.5,7,2.5,9); wall('west ground floor',0,0,0,10,2.5,9);", context);
   vm.runInContext('const westFenceReturnZ=45,eastFenceReturnZ=41;', context);
   run('  const fence = new THREE.Group();', "  fenceRun('West fence return'");

@@ -6,7 +6,7 @@ function getWindowProductIntent(width, height, picture = false, privacy = false)
   const unitWidth = width / columns, unitHeight = height / rows;
   return {
     manufacturer: 'Andersen', series: '100 Series', material: 'Fibrex composite',
-    exteriorFinish: 'White', interiorFinish: 'White', grilles: 'none',
+    exteriorFinish: 'Dark Bronze', interiorFinish: 'White', grilles: 'none',
     operation: picture ? 'fixed picture window' : columns === 3 ? 'casement / fixed picture / casement' : 'casement',
     pictureColumns: picture ? [0] : columns === 3 ? [1] : [],
     columns, rows, widthFeet: width, heightFeet: height,
@@ -40,8 +40,8 @@ function getGroundFrontLayout() {
   const porchDepth = 7;
   return { extension, wallZ, porchDepth, porchEdgeZ: wallZ + porchDepth };
 }
-// Six-light colonial concept per unit. Bars sit off the glazing faces;
-// this is not a selected Andersen grille option or approved order.
+// Historical October 27 six-light colonial concept; not called while the Nov 15
+// exterior configuration specifies no grilles. Not a selected Andersen option.
 function addFrontWindowGrilles(parent, box, material, width, height, columns = 1, rows = 1, glassDepth = 0.04, inset = 0.235) {
   for (let row = 0; row < rows; row++) for (let column = 0; column < columns; column++) {
     const w = width / columns - inset * 2, h = height / rows - inset * 2;
@@ -103,13 +103,14 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     return { x: 15.6, z: getGroundFrontLayout().wallZ, width, height, spring, radius, centerY: height - radius, surroundWidth: 0.65, hingeZ: -0.34 };
   }
 
-  function buildArchedFrontEntry(THREE, { box, wood, trim, hardware, field, oakMaps }, parent) {
+  function buildArchedFrontEntry(THREE, { box, wood, trim, hardware, field, oakMaps, oakFinish = null, surroundFinish = trim }, parent) {
     const layout = getFrontEntryLayout();
     const half = layout.width / 2;
     const topAt = (x, radius = layout.radius) => layout.centerY + Math.sqrt(Math.max(0, radius * radius - x * x));
-    const leafWood = oakMaps ? new THREE.MeshStandardMaterial({ ...oakMaps, color: '#fff2d8', roughness: 0.72, normalScale: new THREE.Vector2(0.15, 0.15) }) : wood;
+    // Natural warm medium oak, matte: tint/roughness come from the shared exterior configuration.
+    const leafWood = oakMaps ? new THREE.MeshStandardMaterial({ ...oakMaps, color: oakFinish?.leafTint ?? '#fff2d8', roughness: oakFinish?.roughness ?? 0.72, normalScale: new THREE.Vector2(0.15, 0.15) }) : wood;
     const leafField = oakMaps ? leafWood.clone() : field;
-    if (oakMaps) leafField.color.set('#eee0c8');
+    if (oakMaps) leafField.color.set(oakFinish?.fieldTint ?? '#eee0c8');
     function mesh(shape, depth, material, name, target = parent, z = 0) {
       const geometry = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 40 });
       if (oakMaps && (material === leafWood || material === leafField)) {
@@ -143,9 +144,9 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       return shape;
     }
     const surround = archBand(half, half + layout.surroundWidth, layout.radius, layout.radius + layout.surroundWidth, 0);
-    mesh(surround, 0.28, trim, 'Deep white arched entry surround', parent, 0.19);
+    mesh(surround, 0.28, surroundFinish, 'Deep cast-stone arched entry surround', parent, 0.19);
     mesh(surround, 0.12, trim, 'Interior arched entry casing', parent, -0.31);
-    mesh(archBand(half + 0.48, half + 0.72, layout.radius + 0.48, layout.radius + 0.72, 0.1), 0.1, trim, 'Projecting outer arch molding', parent, 0.47);
+    mesh(archBand(half + 0.48, half + 0.72, layout.radius + 0.48, layout.radius + 0.72, 0.1), 0.1, surroundFinish, 'Projecting outer arch molding', parent, 0.47);
     for (const side of [-1, 1]) {
       const spandrel = new THREE.Shape();
       const outerX = side * half;
@@ -156,7 +157,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
         spandrel.lineTo(x, topAt(x));
       }
       spandrel.closePath();
-      mesh(spandrel, 0.35, trim, 'Arch-shaped wall closure above door', parent, -0.175);
+      mesh(spandrel, 0.35, surroundFinish, 'Arch-shaped wall closure above door', parent, -0.175);
     }
     const leaves = [];
     for (const side of [-1, 1]) {
@@ -303,8 +304,8 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     return {
       kidsSouthZ: bathroomNorthZ,
       bathroom,
-      bathroomDoor: { x: 24.3, z: bathroomSouthZ, width: 2.5, height: 8, slide: -2.7,
-        pocket: { x: 21.4, w: 2.9, leafWidth: 2.48, leafThickness: 1.375 / 12, clearDepth: 0.25, height: 8.3 } },
+      bathroomDoor: { x: 23.55, z: bathroomSouthZ, width: 2.5, height: 8, slide: -2.7,
+        pocket: { x: 20.65, w: 2.9, leafWidth: 2.48, leafThickness: 1.375 / 12, clearDepth: 0.25, height: 8.3 } },
       // Built-in shower runs wall to wall: from the north paint face to the south (piano-recess) paint face.
       shower: { x: 19.175, z: bathroomNorthZ + 0.175, w: 3.2, d: 5 - 0.35, rotation: 0, clearWidth: 3, clearDepth: 5 - 0.35 - 0.2, entryOffset: 0.35, doorWidth: 2.5, height: 8 },
       wc: { x: 27.85, z: bathroomNorthZ, w: 3.35, d: 5, clearWidth: 3, clearDepth: 4.65 },
@@ -313,8 +314,8 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       vanity: { x: 25.1, z: bathroomNorthZ + 0.175 + 0.875, width: 4, mirrorWidth: 3, rotation: 0, basinCount: 1 },
       closet,
       closetSouthZ,
-      closetDoor: { x: 24.3, z: closetSouthZ, width: 2.5, height: 8, slide: 2.7,
-        pocket: { x: 26.8, w: 2.9, leafWidth: 2.48, leafThickness: 1.375 / 12, clearDepth: 0.25, height: 8.3 } },
+      closetDoor: { x: 23.55, z: closetSouthZ, width: 2.5, height: 8, slide: 2.7,
+        pocket: { x: 26.05, w: 2.9, leafWidth: 2.48, leafThickness: 1.375 / 12, clearDepth: 0.25, height: 8.3 } },
       // November 14 redesign: two built-in end runs on a shared 84-inch shelf
       // and 96-inch door-head datum. West: standard 24 + 30-inch hanging
       // sections (54 in) centered with separate end fillers. North-east:

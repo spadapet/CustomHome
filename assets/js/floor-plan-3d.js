@@ -293,7 +293,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     });
     walkControls.hidden = !walking;
     viewport.classList.toggle('walking', walking);
-    viewport.setAttribute('aria-label', activeFloor === 'exterior' ? `3D paired-gable stone and modern brick exterior study. Drag to ${moving ? 'move' : 'rotate'}; scroll or pinch to zoom. Select Front, Rear, West side, or East side for elevations.` : walking
+    viewport.setAttribute('aria-label', activeFloor === 'exterior' ? `3D paired-gable English-French Transitional full-brick exterior study. Drag to ${moving ? 'move' : 'rotate'}; scroll or pinch to zoom. Select Front, Rear, West side, or East side for elevations.` : walking
       ? `3D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground floor'} third-person tour. Click the floor or plan to travel; drag to look. Tour or Escape exits, Home resets.`
       : `3D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground floor'}. Click the floor to enter the tour. Drag to ${moving ? 'move' : 'rotate'}; scroll or pinch to zoom. Keyboard: left/right arrows rotate, plus/minus zoom, Home resets.`);
     setTourStatus(walking ? 'Tour on.' : '');
@@ -1316,7 +1316,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const windowGlass = new THREE.MeshStandardMaterial({ color: '#eaf5f7', roughness: 0.15, metalness: 0, transparent: true, opacity: 0.16, depthWrite: false });
   const privacyGlass = new THREE.MeshStandardMaterial({ color: '#e0e8e4', roughness: 1, metalness: 0 });
   privacyGlass.name = 'Obscured lower-half bathroom glazing - privacy concept';
-  const windowExterior = windowTrim;
+  // Andersen 100 Series Dark Bronze exterior / White interior (Nov 15 exterior specification).
+  const windowExterior = mat(getExteriorMaterialConfig().window.exterior, 0.6);
+  windowExterior.name = getExteriorMaterialConfig().window.name;
   function windowFrame(name, x, z, width, height, sill, rotation = 0, parent = scene, interiorSide = 1, options = {}) {
     const frame = new THREE.Group();
     frame.name = name;
@@ -1324,7 +1326,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     frame.rotation.y = rotation;
     const picture = options.picture === true;
     const fixed = options.fixed === true || picture;
-    const exteriorFinish = 'White';
+    const exteriorFinish = 'Dark Bronze';
     const exteriorMaterial = options.whiteExterior ? windowTrim : windowExterior;
     // Group large openings without claiming these concept dimensions are catalog sizes.
     const intent = getWindowProductIntent(width, height, fixed, options.privacyLowerHalf);
@@ -1334,8 +1336,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     frame.userData.casingMaterial = (options.casingMaterial ?? windowTrim).name;
     if (!options.fixed || picture) Object.assign(frame.userData, intent);
     if (options.singleHung) Object.assign(frame.userData, { operation: 'single-hung', grilles: 'upper sash only: four lights; clear lower sash', upperSash: 'fixed', lowerSash: 'slides vertically', productSelected: false, assemblyApproved: false, sizeReview: 'Dealer standard single-hung size, rough opening, grille and factory combination review required; nominal envelope only' });
-    frame.userData.frontGrid = options.frontGrid === true;
-    if (options.frontGrid) frame.userData.grilles = 'colonial 2 wide by 3 high per unit; conceptual';
+    // Nov 15 specification: no decorative grilles on any elevation (supersedes the
+    // October 27 front six-light grids); frontGrid is retained only as metadata.
+    frame.userData.frontGrid = false;
     if (options.standardSizeCode) Object.assign(frame.userData, { nominalStudyCode: options.standardSizeCode, standardSizeCode: options.standardSizeCode, standardSizeVerified: false, productSelected: false });
     if (options.privacyLowerHalf) Object.assign(frame.userData, { privacyLowerHalf: true, privacyGlassTopFeet: sill + height / 2, privacyVerified: false });
     parent.add(frame);
@@ -1394,12 +1397,6 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
           box(unit, unitWidth / 2 - 0.18, unitHeight * 0.4, interiorSide * 0.15, 0.05, 0.22, 0.06, windowTrim).name = 'Casement sash lock';
         }
       }
-    }
-    if (isWindow && options.frontGrid) {
-      const grille = new THREE.Group();
-      grille.position.z = normalOffset;
-      frame.add(grille);
-      addFrontWindowGrilles(grille, box, windowTrim, width, height, columns, rows);
     }
     if (isWindow && columns > 1) addWindowShadeDivisions(frame, box, windowTrim,
       Array.from({ length: columns - 1 }, (_, index) => -width / 2 + width * (index + 1) / columns), 0, height, faceDepth, interiorSide);
@@ -4069,7 +4066,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const south = closetSouthFace - 0.125 / 12 - laundryUpper.position.z;
     const towerSouth = closetTower.z + closetTower.d - laundryUpper.position.z;
     const towerNorth = closetTower.z - laundryUpper.position.z;
-    const solidSouthX = guestSuite.closetDoor.pocket.x + guestSuite.closetDoor.pocket.w + 1 / 12;
+    const solidSouthX = Math.max(closetTower.x + 0.75, guestSuite.closetDoor.pocket.x + guestSuite.closetDoor.pocket.w + 1 / 12);
     const southPaint = closetSouthFace - laundryUpper.position.z, eastPaint = closetEastFace - laundryUpper.position.x;
     const eastUpper = box(laundryUpper, cx, closetDatums.upper - closetPanel / 2, (towerNorth + south) / 2, x1 - x0, closetPanel, south - towerNorth, cabinetRailFinish);
     eastUpper.name = 'Guest east continuous 96-inch upper shelf';
@@ -4085,9 +4082,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     closetLed(laundryUpper, x0 + 1 / 12 - laundryUpper.position.x, closetDatums.shelf - closetPanel - 0.125 / 12, (towerSouth + south) / 2, 0.5 / 12, south - towerSouth - 1 / 12);
   }
-  // Dressing mirror on the solid east segment of the north wall, centered
-  // between the bath-entry casing (2.5 in) and the tower side.
-  const mirrorWest = guestSuite.bathroomDoor.x + guestSuite.bathroomDoor.width + 2.5 / 12;
+  // Retain the mirror position when the bathroom opening moves west.
+  const mirrorWest = guestSuite.bathroomDoor.x + guestSuite.bathroomDoor.width + 2.5 / 12 + 0.75;
   const guestMirror = furnishing('Guest closet north-wall dressing mirror', (mirrorWest + closetTower.x) / 2, closetNorthFace);
   guestMirror.userData = { widthInches: 20, heightInches: 62, wall: 'North wall east segment (solid, not a pocket wall)', productSelected: false, provisional: true };
   box(guestMirror, 0, 47 / 12, 0.5 / 12, 20 / 12, 62 / 12, 1 / 12, cabinetFinish).name = 'Guest dressing mirror oak frame';
@@ -4414,7 +4410,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const frontDoor = furnishing('Double front entry', 15.6, groundFrontWallZ);
   frontDoor.userData = { heightInches: 96, lockBrand: 'Wyze', lockModel: null, activeLeafHandingVerified: false, hardwareCompatibilityVerified: false };
-  const frontEntryLeaves = buildArchedFrontEntry(THREE, { box, wood: mat('#c99f6b'), field: mat('#b88e5a'), oakMaps: masonryMaps.oak, trim: windowTrim, hardware: black }, frontDoor);
+  const exteriorFinishes = getExteriorMaterialConfig();
+  const frontEntryLeaves = buildArchedFrontEntry(THREE, { box, wood: mat('#b98f5f'), field: mat('#a98257'), oakMaps: masonryMaps.oak, oakFinish: exteriorFinishes.entryDoor, trim: windowTrim, hardware: black }, frontDoor);
   const activeFrontEntryLeaf = frontEntryLeaves[1];
   const entrySmartLock = new THREE.Group();
   entrySmartLock.name = 'Wyze smart-lock selection placeholder';
@@ -4423,11 +4420,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   activeFrontEntryLeaf.add(entrySmartLock);
   box(entrySmartLock, 0, 0, -0.06, 0.28, 0.55, 0.12, black, true).name = 'Schematic smart-lock interior housing';
   box(entrySmartLock, 0, -0.12, -0.14, 0.16, 0.045, 0.05, steel, true).name = 'Schematic smart-lock thumbturn';
-  tiledFloor('Porch paving', 0, groundFrontWallZ, 31.2, groundFrontLayout.porchDepth, mat('#c9c7bc'));
+  tiledFloor('Porch paving', 0, groundFrontWallZ, 31.2, groundFrontLayout.porchDepth, mat(exteriorFinishes.porchFloor.color));
   const porchCushion = mat('#a49780', 0.95);
   const porchPillow = mat('#74745b', 0.96);
+  // Every porch furnishing in this list also moves into the exterior study.
   const frontPorchChairs = [];
-  for (const x of [3.2, 8]) {
+  // Two matching seating groups, one each side of the entry, clear of the entry
+  // sweep envelope and below the porch window sills (Nov 15 specification).
+  for (const x of [3.2, 8, 23.2, 28]) {
     const chair = furnishing('Front porch cushioned lounge chair', x, groundFrontWallZ + 1.95, 0, 0.035, true);
     frontPorchChairs.push(chair);
     chair.userData = { widthFeet: 2.6, depthFeet: 2.65, seatHeightFeet: 1.5, backHeightFeet: 2.75, outdoorProductSelected: false };
@@ -4445,15 +4445,38 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     back.rotation.x = -0.08;
     box(chair, 0, 1.83, -0.64, 1.3, 0.55, 0.26, porchPillow, true).name = 'Porch chair olive lumbar pillow';
   }
-  const frontPorchTable = furnishing('Front porch small table between chairs', 5.6, groundFrontWallZ + 1.95, 0, 0.035, true);
-  box(frontPorchTable, 0, 1.65, 0, 1.5, 0.12, 1.5, oak, true).name = 'Porch side-table top';
-  for (const x of [-0.57, 0.57]) for (const z of [-0.57, 0.57])
-    box(frontPorchTable, x, 0.795, z, 0.12, 1.59, 0.12, oak).name = 'Porch side-table leg';
+  for (const tableX of [5.6, 25.6]) {
+    const frontPorchTable = furnishing('Front porch small table between chairs', tableX, groundFrontWallZ + 1.95, 0, 0.035, true);
+    frontPorchChairs.push(frontPorchTable);
+    box(frontPorchTable, 0, 1.65, 0, 1.5, 0.12, 1.5, oak, true).name = 'Porch side-table top';
+    for (const x of [-0.57, 0.57]) for (const z of [-0.57, 0.57])
+      box(frontPorchTable, x, 0.795, z, 0.12, 1.59, 0.12, oak).name = 'Porch side-table leg';
+  }
+  // Restrained greenery: a planter at each side of the step approach, outside
+  // the entry columns and the five-foot door envelope.
+  const porchPlanterFinish = mat(exteriorFinishes.gutter.color, 0.6);
+  porchPlanterFinish.name = 'Dark bronze porch planter';
+  const porchPlanterFoliage = mat('#3f5a35', 0.95);
+  const porchPlanterBloom = mat('#e9e4ea', 0.9);
+  for (const x of [10.3, 20.9]) {
+    const planter = furnishing('Front porch entry planter', x, groundFrontWallZ + 6.3, 0, 0.035, true);
+    frontPorchChairs.push(planter);
+    planter.userData = { widthFeet: 1.2, heightFeet: 2.6, planting: 'Boxwood with white trailing annuals', productSelected: false };
+    box(planter, 0, 0.7, 0, 1.2, 1.4, 1.2, porchPlanterFinish, true).name = 'Square porch planter';
+    const shrub = new THREE.Mesh(new THREE.SphereGeometry(0.6, 10, 8), porchPlanterFoliage);
+    shrub.name = 'Porch planter boxwood';
+    shrub.position.set(0, 2, 0);
+    planter.add(shrub);
+    const bloom = new THREE.Mesh(new THREE.SphereGeometry(0.62, 10, 3, 0, Math.PI * 2, Math.PI / 2.4, Math.PI / 6), porchPlanterBloom);
+    bloom.name = 'Porch planter trailing white flowers';
+    bloom.position.set(0, 1.6, 0);
+    planter.add(bloom);
+  }
   windowFrame('Office side window', 0.1, 49, 4, 5, 3, -Math.PI / 2, rest, -1);
   const officeFront = getGroundFrontWindows()[0];
-  windowFrame(officeFront.name, officeFront.center, groundFrontWallZ, officeFront.width, officeFront.height, officeFront.sill, 0, rest, -1, { frontGrid: true });
+  windowFrame(officeFront.name, officeFront.center, groundFrontWallZ, officeFront.width, officeFront.height, officeFront.sill, 0, rest, -1);
   const guestFront = getGroundFrontWindows()[1];
-  windowFrame(guestFront.name, guestFront.center, groundFrontWallZ, guestFront.width, guestFront.height, guestFront.sill, 0, rest, -1, { frontGrid: true });
+  windowFrame(guestFront.name, guestFront.center, groundFrontWallZ, guestFront.width, guestFront.height, guestFront.sill, 0, rest, -1);
 
   const ground = new THREE.Group();
   ground.name = 'Site ground around lowered garage and basement stairwell';
@@ -5314,7 +5337,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     tourMapBounds.right = Math.max(...areas.map((area) => area.x + area.w));
     tourMapBounds.bottom = Math.max(...areas.map((area) => area.z + area.d));
     tourMapScale = (tourMap.width - 24) / Math.max(tourMapBounds.right - tourMapBounds.x, tourMapBounds.bottom - tourMapBounds.z);
-    viewport.setAttribute('aria-label', floor === 'exterior' ? '3D paired-gable stone and modern brick exterior study. Drag to orbit; select an elevation to view each facade.' : `3D ${floor === 'upstairs' ? 'upstairs' : 'ground floor'}. Click the floor to enter the tour. Drag to ${navigationMode === 'move' ? 'move' : 'rotate'}; scroll or pinch to zoom.`);
+    viewport.setAttribute('aria-label', floor === 'exterior' ? '3D paired-gable English-French Transitional full-brick exterior study. Drag to orbit; select an elevation to view each facade.' : `3D ${floor === 'upstairs' ? 'upstairs' : 'ground floor'}. Click the floor to enter the tour. Drag to ${navigationMode === 'move' ? 'move' : 'rotate'}; scroll or pinch to zoom.`);
     tourMap.setAttribute('aria-label', `Clickable ${floor === 'upstairs' ? 'upstairs' : 'ground-floor'} plan. Arrow keys select a destination; Enter travels there.`);
     islandLightsInput.closest('details').hidden = floor !== 'ground';
     document.getElementById('exterior-views').hidden = floor !== 'exterior';
@@ -6097,7 +6120,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (planView) {
       viewport.setAttribute('aria-label', '2D floor plan. Drag to pan; scroll or pinch to zoom. Select Ground or Upstairs to return to 3D.');
     }
-    renderer.domElement.setAttribute('aria-label', planView ? `2D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground-floor'} orthographic furnished plan, north at top` : outside ? `3D paired-gable stone and modern brick study: ${exteriorLabel}, charcoal arched canopy, pale trim and oak doors; daylight sky and shadows are illustrative; roof and cladding construction unverified` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
+    renderer.domElement.setAttribute('aria-label', planView ? `2D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground-floor'} orthographic furnished plan, north at top` : outside ? `3D English-French Transitional full-brick study: ${exteriorLabel}, warm ivory brick, cast-stone entrance, Dark Bronze windows, oak entry doors, straight square-column porch and charcoal roof; daylight sky and shadows are illustrative; roof and cladding construction unverified` : basementCutaway ? '3D floor plan: basement stair cutaway, surrounding shell and upstairs stairs hidden' : `3D floor plan: ${name === 'social' ? 'living, dining and kitchen' : name} view, full-height walls`);
     updateFloorGrid();
     updateLivableArea();
     updatePlanDimensions();
