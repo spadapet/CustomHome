@@ -25,7 +25,7 @@ function build() {
     guestSuite: suite,
     kidsDoorway: { x: 19, z: 27, width: 4.5, height: 8 },
     oak: {}, brass: {}, black: {}, cream: {}, linen: {}, cabinetFinish: {}, cabinetRailFinish: {},
-    windowTrim: {}, porcelain: {},
+    windowTrim: {}, porcelain: {}, steel: { name: 'steel' }, guestClosetGlow: { name: 'Guest closet warm 2700K LED diffuser' },
     furnishing(name, x, z, rotation = 0, elevation = 0) {
       const group = new Group();
       group.name = name;
@@ -54,9 +54,9 @@ function build() {
     },
     cabinetPull() {}
   };
-  const start = source.indexOf('  for (const compartment of guestSuite.closets) {');
+  const start = source.indexOf('  // Guest walk-in closet built-ins.');
   const end = source.indexOf('  const guestCoats =', start);
-  assert.ok(start >= 0 && end > start, 'The current end storage and suite door geometry exists');
+  assert.ok(start >= 0 && end > start, 'The current closet built-ins and suite door geometry exist');
   const doorStart = source.indexOf('  function singlePanelDoor(');
   const doorEnd = source.indexOf('  function shakerFront(', doorStart);
   assert.ok(doorStart >= 0 && doorEnd > doorStart);
@@ -161,96 +161,180 @@ function buildPocketWalls(context)
   return context.walls;
 }
 
-test('west 48 x 24-inch storage retains long and double-short hanging; east becomes laundry', () => {
+const north = suite.closet.z + 0.175, south = suite.closetSouthZ - 0.175, east = 31.2 - 0.175;
+const westFace = suite.notch.x + suite.notch.w + 0.175;
+const [westRun, tower] = suite.closets;
+const crossingCenter = suite.closetDoor.x + suite.closetDoor.width / 2;
+const overlap = (a, b) => ['X', 'Y', 'Z'].every(axis =>
+  Math.min(a[`max${axis}`], b[`max${axis}`]) - Math.max(a[`min${axis}`], b[`min${axis}`]) > 1e-8);
+const builtInNames = ['Guest west wardrobe built-in', 'Guest north-east drawer and folding tower', 'Guest laundry-wall upper shelves', 'Guest closet north-wall dressing mirror'];
+const close = (a, b, message) => assert.ok(Math.abs(a - b) < 1e-8, message ?? `${a} != ${b}`);
+
+function toggler(door) {
+  const start = source.indexOf('    const operation = door.userData.interactiveHouseDoor;');
+  const end = source.indexOf("    if (activeFloor === 'upstairs') buildWalkObstacles();", start);
+  assert.ok(start >= 0 && end > start);
+  const context = { door, THREE: { MathUtils: { degToRad: degrees => degrees * Math.PI / 180 } } };
+  return () => vm.runInNewContext(`{${source.slice(start, end)}}`, context);
+}
+
+test('shared layout records standard closet boxes, centered west run and both datums', () => {
+  close((south - north) * 12, 59.4251968503937);
+  assert.deepEqual(westRun.sections.map(({ width }) => width * 12), [24, 30]);
+  close(westRun.d * 12, 54); close(westRun.w * 12, 24);
+  close((westRun.z - north) * 12, (59.4251968503937 - 54) / 2);
+  close((south - westRun.z - westRun.d) * 12, (59.4251968503937 - 54) / 2);
+  close((westRun.x - westFace) * 12, 0.75, 'West carcass sits off the retained base trim');
+  close(tower.d * 12, 30); close(tower.w * 12, 24);
+  close((east - tower.x - tower.w) * 12, 0.75); close((tower.z - north) * 12, 0.75);
+  close(suite.closetDatums.shelf * 12, 84); close(suite.closetDatums.upper * 12, 96);
+  assert.equal(suite.closetDoor.height * 12, 96, 'Upper datum aligns with the 96-inch pocket door heads');
+});
+
+test('west wardrobe: 24-inch long-hang and 30-inch double-hang sections with separate fillers', () => {
   const { roots, all } = build();
-  const compartments = roots.filter(root => /Guest (west|east) end closet storage/.test(root.name));
-  assert.equal(compartments.length, 1);
-  for (const [index, root] of compartments.entries()) {
-    const expected = suite.closets[index];
-    assert.equal(root.userData.storageType, 'Walk-through end storage');
-    assert.equal(root.userData.depthInches, 24);
-    assert.equal(root.userData.widthInches, 48);
-    assert.equal(root.userData.heightInches, 84);
-    assert.equal(root.userData.separateFillers, true);
-    const contents = meshes(root);
-    assert.ok(contents.length > 0);
-    for (const part of contents) {
+  const wardrobe = roots.find(root => root.name === 'Guest west wardrobe built-in');
+  assert.ok(wardrobe);
+  assert.equal(wardrobe.userData.standardSections, true);
+  assert.equal(wardrobe.userData.separateFillers, true);
+  const b = bounds(wardrobe);
+  close(b.minX, westFace + 0.125 / 12, 'Only the luggage shelf scribes to 1/8 inch of west paint');
+  close(b.maxX, westRun.x + 2, 'Front stays at the 24-inch clothing envelope');
+  close(b.minZ, north + 0.125 / 12); close(b.maxZ, south - 0.125 / 12);
+  close(b.maxY * 12, 96);
+  const panels = meshes(wardrobe).filter(part => part.name === 'Guest wardrobe carcass panel').map(worldBounds).sort((p, q) => p.minZ - q.minZ);
+  assert.equal(panels.length, 3);
+  close((panels[1].minZ + panels[1].maxZ) / 2 - panels[0].minZ, 2, '24-inch long-hang section on centers');
+  close(panels[2].maxZ - (panels[1].minZ + panels[1].maxZ) / 2, 2.5, '30-inch double-hang section on centers');
+  for (const panel of panels) close(panel.maxY * 12, 95.25);
+  const rods = all.filter(part => part.name === 'Guest wardrobe hanging rod');
+  assert.deepEqual(rods.map(rod => Math.round(rod.userData.heightInches * 10) / 10).sort((p, q) => p - q), [40.5, 70, 81]);
+  const lengths = rods.map(rod => { const r = worldBounds(rod); return (r.maxZ - r.minZ) * 12; });
+  close(lengths.reduce((sum, length) => sum + length, 0), 79.5, 'Hanging rod rises from 67.5 to 79.5 inches');
+  assert.deepEqual(lengths.map(length => Math.round(length * 1000) / 1000).sort((p, q) => p - q), [22.5, 28.5, 28.5]);
+  for (const garment of all.filter(part => part.name === 'Guest wardrobe hanging clothes')) {
+    const g = worldBounds(garment);
+    assert.ok(g.minX >= westRun.x && g.maxX <= westRun.x + 2 && g.minY > 4 / 12, 'Clothing stays inside the 24-inch envelope above the deck');
+  }
+  assert.equal(all.filter(part => part.name === 'Guest wardrobe hanging clothes').length, 22);
+  const lower = meshes(wardrobe).filter(part => part.name === 'Guest wardrobe separate lower end filler').map(worldBounds);
+  const upper = meshes(wardrobe).filter(part => part.name === 'Guest wardrobe separate upper end scribe').map(worldBounds);
+  assert.equal(lower.length, 2); assert.equal(upper.length, 2);
+  close(Math.min(...lower.map(f => f.minZ)), north + 0.75 / 12, 'Lower filler stops at the retained base trim');
+  close(Math.max(...upper.map(f => f.maxZ)), south - 0.125 / 12, 'Upper scribe leaves 1/8 inch to paint');
+  for (const f of upper) close(f.minY * 12, 8.125);
+  assert.equal(all.filter(part => part.name === 'Guest wardrobe 84-inch fixed shelf').length, 2);
+  assert.equal(all.filter(part => part.name === 'Guest wardrobe continuous 96-inch luggage shelf').length, 1);
+  assert.equal(all.filter(part => /Guest (west|east) end closet storage|30-inch shallow shelf module/.test(part.name ?? '')).length, 0);
+});
+
+test('north-east tower: four 21-inch-travel drawers, 36-inch folding top and four fixed shelves', () => {
+  const { roots } = build();
+  const unit = roots.find(root => root.name === 'Guest north-east drawer and folding tower');
+  const b = bounds(unit);
+  close((b.maxX - b.minX) * 12, 24 + 1.25, '24-inch box plus 1.25-inch bar pulls');
+  close((b.maxZ - b.minZ) * 12, 30);
+  close(b.maxY * 12, 95.25);
+  const drawers = unit.children.filter(part => part.name === 'Guest tower full-extension drawer');
+  assert.equal(drawers.length, 4);
+  const shelves = meshes(unit).filter(part => part.name === 'Guest tower fixed shelf').map(part => worldBounds(part).maxY * 12).sort((p, q) => p - q);
+  shelves.forEach((top, i) => close(top, [48, 60, 72, 84][i]));
+  close(worldBounds(meshes(unit).find(part => part.name === 'Guest tower 36-inch folding top')).maxY * 12, 36);
+  for (const drawer of drawers) {
+    const toggle = toggler(drawer);
+    assert.equal(drawer.userData.interactiveHouseDoor.open, false);
+    toggle();
+    assert.equal(drawer.userData.interactiveHouseDoor.open, true);
+    close(drawer.position.x * 12, -21);
+    toggle();
+    assert.equal(drawer.position.x, 0, 'Drawers restore their default closed pose');
+  }
+});
+
+test('built-ins fit the shell, keep fixing parts away from both pocket walls and never overlap', () => {
+  const { roots } = build();
+  const builtIns = builtInNames.map(name => roots.find(root => root.name === name));
+  assert.ok(builtIns.every(Boolean));
+  const stack = roots.find(root => /Guest Bosch/.test(root.name));
+  const parts = builtIns.flatMap(meshes);
+  for (const part of parts) {
+    const b = worldBounds(part);
+    assert.ok(b.minX >= westFace - 1e-8 && b.maxX <= east + 1e-8 && b.minZ >= north - 1e-8 && b.maxZ <= south + 1e-8, `${part.name} stays inside finished paint faces`);
+    assert.ok(b.minY >= -1e-8 && b.maxY <= 8 + 1e-8, `${part.name} stays at or below the 96-inch datum`);
+  }
+  for (let i = 0; i < parts.length; i++) {
+    for (let j = i + 1; j < parts.length; j++) assert.ok(!overlap(worldBounds(parts[i]), worldBounds(parts[j])), `${parts[i].name} / ${parts[j].name}`);
+    for (const machine of meshes(stack)) assert.ok(!overlap(worldBounds(parts[i]), worldBounds(machine)), `${parts[i].name} clears ${machine.name}`);
+  }
+  // Fixing members (carcass panels, tower sides, cleats) stay 1 inch off each pocket wall over its cavity run.
+  const fixing = parts.filter(part => /carcass panel|side panel|cleat/.test(part.name));
+  for (const door of [suite.bathroomDoor, suite.closetDoor]) {
+    const face = door === suite.bathroomDoor ? north : south;
+    for (const part of fixing) {
       const b = worldBounds(part);
-      const scribe = part.name === 'Guest upper shelf separate rear scribe' ? 0.0625 - 0.125 / 12 : 0;
-      assert.ok(b.minX >= expected.x - scribe - 1e-8 && b.maxX <= expected.x + expected.w + scribe + 1e-8, `${root.name}: ${part.name} stays within its standard cabinet envelope and separate rear scribes`);
-      assert.ok(b.minZ >= suite.closet.z + 0.175 - 1e-8 && b.maxZ <= suite.closetSouthZ - 0.175 + 1e-8, `${root.name}: ${part.name} stays within finished trim faces`);
-      assert.ok(b.minY >= -1e-8 && b.maxY <= 7.5, `${part.name} stays below the modeled ceiling`);
+      if (b.maxX <= door.pocket.x || b.minX >= door.pocket.x + door.pocket.w) continue;
+      assert.ok(Math.min(Math.abs(b.minZ - face), Math.abs(b.maxZ - face)) >= 1 / 12 - 1e-8, `${part.name} keeps fasteners off the ${door === suite.bathroomDoor ? 'bath' : 'bedroom'} pocket wall`);
     }
   }
-  assert.equal(all.filter(part => part.name === 'Guest continuous end-storage hanging rod').length, 3);
-  assert.equal(all.filter(part => part.name === 'Guest end-storage separate top filler').length, 1);
-  assert.equal(all.filter(part => part.name === 'Guest retained hanging clothes').length, 15);
-  assert.equal(all.filter(part => part.name === 'Guest walk-in closet fittings').length, 0);
-  assert.equal(all.filter(part => /Guest closet connected diagonal corner shelf|Guest closet pull-out drawer/.test(part.name)).length, 0);
+  const above = worldBounds(meshes(roots.find(root => root.name === 'Guest laundry-wall upper shelves')).find(part => part.name === 'Guest laundry 84-inch shelf over dryer'));
+  assert.ok((above.minY - bounds(stack).maxY) * 12 >= 6.25, 'Shelf exceeds the 6.25-inch published top allowance');
+  assert.ok(Math.abs((above.minY - bounds(stack).maxY) * 12 - 15.44) < 1e-6, 'Measured dryer top (on its 0.06-inch leveling datum) to shelf underside');
+  const leds = parts.filter(part => part.name === 'Guest closet warm LED shelf strip');
+  assert.equal(leds.length, 4);
+  for (const led of leds) assert.equal(led.material.name, 'Guest closet warm 2700K LED diffuser');
+  const mirror = bounds(roots.find(root => root.name === 'Guest closet north-wall dressing mirror'));
+  assert.ok(mirror.minX > suite.bathroomDoor.x + suite.bathroomDoor.width + 2.5 / 12 && mirror.maxX < tower.x, 'Mirror sits on the solid wall between casing and tower');
 });
 
-test('shelf extensions reclaim both wall ends while preserving hanging bays, trim and the occupied aisle', () => {
+test('straight pocket-to-pocket crossing keeps a centered 36-inch band clear with drawers and laundry doors open', () => {
   const { roots, all } = build();
-  const storage = roots.filter(root => /Guest (west|east) end closet storage/.test(root.name));
-  assert.equal(all.filter(part => part.name === 'Guest upper shelf wall extension').length, 4);
-  assert.equal(all.filter(part => part.name === 'Guest lower shelf trim-reserved extension').length, 2);
-  assert.equal(all.filter(part => part.name === 'Guest upper shelf separate rear scribe').length, 2);
-  for (const root of storage) {
-    const parts = meshes(root);
-    for (const [y, reserve] of [[7, 0.125 / 12], [0.2, 0.75 / 12]]) {
-      const shelves = parts.filter(part => part.position.y === y);
-      const measured = shelves.map(worldBounds);
-      assert.ok(Math.abs(Math.min(...measured.map(b => b.minZ)) - (suite.closet.z + 0.175 + reserve)) < 1e-8);
-      assert.ok(Math.abs(Math.max(...measured.map(b => b.maxZ)) - (suite.closetSouthZ - 0.175 - reserve)) < 1e-8);
-      const center = worldBounds(parts.find(part => part.name === 'Guest end-storage shelf' && part.position.y === y));
-      const extensions = shelves.filter(part => /extension/.test(part.name)).map(worldBounds).sort((a, b) => a.minZ - b.minZ);
-      assert.ok(Math.abs(extensions[0].maxZ - center.minZ) < 1e-8, 'North extension joins, not overlaps, standard shelf');
-      assert.ok(Math.abs(extensions[1].minZ - center.maxZ) < 1e-8, 'South extension joins standard shelf');
+  const builtIns = builtInNames.map(name => roots.find(root => root.name === name));
+  const stack = roots.find(root => /Guest Bosch/.test(root.name));
+  const band = { minX: crossingCenter - 1.5, maxX: crossingCenter + 1.5, minY: 0, maxY: 8, minZ: north, maxZ: south };
+  const westFront = westRun.x + 2;
+  const stackFront = bounds(stack).minX;
+  close((stackFront - westFront) * 12, 66.35, 'Closed walkway: west clothing envelope to stack front');
+  close((tower.x - westFront) * 12, 70.6, 'Closed walkway: west clothing envelope to tower front');
+  const drawers = all.filter(part => part.name === 'Guest tower full-extension drawer');
+  for (const drawer of drawers) drawer.position.x = drawer.userData.interactiveHouseDoor.openCenterX;
+  const hinges = all.filter(part => /Guest laundry .* door hinge/.test(part.name));
+  let nearestEast = Infinity;
+  for (let degrees = 0; degrees <= 90; degrees += 5) {
+    for (const hinge of hinges) hinge.rotation.y = -degrees * Math.PI / 180;
+    const parts = builtIns.concat(stack).flatMap(meshes).map(worldBounds);
+    for (const part of parts) {
+      assert.ok(!overlap(part, band), `Nothing enters the 36-inch crossing band at ${degrees} degrees`);
+      if (part.minX > crossingCenter) nearestEast = Math.min(nearestEast, part.minX);
     }
+    for (const hinge of hinges) for (const door of meshes(hinge)) for (const drawer of drawers.flatMap(meshes))
+      assert.ok(!overlap(worldBounds(door), worldBounds(drawer)), 'Open drawers and laundry doors can operate together');
   }
-  for (const rod of all.filter(part => part.name === 'Guest continuous end-storage hanging rod')) {
-    assert.ok(Math.abs((worldBounds(rod).maxZ - worldBounds(rod).minZ) - 1.875) < 1e-8);
-  }
+  const westNearest = Math.max(...builtIns.flatMap(meshes).map(worldBounds).filter(b => b.maxX < crossingCenter).map(b => b.maxX));
+  close(westNearest, westFront);
+  close((nearestEast - crossingCenter) * 12 * 2, (tower.x - 22.25 / 12 - crossingCenter) * 12 * 2, 'Open drawer pulls are the nearest east projection');
+  assert.ok((nearestEast - westNearest) * 12 > 48, `Open-front clear width ${(nearestEast - westNearest) * 12}`);
+  assert.ok((nearestEast - crossingCenter) * 2 * 12 > 37, 'Centered crossing band stays wider than 36 inches with fronts open');
+  for (const drawer of drawers) drawer.position.x = 0;
+  for (const hinge of hinges) hinge.rotation.y = 0;
 });
 
-test('real east-end stack and shelf constituents fit shell, clothing and occupied use through both door sweeps', () => {
+test('owner-authorized south-east laundry stack is retained and its doors sweep clear of storage', () => {
   const { roots, all } = build();
   const stack = roots.find(root => /Guest Bosch/.test(root.name));
-  const shelf = roots.find(root => /30-inch shallow shelf module/.test(root.name));
-  const west = roots.find(root => /Guest west end closet storage/.test(root.name));
-  const overlap = (a, b) => ['X', 'Y', 'Z'].every(axis =>
-    Math.min(a[`max${axis}`], b[`max${axis}`]) - Math.max(a[`min${axis}`], b[`min${axis}`]) > 1e-8);
   assert.equal(stack.rotation.y, -Math.PI / 2);
-  assert.equal(all.filter(part => part.name === 'Guest laundry fixed shelf').length, 6);
-  const fixed = meshes(shelf).concat(meshes(west)).map(worldBounds);
-  const north = suite.closet.z + 0.175, south = suite.closetSouthZ - 0.175, east = 31.2 - 0.175;
-  for (const part of meshes(stack).concat(meshes(shelf))) {
+  const fixed = builtInNames.flatMap(name => meshes(roots.find(root => root.name === name))).map(worldBounds);
+  for (const part of meshes(stack)) {
     const b = worldBounds(part);
     assert.ok(b.minZ >= north - 1e-8 && b.maxZ <= south + 1e-8, `${part.name} clears partition paint`);
-    assert.ok(b.maxX <= east - 0.125 / 12 + 1e-8, `${part.name} clears east paint and upper scribe`);
-    for (const f of meshes(west).map(worldBounds)) assert.ok(!overlap(b, f));
+    assert.ok(b.maxX <= east - 0.125 / 12 + 1e-8, `${part.name} clears east paint`);
   }
-  const westFront = suite.closets[0].x + 2; // full 24-inch clothing envelope, not sparse garment bounds
   const rear = east - 3 / 12;
-  const closedFront = rear - 26 / 12;
-  assert.ok(Math.abs((closedFront - westFront) * 12 - 66.35) < 1e-6);
   const openFront = rear - 43.5 / 12;
-  assert.ok((openFront - westFront) * 12 > 48, 'More than 48 inches remains across open door to full clothes envelope');
-  // 30 x 30 occupied loading square is outside the complete published sweep,
-  // south of the shelf module. It is not a universal code clearance.
-  const operator = { minX: openFront - 2.5, maxX: openFront, minY: 0.1, maxY: 6,
-    minZ: south - 31 / 12, maxZ: south - 1 / 12 };
-  assert.ok(operator.minX > westFront);
-  assert.ok(operator.maxZ < south);
-  for (const f of fixed) assert.ok(!overlap(operator, f), 'Loading occupancy clears shelf and clothing');
-  // Loading occupies the ordinary door-to-door route: do not claim passing.
-  assert.ok((closedFront - operator.maxX) * 12 < 30, 'Loading and passing are sequential, not simultaneous');
+  close(bounds(stack).minX, rear - 26 / 12);
+  close((tower.z + tower.d - north) * 12, 30.75);
+  close(((south - 1 / 12 - 23.5 / 12) - (tower.z + tower.d)) * 12, 4.175196850393704, 'Tower/stack side gap');
   for (const hinge of all.filter(part => /Guest laundry .* door hinge/.test(part.name))) {
-    const start = source.indexOf('    const operation = door.userData.interactiveHouseDoor;');
-    const end = source.indexOf("    if (activeFloor === 'upstairs') buildWalkObstacles();", start);
-    assert.ok(start >= 0 && end > start);
-    const toggleContext = { door: hinge, THREE: { MathUtils: { degToRad: degrees => degrees * Math.PI / 180 } } };
-    const toggle = () => vm.runInNewContext(`{${source.slice(start, end)}}`, toggleContext);
+    const toggle = toggler(hinge);
     assert.equal(hinge.userData.interactiveHouseDoor.openAngleDegrees, 0);
     toggle();
     assert.ok(Math.abs(hinge.rotation.y + Math.PI / 2) < 1e-8, 'Existing click handler opens laundry door to 90 degrees');
@@ -261,20 +345,12 @@ test('real east-end stack and shelf constituents fit shell, clothing and occupie
       for (const part of meshes(hinge)) {
         const b = worldBounds(part);
         assert.ok(b.minX >= openFront - 1e-8, `${part.name} stays inside published open-depth reserve`);
-        assert.ok(b.minZ >= north && b.maxZ <= south, `${part.name} clears shell through sweep ${degrees}: ${JSON.stringify(b)} vs ${north}/${south}`);
-        for (const f of fixed) assert.ok(!overlap(b, f), `${part.name} clears storage through sweep`);
+        assert.ok(b.minZ >= north && b.maxZ <= south, `${part.name} clears shell through sweep ${degrees}`);
+        for (const f of fixed) assert.ok(!overlap(b, f), `${part.name} clears closet built-ins through sweep ${degrees}`);
       }
     }
     hinge.rotation.y = 0;
   }
-  // Shelf retrieval uses a separate 30-inch zone, never the appliance body.
-  const sb = bounds(shelf);
-  const retrieval = { minX: sb.minX - 2.5, maxX: sb.minX, minY: 0.1, maxY: 6, minZ: sb.minZ, maxZ: sb.maxZ };
-  for (const part of meshes(stack)) assert.ok(!overlap(retrieval, worldBounds(part)));
-  assert.ok(retrieval.minX > westFront);
-  assert.ok((south - 24.5 / 12) - sb.maxZ > 4 / 12, 'Shelf module is separated from stack side');
-  const scribe = meshes(shelf).find(part => /separate rear scribe/.test(part.name));
-  assert.ok(worldBounds(scribe).minY > 8 / 12 + 0.005, 'Rear scribe clears retained 8-inch baseboard');
   for (const name of ['washer', 'dryer']) {
     const glass = all.find(part => part.name === `Guest laundry ${name} door glass`);
     const rim = all.find(part => part.name === `Guest laundry ${name} door ring`);

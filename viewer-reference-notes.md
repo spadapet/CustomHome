@@ -30,8 +30,9 @@ Bath wall centersz32.977066929–37.977066929;12.2 ×5 ft NOMINAL/61 sq ft.
 North fixed; south/shared wall moves4.2 inches north. Overall55.8 inches clear.
 West built-in wall-to-wall 36 ×53.4-inch clear shower/east30-inch entry;48 ×18-inch vanity; private
 WC36 ×55.8 inches clear/30 ×96 inward solid door. Its opening/south hinge
-move4.2 inches north, handing unchanged; five-degree constituent sweeps
-through90 clear fixtures/paint.24-inch route screen is not accessibility/code approval.
+move4.2 inches north, handing unchanged; the leaf meets wall-fitted jambs and
+an offset pivot clears casing. One-degree constituent sweeps through90 clear
+fixtures, walls and casing.24-inch route screen is not accessibility/code approval.
 South wall is straight through
 the piano north return. Closet actual floorx20.841666667–31.2,
 z37.977066929–43.279166667:54.920916 sq ft;120.1 ×59.4252 inches clear.
@@ -92,8 +93,9 @@ guest-bedroom,kids. Superseded measurements below are historical.
 
 October 31 guest-entry layout: powder toilet and retained 42 x 21 in vanity
 face south from the north wall; south-jamb powder entry is lower right.
-Coat closet is north of the alcove, with its closed 48 x 96 in pair opening
-south. The full north wall replaces the ground rail; retain upper-flight
+Coat closet is north of the alcove, with its closed 48 x 96 in pair recessed
+in the wall and opening south; its inspection view is orthographic. The full
+north wall replaces the ground rail; retain upper-flight
 protection above its nine-foot head. Room sizes, hardwood, privacy window
 and exterior footprint stay unchanged. Door/cabinet operation, occupied coat
 retrieval, wall support and stair-head enclosure still require review.
@@ -414,7 +416,7 @@ All main-kitchen wall faces are warm ivory quartz from floor to the 9-foot ceili
 
 The former smoky blue-gray quartz sill is superseded by the recessed white sill above. Retain three pots and drip saucers; confirm support, sealed wet-area joints, drainage and sash operation before fabrication.
 
-The prep counter uses standard 30 + 30-inch left bases, a 36-inch sink base, an exposed stainless 18-inch dishwasher, a 24-inch cupboard and a 33-inch six-drawer end cabinet, with separate 0.6-inch end fillers. The tower is 33 W x 24 D inches. Its oven/microwave allowance is lowered to 12-60 inches above floor, controls centered at 58.8 inches. The main combi/steam oven is lowered to 30-54 inches, superseding the older height above. A two-slice toaster leaves about 41.9 inches of clear left landing/prep counter. Counter aisle stays about 54.6 inches. Verify owner reach, hot-dish handling, product cutouts, ventilation, appliance operation and services.
+The prep counter uses standard 30 + 30-inch left bases, a 36-inch sink base, an exposed stainless 18-inch dishwasher, a 24-inch cupboard and a 33-inch six-drawer end cabinet, with separate 0.6-inch end fillers. The tower is 33 W x 24 D inches. November 14: it holds only a provisional 30-inch built-in microwave with trim kit, 42-60 inches above floor (door 43.5-57.3 inches, controls centered at 58.8 inches); the prep wall oven is removed and a standard three-drawer stack fills the former oven bay. The main combi/steam oven is lowered to 30-54 inches, superseding the older height above. A two-slice toaster leaves about 41.9 inches of clear left landing/prep counter. Counter aisle stays about 54.6 inches. Verify owner reach, hot-dish handling, product cutouts, ventilation, appliance operation and services.
 
 A compact stainless-look dish rack sits on the counter right of the main sink, above the dishwasher, with three small white plates and a utensil cup. Its neutral 16 × 14-inch removable catch pan has a closed bottom and raised edges, with no drain spout. Remove the pan to empty water manually. This is a placement concept, not a selected product; verify pan removal, cleaning access, and actual fit.
 

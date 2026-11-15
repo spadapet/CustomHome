@@ -327,12 +327,13 @@ test('floor changes restore arrival, furniture placements and visibility without
 test('closet inspection hides canopy shelves and other views restore them without moving storage',()=>{
   const source=fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'),'utf8');
   const start=source.indexOf('    upstairs.group.traverse((object) => {',source.indexOf('  function setView(name)'));
-  const end=source.indexOf('    const planView',start),canopies=[];
+  const end=source.indexOf('    const planView',start),canopies=[],guestClosetCanopies=[{visible:true}];
   model.group.traverse(o=>{if(o.userData.closetCanopy)canopies.push(o);});
   assert.equal(canopies.length,6);
-  for(const name of ['upstairs-primary-closet','upstairs','whole','upstairs-bedroom-2-closet','upstairs-top']){
-    vm.runInNewContext(source.slice(start,end),{upstairs:model,name});
-    assert.ok(canopies.every(o=>o.visible===!name.includes('closet')));
+  for(const name of ['upstairs-primary-closet','upstairs','whole','guest-closet','upstairs-bedroom-2-closet','upstairs-top']){
+    vm.runInNewContext(source.slice(start,end),{upstairs:model,name,guestClosetCanopies});
+    assert.ok(canopies.every(o=>o.visible===!(name.startsWith('upstairs-')&&name.includes('closet'))));
+    assert.equal(guestClosetCanopies[0].visible,name!=='guest-closet');
   }
 });
 test('real door click handler invalidates tour collisions after operation',()=>{
@@ -455,8 +456,9 @@ test('all sixteen leaves clear their own jambs, adjacent walls, casings and base
   }
 });
 
-test('closed upstairs leaves meet their lining or extended latch and head',()=>{
+test('closed upstairs leaves meet their wall-mounted linings without detached extensions',()=>{
   const doors=[];model.group.traverse(o=>{if(o.userData.interactiveHouseDoor)doors.push(o);});
+  assert.equal(meshes(model.group).filter(o=>/^Upstairs door (?:head|latch jamb|hinge jamb) extension$/.test(o.name)).length,0);
   const exceptions=new Set(['Upstairs Closet 2 south interior door hinge','Upstairs Bedroom 3 closet interior door hinge']);
   let aligned=0,retained=0;
   for(const hinge of doors){
@@ -464,20 +466,11 @@ test('closed upstairs leaves meet their lining or extended latch and head',()=>{
     const host=hinge.parent;
     const jambs=host.children.filter(o=>o.name==='Upstairs painted door jamb lining');
     const center=hinge.position.z+Math.cos(hinge.rotation.y)*leaf.position.z;
-    const liningHalf=jambs[0].geometry.d/2;
+    const liningHalf=jambs[0].geometry.d/2+Math.abs(jambs[0].position.z);
     const isException=exceptions.has(hinge.name)||(hinge.name==='Upstairs Bedroom 3 north interior door hinge'&&hinge.position.x>4);
     if(isException){
-      assert.ok(Math.abs(center)-leaf.userData.depth/2>liningHalf);
-      const head=host.children.find(o=>o.name==='Upstairs door head extension' &&
-        Math.abs(o.position.x-hinge.position.x)<hinge.userData.nominalOpeningFeet);
-      const latch=host.children.find(o=>o.name==='Upstairs door latch jamb extension' &&
-        Math.abs(o.position.x-hinge.position.x)<hinge.userData.nominalOpeningFeet+.1);
-      const hingeJamb=host.children.find(o=>o.name==='Upstairs door hinge jamb extension' &&
-        Math.abs(o.position.x-hinge.position.x)<.2);
-      assert.ok(head&&latch&&hingeJamb,hinge.name);
-      close(Math.abs(head.position.z)+head.geometry.d/2,Math.abs(center)+leaf.userData.depth/2);
-      close(Math.abs(latch.position.z)+latch.geometry.d/2,Math.abs(center)+leaf.userData.depth/2);
-      close(Math.abs(hingeJamb.position.z)+hingeJamb.geometry.d/2,Math.abs(center)+leaf.userData.depth/2);
+      close(Math.abs(center)-leaf.userData.depth/2,liningHalf);
+      close((jambs[0].geometry.d-(.35+.125))*12,hinge.name==='Upstairs Bedroom 3 closet interior door hinge'?.125:0);
       retained++;continue;
     }
     assert.ok(Math.abs(center)+leaf.userData.depth/2<=liningHalf+1e-7,hinge.name);

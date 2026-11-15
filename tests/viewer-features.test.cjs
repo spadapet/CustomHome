@@ -152,6 +152,52 @@ test('2D plans use orthographic projection and pan without changing the layout',
   assert.match(source, /top: .*offset: \[0, 110, 0\]/);
 });
 
+test('guest coat inspection uses orthographic framing and restores the normal perspective', () =>
+{
+  const source = read('assets/js/floor-plan-3d.js');
+  const start = source.indexOf('    const aspect = viewport.clientWidth / viewport.clientHeight;', source.indexOf('  function setView(name) {'));
+  const end = source.indexOf('    const basementCutaway', start);
+  const match = source.match(/'guest-coats': (\{ target: .*? \}),/);
+  assert.ok(start >= 0 && end > start && match);
+  class Vector3
+  {
+    constructor(...values) { this.values = values; }
+    set(...values) { this.values = values; return this; }
+    copy(other) { this.values = [...other.values]; return this; }
+    add(other) { this.values = this.values.map((value, i) => value + other.values[i]); return this; }
+    setLength(length)
+    {
+      const current = Math.hypot(...this.values);
+      this.values = this.values.map(value => value * length / current);
+      return this;
+    }
+    length() { return Math.hypot(...this.values); }
+  }
+  const guestEntry = require('../assets/js/floor-plan-ground.js').getGuestEntryLayout();
+  for (const [width, height] of [[1200, 800], [420, 800]])
+  {
+    const orthographic = { isOrthographicCamera: true, position: new Vector3(), updateProjectionMatrix() {} };
+    const perspective = { isOrthographicCamera: false, position: new Vector3(), updateProjectionMatrix() {} };
+    const context = {
+      name: 'guest-coats', mudroomInteriorView: false, mudroomInspectionView: false, prepElevationView: false, exteriorElevation: false,
+      sinkStorageView: false, planView: false, streetEyeView: false,
+      viewport: { clientWidth: width, clientHeight: height }, mudroomInteriorCamera: {}, perspectiveCamera: perspective, cooktopElevationCamera: orthographic,
+      controls: { target: new Vector3(), update() {} }, camera: null,
+      preset: vm.runInNewContext(`(${match[1]})`, { guestEntry }),
+      THREE: { Vector3, MathUtils: { degToRad: value => value * Math.PI / 180, radToDeg: value => value * 180 / Math.PI } }
+    };
+    vm.runInNewContext(`{${source.slice(start, end)}}`, context);
+    assert.equal(context.camera, orthographic);
+    assert.ok(orthographic.right > orthographic.left && orthographic.top > orthographic.bottom);
+    assert.equal(context.controls.object, orthographic);
+    context.name = 'living';
+    vm.runInNewContext(`{${source.slice(start, end)}}`, context);
+    assert.equal(context.camera, perspective);
+    assert.equal(perspective.fov, 38);
+    assert.equal(context.controls.object, perspective);
+  }
+});
+
 test('viewer removes both editors without removing saved layout loading or viewing tools', () => {
   const html = read('floor-plan-3d.html');
   const source = read('assets/js/floor-plan-3d.js');

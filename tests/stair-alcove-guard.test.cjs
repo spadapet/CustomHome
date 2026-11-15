@@ -92,3 +92,116 @@ test('south alcove remains open to the hall with the same measured baseboard-to-
   assert.ok(!plan.walls.some(([, x1, z1, x2, z2]) => x1 === 12.2 && x2 === 12.2 &&
     Math.min(z1, z2) < entry.officeNorthZ && Math.max(z1, z2) > entry.alcove.z), 'No wall closes the hall-facing alcove');
 });
+
+test('guest coat leaves close inside the wall and sweep clear of the jambs and each other', () =>
+{
+  class Group
+  {
+    constructor()
+    {
+      this.children = [];
+      this.userData = {};
+      this.position = { x: 0, y: 0, z: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } };
+      this.rotation = { x: 0, y: 0, z: 0 };
+    }
+    add(child) { child.parent = this; this.children.push(child); }
+    traverse(fn) { fn(this); this.children.forEach(child => child.traverse(fn)); }
+  }
+  const box = (parent, x, y, z, width, height, depth) =>
+  {
+    const mesh = new Group();
+    mesh.geometry = { width, height, depth };
+    mesh.position.set(x, y, z);
+    parent.add(mesh);
+    return mesh;
+  };
+  const roots = [];
+  const context = {
+    THREE: { Group }, guestEntry: entry, windowTrim: {}, cabinetFinish: {}, brass: {}, linen: {}, cream: {},
+    box,
+    cylinder(parent, x, y, z, radius, height) { return box(parent, x, y, z, radius * 2, height, radius * 2); },
+    furnishing(name, x, z)
+    {
+      const group = new Group();
+      group.name = name;
+      group.position.set(x, 0, z);
+      roots.push(group);
+      return group;
+    }
+  };
+  const doorStart = source.indexOf('  function singlePanelDoor('), doorEnd = source.indexOf('  function shakerFront(', doorStart);
+  const pullStart = source.indexOf('  function cabinetPull('), pullEnd = source.indexOf('  function cabinetCupPull(', pullStart);
+  const start = source.indexOf("  const guestCoats = furnishing('Guest coat closet'");
+  const end = source.indexOf('  const powderDoor =', start);
+  assert.ok(doorStart >= 0 && doorEnd > doorStart && pullStart >= 0 && pullEnd > pullStart && start >= 0 && end > start);
+  vm.runInNewContext(source.slice(doorStart, doorEnd) + source.slice(pullStart, pullEnd) + source.slice(start, end), context);
+  const hinges = roots[0].children.filter(part => part.name === 'Guest coat closet French door hinge');
+  assert.equal(hinges.length, 2);
+  const meshes = root =>
+  {
+    const result = [];
+    root.traverse(item => { if (item.geometry) result.push(item); });
+    return result;
+  };
+  const shape = mesh =>
+  {
+    const { width, height, depth } = mesh.geometry;
+    let y = 0;
+    for (let node = mesh; node; node = node.parent) y += node.position.y;
+    const vertices = [[-width / 2, -depth / 2], [width / 2, -depth / 2], [width / 2, depth / 2], [-width / 2, depth / 2]].map(([x, z]) =>
+    {
+      for (let node = mesh; node; node = node.parent)
+      {
+        const c = Math.cos(node.rotation.y), s = Math.sin(node.rotation.y);
+        [x, z] = [node.position.x + c * x + s * z, node.position.z - s * x + c * z];
+      }
+      return [x, z];
+    });
+    return { vertices, low: y - height / 2, high: y + height / 2 };
+  };
+  const overlaps = (a, b) =>
+  {
+    if (Math.min(a.high, b.high) - Math.max(a.low, b.low) <= 1e-6) return false;
+    for (const polygon of [a.vertices, b.vertices]) for (let i = 0; i < polygon.length; i++)
+    {
+      const [x, z] = polygon[i], [nx, nz] = polygon[(i + 1) % polygon.length], axis = [z - nz, nx - x];
+      const project = points => points.map(point => point[0] * axis[0] + point[1] * axis[1]);
+      const p = project(a.vertices), q = project(b.vertices);
+      if (Math.min(Math.max(...p), Math.max(...q)) - Math.max(Math.min(...p), Math.min(...q)) <= 1e-8) return false;
+    }
+    return true;
+  };
+  const rect = (minX, maxX, minZ, maxZ) => ({ vertices: [[minX, minZ], [maxX, minZ], [maxX, maxZ], [minX, maxZ]], low: 0, high: 8 });
+  const { x, z, width } = entry.closetDoor, reveal = 0.125 / 12, casing = 3.5 / 12;
+  const fixed = [
+    rect(entry.coatCloset.x, x, z - .175, z + .175),
+    rect(x + width, entry.coatCloset.x + entry.coatCloset.w, z - .175, z + .175),
+    rect(entry.coatCloset.x - .175, entry.coatCloset.x + .175, entry.coatCloset.z, entry.officeNorthZ),
+    rect(entry.coatCloset.x + entry.coatCloset.w - .175, entry.coatCloset.x + entry.coatCloset.w + .175, entry.coatCloset.z, z),
+    ...roots[0].children.filter(part => part.geometry).map(shape),
+    ...[-1, 1].flatMap(side =>
+    {
+      const a = z + side * .175, b = z + side * (.175 + .0625);
+      return [rect(x - reveal - casing, x - reveal, Math.min(a, b), Math.max(a, b)),
+        rect(x + width + reveal, x + width + reveal + casing, Math.min(a, b), Math.max(a, b))];
+    })
+  ];
+  for (const hinge of hinges)
+  {
+    const leaf = hinge.children.find(part => part.userData.doorStyle);
+    const leafShapes = leaf.children.filter(part => part.geometry).map(shape);
+    close(Math.max(...leafShapes.flatMap(part => part.vertices.map(vertex => vertex[1]))), z + .175);
+    close(Math.min(...leafShapes.flatMap(part => part.vertices.map(vertex => vertex[1]))), z + .175 - .13);
+    const other = hinges.find(part => part !== hinge);
+    for (let degrees = 0; degrees <= 90; degrees++)
+    {
+      hinge.rotation.y = degrees * Math.PI / 180 * hinge.userData.interactiveHouseDoor.openRotationSign;
+      for (const mesh of meshes(hinge))
+      {
+        for (const [index, obstacle] of [...fixed, ...meshes(other).map(shape)].entries())
+          assert.ok(!overlaps(shape(mesh), obstacle), `${mesh.name || mesh.parent.name} clears obstacle ${index} at ${degrees} degrees`);
+      }
+    }
+    hinge.rotation.y = 0;
+  }
+});

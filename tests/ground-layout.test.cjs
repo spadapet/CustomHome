@@ -569,7 +569,7 @@ test('one standard-size powder window cuts the west wall and retains half-froste
   Group.prototype.worldToLocal = function (vector) { return vector; };
   const context = {
     getWindowProductIntent: require('../assets/js/floor-plan-ground.js').getWindowProductIntent,
-    THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, scene: new Group(), windowTrim: {}, windowExterior: {}, glass: {}, privacyGlass: {},
+    THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, scene: new Group(), windowTrim: {}, windowExterior: {}, glass: {}, windowGlass: {}, privacyGlass: {},
     windowFaceDepth: () => 0.075, windowInstallations: [], wallThickness: 0.45,
     openingCasing() {},
     box(parent, x, y, z, width, height, depth, material) {
@@ -598,7 +598,7 @@ test('one standard-size powder window cuts the west wall and retains half-froste
     const lower = sash.children.find((part) => part.name === 'Frosted lower-half privacy pane');
     const upper = sash.children.find((part) => part.name === 'Clear upper-half daylight pane');
     assert.equal(lower.material, context.privacyGlass);
-    assert.equal(upper.material, context.glass);
+    assert.equal(upper.material, context.windowGlass);
     assert.equal(lower.height, upper.height);
     assert.ok(Math.abs(lower.y + lower.height / 2 - upper.y + upper.height / 2) < 1e-9, 'Glazing halves meet without a gap or overlap');
     assert.ok(Math.abs(window.sill + sash.position.y + lower.y + lower.height / 2 - 6) < 1e-9);

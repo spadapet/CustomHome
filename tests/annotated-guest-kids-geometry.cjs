@@ -21,7 +21,7 @@ function measure(THREE) {
     mat: () => material,
     ...Object.fromEntries(['linen', 'cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish',
       'brass', 'oak', 'cream', 'porcelain', 'black', 'windowTrim', 'steel', 'wallMaterial',
-      'countertop', 'glass', 'guestVanityStone'].map(name => [name, material])),
+      'countertop', 'glass', 'guestVanityStone', 'guestClosetGlow'].map(name => [name, material])),
     furnishing(name, x, z, rotation = 0) {
       const root = new THREE.Group(); root.name = name;
       root.position.set(x, 0, z); root.rotation.y = rotation; scene.add(root); return root;
@@ -46,7 +46,7 @@ function measure(THREE) {
   run('  function wall(', '  function joinWallCorners()');
   run('  const bottomRun =', '  const island =');
   run('  const kidsClay =', '  const officeDeskWidth =');
-  run('  for (const compartment of guestSuite.closets)', '  const guestCoats =');
+  run('  // Guest walk-in closet built-ins.', '  const guestCoats =');
   run('  function toilet(name,', '  const powderBasin');
   context.toilet('Guest bathroom toilet', suite.toilet.x, suite.toilet.z, suite.toilet.rotation);
   context.vanity('Guest bathroom vanity', suite.vanity.x, suite.vanity.z, suite.vanity.width,
@@ -134,7 +134,7 @@ function measure(THREE) {
   const wcOpenThresholdInches = (bounds(wc).minZ - suite.wcDoor.z) * 12;
   wc.rotation.y = wcState.closedRotationY;
   scene.updateMatrixWorld(true);
-  const storage = ['west', 'east'].map(side => bounds(named(`Guest ${side} end closet storage`)));
+  const storage = ['Guest west wardrobe built-in', 'Guest north-east drawer and folding tower'].map(name => bounds(named(name)));
   const leaves = ['Guest walk-through closet pocket door', 'Guest bathroom pocket entry from closet'];
   let samples = 0;
   const pocketClearThresholdsInches = [];

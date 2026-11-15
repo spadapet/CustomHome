@@ -36,6 +36,7 @@ function build() {
     scene: new Group(),
     guestVanity: { children: [{ name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }, { name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }] },
     powderGlow: { emissiveIntensity: 0.45 },
+    guestClosetGlow: { emissiveIntensity: 0 },
     upstairs: { group: Object.assign(new Group(), { userData: { ceilingHeightFeet: 9, elevationFeet: 10 } }),
       rooms: [{ name: 'Bedroom 2', x: 31, z: 10, w: 13, d: 12 },
         { name: 'Finished loft', ...require('../assets/js/floor-plan-upstairs.js').getUpstairsLoftGeometry(), ceilingProfile: 'garage-loft' }] },
@@ -59,7 +60,7 @@ function build() {
   return context;
 }
 
-test('guest vanity real lights and night glow restore across Day/Night, plans and floors', () => {
+test('guest vanity real lights, closet LED strips and night glow restore across Day/Night, plans and floors', () => {
   const model = build();
   for (const [floor, view, night, expected] of [
     ['ground', 'whole', true, true], ['ground', 'whole', false, false],
@@ -76,6 +77,7 @@ test('guest vanity real lights and night glow restore across Day/Night, plans an
       assert.equal(lamp.intensity, expected ? 8 : 0);
     }
     assert.equal(model.powderGlow.emissiveIntensity, expected ? 0.45 : 0);
+    assert.equal(model.guestClosetGlow.emissiveIntensity, expected ? 0.8 : 0, 'Guest closet LED strips follow guest Night lighting');
   }
 });
 

@@ -203,7 +203,7 @@ test('both sides use six-inch flush sills, overriding historical plant-ledge opt
     const bottom = casing.children.find(part => part.name === 'White casing flat bottom board');
     close(bottom.d, 0.0625);
     close(bottom.position.z, 0.03125);
-    close(bottom.position.y + bottom.h / 2, -1 / 12);
+    close(bottom.position.y + bottom.h / 2, -1 / 12 + 1 / 96);
   }
   const parent = new Group();
   context.openingCasing(parent, 0, 3, 4, 5, 0.2, 1, true, { material: {}, depth: 3.5 / 12 });

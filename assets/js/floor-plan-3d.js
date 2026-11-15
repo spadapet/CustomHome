@@ -464,6 +464,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   cabinetRailFinish.map.rotation = 0;
   const cabinetPanelFinish = cabinetFinish.clone();
   cabinetPanelFinish.name = 'Stained white oak - recessed panel';
+  // Guest closet shelf LEDs glow only with the guest suite's Night lighting.
+  const guestClosetGlow = new THREE.MeshStandardMaterial({ color: '#fff1d7', emissive: '#ffd9a0', emissiveIntensity: 0, roughness: 0.6 });
+  guestClosetGlow.name = 'Guest closet warm 2700K LED diffuser';
   cabinetPanelFinish.color.set('#e6dccb');
   const brass = new THREE.MeshStandardMaterial({ color: '#b99a60', metalness: 0.65, roughness: 0.35 });
   brass.name = 'Satin gold hardware';
@@ -679,15 +682,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     if (window) {
       // Applied trim surrounds the recessed sill without forming a projecting stool.
       casing.name = 'Flush white window returns';
-      const depth = 6 / 12, thickness = 1 / 12;
-      part('White inset window sill', 0, -thickness / 2, -depth / 2, width, thickness, depth, windowTrim);
+      const depth = 6 / 12, thickness = 1 / 12, surfaceInset = 1 / 96;
+      part('White inset window sill', 0, -thickness / 2 + surfaceInset, -depth / 2, width, thickness, depth, windowTrim);
       for (const edge of [-1, 1])
-        part('White drywall jamb return', edge * (width / 2 + 0.025), height / 2, -depth / 2, 0.05, height, depth, windowTrim);
-      part('White drywall head return', 0, height + 0.025, -depth / 2, width + 0.1, 0.05, depth, windowTrim);
+        part('White drywall jamb return', edge * (width / 2 + 0.025 - surfaceInset), height / 2, -depth / 2, 0.05, height, depth, windowTrim);
+      part('White drywall head return', 0, height + 0.025 - surfaceInset, -depth / 2, width + 0.1, 0.05, depth, windowTrim);
       for (const edge of [-1, 1])
         part('White casing side board', edge * (width / 2 + reveal + sideWidth / 2),
           (height + reveal - thickness) / 2, 0.03125, sideWidth, height + reveal + thickness, 0.0625, windowTrim);
-      if (sillOptions.bottomBoard !== false) part('White casing flat bottom board', 0, -thickness - sideWidth / 2, 0.03125, outerWidth, sideWidth, 0.0625, windowTrim);
+      if (sillOptions.bottomBoard !== false) part('White casing flat bottom board', 0, -thickness - sideWidth / 2 + surfaceInset, 0.03125, outerWidth, sideWidth, 0.0625, windowTrim);
       part('White casing header', 0, height + reveal + 5.5 / 24, 0.03125, outerWidth, 5.5 / 12, 0.0625, windowTrim);
       part('White casing header bead', 0, height + reveal + 0.03125, 0.05, outerWidth + 0.0625, 0.0625, 0.1, windowTrim);
       part('White casing projecting cap', 0, height + reveal + 5.5 / 12 + 0.0416667, 0.0625, outerWidth + 0.125, 1 / 12, 0.125, windowTrim);
@@ -1252,6 +1255,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   ];
   for (const x of kitchenEndSconceCenters) wallSconce(kitchenSconces, x, kitchenWindowWallZ + 0.205, -Math.PI / 2);
   const glass = new THREE.MeshStandardMaterial({ color: '#b3cad0', roughness: 0.15, metalness: 0.15, transparent: true, opacity: 0.52 });
+  const windowGlass = new THREE.MeshStandardMaterial({ color: '#eaf5f7', roughness: 0.15, metalness: 0, transparent: true, opacity: 0.16, depthWrite: false });
   const privacyGlass = new THREE.MeshStandardMaterial({ color: '#e0e8e4', roughness: 1, metalness: 0 });
   privacyGlass.name = 'Obscured lower-half bathroom glazing - privacy concept';
   const windowExterior = windowTrim;
@@ -1308,7 +1312,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
         if (options.singleHung) {
           unit.name = 'Andersen 100 Series single-hung concept';
           Object.assign(unit.userData, { operation: 'single-hung', upperSash: 'fixed', lowerSash: 'slides vertically' });
-          addSingleHungSashes(unit, box, windowTrim, glass, unitWidth, unitHeight);
+          addSingleHungSashes(unit, box, windowTrim, windowGlass, unitWidth, unitHeight);
           continue;
         }
         const sash = new THREE.Group();
@@ -1322,9 +1326,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
         if (options.privacyLowerHalf) {
           const halfPaneHeight = (sashHeight - 0.2) / 2;
           box(sash, 0, 0.1 + halfPaneHeight / 2, 0, sashWidth - 0.2, halfPaneHeight, 0.04, privacyGlass).name = 'Frosted lower-half privacy pane';
-          box(sash, 0, 0.1 + halfPaneHeight * 1.5, 0, sashWidth - 0.2, halfPaneHeight, 0.04, glass).name = 'Clear upper-half daylight pane';
+          box(sash, 0, 0.1 + halfPaneHeight * 1.5, 0, sashWidth - 0.2, halfPaneHeight, 0.04, windowGlass).name = 'Clear upper-half daylight pane';
         } else {
-          box(sash, 0, sashHeight / 2, 0, sashWidth - 0.2, sashHeight - 0.2, 0.04, glass).name = unitFixed ? 'Fixed glazing pane' : 'Single casement glazing pane';
+          box(sash, 0, sashHeight / 2, 0, sashWidth - 0.2, sashHeight - 0.2, 0.04, windowGlass).name = unitFixed ? 'Fixed glazing pane' : 'Single casement glazing pane';
         }
         if (!unitFixed) {
           box(unit, 0, 0.2, interiorSide * 0.16, 0.28, 0.07, 0.08, windowTrim).name = 'White casement crank housing';
@@ -1863,7 +1867,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   for (const [index, x] of [kitchenSinkX - 1.75, kitchenSinkX, kitchenSinkX + 1.75].entries()) {
     const pot = new THREE.Group();
     pot.name = `Kitchen sill flower pot ${index + 1}`;
-    pot.position.set(x, kitchenSinkWindowSill, kitchenWindowWallZ + 0.175 - 0.25);
+    pot.position.set(x, kitchenSinkWindowSill + 1 / 96, kitchenWindowWallZ + 0.175 - 0.25);
     pot.scale.setScalar(0.55);
     pot.userData = { saucerDiameterInches: 3.168, provisional: true };
     sillFlowers.add(pot);
@@ -2553,14 +2557,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const frame = windowFrame(name, x, z, width, height, sill, -Math.PI / 2, rest, 1, { picture: true });
     Object.assign(frame.userData, { room: 'Garage', sillAboveFloorInches: sillAboveFloor * 12, structureVerified: false });
   }
-  const prepTower = furnishing('Prep microwave and wall oven tower', 39.375, kitchenWindowWallZ + 0.25 + 1);
+  const prepTower = furnishing('Prep microwave tower', 39.375, kitchenWindowWallZ + 0.25 + 1);
   const prepTowerWidth = 33 / 12;
   const prepTowerDepth = 24 / 12;
   const prepTowerSide = 0.75 / 12;
-  const prepApplianceBottom = 1;
+  const prepApplianceBottom = 3.5;
   const prepApplianceTop = 5;
   const prepTowerFront = prepTowerDepth / 2 + 0.04;
-  prepTower.userData = { widthInches: 33, depthInches: 24, heightInches: 96, nominalApplianceWidthInches: 30, allowanceHeightInches: 48, modelSelected: false, provisional: true };
+  prepTower.userData = { widthInches: 33, depthInches: 24, heightInches: 96, nominalApplianceWidthInches: 30, allowanceHeightInches: 18, microwaveOnly: true, wallOvenRemoved: true, modelSelected: false, provisional: true };
   box(prepTower, -prepTowerWidth / 2 - 0.325 / 2, 4, 0, 0.325, 8, prepTowerDepth, cabinetFinish).name = 'Prep tower west wall filler';
   box(prepTower, prepTowerWidth / 2 + 0.05, 1.4375, 0, 0.1, 2.875, prepTowerDepth, cabinetFinish).name = 'Prep tower to base filler';
   box(prepTower, prepTowerWidth / 2 + 0.035, 2.97, -0.025, 0.07, 0.14, 2.1, countertop).name = 'Prep tower landing quartz closure';
@@ -2573,24 +2577,32 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   for (const y of [prepApplianceBottom - prepTowerSide / 2, prepApplianceTop + prepTowerSide / 2]) {
     box(prepTower, 0, y, 0, prepTowerWidth - 2 * prepTowerSide, prepTowerSide, prepTowerDepth, cabinetRailFinish).name = 'Prep appliance support shelf';
   }
-  for (const [bottom, top] of [[0.3, prepApplianceBottom - prepTowerSide], [prepApplianceTop + prepTowerSide, 7.85]]) {
+  for (const [bottom, top] of [[prepApplianceTop + prepTowerSide, 7.85]]) {
     for (const side of [-1, 1]) {
       const front = shakerFront(prepTower, side * prepTowerWidth / 4, (bottom + top) / 2, prepTowerFront, prepTowerWidth / 2 - 0.04, top - bottom - 0.04);
-      cabinetPull(front, -side * (prepTowerWidth / 4 - 0.15), bottom < prepApplianceBottom ? (top - bottom) / 2 - 0.35 : -(top - bottom) / 2 + 0.35, 0.09, 0.6, true);
+      cabinetPull(front, -side * (prepTowerWidth / 4 - 0.15), -(top - bottom) / 2 + 0.35, 0.09, 0.6, true);
     }
   }
+  // Former wall-oven bay: standard 33-inch full-extension drawer stack (15 / 12.5 / remaining in, bottom to top).
+  const prepDrawerBottom = 0.3;
+  const prepDrawerTop = prepApplianceBottom - prepTowerSide;
+  const prepDrawerRows = [[prepDrawerBottom, prepDrawerBottom + 15 / 12], [prepDrawerBottom + 15 / 12, prepDrawerBottom + 27.5 / 12], [prepDrawerBottom + 27.5 / 12, prepDrawerTop]];
+  prepDrawerRows.forEach(([bottom, top], row) => {
+    const front = shakerFront(prepTower, 0, (bottom + top) / 2, prepTowerFront, prepTowerWidth - 0.04, top - bottom - 0.04);
+    front.name = 'Prep microwave tower drawer front';
+    Object.assign(front.userData, { drawer: true, prepTowerDrawerRow: row, drawerTravelFeet: 21 / 12, slides: 'Full-extension 21-inch allowance', provisional: true });
+    for (const side of [-1, 1]) cabinetPull(front, side * prepTowerWidth / 4, (top - bottom) / 2 - 0.25, 0.09, 0.6);
+  });
   box(prepTower, 0, 7.925, 0, prepTowerWidth, 0.15, prepTowerDepth, cabinetRailFinish).name = 'Prep appliance tower cornice';
-  const prepCombination = new THREE.Group();
-  prepCombination.name = '30-inch microwave and wall oven combination';
-  prepCombination.userData = { nominalWidthInches: 30, allowanceHeightInches: 48, allowanceDepthInches: 24, bottomInches: 12, modelSelected: false, provisional: true };
-  prepCombination.position.y = -1;
-  prepTower.add(prepCombination);
-  box(prepCombination, 0, 4, 0.05, 2.5, 4, 1.9, steel).name = 'Prep combination appliance envelope';
-  for (const [name, y, height, handleY] of [['Wall oven', 3.25, 2.1, 4.15], ['Microwave', 5.2, 1.15, 4.72]]) {
-    box(prepCombination, 0, y, prepTowerFront + 0.03, 2.25, height, 0.02, black).name = `Prep ${name} glass door`;
-    box(prepCombination, 0, handleY, prepTowerFront + 0.12, 2.1, 0.07, 0.1, steel).name = `Prep ${name} handle`;
-  }
-  box(prepCombination, 0, 5.9, prepTowerFront + 0.03, 2.25, 0.15, 0.02, black).name = 'Prep combination appliance controls';
+  const prepMicrowave = new THREE.Group();
+  prepMicrowave.name = '30-inch built-in microwave with trim kit';
+  prepMicrowave.userData = { nominalWidthInches: 30, allowanceHeightInches: 18, allowanceDepthInches: 24, bottomInches: 42, doorBottomInches: 43.5, doorTopInches: 57.3, microwaveOnly: true, wallOven: false, modelSelected: false, provisional: true };
+  prepTower.add(prepMicrowave);
+  box(prepMicrowave, 0, (prepApplianceBottom + prepApplianceTop) / 2, 0.05, 2.5, prepApplianceTop - prepApplianceBottom, 1.9, steel).name = 'Prep microwave appliance envelope';
+  box(prepMicrowave, 0, (prepApplianceBottom + prepApplianceTop) / 2, prepTowerFront + 0.015, 2.5, prepApplianceTop - prepApplianceBottom, 0.01, steel).name = 'Prep microwave trim kit frame';
+  box(prepMicrowave, 0, 4.2, prepTowerFront + 0.03, 2.25, 1.15, 0.02, black).name = 'Prep Microwave glass door';
+  box(prepMicrowave, 0, 3.72, prepTowerFront + 0.12, 2.1, 0.07, 0.1, steel).name = 'Prep Microwave handle';
+  box(prepMicrowave, 0, 4.9, prepTowerFront + 0.03, 2.25, 0.15, 0.02, black).name = 'Prep microwave controls';
   const prepCounterAppliances = new THREE.Group();
   prepCounterAppliances.name = 'Prep countertop appliances';
   rest.add(prepCounterAppliances);
@@ -3833,52 +3845,106 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   singlePanelDoor(guestBedroomLeaf, 0, 4, -1.5, 2.96, 7.96, 1.375 / 12, windowTrim, Math.PI / 2).name = 'Guest bedroom white single-panel door';
   for (const side of [-1, 1]) cylinder(guestBedroomLeaf, side * 0.13, 3.2, -2.72, 0.07, 0.14, brass).name = 'Guest bedroom gold door knob';
 
-  for (const compartment of guestSuite.closets) {
-    if (compartment.name === 'east end') continue; // replaced by laundry + shallow shelves
-    const storage = furnishing(`Guest ${compartment.name} closet storage`, compartment.x + compartment.w / 2, compartment.z + compartment.d / 2);
-    storage.userData = { storageType: 'Walk-through end storage', widthInches: 48, depthInches: 24, heightInches: 84,
-      standardDepthEnvelope: true, separateFillers: true, removableAccessories: false, provisional: true };
-    const panel = 0.0625;
-    for (const y of [0.2, 7]) box(storage, 0, y, 0, 2, panel, 4, cabinetRailFinish).name = 'Guest end-storage shelf';
-    for (const side of [-1, 1]) box(storage, 0, 3.6, side * (4 - panel) / 2, 2, 6.8, panel, cabinetFinish).name = 'Guest end-storage side panel';
-    // Two standard 24-inch modules: north long-hang, south double-short.
-    box(storage, 0, 3.6, 0, 2, 6.8, panel, cabinetFinish).name = 'Guest hanging module divider';
-    for (const [y, z] of [[5.85, -1], [3.2, 1], [6.2, 1]]) {
-      const rod = cylinder(storage, 0, y, z, 0.035, 1.875, brass);
-      rod.rotation.x = Math.PI / 2;
-      rod.name = 'Guest continuous end-storage hanging rod';
-      for (const offset of [-0.65, -0.3, 0.05, 0.4, 0.7]) {
-        const drop = y === 5.85 ? 4.2 : 2.4;
-        box(storage, 0, y - drop / 2 - 0.08, z + offset, 1.95, drop, 0.12, linen).name = 'Guest retained hanging clothes';
+  // Guest walk-in closet built-ins. Two end runs share the 84-inch shelf and
+  // 96-inch door-head datums; the straight pocket-to-pocket crossing stays open.
+  const closetPanel = 0.75 / 12;
+  const closetNorthFace = guestSuite.closet.z + 0.175;
+  const closetSouthFace = guestSuite.closetSouthZ - 0.175;
+  const closetEastFace = 31.2 - 0.175;
+  const closetWestFace = guestSuite.notch.x + guestSuite.notch.w + 0.175;
+  const closetDatums = guestSuite.closetDatums;
+  const [westRun, closetTower] = guestSuite.closets;
+  // The plan inspection preset hides overhead 84/96-inch shelves and their LEDs
+  // so rods, drawers and the stack read from above; the layout is unchanged.
+  const guestClosetCanopies = [];
+  const closetLed = (parent, x, y, z, width, depth) => {
+    const strip = box(parent, x, y, z, width, 0.25 / 12, depth, guestClosetGlow);
+    strip.name = 'Guest closet warm LED shelf strip';
+    guestClosetCanopies.push(strip);
+    strip.userData = { colorTemperatureKelvin: 2700, lowVoltage: true, dimmable: true, productSelected: false, listingVerified: false,
+      control: 'Switch and accessible driver outside both pocket cavities; electrician to confirm' };
+    return strip;
+  };
+  const wardrobe = furnishing('Guest west wardrobe built-in', westRun.x + westRun.w / 2, westRun.z + westRun.d / 2);
+  wardrobe.userData = { storageType: 'Built-in walk-in wardrobe run', sectionWidthsInches: westRun.sections.map(({ width }) => width * 12),
+    depthInches: 24, heightInches: 96, standardSections: true, separateFillers: true, removableAccessories: false, provisional: true,
+    longHangRodInches: 22.5, doubleHangRodInches: 57, hangingRodInches: 79.5,
+    support: 'Carcass fixes to the solid west wall only; fillers fix to the carcass. No fasteners into either pocket wall. Load/support review required.' };
+  {
+    const half = westRun.d / 2;
+    const carcassTop = closetDatums.upper - closetPanel;
+    // North end, 24-inch section divider and south end; carcass rises to the 96-inch door-head datum.
+    for (const z of [-half + closetPanel / 2, -half + westRun.sections[0].width, half - closetPanel / 2])
+      box(wardrobe, 0, carcassTop / 2, z, 2, carcassTop, closetPanel, cabinetFinish).name = 'Guest wardrobe carcass panel';
+    let start = -half;
+    for (const section of westRun.sections) {
+      const end = start + section.width;
+      const innerStart = start + (Math.abs(start + half) < 1e-9 ? closetPanel : closetPanel / 2);
+      const innerEnd = end - (Math.abs(end - half) < 1e-9 ? closetPanel : closetPanel / 2);
+      const center = (innerStart + innerEnd) / 2, inner = innerEnd - innerStart;
+      box(wardrobe, 1 - 2 / 12 - closetPanel / 2, 3.25 / 24, center, closetPanel, 3.25 / 12, inner, cabinetFinish).name = 'Guest wardrobe recessed plinth';
+      box(wardrobe, 0, (4 - 0.375) / 12, center, 2, closetPanel, inner, cabinetRailFinish).name = 'Guest wardrobe base deck';
+      if (section.name === 'long hang') box(wardrobe, 0, (11 - 0.375) / 12, center, 2, closetPanel, inner, cabinetRailFinish).name = 'Guest wardrobe shoe shelf';
+      const fixedShelf = box(wardrobe, 0, closetDatums.shelf - closetPanel / 2, center, 2, closetPanel, inner, cabinetRailFinish);
+      fixedShelf.name = 'Guest wardrobe 84-inch fixed shelf';
+      guestClosetCanopies.push(fixedShelf);
+      closetLed(wardrobe, 1 - 1 / 12, closetDatums.shelf - closetPanel - 0.125 / 12, center, 0.5 / 12, inner - 1 / 12);
+      for (const y of section.rods) {
+        const rod = cylinder(wardrobe, 0, y, center, 0.035, inner - 0.375 / 12, brass);
+        rod.rotation.x = Math.PI / 2;
+        rod.name = 'Guest wardrobe hanging rod';
+        rod.userData = { section: section.name, lengthInches: (inner * 12) - 0.375, heightInches: y * 12 };
+        const drop = section.name === 'long hang' ? 4.2 : 2.4;
+        const count = Math.floor((inner - 0.2) / 0.3) + 1;
+        for (let i = 0; i < count; i++) {
+          box(wardrobe, 0, y - drop / 2 - 0.08, innerStart + 0.1 + i * (inner - 0.2) / (count - 1), 1.75, drop, 0.12, linen).name = 'Guest wardrobe hanging clothes';
+        }
       }
+      start = end;
     }
-    box(storage, 0, 7.2, 0, 2, 0.08, 4, cabinetRailFinish).name = 'Guest end-storage separate top filler';
-    // Keep the standard 48 x 24 hanging bay; cut-to-fit shelf extensions
-    // reclaim the ends without moving rods, doors or partition cavities.
-    const centerZ = compartment.z + compartment.d / 2;
-    for (const y of [0.2, 7, 7.2]) {
-      const reserve = (y < 1 ? 0.75 : 0.125) / 12;
-      const ends = [
-        [guestSuite.closet.z + 0.175 + reserve, compartment.z],
-        [compartment.z + compartment.d, guestSuite.closetSouthZ - 0.175 - reserve]
-      ];
-      for (const [start, end] of ends) {
-        box(storage, 0, y, (start + end) / 2 - centerZ, 2,
-          y === 7.2 ? 0.08 : panel, end - start, cabinetRailFinish).name =
-          y < 1 ? 'Guest lower shelf trim-reserved extension' : 'Guest upper shelf wall extension';
-      }
+    // Separate end fillers: lower piece stops at the retained 3/4-inch base
+    // trim; upper scribe leaves 1/8 inch to paint. Neither fixes into a wall.
+    const endGap = westRun.z - closetNorthFace;
+    for (const sign of [-1, 1]) {
+      box(wardrobe, 1 - closetPanel / 2, 4 / 12, sign * (half + (endGap - 0.75 / 12) / 2), closetPanel, 8 / 12, endGap - 0.75 / 12, cabinetFinish).name = 'Guest wardrobe separate lower end filler';
+      box(wardrobe, 1 - closetPanel / 2, (8.125 / 12 + carcassTop) / 2, sign * (half + (endGap - 0.125 / 12) / 2), closetPanel,
+        carcassTop - 8.125 / 12, endGap - 0.125 / 12, cabinetFinish).name = 'Guest wardrobe separate upper end scribe';
     }
-    // Rear top scribes are separate from the standard carcass. Leave 1/8 in
-    // to paint; low shelving retains its existing baseboard allowance.
-    const backSign = compartment.name === 'west end' ? -1 : 1;
-    const scribeWidth = panel - 0.125 / 12;
-    const upperSpan = guestSuite.closet.d - 0.35 - 0.25 / 12;
-    for (const y of [7, 7.2]) {
-      box(storage, backSign * (1 + scribeWidth / 2), y, 0,
-        scribeWidth, y === 7.2 ? 0.08 : panel, upperSpan, cabinetRailFinish).name = 'Guest upper shelf separate rear scribe';
+    const backX = closetWestFace + 0.125 / 12 - (westRun.x + 1);
+    const luggageShelf = box(wardrobe, (backX + 1) / 2, closetDatums.upper - closetPanel / 2, 0, 1 - backX, closetPanel, closetSouthFace - closetNorthFace - 0.25 / 12, cabinetRailFinish);
+    luggageShelf.name = 'Guest wardrobe continuous 96-inch luggage shelf';
+    guestClosetCanopies.push(luggageShelf);
+  }
+  const tower = furnishing('Guest north-east drawer and folding tower', closetTower.x + closetTower.w / 2, closetTower.z + closetTower.d / 2);
+  tower.userData = { storageType: 'Built-in drawer, folding and shelf tower', widthInches: 30, depthInches: 24, heightInches: 96,
+    drawers: closetTower.drawerCount, drawerTravelInches: closetTower.drawerTravel * 12, foldingTopInches: 36, fixedShelfTopsInches: [48, 60, 72, 84],
+    standardBox: true, provisional: true, support: 'Fix to the solid north and east walls; keep the laundry-side gap free for the stack side allowance.' };
+  {
+    const halfWidth = closetTower.d / 2, front = -closetTower.w / 2;
+    const top = closetDatums.upper - closetPanel, inner = closetTower.d - 2 * closetPanel;
+    for (const side of [-1, 1]) box(tower, 0, top / 2, side * (halfWidth - closetPanel / 2), 2, top, closetPanel, cabinetFinish).name = 'Guest tower side panel';
+    box(tower, front + 3 / 12 + closetPanel / 2, 3.25 / 24, 0, closetPanel, 3.25 / 12, inner, cabinetFinish).name = 'Guest tower recessed toe kick';
+    box(tower, 0, (4 - 0.375) / 12, 0, 2, closetPanel, inner, cabinetRailFinish).name = 'Guest tower base deck';
+    const bottom = 4.125 / 12, upper = 35.125 / 12, gap = 0.125 / 12, count = closetTower.drawerCount;
+    const frontHeight = (upper - bottom - gap * (count - 1)) / count;
+    for (let i = 0; i < count; i++) {
+      const drawer = new THREE.Group();
+      drawer.name = 'Guest tower full-extension drawer';
+      drawer.userData = { interactiveHouseDoor: { operation: 'sliding', axis: 'x', open: false, closedCenterX: 0, openCenterX: -closetTower.drawerTravel },
+        travelInches: closetTower.drawerTravel * 12, defaultClosed: true };
+      tower.add(drawer);
+      const y = bottom + i * (frontHeight + gap) + frontHeight / 2;
+      box(drawer, front + closetPanel / 2, y, 0, closetPanel, frontHeight, inner - 0.125 / 12, cabinetFinish).name = 'Guest tower inset drawer front';
+      box(drawer, front + closetPanel + 10.5 / 12, y, 0, 21 / 12, frontHeight - 2 / 12, inner - 1 / 12, cabinetRailFinish).name = 'Guest tower drawer box';
+      box(drawer, front - 0.625 / 12, y, 0, 1.25 / 12, 0.5 / 12, 1, brass).name = 'Guest tower drawer bar pull';
     }
-    storage.userData.shelfExtensions = 'Cut-to-fit; upper 1/8-inch paint reserve, lower 3/4-inch trim reserve. Support from carcass; no fasteners into pocket cavities. Load/support review required.';
-    storage.userData.hangingSections = '24-inch nominal long hang + 24-inch nominal double short hang; 24-inch clothing depth';
+    box(tower, 0, (36 - 0.375) / 12, 0, 2, closetPanel, inner, cabinetRailFinish).name = 'Guest tower 36-inch folding top';
+    for (const shelfTop of [48, 60, 72, 84]) {
+      const shelf = box(tower, 0, (shelfTop - 0.375) / 12, 0, 2, closetPanel, inner, cabinetRailFinish);
+      shelf.name = 'Guest tower fixed shelf';
+      if (shelfTop === 84) guestClosetCanopies.push(shelf);
+    }
+    closetLed(tower, front + 1 / 12, closetDatums.shelf - closetPanel - 0.125 / 12, 0, 0.5 / 12, inner - 1 / 12);
   }
   const laundryLayout = guestSuite.laundry;
   const guestLaundry = furnishing('Guest Bosch WGB24600UC WQB245B0UC laundry stack', laundryLayout.x, laundryLayout.z, laundryLayout.rotation, 0.005);
@@ -3924,17 +3990,38 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     glass.name = `Guest laundry ${kind} door glass`;
   }
   box(guestLaundry, 0, 33.875 / 12, 0, laundryLayout.width, 1.25 / 12, laundryLayout.depth, windowTrim).name = 'Guest laundry WTZ27510UC stacking kit reference';
-  const laundryShelves = furnishing('Guest laundry 30-inch shallow shelf module',
-    laundryLayout.shelf.x, laundryLayout.shelf.z, -Math.PI / 2, 0.005);
-  laundryShelves.userData = { widthInches: 30, depthInches: 12, heightInches: 84,
-    separateScribes: true, approvalRequired: true, retrieval: '30-inch occupied retrieval zone in front; no drawers. Shelves fixed at 12, 27, 42, 57, 72 and 84 inches.' };
-  for (const y of [12, 27, 42, 57, 72, 84]) box(laundryShelves, 0, (y - 0.375) / 12, 0,
-    30 / 12, 0.75 / 12, 1, cabinetRailFinish).name = 'Guest laundry fixed shelf';
-  for (const side of [-1, 1]) box(laundryShelves, side * (30 - 0.75) / 24, 42 / 12, 0,
-    0.75 / 12, 84 / 12, 1, cabinetFinish).name = 'Guest laundry shelf side';
-  // Scribe stops above the retained 8-inch baseboard, not through it.
-  box(laundryShelves, 0, (84 + 8.125) / 24, -0.5 - 0.25 / 12,
-    30 / 12, (84 - 8.125) / 12, 0.5 / 12, cabinetFinish).name = 'Guest laundry separate rear scribe';
+  // East upper shelves continue the tower's 84/96-inch datums over the stack.
+  const laundryUpper = furnishing('Guest laundry-wall upper shelves', closetTower.x + closetTower.w / 2, (closetNorthFace + closetSouthFace) / 2);
+  laundryUpper.userData = { dryerTopToShelfInches: 84 - 0.75 - 67.75, stackEnvelopeTopInches: 74, removableForServiceReview: true, approvalRequired: true,
+    support: 'Tower side panel, east-wall cleats and south-wall cleats on the solid segment east of the pocket only. No fasteners into the pocket wall.' };
+  {
+    const x0 = closetTower.x, x1 = closetEastFace - 0.125 / 12, cx = (x0 + x1) / 2 - laundryUpper.position.x;
+    const south = closetSouthFace - 0.125 / 12 - laundryUpper.position.z;
+    const towerSouth = closetTower.z + closetTower.d - laundryUpper.position.z;
+    const towerNorth = closetTower.z - laundryUpper.position.z;
+    const solidSouthX = guestSuite.closetDoor.pocket.x + guestSuite.closetDoor.pocket.w + 1 / 12;
+    const southPaint = closetSouthFace - laundryUpper.position.z, eastPaint = closetEastFace - laundryUpper.position.x;
+    const eastUpper = box(laundryUpper, cx, closetDatums.upper - closetPanel / 2, (towerNorth + south) / 2, x1 - x0, closetPanel, south - towerNorth, cabinetRailFinish);
+    eastUpper.name = 'Guest east continuous 96-inch upper shelf';
+    const dryerShelf = box(laundryUpper, cx, closetDatums.shelf - closetPanel / 2, (towerSouth + south) / 2, x1 - x0, closetPanel, south - towerSouth, cabinetRailFinish);
+    dryerShelf.name = 'Guest laundry 84-inch shelf over dryer';
+    guestClosetCanopies.push(eastUpper, dryerShelf);
+    for (const datum of [closetDatums.shelf, closetDatums.upper]) {
+      const y = datum - closetPanel - 0.75 / 12;
+      box(laundryUpper, (solidSouthX + closetEastFace) / 2 - laundryUpper.position.x, y, southPaint - closetPanel / 2, closetEastFace - solidSouthX, 1.5 / 12, closetPanel, cabinetFinish).name =
+        'Guest laundry shelf cleat on solid south wall';
+      box(laundryUpper, eastPaint - closetPanel / 2, y, (towerSouth + southPaint - closetPanel) / 2, closetPanel, 1.5 / 12, southPaint - closetPanel - towerSouth, cabinetFinish).name =
+        'Guest laundry shelf east-wall cleat';
+    }
+    closetLed(laundryUpper, x0 + 1 / 12 - laundryUpper.position.x, closetDatums.shelf - closetPanel - 0.125 / 12, (towerSouth + south) / 2, 0.5 / 12, south - towerSouth - 1 / 12);
+  }
+  // Dressing mirror on the solid east segment of the north wall, centered
+  // between the bath-entry casing (2.5 in) and the tower side.
+  const mirrorWest = guestSuite.bathroomDoor.x + guestSuite.bathroomDoor.width + 2.5 / 12;
+  const guestMirror = furnishing('Guest closet north-wall dressing mirror', (mirrorWest + closetTower.x) / 2, closetNorthFace);
+  guestMirror.userData = { widthInches: 20, heightInches: 62, wall: 'North wall east segment (solid, not a pocket wall)', productSelected: false, provisional: true };
+  box(guestMirror, 0, 47 / 12, 0.5 / 12, 20 / 12, 62 / 12, 1 / 12, cabinetFinish).name = 'Guest dressing mirror oak frame';
+  box(guestMirror, 0, 47 / 12, 1.0625 / 12, 18 / 12, 60 / 12, 0.125 / 12, steel).name = 'Guest dressing mirror glass';
   const guestPianoLayout = guestSuite.piano;
   const guestPiano = furnishing('Yamaha ARIUS YDP-145 dimensioned study proxy', guestPianoLayout.x, guestPianoLayout.z, guestPianoLayout.rotation);
   guestPiano.userData = { viewerFurniture: true, manufacturerCAD: false, widthMm: 1357, depthMm: 422, heightMm: 815, musicRestHeightMm: 969,
@@ -3977,17 +4064,17 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   bathroomEdgePull.name = 'Guest bathroom retractable pocket edge pull';
   bathroomEdgePull.userData = { pocketEdgePull: true, retractedX: bathroomEdgePull.position.x, extendedX: bathroomOpening.pocket.leafWidth / 2 + 0.235 };
   const wcOpening = guestSuite.wcDoor;
-  const guestWCDoor = furnishing('Guest private WC inward sound-door study', wcOpening.x + 0.4375, wcOpening.z + wcOpening.width - 0.0375);
+  const guestWCDoor = furnishing('Guest private WC inward sound-door study', wcOpening.x + 0.175 + 1.375 / 24 + 0.08, wcOpening.z + wcOpening.width - 0.02);
   guestWCDoor.rotation.y = Math.PI / 2;
   guestWCDoor.userData = { nominalWidthInches: 30, nominalHeightInches: 96, acousticPerformanceVerified: false, sealsAndHardwareUnselected: true,
     interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, closedRotationY: Math.PI / 2, openRotationSign: -1 } };
-  singlePanelDoor(guestWCDoor, 1.2125, 4, -0.0375, 2.46, 7.96, 1.375 / 12, windowTrim).name = 'Guest WC solid white leaf acoustic detailing required';
-  for (const side of [-1, 1]) box(guestWCDoor, 2.2125, 3.2, -0.0375 + side * 0.14, 0.12, 0.12, 0.14, brass).name = 'Guest WC privacy knob';
-  const guestWCFrame = furnishing('Guest WC offset door lining extensions', wcOpening.x + 0.175, wcOpening.z);
-  const guestWCFrameDepth = 0.4 + 1.375 / 24 - 0.175;
-  box(guestWCFrame, guestWCFrameDepth / 2, 4, -0.02, guestWCFrameDepth, 8, 0.04, windowTrim).name = 'Guest WC latch jamb extension';
-  box(guestWCFrame, guestWCFrameDepth / 2, 4, wcOpening.width + 0.1, guestWCFrameDepth, 8, 0.04, windowTrim).name = 'Guest WC hinge jamb extension';
-  box(guestWCFrame, guestWCFrameDepth / 2, 8.02, wcOpening.width / 2, guestWCFrameDepth, 0.04, wcOpening.width, windowTrim).name = 'Guest WC head lining extension';
+  const guestWCLeafOffset = -0.08;
+  singlePanelDoor(guestWCDoor, 1.23, 4, guestWCLeafOffset, 2.46, 7.96, 1.375 / 12, windowTrim).name = 'Guest WC solid white leaf acoustic detailing required';
+  for (const side of [-1, 1]) box(guestWCDoor, 2.23, 3.2, guestWCLeafOffset + side * 0.1, 0.12, 0.12, 0.14, brass).name = 'Guest WC privacy knob';
+  const guestWCFrame = furnishing('Guest WC wall-fitted door lining', wcOpening.x, wcOpening.z);
+  for (const z of [-0.02, wcOpening.width + 0.02])
+    box(guestWCFrame, 0, 4, z, 0.35, 8, 0.04, windowTrim).name = 'Guest WC door jamb lining';
+  box(guestWCFrame, 0, 8.02, wcOpening.width / 2, 0.35, 0.04, wcOpening.width, windowTrim).name = 'Guest WC door head lining';
   const guestCoats = furnishing('Guest coat closet', 9.65, guestEntry.coatCloset.z + guestEntry.coatCloset.d / 2);
   guestCoats.userData = { purpose: 'Guest coats, separate from powder room', nominalWidthInches: 61.2, nominalDepthInches: 28.8, clearDepthInches: 24.6, doorWidthInches: 48, doorHeightInches: guestEntry.closetDoor.height * 12, provisional: true };
   box(guestCoats, 0, 6.5, 0, 4.65, 0.1, 1.95, cabinetFinish).name = 'Guest coat closet upper shelf';
@@ -4004,9 +4091,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     hinge.position.set(guestEntry.closetDoor.x + (side < 0 ? 0 : guestEntry.closetDoor.width) - 9.65, guestEntry.closetDoor.height / 2, guestEntry.closetDoor.z + guestEntry.closetDoor.hingeOffset - guestCoats.position.z);
     hinge.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: side } };
     guestCoats.add(hinge);
-    const door = singlePanelDoor(hinge, -side * width / 2, 0, 0, width, guestEntry.closetDoor.height - 0.04, 0.13, windowTrim);
+    const leafOffset = 0.35 / 2 - 0.13 / 2 - guestEntry.closetDoor.hingeOffset;
+    const door = singlePanelDoor(hinge, -side * width / 2, 0, leafOffset, width, guestEntry.closetDoor.height - 0.04, 0.13, windowTrim);
     door.name = 'Guest coat closet solid Shaker French door leaf';
-    cabinetPull(door, -side * 0.8, 3.5 - guestEntry.closetDoor.height / 2, 0.09, 0.65);
+    cabinetPull(door, -side * 0.68, 3.5 - guestEntry.closetDoor.height / 2, 0.09, 0.65);
   }
 
   const powderDoor = furnishing('Powder room inward-opening door', guestEntry.powderDoor.x - guestEntry.powderDoor.hingeOffset, guestEntry.powderDoor.z + guestEntry.powderDoor.width);
@@ -5010,6 +5098,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       part.intensity = guestEnabled ? 8 : 0;
     }
     powderGlow.emissiveIntensity = guestEnabled ? 0.45 : 0;
+    guestClosetGlow.emissiveIntensity = guestEnabled ? 0.8 : 0;
     for (const rig of homeLighting) {
       const visible = activeFloor === rig.floor && !plan && !(rig.floor === 'ground' && groundLayoutPreview);
       rig.group.visible = visible && (!inspection || rig.task);
@@ -5209,6 +5298,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     mudroom: { target: [41.55, 2, 20.9], offset: [0, 22, 20], span: 17 },
     'mudroom-cubbies': { target: [43.5, 4.4, 22.07], offset: [-4, 1, 0], span: 10.5 },
     'mudroom-storage': { target: [40.3875, 4.8, 17.9], offset: [0, 0.7, 8.35], span: 12 },
+    'guest-coats': { target: [guestEntry.coatCloset.x + guestEntry.coatCloset.w / 2, 3.8, guestEntry.closetDoor.z], offset: [2, 35, 10], span: 9.5 },
     pantry: { target: [46.75, 4.5, 14.325], offset: [0, 0.2, -2.5], span: 14 },
     'prep-counter': { target: [46.6, 4.5, prepCounterZ], offset: [0, 1.2, 2.6], span: 14 },
     powder: { target: [3.7, 1, powderNorthZ + 2.95], offset: [4, 34, 4], span: 12 },
@@ -5852,6 +5942,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     upstairs.group.traverse((object) => {
       if (object.userData.closetCanopy) object.visible = !(name.startsWith('upstairs-') && name.includes('closet'));
     });
+    for (const part of guestClosetCanopies) part.visible = name !== 'guest-closet';
     const planView = name === 'top' || name === 'upstairs-top';
     document.getElementById('dining-clearance-note').hidden = name !== 'dining';
     document.getElementById('firepit-storage-note').hidden = !['exterior-patio', 'exterior-firepit', 'exterior-wood'].includes(name);
@@ -5870,7 +5961,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const portraitPadding = aspect < 1 ? 1.25 : 1;
     // Inside-room perspective shows the connected closet corner without
     // looking through or hiding its real full-height partitions.
-    camera = mudroomInteriorView ? mudroomInteriorCamera : planView || name === 'cooktop' || name === 'guest-suite' || name === 'guest-closet' || sinkStorageView || prepElevationView || mudroomInspectionView || exteriorElevation ? cooktopElevationCamera : perspectiveCamera;
+    camera = mudroomInteriorView ? mudroomInteriorCamera : planView || name === 'cooktop' || name === 'guest-suite' || name === 'guest-closet' || name === 'guest-coats' || sinkStorageView || prepElevationView || mudroomInspectionView || exteriorElevation ? cooktopElevationCamera : perspectiveCamera;
     controls.object = camera;
     camera.zoom = 1;
     if (camera.isOrthographicCamera) {

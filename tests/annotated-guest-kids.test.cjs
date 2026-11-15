@@ -53,15 +53,18 @@ test('adopted north strip has one attribution, conserved total union and no Hall
   close(g.getLivableFloorArea(plan, { includeStairs: true }), 1924.3327083333334);
 });
 
-test('standard end units and their fixing envelopes stay out of both real pocket cavities', () => {
+test('standard closet built-ins and their fixing envelopes stay out of both real pocket cavities', () => {
+  const [west, tower] = suite.closets;
+  close(west.d * 12, 54); close(west.w * 12, 24);
+  close(tower.d * 12, 30); close(tower.w * 12, 24);
+  close((west.z - suite.closet.z - 0.175) * 12, 2.71259842519685);
   for (const unit of suite.closets) {
-    close(unit.d * 12, 48); close(unit.w * 12, 24);
-    close((unit.z - suite.closet.z - 0.175) * 12, 5.71259842519685);
     for (const door of [suite.bathroomDoor, suite.closetDoor]) {
-      // Storage plus a 1-inch conceptual fixing zone must not meet a pocket skin.
-      assert.ok(unit.z - 1 / 12 > door.z + 0.175 || unit.z + unit.d + 1 / 12 < door.z - 0.175);
       close(door.pocket.clearDepth * 12, 3);
+      if (unit.x + unit.w <= door.pocket.x || unit.x >= door.pocket.x + door.pocket.w) continue;
+      // Storage plus a 1-inch conceptual fixing zone must not meet a pocket skin along its cavity run.
+      assert.ok(unit.z - 1 / 12 > door.z + 0.175 || unit.z + unit.d + 1 / 12 < door.z - 0.175);
     }
   }
-  close((suite.closets[1].x - suite.closets[0].x - suite.closets[0].w) * 12, 70.6);
+  close((tower.x - west.x - west.w) * 12, 70.6);
 });

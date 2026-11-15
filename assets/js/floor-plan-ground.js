@@ -314,10 +314,17 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       closetSouthZ,
       closetDoor: { x: 24.3, z: closetSouthZ, width: 2.5, height: 8, slide: 2.7,
         pocket: { x: 26.8, w: 2.9, leafWidth: 2.48, leafThickness: 1.375 / 12, clearDepth: 0.25, height: 8.3 } },
+      // November 14 redesign: two built-in end runs on a shared 84-inch shelf
+      // and 96-inch door-head datum. West: standard 24 + 30-inch hanging
+      // sections (54 in) centered with separate end fillers. North-east:
+      // standard 30 x 24-inch drawer/folding/shelf tower beside the laundry.
       closets: [
-        { name: 'west end', x: 19 + notch.w + 0.175 + 0.0625, z: pianoZ - 2, w: 2, d: 4 },
-        { name: 'east end', x: 31.2 - 0.175 - 0.0625 - 2, z: pianoZ - 2, w: 2, d: 4 }
+        { name: 'west wardrobe', x: 19 + notch.w + 0.175 + 0.75 / 12, z: bathroomSouthZ + 0.175 + (closetSouthZ - bathroomSouthZ - 0.35 - 4.5) / 2, w: 2, d: 4.5,
+          sections: [{ name: 'long hang', width: 2, rods: [70 / 12] }, { name: 'double hang', width: 2.5, rods: [40.5 / 12, 81 / 12] }] },
+        { name: 'north-east tower', x: 31.2 - 0.175 - 0.75 / 12 - 2, z: bathroomSouthZ + 0.175 + 0.75 / 12, w: 2, d: 2.5,
+          drawerCount: 4, drawerTravel: 21 / 12, foldingTop: 36 / 12 }
       ],
+      closetDatums: { shelf: 84 / 12, upper: 96 / 12 },
       // East-end laundry faces west into the long dimension, not across the
       // narrow closet. Ordinary storage replacement authorized November 14.
       laundry: {
@@ -325,10 +332,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
         z: closetSouthZ - 0.175 - 1 / 12 - 23.5 / 24,
         rotation: -Math.PI / 2,
         width: 23.5 / 12, depth: 26 / 12, height: 67.75 / 12,
-        rearClearance: 3 / 12, washerOpenDepth: 43 / 12, dryerOpenDepth: 43.5 / 12,
-        shelf: { x: 31.2 - 0.175 - 0.75 / 12 - 0.5,
-          z: bathroomSouthZ + 0.175 + 0.75 / 12 + 15 / 12,
-          width: 30 / 12, depth: 1, height: 7 }
+        rearClearance: 3 / 12, washerOpenDepth: 43 / 12, dryerOpenDepth: 43.5 / 12
       },
       notch,
       piano: { x: 19.175 + 422 / 304.8 / 2, z: pianoZ, width: 1357 / 304.8, depth: 422 / 304.8, height: 815 / 304.8, restHeight: 969 / 304.8, rotation: -Math.PI / 2 },

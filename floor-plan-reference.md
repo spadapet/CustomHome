@@ -55,10 +55,10 @@ Bath12.2 ×5 ft NOMINAL/61 sq ft; overall142.2 ×55.8 inches clear.
 Bath north stays fixed; south/shared wall moves4.2 inches north.
 Retain48 ×18 vanity,wall-to-wall 36 ×53.4 clear shower/east30-inch entry,36 ×55.8 private WC
 and30 ×96-inch inward WC door. Its opening/hinge shift4.2 inches north;
-handing unchanged, five-degree constituent fixture/wall sweep through90.
+handing unchanged, one-degree constituent fixture/wall/casing sweep through90.
 The closed WC leaf is centered with 0.24-inch gaps at both opening ends;
-head and jamb extensions reach the offset leaf depth, with the hinge-side
-return set back for sweep clearance. These model gaps are not a
+wall-fitted head and jambs meet the leaf without projecting frame strips.
+An offset pivot clears the casing. These model gaps are not a
 selected-product installation allowance.
 Full16-inch towel/hook moves4.2 inches north with wall: former hem conflicted
 at85 degrees. Fixture sweep includes the towel/hem, not just sanitary bodies.
@@ -66,29 +66,47 @@ Built-in shower pan meets the south paint face (former5.4-inch gap removed Novem
 
 Closet floorx20.841666667–31.2/z37.977066929–43.279166667:
 10.358333333 ×5.302099738 ft/54.920916 sq ft,120.1 ×59.4252 inches clear.
-Owner-authorized laundry/storage replacement, November14, supersedes the
-storage-neutral infeasibility screen. South-east Bosch stack faces west along
-the long dimension. West48 ×24-inch carcass becomes two nominal24 ×24 ×84-inch
-modules: north long-hang70.2-inch rod; south double-short38.4/74.4-inch rods.
-Each rod22.5 inches; clear section22.875 inches; full24-inch clothes depth.
-West shelf extensions remain: upper59.1752 inches/1/8-inch paint reserves,
-lower57.9252/3/4-inch trim reserves; separate rear upper5/8-inch scribes.
-Former east48-inch double hanging is lost. North-east standard30 ×12 ×84-inch
-shelves have six fixed tops12/27/42/57/72/84 inches above floor, separate1/2-inch
-rear scribe above8-inch baseboard; north gap3/4 inch/rear paint reserve1/4 inch.
-Stack/shelf gap4.1752 inches, stack south gap1 inch, rear3 inches.
-Support/joinery require review; no fasteners in pocket walls.
+**Current walk-in closet redesign, November 14 (owner: "do a better job"):**
+owner-authorized south-east laundry stays; storage becomes two built-in end
+runs on shared 84-inch shelf and 96-inch door-head datums, with the straight
+pocket-to-pocket crossing x24.3–26.8 left open.
+West wardrobe: standard 24 + 30-inch sections (54 ×24 ×96 inches), centered on
+the 59.4252-inch wall with separate 2.7126-inch end fillers (lower piece stops at
+the 3/4-inch base trim; upper scribe from 8 1/8 inches leaves 1/8 inch to paint).
+North 24-inch long hang: rod 70 inches, shoe shelf 11, deck 4. South 30-inch
+double hang: rods 40.5/81. Rods 22.5 + 28.5 + 28.5 = **79.5 inches (was 67.5)**.
+84-inch fixed shelves in both sections; continuous 96-inch luggage shelf
+(step-stool reach) to 1/8 inch of west, north and south paint.
+North-east tower: standard 30 W ×24 D ×96 H box, 3/4 inch off north and east
+base trim: four inset full-extension drawers (21-inch travel, 1.25-inch bar
+pulls), 36-inch folding top beside the laundry, fixed shelves 48/60/72/84.
+East 96-inch shelf continues over the stack; 84-inch shelf over the dryer leaves
+a measured 15.44-inch top gap (published 6.25; above the 74-inch reserve).
+Shelves over the stack bear on the tower, east-wall cleats and south-wall cleats
+only east of the pocket (from x29.783). Tower/stack side gap 4.1752 inches.
+20 ×62-inch oak-framed dressing mirror on the solid north wall between the
+bath casing and tower. Warm 2700K LED strips under the four 84-inch shelves glow
+with guest-suite Night lighting only (no product selected; existing ceiling
+light retained). Walkway: west clothing face to stack front 66.35 inches, to
+tower front 70.6; with every drawer and both laundry doors open, 48.35 inches
+remain from clothing to drawer pulls and a door-centered 37.4-inch band is
+clear. Capacity: drawers 0 → 4; folding surface 0 → 30 ×24 inches; shelving
+about 297 → 444 linear inches including decks and folding top (most now 24\r
+inches deep, not 12).
+The Guest closets plan preset hides only the 84/96-inch shelves and LEDs for
+readability; other views restore them. Support/joinery and LED wiring require
+review; no fasteners in pocket walls.
 
 Bosch WGB24600UC/WQB245B0UC visible product-reference stack:
 23.5 W ×26 D ×67.75 H inches minimum including provisional WTZ27510UC kit.
 Washer23.5 ×25.5 ×33.25 inches/open depth43; dryer23.5 ×26 ×33.25/open43.5.
 Dryer hinge reversal to left provisional; dimensioned proxy swings, not product CAD.
 Published closet allowances0.5 each side/front,3 rear,6.25 top:
-reserve24.5 W ×29.5 D ×74 H inches. No overhead cabinet. Leveling/pan changes
+reserve24.5 W ×29.5 D ×74 H inches. Open fixed shelf above at84 inches, no cabinet. Leveling/pan changes
 need recheck. Closed dryer/front-to-clothes66.35 inches; published open
 dryer envelope leaves48.85 (washer49.35). A30 ×30-inch loading square leaves
-18.85 inches to clothes: loading and passage sequential. Shelf retrieval30-inch
-zone leaves52.6 inches to clothes. Exact pairing/kit, reach, delivery/turning,
+18.85 inches to clothes: loading and passage sequential. Tower drawers open
+clear of both laundry doors. Exact pairing/kit, reach, delivery/turning,
 service extraction, plumbing/leak protection, support/vibration, electrical,
 waterproofing and garage/fire separation remain unapproved. No utilities modeled.
 Ventless is not unventilated: equivalent high/low openings each1.25 ×24 inches
@@ -396,12 +414,13 @@ front closet recess z51.8; service row z35.1–40.45. The canonical staircase,
 44-inch arrival, latest stepped stringers and full upper-flight guard remain.
 Keep all sixteen 96-inch doors in their restored closed default poses.
 
-Thirteen upstairs closed leaves now sit within their jamb linings, with stops
-behind the leaves and the offset swing pivots retained. Bedroom 2 closet,
-Bedroom 3 closet and Bedroom 3 bath-entry leaves remain offset: recessing them
-reduced a tested closet-access route. Head and jamb extensions now reach these
-leaves, with hinge-side returns set back for sweep clearance. Actual hinges and
-occupied operation remain unresolved.
+Thirteen upstairs closed leaves sit within their jamb linings, with stops
+behind the leaves and the offset swing pivots retained. The Bedroom 2 closet
+and Bedroom 3 bath-entry leaves meet the lining face; the Bedroom 3 closet
+retains its position and has a continuous lining 1/8 inch deeper on the swing
+side. Detached jamb and head strips are removed. The modeled closet-access
+route and 90-degree sweeps remain; actual hinges and occupied operation remain
+unresolved.
 
 Current exterior-measured estimate: 1st 1,924.33 /2nd 2,020.76 /total 3,945.10
 sq ft, including the finished loft intent, subject to conditioning/headroom
@@ -3594,7 +3613,7 @@ Dimensions include nominal room envelopes, not guaranteed usable clear rectangle
 | Guest coat closet | 7.1-12.2 / 35.1-37.5 | 5 ft 1 in x 2 ft 5 in | North of alcove; 24.6 in clear depth, upper shelf/hanging rail, closed 48 x 96 in oak doors facing south into alcove |
 | Guest entry alcove | 7.1-12.2 / 37.5-41 | 5 ft 1 in x 3 ft 6 in | Open east to hall; 37.8 in between paint, 36.3 in between baseboards away from casing/door projections; not occupied/accessibility approval |
 | Office | 0-12.2 / 41-54.67917 | 12 ft 2 in x 13 ft 8 in | 166.89 sq ft nominal; centered north desk, northwest elliptical, southwest loveseat facing north and lower-right east-facing desk. Front window and loveseat move with front wall; side/north walls and French doors retained |
-| Guest closets | x20.841667–31.2 / z37.977067–43.279167, excluding west piano recess | 120.1 × 59.4252 inches clear; stack/clothes 66.35 closed / 48.85 beyond published open dryer depth | Walk-through bedroom → closet → bath; nominal30 ×96 pocket entries unchanged. West two nominal24 ×24 hanging sections; north-east30 ×12 shelves; south-east Bosch stack faces west. Loading/passage sequential; installation unapproved;54.920916 sq ft floor |
+| Guest closets | x20.841667–31.2 / z37.977067–43.279167, excluding west piano recess | 120.1 × 59.4252 inches clear; stack/clothes 66.35 closed / 48.85 beyond published open dryer depth | Walk-through bedroom → closet → bath; nominal30 ×96 pocket entries unchanged. West 24 + 30-inch wardrobe (79.5-inch rod, 84/96-inch shelves); north-east 30 ×24 drawer/folding tower; mirror; south-east Bosch stack faces west. Loading/passage sequential; installation unapproved;54.920916 sq ft floor |
 | Entry hall | 12.2-19 / 34.6-54.67917 | 6 ft 10 in x 20 ft 1 in | Full width restored, approximately 77.4 in between finished wall faces; no borrowed closet strip |
 | Guest bathroom | x19–31.2 / z32.977067–37.977067; full rectangle | 12.2 × 5 ft NOMINAL / 61 sq ft; 142.2 × 55.8 inches clear | West built-in wall-to-wall 36 × 53.4 clear shower/east entry; north-center 48 × 18 vanity; east private WC 36 × 55.8 clear/inward 30 × 96 door. No laundry/recess; wet/occupied/acoustic details unapproved |
 | Ground-floor bedroom | x19–31.2 / z43.279167–54.679167; full rectangle | 142.2 × 132 inches clear over WHOLE room; 139.08 sq ft floor | No piano notch. Preserve west entry z44.8–47.8, queen/east headboard, west TV, two nights and front window |
@@ -3622,7 +3641,7 @@ See [kitchen requirements](kitchen.html), [sink candidate and dispensers](kitche
 | Quartz walls | North sink wall, east cooking/passages wall, south refrigeration wall | Floor-to-ceiling ivory quartz on kitchen-facing surfaces only; cutouts retained; modeled as face materials without added slab thickness |
 | Sink-wall storage | No upper stacks | Three windows replace the upper cabinets; no former under-cabinet task lights there |
 
-The kitchen picture has one flush white 90 x 6 x 1 in sill, top at 42 in. Three pots/saucers are at x = 30.25 / 32 / 33.75, z = 6.925. The joined 18/54/18-inch bank follows the wall at z = 7; see the current kitchen schedule.
+The kitchen picture has one flush white 90 x 6 x 1 in sill, modeled top at 42 1/8 in (1/8 in above the nominal opening sill to avoid coincident faces). Three pots/saucers are at x = 30.25 / 32 / 33.75, z = 6.925. The joined 18/54/18-inch bank follows the wall at z = 7; see the current kitchen schedule.
 
 ### Refrigeration and steam-oven wall
 
@@ -3676,29 +3695,31 @@ Both Designer leaves start closed, click to the included 90-degree stop and anim
 | Compact dishwasher | 18 in bay x = 48.9-50.4, immediately right of sink; exposed stainless front, black controls and steel handle, no cabinet overlay; actual product/services unselected |
 | Remaining right cupboard | Standard 24 in box x = 50.4-52.4; continuous quartz over dishwasher and cupboard |
 | Right extension | Standard 33 in box x = 52.4-55.15 plus 0.6 in end filler; two banks of three drawers |
-| Microwave / wall-oven tower | x = 38-40.75; rear z = 7.25; standard 33 W x 24 D x 96 H in; open space above rather than an oversize ceiling-height box |
-| Tower appliance allowance | 30 x 48 x 24 in W/H/D, y = 1-5; microwave above oven, lowered 12 in; controls center 58.8 in, microwave handle 44.64 in; no selected product |
+| Microwave tower (Nov 14: microwave only) | x = 38-40.75; rear z = 7.25; standard 33 W x 24 D x 96 H in; open space above rather than an oversize ceiling-height box; wall oven removed |
+| Tower microwave allowance | Provisional 30-in built-in microwave with trim kit, 30 x 18 x 24 in W/H/D, 42-60 in above floor; door 43.5-57.3 in, handle 44.64 in and controls 58.8 in unchanged; no selected product |
+| Former oven bay storage | Standard 33 in three-drawer stack, fronts 32.5 in wide, about 14.5 / 12 / 9.7 in high from 3.8 to 41 in; oak Shaker fronts, two gold pulls each, 21 in full-extension allowance; two upper doors kept |
+| Tower drawer travel | Fully open drawer pulls reach z = 11.2 ft; about 27.5 in remains to the pantry front (28.9 in from the open drawer face); not an occupied passing route |
 | Tower-to-left-base gap | 1.2 in body gap, about 0.84 in to counter overhang |
 | Opposite pantry shelves | x = 37.675-55.325, z = 13.825-14.825; 211.8 in (17 ft 7.8 in) overall; four food bays / one cleaning bay, all 12 in deep |
 | Food shelf organization | Three bays retain six usable levels at y = 1 / 2.3 / 3.6 / 4.9 / 6.2 / 7.5 ft; east-end robot bay omits y = 1 shelf and contents, retaining five food levels; empty ceiling caps and original uprights remain |
 | Cleaning bay | x = 37.85-41.1925, z = 13.825-14.825; width 40.11 in / clear 38.61 in; depth 12 in; lower opening 74.025 in, same upper shelves/contents |
 | Robot dock | East-end bay 5, center (53.535,14.225), rotated 90 degrees; same 14 in robot and compact base; outlet stays on shelf backing, no self-emptying tower |
 | Robot shelf clearance | Same removed bottom shelf; next underside 27.225 in; robot projects 2.2 in beyond shelf front z = 13.825 |
-| Prep aisle | 50.6 in at counter, about 48.5 in at pulls and 47.4 in at closed oven handles; robot remains at the opposite end |
+| Prep aisle | 50.6 in at counter, about 48.5 in at pulls and 48.4 in at the closed microwave handle; robot remains at the opposite end |
 
-No cooktop is planned in the prep kitchen; the main-kitchen cooktop is unchanged. No upper cabinets cover the windows. The modeled dishwasher panel/pull sweep from 0 to 90 degrees leaves approximately 22.6 in behind the open door to the pantry front, not an approved occupied passing route. Verify actual door/rack access, electrical supply, counter support and plumbing/drainage. Food contents occupy only the four food bays; cleaning accessories stay in the separate cleaning bay. Ceiling caps remain empty. Contents do not specify shelf capacity. Equipment models, charging services/cord containment, manufacturer docking/approach clearances, oven heat/open-door access, and child-safe storage remain unverified; the static aisle does not approve robot operation.
+No cooktop is planned in the prep kitchen; the main-kitchen cooktop is unchanged. No upper cabinets cover the windows. The modeled dishwasher panel/pull sweep from 0 to 90 degrees leaves approximately 22.6 in behind the open door to the pantry front, not an approved occupied passing route. Verify actual door/rack access, electrical supply, counter support and plumbing/drainage. Food contents occupy only the four food bays; cleaning accessories stay in the separate cleaning bay. Ceiling caps remain empty. Contents do not specify shelf capacity. Equipment models, charging services/cord containment, manufacturer docking/approach clearances, microwave-door/tower-drawer access, and child-safe storage remain unverified; the static aisle does not approve robot operation.
 
 Countertop appliance envelopes, left to right; dimensions are W x D x H:
 
 | Appliance | Approximate size | Placement |
 |---|---|---|
-| Two-slice toaster | 11 x 7 x 8 in | Left counter, center (44.8, 7.9); about 41.9 in clear counter toward oven tower |
+| Two-slice toaster | 11 x 7 x 8 in | Left counter, center (44.8, 7.9); about 41.9 in clear counter toward microwave tower |
 | Stand mixer | 12.6 x 16.8 x 16.8 in | Right-hand row with blender, combined x = 50.3-52.1917; rear z = 8.425, forward of taller window trim |
 | Breville Super Q | 8.1 x 10.5 x 18.1 in | Family reference; 2 in gap to mixer and rice cooker |
 | Rice cooker | 12 x 14.4 x 12.6 in | Right pair with air fryer, combined x = 52.358-54.925 |
 | Provisional dual-drawer Ninja air fryer | 16.8 x 15.6 x 13.2 in | Compact pair has 2 in gap; no final product |
 
-The right-hand appliance row's rear edges are aligned at z = 7.425; bottoms y = 3.04. This is **stored placement**, not safe operating clearance. Pull appliances forward as needed; confirm heat/steam, lid/mixer-head travel, circuits, splash separation and oven landing space. No coffee placeholder remains.
+The right-hand appliance row's rear edges are aligned at z = 7.425; bottoms y = 3.04. This is **stored placement**, not safe operating clearance. Pull appliances forward as needed; confirm heat/steam, lid/mixer-head travel, circuits, splash separation and microwave landing space. No coffee placeholder remains.
 
 The rear alignment above applies to the four-appliance right row; the toaster
 sits forward of the backsplash. Main-kitchen combi/steam oven is lowered
@@ -3821,10 +3842,10 @@ not the current entry geometry. Layout choice is not installation approval.
 | Office | Restored 60 x 33.6 in loveseat concept at (2.8208, 52.4792), rotation pi/facing north; E20 reference 65 x 22 x 64 in L/W/H at (1.65, 44.0292) | Southwest sofa and northwest equipment clear adjacent baseboards by 1 in. Equipment-to-sofa gap 52.1 in; 12.4 in desk/equipment side gap is not a route. Sofa top 2.6 in below sill underside; window reach unverified. Compact 48 in trial superseded, no selected product rescaled. Verify seats, moving equipment/headroom and occupied access |
 | Bedroom | Article Lenia queen reference 63.5 x 82.75 in W/D; center approximately (27.427083, 49.874), rotated -90 degrees | Retain east headboard facing west toward generic 44 x 25 in west-wall TV proxy. Bed placement follows fixed front window; verify bedding circulation and window reach |
 | Bedroom | Two nightstands, approximately 18 x 15.6 in, at (30.2, 46.174) / (30.2, 53.574) | Move with retained queen arrangement; trim/window and occupied use remain to verify |
-| Guest closets | West two nominal24 ×24 ×84-inch modules: long hang + double-short; north-east30 ×12 ×84-inch fixed shelves; south-east Bosch23.5 ×26 ×67.75-inch stack | 59.4252-inch clear depth;66.35-inch closed stack/clothes gap;48.85 beyond published open dryer. Both pocket entries nominal30 ×96; real3-inch voids, no fasteners/services in cavities. Loading/passage sequential; ventilation/services/product installation unapproved |
+| Guest closets | West 24 + 30 ×24 ×96-inch wardrobe: long hang + double hang, 84/96-inch shelves; north-east 30 ×24 ×96-inch four-drawer folding tower; shelves over south-east Bosch23.5 ×26 ×67.75-inch stack | 59.4252-inch clear depth;66.35-inch closed stack/clothes gap; 36-inch crossing band clear with fronts open;48.85 beyond published open dryer. Both pocket entries nominal30 ×96; real3-inch voids, no fasteners/services in cavities. Loading/passage sequential; ventilation/services/product installation unapproved |
 | Powder | Southwest toilet (1.65, 39.65); 42 x 21 in vanity (4.75, 39.875), both facing north from office-shared wall. Centered basin/mirror, symmetrical sconces, 22 in double-door cupboard and two 10 in three-drawer banks retained. East-wall towel hook z38.85 at 48 in; hall hardwood retained | Mirrored 30 x 96 in entry z35.6-38.1, north-jamb hinge, 90-degree inward default. Close drawers before entry or door movement; 15 in extension retained. Verify plumbing, usable interiors, occupied use and flooring moisture/warranty requirements |
 | Guest coats | Reach-in closet centered (9.65, 39.8), upper shelf, continuous hanging rail, four illustrative coats | Closed oak door pair faces north into the mirrored hall alcove; office unchanged |
-| Guest bathroom fixtures | West built-in wall-to-wall 36 ×53.4 clear shower; north-center48 ×18 vanity(25.1,34.027067); toilet(29.525,34.252067) in east36 ×55.8 clear WC | Shower30-inch east entry beside fixed northeast glass; pan and south tile meet the south paint face (former 5.4-inch strip and south glass removed November 14). Inward30 ×96 WC opening/hinge shift4.2 inches north. Minimum sampled paint gaps west0.18/east3.54/south0.48 inches, toilet front/south paint32.424 inches. Close vanity fronts; wet/occupied/acoustic/product details unapproved |
+| Guest bathroom fixtures | West built-in wall-to-wall 36 ×53.4 clear shower; north-center48 ×18 vanity(25.1,34.027067); toilet(29.525,34.252067) in east36 ×55.8 clear WC | Shower30-inch east entry beside fixed northeast glass; pan and south tile meet the south paint face (former 5.4-inch strip and south glass removed November 14). Inward30 ×96 WC door has flush jambs and an offset pivot. Sampled east/south gaps 4.83/1.26 inches; west knob enters the opening past the wall face without hitting jambs or casing. Toilet front/south paint32.424 inches. Close vanity fronts; wet/occupied/acoustic/product details unapproved |
 | Porch | Two 60 x 20.4 in benches at (5, 55.4) / (26.2, 55.4) | No entry runner indoors; no sidelights/transom around the front doors |
 
 Room requirements: [kids/living](foyer/living-room.html#connected-kids-room), [office](office.html), [bedroom/closet](bedrooms.html), [bathrooms](bathrooms.html), [front entry](front-entry.html). Check furniture anchorage, cordless shades, window fall protection/egress, rug grip, safety glazing, electrical services, door swings and sanitary clearances. Accessible fixture shutoffs and timed bathroom fans are requirements, not demonstrated by the simplified model.
@@ -3920,7 +3941,7 @@ All house doors and doorless cased passages have nominal **8 ft / 96 in heads** 
 | Garage side pedestrian opening | 36 x 96 in, x = 55.5, z = 44-47 | Click/tap the modeled pedestrian leaf to toggle its conceptual 180-degree swing; opening rises from garage datum, not house datum |
 | Garage overhead doors, 2 | Each 108 x 96 in, z = 49, x = 32.5-41.5 / 44-53 | Exterior view click/tap rotates each simplified panel to a conceptual overhead pose; tracks, ceiling storage, spring balance, stops and actual travel are not modeled or approved |
 | Powder entry | Nominal 30 x 96 in, x = 7.1, z = 38-40.5 | Casing room at both jambs; painted-white leaf, south-jamb hinge, displayed 90 degrees inward; click/tap 0/90, not through the office wall |
-| Guest coat closet | Nominal 48 x 96 in, z = 37.5, x = 7.65-11.65 | Paired solid white-oak Shaker French doors, nominal 24 in per leaf, outer-jamb hinges and center meeting; closed by default, satin-gold pulls; click/tap each leaf 90 degrees south into alcove, never slide; actual stops/occupied circulation unverified |
+| Guest coat closet | Nominal 48 x 96 in, z = 37.5, x = 7.65-11.65 | Paired solid white-oak Shaker French doors, nominal 24 in per leaf; closed leaves are recessed within the wall, with separated satin-gold pulls. Offset pivots retain individual 90-degree swings; one-degree model checks clear the walls, casing, closet contents and opposite closed leaf. The closet view is orthographic. Actual hinges, stops and occupied circulation remain unverified |
 | Mudroom coat closet | Nominal 48 x 96 in solid French pair, centered x = 40.3875, z = 16.4 | Two nominal 24-inch single recessed panel leaves, cabinet off-white #E6DECE, brass knobs; independently clickable 0/90, closed default; conceptual 50 x 98 assembly reserve within 61.5-inch enclosure; no bifold or basket bay; selected assembly and occupied access need review |
 
 Doorless openings do not provide acoustic separation. Simplified trim does not establish finished clear width or egress/accessibility compliance. See [door requirements](doors.html).
@@ -4187,7 +4208,7 @@ supports and code approval remain unresolved. See [upstairs notes](upstairs.html
 2. **Patio circulation:** inward handing and closed display remain current. The rotated dining set moves 6 in west for swing clearance; actual occupied passage and manufacturer door/chair envelopes still need confirmation.
 3. **Stair enclosure:** relocated flight guards and the new living-side opening guard replace the earlier wall-backed omissions. Confirm required handrails, guards, clear widths, headroom, fire protection, anchorage and structural support after removing the living partition.
 4. **Garage safety/access:** actual levels, rated door, required landings/rails, door tracks, vehicle/equipment movement and charger reach remain unverified; the two-step/no-rail concept is not approval.
-5. **Kitchen installation:** select actual steam oven, prep combination, hood/liner and fixture accessories; resolve cutouts, tower tolerance, appliance/door/drawer operation, services and quartz build-up/support.
+5. **Kitchen installation:** select actual steam oven, prep built-in microwave/trim kit, hood/liner and fixture accessories; resolve cutouts, tower tolerance, appliance/door/drawer operation, services and quartz build-up/support.
 6. **Windows/exterior:** dealer/architect must confirm standard sizes, combinations, rough openings, structure/bracing, egress/safety glass, weatherproofing and sash operation. Exterior-wall extension needs site/elevation/foundation/roof review.
 7. **Image-scaled guest suite:** the October 31 north-kids/full-width-bath/shallow-closet/guest-bedroom arrangement supersedes the older walk-in/east-bath studies. Bedroom/kids dimensions and the NE linen interpretation remain image-scaled assumptions. Verify retained furniture operation and all door sweeps, actual fixture/product envelopes, occupied clearances, window access, drainage, waterproofing, plumbing, exhaust, electrical, structure and local requirements with appropriate professionals; not an approved installation.
 8. **Furniture/use:** seating counts and object gaps are not occupied-clearance or accessibility certifications; verify chair/stool pull-back, bed/nightstand circulation, exercise use and kids' safety with real products.
@@ -4216,8 +4237,8 @@ Current prep shelving and cleaning bay depth is **16 in**, superseding the
 All food shelves/uprights and cleaning panels/caps deepen together; shelf
 heights, widths, stored goods and the absent robot-bay bottom shelf remain.
 Robot/dock remain fixed, with robot front 1.8 in behind the new shelf line.
-The counter aisle is 50.6 in, about 48.5 in at pulls and 47.4 in at closed
-oven handles. Earlier dishwasher sweep notes disagree (18.6 / 22.6 in); do not
+The counter aisle is 50.6 in, about 48.5 in at pulls and 48.4 in at the closed
+microwave handle (prep wall oven removed November 14). Earlier dishwasher sweep notes disagree (18.6 / 22.6 in); do not
 treat either as a passing-space approval. Verify the full sweep and product
 operation, occupied access,
 shelf span/loading, supports and anchorage; this is a design study.

@@ -43,8 +43,8 @@ Bathroom/closet north wall z37.977066929 and bedroom north wall z43.279166667
 are continuous straight x19–31.2 lines, including both piano returns, with no
 duplicate coincident return walls. Bathroom north/kids south is z32.977066929.
 The guest WC's closed leaf is centered with 0.24-inch gaps at both opening
-ends; head and jamb extensions reach its offset leaf depth, with the hinge-side
-return set back for sweep clearance. Hinges, acoustic hardware and occupied
+ends; wall-fitted head and jambs meet the leaf without projecting frame strips.
+An offset pivot clears the casing. Hinges, acoustic hardware and occupied
 operation remain unverified.
 
 | Zone | Wall-center footprint / floor attribution | Finished-face dimensions |
@@ -92,15 +92,31 @@ storage to fit real stacked laundry. This supersedes the storage-neutral
 infeasibility screen. Keep the 120.1 ×59.4252-inch clear shell, piano, adjacent
 boundaries and both pocket entries. Stack faces west from the **south-east** end;
 placing it north would obstruct the washer's left-hinged fold-back swing.
-West retains a 48 ×24-inch carcass divided into two nominal24 ×24 ×84-inch
-modules: north long-hang rod70.2 inches high, south double-short rods38.4/74.4,
-each22.5 inches long; clear section width22.875 inches. Full24-inch clothing
-envelope retained. West upper shelf span59.1752/lower57.9252 inches and separate
-rear scribes remain. Former east48-inch double-hang capacity is sacrificed.
-North-east has one standard30 W ×12 D ×84 H-inch fixed shelf module, six tops
-12/27/42/57/72/84 inches above floor, 3/4-inch north trim reserve and separate
-1/2-inch rear scribe above the8-inch baseboard, leaving1/4 inch to paint.
-Stack/shelf side gap4.1752 inches; stack south paint gap1 inch (1/4 beyond trim).
+Walk-in closet redesign, November 14 (owner: "can you do a better job at
+designing this walk in closet"): supersedes the 48 ×24 west carcass and the
+north-east 30 ×12 shelf module. Thesis: two built-in end runs on shared 84-inch
+shelf and 96-inch door-head datums; the straight pocket-to-pocket crossing
+(x24.3–26.8) stays open. Laundry is an owner requirement and is unchanged.
+West wardrobe: standard 24 + 30-inch sections, 54 ×24 ×96 inches, centered on the
+59.4252-inch wall with separate 2.7126-inch end fillers (lower to 3/4-inch base
+trim, upper scribe from 8 1/8 inches to 1/8 inch of paint). North long hang rod
+70 inches over an 11-inch shoe shelf; south double hang rods 40.5/81. Rod 79.5
+inches (was 67.5). 84-inch fixed shelves; continuous 96-inch luggage shelf
+(step-stool reach, light luggage). Carcass fixes to the solid west wall only.
+North-east tower: standard 30 W ×24 D ×96 H, 3/4 inch off north/east base trim;
+four inset full-extension drawers (21-inch travel), 36-inch folding top for the
+laundry, fixed shelves 48/60/72/84. 96-inch shelf continues over the stack and an
+84-inch shelf sits over the dryer: measured 15.44-inch top gap (Bosch 6.25),
+open shelf not a cabinet; supports are tower, east-wall cleats and south-wall
+cleats east of the pocket only (x29.783+). 20 ×62-inch oak-framed mirror on the
+solid north wall east of the bath casing. Warm 2700K LED strips under the four
+84-inch shelves follow guest Night lighting; ceiling light retained. Stack/tower
+side gap4.1752 inches; stack south paint gap1 inch (1/4 beyond trim).
+Measured: west clothing face to stack front 66.35, to tower 70.6 inches; with all
+drawers and both laundry doors open 48.35 inches remain to drawer pulls and a
+door-centered 37.4-inch crossing band is clear. Drawers 0 → 4; shelving about
+297 → 444 linear inches incl. decks/folding top. LED product/wiring, shelf loads,
+anchorage and joinery remain professional-review items.
 
 Modeled reference: Bosch [WGB24600UC washer](https://www.bosch-home.com/us/en/product/WGB24600UC)
 and [WQB245B0UC heat-pump dryer](https://www.bosch-home.com/us/en/product/WQB245B0UC),
@@ -111,7 +127,7 @@ confirmation before ordering. [Washer manual9001852659_A p40](https://media3.bos
 re-fetched2026-11-14:23.5 W ×26 D ×33.25 H/43.5-inch open depth;
 minimum stack67.75 inches with kit. Closet allowances:0.5 each side/front,
 3 rear,6.25 top; reserved envelope24.5 W ×29.5 D ×74 H inches.
-Actual south allowance1 inch; rear3; no cabinet above. Dryer hinge reversal
+Actual south allowance1 inch; rear3; open shelf (not cabinet) above at84 inches. Dryer hinge reversal
 to left is provisional (manufacturer permits reversal). Leveling/pan changes
 require recheck. Visible bodies/drums/control panels and door rings are
 dimensioned reference proxies, not manufacturer CAD or certified hinge paths.
@@ -119,8 +135,8 @@ dimensioned reference proxies, not manufacturer CAD or certified hinge paths.
 Closed dryer front to full west clothing envelope66.35 inches. Beyond published
 open depth48.85 inches (washer49.35). A30 ×30-inch occupied loading square
 fits beyond the open-depth reserve, leaving18.85 inches to clothing:
-**loading and through-passage are sequential**. Shelf retrieval uses a separate
-30-inch zone, leaving52.6 inches to clothing. Nominal30-inch entries have
+**loading and through-passage are sequential**. Tower drawers and both laundry
+doors can be open together without constituent conflict. Nominal30-inch entries have
 29.34 inches with deployed edge pulls. Delivery turning/service extraction
 remain unverified. Keep existing other laundry provision pending approval.
 Bosch ventilation provision is equivalent high/low openings each1.25 ×24 inches
@@ -154,8 +170,8 @@ front window,kitchen/mud opening,exterior/roof/upstairs and saved JSON.
 Vanity48 ×18,built-in wall-to-wall shower 36 ×53.4 clear/east30-inch entry remain. Bath NORTH stays fixed;
 move shared south wall4.2 inches north. WC is36 ×55.8 clear, not60 deep.
 Its30 ×96-inch inward door and south hinge move4.2 inches north without
-changing handing; five-degree constituent sweeps through90 degrees retain
-fixture/wall clearance. East towel hook/full16-inch towel also follows north
+changing handing; one-degree constituent sweeps through90 degrees retain
+fixture, wall and casing clearance. East towel hook/full16-inch towel also follows north
 4.2 inches: its former hem collided at85 degrees. No towel/door rescaling.
 Bathroom inspection target follows actual room midpoint.
 A24-inch route screen is not accessibility/code approval.
@@ -396,12 +412,12 @@ the 16.2-inch coffee reach gap is not a passage. Sixteen 96-inch doors default
 closed. The eastern garage attic now has a finished southern half-loft;
 its northern half remains unfinished and excluded. The central gallery is unchanged.
 
-Thirteen upstairs door leaves now close within their jamb linings without
-changing their offset swing pivots. Bedroom 2 closet, Bedroom 3 closet and
-Bedroom 3 bath-entry leaves retain the prior offset because an inset reduced a
-tested closet-access route. Their head and jamb extensions reach the leaf depth,
-with hinge-side returns set back for sweep clearance. Hinge hardware and
-occupied use require review.
+Thirteen upstairs door leaves close within their jamb linings without changing
+their offset swing pivots. Bedroom 2 closet and Bedroom 3 bath-entry leaves meet
+the lining face. Bedroom 3 closet retains its leaf position and uses a continuous
+lining 1/8 inch deeper on the swing side, preserving the tested access route.
+Detached jamb and head strips are removed. Hinge hardware and occupied use require
+review.
 
 Loft revision, November 9: move the old north edge z15 to the exact midpoint
 z27.725, retaining south z40.45 and x42.808333–55.5. Old nominal slab
@@ -4454,8 +4470,11 @@ enclosure, structural support and handrail continuity still need review.
 Guest coat doors retain solid white-oak Shaker panels, satin-gold pulls, a
 48 x 96 in opening and closed default pose. Two nominal 24 in leaves hinge
 at x=7.65 / 11.65, z=37.5, meeting at x=9.65; each swings 90 degrees south
-into the alcove independently. Actual stops, occupied circulation and hardware
-remain unverified.
+into the alcove independently. Closed leaves sit within the 0.35-ft wall
+thickness; separated pulls and offset pivots remain. One-degree model sweeps
+clear the adjacent walls, casing, closet contents and opposite closed leaf.
+The closet inspection camera is orthographic. Actual stops, occupied circulation
+and selected hinges remain unverified.
 
 The standard 42 x 21-inch natural white oak Shaker vanity is at (4.75,36.225)
 and northwest toilet at (1.65,36.45), both facing south from the north wall.
@@ -4612,7 +4631,7 @@ Important audit findings: the patio leaf is shown closed with the higher-z hinge
 - The sink/window and prep fixtures remain design concepts; the image does not override the separately clarified fridge placement.
 - October 18 exterior-wall move: the kitchen/prep window wall moved from z = 8 to z = 7 across x = 26.5-55.5, adding about 29 sq ft. The later relocation to z = 8 has been undone; the wall, main/prep sink runs, attached cabinetry/appliances, joined windows, trim and sconces remain at z = 7. Island/pendants, cooktop run, refrigeration, pantry shelves, prep east end-wall window, patio door and passage world positions remain fixed. The main counter front ends at z = 9.225, 6 in before the prep opening at z = 9.725. Source-plan images are unchanged. Foundation, roof, exterior elevation, lot setbacks, and plumbing/electrical changes require architectural verification.
 - Prep sink/window layout: the counter/base run spans x = 40.85-55.2 beside the left-end appliance tower; its counter spans z = 7.225-9.275. Retain the provisional 30 x 18 in stainless single-bowl sink in a 36 in base at x = 47.4, z = 8.25, with a real opening in the quartz top. The joined 2050 / 5050 / 2050 bank is centered at (47.4, 7); its three units, continuous sill and casing remain at the z = 7 wall. The east end-wall window stays at z = 11.55. No uppers cover this wall. The opposite open shelving and both kitchen passages stay fixed. The prep counter-to-pantry aisle is about 50.6 in. Window headers, plumbing/venting, waterproof joints, and faucet/window operation require final coordination.
-- Prep microwave/wall-oven combination: retain the complete white-oak Shaker tower at the left/kitchen-entry end, x = 38.5-41.25, with its rear at z = 7.25. Keep its 33 in width, 25 in depth, and storage above/below. A provisional 30 x 48 x 24 in appliance envelope spans y = 2-6 ft, microwave above oven; no product is selected. Model gap to the fixed pantry shelves at closed oven handles is about 47.4 in; open-door and occupied operation need review. Confirm manufacturer cutout/cabinet dimensions, ventilation, electrical supply, mounting, hot-door access, doorway operating clearances, and landing space. The main kitchen steam-oven tower is unchanged.
+- Historical (superseded November 14 by the microwave-only tower below): Prep microwave/wall-oven combination: retain the complete white-oak Shaker tower at the left/kitchen-entry end, x = 38.5-41.25, with its rear at z = 7.25. Keep its 33 in width, 25 in depth, and storage above/below. A provisional 30 x 48 x 24 in appliance envelope spans y = 2-6 ft, microwave above oven; no product is selected. Model gap to the fixed pantry shelves at closed oven handles is about 47.4 in; open-door and occupied operation need review. Confirm manufacturer cutout/cabinet dimensions, ventilation, electrical supply, mounting, hot-door access, doorway operating clearances, and landing space. The main kitchen steam-oven tower is unchanged.
 - Prep counter extension: retain the 34.2 in-wide, 24 in-deep white-oak base at x = 52.35-55.2, z = 7.25-9.25, with two three-drawer Shaker banks and gold pulls. Keep the left sink-side base at x = 40.85-45.9, with its 1.2 in tower-to-base gap (approximately 0.84 in to the countertop overhang). The quartz top and continuous backsplash remain at the z = 7 run. The counter front is z = 9.275; prep counter-to-pantry aisle is 50.6 in. Drawer operation, tower scribing, and wall fillers need final verification.
 - Split prep countertop appliances into two compact pairs: mixer and Breville at the left end, spanning x = 41.65-43.542; rice cooker and Ninja at the right end, spanning x = 52.358-54.925. Keep 2 in gaps within each pair, rear edges at z = 7.425, and bottoms at y = 3.04 ft. Both pairs sit outside the window trim. Left-to-right: stand mixer (12.6 x 16.8 x 16.8 in W/D/H), Breville Super Q (approximate 8.1 x 10.5 x 18.1 in), rice cooker (12 x 14.4 x 12.6 in), and provisional dual-drawer Ninja air fryer (16.8 x 15.6 x 13.2 in). The coffee placeholder and cup remain removed. Leave clear worktop beside the sink between the appliance pairs. Only the blender family is specified; other envelopes are placeholders. This compact arrangement is for storage, not approved operating spacing. Pull appliances forward as required and verify actual dimensions, circuits, splash separation, oven landing space, hot-air/steam clearances, lid/head opening, and drawer access before operation.
 
@@ -4626,7 +4645,7 @@ Important audit findings: the patio leaf is shown closed with the higher-z hinge
 | Prep kitchen footprint | x = 37.5-55.5; z = 7-15; 18 ft x 8 ft; opposite shelving wall stays at z = 15 |
 | Sink-wall windows | Restored joined 18 / 54 / 18 x 54 in bank, 90 in overall, x29/32/35, z7, sill/head 42/96 in. Standard-product/header/assembly review required |
 | Sink-wall lighting | Two restored ivory/brass end sconces, x27.311458/36.688542, z7.205 ft, mounting datum 75.6 in; actual lights/shade glow follow Night/Day. No former sink-upper strips/task beams. Verify listed wet-area suitability and task illumination |
-| Kitchen plant sill | Restored flush white 90 W x 6 D x 1 H in sill at 42 in; three small pots at x = 30.25 / 32 / 33.75, z = 6.925. Confirm waterproofing and plant care access |
+| Kitchen plant sill | Restored flush white 90 W x 6 D x 1 H in sill, modeled top 42 1/8 in to avoid a coincident wall face; three small pots at x = 30.25 / 32 / 33.75, z = 6.925. Confirm waterproofing and plant care access |
 | Sink-wall upper cabinets | None; both cabinet trials rejected October 28. Trial sample dishes/fillers/ceiling trim removed. Sink/prep runs and attached bases remain at z = 7; island, cooking run and pantry remain fixed |
 | Kitchen wall finish | All main-kitchen-facing wall surfaces use warm ivory quartz from floor to the 9 ft ceiling: sink wall x = 26.5-37.5 at z = 7; cooking/passage wall x = 37.5, z = 7-26.9; refrigeration wall z = 26.9, x = 27.75-37.5. Window/door cutouts remain; opposite faces in prep, mudroom, garage, and outside retain their finish. The model assigns quartz to room-facing wall surfaces without adding thickness; separate backsplash overlays and kitchen-side baseboards remain removed. Colored quartz sills, plain-white casing/aprons, pots and the sink run remain at the z = 7 wall; the hood stays fixed. Verify slab thickness, seams, substrate/support, sealed joints, window drainage, and cooktop heat limits before fabrication |
 | Sink basins and accessories | Nominal 36 in white apron-front sink centered at (32, 8.2), with a low divider, smaller left / larger right basins at approximately 35/65 by clear width, based on candidate Kohler Whitehaven K-6427-0 (10 5/16 / 18 13/16 in bowl widths). Two drains. Rear quartz mounting deck z = 7.175-7.495; main faucet x = 32, separate hot/cold filtered-water dispenser x = 30.95, soap pump x = 33.05, all at z = 7.36. Simplified geometry, not manufacturer CAD; see [candidate and installation checks](kitchen.html#sink-and-dispensers). Exact 30/70 remains preferred; 50/50 excluded |
@@ -4823,3 +4842,21 @@ so half the 4.2-in wall projected into the kitchen. Centreline moves 2.1 in sout
 to z24.941666667; the kitchen paint face is now flush with the cabinet body face.
 Kids floor becomes 91.789696 sq ft (Hall/Kitchen gain the strip; total unchanged).
 Cabinets, appliances, cased-opening width/x and return x28.0125 are unchanged.
+
+## Prep microwave only - November 14
+
+Owner: "In the prep kitchen, I only need a microwave." The prep wall oven is
+removed; the 33 W x 24 D x 96 H in tower at x = 38-40.75 (center 39.375), rear
+z = 7.25, stays in place with its fillers, scribes, cornice and two upper
+doors. It now holds a provisional 30-in built-in microwave with trim kit in a
+30 x 18 x 24 in allowance at 42-60 in above floor. The microwave door
+(43.5-57.3 in), handle (44.64 in) and controls (58.8 in) stay at the earlier
+reachable height; do not raise it. The former oven bay holds a standard 33 in
+three-drawer stack (32.5 in fronts about 14.5 / 12 / 9.7 in high, 3.8-41 in),
+oak Shaker with two gold bar pulls each. Measured in the served model: closed
+microwave handle to pantry front 48.4 in; fully extended 21 in drawers leave
+about 27.5 in from pulls to the pantry (28.9 in from the open face), not an
+occupied passing route. Sink, exposed stainless dishwasher, counters, windows
+and countertop appliances are unchanged. No microwave model is selected;
+confirm trim-kit cutout, ventilation, dedicated outlet/circuit, drawer slides
+and reach. Earlier prep oven/combination notes are historical.

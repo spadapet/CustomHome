@@ -128,9 +128,11 @@ above floor, except the robot bay, which omits the 12-inch shelf. Typical
 modeled food shelf clear width is approximately 41.46; confirm span/support.
 The ceiling cap is not another usable food shelf.
 
-Prep tower appliance allowance: **30 W x 24 D x 48 H**, bottom/top
-**12 / 60 above floor**. Microwave handle is about 44.64 high and controls
-about 58.8 high. No oven/microwave product is selected. The newer **16-inch**
+Prep tower (November 14, microwave only): provisional built-in microwave with
+trim kit, **30 W x 24 D x 18 H**, bottom/top **42 / 60 above floor**; the wall
+oven is removed and a standard 33-inch three-drawer stack fills 3.8-41 in.
+Microwave handle is about 44.64 high and controls about 58.8 high. No
+microwave product is selected. The newer **16-inch**
 pantry depth supersedes 12-inch notes; counter aisle is about 50.6, not
 the former 54.6. An open dishwasher leaves only an estimated 18.6, not
 approved passing space.
@@ -376,7 +378,7 @@ An older budget package is **not** a current purchase commitment.
 | Freezer column | Same nominal bay/body envelope | **Fisher & Paykel RS3084FLJK1**, [manufacturer](https://www.fisherpaykel.com/us/cooling/integrated/30in-series-9-integrated-column-freezer-ice-rs3084fljk1-26891.html). Current model reference. |
 | Main dishwasher | 24 nominal | **Frigidaire Professional PDSH4816BF**, [manufacturer](https://www.frigidaire.com/en/p/kitchen/dishwashers/PDSH4816BF). Recorded package reference, not product-specific CAD/installation approval. |
 | Main steam/combi oven | Generic 30 W x 24 D x 24 H | **No selected SKU**. F&P **OS30NCUDX3** is a [compared candidate](https://www.fisherpaykel.com/us/cooking/ovens/contemporary-ovens/30in-series-9-contemporary-compact-combi-steam-oven-os30ncudx3-84985.html), not an approved fit in the retained tower. |
-| Prep wall oven / microwave | Generic combined 30 W x 24 D x 48 H allowance | **No selected SKU**. F&P **OB30SCPUDX3** is a [package reference](https://www.fisherpaykel.com/us/cooking/ovens/contemporary-ovens/30in-series-9-contemporary-self-cleaning-oven-ob30scpudx3-84895.html), not selection of the modeled stack. |
+| Prep microwave (Nov 14: microwave only) | Generic 30 W x 24 D x 18 H built-in microwave/trim-kit allowance, 42-60 in above floor; prep wall oven removed | **No selected SKU**; confirm trim-kit cutout, ventilation and outlet. The former F&P **OB30SCPUDX3** wall-oven package reference is historical for the prep tower. |
 | Hood / insert | 48-wide plaster-look hood; 24-to-13 tapered depth; 46-wide insert allowance | **Induction Hardware RH-INSERT-46**, [recorded allowance](https://inductionhardware.com/products/46-professional-range-hood-insert). No insert/liner fit approved. |
 | Prep dishwasher | 18 nominal, exposed stainless | **Supplier/model TBD**; do not use the 24-inch main dishwasher reference as its SKU. |
 | Main farmhouse sink | Model 36 nominal; candidate actual 35.6875 W x 21.5625 D x 9.625 H | **Kohler Whitehaven K-6427-0**, [manufacturer](https://www.kohler.com/en/products/kitchen-sinks/shop-kitchen-sinks/whitehaven-undermount-large-medium-double-bowl-kitchen-sink-with-short-apron-6427), [recorded spec sheet](https://www.4willis.com/wp-content/uploads/2020/09/Whitehaven-K-6427-Spec-Sheet-USA.pdf). Candidate only; 36 minimum apron cabinet. Bowl-width ratio about 35/65, not exact 30/70. |

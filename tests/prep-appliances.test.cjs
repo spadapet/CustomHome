@@ -168,25 +168,49 @@ test('prep uses common cabinet widths with separate fillers and a visible toaste
   assert.equal(model.find('Prep toaster bread slot').length, 2);
 });
 
-test('lowered appliance openings and storage fronts follow the reachable appliance heights', () => {
+test('prep tower holds only a reachable microwave with a drawer stack in the former wall-oven bay', () => {
   const model = buildPrepCounter();
-  const tower = model.find('Prep microwave and wall oven tower')[0];
+  assert.equal(model.find('Prep microwave and wall oven tower').length, 0);
+  const tower = model.find('Prep microwave tower')[0];
   assert.equal(tower.userData.widthInches, 33);
   assert.equal(tower.userData.depthInches, 24);
   assert.equal(tower.userData.heightInches, 96);
+  assert.equal(tower.userData.microwaveOnly, true);
+  assert.equal(tower.position.x, 39.375);
   assert.equal(bounds(model.find('Prep appliance tower cornice')[0]).maxY * 12, 96);
-  const envelope = bounds(model.find('Prep combination appliance envelope')[0]);
-  assert.equal(envelope.minY * 12, 12);
-  assert.equal(envelope.maxY * 12, 60);
-  const controls = bounds(model.find('Prep combination appliance controls')[0]);
-  assert.ok(controls.maxY * 12 < 60);
+  const microwave = model.find('30-inch built-in microwave with trim kit')[0];
+  assert.ok(microwave && microwave.parent === tower);
+  assert.equal(microwave.userData.modelSelected, false);
+  assert.equal(microwave.userData.wallOven, false);
+  for (const name of ['Prep Wall oven glass door', 'Prep Wall oven handle', 'Prep combination appliance envelope', 'Prep combination appliance controls']) assert.equal(model.find(name).length, 0, `${name} removed`);
+  const towerParts = (function walk(node) { return [node, ...node.children.flatMap(walk)]; })(tower);
+  assert.ok(towerParts.every(part => !/oven|combination/i.test(part.name || '')), 'No wall oven remains in the prep tower');
+  const envelope = bounds(model.find('Prep microwave appliance envelope')[0]);
+  assert.ok(Math.abs(envelope.minY * 12 - 42) < 1e-9);
+  assert.ok(Math.abs(envelope.maxY * 12 - 60) < 1e-9);
+  const door = bounds(model.find('Prep Microwave glass door')[0]);
+  assert.ok(Math.abs(door.minY * 12 - 43.5) < 1e-9 && Math.abs(door.maxY * 12 - 57.3) < 1e-9, 'Microwave door height is unchanged');
+  const controls = bounds(model.find('Prep microwave controls')[0]);
+  assert.ok(controls.maxY * 12 <= 60);
   const shelves = model.find('Prep appliance support shelf').map(bounds);
   assert.ok(shelves.some(b => Math.abs(b.maxY - envelope.minY) < 1e-9));
   assert.ok(shelves.some(b => Math.abs(b.minY - envelope.maxY) < 1e-9));
-  for (const front of tower.children.filter(part => part.userData.cabinetFront)) {
+  const fronts = tower.children.filter(part => part.userData.cabinetFront);
+  for (const front of fronts) {
     const minY = front.position.y - front.userData.height / 2;
     const maxY = front.position.y + front.userData.height / 2;
-    assert.ok(maxY <= envelope.minY || minY >= envelope.maxY, 'Storage does not cover the lowered appliances');
+    assert.ok(maxY <= envelope.minY || minY >= envelope.maxY, 'Storage does not cover the microwave');
+    assert.ok(Math.abs(front.position.x) + front.userData.width / 2 <= 33 / 24 + 1e-9, 'Front fits inside the tower width');
+    assert.ok(minY >= 0.3 - 1e-9 && maxY <= 7.85 + 1e-9);
+  }
+  const drawers = fronts.filter(front => front.userData.drawer);
+  assert.equal(drawers.length, 3);
+  assert.equal(fronts.length - drawers.length, 2, 'Keep the pair of upper doors');
+  // Open drawer travel must stay clear of the fixed pantry shelves across the aisle (front at z = 14.825 - 16 / 12).
+  const pantryFrontZ = 14.825 - 16 / 12;
+  for (const drawer of drawers) {
+    const openFaceZ = tower.position.z + drawer.position.z + 0.04 + drawer.userData.drawerTravelFeet;
+    assert.ok((pantryFrontZ - openFaceZ) * 12 >= 24, 'Fully open drawer leaves at least 24 in to the pantry shelves');
   }
   assert.match(source, /const steamOvenBottom = 2\.5;/);
   assert.match(source, /const steamOvenTop = 4\.5;/);

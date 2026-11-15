@@ -78,8 +78,8 @@ test('three joined kitchen units share one flush white sill and retained header'
   close(sill.d * 12, 6);
   close(sill.w * 12, 90);
   assert.equal(sill.material, context.windowTrim);
-  close(sill.userData.top * 12, 42);
-  close(sill.userData.bottom * 12, 41);
+  close(sill.userData.top * 12, 42.125);
+  close(sill.userData.bottom * 12, 41.125);
   assert.equal(parts.some(part => part.name === 'White casing flat bottom board'), false);
   close(cap.userData.top * 12, 102.625);
   assert.ok(cap.userData.top < 9, 'retained cap fits below unchanged lower wall/roof datum');
@@ -95,7 +95,10 @@ test('two flat drywall returns surround the bank and joined unit frames have no 
     close(board.userData.bottom, 3.5);
     close(board.userData.top, 8);
     assert.equal(board.material, context.windowTrim);
+    close(Math.abs(board.position.x) - board.w / 2, context.kitchenCounterWindowBank.width / 2 - 1 / 96);
   });
+  const head = parts.find((part) => part.name === 'White drywall head return');
+  close(head.position.y - head.h / 2, context.kitchenSinkWindowHeight - 1 / 96);
   for (let index = 0; index < context.kitchenSinkWindows.length - 1; index++) {
     const left = context.kitchenSinkWindows[index];
     const right = context.kitchenSinkWindows[index + 1];
@@ -108,6 +111,13 @@ test('two flat drywall returns surround the bank and joined unit frames have no 
   assert.ok(potZ - potRadius > sillZ - sill.d / 2);
   assert.ok(potZ + potRadius < sillZ + sill.d / 2);
   close(potZ, sillZ);
+});
+
+test('clear window panes use light transparent glazing without writing depth', () => {
+  assert.match(source, /const windowGlass = new THREE\.MeshStandardMaterial\(\{ color: '#eaf5f7', roughness: 0\.15, metalness: 0, transparent: true, opacity: 0\.16, depthWrite: false \}\)/);
+  assert.match(source, /addSingleHungSashes\(unit, box, windowTrim, windowGlass/);
+  assert.match(source, /sashHeight - 0\.2, 0\.04, windowGlass/);
+  assert.match(source, /halfPaneHeight, 0\.04, privacyGlass/);
 });
 
 test('floor plan and exterior restore one shared opening around the 90-inch bank', () => {

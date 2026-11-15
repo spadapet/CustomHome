@@ -47,7 +47,7 @@ function build() {
     },
     guestSuite: suite,
     porcelain: {}, countertop: {}, glass: {}, cream: {}, brass: {}, steel: {}, cabinetFinish: {}, cabinetRailFinish: {},
-    guestVanityStone: {}, oak: {}, windowTrim: {}, black: {}, linen: {}, cushion: {},
+    guestVanityStone: {}, oak: {}, windowTrim: {}, black: {}, linen: {}, cushion: {}, guestClosetGlow: {},
     groundFrontWallZ: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().wallZ,
     furnishing(name, x, z, rotation = 0) {
       const group = new Group();
@@ -94,7 +94,7 @@ function build() {
   const towelEnd = source.indexOf("  toilet('Guest bathroom toilet'", towelStart);
   assert.ok(towelStart >= 0 && towelEnd > towelStart);
   vm.runInNewContext(source.slice(towelStart, towelEnd), context);
-  const storageStart = source.indexOf('  for (const compartment of guestSuite.closets)');
+  const storageStart = source.indexOf('  // Guest walk-in closet built-ins.');
   const storageEnd = source.indexOf('  const closetOpening =', storageStart);
   assert.ok(storageStart >= 0 && storageEnd > storageStart);
   vm.runInNewContext(source.slice(storageStart, storageEnd), context);
@@ -146,6 +146,27 @@ const meshes = root => {
 function intersectsXZ(a, b) {
   return Math.min(a.maxX, b.maxX) - Math.max(a.minX, b.minX) > 1e-6
     && Math.min(a.maxZ, b.maxZ) - Math.max(a.minZ, b.minZ) > 1e-6;
+}
+
+function intersectsCasing(mesh, bounds) {
+  const { width, depth } = mesh.geometry.parameters;
+  const polygon = [[-width / 2, -depth / 2], [width / 2, -depth / 2], [width / 2, depth / 2], [-width / 2, depth / 2]]
+    .map(([x, z]) => {
+      for (let node = mesh; node; node = node.parent) {
+        x *= node.scale.x; z *= node.scale.z;
+        const c = Math.cos(node.rotation.y), s = Math.sin(node.rotation.y);
+        [x, z] = [node.position.x + c * x + s * z, node.position.z - s * x + c * z];
+      }
+      return [x, z];
+    });
+  const board = [[bounds.minX, bounds.minZ], [bounds.maxX, bounds.minZ], [bounds.maxX, bounds.maxZ], [bounds.minX, bounds.maxZ]];
+  for (const shape of [polygon, board]) for (let i = 0; i < shape.length; i++) {
+    const [x, z] = shape[i], [nx, nz] = shape[(i + 1) % shape.length], axis = [z - nz, nx - x];
+    const project = points => points.map(point => point[0] * axis[0] + point[1] * axis[1]);
+    const a = project(polygon), b = project(board);
+    if (Math.min(Math.max(...a), Math.max(...b)) - Math.max(Math.min(...a), Math.min(...b)) <= 1e-8) return false;
+  }
+  return true;
 }
 
 test('revised guest bath retains west wall-to-wall built-in shower, north-center 48 vanity and east private WC', () => {
@@ -213,16 +234,16 @@ test('private WC solid door is 30 x 96 nominal and sampled inward sweep clears a
   close(meshes(towel).find(p => p.name === 'Guest bathroom hanging towel').geometry.parameters.depth * 12, 16);
   const fixtures = ['Guest bathroom toilet', 'Guest bathroom vanity', 'Guest bathroom shower', 'Guest bathroom wall-mounted towel hook']
     .map(name => meshes(model.find(name)).map(worldBounds));
-  const frame = model.find('Guest WC offset door lining extensions');
-  const frameParts = meshes(frame);
-  const jamb = worldBounds(frameParts.find(part => part.name === 'Guest WC latch jamb extension'));
-  const hingeJamb = worldBounds(frameParts.find(part => part.name === 'Guest WC hinge jamb extension'));
-  const head = worldBounds(frameParts.find(part => part.name === 'Guest WC head lining extension'));
+  assert.equal(model.find('Guest WC offset door lining extensions'), undefined);
+  const frameParts = meshes(model.find('Guest WC wall-fitted door lining'));
+  assert.equal(frameParts.length, 3);
   for (const part of frameParts) {
-    const fixed = worldBounds(part);
+    const frame = worldBounds(part);
+    close(frame.minX, suite.wc.x - 0.175);
+    close(frame.maxX, suite.wc.x + 0.175);
     for (const group of fixtures) for (const fixture of group) {
-      const overlapY = Math.min(fixed.maxY, fixture.maxY) - Math.max(fixed.minY, fixture.minY);
-      assert.ok(overlapY <= 1e-6 || !intersectsXZ(fixed, fixture), `${part.name} clears fixtures`);
+      const overlapY = Math.min(frame.maxY, fixture.maxY) - Math.max(frame.minY, fixture.minY);
+      assert.ok(overlapY <= 1e-6 || !intersectsXZ(frame, fixture), `${part.name} clears fixtures`);
     }
   }
   const movingParts = meshes(door);
@@ -230,30 +251,37 @@ test('private WC solid door is 30 x 96 nominal and sampled inward sweep clears a
   assert.ok(leaf, 'The actual 29.52-inch leaf is present');
   const original = door.rotation.y;
   const closed = worldBounds(leaf);
-  close(jamb.maxX, closed.maxX);
-  close(hingeJamb.maxX, closed.maxX);
-  close(head.maxX, closed.maxX);
+  close(closed.minX, suite.wc.x + 0.175);
   close((closed.minZ - suite.wcDoor.z) * 12, 0.24);
   close((suite.wcDoor.z + suite.wcDoor.width - closed.maxZ) * 12, 0.24);
   const jambWalls = [
     { minX: suite.wc.x - 0.175, maxX: suite.wc.x + 0.175, minZ: suite.wc.z, maxZ: suite.wcDoor.z },
     { minX: suite.wc.x - 0.175, maxX: suite.wc.x + 0.175, minZ: suite.wcDoor.z + suite.wcDoor.width, maxZ: suite.bathroomDoor.z }
   ];
+  const casingReveal = 0.125 / 12;
+  const casingWidth = 3.5 / 12;
+  const casing = [-1, 1].flatMap(side => [
+    { minX: suite.wc.x + side * 0.175 - (side < 0 ? 0.0625 : 0), maxX: suite.wc.x + side * 0.175 + (side > 0 ? 0.0625 : 0),
+      minZ: suite.wcDoor.z - casingReveal - casingWidth, maxZ: suite.wcDoor.z - casingReveal },
+    { minX: suite.wc.x + side * 0.175 - (side < 0 ? 0.0625 : 0), maxX: suite.wc.x + side * 0.175 + (side > 0 ? 0.0625 : 0),
+      minZ: suite.wcDoor.z + suite.wcDoor.width + casingReveal, maxZ: suite.wcDoor.z + suite.wcDoor.width + casingReveal + casingWidth }
+  ]);
   const minimum = { west: Infinity, east: Infinity, south: Infinity };
-  for (let degrees = 0; degrees <= 90; degrees += 5) {
+  for (let degrees = 0; degrees <= 90; degrees += 1) {
     door.rotation.y = Math.PI / 2 - degrees * Math.PI / 180;
     for (const movingPart of movingParts) {
       const bounds = worldBounds(movingPart);
       for (const wall of jambWalls) assert.equal(intersectsXZ(bounds, wall), false, `door clears WC partition at ${degrees} degrees`);
+      for (const [index, board] of casing.entries()) assert.equal(intersectsCasing(movingPart, board), false, `${movingPart.name} clears WC casing ${index} at ${degrees} degrees`);
       for (const part of frameParts) {
-        const fixed = worldBounds(part);
-        const overlapY = Math.min(bounds.maxY, fixed.maxY) - Math.max(bounds.minY, fixed.minY);
-        assert.ok(overlapY <= 1e-6 || !intersectsXZ(bounds, fixed), `door clears WC lining at ${degrees} degrees`);
+        const frame = worldBounds(part);
+        const overlapY = Math.min(bounds.maxY, frame.maxY) - Math.max(bounds.minY, frame.minY);
+        assert.ok(overlapY <= 1e-6 || !intersectsCasing(movingPart, frame), `door clears ${part.name} at ${degrees} degrees`);
       }
       for (const fixtureParts of fixtures) {
         for (const fixture of fixtureParts) assert.equal(intersectsXZ(bounds, fixture), false, `door leaf/handle clears fixtures at ${degrees} degrees`);
       }
-      assert.ok(bounds.minX >= suite.wc.x + 0.175, 'Leaf and hardware remain inside WC west paint');
+      if (movingPart === leaf) assert.ok(bounds.minX >= suite.wc.x + 0.175 - 1e-7, 'Leaf remains inside WC west paint');
       assert.ok(bounds.maxX <= 31.025, 'Leaf and hardware clear east paint');
       assert.ok(bounds.maxZ <= suite.bathroomDoor.z - 0.175, 'Leaf and hardware clear south paint including fully open knobs');
       minimum.west = Math.min(minimum.west, (bounds.minX - suite.wc.x - 0.175) * 12);
@@ -261,9 +289,9 @@ test('private WC solid door is 30 x 96 nominal and sampled inward sweep clears a
       minimum.south = Math.min(minimum.south, (suite.bathroomDoor.z - 0.175 - bounds.maxZ) * 12);
     }
   }
-  close(minimum.west, 0.18); close(minimum.east, 3.54); close(minimum.south, 0.48);
+  close(minimum.west, -1.3525); close(minimum.east, 4.8325); close(minimum.south, 1.26);
   // At 90 degrees the privacy knobs, not the leaf, bound this nominal30-in threshold.
-  close((Math.min(...movingParts.map(p => worldBounds(p).minZ)) - suite.wcDoor.z) * 12, 26.58);
+  close((Math.min(...movingParts.map(p => worldBounds(p).minZ)) - suite.wcDoor.z) * 12, 26.76);
   door.rotation.y = original;
 });
 
@@ -292,7 +320,8 @@ test('a continuous 24-inch route screen connects bedroom, closet, basin, shower 
   for (const door of sliders) door.position.x = door.userData.interactiveHouseDoor.openCenterX;
   const wcDoor = model.find('Guest private WC inward sound-door study');
   wcDoor.rotation.y = 0;
-  const names = ['Guest west end closet storage', 'Guest Bosch WGB24600UC WQB245B0UC laundry stack', 'Guest laundry 30-inch shallow shelf module',
+  const names = ['Guest west wardrobe built-in', 'Guest Bosch WGB24600UC WQB245B0UC laundry stack', 'Guest north-east drawer and folding tower',
+    'Guest laundry-wall upper shelves', 'Guest closet north-wall dressing mirror',
     'Guest bathroom vanity', 'Guest bathroom shower', 'Guest bathroom toilet',
     'Guest walk-through closet pocket door', 'Guest bathroom pocket entry from closet',
     'Guest private WC inward sound-door study'];
@@ -354,19 +383,21 @@ test('Yamaha console constituent bounds fit the independently extended hall-faci
   assert.equal(bench.userData.occupiedHallRouteVerified, false);
 });
 
-test('walk-through closet retains shell and west storage with east laundry replacing hanging', () => {
+test('walk-through closet keeps its shell with west wardrobe, north-east tower and retained south-east laundry', () => {
   const model = build();
   close((suite.closet.d - 0.35) * 12, 59.4251968503937);
   close((require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().wallZ - 0.225 - suite.bedroom.z - 0.175) * 12, 132);
-  const west = meshes(model.find('Guest west end closet storage')).map(worldBounds).reduce(union);
+  const west = meshes(model.find('Guest west wardrobe built-in')).map(worldBounds).reduce(union);
+  const tower = meshes(model.find('Guest north-east drawer and folding tower')).map(worldBounds).reduce(union);
   const east = meshes(model.find('Guest Bosch WGB24600UC WQB245B0UC laundry stack')).map(worldBounds).reduce(union);
-  // Standard 24-in body depth plus separate 5/8-in rear upper scribe;
-  // custom shelf end extensions now reach within 1/8 in of each paint face.
+  // Standard 24-in body depth plus the 96-inch luggage shelf's 5/8-in rear
+  // scribe; it and the separate upper end scribes stop 1/8 in from paint.
   close((west.maxX - west.minX) * 12, 24.625);
   close((east.maxX - east.minX) * 12, 26);
   close((west.maxZ - west.minZ) * 12, 59.4251968503937 - 0.25);
   close((east.maxZ - east.minZ) * 12, 23.5);
-  assert.ok(west.maxX < suite.closetDoor.x && east.minX > suite.closetDoor.x + suite.closetDoor.width);
+  assert.ok(west.maxX < suite.closetDoor.x && east.minX > suite.closetDoor.x + suite.closetDoor.width && tower.minX > suite.closetDoor.x + suite.closetDoor.width);
+  close((tower.maxZ - tower.minZ) * 12, 30);
   assert.ok(west.minX > suite.notch.x + suite.notch.w + 0.175);
   close((east.minX - west.maxX) * 12, 66.35);
   for (const name of ['Guest walk-through closet pocket door', 'Guest bathroom pocket entry from closet']) {
@@ -376,7 +407,7 @@ test('walk-through closet retains shell and west storage with east laundry repla
     assert.equal(door.userData.nominalHeightInches ?? door.userData.heightInches, 96);
     for (let t = 0; t <= 1.001; t += 0.1) {
       door.position.x = data.closedCenterX + t * (data.openCenterX - data.closedCenterX);
-      for (const part of meshes(door)) for (const storage of [west, east]) assert.equal(intersectsXZ(worldBounds(part), storage), false);
+      for (const part of meshes(door)) for (const storage of [west, east, tower]) assert.equal(intersectsXZ(worldBounds(part), storage), false);
     }
     door.position.x = data.closedCenterX;
   }
