@@ -6,66 +6,6 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 const { getLivingRoomFeatureLayout } = require('../assets/js/floor-plan-ground.js');
 
-test('family L sectional has five full cushions without counting its corner and preserves measured access gaps', () => {
-  class Group {
-    constructor() { this.children = []; this.userData = {}; }
-    add(child) { this.children.push(child); }
-    traverse(callback) { callback(this); this.children.forEach((child) => child.traverse(callback)); }
-  }
-  const feature = getLivingRoomFeatureLayout();
-  const scene = new Group();
-  const context = {
-    THREE: { Group, MeshStandardMaterial: class {} }, scene, livingCenterZ: feature.centerZ,
-    livingWeaveTexture() {},
-    box(parent, x, y, z, w, h, d) {
-      const part = new Group();
-      Object.assign(part, { x, y, z, w, h, d, isMesh: true });
-      parent.add(part);
-      return part;
-    }
-  };
-  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
-  vm.runInNewContext(source.slice(source.indexOf('  const familySectional ='), source.indexOf('  const livingLayouts =')), context);
-  const sectional = scene.children[0];
-  assert.equal(sectional.userData.planningSeats, 5);
-  assert.equal(sectional.userData.cornerCounted, false);
-  assert.equal(sectional.userData.comfortVerified, false);
-  assert.equal(sectional.userData.productSelected, false);
-  const seats = sectional.children.filter((part) => part.name === 'L sectional full seating cushion');
-  assert.equal(seats.length, 5);
-  assert.equal(sectional.children.filter((part) => part.name === 'L sectional uncounted corner cushion').length, 1);
-  seats.forEach((seat) => {
-    assert.ok(seat.w * 12 >= 27 && seat.d * 12 >= 30, 'Every counted cushion has full seat width and depth');
-    assert.equal(seat.userData.tourObstacle, true);
-  });
-
-  for (let i = 0; i < seats.length; i++) for (let j = i + 1; j < seats.length; j++) {
-    assert.ok(Math.abs(seats[i].x - seats[j].x) >= (seats[i].w + seats[j].w) / 2 ||
-      Math.abs(seats[i].z - seats[j].z) >= (seats[i].d + seats[j].d) / 2, 'Counted cushions do not overlap');
-  }
-  const bounds = {
-    minX: Math.min(...sectional.children.map((part) => part.x - part.w / 2)),
-    maxX: Math.max(...sectional.children.map((part) => part.x + part.w / 2)),
-    minZ: Math.min(...sectional.children.map((part) => part.z - part.d / 2)),
-    maxZ: Math.max(...sectional.children.map((part) => part.z + part.d / 2))
-  };
-  assert.ok(Math.abs((bounds.maxX - bounds.minX) * 12 - 104) < 0.001);
-  assert.ok(Math.abs((bounds.maxZ - bounds.minZ) * 12 - 144) < 0.001);
-  assert.ok((bounds.minZ - feature.wallStartZ) * 12 >= 26.9, 'Historical L option loses 12.6 inches at the moved wall');
-  assert.ok((feature.wallEndZ - bounds.maxZ) * 12 >= 33.2, 'Historical L option follows the recentered axis');
-  // Built-ins removed: the L return end faces both the continuous baseboard and the stone face.
-  const familyReturn = sectional.children.filter((part) => part.name === 'L sectional upholstered base').sort((a, b) => a.x - b.x)[0];
-  assert.ok(familyReturn.z - familyReturn.d / 2 < feature.centerZ - 3.06 && familyReturn.z + familyReturn.d / 2 > feature.centerZ - 3.06, 'Return spans the stone return and the baseboard run');
-  assert.ok((bounds.minX - 1.38) * 12 >= 28.2, 'Return end clears the stone face');
-  assert.ok(Math.abs((bounds.minX - 0.2375) * 12 - 41.95) < 0.01, 'Return end to the continuous fireplace-wall baseboard');
-  const ottoman = { x: 6.0666667, z: feature.centerZ + 1.5, w: 32 / 12, d: 4 };
-  const mainFront = 10.5666667 - 44 / 24;
-  assert.ok(Math.abs((mainFront - ottoman.x - ottoman.w / 2) * 12 - 16) < 0.001);
-  assert.ok((ottoman.z - ottoman.d / 2 - (feature.centerZ - 25 / 6 + 44 / 24)) * 12 >= 21.9);
-  assert.ok(bounds.maxX < 13.25, 'Sectional leaves the existing hall circulation strip clear');
-  assert.match(source, /place\(familySectional, layout\.familySectional \? \[0, 0, 0\] : null\)/);
-});
-
 function buildLounge() {
   class Group {
     constructor() {
@@ -91,7 +31,7 @@ function buildLounge() {
   };
   vm.createContext(context);
   const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
-  const loungeSource = source.slice(source.indexOf('  const referenceLounge ='), source.indexOf('  const familySectional ='));
+  const loungeSource = source.slice(source.indexOf('  const referenceLounge ='), source.indexOf('  const tableX ='));
   vm.runInContext(loungeSource, context);
   const placeSource = source.slice(source.indexOf('  scene.add(piano);'), source.indexOf('\n', source.indexOf('  piano.userData.location =')));
   context.stairOpening = require('../assets/js/upstairs-layout.js').stairOpening();
@@ -223,76 +163,37 @@ test('reading chair, end table and its lamp and light are removed, not hidden', 
   assert.doesNotMatch(loungeSource, /referenceEndTable|chairSize|endTable|POANG/);
   assert.doesNotMatch(source, /referenceEndTable|'Living reading'|Reference small oak end table|Reference oak POANG/);
   const lighting = source.slice(source.indexOf('  function buildHomeLighting()'), source.indexOf('  const upstairsHelpers ='));
-  assert.equal((lighting.match(/fixture\([^)]*'ground', true\)/g) || []).length, 1, 'Only the piano task lamp remains');
+  assert.equal((lighting.match(/fixture\([^)]*'ground', true\)/g) || []).length, 0, 'Removed living task lamps have no remaining light');
 });
 
-test('piano moves west and against trim with tucked bench, with no built-in beside it', () => {
-  const { context, scene } = buildLounge();
-  const piano = scene.children.find((child) => child.name === 'Yamaha CLP-825 Rosewood digital piano');
-  assert.ok(piano, 'Piano is a direct scene child, independent of seating layouts');
-  const cabinet = worldBounds({ traverse: (cb) => cb(piano.children.find((part) => part.name === 'Piano console cabinet')) });
-  near((cabinet.minX + cabinet.maxX) / 2, 3.758333333333333, 'Exact prior stair-enclosure pose');
-  near((piano.userData.wallRun.faceZ - cabinet.maxZ) * 12, 1, 'Rear gap to panelling');
-  const bench = worldBounds(piano.children.find((part) => part.name.startsWith('Piano bench -')));
-  near((bench.minX + bench.maxX) / 2, piano.position.x, 'Bench stays centered with the piano');
-  const whole = worldBounds(piano);
-  const sofa = worldBounds(scene.children.find((child) => child.name === 'Fireplace-facing U sectional - fit study').children[0]);
-  assert.ok(whole.minZ > sofa.maxZ, 'Tucked piano and bench clear the living sectional');
-  assert.match(piano.userData.location, /pre-straight-wall living side of stair enclosure/);
-  near((whole.minX - 0.2375) * 12, 15.6751968503937, 'West end clearance to window-wall baseboard');
-  const benchGroup = piano.children.find((part) => part.name.startsWith('Piano bench -'));
-  near(benchGroup.position.z, 0.75, 'Bench tucks 6.6 inches from its previous 1.3 foot offset');
-  const seat = benchGroup.children.find((part) => part.name === 'Piano bench seat');
-  near(seat.w * 12, 24, 'Seat width unchanged');
-  near(seat.d * 12, 12, 'Seat depth unchanged');
-  near(seat.position.y * 12, 18, 'Seat center height unchanged');
-  const defaultBenchZ = benchGroup.position.z;
-  benchGroup.position.z += 18 / 12;
-  const occupiedBench = worldBounds(benchGroup);
-  near((bench.minZ - occupiedBench.minZ) * 12, 18, 'Real bench meshes translate north for occupied use');
-  near(occupiedBench.minZ, 23.509120734908137, 'Restored bench north edge after 18-inch pullout');
-  near((occupiedBench.minZ - sofa.maxZ) * 12, 0.10944881889764, 'Only a near-contact operating gap, not a passing aisle');
-  assert.ok(occupiedBench.maxX < 13.2, 'Bench remains outside the independent west-hall strip');
-  benchGroup.position.z = defaultBenchZ;
-  const consoleParts = [];
-  piano.children.filter((part) => part !== benchGroup).forEach((part) => part.traverse((mesh) => { if (mesh.isMesh) consoleParts.push(mesh); }));
-  for (const legOrSeat of benchGroup.children) for (const part of consoleParts) {
-    const a = worldCorners(legOrSeat), b = worldCorners(part);
-    const overlaps = [0, 1, 2].every((axis) => Math.min(Math.max(...a.map((p) => p[axis])), Math.max(...b.map((p) => p[axis]))) -
-      Math.max(Math.min(...a.map((p) => p[axis])), Math.min(...b.map((p) => p[axis]))) > 1e-6);
-    assert.ok(!overlaps, `${legOrSeat.name} clears ${part.name}`);
-  }
+test('living piano, bench and attached lamp are removed rather than hidden or relocated', () => {
+  const { source, scene } = buildLounge();
+  const names = [];
+  scene.traverse((part) => names.push(part.name || ''));
+  assert.ok(!names.some((name) => /piano|bench|music lamp/i.test(name)));
+  assert.doesNotMatch(source, /Yamaha CLP-825|livingPiano|livingPianoBench/);
 });
 
-test('U layout placement tuple restores after switching living layouts', () => {
-  const { context, source, scene } = buildLounge();
-  const lounge = scene.children.find((child) => child.name === 'Fireplace-facing U sectional - fit study');
-  const stub = () => { const g = new (lounge.constructor)(); return g; };
-  Object.assign(context, {
-    navigationMode: 'rotate', activeFloor: 'ground', referenceLounge: lounge,
-    sofa: stub(), sectional: stub(), downloadedSofa: stub(), familySectional: stub(), familyLiving: stub(),
-    familyOttoman: { position: {} }, readingLamp: stub(), livingArmchairs: [stub(), stub()], loungeChairs: [stub(), stub()],
-    cornerOttoman: stub(), readingOttoman: stub(), livingFeatureWall: getLivingRoomFeatureLayout(),
-    document: { querySelectorAll: () => [], getElementById: () => ({}) }, viewport: { dataset: {} }, buildWalkObstacles() {}
-  });
-  context.familyLiving.userData.ottoman = { x: 0, z: 0 };
-  vm.runInContext(source.slice(source.indexOf('  const livingLayouts ='), source.indexOf('  const tableX =')), context);
-  vm.runInContext(source.slice(source.indexOf('  function applyLivingLayout('), source.indexOf('  applyLivingLayout(livingLayouts[0], false);')), context);
-  const layouts = vm.runInContext('livingLayouts', context);
-  assert.equal(layouts[0].id, 'reference-lounge');
-  assert.match(layouts[0].title, /U sectional/);
-  assert.doesNotMatch(layouts[0].note, /POANG|reading chair sits|end table\/lamp beside/);
-  lounge.position.set(9, 0, 9);
-  for (const layout of [layouts[0], layouts.find((item) => item.id === 'double-chaise'), layouts[0]]) {
-    context.applyLivingLayout(layout, false);
-    const active = layout === layouts[0];
-    assert.equal(lounge.visible, active);
-    lounge.traverse((part) => assert.equal(part.userData.livingLayoutHidden, !active));
-  }
-  assert.deepEqual([lounge.position.x, lounge.position.z, lounge.rotation.y], [...lounge.userData.centerOffset]);
+test('default living furniture is only the U sectional and rug at their authored poses', () => {
+  const { source, scene } = buildLounge();
+  assert.deepEqual(scene.children.map((child) => child.name), ['Fireplace-facing U sectional - fit study']);
+  const lounge = scene.children[0];
+  assert.equal(lounge.visible, true);
+  assert.deepEqual([lounge.position.x, lounge.position.y, lounge.position.z, lounge.rotation.y], [0, 0, 0, 0]);
+  assert.deepEqual([...lounge.userData.centerOffset], [0, 0, 0]);
+  lounge.traverse((part) => assert.ok(part.visible !== false && !part.userData.livingLayoutHidden));
   const sofa = worldBounds(lounge.children[0]);
-  near(sofa.maxX, 12.75, 'Restored U back');
-  near(sofa.minZ, 12.5, 'Restored U north edge');
+  near(sofa.maxX, 12.75, 'U back');
+  near(sofa.minZ, 12.5, 'U north edge');
+  const start = source.indexOf("  viewport.dataset.livingLayout = 'reference-lounge';");
+  const end = source.indexOf('  const initialParameters =', start);
+  assert.ok(start > 0 && end > start && end - start < 200, 'Default living setup is a bounded two-statement block');
+  let walkBuilds = 0;
+  const context = { viewport: { dataset: {} }, buildWalkObstacles() { walkBuilds++; } };
+  vm.runInNewContext(source.slice(start, end), context);
+  assert.equal(context.viewport.dataset.livingLayout, 'reference-lounge');
+  assert.equal(walkBuilds, 1);
+  assert.doesNotMatch(source, /livingLayouts|applyLivingLayout|livingLayoutHidden|familySectional|familyLiving|downloadedSofa|livingArmchairs|loungeChairs/);
 });
 
 test('both fireplace built-ins are removed with no constituent meshes, group or userData', () => {

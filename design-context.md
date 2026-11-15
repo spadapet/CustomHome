@@ -1,6 +1,235 @@
 # Ground-floor design context
 
-## Shelf finish only: all stained oak - November 9
+## Living-room piano removed — November 14
+
+Remove the living-room Yamaha CLP-825, its bench and attached music lamp;
+do not relocate them. All earlier living-piano placement/access studies below
+are superseded. Seating, other furnishings, walls and saved layouts stay fixed.
+The guest-suite Yamaha YDP-145, guest bench, recess walls and lighting remain.
+
+Version I SVG remains a historical comparison with its earlier ground layout,
+not the active November 14 guest/kids arrangement. Its regression fixture
+preserves that recorded geometry; current-model suites verify the active plan.
+
+## Kids bookcase and blackboard — November 14 furnishing revision
+
+Remove the east TROFAST frame and all nine removable bins/inserts, as requested;
+the former drawer/bin unit is not relocated. Replace it with one standing
+30 x 12 x 72 in white/oak open bookcase, center (30.45,28.7) ft, facing west.
+Six shelves; books on lower shelves; wall anti-tip anchorage is required
+before use and upper shelves are adult-access only. Generic furniture proxy,
+not a selected product. Two full MITTZON desks/chairs remain unchanged.
+
+Add a 36 x 30 in framed blackboard on the solid west wall, center
+(19.24,28.25) ft, facing east; writing-frame bottom 24 in above floor.
+Tray projects to x19.485; reserve a 24 in standing-use zone east of it.
+This clears the desk/occupied-chair proxy and leaves the north entry/staging
+band unobstructed. Bookcase-to-desk-end gap is 8.1 in, not a passage;
+approach the shelves from the north/open center instead.
+This supersedes current TROFAST/bin-pull and board-pending notes below.
+Earlier two flanking towers and picture/shelf-light relocation remain
+historical/unresolved, not added by this furniture request. No openings,
+wall boundaries, saved layouts or door poses change. Actual child reach,
+occupied passing, blackboard fixings and bookcase anchorage need review.
+
+## Current annotated guest/kids study — November 14
+
+Follow-up supersedes the earlier same-day studies. Numbered image was not
+attached: reversible assumptions are location 1 = former west kids paired
+entry, now solid wall; location 2 = north kitchen-facing span, now a centered
+nominal 60 × 96-inch cased opening without leaves, hinges or handles. Future
+30+30-inch double leaves require supplier framing/rough-opening approval.
+Bathroom/closet north wall z37.977066929 and bedroom north wall z43.279166667
+are continuous straight x19–31.2 lines, including both piano returns, with no
+duplicate coincident return walls. Bathroom north/kids south is z32.977066929.
+The guest WC's closed leaf is centered with 0.24-inch gaps at both opening
+ends; head and jamb extensions reach its offset leaf depth, with the hinge-side
+return set back for sweep clearance. Hinges, acoustic hardware and occupied
+operation remain unverified.
+
+| Zone | Wall-center footprint / floor attribution | Finished-face dimensions |
+|---|---|---|
+| Bedroom | 12.2 × 11.4 ft; 139.08 sq ft | 142.2 × **132 inches over the full rectangle** |
+| Bathroom | 12.2 × **5 ft nominal**; 61 sq ft | 142.2 × 55.8 inches overall; private WC **36 × 55.8** |
+| Closet, excluding recess | x20.841666667–31.2, depth5.302099738 ft; 54.920916 sq ft | 120.1 × **59.4252 inches** |
+| Kids main + NE | 9.0125 × 8.035400262 ft +3.1875 ×6.077066929 ft; **91.789696 sq ft** | North opening x20.875–25.875; west/east nominal piers 22.5/25.65 inches |
+
+Kids north wall's kitchen paint face is **z24.766666667**, flush with the refrigerator/freezer
+cabinet carcass body face: back26.725 +existing setback0.125 −depth25/12. Its centreline is z24.941666667
+(November 14: moved 2.1 in south so the 4.2-in wall no longer stands proud of the cabinets).
+This excludes Shaker fronts, handles and cornice; kitchen bank/appliances stay
+fixed. NE strip starts z26.9 behind the return. Hall/Kitchen floor attributions
+are split at the adopted strip; no double floor area. Total shell/floor union
+is unchanged. Restore only the north side piers, 96-inch opening header and
+matching casing/base returns; infill west z27–31.5 including hall panels/base,
+without orphan casing or doorway/tour metadata. No new door leaves.
+Board/two towers/picture and shelf lights are **pending relocation**, not silently
+deleted requirements: no reachable 60-inch board site above 31.5-inch-deep desks.
+Header/support and relocated electrical circuits need professional review.
+
+The north opening's east pier now meets a full-height perpendicular return at
+x28.0125, from the cabinet-face line to z26.9: moved east 3.15 inches so its
+finished cabinet-side face at x28.1875 touches the existing end panel.
+No oak packing strip or scribe is added. Remove the obsolete back-wall stub;
+the return now meets the existing back wall directly. The 60-inch opening,
+cabinet/appliance positions and standard box sizes stay fixed. Closed fridge
+panel-to-paint reserve is now 0.875 inch; retain the 90-degree door stop.
+Final framing, fixing and selected-product clearances need professional review.
+
+Both full 47.25 ×31.5-inch desks abut as a south-wall work pair:
+centers(23.36875,31.489566929)/(27.30625,31.489566929), chairsz30.152066929.
+One39 ×17.375-inch TROFAST with all nine bins/LEGO inserts is east-wall anchored,
+center(30.301041667,28.7), facing west. It is not floating at the demolished wall.
+Desk/TROFAST corner gap3.625 inches; full bin pull leaves only0.875 inch to the
+tucked east chair: **occupied seating and toy retrieval remain sequential**.
+The former west entry and both leaves/hardware are removed, not moved elsewhere.
+Interior north staging band is103.95 inches wide; its entry threshold is now
+only60 inches nominal, not105 inches.
+This is not independent occupied passing or child-use approval.
+
+Guest closet laundry redesign, November 14: owner explicitly authorizes replacing
+storage to fit real stacked laundry. This supersedes the storage-neutral
+infeasibility screen. Keep the 120.1 ×59.4252-inch clear shell, piano, adjacent
+boundaries and both pocket entries. Stack faces west from the **south-east** end;
+placing it north would obstruct the washer's left-hinged fold-back swing.
+West retains a 48 ×24-inch carcass divided into two nominal24 ×24 ×84-inch
+modules: north long-hang rod70.2 inches high, south double-short rods38.4/74.4,
+each22.5 inches long; clear section width22.875 inches. Full24-inch clothing
+envelope retained. West upper shelf span59.1752/lower57.9252 inches and separate
+rear scribes remain. Former east48-inch double-hang capacity is sacrificed.
+North-east has one standard30 W ×12 D ×84 H-inch fixed shelf module, six tops
+12/27/42/57/72/84 inches above floor, 3/4-inch north trim reserve and separate
+1/2-inch rear scribe above the8-inch baseboard, leaving1/4 inch to paint.
+Stack/shelf side gap4.1752 inches; stack south paint gap1 inch (1/4 beyond trim).
+
+Modeled reference: Bosch [WGB24600UC washer](https://www.bosch-home.com/us/en/product/WGB24600UC)
+and [WQB245B0UC heat-pump dryer](https://www.bosch-home.com/us/en/product/WQB245B0UC),
+provisional WTZ27510UC no-shelf kit; exact cross-series pairing requires Bosch
+confirmation before ordering. [Washer manual9001852659_A p40](https://media3.bosch-home.com/Documents/9001852659_A.pdf):
+23.5 W ×25.5 D ×33.25 H inches/43-inch open depth.
+[Dryer sheet9/26 pp1–4](https://media3.bosch-home.com/Documents/24375690_WQB245B0UC_Spec_Sheet.pdf),
+re-fetched2026-11-14:23.5 W ×26 D ×33.25 H/43.5-inch open depth;
+minimum stack67.75 inches with kit. Closet allowances:0.5 each side/front,
+3 rear,6.25 top; reserved envelope24.5 W ×29.5 D ×74 H inches.
+Actual south allowance1 inch; rear3; no cabinet above. Dryer hinge reversal
+to left is provisional (manufacturer permits reversal). Leveling/pan changes
+require recheck. Visible bodies/drums/control panels and door rings are
+dimensioned reference proxies, not manufacturer CAD or certified hinge paths.
+
+Closed dryer front to full west clothing envelope66.35 inches. Beyond published
+open depth48.85 inches (washer49.35). A30 ×30-inch occupied loading square
+fits beyond the open-depth reserve, leaving18.85 inches to clothing:
+**loading and through-passage are sequential**. Shelf retrieval uses a separate
+30-inch zone, leaving52.6 inches to clothing. Nominal30-inch entries have
+29.34 inches with deployed edge pulls. Delivery turning/service extraction
+remain unverified. Keep existing other laundry provision pending approval.
+Bosch ventilation provision is equivalent high/low openings each1.25 ×24 inches
+(30 sq in each); solid pocket leaves do NOT provide them. Bosch recommends
+open closet doors for shortest drying times. Conditioned air/free-area detailing
+and any proposed open-entry operation require installer approval; no garage air.
+Sheet lists supplied WTZPA20UC/NEMA14-30R adapter or separate208/240 V circuits
+per manuals; electrician selects the installation. Hot/cold isolation, standpipe/
+trap, dryer condensate, leak protection, support/vibration, upper-control reach,
+anchorage, service removal, waterproofing and garage/fire separation remain
+professional holds. No services/penetrations installed. Never fix or route
+services into pocket cavities; storage support/load/joinery remain unapproved.
+
+Retain both nominal30 ×96-inch real pocket entries,3-inch cavities, flush pulls,
+retractable edge pulls (0.66-inch projection when open), default closed. No services
+or storage fasteners in pocket walls. Both units remain clear of the pocket skins.
+YDP-145 recess is **only the closet band**, z37.977066929–43.279166667;
+center40.628116798,20-inch depth to back paint,3-inch finished console end gaps,
+1.29-inch rear gap before low trim. Yamaha1357 ×422 ×815 mm/rest969 mm and
+24 ×12-inch provisional bench are retained; [official dimensions](https://usa.yamaha.com/musical-instruments/pianos/products/arius/ydp-145/specs.html),
+retrieved2026-11-14. This is the specified ARIUS YDP-145, not all Yamaha pianos:
+53 7/16 ×16 5/8 inches rounded. Provisional24 ×12-inch bench is not a selected
+Yamaha bench; default centerx19.15, tucked5.7 inches under the keyboard front,
+0.3871-inch rear-leg/pedal-rail gap,7.0066-inch seat/console vertical gap.
+Retrieve before playing; occupied/retrieval hall route remains unverified.
+Shower pan/south paint gap was5.4 inches; November 14 the built-in shower extends to the south wall (no gap).
+Bath and bedroom floors are full rectangles. Occupied piano/hall use remains unverified.
+
+Keep fixed bedroom entryz44.8–47.8,queen/east headboard,two nights,west TV,
+front window,kitchen/mud opening,exterior/roof/upstairs and saved JSON.
+Vanity48 ×18,built-in wall-to-wall shower 36 ×53.4 clear/east30-inch entry remain. Bath NORTH stays fixed;
+move shared south wall4.2 inches north. WC is36 ×55.8 clear, not60 deep.
+Its30 ×96-inch inward door and south hinge move4.2 inches north without
+changing handing; five-degree constituent sweeps through90 degrees retain
+fixture/wall clearance. East towel hook/full16-inch towel also follows north
+4.2 inches: its former hem collided at85 degrees. No towel/door rescaling.
+Bathroom inspection target follows actual room midpoint.
+A24-inch route screen is not accessibility/code approval.
+Close vanity fronts before passing.
+Source tests provide dimensions/motion screens; parent handles browser matrices,
+Day/Night,floor restoration and elevations. Product fit, occupied routes, reach,
+acoustics, wet detailing, egress, anchorage, electrical and structure remain
+professional-review holds. Local reversible study, not construction approval.
+
+## Historical earlier November 14 guest suite (superseded by annotation above)
+
+North to south: kids, full-width bath, walk-through closet, guest bedroom.
+Keep x19–31.2 shell, front window, bedroom entry z44.8–47.8, kitchen/mud
+opening, queen/east headboard, west TV, two nights, two full MITTZON desks
+and chairs, north TROFAST/nine bins and family board. No saved JSON changes.
+
+Wall centers: kids south/bath north z34.579167; bath south/closet north
+z39.929167; bedroom north z43.279167. Bath nominal depth 5.35 ft; closet
+3.35 ft / **36 inches between north/south paint faces**. Main sleeping
+zone is **11 feet clear** from z43.454167 to exterior inner face z54.454167,
+only **east of the localized NW piano recess**, x21.016667–31.025.
+The reduced northwest corner is not an eleven-foot-deep rectangle.
+
+Bath: west **built-in wall-to-wall shower, 36 × 53.4-inch clear** (November 14: extended to the south wall, no floor strip), 30-inch east entry;
+north-center standard **48 × 18-inch** oak vanity, separate rear scribe,
+36-inch mirror, sconces/night light; east private WC **36 × 60 inches clear**,
+toilet center (29.525,35.854167). Solid 30 × 96-inch inward WC door;
+sound isolation/seals/hardware unselected. Bedroom-to-closet pocket door
+retracts east into x26.8–29.7; closet-to-bath pocket door retracts west into
+x21.4–24.3. Both nominal 30 × 96-inch entries stay closed by default.
+Leaves and recessed pulls travel within 3-inch-deep modeled wall cavities,
+not on wall faces; exposed tracks are removed. Pocket framing, concealed
+headers/tracks, jambs, privacy hardware and wet-side finishes need supplier
+review. Keep plumbing, wiring and cabinet fasteners out of both cavities.
+Retractable edge pulls expose a grip when open, projecting 0.66 inch into
+the nominal opening; click the exposed pull to close. Leaf fitting allowances
+are conceptual, not selected-product rough openings or finished clear width.
+Storage is at WEST/EAST closet ends: two 36-inch-wide × 24-inch-deep
+envelopes, separate fillers, long-/double-short-hang rods, 70.6 inches
+between fronts. No north/south storage crosses the route.
+
+Generic Yamaha ARIUS YDP-145 and provisional 24 × 12-inch bench face west
+into the hall. [Official Yamaha specifications](https://usa.yamaha.com/musical-instruments/pianos/products/arius/ydp-145/specs.html),
+retrieved 2026-11-14: **1357 × 422 × 815 mm**, rest raised **969 mm**.
+This is dimensioned proxy geometry, not manufacturer CAD/installation approval.
+Recess wall-center span z39.178117–44.130216 is independent of closet depth,
+extending 9.01 inches north / 10.21 inches south of that band. West-facing
+depth to back paint 20 inches; 0.9-inch finished end gaps and 1.29-inch rear
+gap before low trim. North return is only 0.59 inch south of the shower pan:
+curb/partition/waterproofing junction needs detailed review. Floors, tile,
+wall returns and hall-panel cutout share the contour; no hall-facing wall
+overlay or tile crosses the recess. The existing living-side piano stays.
+**Occupied bench/hall passing, power and ventilation remain unverified.**
+
+Kids room nominal **12.2 × 7.679167 ft**, **93.69 sq ft**; north stays z26.9.
+Full desks at (22.375,33.091667)/(28.972917,33.091667), chairs z31.754167;
+TROFAST stays (25.775,27.973958). Side desk gap 31.925 inches; east paint
+gap 1 inch; low-foot/baseboard gap 1.2 inches. Frame-to-desk fronts 36.975
+inches: 30-inch chair allowance plus full 17.375-inch bin pull overlaps by
+10.4 inches, so **sequential use only**. Five-degree leaf sweeps clear both
+tucked and nine-inch-pulled chair proxies; west chair edge is just 4.5 inches
+east of nominal leaf reach. Occupied proxy reaches the door strip; independent
+passing is not approved.
+
+Focused source tests measure constituent bounds, pocket-door/wall clearance, WC and kids
+leaf sweeps, floor contour/area conservation and retained furniture.
+Parent task handles browser, actual Three.js matrices, Day/Night and elevation
+inspection separately; no visual verification claimed here. Close vanity
+fronts before passing. Product fit, occupied use, door/casing/seals, acoustic
+performance, window access/egress, anchorage, plumbing/exhaust, wet detailing,
+electrical and garage fire separation remain professional-review holds.
+Local reversible study only, not construction drawings or certified compliance.
+
+## Historical shelf finish (wall assembly removed November 14) - November 9
 
 Use natural stained white oak throughout both family-board shelf towers,
 matching their existing wood backs. Include sides, shelves, plinths, cornices
@@ -12,7 +241,7 @@ trimmed back to the same x28.1875 joint with no shelf-side overhang. Preserve
 lights, board, piano and white wall panelling. Earlier off-white tower finish is superseded; stain samples
 and protective finish remain product-selection requirements.
 
-## November 9 - shelf towers aligned with refrigerator cabinetry
+## Historical November 9 shelf towers (pending relocation November 14)
 
 Retain the stair-side piano/bench/lamp and straight wall. Restore flanking
 off-white 18 × 12-inch standard shelf modules (84 + 24 inches high).
@@ -51,7 +280,7 @@ proxy. This is sequential use, not a passing aisle or comfort approval.
 The independent 65.4-inch hall strip remains empty. Real playing comfort,
 power/ventilation and installation still need review.
 
-## November 9 - straight north wall (centered piano bay superseded above)
+## Historical November 9 straight north wall (suite dimensions superseded November 14)
 
 Use the red line's existing right-hand continuation, z26.9, rather than the
 old kitchen-cabinet front axis. Move only the kids north segment south
@@ -166,6 +395,13 @@ armchair and 18-inch side table. Its north finished route is 36.15 inches;
 the 16.2-inch coffee reach gap is not a passage. Sixteen 96-inch doors default
 closed. The eastern garage attic now has a finished southern half-loft;
 its northern half remains unfinished and excluded. The central gallery is unchanged.
+
+Thirteen upstairs door leaves now close within their jamb linings without
+changing their offset swing pivots. Bedroom 2 closet, Bedroom 3 closet and
+Bedroom 3 bath-entry leaves retain the prior offset because an inset reduced a
+tested closet-access route. Their head and jamb extensions reach the leaf depth,
+with hinge-side returns set back for sweep clearance. Hinge hardware and
+occupied use require review.
 
 Loft revision, November 9: move the old north edge z15 to the exact midpoint
 z27.725, retaining south z40.45 and x42.808333–55.5. Old nominal slab
@@ -969,7 +1205,7 @@ approaches with doors at 90. No generous passing/simultaneous-use,
 occupied, accessibility or code approval. Verify selected seating/comfort,
 stops, window/shade reach, moving equipment, user headroom, services/cables.
 
-## Current image-led guest suite and kids room — October 31
+## Historical image-led guest suite and kids room — October 31, superseded November 14
 
 Implement the owner's north-up reference as a coordinated, reversible
 ground-floor concept. Keep the existing outer shell, kitchen-to-mudroom
@@ -4264,7 +4500,7 @@ Hall stair runs swapped across their existing footprint: the ground-floor upstai
 
 Remove the full-height partition at z = 25.7, x = 0-12.2 between the living room and relocated west stairwell, including its base trim and two wall-mounted sconces. Keep the two living window-end sconces, dining pair and kitchen pair (six total). Guard the north stairwell edge at x = 0.175-10.008333, center z = 26.675, on the solid floor just outside the opening. The 42-inch-high guard uses an oak cap, dark posts and vertical balusters with clear gaps no greater than 3.75 inches; the bottom opening is 1.38 inches. Keep the east hall approach open and retain existing flight/landing rails, under-stair enclosure/bookcases, basement retaining walls and upstairs guards. This supersedes the closed living/stair partition and four-living-sconce notes below. Structural support after wall removal, anchorage, loads, handrail/guard rules and actual headroom require professional review; the model is not safety certification.
 
-## Latest stairs/kids-room swap
+## Historical stairs/kids-room swap (kids furnishing and entry superseded above)
 
 Swap the former west-side kids room and central stairs. The shared stair void is now x = 0.175-10.008333, z = 26.775-34.6; turn the complete upstairs/basement assembly 180 degrees so the turning landings are west and hall entries/arrivals east. Retain 44 / 46.9 in flights, eight 7.5 in rises per flight, seven 10 in treads, 48 in turning-platform depth, four recessed bookcase bays, and +10 / -10 ft arrivals. Guard exposed edges; omit the powder-wall-backed upper outer/landing-side guards and the wall-backed west turning-platform end. Ground/upper floor voids, excavation, retaining walls, tour exclusion, and basement camera follow the new opening.
 
@@ -4398,7 +4634,7 @@ Important audit findings: the patio leaf is shown closed with the higher-z hinge
 | Freezer /fridge centers | (35.4375,25.85) /(29.75,25.85); freezer view-left, fridge view-right, tower-facing handles. Fridge has0.125 in reveal each side; freezer retains0.75 in tower-side shift |
 | Sub-Zero Designer units | DEC3650FI/L and DEC3650R/R; each nominal36 x84 x24 in with35.75 x79.875 x0.75 in custom stained-white-oak Shaker panel, darker recessed center and50.125 in satin-gold tubular handle. Selected3/4 in thickness exceeds5/8 in minimum; typical reveal1/8 in;75 lb maximum; finish all sides. Fabricated weight/mounting unapproved |
 | Bottom-wall cabinetry | x27.9375-37.3,112.35 in: two36 in bays, four0.75 in panels, unchanged31.5 in tower,2.85 in freezer filler and shelf/scribe closure at the former3 in fridge filler |
-| Return-side end | Short kids return x27.75; family shelf/scribe closes the former3 in fridge-filler zone and touches the cabinet side at x28.1875. Closed fridge panel-to-paint reserve4.025 in; factory105-degree swing requires7.25 in, so included90-degree stop remains required |
+| Return-side end | White kids return center x28.0125; finished face x28.1875 touches the fixed fridge end panel without added oak strips. Closed fridge panel-to-paint reserve0.875 in; factory105-degree swing requires7.25 in, so retain the modeled90-degree stop and obtain selected-product clearance approval |
 | Fridge-wall finish | Floor-to-ceiling warm ivory quartz on the kitchen face, including wall sections beside and behind the refrigeration cabinetry; no counter niche is restored |
 | Top /bottom run envelopes | Top x26.7-37.3, counter z7.175-9.225; fridge bay28.25-31.25, tower31.3125-33.9375, freezer34-37; cabinet cavity z24.641667-26.725 |
 | Refrigeration upper storage | Standard36 in appliance boxes, retained31.5 in tower upper; all25 in deep, y7.15-8.85, continuous cornice y8.85-9 |
@@ -4464,7 +4700,7 @@ Latest island treatment: retain the [waterfall reference](assets/images/interior
 - Island: 8 x 3.5 ft waterfall design centered with the cooking run at z = 16.95, with extended oak storage, three Shaker drawer banks, Honey Bronze cup pulls, toe-kick, and quartz ends. Four 18 in stools form one hall-side row at 24 in centers; no end stools. Retain the 2 ft living-room shift; pendants follow the new center. Confirm comfort, occupied circulation, stain, and stone support.
 - Finishes: Accessible Beige SW 7036 screen approximation; continuous 7-inch light-oak planks across hardwood rooms, hall, and prep kitchen. Mudroom and bathrooms retain tile; porch paving and garage epoxy remain separate.
 - Living/dining: E stays the current/default seating layout. Retain the sofa's 2 ft move toward the fireplace at x = 11.6, facing decreasing x; center it with the fireplace and window pair at z = 17.475. Float chairs at (5.5, 12.675) / (5.5, 22.275), rotated 60 / 120 degrees toward the sofa and conversation center. Both low fireplace cabinets are removed. The tree belongs in the dining corner, independently of the seating options. Remove the lamp, small rectangular chair-side table, and square sofa table. Modeled chair-to-sofa bounding-envelope separation is approximately 26.8 in, not a certified walking aisle. Preserve the [105 x 46 x 37 in sofa reference](https://www.crateandbarrel.com/lounge-deep-105-leather-grande-sofa/s336140). Verify occupied comfort, access, heat clearances, and power.
-- Living layouts: the viewer applies J, the oatmeal L lounge, and no longer shows a layout lab or furniture cards. Earlier alternatives remain defined in `livingLayouts`; their notes, the furniture references and the former model-assumption panel are kept in [viewer reference notes](viewer-reference-notes.md). Verify comfort and cabinetry operation.
+- Living layouts: the viewer applies J, the oatmeal L lounge, and no longer shows a layout lab or furniture cards. The unreachable earlier alternatives and their three downloaded models were removed from the viewer code on November 14 for load and render performance; historical descriptions remain in [foyer/living-room.html](foyer/living-room.html). Their notes, the furniture references and the former model-assumption panel are kept in [viewer reference notes](viewer-reference-notes.md). Verify comfort and cabinetry operation.
 - Living accent lighting: four matching satin-gold/opal sconces. Keep the kids-room-wall pair at x = 3.4 / 8.8, y = 6.3, z = 25.495. Move the return-wall pair to the two outer ends of the window group at x = 0.95 / 12.25, y = 6.3, z = 8.205; no lights between windows or on the fireplace. Verify electrical boxes, mounting, dimming, and glare; illumination is illustrative.
 - Exception to the general casement direction: the center living return-wall unit is now a fixed picture window. It retains Black exterior/White interior finishes and matching casing, but has one uninterrupted pane and no operable sash hardware.
 - Dining eight-seat centering correction: retain the provisional 84 x 38 x 29 in walnut table and eight Nosh-size chairs, but center the whole set on the actual dining-room midpoint (19.85, 2.95) and rotate its long axis across the wider x dimension. Three chairs per long side at 24 in centers, one per end; preserve their relative offsets. All stowed chairs now fit within the nominal room instead of using the hall end. Table has equal 35.7 in side-wall clearances and aligns with the rear-window center. Tree, windows, patio door and lighting stay fixed. Operating trade-off: patio-end chair must be tucked for full inward door swing; 18 in end pull-outs fit closed-door geometry, 24 in reaches side-wall trim. Add a visible dining-view warning, not a false full-clearance claim. Actual products, knee room, occupied circulation and simultaneous passing remain unverified.
@@ -4578,3 +4814,12 @@ The earlier dishwasher sweep leaves about 18.6 in, not an approved occupied
 route; another current note records 22.6 in, so the estimate remains unresolved.
 Shelf capacity, anchorage, docking and actual door/rack/occupied access remain
 unverified. No room boundaries change.
+
+## Kids north wall flush with kitchen cabinets - November 14
+
+Owner: the Kids north wall stood about 2 in proud of the kitchen refrigeration
+cabinet run. Its centreline had been set ON the carcass body face (z24.766666667),
+so half the 4.2-in wall projected into the kitchen. Centreline moves 2.1 in south
+to z24.941666667; the kitchen paint face is now flush with the cabinet body face.
+Kids floor becomes 91.789696 sq ft (Hall/Kitchen gain the strip; total unchanged).
+Cabinets, appliances, cased-opening width/x and return x28.0125 are unchanged.

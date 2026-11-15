@@ -9,5 +9,6 @@ test('rejected media shelves and under-stair casework are removed', () => {
   assert.doesNotMatch(source, /livingMediaShelf|cableBasket|Open media shelf oak board|Media shelf wall bracket|Media shelf support arm|Cable basket bottom/);
   assert.doesNotMatch(source, /stairBookcases|bookcaseBays|Open bookcase shelf|Built-in shelf book/);
   assert.match(source, /Continuous landing-side enclosure/);
-  assert.match(source, /piano\.name = 'Yamaha CLP-825 Rosewood digital piano'/);
+  assert.doesNotMatch(source, /Yamaha CLP-825|livingPiano/);
+  assert.match(source, /const guestPianoLayout = guestSuite.piano;/);
 });

@@ -33,7 +33,7 @@ function build() {
         }
       }
     },
-    scene: new Group(), piano: new Group(),
+    scene: new Group(),
     guestVanity: { children: [{ name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }, { name: 'Guest bathroom warm vanity light', intensity: 8, visible: true }] },
     powderGlow: { emissiveIntensity: 0.45 },
     upstairs: { group: Object.assign(new Group(), { userData: { ceilingHeightFeet: 9, elevationFeet: 10 } }),
@@ -42,7 +42,7 @@ function build() {
     HomeRoof: require('../assets/js/floor-plan-roof.js'),
     getGroundFloorDefaultPlan: require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan,
     getUpstairsMeasuredGeometry: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry,
-    cream: {}, brass: {}, rosewood: {}, windowTrim: {}, black: { clone() { return {}; } }, ceilingHeight: 9, garageFloorY: -1.25,
+    cream: {}, brass: {}, windowTrim: {}, black: { clone() { return {}; } }, ceilingHeight: 9, garageFloorY: -1.25,
     nightLighting: true, canLightsInput: { checked: true }, activeFloor: 'ground', currentView: 'living', groundLayoutPreview: null,
     cylinder(parent, x, y, z, radius, height, material) {
       const mesh = new Group();
@@ -131,11 +131,12 @@ test('five independent upstairs bathroom nightlights sit low and restore actual 
   }
 });
 
-test('warm deep-regressed cans cover both floors with separate unchanged low-output task lamps', () => {
+test('warm deep-regressed cans cover both floors without removed living task lamps', () => {
   const model = build();
   const rigs = model.homeLighting;
   assert.ok(rigs.length > 20);
-  assert.equal(rigs.filter((rig) => rig.task).length, 1, 'Piano task lamp only; the living end-table lamp is removed');
+  assert.equal(rigs.filter((rig) => rig.task).length, 0, 'Living piano and end-table lamps are removed');
+  assert.equal(rigs.some((rig) => /Piano music/.test(rig.group.name)), false);
   assert.ok(rigs.some((rig) => rig.floor === 'upstairs'));
   assert.equal(rigs.filter((rig) => rig.group.name.startsWith('Garage')).length, 3);
   for (const rig of rigs) {

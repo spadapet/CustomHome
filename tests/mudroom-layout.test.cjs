@@ -208,7 +208,7 @@ function buildMudroom() {
       Object.assign(part, kind === 'shoe' ? { w: 4.471 / 12, h: 5.911 / 12, d: 11.5 / 12 } : { w: 3.43 / 12, h: 14 / 12, d: 10 / 12 });
       part.position.y = part.h / 2;
       group.add(part);
-      group.userData = { asset: kind === 'shoe' ? 'assets/models/khronos/MaterialsVariantsShoe.glb' : 'assets/models/poly-haven/rubber_boots/rubber_boots_1k.gltf', uniformScale: true };
+      group.userData = { asset: kind === 'shoe' ? 'assets/models/khronos/MaterialsVariantsShoe-lite.glb' : 'assets/models/poly-haven/rubber_boots/rubber_boots_1k.gltf', uniformScale: true };
       return group;
     }
   });
@@ -552,7 +552,9 @@ test('garage entry door defaults 90 degrees and its full inward sweep clears rem
     }
     leaf.rotation.y = 0;
     const panel = bounds(model.find('Solid mudroom garage door panel')[0]);
-    assert.ok(panel.min[0] > 38 && panel.max[0] < 41, 'Leaf fits the relocated garage opening when closed');
+    assert.ok(Math.abs((panel.min[0] - 38) * 12 - 0.125) < 1e-8, 'Closed leaf clears west jamb by 1/8 inch');
+    assert.ok(Math.abs((41 - panel.max[0]) * 12 - 0.125) < 1e-8, 'Closed leaf clears east jamb by 1/8 inch');
+    assert.ok(Math.abs((panel.min[2] + panel.max[2]) / 2 - 26.725) < 1e-8, 'Closed leaf is centered on the wall plane');
     assert.ok(panel.min[1] > 0 && panel.max[1] < 8);
     assert.ok(Math.abs((panel.min[1] - 0.0405) * 12 - 0.5) < 1e-9, 'Door bottom clears finished tile/grout by the modeled half inch, not merely the structural floor datum');
   } finally {

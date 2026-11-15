@@ -1,418 +1,179 @@
 'use strict';
-
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const ground = require('../assets/js/floor-plan-ground.js');
 const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
+const suite = ground.getGuestSuiteLayout();
+const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
 
-function buildKidsRoom() {
-  class Group {
-    constructor() {
-      this.children = [];
-      this.rotation = { y: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } };
-      this.scale = { x: 1, set() {}, setScalar() {} };
-      this.position = { x: 0, y: 0, z: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } };
-      this.userData = {};
-    }
-    add(child) { child.parent = this; this.children.push(child); }
-    clone() { return new Group(); }
+class Group {
+  constructor() {
+    this.children = []; this.userData = {};
+    this.position = { x: 0, y: 0, z: 0, set(x, y, z) { Object.assign(this, { x, y, z }); } };
+    this.rotation = { x: 0, y: 0, z: 0 };
   }
+  add(child) { child.parent = this; this.children.push(child); }
+}
+function build() {
   const roots = [];
-  const returnX = require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout().returnX;
-  const kidsRoom = { x: 19, z: 26.9, width: returnX - 19, southWidth: 12.2 };
   const context = {
-    kidsRoom,
-    groundFrontWallZ: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().wallZ,
-    officeEntry: { x: 12.2, z: 45.25, width: 5, height: 8 },
-    guestSuite: require('../assets/js/floor-plan-ground.js').getGuestSuiteLayout(),
+    THREE: { Group }, guestSuite: suite,
+    kidsRoom: { x: 19, z: ground.getKitchenRefrigerationLayout().bodyFaceZ, width: ground.getKitchenRefrigerationLayout().returnX - 19, southWidth: 12.2 },
     kidsDoorway: { x: 19, z: 27, width: 4.5, height: 8 },
-    casingSideWidth: 3.5 / 12,
-    casingReveal: 0.125 / 12,
-    ...Object.fromEntries(['linen', 'cabinetFinish', 'cabinetRailFinish', 'cabinetPanelFinish', 'brass', 'oak', 'cream', 'porcelain', 'black'].map((name) => [name, { name }])),
-    refrigerationCorniceTop: 9,
-    bottomRunLeft: require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout().runLeft,
-    fridgeCabinetOuterFaceX: require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout().runLeft
-      + require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout().fridgeFillerWidth,
-    wovenShadeMaterial: {},
-    leafGreen: {},
-    readingBook: new Group(),
-    sillFlowers: { children: [new Group()] },
-    THREE: { Group, SphereGeometry: class {}, Mesh: Group },
-    mat: (color) => ({ color }),
+    groundFrontWallZ: ground.getGroundFrontLayout().wallZ,
+    casingSideWidth: 2.5 / 12, casingReveal: 0.125 / 12,
+    ...Object.fromEntries(['linen', 'cabinetFinish', 'cabinetRailFinish', 'brass', 'oak', 'cream', 'porcelain', 'black', 'windowTrim'].map(name => [name, { name }])),
+    mat: color => ({ color }),
     furnishing(name, x, z, rotation = 0) {
-      const group = new Group();
-      group.name = name;
-      group.position.set(x, 0, z);
-      group.rotation.y = rotation;
-      roots.push(group);
-      return group;
+      const g = new Group(); g.name = name; g.position.set(x, 0, z); g.rotation.y = rotation; roots.push(g); return g;
     },
     box(parent, x, y, z, w, h, d, material) {
-      assert.ok(material, 'All kids-room parts have defined materials');
-      const mesh = new Group();
-      Object.assign(mesh, { w, h, d, material });
-      mesh.position.set(x, y, z);
-      parent.add(mesh);
-      return mesh;
+      assert.ok(material);
+      const p = new Group(); Object.assign(p, { w, h, d, material }); p.position.set(x, y, z); parent.add(p); return p;
     },
-    cylinder(parent, x, y, z, radius, height, material) {
-      return context.box(parent, x, y, z, radius * 2, height, radius * 2, material);
-    }
+    cylinder(parent, x, y, z, r, h, material) { return context.box(parent, x, y, z, 2 * r, h, 2 * r, material); },
+    singlePanelDoor(parent, x, y, z, w, h, d, material) { return context.box(parent, x, y, z, w, h, d, material); }
   };
-  vm.runInNewContext(source.slice(source.indexOf('  function shakerFront('), source.indexOf('  function cabinetCupPull(')), context);
-  const start = source.indexOf('  const kidsClay =');
-  const end = source.indexOf('  const officeDeskWidth =', start);
-  assert.ok(start >= 0 && end > start, 'Locate the complete kids-room furnishings');
-  vm.runInNewContext(source.slice(start, end), context);
-  const descendants = (node) => [node, ...node.children.flatMap(descendants)];
-  const all = roots.flatMap(descendants);
-  return { roots, kidsRoom, find: (name) => all.filter((item) => item.name === name) };
+  for (const [first, last] of [
+    ['  const kidsClay =', '  const officeDeskWidth =']
+  ]) {
+    const start = source.indexOf(first), end = source.indexOf(last, start);
+    assert.ok(start >= 0 && end > start);
+    vm.runInNewContext(source.slice(start, end), context);
+  }
+  const descend = node => [node, ...node.children.flatMap(descend)];
+  const all = roots.flatMap(descend);
+  return { roots, all, find: name => all.filter(p => p.name === name), context };
 }
-
+// Constituent corner transforms, including every ancestor, not enclosing empty space.
 function bounds(root) {
-  const b = { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity };
+  const result = { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity };
   function visit(node) {
-    if (node.w !== undefined) {
-      for (const dx of [-1, 1]) for (const dz of [-1, 1]) {
-        let [x, z] = [dx * node.w / 2, dz * node.d / 2];
-        for (let current = node; current; current = current.parent) {
-          const angle = current.rotation.y;
-          [x, z] = [x * Math.cos(angle) + z * Math.sin(angle), -x * Math.sin(angle) + z * Math.cos(angle)];
-          x += current.position.x;
-          z += current.position.z;
-        }
-        b.minX = Math.min(b.minX, x);
-        b.maxX = Math.max(b.maxX, x);
-        b.minZ = Math.min(b.minZ, z);
-        b.maxZ = Math.max(b.maxZ, z);
+    if (node.w !== undefined) for (const dx of [-1, 1]) for (const dz of [-1, 1]) {
+      let x = dx * node.w / 2, z = dz * node.d / 2;
+      for (let p = node; p; p = p.parent) {
+        const c = Math.cos(p.rotation.y), s = Math.sin(p.rotation.y);
+        [x, z] = [c * x + s * z + p.position.x, -s * x + c * z + p.position.z];
       }
+      result.minX = Math.min(result.minX, x); result.maxX = Math.max(result.maxX, x);
+      result.minZ = Math.min(result.minZ, z); result.maxZ = Math.max(result.maxZ, z);
     }
     node.children.forEach(visit);
   }
-  visit(root);
-  return b;
+  visit(root); return result;
 }
+const intersects = (a, b) => Math.min(a.maxX, b.maxX) - Math.max(a.minX, b.minX) > 1e-8 &&
+  Math.min(a.maxZ, b.maxZ) - Math.max(a.minZ, b.minZ) > 1e-8;
 
-test('two electric IKEA MITTZON desks use the referenced product dimensions', () => {
-  const model = buildKidsRoom();
-  const desks = model.roots.filter((item) => item.name.startsWith('IKEA MITTZON kids desk '));
-  assert.equal(desks.length, 2);
-  assert.equal(model.roots.filter((item) => item.name.startsWith('Kids desk chair ')).length, 2);
-  assert.equal(model.find('MITTZON desktop').length, 2);
-  assert.equal(model.find('Kids all-in-one PC').length, 1);
-  assert.equal(model.find('Kids PC keyboard').length, 1);
-  assert.equal(model.find('Homework writing mat').length, 1);
-  assert.equal(model.find('Removable art supply caddy').length, 1);
-  for (const desk of desks) {
-    assert.equal(desk.userData.model, 'MITTZON');
-    assert.equal(desk.userData.minHeightInches, 24.375);
-    assert.equal(desk.userData.maxHeightInches, 49.625);
-    const top = desk.children.find((part) => part.name === 'MITTZON desktop');
-    assert.ok(Math.abs(top.w * 12 - 47.25) < 1e-9);
-    assert.ok(Math.abs(top.d * 12 - 31.5) < 1e-9);
-    assert.ok(Math.abs((top.position.y + top.h / 2) * 12 - 29.5) < 1e-9);
-  }
-  for (const [index, desk] of desks.entries()) {
+test('both full electric MITTZON desks, PC and homework activities remain with two chairs', () => {
+  const m = build();
+  for (const name of ['MITTZON desktop', 'MITTZON cable tray', 'MITTZON height control']) assert.equal(m.find(name).length, 2);
+  for (const name of ['Kids all-in-one PC', 'All-in-one PC stand', 'Kids PC keyboard', 'Kids PC mouse', 'Homework writing mat', 'Homework notebook', 'Removable art supply caddy']) assert.equal(m.find(name).length, 1);
+  assert.equal(m.find('MITTZON T foot').length, 4);
+  assert.equal(m.find('Kids desk chair seat').length, 2);
+  for (let i = 1; i <= 2; i++) {
+    const desk = m.find(`IKEA MITTZON kids desk ${i}`)[0], b = bounds(desk);
+    close((b.maxX - b.minX) * 12, 47.25); close((b.maxZ - b.minZ) * 12, 31.5);
+    assert.equal(desk.userData.minHeightInches, 24.375); assert.equal(desk.userData.maxHeightInches, 49.625);
+    assert.equal(desk.userData.childUseRequiresReview, true);
     assert.equal(desk.rotation.y, Math.PI);
-    const southFace = 37.025;
-    assert.ok(Math.abs(desk.position.z - 35.7125) < 1e-9, 'Both desks align to the full-width bathroom-side wall');
-    const top = desk.children.find(part => part.name === 'MITTZON desktop');
-    assert.ok(Math.abs(southFace - bounds(top).maxZ) < 1e-9, 'Actual rear tabletop meets its finished south wall above trim');
-    for (const foot of desk.children.filter(part => part.name === 'MITTZON T foot')) {
-      assert.ok(Math.abs((southFace - 0.0625 - bounds(foot).maxZ) * 12 - 1.2) < 1e-9, 'Low T feet clear projecting baseboard');
-    }
-  }
-  const rightWallFace = model.kidsRoom.x + model.kidsRoom.southWidth - 0.175;
-  assert.ok(Math.abs((rightWallFace - bounds(desks[1]).maxX) * 12 - 1) < 1e-9, 'Right desk is one inch off the finished east wall');
-  assert.ok(Math.abs(desks[0].position.x - 22.375) < 1e-9, 'PC desk stays west of the retained paired-entry approach');
-  assert.ok(Math.abs(desks[1].position.x - 28.972916666666666) < 1e-9, 'Homework desk remains in the east end of the south-wall arrangement');
-  const craftChair = model.find('Kids desk chair 2')[0];
-  assert.equal(craftChair.rotation.y, 2 * Math.PI);
-  assert.equal(craftChair.position.x, desks[1].position.x);
-  assert.ok(craftChair.position.z < desks[1].position.z, 'Chair sits north of south-facing desk');
-  assert.ok(bounds(desks[0]).maxX < bounds(desks[1]).minX, 'Desks do not overlap');
-  const pcChair = model.find('Kids desk chair 1')[0];
-  assert.ok(Math.abs(pcChair.position.x - 22.375) < 1e-9);
-  assert.ok(Math.abs(pcChair.position.z - 34.375) < 1e-9, 'PC chair follows the desk, north of its front');
-  const pc = bounds(desks[0]);
-  assert.ok(Math.abs((pc.minX - 19.175) * 12 - 14.775) < 1e-9);
-  assert.ok(Math.abs((25.575 - pc.maxX) * 12 - 14.775) < 1e-9);
-  assert.ok(Math.abs((bounds(desks[1]).minX - pc.maxX) * 12 - 31.925) < 1e-9, 'The desks sit side-by-side with a 31.925-inch clear gap');
-  pcChair.position.z -= 9 / 12;
-  const pulledChair = bounds(pcChair);
-  assert.ok(pulledChair.minZ > 31.5 && pulledChair.maxZ < pc.minZ, 'Nine-inch chair pull clears the desktop front and west opening');
-  pcChair.position.z += 9 / 12;
-});
-
-test('desks, attached contents and chairs restore after upstairs/exterior/view round trips', () => {
-  const model = buildKidsRoom();
-  const roots = model.roots.filter(o => /IKEA MITTZON kids desk|Kids desk chair/.test(o.name));
-  roots.forEach(o => { o.visible = true; });
-  const element = () => ({ setAttribute() {}, closest: () => ({}) });
-  const state = {
-    upstairs: { group: {} }, stairs: {}, basementStairs: {}, upstairsStairParts: [],
-    activeFloor: 'ground', groundVisibility: new Map(), groundModelRoots: roots, frontPorchChairs: [],
-    groundLayoutPreview: null, exterior: {}, tourMapBounds: {}, tourMap: { width: 200, setAttribute() {} },
-    viewport: element(), islandLightsInput: element(), navigationMode: 'rotate',
-    document: { getElementById: element, querySelector: element, querySelectorAll: () => [] },
-    floorAreas: () => [{ x: 0, z: 0, w: 54, d: 60 }]
-  };
-  vm.runInNewContext(source.slice(source.indexOf('  function selectFloor(floor) {'), source.indexOf('  function refreshUpstairsDimensions() {')), state);
-  const snapshot = () => roots.map(o => [o.name, o.position.x, o.position.z, o.rotation.y, o.children.length]);
-  const poses = snapshot();
-  for (const floor of ['upstairs', 'exterior', 'upstairs', 'ground', 'exterior', 'ground']) {
-    state.selectFloor(floor);
-    roots.forEach(o => assert.equal(o.visible, floor === 'ground'));
-    assert.deepEqual(snapshot(), poses);
+    const top = m.find('MITTZON desktop')[i - 1];
+    close((top.position.y + top.h / 2) * 12, 29.5);
+    const chair = m.find(`Kids desk chair ${i}`)[0];
+    close(chair.position.x, desk.position.x);
+    close(chair.position.z, suite.kidsSouthZ - 0.175 - 31.5 / 12 - 0.025);
   }
 });
 
-test('bench, floor books and upper artwork are removed while TROFAST bins remain', () => {
-  const model = buildKidsRoom();
-  for (const name of ['Kids reading bench', 'Reading bench storage base', 'Sage reading bench cushion', 'Reading nook back cushion']) assert.equal(model.find(name).length, 0);
-  assert.equal(model.find('Kids face-out book display').length, 0);
-  assert.equal(model.find('Displayed picture book').length, 0);
-  assert.equal(model.find('Rotating child artwork').length, 0);
-  assert.equal(model.find('Kids low toy storage').length, 0);
-  assert.equal(model.find('IKEA TROFAST toy storage 1').length, 1);
-  assert.equal(model.find('IKEA TROFAST toy storage 2').length, 0);
-  assert.equal(model.find('Kids art display board').length, 0);
-  assert.equal(model.find('Kids activity table').length, 0);
-  assert.equal(model.find('Kids activity stool').length, 0);
-  assert.equal(model.find('Kids play rug').length, 0, 'Oak floor stays exposed without a carpet or rug');
+test('south desk pair and tall bookcase fit without overlap and retain an open north route', () => {
+  const m = build(), desks = [1, 2].map(i => m.find(`IKEA MITTZON kids desk ${i}`)[0]);
+  const toys = m.find('Kids tall standing bookcase')[0], tb = bounds(toys);
+  const furniture = [...desks, ...[1, 2].map(i => m.find(`Kids desk chair ${i}`)[0]), toys];
+  for (const p of furniture) {
+    const b = bounds(p);
+    assert.ok(b.minX >= 19.175 && b.maxX <= 31.025 + 1e-8);
+    assert.ok(b.minZ >= 26.9 && b.maxZ <= suite.kidsSouthZ - 0.175 + 1e-8);
+  }
+  // Tucked chairs intentionally partly tuck under desk tops at a different height.
+  close(bounds(desks[0]).minX, 21.4);
+  close(bounds(desks[0]).maxX, bounds(desks[1]).minX);
+  close(bounds(desks[1]).maxX, 29.275);
+  for (const d of desks) assert.equal(intersects(bounds(d), tb), false);
+  close(tb.maxX, 30.95);
+  close((tb.minX - bounds(desks[1]).maxX) * 12, 8.1);
+  close(tb.minZ, 27.45); close(tb.maxZ, 29.95);
+  const northRoute = { minX: 19.175, maxX: 27.8375, minZ: m.context.kidsRoom.z, maxZ: 27 };
+  for (const p of furniture) assert.equal(intersects(bounds(p), northRoute), false);
+  close((northRoute.maxX - northRoute.minX) * 12, 103.95);
 });
 
-test('retained desks, chairs and toy storage fit the stepped room and preserve the paired-entry approach', () => {
-  const model = buildKidsRoom();
-  const desks = model.roots.filter((item) => item.name.startsWith('IKEA MITTZON kids desk '));
-  const chairs = model.roots.filter((item) => item.name.startsWith('Kids desk chair '));
-  const storage = model.roots.filter((item) => item.name.startsWith('IKEA TROFAST toy storage '));
-  assert.equal(desks.length, 2);
-  assert.equal(chairs.length, 2);
-  assert.equal(storage.length, 1, 'Retain the existing TROFAST rather than removing required toy storage');
-  const deskBounds = desks.map(bounds);
-  const chairBounds = chairs.map(bounds);
-  const toyBounds = bounds(storage[0]);
-  const finishedWest = 19.175, finishedEast = 31.025, finishedSouth = 37.025;
-  for (const b of [...deskBounds, ...chairBounds]) {
-    assert.ok(b.minX >= finishedWest - 1e-9 && b.maxX <= finishedEast + 1e-9);
-    assert.ok(b.minZ >= model.kidsRoom.z + 0.175 - 1e-9 && b.maxZ <= finishedSouth + 1e-9);
-  }
-  assert.ok(toyBounds.minX >= finishedWest && toyBounds.maxX < model.kidsRoom.x + model.kidsRoom.width - 0.175);
-  assert.ok(toyBounds.minZ >= model.kidsRoom.z + 0.175 && toyBounds.maxZ < 29);
-  assert.ok(Math.abs((finishedEast - deskBounds[1].maxX) * 12 - 1) < 1e-9, 'East desk leaves one inch to finished return');
-  assert.ok(Math.abs((finishedSouth - deskBounds[0].maxZ) * 12) < 1e-9, 'Desk tops meet the finished south wall above its projecting baseboard');
-  assert.ok(Math.abs((deskBounds[1].minX - deskBounds[0].maxX) * 12 - 31.925) < 1e-9);
-  assert.ok(Math.abs(chairs[0].position.z - 34.375) < 1e-9 && Math.abs(chairs[1].position.z - 34.375) < 1e-9);
-  const entryApproach = { minX: 19.175, maxX: 21.675, minZ: 27, maxZ: 31.5 };
-  const approach = { minX: 19.175, maxX: 21.675, minZ: 27, maxZ: 30.625 };
-  for (const b of [...deskBounds, ...chairBounds, toyBounds]) {
-    assert.ok(b.minX >= entryApproach.maxX || b.maxX <= entryApproach.minX || b.minZ >= entryApproach.maxZ || b.maxZ <= entryApproach.minZ, 'Retained furniture clears the full paired-door opening');
-    assert.ok(b.minX >= approach.maxX || b.maxX <= approach.minX || b.minZ >= approach.maxZ || b.maxZ <= approach.minZ, 'Furniture clears the 30-inch-wide entry approach');
-  }
-  assert.ok(chairBounds.every((b, index) => b.maxZ < deskBounds[index].maxZ), 'Default chairs sit north of the desk rear edge and are not claimed as operating clearance');
-  const frontGap = (deskBounds[1].minZ - toyBounds.maxZ) * 12;
-  assert.ok(Math.abs(frontGap - 68.425) < 1e-9, 'North-wall move keeps actual toy frame and desk fronts coordinated');
-  assert.ok(Math.abs(frontGap - 30 - 17.375 - 21.05) < 1e-9, 'Occupied chair and full-depth bin use leave only a sequential-use gap, not a passing aisle');
+test('drawer unit is removed and a full-height bookcase provides open shelving with anchorage required', () => {
+  const m = build(), toy = m.find('Kids tall standing bookcase')[0], b = bounds(toy);
+  assert.equal(m.find('IKEA TROFAST toy storage 1').length, 0);
+  assert.equal(m.find('TROFAST removable mesh box').length, 0);
+  assert.equal(toy.userData.wallAnchorageRequired, true);
+  close((b.maxZ - b.minZ) * 12, 30); close((b.maxX - b.minX) * 12, 12);
+  assert.equal(toy.userData.heightInches, 72); assert.equal(toy.rotation.y, -Math.PI / 2);
+  assert.equal(m.find('Kids bookcase shelf').length, 6);
+  assert.equal(toy.userData.upperShelvesAdultAccess, true);
 });
 
-test('one retained TROFAST matches the linked size and has nine removable boxes, not drawers', () => {
-  const model = buildKidsRoom();
-  const storage = model.roots.filter((item) => item.name.startsWith('IKEA TROFAST toy storage '));
-  assert.equal(storage.length, 1);
-  assert.equal(model.find('TROFAST removable mesh box').length, 9);
-  assert.equal(model.find('Separate LEGO organizer insert').length, 9);
-  assert.equal(model.find('LEGO organizer removable lid').length, 9);
-  for (const unit of storage) {
-    const b = bounds(unit);
-    assert.ok(Math.abs((b.maxX - b.minX) * 12 - 39) < 1e-9);
-    assert.ok(Math.abs((b.maxZ - b.minZ) * 12 - 17.375) < 1e-9);
-    assert.equal(unit.userData.heightInches, 37);
-    const top = unit.children.filter((part) => part.name === 'TROFAST white horizontal frame').at(-1);
-    assert.ok(Math.abs((top.position.y + top.h / 2) * 12 - 37) < 1e-9);
-    assert.equal(unit.userData.articleNumber, '796.131.29');
-    assert.equal(unit.userData.wallAnchorageRequired, true);
-    const bins = unit.children.filter((part) => part.name === 'TROFAST removable mesh box');
-    assert.equal(bins.length, 9);
-    for (const bin of bins) {
-      assert.equal(bin.userData.removable, true);
-      assert.equal(bin.userData.builtInDrawer, false);
-      const bb = bounds(bin);
-      assert.ok(bb.minX > b.minX && bb.maxX < b.maxX && bb.minZ > b.minZ && bb.maxZ < b.maxZ, 'Bins fit inside each frame');
-    }
-  }
-  assert.ok(Math.abs((model.kidsRoom.x + model.kidsRoom.width - 0.175 - bounds(storage[0]).maxX) * 12 - 2.1) < 1e-9, 'Retained storage follows the revised return with trim clearance');
-  assert.ok(Math.abs(bounds(storage[0]).minX - 24.15) < 1e-9, 'Retain full-size toy storage without blocking the west approach');
-  for (const unit of storage) {
-    assert.equal(unit.rotation.y, 0);
-    assert.ok(Math.abs((bounds(unit).minZ - model.kidsRoom.z - 0.175) * 12 - 2.1) < 1e-9, 'Storage backs onto north wall');
-  }
+test('blackboard has standing access on the west wall and bookcase access clears occupied desk chairs', () => {
+  const m = build(), t = bounds(m.find('Kids tall standing bookcase')[0]);
+  const c = bounds(m.find('Kids desk chair 2')[0]);
+  const occupied = { minX: c.minX - 0.5, maxX: c.maxX + 0.5, minZ: c.minZ - 0.75 - 0.5, maxZ: c.maxZ - 0.75 + 0.5 };
+  assert.equal(intersects(occupied, t), false);
+  const board = m.find('Kids wall blackboard')[0], bb = bounds(board);
+  assert.equal(board.userData.bottomInches, 24);
+  close(bb.minZ, 26.75); close(bb.maxZ, 29.75);
+  const writingZone = { minX: bb.maxX, maxX: bb.maxX + 2, minZ: bb.minZ, maxZ: bb.maxZ };
+  for (const item of [t, ...[1, 2].map(i => bounds(m.find(`IKEA MITTZON kids desk ${i}`)[0]))]) assert.equal(intersects(writingZone, item), false);
+  assert.equal(intersects(writingZone, occupied), false);
+  const openRoute = { minX: 19.175, maxX: 21.25, minZ: 27, maxZ: 31.5 };
+  assert.equal(intersects(occupied, openRoute), false);
 });
 
-test('family board is centered on the kitchen face without entering the desk lift zone', () => {
-  const model = buildKidsRoom();
-  const board = model.find('Family glass dry-erase and cork board')[0];
-  const b = bounds(board);
-  assert.equal(board.position.x, model.kidsRoom.x + model.kidsRoom.width / 2);
-  assert.equal(board.rotation.y, Math.PI);
-  assert.equal(board.userData.widthInches, 60);
-  assert.equal(board.userData.heightInches, 48);
-  assert.equal(board.userData.bottomInches, 30);
-  assert.equal(model.find('Family charcoal dry-erase glass').length, 1);
-  assert.equal(model.find('Family charcoal chalkboard').length, 0);
-  assert.equal(model.find('Family board chalk').length, 0);
-  assert.equal(model.find('Family board dry-erase marker').length, 2);
-  assert.match(board.userData.writingMedium, /approved for black glass/);
-  assert.equal(board.userData.safetyGlazingRequired, true);
-  assert.equal(model.find('Family cork pinboard').length, 1);
-  assert.equal(model.find('Pinned family paper').length, 3);
-  assert.ok(b.minX >= 19.175 && b.maxX <= 28.825, 'Frame stays inside wall ends');
-  const wallFace = model.kidsRoom.z - 0.175;
-  assert.ok(b.maxZ < wallFace, 'Every board part stays outside the wall and kids room');
-  assert.ok((wallFace - b.minZ) * 12 <= 3.5, 'Tray projects less than 3.5 inches');
-  assert.ok(Math.abs((wallFace - b.minZ) * 12 - 3.08) < 1e-9, 'Projection includes new panelling and tray');
-  assert.ok(model.roots.filter((item) => item.name.startsWith('IKEA MITTZON kids desk ')).every((desk) => bounds(desk).minZ > b.maxZ), 'No overlap with moving desks at any height');
+test('assumed west location is solid and north entry reserves 60 x 96 without leaves or hardware', () => {
+  const m = build(), plan = ground.getGroundFloorDefaultPlan();
+  const west = plan.walls.find(([name]) => name === 'Kids west');
+  assert.equal(west[5], undefined);
+  const north = plan.walls.find(([name]) => name === 'Kids north');
+  assert.deepEqual(north.slice(1, 5), [19, ground.getKitchenRefrigerationLayout().bodyFaceZ + 0.175, 28.0125, ground.getKitchenRefrigerationLayout().bodyFaceZ + 0.175]);
+  assert.deepEqual(north[5], [[1.875, 6.875, 0, 8]]);
+  close(north[5][0][0] * 12, 22.5);
+  close((north[3] - north[1] - north[5][0][1]) * 12, 25.65);
+  assert.equal(m.find('Kids room paired west entry doors').length, 0);
+  assert.doesNotMatch(source, /kidsDoorway|Kids room (north|south) entry leaf hinge|const kidsEntry/);
 });
 
-test('stained oak standard shelf modules match kitchen cornice height while piano stays beside stairs', () => {
-  const model = buildKidsRoom();
-  const towers = model.find('Family off-white open shelf tower');
-  assert.equal(towers.length, 2);
-  for (const tower of towers) {
-    assert.equal(tower.userData.widthInches, 18);
-    assert.equal(tower.userData.depthInches, 12);
-    assert.deepEqual(Array.from(tower.userData.moduleHeightsInches), [84, 24]);
-    assert.equal(tower.userData.heightInches, 108);
-    const cornice = tower.children.find(p => p.name === 'Family shelf aligned cornice');
-    assert.equal(cornice.position.y + cornice.h / 2, 9);
-    for (const part of tower.children.filter(p => /module side|support shelf|cornice|plinth|rear wall scribe/.test(p.name))) assert.equal(part.material.name, 'cabinetFinish');
-    assert.equal(tower.userData.finish, 'Natural stained white oak cases, shelves and backs');
-    assert.equal(tower.children.filter(p => p.name === 'Family open compartment support shelf').length, 6);
-    assert.equal(tower.children.filter(p => p.name === 'Family removable purchased woven basket').length, 2);
-    assert.equal(tower.children.some(p => /frieze|outer scribe/.test(p.name)), false);
-    const sides = tower.children.filter(p => p.name === 'Family shelf standard module side');
-    const outer = towers.indexOf(tower) ? tower.position.x + 0.75 : tower.position.x - 0.75;
-    assert.equal(outer, tower.userData.outerEdgeX);
-    assert.ok(Math.abs(tower.position.z + 0.5 - tower.userData.rearContactZ) < 1e-9);
-    const upper = sides.filter(p => p.position.y > 7);
-    assert.equal(upper.length, 2);
-    assert.equal(upper[0].h * 12, 24);
-    assert.equal(cornice.d * 12, 12);
-    assert.equal(cornice.w * 12, 18);
-    assert.ok(Math.abs((cornice.position.y - cornice.h / 2 - 7) * 12 - 22.2) < 1e-9);
-    const oakBacks = tower.children.filter(p => p.name === 'Family shelf natural oak module backing');
-    assert.equal(oakBacks.length, 2);
-    assert.ok(oakBacks.every(p => p.material.name === 'cabinetFinish'));
-    for (const basket of tower.children.filter(p => p.name === 'Family removable purchased woven basket')) {
-      assert.equal(basket.userData.builtIn, false);
-      const base = basket.children.find(p => p.name === 'Woven basket base');
-      assert.equal(base.position.y - base.h / 2, 0);
-      assert.ok(tower.children.some(p => p.name === 'Family open compartment support shelf' && p.position.y + p.h / 2 === basket.position.y));
-    }
-  }
-  assert.equal(model.find('Family glass dry-erase and cork board').length, 1);
-  assert.equal(model.find('Family glass dry-erase and cork board')[0].position.y, 0);
-  assert.match(source, /const refrigerationCorniceTop = upperStorageTop \+ 0.15/);
-  assert.match(source, /pre-straight-wall living side of stair enclosure/);
-  assert.equal(towers[0].userData.outerEdgeX, 18.825);
-  const refrigeration = require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout();
-  assert.equal(towers[1].userData.outerEdgeX, refrigeration.runLeft + refrigeration.fridgeFillerWidth);
-  assert.equal(bounds(towers[1]).maxX, refrigeration.runLeft + refrigeration.fridgeFillerWidth, 'Shelf side touches the refrigerator cabinet outer panel');
-  const rearScribe = towers[1].children.find(p => p.name === 'Family shelf fitted rear wall scribe');
-  assert.ok(rearScribe);
-  assert.ok(Math.abs(rearScribe.w * 12 - 7.35) < 1e-9);
-  assert.equal(rearScribe.d * 12, 0.5);
-  assert.equal(rearScribe.h * 12, 108);
-  assert.equal(towers[0].children.some(p => p.name === 'Family shelf fitted rear wall scribe'), false);
+test('demolished north assembly leaves no floating board, shelves, panels, edge returns or lights', () => {
+  const m = build();
+  for (const name of ['Family glass dry-erase and cork board', 'Family message wall panelling', 'Family vertical wall panel',
+    'Family message wall white edge trim', 'Family off-white open shelf tower', 'Family white edge front strip', 'Family white edge corner return']) assert.equal(m.find(name).length, 0);
+  assert.doesNotMatch(source, /familyBoard\.add|familyShelfTowers|Family board soft wash beam|Family shelf task beam/);
+  assert.equal(ground.getGroundFloorDefaultPlan().walls.filter(([name]) => name === 'Kids north').length, 1);
+  assert.doesNotMatch(source, /\[kidsRoom\.x, kidsRoom\.z, kidsRoom\.x \+ kidsRoom\.width, kidsRoom\.z/);
 });
 
-test('warm-white wall panelling fits above the existing baseboard and behind the family board', () => {
-  const model = buildKidsRoom();
-  const panelling = model.find('Family message wall panelling')[0];
-  const panels = model.find('Family vertical wall panel');
-  assert.equal(panels.length, 20);
-  assert.equal(panels[0].material.color, '#f2efe7');
-  assert.equal(panelling.userData.finish, 'Warm-white painted vertical grooved panelling');
-  assert.notEqual(panels[0].material.color, model.find('Family panelling recessed groove backing')[0].material.color, 'Grooves stay visible without renderer shadows');
-  const b = bounds(panelling);
-  const wallFace = model.kidsRoom.z - 0.175;
-  assert.ok(Math.abs(b.minX - 19.175) < 1e-9);
-  assert.ok(Math.abs(b.maxX - (model.kidsRoom.x + model.kidsRoom.width - 0.175)) < 1e-9);
-  assert.ok(Math.abs(b.maxZ - wallFace) < 1e-9, 'Backing meets finished wall');
-  assert.ok(Math.abs((wallFace - b.minZ) * 12 - 0.5) < 1e-9);
-  for (const panel of panels) {
-    assert.ok(Math.abs((panel.position.y - panel.h / 2) * 12 - 8) < 1e-9, 'Stop above flat white baseboard');
-    assert.ok(Math.abs((panel.position.y + panel.h / 2) * 12 - 108) < 1e-9, 'Full-height finish');
+test('hall white panels still meet the new north end and avoid doors and the closet-only recess', () => {
+  const m = build(), hall = m.find('Hall-facing white wall panelling')[0], b = bounds(hall);
+  close(b.maxX, 18.825); close(b.minX, 18.825 - 0.5 / 12);
+  close(b.minZ, m.context.kidsRoom.z + 0.175);
+  close(b.maxZ, ground.getGroundFrontLayout().wallZ - 0.175);
+  assert.ok(m.find('Hall vertical wall panel').length > 50);
+  const cutouts = [[44.8 - 2.625 / 12, 47.8 + 2.625 / 12, 8.46875],
+    [suite.notch.z - 0.175, suite.notch.z + suite.notch.d + 0.175, 9]];
+  for (const p of hall.children) {
+    const pb = bounds(p), bottom = p.position.y - p.h / 2, top = p.position.y + p.h / 2;
+    assert.ok(bottom >= 8 / 12 && top <= 9 + 1e-8);
+    for (const [start, end, height] of cutouts) assert.ok(pb.maxZ <= start + 1e-8 || pb.minZ >= end - 1e-8 || bottom >= height - 1e-8);
   }
-  const board = bounds(model.find('Family glass dry-erase and cork board')[0]);
-  assert.ok(board.maxZ < b.minZ, 'Board is remounted outside panel face, not embedded in it');
+  assert.ok(hall.children.some(p => {
+    const b = bounds(p);
+    return b.minZ < 29 && b.maxZ > 29 && p.position.y - p.h / 2 < 4 && p.position.y + p.h / 2 > 4;
+  }), 'Hall finish fills the former west doorway at seated/standing height');
 });
 
-test('matching white strips cover both wall edges and return around the outside corners', () => {
-  const model = buildKidsRoom();
-  const trim = model.find('Family message wall white edge trim')[0];
-  const strips = model.find('Family white edge front strip').map(bounds).sort((a, b) => a.minX - b.minX);
-  const returns = model.find('Family white edge corner return').map(bounds).sort((a, b) => a.minX - b.minX);
-  const panels = bounds(model.find('Family message wall panelling')[0]);
-  assert.equal(strips.length, 2);
-  assert.equal(returns.length, 2);
-  assert.equal(trim.userData.finish, 'Warm-white paint matching wall panelling');
-  assert.equal(model.find('Family message wall oak edge trim').length, 0);
-  assert.ok(Math.abs(strips[0].minX - 18.825) < 1e-9);
-  assert.ok(Math.abs(strips[0].maxX - panels.minX) < 1e-9, 'Left edge meets white panelling without a gap');
-  assert.ok(Math.abs(strips[1].minX - panels.maxX) < 1e-9, 'Right edge meets white panelling without a gap');
-  assert.ok(Math.abs(strips[1].maxX - (model.kidsRoom.x + model.kidsRoom.width + 0.175)) < 1e-9);
-  for (const [index, strip] of strips.entries()) {
-    assert.ok(Math.abs(strip.minZ - panels.minZ) < 1e-9, 'Edge and main panel front faces are flush');
-    assert.ok(Math.abs(returns[index].minZ - strip.minZ) < 1e-9, 'Return covers front panel thickness');
-    assert.ok(Math.abs(returns[index].maxZ - model.kidsRoom.z - 0.175) < 1e-9, 'Return covers full 4.2-inch wall end');
-  }
-  assert.ok(Math.abs(returns[0].maxX - strips[0].minX) < 1e-9);
-  assert.ok(Math.abs(returns[1].minX - strips[1].maxX) < 1e-9);
-  for (const part of trim.children) {
-    assert.equal(part.material, model.find('Family vertical wall panel')[0].material, 'Edges share the main panelling finish');
-    assert.equal(part.material.color, '#f2efe7');
-    assert.ok(Math.abs((part.position.y - part.h / 2) * 12 - 8) < 1e-9);
-    assert.ok(Math.abs((part.position.y + part.h / 2) * 12 - 108) < 1e-9);
-  }
-});
-
-test('white panelling continues along the hall to the foyer without blocking either cased doorway', () => {
-  const model = buildKidsRoom();
-  const hall = model.find('Hall-facing white wall panelling')[0];
-  const b = bounds(hall);
-  const corner = bounds(model.find('Family white edge corner return').find((part) => bounds(part).minX < 19));
-  assert.ok(Math.abs(b.minX - (18.825 - 0.5 / 12)) < 1e-9);
-  assert.ok(Math.abs(b.maxX - 18.825) < 1e-9, 'Finish stays on hall face, outside kids and guest rooms');
-  assert.ok(Math.abs(b.minZ - corner.maxZ) < 1e-9, 'Continuation meets existing corner return without overlap');
-  assert.ok(Math.abs(b.maxZ - (require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().wallZ - 0.175)) < 1e-9, 'Finish stops at foyer south-wall face');
-  assert.ok(model.find('Hall vertical wall panel').length > 50, 'Continue vertical grooves along entire run');
-  const white = model.find('Family vertical wall panel')[0].material;
-  for (const panel of model.find('Hall vertical wall panel')) assert.equal(panel.material, white);
-  const cutouts = [];
-  for (const [start, end] of [[27, 31.5], [44.8, 47.8]]) {
-    const sideExtent = 3.625 / 12;
-    const headerTop = 8 + 0.125 / 12 + 5.5 / 12;
-    cutouts.push(
-      { minZ: start - sideExtent, maxZ: end + sideExtent, bottom: 0, top: headerTop },
-      { minZ: start - sideExtent - 0.03125, maxZ: end + sideExtent + 0.03125, bottom: 8 + 0.125 / 12, top: 8 + 0.125 / 12 + 0.0625 },
-      { minZ: start - sideExtent - 0.0625, maxZ: end + sideExtent + 0.0625, bottom: headerTop, top: headerTop + 0.0416667 + 1 / 24 }
-    );
-  }
-  for (const part of hall.children) {
-    const p = bounds(part);
-    const bottom = part.position.y - part.h / 2;
-    const top = part.position.y + part.h / 2;
-    assert.ok(bottom >= 8 / 12 - 1e-9 && top <= 9 + 1e-9, 'Existing baseboard and ceiling preserved');
-    for (const cut of cutouts) {
-      assert.ok(p.maxZ <= cut.minZ + 1e-9 || p.minZ >= cut.maxZ - 1e-9 || top <= cut.bottom + 1e-9 || bottom >= cut.top - 1e-9, 'No panelling in door opening or casing envelope');
-    }
-  }
-  for (const [start, end] of [[27, 31.5], [44.8, 47.8]]) {
-    assert.ok(hall.children.some(part => {
-      const p = bounds(part);
-      return p.minZ < (start + end) / 2 && p.maxZ > (start + end) / 2 && part.position.y - part.h / 2 > 8.5;
-    }), 'Panelling continues over each doorway header');
-  }
-});
+module.exports = { build, bounds };

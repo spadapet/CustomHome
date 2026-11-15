@@ -2,39 +2,35 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const vm = require('node:vm');
 const ground = require('../assets/js/floor-plan-ground.js');
 
-test('straight kids boundary retains refrigeration and coordinated nonzero floor strips', () => {
+test('open kids wall kitchen face aligns with refrigeration carcass face and retains fixed kitchen returns', () => {
   const plan = ground.getGroundFloorDefaultPlan();
   const north = plan.walls.find(([name]) => name === 'Kids north');
-  assert.deepEqual(north.slice(1, 5), [19, 26.9, 27.75, 26.9]);
+  assert.deepEqual(north[5], [[1.875, 6.875, 0, 8]]);
+  const face = ground.getKitchenRefrigerationLayout().bodyFaceZ;
+  assert.ok(Math.abs(face - 24.766666666666666) < 1e-9);
   assert.equal(plan.walls.some(([name]) => name === 'Kids east return'), false);
-  for (const name of ['Kitchen south left', 'Kids kitchen return']) {
+  for (const name of ['Kitchen south', 'Kids kitchen return']) {
     const wall = plan.walls.find(([n]) => n === name);
-    assert.equal(wall[2], north[2]);
-    assert.equal(wall[4], north[2]);
+    assert.equal(wall[2], 26.9);
+    assert.equal(wall[4], 26.9);
   }
   const floors = plan.floors.filter(({room}) => room === 'Kids room');
-  assert.ok(floors.every(({z,d}) => z === 26.9 && Math.abs(z+d-37.2)<1e-9));
-  assert.ok(Math.abs(floors.reduce((sum,{w,d})=>sum+w*d,0)-125.66)<1e-9);
+  assert.ok(Math.abs(floors[0].z - 0.175 - face) < 1e-9, 'Kitchen paint face of the 4.2-in wall is flush with the cabinet face');
+  assert.ok(floors.every(({z,d}) => Math.abs(z+d-ground.getGuestSuiteLayout().kidsSouthZ)<1e-9));
+  assert.equal(floors[1].z, 26.9);
   assert.ok(plan.floors.every(({w,d})=>w>0&&d>0));
 });
 
-test('redirect restores the single unchanged piano to the pre-straight-wall stair pose', () => {
+test('living piano, bench, materials, lamp and lifecycle references are removed; guest remains', () => {
   const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
-  const piano = { position: { set(x,y,z) { Object.assign(this,{x,y,z}); } }, rotation: {}, userData: {} };
-  const start = source.indexOf('  scene.add(piano);');
-  const end = source.indexOf('\n', source.indexOf('  piano.userData.location =', start));
-  const stairOpening = require('../assets/js/upstairs-layout.js').stairOpening(10);
-  vm.runInNewContext(source.slice(start,end), {piano, stairOpening, scene:{add(){}}, pianoDepth:411/304.8});
-  assert.equal((source.match(/const piano = new THREE.Group/g)||[]).length,1);
-  assert.ok(Math.abs(piano.position.x-3.758333333333333)<1e-9);
-  assert.ok(Math.abs(piano.position.z-26.259120734908137)<1e-9);
-  assert.equal(piano.rotation.y,Math.PI);
-  assert.ok(Math.abs((piano.userData.wallRun.faceZ-piano.position.z-411/304.8/2)*12-1)<1e-9);
-  assert.equal(piano.userData.wallRun.windowShiftInches,16);
+  assert.doesNotMatch(source, /\b(?:pianoBench|pianoWidth|pianoDepth|pianoHeight|rosewood|keyWhite|keyBlack)\b/);
+  assert.doesNotMatch(source, /\bpiano\s*[,.=)]|CLP-825|Piano music|Piano lamp support/);
+  assert.match(source, /const guestPianoLayout = guestSuite.piano;/);
+  assert.match(source, /Guest piano provisional 24 x 12 inch bench/);
+  assert.match(source, /YDP-145/);
+  assert.ok(ground.getGroundFloorDefaultPlan().walls.some(([name]) => name === 'Piano recess back'));
   assert.doesNotMatch(source,/familyBoard.position.y = 14 \/ 12/);
-  assert.match(source,/bottomInches: 30/);
-  assert.match(source,/pianoBench.position.set\(0, 0, 0.75\)/);
+  assert.doesNotMatch(source,/furnishing\('Family glass dry-erase and cork board'/);
 });

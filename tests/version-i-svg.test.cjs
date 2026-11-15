@@ -9,7 +9,10 @@ const ground = require('../assets/js/floor-plan-ground.js');
 const root = path.join(__dirname, '..');
 const directory = path.join(root, 'assets', 'images', 'plans', 'upstairs-2000');
 const svg = fs.readFileSync(path.join(directory, 'version-i.svg'), 'utf8');
-const plan = ground.getGroundFloorDefaultPlan();
+// Version I is a preserved comparison, not the active November 14 guest/kids
+// arrangement. Keep all geometry/chart assertions against its recorded plan;
+// annotated-guest-kids and ground-layout exercise the current shared geometry.
+const plan = require('./fixtures/version-i-ground.json');
 
 function attributes(tag) {
   return Object.fromEntries([...tag.matchAll(/([\w-]+)="([^"]*)"/g)].map(match => [match[1], match[2]]));
@@ -204,7 +207,7 @@ test('Version I is standalone accessible vector SVG and preserves Version H byte
   assert.match(svg, /fixed-stair registration exception/);
 });
 
-test('every downstairs floor strip and its actual kids area match the shared 3D plan', () => {
+test('every preserved downstairs floor strip and kids area match the Version I reference', () => {
   const floors = tags(group('ground-floors'), 'rect');
   assert.equal(floors.length, plan.floors.length);
   floors.forEach((floor, index) => {
@@ -219,7 +222,7 @@ test('every downstairs floor strip and its actual kids area match the shared 3D 
   for (const [a, b] of [['x', 'x'], ['y', 'z'], ['width', 'width'], ['height', 'depth']]) near(element('ground-stairs')[a], plan.stairs[b]);
 });
 
-test('every drawn downstairs wall and window opening matches current shared coordinates', () => {
+test('every preserved downstairs wall and window opening matches Version I reference coordinates', () => {
   const walls = tags(group('ground-walls'), 'path').filter(wall => wall['data-wall']);
   assert.equal(walls.length, plan.walls.length);
   for (const wall of walls) {

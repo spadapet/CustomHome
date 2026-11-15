@@ -220,8 +220,11 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
   }
 
   function getKitchenRefrigerationLayout() {
-    const returnX = 27.75;
-    return { returnX, runLeft: returnX + 0.1875, runRight: 37.3, columnWidth: 36 / 12, fridgeFillerWidth: 3 / 12 };
+    const runLeft = 27.9375, fridgeFillerWidth = 3 / 12;
+    const returnX = runLeft + fridgeFillerWidth - 0.175;
+    const carcassBackZ = 26.725, wallSetback = 1.5 / 12, carcassDepth = 25 / 12;
+    return { returnX, runLeft, runRight: 37.3, columnWidth: 36 / 12, fridgeFillerWidth,
+      carcassBackZ, wallSetback, carcassDepth, bodyFaceZ: carcassBackZ + wallSetback - carcassDepth };
   }
 
   function getPrepWindowLayout() {
@@ -273,27 +276,65 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
   }
 
   function getGuestSuiteLayout() {
-    // Image-scaled concept dimensions within the unchanged x19–31.2 shell.
-    // The guest/kids zone proportions are assumptions, not site measurements.
-    const bathroomNorthZ = 37.2;
-    const bathroomSouthZ = 42;
-    const closetSouthZ = 44.4;
     const front = getGroundFrontLayout();
+    // Eleven feet clear over the WHOLE rectangular bedroom. The piano recess
+    // fits only in the closet band; both returns continue its straight walls.
+    const closetSouthZ = front.wallZ - 0.225 - 11 - 0.175;
+    const notchDepth = 1357 / 304.8 + 6 / 12 + 0.35;
+    const bathroomSouthZ = closetSouthZ - notchDepth;
+    const bathroomNorthZ = bathroomSouthZ - 5;
+    const pianoZ = (bathroomSouthZ + closetSouthZ) / 2;
+    // Expanded closet band: 4.2-in wall thickness plus 3-in piano end gaps.
+    const notch = { x: 19, z: bathroomSouthZ,
+      w: 20 / 12 + 0.175, d: notchDepth, wallThickness: 0.35 };
+    const splitFloor = (room, name) => {
+      const start = Math.max(room.z, notch.z), end = Math.min(room.z + room.d, notch.z + notch.d);
+      if (end - start <= 1e-8) return [{ ...room, room: name }];
+      return [
+        { x: room.x, z: room.z, w: room.w, d: start - room.z, room: name },
+        { x: room.x + notch.w, z: start, w: room.w - notch.w, d: end - start, room: name },
+        { x: room.x, z: end, w: room.w, d: room.z + room.d - end, room: name }
+      ].filter(({ d }) => d > 1e-8);
+    };
+    const bathroom = { x: 19, z: bathroomNorthZ, w: 12.2, d: bathroomSouthZ - bathroomNorthZ };
+    const closet = { x: 19, z: bathroomSouthZ, w: 12.2, d: closetSouthZ - bathroomSouthZ };
+    const bedroom = { x: 19, z: closetSouthZ, w: 12.2, d: front.wallZ - closetSouthZ };
     return {
       kidsSouthZ: bathroomNorthZ,
-      bathroom: { x: 19, z: bathroomNorthZ, w: 12.2, d: bathroomSouthZ - bathroomNorthZ },
-      bathroomDoor: { x: 27.95, z: bathroomSouthZ, width: 2.5, height: 8, hinge: 'west', inward: true, maxAngleDegrees: 90 },
-      bathroomRecess: { x: 28.9, z: bathroomNorthZ + 0.175, w: 2.125, d: 1.825, openSide: 'south' },
-      shower: { x: 19.375, z: bathroomNorthZ + 0.175, w: 3.2, d: 4.45, rotation: 0, clearWidth: 3, clearDepth: 4.25, entryOffset: 0.35, doorWidth: 2.5, height: 8 },
-      toilet: { x: 24.5, z: 38.475, rotation: 0 },
-      vanity: { x: 27.05, z: 38.15, width: 2.5, mirrorWidth: 2, rotation: 0, basinCount: 1 },
-      closet: { x: 19, z: bathroomSouthZ, w: 12.2, d: closetSouthZ - bathroomSouthZ },
+      bathroom,
+      bathroomDoor: { x: 24.3, z: bathroomSouthZ, width: 2.5, height: 8, slide: -2.7,
+        pocket: { x: 21.4, w: 2.9, leafWidth: 2.48, leafThickness: 1.375 / 12, clearDepth: 0.25, height: 8.3 } },
+      // Built-in shower runs wall to wall: from the north paint face to the south (piano-recess) paint face.
+      shower: { x: 19.175, z: bathroomNorthZ + 0.175, w: 3.2, d: 5 - 0.35, rotation: 0, clearWidth: 3, clearDepth: 5 - 0.35 - 0.2, entryOffset: 0.35, doorWidth: 2.5, height: 8 },
+      wc: { x: 27.85, z: bathroomNorthZ, w: 3.35, d: 5, clearWidth: 3, clearDepth: 4.65 },
+      wcDoor: { x: 27.85, z: bathroomNorthZ + 2.15, width: 2.5, height: 8 },
+      toilet: { x: 29.525, z: bathroomNorthZ + 1.275, rotation: 0 },
+      vanity: { x: 25.1, z: bathroomNorthZ + 0.175 + 0.875, width: 4, mirrorWidth: 3, rotation: 0, basinCount: 1 },
+      closet,
       closetSouthZ,
+      closetDoor: { x: 24.3, z: closetSouthZ, width: 2.5, height: 8, slide: 2.7,
+        pocket: { x: 26.8, w: 2.9, leafWidth: 2.48, leafThickness: 1.375 / 12, clearDepth: 0.25, height: 8.3 } },
       closets: [
-        { name: 'single', x: 19.6, z: bathroomSouthZ + 0.2, w: 3.2, d: 2, door: { x: 19.95, z: closetSouthZ, width: 2.5, height: 8, leaves: 1 } },
-        { name: 'paired', x: 23, z: bathroomSouthZ + 0.2, w: 4.7, d: 2, door: { x: 23.35, z: closetSouthZ, width: 4, height: 8, leaves: 2 } }
+        { name: 'west end', x: 19 + notch.w + 0.175 + 0.0625, z: pianoZ - 2, w: 2, d: 4 },
+        { name: 'east end', x: 31.2 - 0.175 - 0.0625 - 2, z: pianoZ - 2, w: 2, d: 4 }
       ],
-      bedroom: { x: 19, z: closetSouthZ, w: 12.2, d: front.wallZ - closetSouthZ },
+      // East-end laundry faces west into the long dimension, not across the
+      // narrow closet. Ordinary storage replacement authorized November 14.
+      laundry: {
+        x: 31.2 - 0.175 - 3 / 12 - 26 / 24,
+        z: closetSouthZ - 0.175 - 1 / 12 - 23.5 / 24,
+        rotation: -Math.PI / 2,
+        width: 23.5 / 12, depth: 26 / 12, height: 67.75 / 12,
+        rearClearance: 3 / 12, washerOpenDepth: 43 / 12, dryerOpenDepth: 43.5 / 12,
+        shelf: { x: 31.2 - 0.175 - 0.75 / 12 - 0.5,
+          z: bathroomSouthZ + 0.175 + 0.75 / 12 + 15 / 12,
+          width: 30 / 12, depth: 1, height: 7 }
+      },
+      notch,
+      piano: { x: 19.175 + 422 / 304.8 / 2, z: pianoZ, width: 1357 / 304.8, depth: 422 / 304.8, height: 815 / 304.8, restHeight: 969 / 304.8, rotation: -Math.PI / 2 },
+      floors: [...splitFloor(bathroom, 'Bathroom'), ...splitFloor(closet, 'Closet'), ...splitFloor(bedroom, 'Guest room'),
+        { ...notch, room: 'Hall piano recess' }],
+      bedroom,
       bedroomDoor: { x: 19, z: 44.8, width: 3, height: 8, hinge: 'south', inward: true, maxAngleDegrees: 90 }
     };
   }
@@ -392,8 +433,9 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     const front = getGroundFrontLayout();
     const powderZ = guestEntry.powder.z;
     const entryZ = guestEntry.alcove.z, officeZ = guestEntry.officeNorthZ;
-    const kidsNorthZ = 26.9;
     const refrigeration = getKitchenRefrigerationLayout();
+    // Kids north wall centreline sits half a 4.2-in wall behind the cabinet face, so its kitchen paint face is flush with the refrigeration run.
+    const kidsNorthZ = refrigeration.bodyFaceZ + 0.175;
     const garageNorthWestX = 44.9 - 8 / 12, garageWestX = 31.2, garageEastX = 55.5;
     const garageNorthZ = 15, garageStepZ = 26.9, garageSouthZ = 49;
     const rooms = [
@@ -411,6 +453,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       [0, livingFeatureWall.returnWallZ, 13.2, 25.7 - livingFeatureWall.returnWallZ, 'Living room'], [13.2, livingFeatureWall.diningRearZ, 13.675, 8 - livingFeatureWall.diningRearZ, 'Dining room'],
       [13.2, 8, 5.8, 17.7, 'Hall'], [19, 8, 7.5, kidsNorthZ - 8, 'Hall'],
       [26.875, 7, 10.625, 1, 'Kitchen'], [26.5, 8, 11, kidsNorthZ - 8, 'Kitchen'],
+      [refrigeration.returnX, kidsNorthZ, 37.5 - refrigeration.returnX, 26.9 - kidsNorthZ, 'Kitchen'],
       [37.5, 7, 7.9, 8, 'Prep kitchen'], [45.4, 7, 10.1, 8, 'Prep kitchen'], [37.5, 15, 7.4 - 8 / 12, 11.9, 'Mudroom'],
       [0, 25.7, 12.2, stairs.z - 25.7], [0, stairs.z, stairs.x, stairs.depth],
       [stairs.x + stairs.width, stairs.z, 12.2 - stairs.x - stairs.width, stairs.depth],
@@ -419,8 +462,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       [refrigeration.returnX, 26.9, 31.2 - refrigeration.returnX, guestSuite.kidsSouthZ - 26.9, 'Kids room'],
       [12.2, 34.6, 6.8, front.wallZ - 34.6, 'Entry hall'], [0, powderZ, 7.1, guestEntry.powder.d, 'Powder room'],
       [7.1, entryZ, 5.1, guestEntry.alcove.d, 'Guest entry alcove'],       [0, officeZ, 12.2, front.wallZ - officeZ, 'Office'],
-      ...[['Closet', guestSuite.closet], ['Bathroom', guestSuite.bathroom]].map(([name, { x, z, w, d }]) => [x, z, w, d, name]),
-      [guestSuite.bedroom.x, guestSuite.bedroom.z, guestSuite.bedroom.w, guestSuite.bedroom.d, 'Guest room'],
+      ...guestSuite.floors.map(({ x, z, w, d, room }) => [x, z, w, d, room]),
       [7.1, guestEntry.coatCloset.z, 5.1, guestEntry.coatCloset.d, 'Guest coat closet'],
       [garageNorthWestX, garageNorthZ, garageEastX - garageNorthWestX, garageStepZ - garageNorthZ, 'Garage', -1.25],
       [garageWestX, garageStepZ, garageEastX - garageWestX, 34.6 - garageStepZ, 'Garage', -1.25],
@@ -445,7 +487,11 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
         [21.3 - (livingFeatureWall.wallEndZ - 25.7), 25.3 - (livingFeatureWall.wallEndZ - 25.7), 3, 8]
       ]],
       ['Living west', 0, livingFeatureWall.returnWallZ, 0, livingFeatureWall.wallEndZ, livingFeatureWall.windowCenters.map((z) => [z - livingFeatureWall.returnWallZ - livingFeatureWall.fireplaceWindows.width / 2, z - livingFeatureWall.returnWallZ + livingFeatureWall.fireplaceWindows.width / 2, livingFeatureWall.fireplaceWindows.sill, livingFeatureWall.fireplaceWindows.head])],
-      ['Kids north', 19, kidsNorthZ, refrigeration.returnX, kidsNorthZ], ['Kids west', 19, kidsNorthZ, 19, guestSuite.kidsSouthZ, [[27 - kidsNorthZ, 31.5 - kidsNorthZ, 0, 8]]],
+      // Location assumptions (numbered image unavailable): west infill; north
+      // nominal 60 x 96 cased opening for future 30+30 leaves, no doors now.
+      ['Kids west', 19, kidsNorthZ, 19, guestSuite.kidsSouthZ],
+      ['Kids north', 19, kidsNorthZ, refrigeration.returnX, kidsNorthZ, [[1.875, 6.875, 0, 8]]],
+      ['Kids refrigeration return', refrigeration.returnX, kidsNorthZ, refrigeration.returnX, 26.9],
       ['Powder north', 0, powderZ, guestEntry.coatCloset.x + guestEntry.coatCloset.w, powderZ],
       ['Powder east', 7.1, powderZ, 7.1, officeZ, [[guestEntry.powderDoor.z - powderZ, guestEntry.powderDoor.z - powderZ + guestEntry.powderDoor.width, 0, guestEntry.powderDoor.height]]],
       ['Guest coat closet front', 7.1, guestEntry.closetDoor.z, 12.2, guestEntry.closetDoor.z, [[guestEntry.closetDoor.x - 7.1, guestEntry.closetDoor.x - 7.1 + guestEntry.closetDoor.width, 0, guestEntry.closetDoor.height]]],
@@ -454,14 +500,14 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       ['Office north', 0, officeZ, 12.2, officeZ],
       ['House south', 0, front.wallZ, 31.2, front.wallZ, [...getGroundFrontWindows().map(w => [w.center-w.width/2,w.center+w.width/2,w.sill,w.sill+w.height]), [13.1,18.1,0,8]].sort((a,b)=>a[0]-b[0])],
       ['Kids south', 19, guestSuite.kidsSouthZ, 31.2, guestSuite.kidsSouthZ],
-      ['Guest west', 19, guestSuite.kidsSouthZ, 19, front.wallZ, [[guestSuite.bedroomDoor.z - guestSuite.kidsSouthZ, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - guestSuite.kidsSouthZ, 0, 8]]],
-      ['Closet south', 19, guestSuite.closetSouthZ, 27.7, guestSuite.closetSouthZ, guestSuite.closets.map(({ door }) => [door.x - 19, door.x - 19 + door.width, 0, door.height])],
-      ['Guest closet divider', 22.9, guestSuite.closet.z, 22.9, guestSuite.closetSouthZ],
-      ['Bathroom south', guestSuite.bathroom.x, guestSuite.bathroomDoor.z, guestSuite.bathroom.x + guestSuite.bathroom.w, guestSuite.bathroomDoor.z, [[guestSuite.bathroomDoor.x - guestSuite.bathroom.x, guestSuite.bathroomDoor.x - guestSuite.bathroom.x + guestSuite.bathroomDoor.width, 0, guestSuite.bathroomDoor.height]]],
-      ['Bathroom recess west', guestSuite.bathroomRecess.x, guestSuite.bathroomRecess.z - 0.175, guestSuite.bathroomRecess.x, guestSuite.bathroomRecess.z + guestSuite.bathroomRecess.d],
-      ['Bathroom recess south', guestSuite.bathroomRecess.x, guestSuite.bathroomRecess.z + guestSuite.bathroomRecess.d, 31.2, guestSuite.bathroomRecess.z + guestSuite.bathroomRecess.d],
+      ['Guest west north', 19, guestSuite.kidsSouthZ, 19, guestSuite.notch.z],
+      ['Guest west', 19, guestSuite.notch.z + guestSuite.notch.d, 19, front.wallZ, [[guestSuite.bedroomDoor.z - guestSuite.notch.z - guestSuite.notch.d, guestSuite.bedroomDoor.z + guestSuite.bedroomDoor.width - guestSuite.notch.z - guestSuite.notch.d, 0, 8]]],
+      ['Piano recess back', 19 + guestSuite.notch.w, guestSuite.notch.z, 19 + guestSuite.notch.w, guestSuite.notch.z + guestSuite.notch.d],
+      ['Closet south', 19, guestSuite.closetSouthZ, 31.2, guestSuite.closetSouthZ, [[guestSuite.closetDoor.x - 19, guestSuite.closetDoor.x + guestSuite.closetDoor.width - 19, 0, 8]]],
+      ['Bathroom south', 19, guestSuite.bathroomDoor.z, 31.2, guestSuite.bathroomDoor.z, [[guestSuite.bathroomDoor.x - 19, guestSuite.bathroomDoor.x + guestSuite.bathroomDoor.width - 19, 0, 8]]],
+      ['Guest WC privacy', guestSuite.wc.x, guestSuite.wc.z, guestSuite.wc.x, guestSuite.wc.z + guestSuite.wc.d, [[guestSuite.wcDoor.z - guestSuite.wc.z, guestSuite.wcDoor.z + guestSuite.wcDoor.width - guestSuite.wc.z, 0, 8]]],
       ['Garage west', 31.2, 34.6, 31.2, 49], ['Garage west return', 31.2, 26.9, 31.2, 34.6],
-      ['Kitchen south left', refrigeration.returnX, 26.9, refrigeration.runLeft, 26.9], ['Kids kitchen return', refrigeration.runLeft, 26.9, 31.2, 26.9],
+      ['Kids kitchen return', refrigeration.runLeft, 26.9, 31.2, 26.9],
       ['Kitchen south', 31.2, 26.9, 37.3, 26.9],
       ['Kitchen south right', 37.3, 26.9, 37.5, 26.9],
       ['Kitchen east', kitchenPassages.wallX, kitchenPassages.wallZ, kitchenPassages.wallX, 25.3, kitchenPassages.openings],
@@ -503,7 +549,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     }
     for (const wall of plan.walls) {
       const distance = UpstairsLayout.length(wall), dx = (wall.x2 - wall.x1) / distance, dz = (wall.z2 - wall.z1) / distance;
-      const base = wall.name.startsWith('Garage') || ['Kitchen south left', 'Kitchen south', 'Kitchen south right', 'Mudroom south', 'Mudroom east'].includes(wall.name) ? -1.25 : 0;
+      const base = wall.name.startsWith('Garage') || ['Kitchen south', 'Kitchen south right', 'Mudroom south', 'Mudroom east'].includes(wall.name) ? -1.25 : 0;
       const height = wall.name.startsWith('Porch') ? 2.6 : 9;
       function part(start, end, bottom, top, material = wallMaterial) {
         if (end <= start || top <= bottom) return;

@@ -455,6 +455,38 @@ test('all sixteen leaves clear their own jambs, adjacent walls, casings and base
   }
 });
 
+test('closed upstairs leaves meet their lining or extended latch and head',()=>{
+  const doors=[];model.group.traverse(o=>{if(o.userData.interactiveHouseDoor)doors.push(o);});
+  const exceptions=new Set(['Upstairs Closet 2 south interior door hinge','Upstairs Bedroom 3 closet interior door hinge']);
+  let aligned=0,retained=0;
+  for(const hinge of doors){
+    const leaf=hinge.children.find(o=>o.userData.doorStyle);
+    const host=hinge.parent;
+    const jambs=host.children.filter(o=>o.name==='Upstairs painted door jamb lining');
+    const center=hinge.position.z+Math.cos(hinge.rotation.y)*leaf.position.z;
+    const liningHalf=jambs[0].geometry.d/2;
+    const isException=exceptions.has(hinge.name)||(hinge.name==='Upstairs Bedroom 3 north interior door hinge'&&hinge.position.x>4);
+    if(isException){
+      assert.ok(Math.abs(center)-leaf.userData.depth/2>liningHalf);
+      const head=host.children.find(o=>o.name==='Upstairs door head extension' &&
+        Math.abs(o.position.x-hinge.position.x)<hinge.userData.nominalOpeningFeet);
+      const latch=host.children.find(o=>o.name==='Upstairs door latch jamb extension' &&
+        Math.abs(o.position.x-hinge.position.x)<hinge.userData.nominalOpeningFeet+.1);
+      const hingeJamb=host.children.find(o=>o.name==='Upstairs door hinge jamb extension' &&
+        Math.abs(o.position.x-hinge.position.x)<.2);
+      assert.ok(head&&latch&&hingeJamb,hinge.name);
+      close(Math.abs(head.position.z)+head.geometry.d/2,Math.abs(center)+leaf.userData.depth/2);
+      close(Math.abs(latch.position.z)+latch.geometry.d/2,Math.abs(center)+leaf.userData.depth/2);
+      close(Math.abs(hingeJamb.position.z)+hingeJamb.geometry.d/2,Math.abs(center)+leaf.userData.depth/2);
+      retained++;continue;
+    }
+    assert.ok(Math.abs(center)+leaf.userData.depth/2<=liningHalf+1e-7,hinge.name);
+    close(leaf.userData.height,7.96);
+    aligned++;
+  }
+  assert.equal(aligned,13);assert.equal(retained,3);
+});
+
 test('tight corner casing constituents clear perpendicular returns, including projecting head caps',()=>{
   for(const [name,adjacent] of [['Laundry west','Laundry notch return'],['Bedroom 4 north','Bedroom 4 east'],['Laundry south','Service east']]){
     const host=item(`wall: ${name}`),target=meshes(item(`wall: ${adjacent}`)).filter(m=>m.name==='Upstairs partition');

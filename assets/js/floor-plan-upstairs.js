@@ -300,30 +300,37 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
         const closedRotationY = rightHinge ? Math.PI : 0;
         const hinge = new THREE.Group();
         hinge.name = name === 'Toilet partition' && start > 5 ? 'Upstairs Primary bath linen closet door hinge' : `Upstairs ${name} interior door hinge`;
-        // Surface hinge axis lies beyond paint + casing + half leaf thickness.
-        // Centerline pivots cut their own jamb at intermediate angles. This
-        // rebated/offset-hinge concept retains the aperture and full 90° motion.
+        // An offset hinge axis clears the casing while the leaf closes inside
+        // the lining. Three tight closet approaches retain the prior pose.
         const openingSide = -(rightHinge ? -1 : 1) * swingSign;
         const hingeOffset = thickness / 2 + .0625 + .13 / 2 + 1 / 96;
-        // Painted aperture lining and stops complete the offset-leaf concept;
-        // these sit behind its closing face, not across the operating sweep.
+        const insetLeaf = name !== 'Closet 2 south' && name !== 'Bedroom 3 closet' && !(name === 'Bedroom 3 north' && start > 4);
+        // Place the stop behind the closed leaf, not in its operating sweep.
         // Lining/wall contact is intentional joinery, not a second partition.
         const jambDepth = thickness + .125;
         for (const [edge, direction] of [[start, -1], [end, 1]]) {
           box(parent, edge + direction * .02, top / 2, 0, .04, top, jambDepth, windowTrim).name = 'Upstairs painted door jamb lining';
-          box(parent, edge + direction * .005, top / 2, openingSide * (jambDepth / 2 + .005),
+          box(parent, edge + direction * .005, top / 2, openingSide * (insetLeaf ? thickness / 2 - .13 - .005 : jambDepth / 2 + .005),
             .05, top, .01, windowTrim).name = 'Upstairs door jamb stop';
         }
         box(parent, (start + end) / 2, top + .02, 0, end - start, .04, jambDepth, windowTrim).name = 'Upstairs painted door head lining';
-        box(parent, (start + end) / 2, top + .005, openingSide * (jambDepth / 2 + .005),
+        if (!insetLeaf) {
+          const extension = hingeOffset + .13 / 2 - jambDepth / 2;
+          const z = openingSide * (jambDepth / 2 + extension / 2);
+          box(parent, rightHinge ? start - .02 : end + .02, top / 2, z, .04, top, extension, windowTrim).name = 'Upstairs door latch jamb extension';
+          box(parent, rightHinge ? end + .1 : start - .1, top / 2, z, .04, top, extension, windowTrim).name = 'Upstairs door hinge jamb extension';
+          box(parent, (start + end) / 2, top + .02, z, end - start, .04, extension, windowTrim).name = 'Upstairs door head extension';
+        }
+        box(parent, (start + end) / 2, top + .005, openingSide * (insetLeaf ? thickness / 2 - .13 - .005 : jambDepth / 2 + .005),
           end - start, .05, .01, windowTrim).name = 'Upstairs door head stop';
         hinge.position.set(closedRotationY ? end - 0.02 : start + 0.02, 0, openingSide * hingeOffset);
         hinge.rotation.y = closedRotationY;
         hinge.userData = { interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 90, openRotationSign: swingSign, closedRotationY }, nominalOpeningFeet: end - start };
         parent.add(hinge);
         const width = end - start - 0.04;
-        singlePanelDoor(hinge, width / 2, top / 2, 0, width, top - 0.04, 0.13, windowTrim);
-        for (const side of [-1, 1]) box(hinge, width - 0.22, 3, side * 0.1, 0.12, 0.12, 0.08, steel).name = 'Upstairs interior door handle';
+        const leafOffset = insetLeaf ? -openingSide * (hingeOffset - (thickness / 2 - .13 / 2)) * (rightHinge ? -1 : 1) : 0;
+        singlePanelDoor(hinge, width / 2, top / 2, leafOffset, width, top - 0.04, 0.13, windowTrim);
+        for (const side of [-1, 1]) box(hinge, width - 0.22, 3, leafOffset + side * 0.1, 0.12, 0.12, 0.08, steel).name = 'Upstairs interior door handle';
       }
       cursor = end;
     }
@@ -433,7 +440,6 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     }
     return item;
   }
-  const primaryCenterX = g.primaryEast / 2;
   const primaryWestWall = plan.walls.find(wall => wall.name === 'Primary west');
   const primaryBedX = 3.8;
   for (const [name, x, z, mattressWidth, mattressLength, rotation, bedsideSide] of [
@@ -452,8 +458,6 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     box(bed, 0, 1.7, -length / 2, width, 2, 0.18, oak);
     for (const dx of [-width / 4, width / 4]) box(bed, dx, 1.8, -2.3, width / 2 - 0.35, 0.28, 1.2, windowTrim, true);
     for (const side of name === 'Primary bed' ? [-1, 1] : [bedsideSide]) {
-      const dx = side * (width / 2 + 1);
-      const bedsideZ = -length / 2 + 0.85;
       const lampMount = name === 'Primary bed'
         ? { x: primaryWestWall.x1 + primaryWestWall.thickness / 2 + 0.04, z: side < 0 ? 18.8 : 14.95, rotation: Math.PI / 2 }
         : name === 'Bedroom 2 bed'
@@ -487,8 +491,6 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     const light = group.children.find(o => o.name === `Upstairs ${name} desk wall lamp`);
     light.position.set(x, 0, z);
   }
-  const primarySouthWall = plan.walls.find(wall => wall.name === 'Primary south');
-  const primarySeatingRearZ = primarySouthWall.z1 - primarySouthWall.thickness / 2 - 0.0625 - 1 / 12;
   loungeChair('Primary sitting chair 1', 3.875, 25.225);
   loungeChair('Primary sitting chair 2', 9.075, 25.225);
   const sittingTable = furniture('Primary sitting side table', 7.025, 25.65, Math.PI, true);

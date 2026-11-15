@@ -71,7 +71,8 @@ test('orbit interaction restores full-quality rendering after release', () => {
   handlers.end();
   frames.shift()();
   assert.deepEqual(states, [true, false]);
-  const renderBody = source.slice(source.indexOf('  function render() {'), source.indexOf('  function applyLivingLayout('));
+  const renderBody = source.slice(source.indexOf('  function render() {'), source.indexOf("  viewport.dataset.livingLayout = 'reference-lounge';"));
+  assert.ok(renderBody.length > 0 && renderBody.length < 20000, 'Render body extraction is bounded');
   assert.match(renderBody, /!orbitInteracting\) renderInterior\(\)/);
 });
 

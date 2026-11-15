@@ -23,13 +23,15 @@ test('36-inch Designer bays and separate fillers fit the approved short-wall rev
   };
   const start = source.indexOf('  const bottomRun =');
   const end = source.indexOf('  const steamOvenBottom =', start);
-  const cornice = source.match(/  box\(bottomRun, bottomRunCenterX,[^\n]+Continuous refrigeration cabinet cornice';/);
+  const cornice = source.match(/  const refrigerationCorniceWidth =[^\n]+\r?\n  box\(bottomRun,[^\n]+Continuous refrigeration cabinet cornice';/);
   assert.ok(start >= 0 && end > start && cornice);
-  vm.runInNewContext(`${source.slice(start, end)}\nconst refrigerationCorniceTop = upperStorageTop + 0.15;\n${cornice[0]}\nglobalThis.layout = { fridgeLeft, freezerRight, pantryWidth, pantryCenterX, columnWidth };`, context);
-  assert.equal(boxes.length, 1);
-  assert.ok(Math.abs(boxes[0].x - boxes[0].w / 2 - 27.9375) < 1e-9);
-  assert.ok(Math.abs(boxes[0].x + boxes[0].w / 2 - 37.3) < 1e-9);
-  assert.ok(Math.abs(boxes[0].w * 12 - 112.35) < 1e-9, '72 inches of appliances + 31.5 tower + 3 framing + 5.85 fillers');
+  vm.runInNewContext(`${source.slice(start, end)}\nconst refrigerationCorniceTop = upperStorageTop + 0.15;\n${cornice[0]}\nglobalThis.layout = { bottomRunLeft, fridgeLeft, freezerRight, pantryWidth, pantryCenterX, columnWidth };`, context);
+  assert.equal(boxes.length, 1, 'Only the retained bank cornice is built here; no extra end wood blocks');
+  const cap = boxes.find(part => part.name === 'Continuous refrigeration cabinet cornice');
+  assert.ok(Math.abs(cap.x - cap.w / 2 - 28.1875) < 1e-9, 'Cornice keeps its approved appliance-side endpoint');
+  assert.ok(Math.abs(cap.x + cap.w / 2 - 37.3) < 1e-9);
+  assert.ok(Math.abs(cap.w * 12 - 109.35) < 1e-9, 'Cornice alone stops at the end-panel joint; appliance boxes and fillers remain full width');
+  assert.ok(Math.abs(context.layout.bottomRunLeft - 27.9375) < 1e-9);
   assert.equal(context.layout.fridgeLeft, 28.25);
   assert.equal(context.layout.freezerRight, 37);
   assert.equal(context.layout.pantryWidth, 2.625, 'Do not widen the oven/storage tower');
@@ -40,14 +42,23 @@ test('36-inch Designer bays and separate fillers fit the approved short-wall rev
   assert.equal(freezerCenter, 35.5);
   assert.equal(context.layout.pantryCenterX, (fridgeCenter + freezerCenter) / 2);
   const plan = require('../assets/js/floor-plan-ground.js').getGroundFloorDefaultPlan();
-  const movedWall = ['Refrigeration end', 27.75, 26.9, 27.75, 26.9];
-  assert.equal(movedWall[1], 27.75, 'Owner approved 15-inch west shift: 12 inches for appliances + 3 inches for filler');
-  assert.equal(movedWall[3], 27.75);
+  const movedWall = plan.walls.find(([name]) => name === 'Kids refrigeration return');
+  assert.ok(movedWall, 'A real wall return closes the opening/cabinet junction');
+  close(movedWall[1], 28.0125);
+  close(movedWall[3], 28.0125);
+  close(movedWall[2] - 0.175, context.kitchenRefrigeration.bodyFaceZ, 'Kids north kitchen paint face is flush with the cabinet body face');
+  close(movedWall[4], 26.9);
+  const north = plan.walls.find(([name]) => name === 'Kids north');
+  close(north[3], movedWall[1]);
+  close(north[4], movedWall[2]);
+  close((north[5][0][1] - north[5][0][0]) * 12, 60);
+  assert.equal(plan.walls.filter(([name]) => name === 'Kids refrigeration return').length, 1);
+  assert.doesNotMatch(source, /Fridge separate 3-inch wall filler|Fridge separate wall scribe/, 'Owner removed the extra oak strip and its scribe; retain the white return');
   assert.equal(plan.walls.find(([name]) => name === 'Kitchen east')[1], 37.5);
-  const endGapInches = (boxes[0].x - boxes[0].w / 2 - (movedWall[1] + 0.175)) * 12;
-  assert.ok(endGapInches > 0 && endGapInches <= 0.25, 'Retain a small scribe gap outside the separate filler');
-  assert.ok(Math.abs((context.layout.fridgeLeft - movedWall[1] - 0.175) * 12 - 3.9) < 1e-9);
-  assert.doesNotMatch(source, /\[kitchenRefrigeration\.returnX, kidsRoom\.z, kitchenRefrigeration\.returnX, 26\.9/, 'Obsolete jog is removed from furnished walls');
+  close(movedWall[1] + 0.175, context.layout.fridgeLeft - 0.75 / 12);
+  close((movedWall[1] - 27.75) * 12, 3.15);
+  assert.equal(plan.walls.some(([name]) => name === 'Kitchen south left'), false, 'Remove the obsolete corner stub now inside the relocated return');
+  assert.match(source, /'Kids south', 'Kids refrigeration return'/, 'Furnished walls use the same end return as the shared plan');
   assert.equal(plan.walls.find(([name]) => name === 'Garage west return')[1], 31.2, 'Garage partition aligns with the bathroom, independently of the kitchen return');
   assert.doesNotMatch(source, /Stair-side narrow pull-out cabinet|Narrow pull-out carcass|Narrow end overhead cabinet|endStorageFront|endUpperFront/);
   assert.match(source, /appliance\.position\.set\(x, 0, 25\.725 \+ refrigerationWallSetback\)/);
@@ -95,13 +106,15 @@ test('kids-room expansion preserves kitchen return and all opening widths', () =
   const kids = plan.rooms.find((room) => room.name === 'Kids room');
   assert.equal(kids.w, 12.2);
   const kidsFloors = plan.floors.filter((floor) => floor.room === 'Kids room');
-  const kidsNorthZ = plan.walls.find(([name]) => name === 'Kids north')[2];
+  assert.equal(plan.walls.filter(([name]) => name === 'Kids north').length, 1);
+  const kidsNorthZ = require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout().bodyFaceZ + 0.175;
+  const kidsSouthZ = require('../assets/js/floor-plan-ground.js').getGuestSuiteLayout().kidsSouthZ;
   assert.deepEqual(kidsFloors.map(({ x, z, w, d, elevation }) => [x, z, w, d, elevation]), [
-    [19, kidsNorthZ, 8.75, 37.2 - kidsNorthZ, 0],
-    [27.75, 26.9, 31.2 - 27.75, 37.2 - kidsNorthZ - (26.9 - kidsNorthZ), 0]
+    [19, kidsNorthZ, 9.0125, kidsSouthZ - kidsNorthZ, 0],
+    [28.0125, 26.9, 31.2 - 28.0125, kidsSouthZ - 26.9, 0]
   ], 'Both kids floor strips stop at the full-width bathroom; only the short northeast corner transfers to kitchen');
   for (const floor of kidsFloors) {
-    assert.ok(floor.x + floor.w <= 27.75 || floor.z >= 26.9, 'No kids flooring may enter the widened refrigeration run');
+    assert.ok(floor.x + floor.w <= 28.0125 || floor.z >= 26.9, 'No kids flooring may enter the retained refrigeration run');
   }
   for (let i = 0; i < kidsFloors.length; i++) {
     for (const other of kidsFloors.slice(i + 1)) {
@@ -112,7 +125,8 @@ test('kids-room expansion preserves kitchen return and all opening widths', () =
     }
   }
   const north = plan.walls.find(([name]) => name === 'Kids north');
-  assert.equal(north[3], 27.75);
+  assert.deepEqual(north[5], [[1.875, 6.875, 0, 8]]);
+  close(plan.rooms.find(room => room.name === 'Kids room').z, kidsNorthZ);
   const shared = plan.walls.find(([name]) => name === 'Kitchen east');
   assert.deepEqual(shared.slice(1, 5), [37.5, 7, 37.5, 25.3]);
   [[2.6375, 5.1375], [14.7625, 17.2625]].forEach(([start, end], index) => {
@@ -175,12 +189,15 @@ test('house-door picker toggles hinged, bifold and sliding leaves to their model
   context.pickHouseDoor({ clientX: 60, clientY: 40 });
   assert.equal(door.rotation.y, 115 * Math.PI / 180, 'The opposite-hand refrigerator opens from its opposite hinge');
 
-  const slider = { userData: { interactiveHouseDoor: { operation: 'sliding', open: false, closedCenterX: 2, openCenterX: 5 } }, position: { x: 2 }, visible: true };
+  const edgePull = { userData: { pocketEdgePull: true, retractedX: 1, extendedX: 1.25 }, position: { x: 1 } };
+  const slider = { children: [edgePull], userData: { interactiveHouseDoor: { operation: 'sliding', open: false, closedCenterX: 2, openCenterX: 5 } }, position: { x: 2 }, visible: true };
   context.intersections = [{ object: { parent: slider, visible: true } }];
   assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), true);
   assert.equal(slider.position.x, 5);
+  assert.equal(edgePull.position.x, 1.25, 'Pocketed leaf extends a retrievable closing grip');
   assert.equal(context.pickHouseDoor({ clientX: 60, clientY: 40 }), true);
   assert.equal(slider.position.x, 2);
+  assert.equal(edgePull.position.x, 1, 'Closing restores the flush edge pull');
 
   slider.userData.interactiveHouseDoor = { operation: 'sliding', axis: 'z', open: false, closedCenterX: 0, openCenterX: 1.75 };
   slider.position.z = 0;

@@ -68,19 +68,19 @@ const find = (root, pattern) => {
   return results;
 };
 
-test('four small regressed downlights supplement under-cabinet, hood, pendant and board lighting', () => {
+test('four regressed downlights supplement under-cabinet, hood and pendant lighting with demolished board lights removed', () => {
   const model = build();
   const rig = model.kitchenPracticalLights;
   assert.equal(rig.ceilingFixtures.children.length, 4);
-  assert.equal(rig.lights.length, 23);
-  assert.equal(model.familyShelfTowers.reduce((count, tower) => count + find(tower, /Family shelf task beam/).length, 0), 12);
-  assert.equal(find(model.familyBoard, /shielded picture light/)[0].userData.mountingHeightInches, 85.2);
+  assert.equal(rig.lights.length, 9);
+  assert.equal(model.familyShelfTowers.reduce((count, tower) => count + find(tower, /Family shelf task beam/).length, 0), 0);
+  assert.equal(find(model.familyBoard, /shielded picture light/).length, 0);
   assert.equal(rig.group.userData.apertureInches, 4);
   assert.equal(rig.group.userData.photometryVerified, false);
   assert.equal(find(model.cooktopUppers, /under-cabinet task beam/).length, 2);
   assert.equal(find(model.cooktopHood, /hood task beam/).length, 1);
   assert.equal(find(model.islandPendants, /pendant task beam/).length, 2);
-  assert.equal(find(model.familyBoard, /soft wash beam/).length, 2);
+  assert.equal(find(model.familyBoard, /soft wash beam/).length, 0);
   for (const lamp of find(model.familyBoard, /soft wash beam/)) {
     assert.ok(lamp.distance > Math.hypot(lamp.position.y - 2.5, lamp.position.z - 0.07) + 2, 'Do not clip the lower half of the board with the light range');
   }

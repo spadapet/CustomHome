@@ -71,18 +71,6 @@
     return { id, finish, bounds: [left, right, rear, front], planes };
   }
 
-  function hipRoof(id, left, right, rear, front, base, ridge, ridgeRear, ridgeLeft, ridgeRight) {
-    return {
-      id, bounds: [left, right, rear, front],
-      planes: [
-        [0, (ridge - base) / (ridgeRear - rear), base - (ridge - base) / (ridgeRear - rear) * rear],
-        [0, -(ridge - base) / (front - ridgeRear), base + (ridge - base) / (front - ridgeRear) * front],
-        [(ridge - base) / (ridgeLeft - left), 0, base - (ridge - base) / (ridgeLeft - left) * left],
-        [-(ridge - base) / (right - ridgeRight), 0, base + (ridge - base) / (right - ridgeRight) * right]
-      ]
-    };
-  }
-
   function getConnectedRoofDefinitions(floorToFloor = 10) {
     const diningRearZ = typeof getLivingRoomFeatureLayout === 'function' ? getLivingRoomFeatureLayout().diningRearZ
       : require('./floor-plan-ground.js').getLivingRoomFeatureLayout().diningRearZ;
@@ -174,9 +162,7 @@
   function getPorchRoofDefinitions() {
     const front = typeof getGroundFrontLayout === 'function'
       ? getGroundFrontLayout() : require('./floor-plan-ground.js').getGroundFrontLayout();
-    const angle = 0.13, centerHeight = 10.5, centerZ = 57.5 + front.extension, halfWidth = 4.5;
-    const slope = 2.4 / halfWidth;
-    const halfRoofWidth = halfWidth + 0.65 / Math.sqrt(1 + slope * slope);
+    const angle = 0.13, centerHeight = 10.5, centerZ = 57.5 + front.extension;
     const porchPlane = [0, -Math.tan(angle), centerHeight + centerZ * Math.tan(angle)];
     // Segmental barrel accent: sixteen true sloping facets, clipped into the
     // porch plane with a rear falling return, not a floating applied arch.

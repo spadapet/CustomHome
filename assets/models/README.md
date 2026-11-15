@@ -16,20 +16,20 @@ It is product-based, not an AI reconstruction; display width is 86 inches.
 F retains the earlier custom sectional. The AI-generated evaluation candidates
 are not included in this library.
 
-Current J uses a custom oatmeal L-sectional concept, not the downloaded sofa.
-Its single armchair is a clone of Modern Arm Chair 01, uniformly scaled to
-30 inches wide with a new oatmeal color map; original normal/roughness maps
-remain. The dark comparison chairs are unchanged. Its end table uses Side
-Table 01. Neither original asset file is modified.
+Current J uses a custom U-sectional concept, not the downloaded sofa. The
+viewer no longer loads Glam Velvet Sofa, Modern Arm Chair 01 or Side Table 01
+(unreachable comparison layouts removed November 14, 2026); the files remain
+in this library. Neither original asset file is modified.
 
-The mudroom uses Shopify's textured Materials Variants Shoe and Poly Haven
-Rubber Boots in place of simplified shoe blocks. Footwear is uniformly scaled:
+The mudroom uses a lightweight derivative of Shopify's textured Materials
+Variants Shoe and Poly Haven Rubber Boots in place of simplified shoe blocks.
+Footwear is uniformly scaled:
 11.5 in-long sneakers, 14 in-high adult boots under the bench, 11 in-high
 shelf boots and smaller children's sneakers. These are visual references,
 not selected products. Clean left/right boots are extracted from the supplied
-four-boot scene; source files remain unmodified.
+four-boot scene; the boot source files remain unmodified.
 
-Current collection: **1,184 models, 309.2 MiB** of model resources.
+Current collection: **1,185 models, 309.4 MiB** of model resources.
 The two footwear assets pass structure, dependency, checksum and browser
 loading checks. The downloader budget is now 312 MiB; use
 `.\scripts\download-home-assets.ps1 -MudroomOnly` to refresh just footwear
@@ -84,9 +84,14 @@ The downloader also restores this sofa and verifies its pinned SHA-256.
 
 [Materials Variants Shoe](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/MaterialsVariantsShoe),
 copyright 2021 **Shopify**, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-Original GLB retained unmodified; viewer uniformly scales, rotates and clones
-it for conceptual footwear. Retain this credit and the viewer's design-note
-credit when publishing. [Rubber Boots](https://polyhaven.com/a/rubber_boots)
+The original GLB is retained unmodified. The viewer loads
+`khronos/MaterialsVariantsShoe-lite.glb`, a modified derivative made November
+14, 2026 for performance with glTF-Transform and meshoptimizer: default
+material only (variants removed), mesh simplified from about 22,700 to 2,043
+triangles, textures resized to 512 px JPEG (7.8 MB to 224 KB). It is uniformly
+scaled, rotated and cloned for conceptual footwear. Retain this credit,
+including the modification notice, and the viewer's design-note credit when
+publishing. [Rubber Boots](https://polyhaven.com/a/rubber_boots)
 is CC0; its two clean boot meshes are used for the mudroom.
 
 ## Required bicycle credit

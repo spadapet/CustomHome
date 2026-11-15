@@ -19,30 +19,31 @@ test('front rooms and porch extend 5.75 inches to an approximately 64-foot envel
   const bedroom = baseline.rooms.find(({ name }) => name === 'Guest room');
   const porch = baseline.rooms.find(({ name }) => name === 'Front porch');
   close(office.d, front.wallZ - 41);
-  close(bedroom.d, front.wallZ - 44.4);
+  close(bedroom.d, 11.4);
   close(porch.z, front.wallZ);
   close(porch.d, 7);
   close(front.porchEdgeZ - (-2.325), 64.00416666666666);
 });
 
-test('image-scaled kids, bathroom, shallow-closet and bedroom bands meet without overlap', () => {
+test('open kids, straight bath, larger closet and rectangular bedroom floors meet without overlap', () => {
   const s = getGuestSuiteLayout();
   const close = (a, b) => assert.ok(Math.abs(a - b) < 1e-8, `${a} != ${b}`);
-  for (const [part, expected] of [[s.bathroom, { x: 19, z: 37.2, w: 12.2, d: 4.8 }],
-    [s.closet, { x: 19, z: 42, w: 12.2, d: 2.4 }]]) {
+  for (const [part, expected] of [[s.bathroom, { x: 19, z: 32.97706692913386, w: 12.2, d: 5 }],
+    [s.closet, { x: 19, z: 37.977066929133865, w: 12.2, d: 1357 / 304.8 + 0.85 }]]) {
     for (const key of Object.keys(expected)) close(part[key], expected[key]);
   }
   assert.deepEqual(s.bedroomDoor, { x: 19, z: 44.8, width: 3, height: 8, hinge: 'south', inward: true, maxAngleDegrees: 90 });
-  assert.deepEqual(s.bathroomDoor, { x: 27.95, z: 42, width: 2.5, height: 8, hinge: 'west', inward: true, maxAngleDegrees: 90 });
+  assert.deepEqual(s.bathroomDoor, { x: 24.3, z: s.closet.z, width: 2.5, height: 8, slide: -2.7,
+    pocket: { x: 21.4, w: 2.9, leafWidth: 2.48, leafThickness: 1.375 / 12, clearDepth: 0.25, height: 8.3 } });
   assert.equal(s.bedroom.z, s.closet.z + s.closet.d);
-  close(s.bedroom.d, getGroundFrontLayout().wallZ - 44.4);
+  close(s.bedroom.d - 0.175 - 0.225, 11);
   close(s.kidsSouthZ, s.bathroom.z);
   const kids = baseline.floors.filter(({ room }) => /^Kids room/.test(room ?? ''));
   assert.equal(kids.length, 2, 'The NE kitchen return creates a two-rectangle kids floor');
-  close(kids[0].x, 19); close(kids[0].w, 8.75); close(kids[0].z, baseline.rooms.find(({ name }) => name === 'Kids room').z);
-  close(kids[1].x, 27.75); close(kids[1].w, 3.45); close(kids[1].z, 26.9);
-  close(kids.reduce((sum, { w, d }) => sum + w * d, 0), 125.66);
-  const zones = baseline.floors.filter(({ room }) => /^(Kids room|Closet$|Bathroom$|Guest room$)/.test(room ?? ''));
+  close(kids[0].x, 19); close(kids[0].w, 9.0125); close(kids[0].z, baseline.rooms.find(({ name }) => name === 'Kids room').z);
+  close(kids[1].x, 28.0125); close(kids[1].w, 3.1875); close(kids[1].z, 26.9);
+  close(kids.reduce((sum, { w, d }) => sum + w * d, 0), 9.0125 * (s.kidsSouthZ - (26.85 - 25 / 12 + 0.175)) + 3.1875 * (s.kidsSouthZ - 26.9));
+  const zones = baseline.floors.filter(({ room }) => /^(Kids room|Closet$|Bathroom$|Guest room$|Hall piano recess$)/.test(room ?? ''));
   for (const f of zones) assert.ok(f.w > 0 && f.d > 0);
   for (let i = 0; i < zones.length; i++) for (let j = i + 1; j < zones.length; j++) {
     const a = zones[i], b = zones[j];
@@ -85,7 +86,7 @@ test('all ground-floor door and passage openings are eight feet above their floo
   const entry = getGuestEntryLayout();
   const suite = getGuestSuiteLayout();
   for (const door of [entry.powderDoor, entry.closetDoor, suite.bedroomDoor, suite.bathroomDoor, suite.shower,
-    ...suite.closets.map(({ door }) => door)]) assert.equal(door.height, 8);
+    suite.closetDoor, suite.wcDoor]) assert.equal(door.height, 8);
 });
 
 test.skip('superseded walk-in closet and east-side bath study', () => {
@@ -192,7 +193,7 @@ test.skip('superseded walk-in fixtures, pocket door and bath-clearance study', (
   };
   vm.runInNewContext(source.slice(source.indexOf('  function singlePanelDoor('), source.indexOf('  function shakerFront(')), context);
   vm.runInNewContext(source.slice(source.indexOf('  function shakerFront('), source.indexOf('  function cabinetCupPull(')), context);
-  vm.runInNewContext(source.slice(source.indexOf('  function vanity('), source.indexOf('  const powderStone =')), context);
+  vm.runInNewContext(source.slice(source.indexOf('  function vanity('), source.indexOf('  const powderBasin =')), context);
   vm.runInNewContext(source.slice(source.indexOf("  const wardrobe = furnishing("), source.indexOf("  const guestCoats =")), context);
   vm.runInNewContext(source.slice(source.indexOf("  tiledFloor('Guest bathroom tile'"), source.indexOf("  const frontDoor =")), context);
   const suite = context.guestSuite;
@@ -639,7 +640,7 @@ test('powder vanity centers its sink and lighting between matching drawer banks 
   context.cylinder = (parent, x, y, z, radius, height, material) => context.box(parent, x, y, z, radius * 2, height, radius * 2, material);
   const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   vm.runInNewContext(source.slice(source.indexOf('  function singlePanelDoor('), source.indexOf('  function cabinetCupPull(')), context);
-  vm.runInNewContext(source.slice(source.indexOf('  const powderStone ='), source.indexOf("  tiledFloor('Guest bathroom tile'")), context);
+  vm.runInNewContext(source.slice(source.indexOf('  const powderBasin ='), source.indexOf("  for (const { x, z, w, d } of guestSuite.floors.filter")), context);
   const vanity = items.find((item) => item.name === 'Powder vanity');
   const drawers = vanity.children.filter((part) => /^Powder vanity drawer \d$/.test(part.name));
   assert.equal(drawers.length, 6);
@@ -729,15 +730,14 @@ test('original wall-backed rail omissions preserve stringers and unrelated expos
   }
 });
 
-test('kitchen-facing kids-room wall continues straight behind the tall cabinets without moving the doorway', () => {
+test('kids north has a 60 x 96 cased opening, its kitchen face flush with the cabinet body face, and west entry is infilled', () => {
   const wall = baseline.walls.find(([name]) => name === 'Kids north');
   const room = baseline.rooms.find((room) => room.name === 'Kids room');
-  assert.equal(wall[2], 26.9);
-  assert.equal(wall[4], 26.9);
-  assert.ok(Math.abs(room.z + room.d - 37.2) < 1e-9);
+  assert.deepEqual(wall[5], [[1.875, 6.875, 0, 8]]);
+  assert.ok(Math.abs(room.z - (26.85 - 25 / 12 + 0.175)) < 1e-9, 'Wall centreline sits half a 4.2-in wall behind the cabinet face');
+  assert.ok(Math.abs(room.z + room.d - getGuestSuiteLayout().kidsSouthZ) < 1e-9);
   const west = baseline.walls.find(([name]) => name === 'Kids west');
-  assert.ok(Math.abs(west[2] + west[5][0][0] - 27) < 1e-9);
-  assert.ok(Math.abs(west[2] + west[5][0][1] - 31.5) < 1e-9);
+  assert.equal(west[5], undefined);
   for (const floor of baseline.floors.filter((floor) => ['Hall', 'Kitchen'].includes(floor.room))) {
     for (const kidsFloor of baseline.floors.filter((floor) => floor.room === 'Kids room')) {
     const overlapX = Math.min(floor.x + floor.w, kidsFloor.x + kidsFloor.w) - Math.max(floor.x, kidsFloor.x);
@@ -750,12 +750,12 @@ test('kitchen-facing kids-room wall continues straight behind the tall cabinets 
 test('kids-room kitchen return and garage partition stay aligned around the full-width bath', () => {
   const wall = baseline.walls.find(([name]) => name === 'Garage west return');
   assert.deepEqual(wall.slice(1), [31.2, 26.9, 31.2, 34.6]);
-  assert.equal(baseline.walls.find(([name]) => name === 'Kids south')[2], 37.2);
+  assert.equal(baseline.walls.find(([name]) => name === 'Kids south')[2], getGuestSuiteLayout().kidsSouthZ);
   assert.ok(!baseline.walls.some(([name]) => name === 'Garage southwest return'));
   const floors = baseline.floors.filter((floor) => floor.room === 'Kids room');
   const area = floors.reduce((sum, floor) => sum + floor.w * floor.d, 0);
-  assert.ok(Math.abs(area - 125.66) < 1e-9);
-  assert.ok(Math.abs(floors.find(({ x }) => x === 27.75).w * floors.find(({ x }) => x === 27.75).d - 35.535) < 1e-9);
+  assert.ok(Math.abs(area - 91.78969570209975) < 1e-8);
+  assert.ok(Math.abs(floors.find(({ x }) => x === 28.0125).w * floors.find(({ x }) => x === 28.0125).d - 3.1875 * (getGuestSuiteLayout().kidsSouthZ - 26.9)) < 1e-9);
   for (const kids of floors) for (const garage of baseline.floors.filter((floor) => floor.room === 'Garage')) {
     assert.ok(Math.min(kids.x + kids.w, garage.x + garage.w) - Math.max(kids.x, garage.x) < 1e-9 ||
       Math.min(kids.z + kids.d, garage.z + garage.d) - Math.max(kids.z, garage.z) < 1e-9);
@@ -781,7 +781,7 @@ test('fireplace built-ins are removed entirely and baseboard runs continuously f
   const feature = getLivingRoomFeatureLayout();
   vm.runInNewContext(`${halfSource[0]}\n${source.slice(source.indexOf('\n', start), end)}`, {
     THREE: { Vector2 }, livingFeatureWall: feature, guestEntry: { stairGuard: { x: 99, z: 99 } },
-    guestSuite: { shower: { x: 99, z: 99, w: 1, d: 1 }, bathroom: { x: 99 }, toilet: { z: 99 }, vanity: { z: 99 } },
+    guestSuite: getGuestSuiteLayout(),
     cover(a, b, normal) { covers.push({ a, b, normal }); }
   });
   const onWindowWall = covers.filter(({ a, b, normal }) => Math.abs(a.x - 0.175) < 0.01 && Math.abs(b.x - 0.175) < 0.01 && normal.x === 1 &&
@@ -799,119 +799,13 @@ test('fireplace built-ins are removed entirely and baseboard runs continuously f
   assert.ok(livingWall, 'Living window wall keeps only sill-height openings, so base trim is not split by them');
 });
 
-test('double-chaise sectional has exactly chaise-seat-seat-chaise modules and fits the living area', () => {
-  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
-  class Group {
-    constructor() {
-      this.children = [];
-      this.position = { set(x, y, z) { Object.assign(this, { x, y, z }); } };
-      this.rotation = {};
-    }
-    add(child) { this.children.push(child); }
-  }
-  const scene = new Group();
-  const context = {
-    THREE: { Group }, scene, livingCenterZ: getLivingRoomFeatureLayout().centerZ, tanLeather: {}, tanLeatherCushion: {},
-    box(parent, x, y, z, width, height, depth) {
-      const mesh = { x, y, z, width, height, depth };
-      parent.add(mesh);
-      return mesh;
-    }
-  };
-  vm.runInNewContext(source.slice(source.indexOf('  const sectional ='), source.indexOf('  const livingChairWidth =')), context);
-  const sectional = scene.children[0];
-  const modules = sectional.children.filter((part) => part.userData);
-  assert.deepEqual(modules.map((part) => part.userData.type), ['chaise', 'seat', 'seat', 'chaise']);
-  assert.deepEqual(modules.map((part) => part.userData.moduleIndex), [0, 1, 2, 3]);
-  assert.ok(modules.every((part, index) => index === 0 || part.x > modules[index - 1].x));
-  assert.equal(modules[0].depth, modules[3].depth);
-  assert.equal(modules[1].depth, modules[2].depth);
-  assert.ok(Math.abs((modules[0].depth - modules[1].depth) * 12 - 26) < 1e-9);
-  assert.equal(sectional.children.filter((part) => part.name === 'Sectional chaise extension').length, 2);
-  const minX = Math.min(...sectional.children.map((part) => part.x - part.width / 2));
-  const maxX = Math.max(...sectional.children.map((part) => part.x + part.width / 2));
-  const minZ = Math.min(...sectional.children.map((part) => part.z - part.depth / 2));
-  const maxZ = Math.max(...sectional.children.map((part) => part.z + part.depth / 2));
-  assert.ok(Math.abs((maxX - minX) * 12 - 132) < 1e-9);
-  assert.ok(Math.abs((maxZ - minZ) * 12 - 68) < 1e-9);
-  assert.equal(Math.max(...sectional.children.map((part) => part.y + part.height / 2)) * 12, 36);
-  assert.equal(sectional.rotation.y, -Math.PI / 2);
-  assert.ok(sectional.position.x - maxZ - 1.38 > 3, 'Chaise tips leave more than three feet to fireplace face, not heat-clearance approval');
-  assert.ok(sectional.position.x - minZ <= 13.2, 'Sectional back remains inside living area');
-  assert.ok(sectional.position.z - maxX > getLivingRoomFeatureLayout().wallStartZ);
-  assert.ok(sectional.position.z - minX < baseline.stairs.z, 'Sectional stays outside stair opening');
-});
-
-test('earlier sectional comparison restores visibility and obstacle flags when switching from the default', () => {
-  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
-  function object(children = []) {
-    return {
-      children, userData: {}, visible: true, position: { set() {} }, rotation: {},
-      traverse(callback) { callback(this); this.children.forEach((child) => child.traverse(callback)); }
-    };
-  }
-  const cornerOttoman = object([object()]);
-  const readingOttoman = object([object()]);
-  const book = object();
-  const context = {
-    livingCenterZ: getLivingRoomFeatureLayout().centerZ, livingFeatureWall: getLivingRoomFeatureLayout(),
-    navigationMode: 'rotate', activeFloor: 'ground',
-    sofa: object([object()]), sectional: object([object()]),
-    downloadedSofa: object(), familySectional: object(), referenceLounge: object(), familyLiving: object(),
-    livingArmchairs: [object([object()]), object([object()])],
-    loungeChairs: [object([cornerOttoman]), object([readingOttoman, book])], cornerOttoman, readingOttoman,
-    document: { querySelectorAll: () => [], getElementById: () => ({}) },
-    viewport: { dataset: {} }, buildWalkObstacles() {}
-  };
-  const layouts = source.slice(source.indexOf('  const livingLayouts ='), source.indexOf('  const tableX ='));
-  const apply = source.slice(source.indexOf('  function applyLivingLayout('), source.indexOf('  applyLivingLayout(livingLayouts[0], false);'));
-  vm.runInNewContext(`${layouts}\n${apply}\nglobalThis.layouts = livingLayouts;`, context);
-  assert.equal(context.layouts[0].id, 'reference-lounge');
-  assert.equal(context.layouts[0].recommended, true);
-  const current = context.layouts.find((layout) => layout.id === 'double-chaise');
-  assert.equal(current.id, 'double-chaise');
-  assert.ok(!current.recommended);
-  assert.equal(current.sofa, null);
-  assert.ok(current.chairs.every((chair) => chair === null));
-  assert.equal(current.sectional[1], getLivingRoomFeatureLayout().centerZ);
-  const previous = context.layouts.find((layout) => layout.id === 'centered');
-  assert.ok(!previous.recommended);
-  assert.equal(context.layouts.length, 10);
-  for (const layout of [context.layouts[0], current, previous, current]) {
-    context.applyLivingLayout(layout, false);
-    const showingSectional = layout === current;
-    assert.equal(context.sectional.visible, showingSectional);
-    assert.equal(context.sofa.visible, layout === previous);
-    assert.equal(context.referenceLounge.visible, layout === context.layouts[0]);
-    for (const chair of context.livingArmchairs) {
-      assert.equal(chair.visible, showingSectional);
-      chair.traverse((part) => {
-        assert.equal(part.userData.livingLayoutHidden, !showingSectional, 'Wing chairs block tours only in their active layout');
-      });
-    }
-    for (const chair of context.loungeChairs) {
-      assert.equal(chair.visible, layout === previous);
-      chair.traverse((part) => {
-        assert.equal(part.userData.livingLayoutHidden, layout !== previous, 'Hidden seating and descendants do not block tours');
-      });
-    }
-    assert.equal(cornerOttoman.visible, layout === previous);
-    assert.equal(readingOttoman.visible, layout === previous);
-    assert.equal(context.sectional.children[0].userData.livingLayoutHidden, !showingSectional);
-  }
-});
-
-test('earlier corner-chair comparison preserves centered fireplace and sofa', () => {
+test('living fireplace composition stays centered on its approved axis', () => {
   const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   const context = { getLivingRoomFeatureLayout };
   const feature = getLivingRoomFeatureLayout();
   const windowData = source.slice(source.indexOf('  const livingFeatureWall ='), source.indexOf('  const livingSideWindows ='));
-  const layoutData = source.slice(source.indexOf('  const livingLayouts ='), source.indexOf('  const tableX ='));
-  vm.runInNewContext(`${windowData}\n${layoutData}\nglobalThis.windows = livingWindowCenters; globalThis.layouts = livingLayouts;`, context);
+  vm.runInNewContext(`${windowData}\nglobalThis.windows = livingWindowCenters;`, context);
   const midpoint = (context.windows[0] + context.windows[1]) / 2;
-  const layout = context.layouts.find((option) => option.id === 'centered');
-  assert.equal(layout.id, 'centered');
-  assert.ok(!layout.recommended);
   assert.ok(Math.abs(feature.wallStartZ - 9.225) < 1e-9);
   assert.equal(feature.wallEndZ, 26.775, 'Approved living composition remains fixed independently of stair gap closure');
   assert.equal(baseline.walls.find(([name]) => name === 'Living west')[4], feature.wallEndZ);
@@ -919,62 +813,7 @@ test('earlier corner-chair comparison preserves centered fireplace and sofa', ()
   assert.ok(Math.abs(midpoint - 18) < 1e-9);
   assert.ok(Math.abs(feature.windowCenters[0] - 2 - feature.wallStartZ - 0.975) < 1e-9);
   assert.ok(Math.abs(feature.wallEndZ - feature.windowCenters[1] - 2 - 0.975) < 1e-9);
-  assert.ok(Math.abs(layout.sofa[1] - midpoint) < 1e-9);
-  assert.ok(Math.abs(layout.chairs[0][1] - 11.95) < 1e-9);
-  assert.ok(Math.abs(layout.chairs[1][1] - (feature.wallEndZ - 2.175)) < 1e-9);
-  assert.equal(layout.chairs[1][0], 2.9);
-  assert.equal(layout.chairs[0][0], 3.6);
-  for (const [index, chair] of layout.chairs.entries()) {
-    assert.ok(Math.sin(chair[2]) > 0, 'Chair faces toward the sofa');
-    assert.ok(Math.cos(chair[2]) * (index === 0 ? 1 : -1) > 0, 'Chair faces toward the conversation center');
-    const halfWidth = (Math.abs(Math.cos(chair[2])) * 34 / 12 + Math.abs(Math.sin(chair[2])) * 34.5 / 12) / 2;
-    const sofaFront = layout.sofa[0] - 46 / 24;
-    assert.ok((sofaFront - chair[0] - halfWidth) * 12 >= 26, 'At least 26 inches between chair and sofa bounding envelopes');
-  }
-  assert.ok(context.layouts.every((option) => !('tables' in option)), 'No living layout restores the removed sofa-side table');
   assert.doesNotMatch(source, /livingTables|Square walnut sofa end table|Walnut end-table leg/, 'Removed table geometry and preview wiring stay absent');
-  assert.equal(layout.sofa[0], 11.6);
-  assert.equal(context.layouts.length, 10);
-  const readingChair = layout.chairs[1];
-  const halfDepth = (Math.abs(Math.sin(readingChair[2])) * 34 / 12 + Math.abs(Math.cos(readingChair[2])) * 34.5 / 12) / 2;
-  assert.match(layout.note, /predating removal of the fireplace built-ins/);
-  assert.doesNotMatch(layout.note, /wall-length cabinet/);
-  assert.ok(readingChair[1] + halfDepth < feature.wallEndZ - 0.08, 'Reading-chair envelope clears the stair guard centerline');
-  const cornerChair = layout.chairs[0];
-  const halfWidth = (Math.abs(Math.cos(cornerChair[2])) * 34 / 12 + Math.abs(Math.sin(cornerChair[2])) * 34.5 / 12) / 2;
-  const cornerHalfDepth = (Math.abs(Math.sin(cornerChair[2])) * 34 / 12 + Math.abs(Math.cos(cornerChair[2])) * 34.5 / 12) / 2;
-  assert.ok(cornerChair[0] - halfWidth > 1.38, 'Corner chair clears the stone face plane');
-  assert.ok(cornerChair[1] - cornerHalfDepth > feature.wallStartZ + 0.1, 'Corner chair clears the return-wall trim');
-  const ottomanFrontX = cornerChair[0] + Math.sin(cornerChair[2]) * 2.7 + Math.abs(Math.cos(cornerChair[2])) + Math.abs(Math.sin(cornerChair[2])) * 20 / 24;
-  assert.ok(ottomanFrontX < layout.sofa[0] - 46 / 24, 'New ottoman stays clear of the sofa');
-  assert.ok(2.7 - 34.5 / 24 - 20 / 24 > 5 / 12, 'At least five inches between chair and ottoman');
-});
-
-test('matching chair ottomans use tan upholstery, scaled dimensions and follow their parent chairs', () => {
-  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
-  class Group {
-    constructor() { this.children = []; this.position = {}; }
-    add(child) { this.children.push(child); }
-  }
-  const context = {
-    THREE: { Group }, oak: {}, tanLeather: {}, tanLeatherCushion: {},
-    box(parent, x, y, z, width, height, depth, material) {
-      const part = { x, y, z, width, height, depth, material };
-      parent.add(part);
-      return part;
-    }
-  };
-  vm.runInNewContext(source.slice(source.indexOf('  function loungeOttoman('), source.indexOf('  const cornerOttoman =')), context);
-  for (const chair of [new Group(), new Group()]) {
-    const ottoman = context.loungeOttoman(chair);
-    assert.equal(chair.children[0], ottoman);
-    assert.equal(ottoman.position.z, 2.7);
-    const cushion = ottoman.children.find((part) => part.name === 'Ottoman cushion');
-    assert.equal(cushion.material, context.tanLeatherCushion);
-    assert.equal(cushion.width * 12, ottoman.userData.widthInches);
-    assert.equal(cushion.depth * 12, ottoman.userData.depthInches);
-    assert.equal((cushion.y + cushion.height / 2) * 12, ottoman.userData.heightInches);
-  }
 });
 
 test('first-floor baseline matches the furnished model floors and canonical wall openings', () => {
@@ -1024,18 +863,19 @@ test('first-floor room edits move shared edges and preserve immutable baseline a
 });
 
 test('first-floor walls move in both axes, change thickness and keep joins', () => {
-  const edits = layout.editWall(baseline, layout.empty(), 'Kids north', { z1: 27.2, z2: 27.2, thickness: 0.5 });
+  const edits = layout.editWall(baseline, layout.empty(), 'Kids south', { z1: 33.2, z2: 33.2, thickness: 0.5 });
   const plan = layout.resolve(baseline, edits);
-  assert.equal(plan.walls.find((wall) => wall.name === 'Kids west').z1, 27.2);
-  assert.equal(plan.rooms.find((room) => room.name === 'Kids room').z, 27.2);
-  assert.equal(plan.walls.find((wall) => wall.name === 'Kids north').thickness, 0.5);
+  assert.equal(plan.walls.find((wall) => wall.name === 'Kids west').z2, 33.2);
+  const kids = plan.rooms.find((room) => room.name === 'Kids room');
+  assert.ok(Math.abs(kids.z + kids.d - 33.2) < 1e-8);
+  assert.equal(plan.walls.find((wall) => wall.name === 'Kids south').thickness, 0.5);
   const horizontalMove = layout.editWall(baseline, layout.empty(), 'Office north', { x1: 0.25, x2: 12.45 });
   assert.equal(layout.resolve(baseline, horizontalMove).walls.find((wall) => wall.name === 'Office north').x1, 0.25);
 });
 
 test('first-floor stairs, opening widths and schema remain protected', () => {
   assert.throws(() => layout.editRoom(baseline, layout.empty(), 'Kids room', { x: 1 }), /stair/);
-  assert.throws(() => layout.editWall(baseline, layout.empty(), 'Kids north', { x1: 1, x2: 11, z1: 28, z2: 28 }), /stair/);
+  assert.throws(() => layout.editWall(baseline, layout.empty(), 'Kids south', { x1: 1, x2: 11, z1: 28, z2: 28 }), /stair/);
   assert.throws(() => layout.editWall(baseline, layout.empty(), 'Living north', { x2: 2 }), /opening/);
   assert.throws(() => layout.resolve(baseline, { version: 1, rooms: [], walls: [{ name: 'unknown' }] }), /Unknown/);
   assert.deepEqual(layout.resolve(baseline, layout.empty()).rooms, baseline.rooms);

@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "retrievedOn": "2026-10-24",
   "purpose": "Reusable local asset library; not automatically placed in the home model. Dimensions and suitability are unverified.",
-  "assetCount": 1184,
-  "totalBytes": 324189373,
+  "assetCount": 1185,
+  "totalBytes": 324413453,
   "assets": [
     {
       "id": "grab3d/bike-rack",
@@ -23370,6 +23370,28 @@
           "bytes": 7833592,
           "sha256": "e1d7cb190382111e5a5b37b51e9a7f007f7eb2ab1b6185e0188e8d0a0d1265a7",
           "download": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/MaterialsVariantsShoe/glTF-Binary/MaterialsVariantsShoe.glb"
+        }
+      ]
+    },
+    {
+      "id": "khronos/materials-variants-shoe-lite",
+      "provider": "Khronos glTF Sample Assets",
+      "title": "Materials Variants Shoe (lightweight derivative)",
+      "style": "realistic",
+      "authors": [
+        "Shopify"
+      ],
+      "source": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/MaterialsVariantsShoe",
+      "license": "CC-BY-4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
+      "attribution": "Materials Variants Shoe, copyright 2021 Shopify, CC BY 4.0. Modified derivative (November 14, 2026): default material only (variants removed), mesh simplified from about 22,700 to 2,043 triangles with meshoptimizer, textures resized to 512 px JPEG via glTF-Transform for viewer performance. The unmodified original GLB is retained alongside.",
+      "entry": "khronos/MaterialsVariantsShoe-lite.glb",
+      "files": [
+        {
+          "path": "khronos/MaterialsVariantsShoe-lite.glb",
+          "bytes": 224080,
+          "sha256": "8f99e7931624ef619715ee2d48a2813cdd78b40b74441735d9e8f6d2cec8c752",
+          "derivedFrom": "khronos/MaterialsVariantsShoe.glb"
         }
       ]
     },

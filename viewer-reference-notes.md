@@ -2,6 +2,94 @@
 
 ## Compact viewer
 
+November 14 follow-up: north-entry kids → full-width rectangular bath →
+larger walk-through closet → rectangular bedroom. Kids north wall's kitchen paint face
+is flush with the refrigeration carcass body face z24.766666667 (centreline z24.941666667), excluding
+fronts/handles. Numbered image unavailable: assume1 = west entry infill,
+2 = north nominal60 ×96 cased openingx20.875–25.875 with22.5/25.65-inch west/east piers.
+The white return moves east3.15 inches to x28.0125; its finished face touches
+the fridge end panel at x28.1875 without added oak strips. Cabinet bank and
+opening stay fixed. Retain90-degree stops; installation clearance needs review.
+Future30+30 double leaves need supplier frame/rough-opening approval;
+no leaves/hinges/handles now. No board/towers/lights are restored.
+Board/two towers/lights await relocation: deep desks are not a writing-reach site.
+New opening/header/support and circuit relocation need professional review.
+
+Kids main9.0125 ×8.035400262 ft plus NE3.1875 ×6.077066929 ft fromz26.9:
+91.789696 sq ft, not the rectangular label envelope. Hall/Kitchen attribution
+is split with no double floor area. Both full47.25 ×31.5-inch desks form a
+contiguous south pair atx23.36875/27.30625,z31.489566929; chairsz30.152066929.
+East-wall39 ×17.375-inch TROFAST at(30.301041667,28.7), facing west,
+keeps nine bins/lidded LEGO inserts. Corner gap3.625 inches; full bin pull
+leaves0.875 inch to tucked east chair: occupied chair/toy use remains sequential.
+Westz27–31.5 is solid including hall panels/base; former leaves, hardware,
+casing and doorway metadata are removed. Interior north staging band103.95
+inches wide narrows to60 nominal at entry, not occupied passing approval.
+
+Bath wall centersz32.977066929–37.977066929;12.2 ×5 ft NOMINAL/61 sq ft.
+North fixed; south/shared wall moves4.2 inches north. Overall55.8 inches clear.
+West built-in wall-to-wall 36 ×53.4-inch clear shower/east30-inch entry;48 ×18-inch vanity; private
+WC36 ×55.8 inches clear/30 ×96 inward solid door. Its opening/south hinge
+move4.2 inches north, handing unchanged; five-degree constituent sweeps
+through90 clear fixtures/paint.24-inch route screen is not accessibility/code approval.
+South wall is straight through
+the piano north return. Closet actual floorx20.841666667–31.2,
+z37.977066929–43.279166667:54.920916 sq ft;120.1 ×59.4252 inches clear.
+Owner-authorized storage replacement: south-east Bosch WGB24600UC/WQB245B0UC
+stack faces west. Product reference23.5 ×26 ×67.75 inches, provisional
+WTZ27510UC kit/reversed dryer hinge. West48 ×24-inch carcass now has two nominal
+24 ×24 ×84-inch long/double-short modules with three22.5-inch rods. West shelf
+extensions remain upper59.1752/lower57.9252 inches with separate rear scribes.
+North-east30 ×12 ×84-inch shelf module has six fixed levels12/27/42/57/72/84,
+separate1/2-inch rear scribe above8-inch baseboard. Stack south gap1 inch,
+rear3; shelf/stack gap4.1752 inches. Closed stack/clothes clearance66.35 inches;
+published open dryer envelope leaves48.85. A30 ×30-inch occupied loading square
+leaves18.85 inches to clothes: loading and through-passage sequential.
+Shelf retrieval30-inch zone leaves52.6 inches to clothes. Former east double
+hanging is sacrificed. Model doors are proxies, not certified hinge CAD.
+Approval required: exact pairing/kit, delivery/turning and service extraction,
+reach, ventilation/conditioned air, support/vibration, plumbing/leak protection,
+power, waterproofing and garage/fire separation. Solid pocket doors do not
+provide Bosch's equivalent high/low30-sq-in openings; do not operate until
+approved. No services modeled or allowed in pocket cavities/garage separation.
+Retain other laundry pending approval. Official sources/retrieval2026-11-14
+and dimensions in bedrooms.html; no new visible UI.
+Verification, November14: HTTP model inspected in top, east-facing closed/open
+laundry and reverse hanging views, including Night. Actual Three.js matrices:
+stack26 ×67.75 ×23.5 inches in world X/Y/Z; base at0.005-ft hardwood.
+Constituent checks against35 nearby wall/trim meshes found no positive overlap;
+both reference doors sampled every5 degrees through180 and both pocket leaves
+at21 positions cleared storage/shell. Appliance click targets use the existing
+90-degree door handler; Node exercises open/close, not certified hinge motion.
+Floor/Day-Night restoration checked; temporary route removed and production
+reloaded. Laundry/bath13 tests pass; expanded ground/piano suites hit unrelated
+concurrent kids-boundary fixture failures and are not an all-green verification.
+Bedroom north wall is straight through the
+piano south return; full bedroom142.2 ×132 inches clear/139.08 sq ft floor.
+Keep front window,entryz44.8–47.8,queen/east headboard,TV/nights.
+November 14: living-room CLP-825, bench and music lamp removed, not relocated.
+Guest YDP-145, bench, recess walls and lighting retained. Earlier living-piano
+retention/placement notes in this reference are superseded historical studies.
+
+Both nominal30 ×96 pocket entries remain real3-inch cavities, default closed,
+flush pulls/retractable edge pulls (0.66-inch projection into opening when open).
+No exposed tracks; keep services/fasteners out of cavities. Supplier framing,
+headers, jambs, acoustic/privacy hardware and wet-side finishes unresolved.
+YDP-145 proxy1357 ×422 ×815 mm/rest969 mm; official source/retrieval2026-11-14
+in bedroom notes (53 7/16 ×16 5/8 inches rounded, this Yamaha only).
+Recess only in closet band,centerz40.628116798,20-inch depth,
+3-inch end/1.29-inch rear gaps before low trim. Provisional24 ×12-inch bench
+(not selected Yamaha bench) defaults tucked atx19.15:5.7-inch insertion,
+0.3871-inch rear-leg/pedal-rail gap,7.0066-inch seat/console vertical gap.
+Constituent XYZ meshes do not intersect; retrieve before playing.
+Bath/bed floors rectangular; built-in shower pan meets south paint (former5.4-inch gap removed).
+Occupied/retrieval piano/hall use,power/ventilation unverified. Close vanity fronts
+before passing. All occupied/product,reach,anchorage,wet-area,structural,
+electrical,egress and garage-separation decisions require professional review.
+Source tests only; parent performs browser matrices,Day/Night,floor restoration
+and unchanged elevations. Current views:guest-suite,guest-closet,guest-bathroom,
+guest-bedroom,kids. Superseded measurements below are historical.
+
 October 31 guest-entry layout: powder toilet and retained 42 x 21 in vanity
 face south from the north wall; south-jamb powder entry is lower right.
 Coat closet is north of the alcove, with its closed 48 x 96 in pair opening
@@ -23,7 +111,7 @@ including southern finished-loft intent with a flat nine-foot ceiling, subject
 to conditioning and finished-area eligibility review. The northern unfinished half stays excluded.
 The owner's exterior-measurement preference supersedes the earlier
 inside-wall and once-only stair rules. Latest downstairs wall shifts, z18
-fireplace/seating, kitchen/prep and straight kids wall/piano bay remain.
+fireplace/seating and kitchen/prep remain; living piano removal supersedes the piano bay study.
 H is active in the normal viewer; I SVG and saved JSON remain comparisons.
 Whole house: 27 openings /47 units; upstairs: 12 openings /17 casements.
 The current actual stairs, stepped stringers and full upper-flight guard stay.
@@ -230,7 +318,7 @@ These notes were moved out of the 3D viewer page so the viewer stays model-first
 
 Current J (October 27) is a fireplace-facing 132 x 99 in U sectional with no chair or end table; see the living room page. Historical J: kept the warm-neutral grouping: mushroom main sofa, perpendicular brown-gray 66-inch two-seat loveseat, and two oatmeal chairs opposite it with a small oak end table between them. The latest table request overrides the earlier no-end-table direction; retain no coffee table, cart, lamp or rug. Hardwood stays exposed. Do not copy the double-height architecture or oversized chandelier. Performance fabric, family comfort, table stability/reach, occupied access, stair/guard access and fireplace clearances require verification. I retains the earlier brown L and ottoman; A-H retain older studies.
 
-The viewer applies alternative J, now the fireplace-facing U sectional, by default. The other alternatives (A-I) remain defined as `livingLayouts` in `assets/js/floor-plan-3d.js`; see the [living room page](foyer/living-room.html#living-room-layout).
+The viewer applies alternative J, now the fireplace-facing U sectional, by default. The unreachable alternatives (A-I) and their three downloaded models (armchair, Glam velvet sofa and side table) were removed from the viewer code on November 14 for load and render performance; the model files remain in the asset library. Historical descriptions remain on the [living room page](foyer/living-room.html#living-room-layout).
 
 ## Furniture references
 

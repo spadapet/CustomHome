@@ -119,7 +119,14 @@ test('room navigation gives every room its own floor-aware camera and keeps insp
   assert.doesNotMatch(toolbar, /data-view="(?:social|prep|mudroom-cubbies|mudroom-storage)"/);
   for (const key of ['social:', 'prep:', "'mudroom-cubbies':", "'mudroom-storage':"]) assert.ok(source.includes(key), 'Legacy inspection/deep-link presets remain available');
   assert.ok(source.includes("presets[name].floor ??"));
-  assert.match(source, /'guest-bathroom': \{ target: \[25\.1, 1\.5, 39\.5\], offset: \[0\.2, 15, 0\.01\], span: 15 \}/);
+  const bathroomPreset = source.match(/'guest-bathroom': (\{ target:.*? \}),/);
+  assert.ok(bathroomPreset, 'Bathroom inspection preset exists');
+  const suite = require('../assets/js/floor-plan-ground.js').getGuestSuiteLayout();
+  const measuredPreset = vm.runInNewContext(`(${bathroomPreset[1]})`, { guestSuite: suite });
+  assert.deepEqual(Array.from(measuredPreset.target), [25.1, 1.5, suite.bathroom.z + suite.bathroom.d / 2],
+    'Inspection remains centered in the actual shortened bathroom');
+  assert.deepEqual(Array.from(measuredPreset.offset), [0.2, 18, 0.01]);
+  assert.equal(measuredPreset.span, 15);
   const startSource = source.slice(source.indexOf('  function startWalking('), source.indexOf('    buildWalkObstacles();', source.indexOf('  function startWalking(')));
   vm.runInNewContext(`${startSource}return { x, z, lookX, lookZ }; }`, context);
   for (const view of ['powder', 'prep-kitchen', 'office', upstairsButtons[0].dataset.view]) {
@@ -234,7 +241,7 @@ test('reference sections below the viewer live in markdown, not on the page', ()
   const notes = read('viewer-reference-notes.md');
   assert.doesNotMatch(html, /Living-room layout lab|Meet the furniture|Model assumptions|furniture-card|concept-details|data-living-choice/);
   assert.doesNotMatch(source, /living-layout-options|living-layout-status|furniture-card|furniture-photo|function livingPlan/);
-  assert.match(source, /applyLivingLayout\(livingLayouts\[0\], false\);/);
+  assert.doesNotMatch(source, /applyLivingLayout|livingLayouts/);
   assert.match(html, /class="studio-footer"/);
   for (const heading of ['## Living-room layout alternatives', '## Furniture references', '## Model assumptions, dimensions and vehicle references']) assert.ok(notes.includes(heading), heading);
 });
@@ -297,11 +304,13 @@ test('floor-plan archive preserves both revisions and marks the shower option as
       assert.equal(label.children[0].textContent, context.planRoomName(room.name));
       const clear = floor === 'upstairs' ? scope.getUpstairsRoomClearDimensions(room, upstairsPlan.walls) : room;
       const maxExtent = floor === 'ground' && room.name === 'Garage';
-      const size = floor === 'ground' && room.name === 'Kids room' ? '125.66 sq ft, stepped plan' : `${context.feet(clear.w)} x ${context.feet(clear.d)}${floor === 'upstairs' ? ' paint-face' : ''}${maxExtent ? ' max extents; L-shaped footprint' : ''}`;
+      const shape = floor === 'ground' && ['Kids room', 'Closet'].includes(room.name);
+      const area = shape ? context.groundBaseline.floors.filter(f => f.room === room.name).reduce((sum, f) => sum + f.w * f.d, 0).toFixed(2) : null;
+      const size = shape ? `${area} sq ft, nominal floor` : `${context.feet(clear.w)} x ${context.feet(clear.d)}${floor === 'upstairs' ? ' paint-face' : ''}${maxExtent ? ' max extents; L-shaped footprint' : ''}`;
       assert.equal(elements['plan-dimension-list'].children[index].textContent, `${room.name}: ~ ${size}`);
       assert.equal(label.title, `${room.name}: ${size}`, 'Detailed names and qualifications remain available');
       assert.doesNotMatch(label.children[1].textContent, /paint-face|stepped|edge|to z/);
-      const compact = floor === 'ground' && room.name === 'Kids room' ? '125.66 sq ft'
+      const compact = shape ? `${area} sq ft`
         : `${context.feet(clear.w)} x ${context.feet(clear.d)}${maxExtent ? ' max' : ''}`.replace(/' /g, "'").replace(/'0"/g, "'");
       assert.equal(label.children[1].textContent, compact);
       if (floor === 'upstairs' && room.name === 'Bedroom 2') {
@@ -338,7 +347,7 @@ test('floor-plan archive preserves both revisions and marks the shower option as
   assert.equal(input.disabled, true);
   assert.equal(elements['plan-dimension-labels'].hidden, true);
   assert.match(source, /roomDimensionsInput.checked = initialParameters.get\('dimensions'\) !== '0'/);
-  const renderBody = source.slice(source.indexOf('  function render() {'), source.indexOf('  function applyLivingLayout('));
+  const renderBody = source.slice(source.indexOf('  function render() {'), source.indexOf("  viewport.dataset.livingLayout = 'reference-lounge';"));
   assert.match(renderBody, /updateVehicleDoorControls\(\);\s+positionPlanDimensions\(\)/);
 });
 

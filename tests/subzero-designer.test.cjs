@@ -109,7 +109,7 @@ test('Designer units use cabinet-matching Shaker panels, mirrored hinges and sat
     close((b.maxX - b.minX) * 12, 35.75); close(b.maxY * 12, 84);
     const sideWallFace = unit.name === 'Column freezer' ? 37.5 - 0.175 : ground.getKitchenRefrigerationLayout().returnX + 0.175;
     const sideReserveInches = (unit.name === 'Column freezer' ? sideWallFace - b.maxX : b.minX - sideWallFace) * 12;
-    close(sideReserveInches, unit.name === 'Column freezer' ? 4.775 : 4.025);
+    close(sideReserveInches, unit.name === 'Column freezer' ? 4.775 : 0.875);
     const cavity = unit.children.find(part => part.name === 'Sub-Zero Designer chassis envelope');
     const wallGapInches = (26.9 - bounds(cavity).maxZ) * 12;
     close(wallGapInches, 0.6);
@@ -229,11 +229,13 @@ test('stopped door and handle sweeps clear current geometry while the hinge prox
 test('interior floor transfer preserves total area and all passage, stair and garage boundaries', () => {
   const plan = ground.getGroundFloorDefaultPlan();
   const kidsArea = plan.floors.filter(part => part.room === 'Kids room').reduce((sum, part) => sum + part.w * part.d, 0);
-  close(kidsArea, 125.66);
-  close(plan.rooms.find(room => room.name === 'Kids room').z, 26.9, 'Latest north wall stays aligned with the refrigerator-wall return');
+  close(kidsArea, 91.78969570209975);
+  close(plan.rooms.find(room => room.name === 'Kids room').z - 0.175, ground.getKitchenRefrigerationLayout().bodyFaceZ);
   close(ground.getLivableFloorArea(plan, { includeStairs: true }), 1924.3327083333334);
   assert.equal(ground.getKitchenPassageLayout().wallX, 37.5);
   assert.equal(ground.getKitchenPassageLayout().clearWidth, 2.5);
   assert.equal(plan.walls.find(([name]) => name === 'Garage west return')[1], 31.2);
-  assert.deepEqual(plan.walls.find(([name]) => name === 'Kids west')[5], [[27 - plan.rooms.find(room => room.name === 'Kids room').z, 31.5 - plan.rooms.find(room => room.name === 'Kids room').z, 0, 8]]);
+  assert.equal(plan.walls.find(([name]) => name === 'Kids west')[5], undefined, 'Assumed location1 is now solid');
+  assert.deepEqual(plan.walls.find(([name]) => name === 'Kids north')[5], [[1.875, 6.875, 0, 8]],
+    'Assumed location2 is60 ×96 nominal while refrigeration and kitchen passages stay fixed');
 });
