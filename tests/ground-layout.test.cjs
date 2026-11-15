@@ -42,7 +42,7 @@ test('open kids, straight bath, larger closet and rectangular bedroom floors mee
   assert.equal(kids.length, 2, 'The NE kitchen return creates a two-rectangle kids floor');
   close(kids[0].x, 19); close(kids[0].w, 9.0125); close(kids[0].z, baseline.rooms.find(({ name }) => name === 'Kids room').z);
   close(kids[1].x, 28.0125); close(kids[1].w, 3.1875); close(kids[1].z, 26.9);
-  close(kids.reduce((sum, { w, d }) => sum + w * d, 0), 9.0125 * (s.kidsSouthZ - (26.85 - 25 / 12 + 0.175)) + 3.1875 * (s.kidsSouthZ - 26.9));
+  close(kids.reduce((sum, { w, d }) => sum + w * d, 0), 9.0125 * (s.kidsSouthZ - (26.725 - 25 / 12 + 0.175)) + 3.1875 * (s.kidsSouthZ - 26.9));
   const zones = baseline.floors.filter(({ room }) => /^(Kids room|Closet$|Bathroom$|Guest room$|Hall piano recess$)/.test(room ?? ''));
   for (const f of zones) assert.ok(f.w > 0 && f.d > 0);
   for (let i = 0; i < zones.length; i++) for (let j = i + 1; j < zones.length; j++) {
@@ -734,7 +734,7 @@ test('kids north has a 60 x 96 cased opening, its kitchen face flush with the ca
   const wall = baseline.walls.find(([name]) => name === 'Kids north');
   const room = baseline.rooms.find((room) => room.name === 'Kids room');
   assert.deepEqual(wall[5], [[1.875, 6.875, 0, 8]]);
-  assert.ok(Math.abs(room.z - (26.85 - 25 / 12 + 0.175)) < 1e-9, 'Wall centreline sits half a 4.2-in wall behind the cabinet face');
+  assert.ok(Math.abs(room.z - (26.725 - 25 / 12 + 0.175)) < 1e-9, 'Wall centreline sits half a 4.2-in wall behind the cabinet face');
   assert.ok(Math.abs(room.z + room.d - getGuestSuiteLayout().kidsSouthZ) < 1e-9);
   const west = baseline.walls.find(([name]) => name === 'Kids west');
   assert.equal(west[5], undefined);
@@ -754,7 +754,8 @@ test('kids-room kitchen return and garage partition stay aligned around the full
   assert.ok(!baseline.walls.some(([name]) => name === 'Garage southwest return'));
   const floors = baseline.floors.filter((floor) => floor.room === 'Kids room');
   const area = floors.reduce((sum, floor) => sum + floor.w * floor.d, 0);
-  assert.ok(Math.abs(area - 91.78969570209975) < 1e-8);
+  // Nov 15: refrigeration bank flush to the kitchen wall face (no 1.5-in setback into it); kids north wall follows the cabinet face.
+  assert.ok(Math.abs(area - (91.78969570209975 + 1.5 / 12 * 9.0125)) < 1e-8);
   assert.ok(Math.abs(floors.find(({ x }) => x === 28.0125).w * floors.find(({ x }) => x === 28.0125).d - 3.1875 * (getGuestSuiteLayout().kidsSouthZ - 26.9)) < 1e-9);
   for (const kids of floors) for (const garage of baseline.floors.filter((floor) => floor.room === 'Garage')) {
     assert.ok(Math.min(kids.x + kids.w, garage.x + garage.w) - Math.max(kids.x, garage.x) < 1e-9 ||
@@ -781,7 +782,7 @@ test('fireplace built-ins are removed entirely and baseboard runs continuously f
   const feature = getLivingRoomFeatureLayout();
   vm.runInNewContext(`${halfSource[0]}\n${source.slice(source.indexOf('\n', start), end)}`, {
     THREE: { Vector2 }, livingFeatureWall: feature, guestEntry: { stairGuard: { x: 99, z: 99 } },
-    guestSuite: getGuestSuiteLayout(),
+    guestSuite: getGuestSuiteLayout(), kitchenRefrigeration: require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout(),
     cover(a, b, normal) { covers.push({ a, b, normal }); }
   });
   const onWindowWall = covers.filter(({ a, b, normal }) => Math.abs(a.x - 0.175) < 0.01 && Math.abs(b.x - 0.175) < 0.01 && normal.x === 1 &&

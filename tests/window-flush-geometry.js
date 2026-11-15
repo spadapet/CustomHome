@@ -48,13 +48,19 @@ function verifyFlushWindowGeometry(THREE, scene) {
     unitCount += units.length / 4;
     const sideBoards = returns.children.filter(part => part.name === 'White casing side board');
     const bottomBoards = returns.children.filter(part => part.name === 'White casing flat bottom board');
-    if (sideBoards.length !== 2 || bottomBoards.length !== 1) throw new Error('Missing complete flat window surround');
+    // A shower-side wet edge omits/shortens painted trim at the enclosure face.
+    const wetEdge = returns.userData.wetJambEdge ?? 0;
+    const omittedLegs = wetEdge && returns.userData.paintedTrimStopFeet <= returns.userData.width / 2 + 0.125 / 12 + 0.001 ? 1 : 0;
+    if (sideBoards.length !== 2 - omittedLegs || bottomBoards.length !== 1) throw new Error('Missing complete flat window surround');
     const bottomBoard = bottomBoards[0];
     const tangent = new THREE.Vector3(1, 0, 0).transformDirection(returns.matrixWorld);
     const bottomSpan = interval(bottomBoard, tangent);
     const sideSpans = sideBoards.map(part => interval(part, tangent));
-    close(bottomSpan[0], Math.min(...sideSpans.map(span => span[0])), 'bottom board left edge aligns with sides');
-    close(bottomSpan[1], Math.max(...sideSpans.map(span => span[1])), 'bottom board right edge aligns with sides');
+    const center = returns.getWorldPosition(new THREE.Vector3()).dot(tangent);
+    if (wetEdge < 0) close(bottomSpan[0], center - returns.userData.paintedTrimStopFeet, 'bottom board stops at the shower face');
+    else close(bottomSpan[0], Math.min(...sideSpans.map(span => span[0])), 'bottom board left edge aligns with sides');
+    if (wetEdge > 0) close(bottomSpan[1], center + returns.userData.paintedTrimStopFeet, 'bottom board stops at the shower face');
+    else close(bottomSpan[1], Math.max(...sideSpans.map(span => span[1])), 'bottom board right edge aligns with sides');
     close(interval(bottomBoard, new THREE.Vector3(0, 1, 0))[1], vertical[0], 'bottom board meets sill underside');
     for (const board of [...sideBoards, bottomBoard]) {
       close(interval(board, normal)[1], edge + 0.0625, 'flat surround faces aligned');
@@ -81,10 +87,12 @@ function verifyFlushWindowGeometry(THREE, scene) {
     for (const part of returns.children) {
       if (['White casing header', 'White casing header bead', 'White casing projecting cap', 'White casing side board', 'White casing flat bottom board'].includes(part.name)) continue;
       if (interval(part, normal)[1] > edge + 0.00001) throw new Error('Return projects into room');
+      if (/^Tiled shower window/.test(part.name)) continue; // Wet-area tile finish, not painted trim.
       if (/casing|apron|cap/i.test(part.name)) throw new Error('Projecting window trim remains');
       if (!part.material.color.equals(sill.material.color)) throw new Error('Window returns must share the white sill finish');
     }
-    close(sill.geometry.parameters.width, returns.userData.width, 'opening-width sill, no horns');
+    const wetSill = returns.children.find(part => part.name === 'Tiled shower window sill return');
+    close(sill.geometry.parameters.width + (wetSill?.geometry.parameters.width ?? 0), returns.userData.width, 'opening-width sill, no horns');
   }
   for (const frame of exterior) {
     const center = frame.getWorldPosition(new THREE.Vector3());

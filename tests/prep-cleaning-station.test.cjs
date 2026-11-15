@@ -200,8 +200,8 @@ test('robot and charging base turn sideways together while the power outlet stay
   assert.equal(dock.rotation.y, Math.PI / 2);
   assert.equal(model.find('Compact robot charging base allowance')[0].parent, dock);
   assert.ok(base.minX > robot.maxX, 'Dock sits east of the robot, not behind it across the aisle');
-  assert.ok(Math.abs((robot.minZ - (14.825 - 16 / 12)) * 12 - 1.8) < 1e-9, 'Unmoved robot now sits 1.8 inches behind the deeper shelf front');
-  assert.ok(robot.maxZ < 14.825 && base.maxZ < 14.825, 'Robot and base clear the rear wall');
+  assert.ok(Math.abs((robot.minZ - (14.825 - 16 / 12)) * 12 - 0.96) < 1e-9, 'Robot sits 0.96 inch behind the deeper shelf front');
+  assert.ok(robot.maxZ < 14.825 - 0.75 / 12 && base.maxZ < 14.825 - 0.75 / 12, 'Robot and base clear the rear-wall base trim');
   const outlet = model.find('Robot dock power outlet allowance')[0];
   assert.equal(outlet.parent, model.find('Prep open pantry shelves')[0]);
   assert.ok(bounds(outlet).minZ > 14, 'Outlet follows the shelf backing instead of rotating with equipment');

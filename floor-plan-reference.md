@@ -41,7 +41,7 @@ geometry agrees on these wall-center datums:
 | Boundary | z, feet |
 |---|---:|
 | Refrigeration cabinet carcass face = Kids north wall kitchen paint face (flush) | 24.766666667 |
-| Kids north wall centreline / cased opening / room line | 24.941666667 |
+| Kids north wall centreline / cased opening / room line | 24.816666667 |
 | Kids south / bath north | 32.977066929 |
 | Bath south / closet north / piano north return | 37.977066929 |
 | Closet south / bedroom north / piano south return | 43.279166667 |
@@ -134,9 +134,9 @@ atx19.15:5.7-inch seat insertion,0.3871-inch rear-leg/pedal-rail gap and
 Retrieve before playing. Occupied/retrieval hall/bench,
 power and ventilation remain unverified. Living-side piano unchanged.
 
-Kids floor is two rectangles:9.0125 ×8.035400262 ft main and3.1875 ×6.077066929 ft
-NE fromz26.9, **91.789696 sq ft**, not its rectangular room-label envelope.
-North wall kitchen paint face is flush with the cabinet body face26.725 +0.125 −25/12 (centreline +2.1 in);
+Kids floor is two rectangles:9.0125 ×8.160400262 ft main and3.1875 ×6.077066929 ft
+NE fromz26.9, **92.916258 sq ft**, not its rectangular room-label envelope.
+North wall kitchen paint face is flush with the cabinet body face26.725 −25/12 (Nov 15: no setback into the wall; centreline +2.1 in);
 not handles/fronts/cornice. Split Hall/Kitchen floors around adopted strip,
 conserving shell/floor union without double attribution. North opening is
 x20.875–25.875 with22.5/25.65-inch west/east nominal piers and96-inch header;
@@ -462,6 +462,13 @@ survives. Laundry south counter/run shifts 1.2 inches east, retaining standard
 Bath 2 toilet centre (38.141667,8.6) is 15.2 inches from counter/shower each
 side, not sanitary/product approval. Its partition-side vanity leaf reverses
 handing so its actual pull clears.
+November 15: the fixed Bath 2 window (x37.575–39.575, unchanged inside and on
+the rear elevation) enters the Bedroom 2 shower by 2 inches. Painted casing
+stops at the shower face x39.408 (east leg omitted, bottom board shortened);
+the east jamb and in-shower sill end are tiled returns; the shower back tile
+is notched (below the 36-inch sill, resuming at the jamb face x39.6146).
+Trim-to-shower interpenetration 0 (was 0.51 in). Window-in-wet-area
+waterproofing, sill slope and safety/obscure glazing need professional review.
 
 Four bathrooms plus enclosed WC each have independent 2700 K downward-wash
 nightlight faceplate centres at +10.8 inches, actual emitters +9.84 inches,
@@ -699,7 +706,7 @@ and [Designer door stops](https://www.subzero-wolf.com/assistance/answers/sub-ze
 They document dimensions, accessories and stops, not the concealed hinge's
 complete movement path.
 
-Targeted source-geometry regression samples each custom panel and documented handle at 901 poses from 0 to the included 90-degree stop in 0.1-degree increments. Both stopped sweeps clear the modeled side-wall planes, flush refrigeration panels, island and 108-inch cooktop counter. The same fixed-axis proxy is separately checked at the factory 105-degree endpoint and reproduces Sub-Zero's 34.5-inch forward clearance and 7.25-inch side clearance; the unrestricted sweeps reach the adjacent finished walls before 105 degrees, which is why the stops are required. The refrigerator is now centered in its 36-inch bay at x29.75, leaving the intended 0.125-inch reveal on both sides instead of the prior oversized outer gap; the freezer retains its 0.75-inch tower-side shift. Fridge/freezer-to-island gaps remain 46.05 inches at the closed custom face and 44.30 inches at the documented 1.75-inch handle projection. Both 300 ms open/close animations are separately interaction-tested. The full refrigeration bank remains set back 1.5 inches, leaving 0.6 inch between the modeled 24-inch body and wall plane. This is not a browser visual review, manufacturer-CAD hinge simulation or installation approval. Both 30-inch passages move 1.05 inches away from cooking to z = 9.6375-12.1375 and 21.7625-24.2625. Finished casing faces are 108.25 inches apart, leaving a modeled 0.125-inch gap at each end of the 108-inch counter. Verify fabricated panel weight/mounting, casing tolerances, shelf/drawer withdrawal, ventilation, anchorage, loads, structure and services before installation.
+Targeted source-geometry regression samples each custom panel and documented handle at 901 poses from 0 to the included 90-degree stop in 0.1-degree increments. Both stopped sweeps clear the modeled side-wall planes, flush refrigeration panels, island and 108-inch cooktop counter. The same fixed-axis proxy is separately checked at the factory 105-degree endpoint and reproduces Sub-Zero's 34.5-inch forward clearance and 7.25-inch side clearance; the unrestricted sweeps reach the adjacent finished walls before 105 degrees, which is why the stops are required. The refrigerator is now centered in its 36-inch bay at x29.75, leaving the intended 0.125-inch reveal on both sides instead of the prior oversized outer gap; the freezer retains its 0.75-inch tower-side shift. Fridge/freezer-to-island gaps remain 46.05 inches at the closed custom face and 44.30 inches at the documented 1.75-inch handle projection. Both 300 ms open/close animations are separately interaction-tested. November 15: the full refrigeration bank bears on the finished kitchen/garage wall face (z26.725) with zero rear gap; the former 1.5-inch setback ran the 24-inch bodies 1.5 inches into the wall (its 0.6-inch figure was measured to the centreline). This is not a browser visual review, manufacturer-CAD hinge simulation or installation approval. Both 30-inch passages move 1.05 inches away from cooking to z = 9.6375-12.1375 and 21.7625-24.2625. Finished casing faces are 108.25 inches apart, leaving a modeled 0.125-inch gap at each end of the 108-inch counter. Verify fabricated panel weight/mounting, casing tolerances, shelf/drawer withdrawal, ventilation, anchorage, loads, structure and services before installation.
 
 ## Historical H restoration baseline - November 6 source, interiors superseded November 9
 
@@ -3608,7 +3615,7 @@ Dimensions include nominal room envelopes, not guaranteed usable clear rectangle
 | Prep kitchen | 37.5-55.5 / 7-15 | 18 ft x 8 ft | Rear sink/counter/window bank follows z = 7 wall; pantry and end-wall window stay fixed |
 | Mudroom | 37.5-45.4 / 15-26.9 | 7 ft 11 in x 11 ft 11 in | West wall/cases coordinated at x = 37.5; coat closet centered at x = 41.45; cubby bench and garage entry fixed |
 | Garage | 44.233-55.5 / 15-26.9 plus 31.2-55.5 / 26.9-49 | 24 ft 4 in x 34 ft maximum extents; L-shaped | West edge steps east to x=44.233 for the north leg, then returns to x=31.2 at z=26.9; narrow forward bike alcove, two parking bays, lower slab |
-| Kids' room | Main x19–28.0125 / z24.941667–32.977067; NE x28.0125–31.2 / z26.9–32.977067 | 91.789696 sq ft, two rectangles | Two full south MITTZON desks/chairs, east nine-bin TROFAST; assumed west infill/north 60 × 96-inch cased entry, no leaves now. Board/towers/lights pending relocation; sequential chair/bin use |
+| Kids' room | Main x19–28.0125 / z24.816667–32.977067; NE x28.0125–31.2 / z26.9–32.977067 | 92.916258 sq ft, two rectangles | Two full south MITTZON desks/chairs, east nine-bin TROFAST; assumed west infill/north 60 × 96-inch cased entry, no leaves now. Board/towers/lights pending relocation; sequential chair/bin use |
 | Powder room | 0-7.1 / 35.1-41 | 7 ft 1 in x 5 ft 11 in | Lower east entry; south-facing northwest toilet and centered north-wall vanity, east towel hook, retained centered west privacy window |
 | Guest coat closet | 7.1-12.2 / 35.1-37.5 | 5 ft 1 in x 2 ft 5 in | North of alcove; 24.6 in clear depth, upper shelf/hanging rail, closed 48 x 96 in oak doors facing south into alcove |
 | Guest entry alcove | 7.1-12.2 / 37.5-41 | 5 ft 1 in x 3 ft 6 in | Open east to hall; 37.8 in between paint, 36.3 in between baseboards away from casing/door projections; not occupied/accessibility approval |
@@ -3652,7 +3659,7 @@ Both columns face decreasing z into the kitchen. From the kitchen, view-left to 
 | Complete cabinet run | x =27.9375-37.3;112.35 inches, no end pull-out |
 | Freezer | Sub-Zero Designer DEC3650FI/L with ice maker, model center (35.4375,25.85), view-left/left hinge |
 | Refrigerator | Sub-Zero Designer DEC3650R/R, model center (29.75,25.85), view-right/right hinge; centered in 36 in bay with 0.125 in reveal each side |
-| Each unit | Manufacturer nominal 36 x 84 x 24 in. Selected custom stained-white-oak Shaker panel 35.75 x 79.875 x 0.75 in with cabinet-matching darker recessed field, 4 in toe kick and typical 1/8 in reveals; minimum thickness 5/8 in, maximum panel weight 75 lb, finish all sides. Satin-gold 50.125 x 0.75 in tubular handle projects 1.75 in. Fixed-axis proxy matches the 34.5 in forward / 7.25 in side endpoint at factory 105 degrees; included 90-degree stop is modeled. Panel weight/mounting and 25 in cabinetry reservation remain unapproved. Model body-to-wall gap is 0.6 in |
+| Each unit | Manufacturer nominal 36 x 84 x 24 in. Selected custom stained-white-oak Shaker panel 35.75 x 79.875 x 0.75 in with cabinet-matching darker recessed field, 4 in toe kick and typical 1/8 in reveals; minimum thickness 5/8 in, maximum panel weight 75 lb, finish all sides. Satin-gold 50.125 x 0.75 in tubular handle projects 1.75 in. Fixed-axis proxy matches the 34.5 in forward / 7.25 in side endpoint at factory 105 degrees; included 90-degree stop is modeled. Panel weight/mounting and 25 in cabinetry reservation remain unapproved. Model body-to-wall gap is 0 in (bears on the wall face, November 15) |
 | Fridge / freezer bays | x =28.25-31.25 /34-37 |
 | Tower | x =31.3125-33.9375, center32.625; retained31.5 in bay,30 clear,25 deep |
 | Steam oven | Generic 30 x 24 x 24 in W/H/D envelope, bottom lowered to 30 in above floor; no model selected |
@@ -3661,7 +3668,7 @@ Both columns face decreasing z into the kitchen. From the kitchen, view-left to 
 | Panels / fillers | Four 0.75 in plywood sides, 24 in deep to meet the Designer panel backs; 2.85 in freezer-side filler. Family shelf and 7.35 in fitted rear scribe occupy the former 3 in fridge-side filler zone and touch the cabinet side at x28.1875 |
 | Return-side end | White return x28.0125; finished face x28.1875 touches the fixed fridge end panel, no added oak packing. Fridge remains x29.75 with 0.125 in panel reveals and 0.875 in closed panel-to-paint reserve. Freezer retains its 0.75 in tower-side shift. Factory 105-degree swing needs 7.25 in; retain 90-degree stops and verify product clearance |
 
-The full refrigeration bank is set back 1.5 in while keeping the oven/tower aligned; the model leaves 0.6 in from each 24-inch appliance body to the wall plane. No counter niche or refrigeration-end pull-out remains. Cooking wall, passages, stairs, island, garage and exterior footprint stay fixed. Both appliance overheads are standard 36-inch boxes; tower/storage/oven size and mounting stay. The custom panels and handles use documented dimensions; the concealed hinge remains a fixed-axis proxy calibrated to the published endpoint. Check manufacturer opening/depth requirements, finished returns, dual-installation/service requirements, anti-tip anchorage, floor/support loads, services, stopped shelf/drawer withdrawal and occupied circulation.
+The full refrigeration bank keeps the oven/tower aligned and, since November 15, bears on the finished wall face z26.725 with zero gap behind each 24-inch appliance body (the former 1.5 in setback penetrated the wall). No counter niche or refrigeration-end pull-out remains. Cooking wall, passages, stairs, island, garage and exterior footprint stay fixed. Both appliance overheads are standard 36-inch boxes; tower/storage/oven size and mounting stay. The custom panels and handles use documented dimensions; the concealed hinge remains a fixed-axis proxy calibrated to the published endpoint. Check manufacturer opening/depth requirements, finished returns, dual-installation/service requirements, anti-tip anchorage, floor/support loads, services, stopped shelf/drawer withdrawal and occupied circulation.
 
 ### Island, seating and measured aisles
 
@@ -3675,11 +3682,11 @@ The full refrigeration bank is set back 1.5 in while keeping the oven/tower alig
 |---|---|---|
 | Cooktop counter to island | 60.9 in | Counter edges; island size/position unchanged |
 | Sink counter to island | 44.7 in | Counter edges; excludes dishwasher projection; model gap only, not operating approval |
-| Closed Designer custom Shaker panel / satin-gold tubular handle to island | 46.05 / 44.30 in | After 1.5 in refrigeration-bank setback; modeled 0.75 in panel and documented 1.75 in handle projection; not open-door, shelf/drawer or occupied approval |
+| Closed Designer custom Shaker panel / satin-gold tubular handle to island | 44.55 / 42.80 in | November 15: refrigeration bank bears on the finished kitchen/garage wall face z26.725 (the former 1.5 in setback ran chassis, carcass and cornice into the wall); modeled 0.75 in panel and documented 1.75 in handle projection; not open-door, shelf/drawer or occupied approval |
 | Prep opening relative to main sink counter front | Counter stops 4.95 in short of opening start | Opening starts at z = 9.6375; counter front ends at z = 9.225. Verify finish and casing fit |
 | Mudroom casing cap to refrigeration panel | About 0.175 in | Positive modeled trim-to-panel gap after the 1.05 in passage shift; very tight and not appliance hinge clearance or fabrication approval |
 
-Both Designer leaves start closed, click to the included 90-degree stop and animate through matching 300 ms open/close transitions. Each 35.75-inch custom Shaker panel and satin-gold tubular handle was sampled at 901 poses; the stopped sweeps clear the side-wall planes, flush panels, island and cooktop counter. A separate 105-degree endpoint check reproduces the guide's 34.5-inch forward and 7.25-inch side dimensions, but the unrestricted swing reaches a side wall near 98 degrees. Appliances remain 0.75 inch inboard and the complete wall bank sits 1.5 inches deeper. These are geometric model results, not approval of the fixed-axis hinge proxy, panel fabrication, 0.6-inch body-to-wall gap, casing fit, shelf/drawer withdrawal or occupied access. An open freezer can still obstruct the mudroom approach.
+Both Designer leaves start closed, click to the included 90-degree stop and animate through matching 300 ms open/close transitions. Each 35.75-inch custom Shaker panel and satin-gold tubular handle was sampled at 901 poses; the stopped sweeps clear the side-wall planes, flush panels, island and cooktop counter. A separate 105-degree endpoint check reproduces the guide's 34.5-inch forward and 7.25-inch side dimensions, but the unrestricted swing reaches a side wall near 98 degrees. Appliances remain 0.75 inch inboard; since November 15 the complete wall bank bears on the kitchen wall face instead of sitting 1.5 inches into it. These are geometric model results, not approval of the fixed-axis hinge proxy, panel fabrication, zero body-to-wall gap, casing fit, shelf/drawer withdrawal or occupied access. An open freezer can still obstruct the mudroom approach.
 
 ## Prep kitchen and mudroom
 
@@ -3803,7 +3810,7 @@ The [living-room requirements](foyer/living-room.html) and [viewer reference not
 | Two flights per level | Eight 7.5 in rises each; seven 10 in treads per flight; 70 in horizontal tread run |
 | Kitchen-side upstairs / basement return flight | 44 in tread width |
 | Wider upstairs / basement entry flight | 46.9 in tread width, on north side after rotation |
-| Inter-flight gap | 3 in, kept open with guards, not a solid dividing wall |
+| Inter-flight gap | 3 in, kept open with guards, not a solid dividing wall. Basement well (November 15): each flight's well-side stringer (3.6 in across the well) and 1.44 in handrail/guard bars stay in its own half, meeting the other flight's members only face to face at the well centreline; previously the returning flight's handrail/bars ran 1.44 / 0.54 in into the entry flight's stringer. The handrails now sit 0.06 in off their tread edges with no hand clearance between them where they pass; graspability, continuity and guard openings need professional review |
 | Turning platforms, upstairs and basement | Exactly 48 in deep along x x 93.9 in across z; x = 0.175-4.175, at west end |
 | Landing elevations | Turning platforms at y = +5 / -5 ft; arrivals at +10 / -10 ft |
 | Upper arrival landing | East side: x = 10.008333-13.675, z = 26.775-30.683333, y = 10; 44 in along x x 46.9 in across z |
@@ -3832,7 +3839,7 @@ not the current entry geometry. Layout choice is not installation approval.
 | Room | Furniture / fittings | Layout and constraints |
 |---|---|---|
 | Kids / kitchen north | Fixed 60 × 96-inch Craftsman cased opening x20.875–25.875, z24.766667 | West/east nominal piers22.5/25.65 inches after moving only the return to touch the cabinet; no leaves/hardware now. Future30+30 double unit supplier framing/rough opening unapproved |
-| Hall / foyer east wall | Warm-white grooved panelling x18.7833–18.825, bottom8/top108 inches | Fromz24.941667 to54.504167, uninterrupted across former kids doorwayz27–31.5. Exclude bedroom openingz44.8–47.8/casing and closet-only piano recess; verify finish junctions |
+| Hall / foyer east wall | Warm-white grooved panelling x18.7833–18.825, bottom8/top108 inches | Fromz24.816667 to54.504167, uninterrupted across former kids doorwayz27–31.5. Exclude bedroom openingz44.8–47.8/casing and closet-only piano recess; verify finish junctions |
 | Kids / kitchen hall | Board, two shelf towers and attached lights remain removed, pending relocation | No floating board or restored panels/towers; deep desks are not a writing-reach site. Future location, child reach, glazing, anti-tip/blocking and circuits need review |
 | Kids | Two full 47.25 × 31.5-inch MITTZON desks at x23.36875/27.30625, z31.489566929, rotation180 degrees | Chairs north at z30.152066929. Tops abut, combined x21.4–29.275. Occupied use/passing remains unverified |
 | Kids | Bench, floor books and upper artwork remain removed | Family board/towers/lights pending relocation, not reinstalled |

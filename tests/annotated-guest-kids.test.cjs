@@ -38,8 +38,8 @@ test('adopted north strip has one attribution, conserved total union and no Hall
   const face = g.getKitchenRefrigerationLayout().bodyFaceZ;
   const kids = plan.floors.filter(f => f.room === 'Kids room');
   close(kids[0].z, face + 0.175);
-  close(26.9 - face, 25.6 / 12);
-  close(area(kids), 91.78969570209975);
+  close(26.9 - face, 27.1 / 12);
+  close(area(kids), 91.78969570209975 + 1.5 / 12 * 9.0125);
   const relevant = plan.floors.filter(f => ['Hall', 'Kitchen', 'Kids room', 'Bathroom', 'Closet', 'Guest room', 'Hall piano recess'].includes(f.room));
   for (let i = 0; i < relevant.length; i++) for (const b of relevant.slice(i + 1)) {
     const a = relevant[i];

@@ -8,7 +8,7 @@ function harness() {
   class Group { constructor() { this.children = []; this.userData = {}; } add(o) { this.children.push(o); } }
   const meshes = [];
   return {
-    THREE: { Group }, group: new Group(), trim: {}, baseBrick: {}, porchColumnFinish: {}, meshes,
+    THREE: { Group }, group: new Group(), trim: {}, baseBrick: {}, porchColumnFinish: {}, meshes, wallThickness: 0.45,
     frontShift: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().extension,
     box(parent, x, y, z, w, h, d) {
       const mesh = { x, y, z, w, h, d, min: [x-w/2,y-h/2,z-d/2], max: [x+w/2,y+h/2,z+d/2] };
@@ -33,11 +33,14 @@ test('upper stone constituents border rather than fill actual glazing; cornice f
   vm.runInContext(source.slice(source.indexOf('  function articulateUpperMasonry('),source.indexOf('  const win =')),c);
   c.parent = new c.THREE.Group();
   vm.runInContext('articulateUpperMasonry(parent,31,19,[{center:4.8,width:2.4,sill:13,height:5}])',c);
-  assert.equal(c.meshes.length,8);
+  // Courses (bed molding broken by the lintel), stool, lintel, two jambs and the
+  // white sill/head trim; every piece starts at the brick face (z 0.225).
+  assert.equal(c.meshes.length,11);
   for (const o of c.meshes) {
     assert.ok(o.max[0] <= 3.6+1e-8 || o.min[0] >= 6-1e-8 || o.max[1]<=13 || o.min[1]>=18,
       `${o.name} must not cover the glazing aperture`);
     assert.ok(o.max[1] <= 19);
+    assert.ok(Math.abs(o.min[2] - 0.225) < 1e-9, `${o.name} bears on, not inside, the brick face`);
   }
-  assert.equal(c.meshes.filter(o=>o.name.startsWith('Cornice')).length,3);
+  assert.equal(c.meshes.filter(o=>o.name.startsWith('Cornice')).length,4);
 });

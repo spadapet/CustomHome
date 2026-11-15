@@ -198,7 +198,7 @@ test('low stone and brick constituents respect every fixed opening without appli
     constructor() { this.userData = {}; this.position = { set() {} }; this.rotation = {}; }
     add(mesh) { meshes.push(mesh); }
   }
-  const context = { accentStone: { clone: () => ({}) }, stoneTexture: { clone: () => ({repeat:{set(){}}}) }, THREE: { Group }, white: {}, trim: {}, garageFloorY: -1.25, group: { add(wall) { walls.push(wall); } }, wallThickness: 0.45, box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'siding' }; parent.add(mesh); return mesh; }, brickBox(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'brick' }; parent.add(mesh); return mesh; }, windowUnit() {} };
+  const context = { accentStone: { clone: () => ({}) }, stoneTexture: { clone: () => ({repeat:{set(){}}}) }, THREE: { Group }, white: {}, trim: {}, garageFloorY: -1.25, group: { add(wall) { walls.push(wall); } }, wallThickness: 0.45, box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'siding' }; parent.add(mesh); return mesh; }, brickBox(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'brick' }; parent.add(mesh); return mesh; }, windowUnit() {}, getUpstairsExteriorSegments: () => [] };
   vm.createContext(context);
   vm.runInContext(source.slice(0, source.indexOf('function buildExteriorModel')) + '\nconst cladding = getExteriorCladdingStudy();', context);
   vm.runInContext(source.slice(source.indexOf('  function wall('), source.indexOf('  const win =')), context);
@@ -226,9 +226,9 @@ test('low stone and brick constituents respect every fixed opening without appli
 test('slim paired masonry bays create 2.4-inch pockets without occupying fixed apertures', () => {
   const meshes = [];
   const context = {
-    trim: {},
+    trim: {}, wallThickness: 0.45,
     brickBox(parent, x, y, z, w, h, d) { const m = { x, y, z, w, h, d }; meshes.push(m); return m; },
-    box(parent, x, y, z, w, h, d) { const m = { x, y, z, w, h, d }; meshes.push(m); return m; }
+    box(parent, x, y, z, w, h, d) { const m = { x, y, z, w, h, d, rotation: { x: 0 } }; meshes.push(m); return m; }
   };
   vm.createContext(context);
   vm.runInContext(source.slice(source.indexOf('  function articulateUpperMasonry('), source.indexOf('  const win =')), context);

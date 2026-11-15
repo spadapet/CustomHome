@@ -9,7 +9,8 @@ test('open kids wall kitchen face aligns with refrigeration carcass face and ret
   const north = plan.walls.find(([name]) => name === 'Kids north');
   assert.deepEqual(north[5], [[1.875, 6.875, 0, 8]]);
   const face = ground.getKitchenRefrigerationLayout().bodyFaceZ;
-  assert.ok(Math.abs(face - 24.766666666666666) < 1e-9);
+  // Nov 15: refrigeration carcass bears on the kitchen wall face (26.725) with no setback into the wall.
+  assert.ok(Math.abs(face - (26.725 - 25 / 12)) < 1e-9);
   assert.equal(plan.walls.some(([name]) => name === 'Kids east return'), false);
   for (const name of ['Kitchen south', 'Kids kitchen return']) {
     const wall = plan.walls.find(([n]) => n === name);

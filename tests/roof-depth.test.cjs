@@ -44,6 +44,8 @@ function render(metal = false, override = null) {
     }
   };
   vm.createContext(context);
+  context.masonryFootprints = [];
+  vm.runInContext(source.slice(source.indexOf('function clipGutterToMasonry('), source.indexOf('function buildExteriorModel(')), context);
   const start = source.indexOf('  function renderRoofEnvelope('), end = source.indexOf('  const slateFinish =', start);
   assert.ok(start >= 0 && end > start);
   vm.runInContext(source.slice(start, end), context);

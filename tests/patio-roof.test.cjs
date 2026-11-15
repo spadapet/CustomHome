@@ -33,7 +33,7 @@ function buildRoof() {
     projectionWest: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathWest - .225,
     projectionEast: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathEast + .225,
     projectionRear: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathNorth - .225,
-    masonryMaps: null,
+    masonryMaps: null, HomeRoof: require('../assets/js/floor-plan-roof.js'),
     lot: { left: -12.605, right: 62.395, rear: -32.325 }, fenceBoundaryInset: 0.5,
     THREE: { BoxGeometry, SphereGeometry: class extends BoxGeometry { constructor(radius) { super(radius * 2, radius * 2, radius * 2); } }, PointLight: class extends Group { constructor(color, intensity, distance, decay) { super(); Object.assign(this, { color, intensity, distance, decay }); } }, Mesh, Group }, livingFeatureWall: require('../assets/js/floor-plan-ground.js').getLivingRoomFeatureLayout(), glass: {}, mat: () => ({}), wallThickness: 0.45, frontBrick: {}, brickFaceUVs() {}, wood: {}, dark: {}, white: {}, baseStone: {}, stepStone: {}, stepEdge: {}, glow: {},
     patio: { add(mesh) { meshes.push(mesh); } },
@@ -324,7 +324,8 @@ test('patio camera mounts to the dining wall after its post is removed', () => {
   vm.createContext(context);
   vm.runInContext(source.slice(start, end), context);
   const cameras = vm.runInContext('cameraSchedule', context);
-  assert.deepEqual(Array.from(cameras.find((camera) => camera.id === 'C3').position), [12.9, 8, 6.65]);
+  // Lowered/backed off so the tilted housing clears the 7.86 ft canopy soffit and the x12.98 brick face.
+  assert.deepEqual(Array.from(cameras.find((camera) => camera.id === 'C3').position), [12.69, 7.45, 6.65]);
   const rear = cameras.find((camera) => camera.id === 'C4').position;
   assert.deepEqual(Array.from(rear), [25.8, 8.5, -0.5]);
   assert.ok(rear[0] - 0.4 > 23.0375 && rear[0] + 0.4 < 26.65, 'Camera housing fits the solid pier east of dining rear glazing');

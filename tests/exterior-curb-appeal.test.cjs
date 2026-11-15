@@ -33,10 +33,10 @@ test('front evergreen constituents no longer overlap and stay within the unchang
     assert.equal(shrubs.length,5);
     const b = bed.userData.limits;
     shrubs.forEach((s,i) => {
-      assert.ok(s.position.x-0.9 >= b.left && s.position.x+0.9 <= b.right);
-      assert.ok(s.position.z-0.9 >= b.rear && s.position.z+0.9 <= b.front);
-      assert.equal(s.position.y-0.9,bed.userData.topFeet);
-      if(i) assert.ok(s.position.x-shrubs[i-1].position.x-1.8 >= 0.25-1e-8);
+      assert.ok(s.position.x-0.85 >= b.left && s.position.x+0.85 <= b.right);
+      assert.ok(s.position.z-0.85 >= b.rear && s.position.z+0.85 <= b.front);
+      assert.equal(s.position.y-0.85,bed.userData.topFeet);
+      if(i) assert.ok(s.position.x-shrubs[i-1].position.x-1.7 >= 0.25-1e-8);
     });
     const low = all.filter(o => o.name === 'Low front-bed planting mound' && o.userData.plantingBed === bed.name);
     assert.equal(low.length,7);
@@ -55,7 +55,8 @@ test('stone edging remains inside existing soil, below the walk, and outside ent
   for (const e of edges) {
     assert.ok(e.position.z+e.d/2 <= 64.5+frontLayout.extension+1e-8);
     assert.ok(e.position.y+e.h/2 < -1.35);
-    assert.ok(e.position.x+e.w/2 <= 10.7+1e-8 || e.position.x-e.w/2 >= 20.5-1e-8);
+    // Beds stop at the 10.8 ft entry steps (x10.2-21.0); no edging, mulch or planting under a tread.
+    assert.ok(e.position.x+e.w/2 <= 10.2+1e-8 || e.position.x-e.w/2 >= 21-1e-8);
     assert.ok(e.position.x+e.w/2 <= 30.9+1e-8);
   }
 });

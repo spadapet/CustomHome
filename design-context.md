@@ -1,5 +1,156 @@
 # Ground-floor design context
 
+## Whole-model overlap audit — November 15
+
+Owner: "we cannot have overlap." A temporary browser audit measured every
+visible mesh as a world-space oriented box (SAT, 0.25 in joint tolerance) in
+Ground, Upstairs and Exterior. Real collisions fixed at the source:
+
+- Garage top view slab: the refrigeration bank (oak cornice, carcass backs,
+  side panels and both 24 in Sub-Zero chassis) ran 1.5 in into the
+  kitchen/garage wall. The bank now bears on the wall face z26.725 (zero
+  gap); the kids north wall stays flush with the cabinet face (kids floor
+  +1.13 sq ft, kitchen −1.13, total unchanged). Island gaps 44.55 / 42.80 in.
+- No base trim behind the fridge return/back, prep casework scribes or the
+  cleaning bay; robot dock 0.84 in and its outlet 2.4 in clear of base trim.
+- Shop vac 1.2 in west, clear of the garage-entry tread; garden-tool rail on
+  (not in) the north garage wall; split-floor doorway keeps one threshold.
+- Office French leaves pivot inside the jamb (open 90°, clear of wall and
+  casing); dining patio door's duplicate interior casing removed; door
+  casings scribe to an adjoining wall face (guest WC, upstairs closet 4);
+  laundry/loft casing sits on the loft lining; hidden under-stair end return
+  removed; prep extension quartz stops at the east closure.
+- Fireplace backing starts at the wall face; firebox face and mantel sit on
+  the deepest stone (mantel +1 in proud).
+- Front beds/shrubs stop at the 10.8 ft entry steps (shrubs 20.4 in);
+  rear foundation shrubs moved from inside the kitchen/prep onto the garden
+  soil; fence posts stop at the masonry; patio camera C3 lowered/backed off
+  the soffit and brick.
+
+Left as intended: cabinet/contents nesting, faucets, casing over baseboard
+ends, sills/lintels bearing in masonry, recessed lights, edging in mulch,
+leaders to drains, cabinets set on subfloor under ≤0.5 in tile.
+
+Follow-up fixes (owner unavailable; least-disruptive choices, measured with
+world-space constituent SAT before/after):
+
+- Bath 2 window vs Bedroom 2 shower: window and rear elevation unchanged; its
+  east 2 in lie inside the shower. Painted casing stops at the shower face
+  x39.408 (east leg omitted, bottom board shortened); east jamb and the
+  in-shower sill end are tiled returns; the shower back tile is notched
+  (below the sill, resuming at the jamb face). 0.51 in → 0 (casing had run
+  5.6 in into the shower plan). Wet-area waterproofing, sloped sill and
+  safety/obscure glazing still need professional/supplier review.
+- Basement U-stair 3 in well: each flight's well-side stringer and rail stay
+  in its own half, meeting only face to face at the centreline. Returning
+  handrail/bars into the entry stringer 1.44 / 0.54 in → 0. No widening;
+  risers, treads, flights, landing guard, junction break and wall-side rail
+  omissions unchanged. Rails sit 0.06 in off the tread edges with no hand
+  clearance between them: graspability/continuity need professional review.
+  The audit's 0.99 in upper-stair item was the exposed outer handrail against
+  the extruded stringer's bounding box; exact profile checks show 0.
+- Dining-projection low-roof gutters stop at the finished brick face with
+  end caps: east run at the kitchen/prep face z6.775 (2.4 in → 0); the run
+  wholly inside the upper bath rear wall (2.4 in; 1.44 in into a stone jamb)
+  is omitted — that abutment needs flashing design. No downspouts/hangers on
+  these runs.
+- West dining-eave gutter (x13.2): the living-patio canopy's east brick
+  closure rises from y9 on the same line from z1.772 (shared
+  `getLivingPatioCanopyFrame`; the canopy builder throws if it drifts), so
+  the whole run z1.9–7.155 lay in the closure (2.22 in), canopy roof
+  (1.44), side fascia (1.2), stepped flashing (0.72) and soffit (0.71 in).
+  It is omitted, not capped — no piece remains outside the closure. Patio
+  cover unchanged. The dining roof's west slope now meets the closure as a
+  roof-to-wall abutment: cricket/step-flashing or scupper drainage design
+  required.
+- Rear dining path wall downlight: the centred y8.6 mount ran 1.14 in into
+  the rear gutter (0.96 in into the fascia); lowering on the centreline is
+  blocked by the window head trim (y8.05–8.35). Moved to the centre of the
+  east pier (x25.23, between head trim x23.36 and corner x27.1; the wall is
+  symmetric about the window, and the west end is lit by the patio-steps
+  light), top 8.0 ft at the window-head datum. Clearances: housing to fascia
+  2.76 in, to gutter 6.66 in; 20.6 in from the head trim and the corner.
+  Aimed straight out to z−3; Night source verified. A matching west-pier
+  sconce is a reversible option if elevation symmetry is preferred.
+- Low-roof masonry stop (all low roofs: dining projection, garage gable/
+  hip/service return and attic shed, living-patio canopy, porch/entry).
+  Edge members had been built on wall centre lines. After the exterior is
+  built, every roof skin, closed underside, edge soffit, eaves/rake fascia,
+  hip/ridge/valley cap, stepped flashing and canopy finish loses only the
+  constituent triangles inside finished masonry: wall brick/stone/coping,
+  base courses, cornices, window stools/jambs/allowances, the raised
+  headwall and the exact sloping-top canopy closure, garage-gable and east
+  wall-head closures. Cuts lie on the masonry face, so ends read clean; no
+  slope, eave, ridge height or opening moved and the main hipped roof had
+  no such defect (unchanged). Razor leftovers under 1/4 in past a far face
+  and fragments wholly inside a ground room below the 9-ft wall head are
+  dropped; cut ends become separate constituents. Before → after (OBB/SAT
+  on boxes; exact triangle-in-solid depth for sheets): dining west eave
+  fascia 3.12 in (dining west brick; 1.32 closure, 1.56 dining rear) → 0
+  (buried run omitted; 5-in corner stub kept); west rake stub 2.89 → 0;
+  north rake/ridge fascia against the upper rear walls 3.06–3.12 (stone
+  stool 2.4, jamb 1.56, base course 1.68) → 0 (omitted — roof-to-wall
+  abutment); east eave fascia 3.12 into kitchen/prep brick → 0 at z6.775;
+  dining skin/underside/soffit/hips 1.5–2.67 → 0, roof now ends at the
+  upper rear face z7.175 and against the closure; garage front-gable rake
+  2.96–3.12, service-return rake 3.11, gable-rake end 1.31, stepped
+  flashing 0.72–1.69, hips/valley 0.3–1.46, closure soffits 0.3–1.18 → 0;
+  canopy roof/soffit/side fascia/counterflashing 2.7 into the upper west
+  wall, 0.6–2.7 into the headwall → 0 (house abutment strip wholly in the
+  headwall removed); porch roof/underside 0.52 into closet-4 returns → 0.
+  The canopy's dining-side stepped flashing (0.72 into dining west brick,
+  2.4 into the closure) now sits on the closure's east face x13.425–13.485
+  bearing on the dining roof skin, from z3.94 to the upper rear face.
+- Patio-steps wall light: at z1 there was no wall behind it (1.5 in short
+  of the canopy side fascia, whose inner face is concealed above the
+  soffit) and its housing/backplate pierced the canopy soffit (1.2 in).
+  Moved onto the dining west brick face: backplate x12.875–12.975 (0 gap,
+  no penetration), z1.95–2.25 (on brick from z1.9; 2.4 in clear of the
+  patio door opening), top 8.15 ft, 1.6 in below the soffit. Same aim at
+  the steps; Night source verified.
+- Rescan against the pre-fix baseline (same SAT, 0.25 in joints): Exterior
+  4,146 → 4,022 hits (2,018 → 2,036 meshes after splitting cut ends),
+  Upstairs 991 and Ground 3,541 unchanged; no hit in a new location. Only
+  remaining SAT "deeper" item: relocated dining flashing vs the world-space
+  dining roof sheets' bounding boxes 0.48 → 0.72 in, a box artifact (exact
+  triangle check 0). Pre-existing, out of scope then: fascia-to-fascia
+  corner mitres and door stile/rail joinery. The upper bath rear
+  window's stool sits below the dining ridge line (roof now notched around
+  it): window/roof coordination needs design review. The dining roof's
+  north edge and the garage service rake are roof-to-wall abutments that
+  need step/counter-flashing design; the drainage notes still apply.
+- Upper applied stone, bay heads and cornices (follow-up): every upper
+  wall's base course, cornice bed/frieze/crown, stools, lintels, jambs,
+  bay piers/bridging heads, paired sills and the window sill/head trim now
+  start at the brick face (z = 0.225 ft local) and keep their former
+  front faces, so the elevations are unchanged. Front bay-head weathering
+  caps: 1.02 in into brick and 0.96 in into the cornice crown (box SAT;
+  noted earlier as 0.48 in) → 0. Each cap now has a 1:12 outward wash:
+  back-bottom edge on the brick face, back-top edge at the crown soffit
+  y18.84, drip at z0.79 ft (6.8 in off the face, 4.2 in past the head);
+  bridging heads drop from y18.80 to 18.70 so the sloping underside bears
+  on their front arris. Rear/side lintels stop at the frieze (y18.44,
+  0.84 in lower) and the bed molding stops at each lintel end (lintel
+  into bed 3.0 / frieze 0.84 in → 0). Course ends stop at adjoining brick
+  faces and the shorter wall's course butts the longer one at corners
+  (closet-4 recess, rear/east corners; 1.44–4.8 in → 0). Window trim sits
+  between jambs, above stools/paired sills, below lintels/bay heads and
+  clear of the installation allowances (0.6–2.64 in → 0); the ground front
+  head trim stops under the limestone lintel (2.46 in → 0). Rescan
+  (same SAT): Exterior 4,598 → 4,134 hits (2,045 → 2,053 meshes), this
+  family 350 → 0, no new location, nothing deeper; exact triangle checks
+  of roof sheets against the moved pieces are 0 except the pre-existing
+  patio tapered closure vs primary-rear base course (6.32 SAT → 3.06 in
+  exact). Found, not changed: on the primary/bath/bedroom rear, east
+  rooms, service east and bedroom east return walls this stone and
+  cornice is built on the room-side face, not the exterior — moving it
+  outside would change the rear/east elevations and low-roof abutments
+  and needs an owner decision. Cap wash, drips, flashing, veneer support
+  and anchorage still need professional detailing.
+
+Open: zero fridge rear gap (Sub-Zero install review). Regression:
+`tests/model-overlap.test.cjs`.
+
 ## Living-room piano removed — November 14
 
 Remove the living-room Yamaha CLP-825, its bench and attached music lamp;
@@ -52,7 +203,7 @@ operation remain unverified.
 | Bedroom | 12.2 × 11.4 ft; 139.08 sq ft | 142.2 × **132 inches over the full rectangle** |
 | Bathroom | 12.2 × **5 ft nominal**; 61 sq ft | 142.2 × 55.8 inches overall; private WC **36 × 55.8** |
 | Closet, excluding recess | x20.841666667–31.2, depth5.302099738 ft; 54.920916 sq ft | 120.1 × **59.4252 inches** |
-| Kids main + NE | 9.0125 × 8.035400262 ft +3.1875 ×6.077066929 ft; **91.789696 sq ft** | North opening x20.875–25.875; west/east nominal piers 22.5/25.65 inches |
+| Kids main + NE | 9.0125 × 8.160400262 ft +3.1875 ×6.077066929 ft; **92.916258 sq ft** | North opening x20.875–25.875; west/east nominal piers 22.5/25.65 inches |
 
 Kids north wall's kitchen paint face is **z24.766666667**, flush with the refrigerator/freezer
 cabinet carcass body face: back26.725 +existing setback0.125 −depth25/12. Its centreline is z24.941666667
@@ -697,11 +848,15 @@ Bank x27.9375-37.3, 112.35 inches total: 72 inches refrigeration + 31.5 tower
 + 3 inches framing + 2.85-inch freezer filler; the former 3-inch refrigerator
 filler zone is closed by the adjoining shelf tower and fitted scribe. The current
 model centers the fridge at29.75 with 0.125-inch reveals and retains the freezer
-0.75 inch toward the tower at35.4375, with a
-1.5-inch wall setback (z25.85 appliance datum); tower remains at x32.625 and
+0.75 inch toward the tower at35.4375. November 15 overlap audit: the former
+1.5-inch "setback" pushed the 24-inch chassis, carcass backs and oak cornice
+1.5 inches into the kitchen/garage wall (its earlier 0.6-inch gap was measured
+to the wall centreline). The bank now bears on the finished wall face z26.725
+(z25.725 appliance datum, zero gap); the kids north wall follows the cabinet
+face. Tower remains at x32.625 and
 unaltered in size: 31.5 wide / 30 clear / 25 deep; oven 30 x 24 x 24 inches,
-bottom 30 inches. The body-to-wall gap is 0.6 inch and needs product/install
-review. Standard 36-inch overheads and oak Shaker/gold cabinetry remain.
+bottom 30 inches. Zero rear gap needs Sub-Zero product/install review.
+Standard 36-inch overheads and oak Shaker/gold cabinetry remain.
 
 Manufacturer facts from official product, design and support documents,
 accessed November 8, 2026: nominal 36 x 84 x 24-inch units; the selected custom
@@ -714,7 +869,8 @@ the unrestricted swing reaches the adjacent finished wall near 98 degrees, so
 the included 90-degree stops are modeled. Closed panel-to-paint clearance is
 4.775 inches; 901 stopped poses per door clear modeled return planes, flush
 panels, island and cooktop counter. Closed panel/handle gaps to island are
-46.05 / 44.30 inches. These geometry results do not approve accessory part
+44.55 / 42.80 inches (November 15; formerly 46.05 / 44.30 with the bank set
+1.5 inches into the wall). These geometry results do not approve accessory part
 numbers, finished returns, shelf/drawer access, ventilation, anchorage, loads,
 structure, services or circulation. Both doors animate through 300 ms
 transitions. Retain the direct source links: Sub-Zero [Designer Series Design Guide](https://www.subzero-wolf.com/-/media/files/united-states/product-downloads/sub-zero-wolf/design-guides/subzero-design-guide.ashx),
@@ -4074,7 +4230,7 @@ Pantry spans x = 37.675-55.325 (211.8 in), cleaning bay 40.11 in wide,
 38.61 in clear. Mudroom west cases shift west six inches, centered coat
 closet to (41.45,16.4), blind corners/top trim remain connected; no new
 counted corner storage. Keep cubbies/hooks/containers/shoe allowances.
-Static cooking aisle is about 60.9 in, closed Designer panel 46.05 in, and mudroom aisle
+Static cooking aisle is about 60.9 in, closed Designer panel 44.55 in (Nov 15, bank flush to the wall face), and mudroom aisle
 54.9 in. With the separate divider aligned at z = 15, prep clearances remain
 54.6 in at the counter, 52.5 in at pulls and 51.4 in at closed oven handles.
 These coordinates supersede the older kitchen schedules below. Actual
@@ -4659,7 +4815,7 @@ Important audit findings: the patio leaf is shown closed with the higher-z hinge
 | Refrigeration upper storage | Standard36 in appliance boxes, retained31.5 in tower upper; all25 in deep, y7.15-8.85, continuous cornice y8.85-9 |
 | Oven/storage tower | Unchanged31.5 in width,30 clear,25 depth; center32.625. Oven30 x24 x24 in, y2.5-4.5, bottom30 inches; storage above/below. Not a verified vendor cabinet/cutout |
 | Island countertop center | (28.65, 16.95); x = 26.9-30.4, z = 12.95-20.95; 8 ft long, 3.5 ft wide. Extends 12 in toward prep while refrigerator-side end stays fixed. Base, drawers, waterfalls, toe-kick, stools, pendant centerline, and camera follow |
-| Counter clearances | Sink counter-to-island gap 44.7 in; open sink drawer leaves 25.16 in. Closed Designer custom Shaker panel / satin-gold tubular handle to island 46.05 / 44.30 in. Unoccupied model measurements, not seating or operation approval |
+| Counter clearances | Sink counter-to-island gap 44.7 in; open sink drawer leaves 25.16 in. Closed Designer custom Shaker panel / satin-gold tubular handle to island 44.55 / 42.80 in (Nov 15, no setback into the wall). Unoccupied model measurements, not seating or operation approval |
 | Cooktop / hood center | Cooktop (36.325, 16.95), hood z = 16.95. Openings z = 9.6375-12.1375 / 21.7625-24.2625; inner edges12.1375 /21.7625. Counter z =12.45-21.45, width108 in. Three standard36 in drawer bases; finished casing faces108.25 in apart,0.125 in gap per end;1/8 in front reveals |
 | Cooktop alignment inspection | Orthographic preset targets (37, 5.3, 16.95). Hood margins to openings equal 26.7 in. Hides island, pendants, and accessories for inspection |
 | Reference-style cooktop hood | October 19 reference: warm off-white plaster, constant 48 in width, depth taper 24 to 13 in, rear x = 37.8, center z = 16.95. Plain plaster lower edge replaces walnut band at y = 6.3-6.5; cornice aligns with cabinets at 9 ft. Concealed 46 in insert allowance remains; verify liner fit, adjacent combustible cabinets, heat clearances, ducting, and service access |

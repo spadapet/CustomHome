@@ -321,6 +321,40 @@
           (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) > 1e-8);
     });
   }
+  // Remove the part of each triangle inside a convex solid (for example a
+  // finished masonry box). planes are [nx, ny, nz, d] with n.p + d >= 0 inside;
+  // vertices are [x, y, z, ...attributes] and attributes are interpolated.
+  function trianglesOutsideConvex(triangles, planes) {
+    const value = (plane, p) => plane[0] * p[0] + plane[1] * p[1] + plane[2] * p[2] + plane[3];
+    function half(polygon, plane, sign) {
+      const result = [];
+      for (let i = 0; i < polygon.length; i++) {
+        const a = polygon[i], b = polygon[(i + 1) % polygon.length];
+        const av = value(plane, a) * sign, bv = value(plane, b) * sign;
+        if (av >= 0) result.push(a);
+        if ((av < 0 && bv > 0) || (av > 0 && bv < 0)) {
+          const t = av / (av - bv);
+          result.push(a.map((v, j) => v + (b[j] - v) * t));
+        }
+      }
+      return result;
+    }
+    return triangles.flatMap((triangle) => {
+      let remaining = triangle;
+      const pieces = [];
+      for (const plane of planes) {
+        if (remaining.length < 3) break;
+        pieces.push(half(remaining, plane, -1));
+        remaining = half(remaining, plane, 1);
+      }
+      // Whatever remains after every plane lies inside the solid and is dropped.
+      return pieces.flatMap((polygon) => polygon.length < 3 ? [] : polygon.slice(1, -1).map((p, i) => [polygon[0], p, polygon[i + 2]]))
+        .filter(([a, b, c]) => Math.hypot(
+          (b[1] - a[1]) * (c[2] - a[2]) - (b[2] - a[2]) * (c[1] - a[1]),
+          (b[2] - a[2]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[2] - a[2]),
+          (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])) > 1e-10);
+    });
+  }
   // Clip wall-head closures to the actual envelope faces. A roof skin above
   // a fixed 19 ft wall is not itself a vertical attic-wall closure.
   function wallHeadSegments(plan, start, end, wallTop, skinDepth = 0.16) {
@@ -351,7 +385,7 @@
       skinDepthFeet, framingReserveFeet, liningDepthFeet,
       heightAt: () => ceilingHeightFeet };
   }
-  const api = { getFinishedLoftSection, getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, wallHeadSegments };
+  const api = { getFinishedLoftSection, getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, trianglesOutsideConvex, wallHeadSegments };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.HomeRoof = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

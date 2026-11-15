@@ -288,7 +288,24 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
         // Slim side boards at the two front entries keep the projecting head
         // caps clear of the perpendicular bathroom/closet wall returns.
         const sideWidth = ['Bedroom 3 north', 'Bedroom 4 north', 'Primary suite entry', 'Bath south', 'Laundry west', 'Laundry south'].includes(name) ? 0.75 / 12 : 3.5 / 12;
-        openingCasing(parent, (start + end) / 2, 0, end - start, top, thickness / 2, side, false, { sideWidth, flushHeadEnds: name === 'Laundry west' });
+        // Scribe legs/head ends to any perpendicular wall face closer than the full casing.
+        const dx = (x2 - x1) / length, dz = (z2 - z1) / length;
+        const edgeRoom = { [-1]: Infinity, 1: Infinity };
+        for (const other of plan.walls) {
+          const otherLength = Math.hypot(other.x2 - other.x1, other.z2 - other.z1);
+          if (other === wall || !otherLength || Math.abs(((other.x2 - other.x1) * dx + (other.z2 - other.z1) * dz) / otherLength) > 1e-6) continue;
+          const t = (other.x1 - x1) * dx + (other.z1 - z1) * dz;
+          const a1 = -(other.x1 - x1) * dz + (other.z1 - z1) * dx, a2 = -(other.x2 - x1) * dz + (other.z2 - z1) * dx;
+          const half = thickness / 2;
+          const reaches = side > 0 ? Math.max(a1, a2) > half + 1e-6 && Math.min(a1, a2) < half + 0.2 : Math.min(a1, a2) < -half - 1e-6 && Math.max(a1, a2) > -half - 0.2;
+          if (!reaches) continue;
+          const otherHalf = (other.thickness ?? 0.35) / 2;
+          if (t < start) edgeRoom[-1] = Math.min(edgeRoom[-1], start - t - otherHalf);
+          if (t > end) edgeRoom[1] = Math.min(edgeRoom[1], t - end - otherHalf);
+        }
+        // The finished-loft face of the laundry east wall carries a 0.6-inch painted lining; casing sits on it.
+        const liningDepth = name === 'Laundry east' && -dz * side > 0.5 ? 0.05 : 0;
+        openingCasing(parent, (start + end) / 2, 0, end - start, top, thickness / 2 + liningDepth, side, false, { sideWidth, flushHeadEnds: name === 'Laundry west', edgeRoom });
       }
       if (bottom === 0 && end - start <= 3.05) {
         // Deliberate 90-degree operating envelopes, not a 180-degree fold-back
@@ -330,7 +347,30 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     }
     section(cursor, length, 0, wallHeight);
   }
-  for (const [name, x, z, width, rotation, side] of plan.windows) windowFrame(`Upstairs ${name} window`, x, z, width, 5, 3, rotation, group, side, { installationWalls: plan.walls, frontGrid: rotation === 0 && side === -1 });
+  // Fixed shower enclosures (pan centre/size). A window whose interior casing would
+  // reach into one keeps its opening; painted trim stops at the enclosure face and
+  // the jamb/sill inside the shower become tiled returns (November 15 overlap fix).
+  const showers = [
+    ['Primary shower', 26.15, 10.75, 3.5, 6],
+    ['Bedroom 2 shower', 40.90833333333333, 10.075, 3, 5],
+    ['West bath shower', 7.675, 37.775, 3, 5],
+    ['East bath shower', 35.075, 37.775, 3, 5]
+  ].map(([name, x, z, w, d]) => ({ name, x, z, w, d, anchor: UpstairsLayout.furniturePosition(baseline, plan, x, z), windows: [] }));
+  const casingReach = (0.125 + 3.5) / 12;
+  function showerWetEdge(name, x, z, width, rotation, side) {
+    if (rotation !== 0 || side !== 1) return undefined;
+    for (const shower of showers) {
+      const west = shower.anchor.x - shower.w / 2, east = shower.anchor.x + shower.w / 2;
+      // Back of the enclosure on this window's interior wall face.
+      if (Math.abs(shower.anchor.z - shower.d / 2 - (z - 0.1 + g.t / 2)) > 0.1) continue;
+      const edge = west > x && west < x + width / 2 + casingReach ? 1 : east < x && east > x - width / 2 - casingReach ? -1 : 0;
+      if (!edge) continue;
+      shower.windows.push({ name, x, width, sill: 3, edge });
+      return { edge, stop: edge > 0 ? west - x : x - east, material: tile, enclosure: shower.name };
+    }
+    return undefined;
+  }
+  for (const [name, x, z, width, rotation, side] of plan.windows) windowFrame(`Upstairs ${name} window`, x, z, width, 5, 3, rotation, group, side, { installationWalls: plan.walls, frontGrid: rotation === 0 && side === -1, wetEdge: showerWetEdge(name, x, z, width, rotation, side) });
   const furnitureAnchors = [];
   function furniture(name, x, z, rotation = 0, viewerFurniture = false) {
     const item = new THREE.Group();
@@ -534,15 +574,21 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
   toilet('Bedroom 2 toilet', 38.141666666666666, 8.6);
   toilet('West bath toilet', 4.725, 36.3);
   toilet('East bath toilet', 32.175, 36.3);
-  for (const [name, x, z, w, d, rotation = 0] of [
-    ['Primary shower', 26.15, 10.75, 3.5, 6],
-    ['Bedroom 2 shower', 40.90833333333333, 10.075, 3, 5],
-    ['West bath shower', 7.675, 37.775, 3, 5],
-    ['East bath shower', 35.075, 37.775, 3, 5]
-  ]) {
-    const item = furniture(name, x, z, rotation);
+  for (const { name, x, z, w, d, windows: wetWindows } of showers) {
+    const item = furniture(name, x, z, 0);
     box(item, 0, 0.12, 0, w, 0.24, d, cream);
-    box(item, 0, 3, -d / 2 + 0.08, w, 6, 0.12, tile);
+    // Back tile wall, notched around any window opening that enters the enclosure:
+    // tile runs below the sill there and resumes at the tiled jamb return's face.
+    let tileSpans = [[-w / 2, w / 2, 6]];
+    for (const opening of wetWindows) {
+      const jambFace = (opening.x + opening.edge * (opening.width / 2 + 0.05 - 1 / 96)) - item.position.x;
+      tileSpans = opening.edge > 0
+        ? [[-w / 2, Math.min(jambFace, w / 2), opening.sill], [Math.min(jambFace, w / 2), w / 2, 6]]
+        : [[Math.max(jambFace, -w / 2), w / 2, opening.sill], [-w / 2, Math.max(jambFace, -w / 2), 6]];
+      item.userData.windowNotch = { window: opening.name, jambFaceLocalX: jambFace, sillFeet: opening.sill };
+    }
+    for (const [left, right, top] of tileSpans) if (right - left > 0.001)
+      box(item, (left + right) / 2, top / 2, -d / 2 + 0.08, right - left, top, 0.12, tile).name = top < 6 ? 'Shower tile below window sill' : 'Shower tile wall';
     box(item, 0, 5.5, -d / 2 + 0.4, 0.5, 0.06, 0.5, steel);
     box(item, 0, 3.2, -d / 2 + 0.18, 0.25, 0.4, 0.08, steel);
     box(item, 0, 0.25, 0, 0.3, 0.015, 0.3, steel);

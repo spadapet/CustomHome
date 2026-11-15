@@ -31,7 +31,8 @@ test('six retained ground/compact upper front openings have no shutters; loft op
     windowUnit(parent, center, sill, width, height, privacy, picture, perimeterTrim, front) {
       windows.push({ center, sill, width, height, front });
     },
-    articulateUpperMasonry() {}
+    articulateUpperMasonry() {},
+    localUpperNeighbours() { return []; }
   };
   context.brickBox = context.box;
   const start = source.indexOf('  function wall(');

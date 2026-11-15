@@ -4,7 +4,7 @@
 
 November 14 follow-up: north-entry kids → full-width rectangular bath →
 larger walk-through closet → rectangular bedroom. Kids north wall's kitchen paint face
-is flush with the refrigeration carcass body face z24.766666667 (centreline z24.941666667), excluding
+is flush with the refrigeration carcass body face z24.641666667 (centreline z24.816666667), excluding
 fronts/handles. Numbered image unavailable: assume1 = west entry infill,
 2 = north nominal60 ×96 cased openingx20.875–25.875 with22.5/25.65-inch west/east piers.
 The white return moves east3.15 inches to x28.0125; its finished face touches
@@ -15,8 +15,8 @@ no leaves/hinges/handles now. No board/towers/lights are restored.
 Board/two towers/lights await relocation: deep desks are not a writing-reach site.
 New opening/header/support and circuit relocation need professional review.
 
-Kids main9.0125 ×8.035400262 ft plus NE3.1875 ×6.077066929 ft fromz26.9:
-91.789696 sq ft, not the rectangular label envelope. Hall/Kitchen attribution
+Kids main9.0125 ×8.160400262 ft plus NE3.1875 ×6.077066929 ft fromz26.9:
+92.916258 sq ft, not the rectangular label envelope. Hall/Kitchen attribution
 is split with no double floor area. Both full47.25 ×31.5-inch desks form a
 contiguous south pair atx23.36875/27.30625,z31.489566929; chairsz30.152066929.
 East-wall39 ×17.375-inch TROFAST at(30.301041667,28.7), facing west,

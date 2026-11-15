@@ -82,9 +82,10 @@ test('Designer units use cabinet-matching Shaker panels, mirrored hinges and sat
   for (const unit of [freezer, fridge]) {
     assert.equal(unit.userData.manufacturer, 'Sub-Zero');
     assert.equal(unit.userData.productWidthInches, 36);
-    assert.equal(unit.userData.wallSetbackInches, 1.5);
+    // Nov 15: the former 1.5-in setback pushed the 24-in chassis and carcass into the kitchen wall; units now bear on the wall face.
+    assert.equal(unit.userData.wallSetbackInches, 0);
     assert.equal(unit.userData.inboardShiftInches, unit.name === 'Column freezer' ? 0.75 : 0);
-    close(unit.position.z, 25.725 + 1.5 / 12);
+    close(unit.position.z, 25.725);
     assert.equal(unit.userData.heightInches, 84);
     assert.equal(unit.userData.series, 'Designer');
     assert.equal(unit.userData.bodyDepthInches, 24);
@@ -111,8 +112,9 @@ test('Designer units use cabinet-matching Shaker panels, mirrored hinges and sat
     const sideReserveInches = (unit.name === 'Column freezer' ? sideWallFace - b.maxX : b.minX - sideWallFace) * 12;
     close(sideReserveInches, unit.name === 'Column freezer' ? 4.775 : 0.875);
     const cavity = unit.children.find(part => part.name === 'Sub-Zero Designer chassis envelope');
-    const wallGapInches = (26.9 - bounds(cavity).maxZ) * 12;
-    close(wallGapInches, 0.6);
+    // Measure to the finished kitchen wall face (centreline 26.9 - 0.175), not the centreline: the chassis bears on the face.
+    const wallGapInches = (26.9 - 0.175 - bounds(cavity).maxZ) * 12;
+    close(wallGapInches, 0);
     const door = unit.children.find(part => part.userData.interactiveHouseDoor);
     const leaf = door.children.find(part => part.name === 'Sub-Zero Designer custom white-oak Shaker panel');
     assert.equal(door.rotation.y, 0);
@@ -221,15 +223,15 @@ test('stopped door and handle sweeps clear current geometry while the hinge prox
     door.rotation.y = 0;
   }
   const fridgeDoor = bank.find('Sub-Zero Designer custom white-oak Shaker panel')[1];
-  close((bounds(fridgeDoor).minZ - 20.95) * 12, 46.05);
+  close((bounds(fridgeDoor).minZ - 20.95) * 12, 44.55);
   const handle = bank.find('Sub-Zero tower-facing satin-gold tubular handle')[1];
-  close((bounds(handle).minZ - 20.95) * 12, 44.3);
+  close((bounds(handle).minZ - 20.95) * 12, 42.8);
 });
 
 test('interior floor transfer preserves total area and all passage, stair and garage boundaries', () => {
   const plan = ground.getGroundFloorDefaultPlan();
   const kidsArea = plan.floors.filter(part => part.room === 'Kids room').reduce((sum, part) => sum + part.w * part.d, 0);
-  close(kidsArea, 91.78969570209975);
+  close(kidsArea, 91.78969570209975 + 1.5 / 12 * 9.0125);
   close(plan.rooms.find(room => room.name === 'Kids room').z - 0.175, ground.getKitchenRefrigerationLayout().bodyFaceZ);
   close(ground.getLivableFloorArea(plan, { includeStairs: true }), 1924.3327083333334);
   assert.equal(ground.getKitchenPassageLayout().wallX, 37.5);

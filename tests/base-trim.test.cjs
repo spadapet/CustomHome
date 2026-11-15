@@ -45,13 +45,12 @@ test('under-stair flat boards retain their bottom-step and enclosure-end returns
   assert.deepEqual(Object.keys(trim.userData).sort(), ['heightInches', 'thicknessInches']);
   assert.deepEqual(trim.children.map((part) => part.name), [
     'Under-stair white baseboard', 'Bottom-step baseboard extension',
-    'Bottom-step front trim return', 'Enclosure end baseboard return'
+    'Bottom-step front trim return'
   ]);
   assert.equal(trim.children[0].h * 12, 8);
   assert.equal(trim.children[0].d * 12, 0.75);
   assert.ok(trim.children[1].h < context.stairRise);
   assert.equal(trim.children[2].w * 12, 0.75);
-  assert.equal(trim.children[3].w * 12, 0.75);
 });
 
 test('trim requirements consistently specify no quarter-round or shoe molding', () => {
@@ -64,7 +63,7 @@ test('baseboards stop behind the fitted mudroom cases and remain outside the kit
   const covered = [];
   class Vector2 { constructor(x, y) { Object.assign(this, { x, y }); } }
   const start = source.indexOf('      // Fitted mudroom joinery meets');
-  const end = source.indexOf('      for (const wall of baseTrimSections)', start);
+  const end = source.indexOf('      // Full-height refrigeration side panel and prep casework', start);
   assert.ok(start > 0 && end > start);
   vm.runInNewContext(source.slice(start, end), { THREE: { Vector2 }, cover(a, b, normal) { covered.push({ a, b, normal }); } });
   assert.equal(covered.length, 4);
@@ -77,4 +76,20 @@ test('baseboards stop behind the fitted mudroom cases and remain outside the kit
   ]);
   assert.equal(covered[1].b.y, 17.54, 'Baseboard resumes at north enclosure, not at the removed west tower');
   assert.ok(covered[3].a.x > 41 + (2.5 + 0.125) / 12, 'No fitted joinery or trim cuts across the actual garage opening/casing');
+});
+
+test('baseboards stop behind the refrigeration side panel and scribed prep casework', () => {
+  const covered = [];
+  class Vector2 { constructor(x, y) { Object.assign(this, { x, y }); } }
+  const start = source.indexOf('      // Full-height refrigeration side panel and prep casework');
+  const end = source.indexOf('      for (const wall of baseTrimSections)', start);
+  assert.ok(start > 0 && end > start);
+  const kitchenRefrigeration = require('../assets/js/floor-plan-ground.js').getKitchenRefrigerationLayout();
+  vm.runInNewContext(source.slice(start, end), { THREE: { Vector2 }, kitchenRefrigeration, cover(a, b, normal) { covered.push({ a, b, normal }); } });
+  const rows = covered.map(({ a, b, normal }) => [a.x, a.y, b.x, b.y, normal.x, normal.y].map((value) => +value.toFixed(4)));
+  assert.deepEqual(rows[0], [28.1875, +kitchenRefrigeration.bodyFaceZ.toFixed(4), 28.1875, 26.725, 1, 0], 'Fridge return face is covered by the full-height side panel');
+  assert.deepEqual(rows[1], [28.1875, 26.725, 37.3, 26.725, 0, -1], 'No base trim behind the refrigeration bank on the kitchen south wall');
+  assert.deepEqual(rows[2], [37.675, 7.175, 55.325, 7.175, 0, 1], 'Prep sink-wall casework is scribed to the wall face');
+  assert.deepEqual(rows.slice(3, 5).map((row) => row[3]), [9.25, 9.25], 'Prep end scribes stop at the 24-inch cabinet depth');
+  assert.ok(rows[5][0] > 37.675 && rows[5][2] < 41.25 && rows[5][5] === -1, 'Only the cleaning-station bay loses south-wall base trim');
 });

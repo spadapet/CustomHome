@@ -222,7 +222,8 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
   function getKitchenRefrigerationLayout() {
     const runLeft = 27.9375, fridgeFillerWidth = 3 / 12;
     const returnX = runLeft + fridgeFillerWidth - 0.175;
-    const carcassBackZ = 26.725, wallSetback = 1.5 / 12, carcassDepth = 25 / 12;
+    // Carcass backs and the 24-inch Designer chassis bear on the kitchen wall face; no setback into the wall.
+    const carcassBackZ = 26.725, wallSetback = 0, carcassDepth = 25 / 12;
     return { returnX, runLeft, runRight: 37.3, columnWidth: 36 / 12, fridgeFillerWidth,
       carcassBackZ, wallSetback, carcassDepth, bodyFaceZ: carcassBackZ + wallSetback - carcassDepth };
   }

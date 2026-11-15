@@ -683,14 +683,30 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       // Applied trim surrounds the recessed sill without forming a projecting stool.
       casing.name = 'Flush white window returns';
       const depth = 6 / 12, thickness = 1 / 12, surfaceInset = 1 / 96;
-      part('White inset window sill', 0, -thickness / 2 + surfaceInset, -depth / 2, width, thickness, depth, windowTrim);
-      for (const edge of [-1, 1])
-        part('White drywall jamb return', edge * (width / 2 + 0.025 - surfaceInset), height / 2, -depth / 2, 0.05, height, depth, windowTrim);
+      // wetEdge { edge, stop, material }: a shower enclosure face lies `stop` from the
+      // opening centre (casing-local x) on `edge`. Painted trim stops at that face; the
+      // jamb and the sill inside the enclosure become tiled returns (wet-area finish).
+      const wet = sillOptions.wetEdge;
+      const clip = (left, right) => wet ? (wet.edge > 0 ? [left, Math.min(right, wet.stop)] : [Math.max(left, -wet.stop), right]) : [left, right];
+      const [sillLeft, sillRight] = clip(-width / 2, width / 2);
+      if (sillRight - sillLeft > 0.001) part('White inset window sill', (sillLeft + sillRight) / 2, -thickness / 2 + surfaceInset, -depth / 2, sillRight - sillLeft, thickness, depth, windowTrim);
+      if (wet && wet.stop < width / 2) {
+        const wetWidth = width / 2 - Math.max(wet.stop, -width / 2);
+        part('Tiled shower window sill return', wet.edge * (width / 2 - wetWidth / 2), -thickness / 2 + surfaceInset, -depth / 2, wetWidth, thickness, depth, wet.material);
+      }
+      for (const edge of [-1, 1]) {
+        const tiled = wet?.edge === edge;
+        part(tiled ? 'Tiled shower window jamb return' : 'White drywall jamb return', edge * (width / 2 + 0.025 - surfaceInset), height / 2, -depth / 2, 0.05, height, depth, tiled ? wet.material : windowTrim);
+      }
       part('White drywall head return', 0, height + 0.025 - surfaceInset, -depth / 2, width + 0.1, 0.05, depth, windowTrim);
-      for (const edge of [-1, 1])
-        part('White casing side board', edge * (width / 2 + reveal + sideWidth / 2),
-          (height + reveal - thickness) / 2, 0.03125, sideWidth, height + reveal + thickness, 0.0625, windowTrim);
-      if (sillOptions.bottomBoard !== false) part('White casing flat bottom board', 0, -thickness - sideWidth / 2 + surfaceInset, 0.03125, outerWidth, sideWidth, 0.0625, windowTrim);
+      for (const edge of [-1, 1]) {
+        // The painted leg is omitted where the enclosure face leaves no room for it.
+        const [legLeft, legRight] = clip(...(edge < 0 ? [-(width / 2 + reveal + sideWidth), -(width / 2 + reveal)] : [width / 2 + reveal, width / 2 + reveal + sideWidth]));
+        if (legRight - legLeft > 0.001) part('White casing side board', (legLeft + legRight) / 2,
+          (height + reveal - thickness) / 2, 0.03125, legRight - legLeft, height + reveal + thickness, 0.0625, windowTrim);
+      }
+      const [boardLeft, boardRight] = clip(-outerWidth / 2, outerWidth / 2);
+      if (sillOptions.bottomBoard !== false && boardRight - boardLeft > 0.001) part('White casing flat bottom board', (boardLeft + boardRight) / 2, -thickness - sideWidth / 2 + surfaceInset, 0.03125, boardRight - boardLeft, sideWidth, 0.0625, windowTrim);
       part('White casing header', 0, height + reveal + 5.5 / 24, 0.03125, outerWidth, 5.5 / 12, 0.0625, windowTrim);
       part('White casing header bead', 0, height + reveal + 0.03125, 0.05, outerWidth + 0.0625, 0.0625, 0.1, windowTrim);
       part('White casing projecting cap', 0, height + reveal + 5.5 / 12 + 0.0416667, 0.0625, outerWidth + 0.125, 1 / 12, 0.125, windowTrim);
@@ -702,22 +718,51 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
           -depth - 0.12, width + 0.2, edge < 0 ? thickness : 0.05, 0.24, windowTrim);
       }
       casing.userData = { window: true, width, height, side, installationConcept: true };
+      if (wet) Object.assign(casing.userData, { wetJambEdge: wet.edge, paintedTrimStopFeet: wet.stop, wetEnclosure: wet.enclosure ?? null, wetDetailVerified: false });
       return;
     }
-    for (const edge of [-1, 1]) {
-      const legBottom = sillOptions.legBottom ?? 0;
-      part('White casing side board', edge * (width / 2 + reveal + sideWidth / 2), (height + reveal + legBottom) / 2, 0.03125, sideWidth, height + reveal - legBottom, 0.0625);
-    }
-    part('White casing header', 0, height + reveal + 5.5 / 24, 0.03125, outerWidth, 5.5 / 12, 0.0625);
     const headOverhang = sillOptions.flushHeadEnds ? 0 : .0625;
-    part('White casing header bead', 0, height + reveal + 0.03125, 0.05, outerWidth + headOverhang, 0.0625, 0.1);
-    part('White casing projecting cap', 0, height + reveal + 5.5 / 12 + 0.0416667, 0.0625, outerWidth + 2 * headOverhang, 1 / 12, 0.125);
+    // Scribe a leg (and its head ends) where the opening sits closer to an adjoining wall face than the full casing width.
+    const legWidths = [-1, 1].map((edge) => {
+      const room = sillOptions.edgeRoom?.[side === -1 ? -edge : edge];
+      return room > 0 ? Math.max(0, Math.min(sideWidth, room - reveal)) : sideWidth;
+    });
+    const headEnds = [-1, 1].map((edge, index) => {
+      const room = sillOptions.edgeRoom?.[side === -1 ? -edge : edge];
+      const outer = width / 2 + reveal + legWidths[index];
+      return room > 0 ? Math.min(outer + headOverhang, Math.max(outer, width / 2 + room)) : outer + headOverhang;
+    });
+    for (const [index, edge] of [-1, 1].entries()) {
+      const legBottom = sillOptions.legBottom ?? 0;
+      if (legWidths[index] > 0.001) part('White casing side board', edge * (width / 2 + reveal + legWidths[index] / 2), (height + reveal + legBottom) / 2, 0.03125, legWidths[index], height + reveal - legBottom, 0.0625);
+    }
+    const legLeft = -(width / 2 + reveal + legWidths[0]), legRight = width / 2 + reveal + legWidths[1];
+    part('White casing header', (legLeft + legRight) / 2, height + reveal + 5.5 / 24, 0.03125, legRight - legLeft, 5.5 / 12, 0.0625);
+    const beadLeft = -Math.min(headEnds[0], -legLeft + headOverhang / 2), beadRight = Math.min(headEnds[1], legRight + headOverhang / 2);
+    part('White casing header bead', (beadLeft + beadRight) / 2, height + reveal + 0.03125, 0.05, beadRight - beadLeft, 0.0625, 0.1);
+    part('White casing projecting cap', (headEnds[1] - headEnds[0]) / 2, height + reveal + 5.5 / 12 + 0.0416667, 0.0625, headEnds[0] + headEnds[1], 1 / 12, 0.125);
   }
 
   const baseTrimSections = [];
   function wall(x1, z1, x2, z2, furnished = false, openings = [], height = ceilingHeight, trimSides = [-1, 1], quartzSide = 0, base = 0, casingOptions = {}) {
     windowWallDatums.push({ x1, z1, x2, z2, thickness: 0.35 });
     const length = Math.hypot(x2 - x1, z2 - z1);
+    // Clear distance from each door jamb to the face of a perpendicular wall on the casing side.
+    function casingRoom(start, end, side) {
+      const dx = (x2 - x1) / length, dz = (z2 - z1) / length;
+      const room = { [-1]: Infinity, 1: Infinity };
+      for (const [sx1, sz1, sx2, sz2] of wall.segments ?? []) {
+        const otherLength = Math.hypot(sx2 - sx1, sz2 - sz1);
+        if (!otherLength || Math.abs(((sx2 - sx1) * dx + (sz2 - sz1) * dz) / otherLength) > 1e-6) continue;
+        const t = (sx1 - x1) * dx + (sz1 - z1) * dz;
+        const a1 = -(sx1 - x1) * dz + (sz1 - z1) * dx, a2 = -(sx2 - x1) * dz + (sz2 - z1) * dx;
+        const reaches = side > 0 ? Math.max(a1, a2) > 0.175 + 1e-6 && Math.min(a1, a2) < 0.35 : Math.min(a1, a2) < -0.175 - 1e-6 && Math.max(a1, a2) > -0.35;
+        if (!reaches) continue;
+        if (t < start) room[-1] = Math.min(room[-1], start - t - 0.175);
+        if (t > end) room[1] = Math.min(room[1], t - end - 0.175);
+      }
+      return room;
+    }
     const group = new THREE.Group();
     group.position.set(x1, 0, z1);
     group.rotation.y = -Math.atan2(z2 - z1, x2 - x1);
@@ -770,11 +815,12 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     let cursor = 0;
     openings.forEach(([start, end, bottom, top]) => {
       part(cursor, start, base, height);
-      part(start, end, base, bottom);
+      // The garage-entry threshold assembly fills the split-floor doorway below the house floor; no duplicate wall stub.
+      if (!(casingOptions.splitFloor && bottom === 0)) part(start, end, base, bottom);
       part(start, end, top, height);
       if ((bottom === 0 || bottom === base) && !(z1 === groundFrontWallZ && z2 === groundFrontWallZ && start === 13.1 && end === 18.1)) {
         for (const side of trimSides) openingCasing(group, (start + end) / 2, bottom, end - start, top - bottom, 0.175, side, false,
-          { ...casingOptions, legBottom: casingOptions.splitFloor ? (side === -1 ? 0.0405 : -garageRise) : 0 });
+          { ...casingOptions, legBottom: casingOptions.splitFloor ? (side === -1 ? 0.0405 : -garageRise) : 0, edgeRoom: casingRoom(start, end, side) });
       }
       cursor = end;
     });
@@ -886,6 +932,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       cover(new THREE.Vector2(37.675, 15.175), new THREE.Vector2(37.675, 17.54), new THREE.Vector2(1, 0));
       cover(new THREE.Vector2(44.9 - 8 / 12 - 0.175, 15.175), new THREE.Vector2(44.9 - 8 / 12 - 0.175, 26.725), new THREE.Vector2(-1, 0));
       cover(new THREE.Vector2(43.075 - 8 / 12, 26.725), new THREE.Vector2(44.9 - 8 / 12 - 0.175, 26.725), new THREE.Vector2(0, -1));
+      // Full-height refrigeration side panel and prep casework are scribed to these wall faces: no base trim behind them.
+      cover(new THREE.Vector2(kitchenRefrigeration.returnX + 0.175, kitchenRefrigeration.bodyFaceZ), new THREE.Vector2(kitchenRefrigeration.returnX + 0.175, kitchenRefrigeration.carcassBackZ), new THREE.Vector2(1, 0));
+      cover(new THREE.Vector2(kitchenRefrigeration.returnX + 0.175, kitchenRefrigeration.carcassBackZ), new THREE.Vector2(kitchenRefrigeration.runRight, kitchenRefrigeration.carcassBackZ), new THREE.Vector2(0, -1));
+      cover(new THREE.Vector2(37.675, 7.175), new THREE.Vector2(55.325, 7.175), new THREE.Vector2(0, 1));
+      cover(new THREE.Vector2(37.675, 7.175), new THREE.Vector2(37.675, 9.25), new THREE.Vector2(1, 0));
+      cover(new THREE.Vector2(55.325, 7.175), new THREE.Vector2(55.325, 9.25), new THREE.Vector2(-1, 0));
+      cover(new THREE.Vector2(37.675 + 0.175, 14.825), new THREE.Vector2(37.675 + (55.325 - 37.675 - 0.75 / 12) / 5, 14.825), new THREE.Vector2(0, -1));
       for (const wall of baseTrimSections) {
         for (const side of [-1, 1]) {
           if (wall.sides.includes(side)) continue;
@@ -1017,7 +1070,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   // Outer face of each stone side return (October 27 owner decision: no fireplace-side built-ins).
   const fireplaceStoneHalfWidth = 3.06;
   const fireplaceBackingFrontX = fireplaceFaceX - 0.08;
-  const fireplaceBackingDepth = fireplaceBackingFrontX - 0.02;
+  // Stone backing starts at the finished west wall face (x0.175), not inside the wall framing.
+  const fireplaceBackingDepth = fireplaceBackingFrontX - 0.175;
 
   const stairWidth = 44 / 12;
   const stairGap = 0.25;
@@ -1104,7 +1158,10 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     // Stock 1x3 legs on BOTH faces leave the west corner clear, including the cap.
     // Garage legs land on the centered tread; mudroom legs land on finished tile.
     [37.5, 26.9, 44.9 - 8 / 12, 26.9, false, [[garageEntry.x - 37.5, garageEntry.x - 37.5 + garageEntry.width, 0, garageEntry.height]], ceilingHeight, [-1, 1], 0, garageFloorY, { sideWidth: 2.5 / 12, splitFloor: true }]
-  ].forEach((segment) => wall(...segment));
+  ].forEach((segment, index, segments) => {
+    wall.segments = segments;
+    wall(...segment);
+  });
 
   joinWallCorners();
   buildBaseTrim();
@@ -1124,7 +1181,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   fireplace.name = 'Floor-to-ceiling stone fireplace';
   scene.add(fireplace);
   const mortar = mat('#635a50');
-  box(fireplace, 0.02 + fireplaceBackingDepth / 2, ceilingHeight / 2, livingCenterZ, fireplaceBackingDepth, ceilingHeight, 6, mortar).name = 'Fireplace stone backing';
+  box(fireplace, 0.175 + fireplaceBackingDepth / 2, ceilingHeight / 2, livingCenterZ, fireplaceBackingDepth, ceilingHeight, 6, mortar).name = 'Fireplace stone backing';
   const stoneCanvas = document.createElement('canvas');
   stoneCanvas.width = stoneCanvas.height = 128;
   const stoneContext = stoneCanvas.getContext('2d');
@@ -1159,13 +1216,14 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       start += length;
     }
     for (const z of [livingCenterZ - 3.03, livingCenterZ + 3.03]) {
-      box(fireplace, 0.02 + fireplaceBackingDepth / 2, y, z, fireplaceBackingDepth, 0.475, 0.06, fireplaceStones[row % fireplaceStones.length]).name = 'Fireplace stone side return';
+      box(fireplace, 0.175 + fireplaceBackingDepth / 2, y, z, fireplaceBackingDepth, 0.475, 0.06, fireplaceStones[row % fireplaceStones.length]).name = 'Fireplace stone side return';
     }
   }
-  box(fireplace, 0.02 + fireplaceBackingDepth / 2, ceilingHeight - 0.015, livingCenterZ, fireplaceBackingDepth, 0.03, 6, fireplaceStones[0]).name = 'Fireplace stone top cap';
+  box(fireplace, 0.175 + fireplaceBackingDepth / 2, ceilingHeight - 0.015, livingCenterZ, fireplaceBackingDepth, 0.03, 6, fireplaceStones[0]).name = 'Fireplace stone top cap';
   const fireboxBottom = 1;
   const fireboxHeight = 1.25;
-  const firebox = box(scene, fireplaceFaceX + 0.02, fireboxBottom + fireboxHeight / 2, livingCenterZ, 0.12, fireboxHeight, 4.6, black);
+  // Black linear firebox face is applied in front of the deepest stacked stone (x1.381), not buried in it.
+  const firebox = box(scene, fireplaceFaceX + 0.065, fireboxBottom + fireboxHeight / 2, livingCenterZ, 0.12, fireboxHeight, 4.6, black);
   firebox.name = 'Fireplace firebox';
   firebox.userData = { bottomInches: 12, heightInches: 15, clearanceVerified: false, provisional: true };
   const ember = new THREE.MeshStandardMaterial({ color: '#c7793e', emissive: '#c65c20', emissiveIntensity: 1 });
@@ -1192,7 +1250,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       fire.add(flame);
     }
   }
-  const mantel = box(scene, fireplaceFaceX + 0.25, 4.15, livingCenterZ, 0.65, 0.3, 6.2, cabinetRailFinish);
+  const mantel = box(scene, fireplaceFaceX + 0.33, 4.15, livingCenterZ, 0.65, 0.3, 6.2, cabinetRailFinish);
   mantel.name = 'White oak fireplace mantel';
   mantel.userData = { widthInches: 74.4, thicknessInches: 3.6, bottomInches: 48, clearanceVerified: false, provisional: true };
   box(scene, fireplaceFaceX + 0.06, 5.8, livingCenterZ, 0.15, 2.7, 4.6, black, true).name = 'Fireplace television';
@@ -1372,7 +1430,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   for (const y of [0.08, 7.92]) box(livingPatioDoor, 0, y, 0, 3, 0.16, 0.2, windowTrim).name = 'Living patio door rail';
   box(livingPatioDoor, 0, 4, 0, 2.76, 7.68, 0.05, glass).name = 'Living patio door glazing';
   box(livingPatioDoor, -1.15, 3, -0.16, 0.08, 0.4, 0.12, black).name = 'Living patio door handle';
-  openingCasing(livingPatioDoor, 0, 0, 3, 8, 0.2, -1, false);
+  // Interior casing comes from the dining west wall opening; no second overlapping casing here.
   const livingPatioHinge = new THREE.Group();
   livingPatioHinge.name = 'Dining west patio inward door hinge';
   livingPatioHinge.position.set(1.44, 0, 0);
@@ -2407,7 +2465,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const firstStepTrimHeight = Math.min(8 / 12, stairRise - 0.1);
   box(stairBaseTrim, stairGoing / 2, 0.005 + firstStepTrimHeight / 2, -0.75 / 24, stairGoing, firstStepTrimHeight, 0.75 / 12, windowTrim).name = 'Bottom-step baseboard extension';
   box(stairBaseTrim, -0.75 / 24, 0.005 + firstStepTrimHeight / 2, (stairWidth - 0.75 / 12) / 2, 0.75 / 12, firstStepTrimHeight, stairWidth + 0.75 / 12, windowTrim).name = 'Bottom-step front trim return';
-  box(stairBaseTrim, landingEndX + 0.75 / 24, 0.005 + 4 / 12, (stairEnclosureDepth - 0.75 / 12) / 2, 0.75 / 12, 8 / 12, stairEnclosureDepth + 0.75 / 12, windowTrim).name = 'Enclosure end baseboard return';
+  // The landing enclosure ends against the west wall face: no hidden end return inside the wall.
   const landingGuardZ = -0.08;
   stairBeam('Turning landing side handrail', [stairRun, landingHeight + 3, landingGuardZ], [landingEndX, landingHeight + 3, landingGuardZ], 0.12, 0.12, oak);
   for (let rail = 1; rail <= 8; rail++) {
@@ -2443,8 +2501,15 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const endX = startX + direction * stairRun;
     box(flight, endX + direction * 0.04, baseY - landingHeight + (stairRise - 0.1) / 2, centerZ, 0.08, stairRise - 0.1, flightWidth, cream).name = 'Basement landing riser';
     for (const side of [-1, 1]) {
-      const railZ = !returning && side === 1 ? outerStairRailZ : centerZ + side * (flightWidth / 2 + 0.08);
-      stairBeam('Basement stair stringer', [startX, baseY - stairRise - 0.2, railZ], [endX, baseY - landingHeight - 0.2, railZ], 0.12, 0.3, oak, flight);
+      // Inner (well-side) members share the 3-in well without crossing: each flight's
+      // stringer and rail stay in its own half, meeting the other flight's members
+      // only face-to-face at the well centreline (November 15 overlap fix).
+      const inner = returning ? side === 1 : side === -1;
+      const wellCenterZ = stairWidth + stairGap / 2;
+      const railZ = !returning && side === 1 ? outerStairRailZ
+        : inner ? wellCenterZ - side * 0.06 : centerZ + side * (flightWidth / 2 + 0.08);
+      const stringerZ = inner ? wellCenterZ - side * 0.15 : railZ;
+      stairBeam('Basement stair stringer', [startX, baseY - stairRise - 0.2, stringerZ], [endX, baseY - landingHeight - 0.2, stringerZ], 0.12, 0.3, oak, flight);
       // Photo-matched powder-room side of the basement entry: keep its stringer.
       // Wall/handrail continuity at the entrance remains a professional-review item.
       if (!returning && side === 1) continue;
@@ -2506,7 +2571,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   prepExtensionBody.userData.cabinetBody = 'z+';
   box(prepExtension, 0, 2.8875, 0, 2.75, 0.025, 2, cabinetRailFinish).name = 'Prep extension counter support packer';
   box(prepExtension, 0, 1.4375, -1.0375, 2.75, 2.875, 0.075, cabinetFinish).name = 'Prep extension rear wall scribe';
-  box(prepExtension, 0.04, 2.97, 0, 2.83, 0.14, 2.05, countertop).name = 'Prep extension quartz counter';
+  box(prepExtension, 0.025, 2.97, 0, 2.8, 0.14, 2.05, countertop).name = 'Prep extension quartz counter';
   box(prepExtension, 1.4, 1.475, 0, 0.05, 2.85, 2, cabinetFinish).name = 'Prep right 0.6 inch scribe filler';
   for (const x of [-0.6875, 0.6875]) drawerFront(x, 1.04, 1.335, 0, prepExtension);
   const prepSink = new THREE.Group();
@@ -2738,7 +2803,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
 
   const prepRobotBayWidth = (prepShelfWidth - prepShelfThickness) / prepShelfBays;
   const prepRobotX = prepShelfStart + prepShelfThickness / 2 + (prepRobotBay + 0.5) * prepRobotBayWidth;
-  const robotDock = furnishing('Prep robot docking station', prepRobotX, prepCleaningRearZ - 0.6, Math.PI / 2);
+  // Keep the dock and robot clear of the 0.75-inch base trim on the south wall face.
+  const robotDock = furnishing('Prep robot docking station', prepRobotX, prepCleaningRearZ - 0.67, Math.PI / 2);
   robotDock.userData = { pantryBay: prepRobotBay + 1, orientation: 'Sideways, facing west along the shelves', floorLevelRobotAccess: true, threshold: false, doors: false, depthAllowanceInches: 14, overheadClearHeightInches: (prepShelfLevels[1] - prepShelfThickness / 2) * 12, dockingClearancesVerified: false, provisional: true };
   const cleaningRobot = new THREE.Group();
   cleaningRobot.name = 'Prep iRobot vacuum allowance';
@@ -2749,7 +2815,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   cylinder(cleaningRobot, 0, 4 / 12 - 0.005, 0, 0.14, 0.01, steel).name = 'Robot vacuum top control';
   box(robotDock, 0, 1 / 3, 0.64, 14 / 12, 2 / 3, 0.25, black, true).name = 'Compact robot charging base allowance';
   box(robotDock, 0, 0.12, 0.48, 0.8, 0.12, 0.08, steel).name = 'Robot charging contacts allowance';
-  box(prepShelves, prepRobotX - prepShelves.position.x + 0.9, 0.75, prepShelfDepth / 2 - 0.04, 0.25, 0.4, 0.03, cream).name = 'Robot dock power outlet allowance';
+  box(prepShelves, prepRobotX - prepShelves.position.x + 0.9, 0.95, prepShelfDepth / 2 - 0.04, 0.25, 0.4, 0.03, cream).name = 'Robot dock power outlet allowance';
 
   const pantryContents = new THREE.Group();
   pantryContents.name = 'Prep pantry contents';
@@ -3532,7 +3598,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   box(mower, 0, 3.3, 3.25, 1.7, 0.08, 0.08, black).name = 'Unfolded mower handle grip';
   const shopVac = new THREE.Group();
   shopVac.name = 'Large rolling shop vacuum';
-  shopVac.position.set(2.1, 0, 1);
+  // Keep the drum 0.6 inch clear of the garage-entry intermediate tread (x37.5).
+  shopVac.position.set(2, 0, 1);
   yardTools.add(shopVac);
   cylinder(shopVac, 0, 1.25, 0, 0.85, 1.9, steel).name = 'Large shop vac drum';
   box(shopVac, 0, 2.3, 0, 1.55, 0.35, 1.55, black, true).name = 'Shop vac motor lid';
@@ -3549,7 +3616,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   for (const x of [-2.1, -0.7, 0.7, 2.1]) garageProp('plastic_crate_01', 'Garage tool storage bin', yardTools, x, 6.56, 0.8);
   const hangingTools = furnishing('Accessible garage garden-tool rail', 46.75, 15.175, 0, garageFloorY);
   hangingTools.userData = { widthInches: 30, location: 'North garage wall west of the bikes, with a clear retrieval approach', contents: 'Rake, broom and dustpan, with four spare hooks', floorStorage: false, anchorageVerified: false, provisional: true };
-  for (const y of [3.2, 5.05]) box(hangingTools, 0, y, 0.03, 2.5, 0.15, 0.12, black).name = 'Garage garden-tool mounting rail';
+  for (const y of [3.2, 5.05]) box(hangingTools, 0, y, 0.06, 2.5, 0.15, 0.12, black).name = 'Garage garden-tool mounting rail';
   for (const [x, y] of [[-0.8, 4.95], [-0.2, 5.05], [0.8, 5.05]]) {
     box(hangingTools, x, y, 0.12, 0.12, 0.18, 0.12, steel).name = 'Garage garden-tool wall clip';
     box(hangingTools, x, y, 0.24, 0.16, 0.06, 0.2, black).name = 'Garage garden-tool retaining clip';
@@ -3790,6 +3857,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
       knob.position.set(handleX, 38 / 12, face * (officeLeafThickness / 2 + 0.16));
       leaf.add(knob);
     }
+    // Pivot half a leaf thickness inside the jamb so the 90-degree leaf stays within the opening, clear of wall and casing.
+    leaf.position.x -= side * officeLeafThickness / 2;
+    for (const child of leaf.children) child.position.x += side * officeLeafThickness / 2;
     for (const y of [9, 34, 63, 87]) cylinder(leaf, 0, y / 12, 0, 0.03, 0.25, black).name = 'Office dark door hinge';
   }
 

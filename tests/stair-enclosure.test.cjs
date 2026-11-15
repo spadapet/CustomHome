@@ -106,8 +106,9 @@ test('treads, platforms, guards and flat trim remain with no projecting casework
   assert.equal(beams.filter(b => b.name === 'Horizontal landing guard rail').length, 8);
   assert.equal(meshes.filter(m => m.name === 'Landing guard post').length, 2);
   assert.equal(meshes.filter(m => m.name === 'Stair guard post').length, 9);
+  // Nov 15: the hidden enclosure end return inside the west wall was removed.
   const trim = meshes.filter(m => /baseboard|trim return/.test(m.name));
-  assert.equal(trim.length, 4);
+  assert.equal(trim.length, 3);
   assert.ok(trim.every(m => m.z - m.d / 2 >= -0.75 / 12 - 1e-8));
   assert.ok(trim.every(m => m.z + m.d / 2 <= 44 / 12 + 1e-8));
 });

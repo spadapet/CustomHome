@@ -63,6 +63,179 @@ function mapBrickBoxUVs(geometry, widthFeet, heightFeet) {
   uv.needsUpdate = true;
 }
 
+// Plan-view clip of a roof gutter strip against finished masonry footprints.
+// Returns the gutter pieces outside the brick (as [start, end] 3D points along
+// the original edge) and flags which piece ends were cut at a brick face, so
+// those ends receive end caps instead of running into the veneer.
+function clipGutterToMasonry(start, end, footprints, halfWidth, yLow, yHigh, tolerance = 0.25 / 12) {
+  const ax = start[0], az = start[2], dx = end[0] - ax, dz = end[2] - az, length = Math.hypot(dx, dz);
+  if (length < 1e-9) return [];
+  const px = -dz / length, pz = dx / length;
+  const removed = [];
+  for (const wall of footprints) {
+    if (Math.min(yHigh, wall.top) - Math.max(yLow, wall.bottom) <= tolerance) continue;
+    const wl = Math.hypot(wall.x2 - wall.x1, wall.z2 - wall.z1);
+    const ux = (wall.x2 - wall.x1) / wl, uz = (wall.z2 - wall.z1) / wl, nx = -uz, nz = ux;
+    // Along-wall (s) and through-wall (r) coordinates are linear in t; the strip
+    // adds |cross-section| spread. Interior overlap must exceed the tolerance.
+    const interval = (margin) => {
+      let low = 0, high = 1;
+      for (const [axisX, axisZ, min, max] of [[ux, uz, 0, wl], [nx, nz, -wall.thickness / 2, wall.thickness / 2]]) {
+        const origin = (ax - wall.x1) * axisX + (az - wall.z1) * axisZ;
+        const slope = dx * axisX + dz * axisZ;
+        const spread = halfWidth * Math.abs(px * axisX + pz * axisZ);
+        const a = min + margin - spread, b = max - margin + spread;
+        if (Math.abs(slope) < 1e-9) { if (origin <= a || origin >= b) return null; continue; }
+        const t1 = (a - origin) / slope, t2 = (b - origin) / slope;
+        low = Math.max(low, Math.min(t1, t2)); high = Math.min(high, Math.max(t1, t2));
+      }
+      return high > low ? [low, high] : null;
+    };
+    // Only a real (> tolerance) penetration cuts the gutter; the cut then stops
+    // the strip exactly at the finished brick face.
+    if (interval(tolerance)) removed.push(interval(0));
+  }
+  removed.sort((a, b) => a[0] - b[0]);
+  const pieces = [];
+  let cursor = 0, cutStart = false;
+  const at = (t) => [ax + dx * t, start[1] + (end[1] - start[1]) * t, az + dz * t];
+  for (const [low, high] of removed) {
+    if (low > cursor + 1e-6) pieces.push({ start: at(cursor), end: at(low), cutStart, cutEnd: true });
+    cursor = Math.max(cursor, high); cutStart = true;
+  }
+  if (cursor < 1 - 1e-6) pieces.push({ start: at(cursor), end: at(1), cutStart, cutEnd: false });
+  return pieces;
+}
+
+// Living-patio canopy section shared by the canopy builder (which checks it
+// against its own values) and the lower dining-roof gutter stop. The east
+// tapered brick closure rises from y=9 at closureStart along x=13.2, the same
+// line as the dining roof's west eave, so that eave abuts the closure.
+function getLivingPatioCanopyFrame(wallThickness, returnWallZ) {
+  const rear = -0.1 - wallThickness / 2, front = returnWallZ + wallThickness / 2;
+  const pitch = 3 / 16, thickness = 0.18, right = 13.2, closureBottom = 9;
+  const centerZ = (rear + front) / 2;
+  const roofY = 9.5 + (returnWallZ - 8) * pitch / 2;
+  const halfDepth = thickness / (2 * Math.cos(Math.atan(pitch)));
+  const undersideAt = (z) => roofY + (z - centerZ) * pitch - halfDepth;
+  const closureStart = centerZ + (closureBottom - roofY + halfDepth) / pitch;
+  return { rear, front, right, pitch, thickness, roofY, centerZ, undersideAt, closureStart,
+    closureFootprint: { name: 'Patio roof east tapered closure', x1: right, z1: closureStart, x2: right, z2: front,
+      bottom: closureBottom, top: undersideAt(front) + 0.02, thickness: wallThickness },
+    // Exact sloping-top solid of the same closure for the finish masonry stop.
+    closureSolid: prismMasonrySolid('Patio roof east tapered closure', [[right - wallThickness / 2, closureStart], [right + wallThickness / 2, closureStart],
+      [right + wallThickness / 2, front], [right - wallThickness / 2, front]], closureBottom, [0, pitch, roofY - centerZ * pitch - halfDepth + 0.02]) };
+}
+
+// Masonry stop for roof, soffit, fascia, rake, flashing and closure finishes.
+// A solid is a world-space convex volume of finished masonry (brick, stone,
+// coping, articulation, window allowances or a fitted closure), stored as
+// half-spaces [nx, ny, nz, d] (inside when n.p + d >= 0) plus a plan/height box.
+function boxMasonrySolid(mesh) {
+  const { width, height, depth } = mesh.geometry.parameters;
+  const e = mesh.matrixWorld.elements, center = [e[12], e[13], e[14]];
+  const planes = [[0, width], [4, height], [8, depth]].flatMap(([i, size]) => {
+    const length = Math.hypot(e[i], e[i + 1], e[i + 2]);
+    const axis = [e[i] / length, e[i + 1] / length, e[i + 2] / length];
+    const c = axis[0] * center[0] + axis[1] * center[1] + axis[2] * center[2], half = size * length / 2;
+    return [[...axis, half - c], [-axis[0], -axis[1], -axis[2], half + c]];
+  });
+  return { name: mesh.name, planes };
+}
+// Vertical prism over a convex plan polygon [[x, z], ...] between a level
+// bottom and a sloping top plane [a, b, c] (y = a x + b z + c).
+function prismMasonrySolid(name, polygon, bottom, top) {
+  const area = polygon.reduce((sum, a, i) => { const b = polygon[(i + 1) % polygon.length]; return sum + a[0] * b[1] - b[0] * a[1]; }, 0);
+  const s = Math.sign(area);
+  const planes = polygon.map((a, i) => {
+    const b = polygon[(i + 1) % polygon.length];
+    return [-s * (b[1] - a[1]), 0, s * (b[0] - a[0]), s * ((b[1] - a[1]) * a[0] - (b[0] - a[0]) * a[1])];
+  });
+  planes.push([0, 1, 0, -bottom], [top[0], -1, top[1], top[2]]);
+  return { name, planes };
+}
+// True when a triangle set enters the solid by more than depth (feet). Faces
+// lying on, or merely touching, the finished face are not penetrations.
+function penetratesMasonry(triangles, planes, depth = 1e-4) {
+  const value = (plane, p) => plane[0] * p[0] + plane[1] * p[1] + plane[2] * p[2] + plane[3] - depth;
+  return triangles.some((triangle) => {
+    let polygon = triangle;
+    for (const plane of planes) {
+      const next = [];
+      for (let i = 0; i < polygon.length; i++) {
+        const a = polygon[i], b = polygon[(i + 1) % polygon.length], av = value(plane, a), bv = value(plane, b);
+        if (av >= 0) next.push(a);
+        if ((av < 0 && bv > 0) || (av > 0 && bv < 0)) next.push(a.map((v, j) => v + (b[j] - v) * av / (av - bv)));
+      }
+      polygon = next;
+      if (polygon.length < 3) return false;
+    }
+    return true;
+  });
+}
+// For a solid trim member, extend a masonry solid's face plane across any
+// leftover thinner than the 1/4-in joint tolerance beyond it (for example a
+// fascia 0.06 in past the room-side face of a wall it is buried in), so the
+// stop leaves no razor sliver. Faces with real material beyond them stay exact.
+function fitMasonrySolidToMember(triangles, planes, joint = 0.25 / 12) {
+  const value = (plane, p) => plane[0] * p[0] + plane[1] * p[1] + plane[2] * p[2] + plane[3];
+  return planes.map((plane, index) => {
+    let beyond = 0;
+    for (const triangle of triangles) {
+      let polygon = triangle;
+      for (let other = 0; other < planes.length && polygon.length >= 3; other++) {
+        if (other === index) continue;
+        const next = [];
+        for (let i = 0; i < polygon.length; i++) {
+          const a = polygon[i], b = polygon[(i + 1) % polygon.length], av = value(planes[other], a), bv = value(planes[other], b);
+          if (av >= 0) next.push(a);
+          if ((av < 0 && bv > 0) || (av > 0 && bv < 0)) next.push(a.map((v, j) => v + (b[j] - v) * av / (av - bv)));
+        }
+        polygon = next;
+      }
+      if (polygon.length >= 3) for (const p of polygon) beyond = Math.max(beyond, -value(plane, p));
+    }
+    return beyond > 1e-9 && beyond < joint ? [plane[0], plane[1], plane[2], plane[3] + beyond + 1e-6] : plane;
+  });
+}
+// Even-odd plan test ([x, z]) for a simple polygon; boundary points count as inside.
+function pointInPlanPolygon(polygon, point, epsilon = 1e-6) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [xi, zi] = polygon[i], [xj, zj] = polygon[j];
+    const cross = (xj - xi) * (point[1] - zi) - (zj - zi) * (point[0] - xi);
+    const within = (point[0] - xi) * (point[0] - xj) <= epsilon && (point[1] - zi) * (point[1] - zj) <= epsilon;
+    if (Math.abs(cross) <= epsilon * Math.hypot(xj - xi, zj - zi) && within) return true;
+    if ((zi > point[1]) !== (zj > point[1]) && point[0] < (xj - xi) * (point[1] - zi) / (zj - zi) + xi) inside = !inside;
+  }
+  return inside;
+}
+// Split triangles ([x, y, z, ...] vertices) into connected pieces that share a
+// vertex, so separate fragments left by a masonry stop become separate parts.
+function connectedTrianglePieces(triangles) {
+  const parent = triangles.map((_, i) => i);
+  const find = (i) => { while (parent[i] !== i) i = parent[i] = parent[parent[i]]; return i; };
+  const owner = new Map();
+  triangles.forEach((triangle, index) => {
+    for (const vertex of triangle) {
+      // 1e-4 ft grid; neighbouring cells are joined so rounding never splits a seam.
+      const cell = vertex.slice(0, 3).map((value) => Math.round(value * 1e4));
+      for (const dx of [-1, 0, 1]) for (const dy of [-1, 0, 1]) for (const dz of [-1, 0, 1]) {
+        const other = owner.get(`${cell[0] + dx},${cell[1] + dy},${cell[2] + dz}`);
+        if (other !== undefined) parent[find(index)] = find(other);
+      }
+      owner.set(cell.join(','), index);
+    }
+  });
+  const groups = new Map();
+  triangles.forEach((triangle, index) => {
+    const root = find(index);
+    if (!groups.has(root)) groups.set(root, []);
+    groups.get(root).push(triangle);
+  });
+  return [...groups.values()];
+}
+
 function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations = [] }, floorToFloor, garageFloorY) {
   const group = new THREE.Group();
   const frontLayout = getGroundFrontLayout();
@@ -320,7 +493,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     material.map.repeat.set((roof ? w : Math.max(w, d)) / 8, (roof ? d : h) / 8);
     return box(parent, x, y, z, w, h, d, material);
   }
-  function windowUnit(parent, center, sill, width, height, privacyLowerHalf = false, picture = false, perimeterTrim = true, front = false, singleHung = false) {
+  function windowUnit(parent, center, sill, width, height, privacyLowerHalf = false, picture = false, perimeterTrim = true, front = false, singleHung = false, headTrimTop = Infinity) {
     const frame = new THREE.Group();
     frame.name = 'Andersen 100 Series exterior concept window';
     const intent = getWindowProductIntent(width, height, picture, privacyLowerHalf);
@@ -384,10 +557,13 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     }
     if (perimeterTrim) {
       box(parent, center, sill - 0.13, 0.3, width + 0.65, 0.22, 0.45, windowFinish);
-      box(parent, center, sill + height + 0.2, 0.28, width + 0.65, 0.3, 0.3, windowFinish);
+      // An applied stone lintel above may cap the head trim (it stops beneath it).
+      const headLow = sill + height + 0.05, headHigh = Math.min(sill + height + 0.35, headTrimTop);
+      if (headHigh - headLow > 1e-6) box(parent, center, (headLow + headHigh) / 2, 0.28, width + 0.65, headHigh - headLow, 0.3, windowFinish);
     }
   }
   function wall(name, x1, z1, x2, z2, bottom, top, openings = []) {
+    masonryFootprints.push({ name, x1, z1, x2, z2, bottom, top, thickness: wallThickness });
     const front = ['front ground floor', 'upper front bedrooms', 'upper front bedroom 4', 'upper loft south'].includes(name);
     const wallGroup = new THREE.Group();
     wallGroup.name = `Exterior brick wall: ${name}`;
@@ -429,27 +605,102 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
           opening.frameSill, opening.frameHeight, bankFrame.position.z + 0.12);
         box(wallGroup, center, opening.frameSill - 0.13, 0.3, opening.frameWidth + 0.65, 0.22, 0.45, trim).name = `${opening.trimLabel ?? 'Prep'} bank continuous exterior sill`;
         box(wallGroup, center, opening.frameSill + opening.frameHeight + 0.2, 0.28, opening.frameWidth + 0.65, 0.3, 0.3, trim).name = `${opening.trimLabel ?? 'Prep'} bank continuous exterior header trim`;
-      } else if (!door) windowUnit(wallGroup, center, opening.frameSill ?? sill, opening.frameWidth ?? width, opening.frameHeight ?? height, opening.privacyLowerHalf, opening.picture, true, front);
+      } else if (!door) windowUnit(wallGroup, center, opening.frameSill ?? sill, opening.frameWidth ?? width, opening.frameHeight ?? height, opening.privacyLowerHalf, opening.picture, !name.startsWith('upper '), front, false,
+        name === 'front ground floor' ? groundFrontLintel.y - groundFrontLintel.height / 2 : Infinity);
       cursor = center + width / 2;
     }
     fill(cursor, length, bottom, top);
-    if (name.startsWith('upper ')) articulateUpperMasonry(wallGroup, length, top, openings);
+    if (name.startsWith('upper ')) articulateUpperMasonry(wallGroup, length, top, openings, localUpperNeighbours(name.slice('upper '.length)));
     return wallGroup;
   }
+  // Finished masonry footprints (centreline, thickness and height) recorded by wall();
+  // roof gutters stop at the brick face instead of running into the veneer.
+  const masonryFootprints = [];
+  // Fitted (non-box) masonry closures registered as exact convex solids for the
+  // finish masonry stop; the wall groups' box constituents are added later.
+  const masonrySolids = [];
+  // Ground front projecting limestone lintels; the window head trim stops beneath them.
+  const groundFrontLintel = { y: 8.32, height: 0.35 };
   // Applied stone is a supported veneer concept, never a substitute for headers.
   // Work in each actual wall's local coordinates so every return is coordinated.
-  function articulateUpperMasonry(parent, length, top, openings) {
+  const upperCourseOnlyWalls = ['upper front bedrooms', 'upper front bedroom 4', 'upper loft south'];
+  // Other upper walls in one wall's local frame (x along the wall, +z toward its
+  // articulated face): their brick footprint and the plan of their courses, so
+  // course ends stop at an adjoining brick face and one course yields at a corner.
+  function localUpperNeighbours(ownName) {
+    const segments = getUpstairsExteriorSegments();
+    const own = segments.find(([name]) => name === ownName);
+    if (!own) return [];
+    const [, ox1, oz1, ox2, oz2] = own;
+    const ownLength = Math.hypot(ox2 - ox1, oz2 - oz1);
+    const ux = (ox2 - ox1) / ownLength, uz = (oz2 - oz1) / ownLength;
+    return segments.filter(([name]) => name !== ownName).map(([name, x1, z1, x2, z2]) => {
+      const segmentLength = Math.hypot(x2 - x1, z2 - z1);
+      const vx = (x2 - x1) / segmentLength, vz = (z2 - z1) / segmentLength;
+      const rect = (out0, out1) => {
+        const points = [[0, out0], [0, out1], [segmentLength, out0], [segmentLength, out1]].map(([along, out]) => {
+          const x = x1 + along * vx - out * vz - ox1, z = z1 + along * vz + out * vx - oz1;
+          return [x * ux + z * uz, -x * uz + z * ux];
+        });
+        return { x0: Math.min(...points.map(p => p[0])), x1: Math.max(...points.map(p => p[0])),
+          z0: Math.min(...points.map(p => p[1])), z1: Math.max(...points.map(p => p[1])) };
+      };
+      return { name: `Exterior brick wall: upper ${name}`, length: segmentLength, brick: rect(-wallThickness / 2, wallThickness / 2),
+        course: (front, label) => upperCourseOnlyWalls.includes(`upper ${name}`) && /lower bed|frieze/.test(label) ? null : rect(wallThickness / 2, front) };
+    });
+  }
+  function articulateUpperMasonry(parent, length, top, openings, neighbours = []) {
     const stone = trim;
     const pairedFront = ['Exterior brick wall: upper front bedrooms', 'Exterior brick wall: upper front bedroom 4'].includes(parent.name);
     const blindLoft = parent.name === 'Exterior brick wall: upper loft south';
-    for (const [y, height, depth, label] of [
-      [10.05, 0.3, 0.36, 'Upper masonry base course'],
-      [top - 0.65, 0.18, 0.38, 'Cornice lower bed molding'],
-      [top - 0.36, 0.4, 0.28, 'Cornice frieze'],
-      [top - 0.1, 0.12, 0.46, 'Cornice projecting crown']
+    // Applied stone and bay masonry bear on the finished brick face: each piece
+    // keeps its exposed front face and starts at the face, never inside the
+    // veneer (Nov 15 overlap audit). Returns [centre z, depth] for a front face.
+    const brickFace = wallThickness / 2;
+    const onFace = front => [(brickFace + front) / 2, front - brickFace];
+    const friezeBottom = top - 0.56, bedBottom = top - 0.74, crownBottom = top - 0.16;
+    // Window lintels rise to the frieze; the bed molding stops against each
+    // lintel end instead of running through it.
+    const lintels = pairedFront || blindLoft ? [] : openings.map(({ center, width, sill, height }) => ({
+      left: center - (width + 0.9) / 2, right: center + (width + 0.9) / 2,
+      bottom: sill + height + 0.13, top: Math.min(sill + height + 0.51, friezeBottom)
+    }));
+    // The window's white perimeter sill/head trim (same finish as the stone) is
+    // built here on upper walls: on the brick face, between the stone jambs,
+    // above the stone sill/stool and below the lintel or bay head, and clear of
+    // the 0.1 ft installation depth allowances at the frame sill and head.
+    const perimeterTrim = (opening, floor, ceiling, halfWidth) => {
+      if (opening.door || opening.units) return;
+      const frameSill = opening.frameSill ?? opening.sill, frameHead = frameSill + (opening.frameHeight ?? opening.height);
+      const sillLow = Math.max(frameSill - 0.24, floor), sillHigh = frameSill - 0.1;
+      const headLow = frameHead + 0.1, headHigh = Math.min(frameHead + 0.35, ceiling);
+      const [sillZ, sillDepth] = onFace(0.525), [headZ, headDepth] = onFace(0.43);
+      if (sillHigh - sillLow > 1e-6) box(parent, opening.center, (sillLow + sillHigh) / 2, sillZ,
+        halfWidth * 2, sillHigh - sillLow, sillDepth, trim).name = 'Upper window white sill trim';
+      if (headHigh - headLow > 1e-6) box(parent, opening.center, (headLow + headHigh) / 2, headZ,
+        halfWidth * 2, headHigh - headLow, headDepth, trim).name = 'Upper window white head trim';
+    };
+    for (const [y, height, front, label] of [
+      [10.05, 0.3, 0.45, 'Upper masonry base course'],
+      [top - 0.65, 0.18, 0.46, 'Cornice lower bed molding'],
+      [top - 0.36, 0.4, 0.41, 'Cornice frieze'],
+      [top - 0.1, 0.12, 0.5, 'Cornice projecting crown']
     ]) {
       if ((pairedFront || blindLoft) && /lower bed|frieze/.test(label)) continue;
-      box(parent, length / 2, y, 0.27, length, height, depth, stone).name = label;
+      const [z, depth] = onFace(front);
+      const overlapsCourse = rect => rect && Math.min(rect.z1, front) - Math.max(rect.z0, brickFace) > 1e-6;
+      const breaks = [
+        ...lintels.filter(l => l.top > y - height / 2 + 1e-9 && l.bottom < y + height / 2 - 1e-9),
+        ...neighbours.filter(n => overlapsCourse(n.brick)).map(n => ({ left: n.brick.x0, right: n.brick.x1 })),
+        ...neighbours.filter(n => n.length > length + 1e-9 || (Math.abs(n.length - length) <= 1e-9 && n.name < parent.name))
+          .map(n => n.course(front, label)).filter(overlapsCourse).map(r => ({ left: r.x0, right: r.x1 }))
+      ].sort((a, b) => a.left - b.left);
+      let start = 0;
+      for (const end of [...breaks, { left: length, right: length }]) {
+        const stop = Math.min(end.left, length);
+        if (stop - start > 1e-6) box(parent, (start + stop) / 2, y, z, stop - start, height, depth, stone).name = label;
+        start = Math.max(start, end.right);
+      }
     }
     if (pairedFront || blindLoft) {
       // Thickened veneer, not moved rooms: the original masonry is the
@@ -461,27 +712,48 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       ]);
       const piers = bays.flatMap(([left, right]) => [left - .75, right + .75])
         .filter((x, i, all) => all.slice(0, i).every(other => Math.abs(x - other) > .1));
+      const bayFront = 0.425;
+      const [bayZ, bayDepth] = onFace(bayFront);
       for (const x of piers) {
-        brickBox(parent, x, 14.25, 0.30, 1, 8.1, 0.25).name = 'Upper bay projecting masonry pier';
+        brickBox(parent, x, 14.25, bayZ, 1, 8.1, bayDepth).name = 'Upper bay projecting masonry pier';
       }
+      // Weathering cap: 1:12 wash falling outward. Its back-bottom edge bears on
+      // the brick face, its back-top edge stops at the cornice crown soffit and
+      // its drip edge projects past the bridging head, which is lowered so the
+      // sloping underside bears on the head's front arris.
+      const capThick = 0.12, capDepth = 0.555, wash = Math.atan2(1, 12);
+      const capZ = brickFace + capThick / 2 * Math.sin(wash) + capDepth / 2 * Math.cos(wash);
+      const capY = crownBottom - capThick / 2 * Math.cos(wash) - capDepth / 2 * Math.sin(wash);
+      const headBottom = 18.3;
+      const headTop = capY - capThick / 2 * Math.cos(wash) + capDepth / 2 * Math.sin(wash) - (bayFront - brickFace) * Math.tan(wash);
       for (const [left, right] of bays) {
-        brickBox(parent, (left + right) / 2, 18.55, 0.30, right - left, 0.5, 0.25).name = 'Upper bay bridging masonry head';
-        box(parent, (left + right) / 2, 18.86, 0.46, right - left + 0.12, 0.12, 0.64, stone).name = 'Upper bay head weathering cap - flashing required';
+        brickBox(parent, (left + right) / 2, (headBottom + headTop) / 2, bayZ, right - left, headTop - headBottom, bayDepth).name = 'Upper bay bridging masonry head';
+        const cap = box(parent, (left + right) / 2, capY, capZ, right - left + 0.12, capThick, capDepth, stone);
+        cap.rotation.x = wash;
+        cap.name = 'Upper bay head weathering cap - flashing required';
         if (pairedFront) {
-          box(parent, (left + right) / 2, 12.72, 0.48, right - left, 0.22, 0.7, stone).name = 'Paired window continuous stone sill';
+          const [sillZ, sillDepth] = onFace(0.83);
+          box(parent, (left + right) / 2, 12.72, sillZ, right - left, 0.22, sillDepth, stone).name = 'Paired window continuous stone sill';
         }
+      }
+      for (const opening of openings) {
+        perimeterTrim(opening, pairedFront ? 12.83 : -Infinity, headBottom, (opening.frameWidth ?? opening.width) / 2 + 0.325);
       }
       parent.userData.bayStudy = '12 inch finish piers, 2.4 inch projection beyond wall face; rooms fixed. Veneer bearing, ties, shelf supports, weathering and flashing require design.';
       parent.userData.stonework = 'Supported veneer, flashing, drip grooves and anchors require professional detailing';
       return;
     }
-    for (const { center, width, sill, height } of openings) {
-      box(parent, center, sill - 0.23, 0.32, width + 0.9, 0.2, 0.64, stone).name = 'Upper window stone stool';
-      box(parent, center, sill + height + 0.32, 0.3, width + 0.9, 0.38, 0.5, stone).name = 'Upper window stone lintel';
+    for (const [index, opening] of openings.entries()) {
+      const { center, width, sill, height } = opening;
+      const [stoolZ, stoolDepth] = onFace(0.64), [lintelZ, lintelDepth] = onFace(0.55), [jambZ, jambDepth] = onFace(0.46);
+      const lintel = lintels[index];
+      box(parent, center, sill - 0.23, stoolZ, width + 0.9, 0.2, stoolDepth, stone).name = 'Upper window stone stool';
+      box(parent, center, (lintel.bottom + lintel.top) / 2, lintelZ, width + 0.9, lintel.top - lintel.bottom, lintelDepth, stone).name = 'Upper window stone lintel';
       for (const side of [-1, 1]) {
-        box(parent, center + side * (width / 2 + 0.29), sill + height / 2, 0.28,
-          0.24, height + 0.2, 0.36, stone).name = 'Upper window stone jamb';
+        box(parent, center + side * (width / 2 + 0.29), sill + height / 2, jambZ,
+          0.24, height + 0.2, jambDepth, stone).name = 'Upper window stone jamb';
       }
+      perimeterTrim(opening, sill - 0.13, lintel.bottom, Math.min((opening.frameWidth ?? width) / 2 + 0.325, width / 2 + 0.17));
     }
     parent.userData.stonework = 'Supported veneer, flashing, drip grooves and anchors require professional detailing';
   }
@@ -498,7 +770,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   group.add(archedEntry);
   buildArchedFrontEntry(THREE, { box, wood: entryWood, field: mat('#b88e5a'), oakMaps: masonryMaps?.oak, trim, hardware: dark }, archedEntry);
   for (const {center: x, width} of getGroundFrontWindows()) {
-    box(group, x, 8.32, frontWallZ + 0.34, width + 0.65, 0.35, 0.24, trim).name = 'Front window projecting limestone lintel';
+    box(group, x, groundFrontLintel.y, frontWallZ + 0.34, width + 0.65, groundFrontLintel.height, 0.24, trim).name = 'Front window projecting limestone lintel';
     box(group, x, 2.78, frontWallZ + 0.35, width + 0.6, 0.18, 0.3, trim).name = 'Front window cut-stone sill';
   }
   const livingFeatureWall = getLivingRoomFeatureLayout();
@@ -671,7 +943,29 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
         if (polygon.length) surface(polygon, face.plane,
           white, 'Connected roof closed edge soffit', -0.2);
       }
-      if (!rake) linePart(edge.start, edge.end, 0.24, 0.2, trim, 'Connected roof perimeter gutter', -0.1);
+      if (!rake) {
+        // Stop the trough at the finished brick face with a closed end cap; a gutter
+        // wholly behind the face (a roof-to-wall abutment) is omitted. No hangers or
+        // outlets are modeled on these lower-roof runs; outlets remain unverified.
+        const gutterTop = (edge.start[1] + edge.end[1]) / 2, capDepth = 0.02;
+        // One continuous run per eave: a fragment beyond the brick lies inside the envelope.
+        const pieces = clipGutterToMasonry(edge.start, edge.end, masonryFootprints, 0.12, gutterTop - 0.2, gutterTop);
+        const runLength = (piece) => Math.hypot(piece.end[0] - piece.start[0], piece.end[2] - piece.start[2]);
+        for (const piece of pieces.sort((a, b) => runLength(b) - runLength(a)).slice(0, 1)) {
+          const along = piece.end.map((value, index) => value - piece.start[index]);
+          const pieceLength = Math.hypot(along[0], along[2]);
+          if (pieceLength < capDepth * 3) continue;
+          const unit = along.map((value) => value / pieceLength);
+          const inset = (point, sign) => point.map((value, index) => value + sign * unit[index] * capDepth);
+          const trough = linePart(piece.cutStart ? inset(piece.start, 1) : piece.start, piece.cutEnd ? inset(piece.end, -1) : piece.end, 0.24, 0.2, trim, 'Connected roof perimeter gutter', -0.1);
+          if (trough && (piece.cutStart || piece.cutEnd)) trough.userData.stopsAtMasonryFace = true;
+          for (const [cut, face, sign] of [[piece.cutStart, piece.start, 1], [piece.cutEnd, piece.end, -1]]) {
+            if (!cut) continue;
+            const cap = linePart(face, inset(face, sign), 0.24, 0.2, trim, 'Connected roof gutter end cap at brick face', -0.1);
+            if (cap) cap.userData.endCap = true;
+          }
+        }
+      }
     }
     return model;
   }
@@ -680,8 +974,13 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const houseRoof = renderRoofEnvelope('Connected main-house roof system', HomeRoof.getConnectedRoofDefinitions(floorToFloor)
     .filter(({ id }) => !id.startsWith('Garage') && id !== 'Dining rear projection'), slateFinish);
   const setbackFinish = mat('#656863', 0.85);
+  // The dining roof's west eave (x13.2, y9.185) runs into the patio canopy's
+  // east brick closure (bottom y9 from z1.77); that run is a roof-to-wall
+  // abutment, so its gutter is omitted rather than buried in the closure.
+  const livingPatioCanopy = getLivingPatioCanopyFrame(wallThickness, livingFeatureWall.returnWallZ);
+  masonryFootprints.push(livingPatioCanopy.closureFootprint);
   const setbackRoofs = renderRoofEnvelope('Closed ground-floor setback roofs', HomeRoof.getLowerRoofDefinitions(), slateFinish, false, setbackFinish);
-  setbackRoofs.userData.designReview = 'Illustrative low-slope metal roof closure; selected roofing minimum slope, tapered build-up, wall flashing, support and east-side drainage require design. No terrace or added room.';
+  setbackRoofs.userData.designReview = 'Illustrative low-slope metal roof closure; selected roofing minimum slope, tapered build-up, wall flashing, support, east-side drainage and the dining west slope draining against the patio canopy closure require design. No terrace or added room.';
   const setbackPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getLowerRoofDefinitions());
   const abutments = HomeRoof.getSetbackAbutments();
   function isSetbackAbutment(edge) {
@@ -993,6 +1292,12 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   }
   wall('Patio roof raised headwall', patioRoofRight, livingFeatureWall.returnWallZ, patioRoofLeft, livingFeatureWall.returnWallZ, 9, patioRoofUndersideAt(patioRoofFront) + 0.02);
   const patioSideClosureStart = patioRoofCenterZ + (9 - patioRoofY + patioRoofThickness / (2 * Math.cos(patioRoofAngle))) / patioRoofPitch;
+  // The lower-roof gutter stop uses the shared frame; fail loudly if they drift
+  // (isolated source-slice tests may build the canopy without that frame).
+  if (typeof livingPatioCanopy !== 'undefined' && [[patioRoofRight, livingPatioCanopy.right], [patioRoofFront, livingPatioCanopy.front], [patioSideClosureStart, livingPatioCanopy.closureStart],
+    [patioRoofUndersideAt(patioRoofFront), livingPatioCanopy.undersideAt(patioRoofFront)]].some(([a, b]) => Math.abs(a - b) > 1e-9)) {
+    throw new Error('Living patio canopy closure no longer matches the dining gutter stop');
+  }
   for (const { x, rear, name } of [
     { x: patioRoofRight, rear: patioSideClosureStart, name: 'Patio roof east tapered closure' }
   ]) {
@@ -1050,10 +1355,29 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     livingPatioBounds.rear, livingPatioBounds.rear + 0.1, canopySoffitBottomAt, patioRoofUndersideAt);
   canopySection('Canopy closed house abutment', patioRoofLeft, patioRoofRight,
     livingFeatureWall.returnWallZ - 0.02, livingFeatureWall.returnWallZ + 0.08, canopySoffitBottomAt, patioRoofUndersideAt);
-  canopySection('Canopy dining-wall stepped abutment flashing', patioRoofRight - 0.02, patioRoofRight + 0.04,
-    livingPatioBounds.rear, 7.5,
-    (z) => Math.min(patioRoofUndersideAt(z) + 0.16, 9.2),
-    (z) => Math.max(patioRoofUndersideAt(z) + 0.2, 9.2) + 0.15, dark);
+  // Step flashing where the dining roof's west slope meets the closure's east
+  // brick face: on the face (zero gap), bearing on the roof skin, never above
+  // the closure top; the masonry stop ends it at the upper rear wall face.
+  const diningWestSlope = HomeRoof.getLowerRoofDefinitions().find(({ id }) => id === 'Dining rear projection').planes[0];
+  const diningFlashLeft = patioRoofRight + wallThickness / 2, diningFlashRight = diningFlashLeft + 0.06;
+  const diningRoofAt = (x) => HomeRoof.heightAt(diningWestSlope, [x, 0]);
+  const diningFlashRear = patioRoofCenterZ + (diningRoofAt(diningFlashRight) - patioRoofUndersideAt(patioRoofCenterZ)) / patioRoofPitch;
+  const diningFlashFront = 7.5;
+  {
+    const geometry = new THREE.BoxGeometry(diningFlashRight - diningFlashLeft, 1, diningFlashFront - diningFlashRear);
+    const p = geometry.attributes.position;
+    const xCenter = (diningFlashLeft + diningFlashRight) / 2, zCenter = (diningFlashRear + diningFlashFront) / 2;
+    for (let i = 0; i < p.count; i++) {
+      const x = xCenter + p.getX(i), z = zCenter + p.getZ(i);
+      p.setY(i, p.getY(i) > 0 ? Math.max(diningRoofAt(x), Math.min(diningRoofAt(x) + 0.35, patioRoofUndersideAt(z) + 0.02)) : diningRoofAt(x));
+    }
+    geometry.computeVertexNormals();
+    const flashing = new THREE.Mesh(geometry, dark);
+    flashing.name = 'Canopy dining-wall stepped abutment flashing';
+    flashing.position.set(xCenter, 0, zCenter);
+    flashing.userData = { onMasonryFace: diningFlashLeft, bearsOnRoof: 'Dining rear projection', waterproofingDesigned: false };
+    livingPatio.add(flashing);
+  }
   canopySection('Canopy house counterflashing - waterproofing concept', patioRoofLeft, patioRoofRight,
     livingFeatureWall.returnWallZ - 0.06, livingFeatureWall.returnWallZ + 0.02, (z) => patioRoofUndersideAt(z) + 0.16,
     (z) => patioRoofUndersideAt(z) + 0.55, dark);
@@ -1087,7 +1411,15 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     if (part.isMesh && (part === patioRoof || /soffit|fascia|abutment|tapered closure/i.test(part.name))) canopyParts.push(part);
   });
   const raisedHeadwall = group.getObjectByName('Exterior brick wall: Patio roof raised headwall');
-  raisedHeadwall.traverse(part => { if (part.isMesh) canopyParts.push(part); });
+  raisedHeadwall.traverse(part => {
+    if (!part.isMesh) return;
+    canopyParts.push(part);
+    // Register the headwall as a masonry-stop solid before its notch clip below.
+    if (part.geometry.type === 'BoxGeometry') {
+      part.updateWorldMatrix(true, false);
+      masonrySolids.push({ ...boxMasonrySolid(part), box: new THREE.Box3().setFromObject(part) });
+    }
+  });
   for (const part of canopyParts) {
     part.updateWorldMatrix(true, false);
     const input = part.geometry.index ? part.geometry.toNonIndexed() : part.geometry;
@@ -1512,7 +1844,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   fence.userData = { heightFeet: 6, boundaryInsetFeet: 0.5, gateWidthFeet: 4, westReturnZFeet: westFenceReturnZ, eastReturnZFeet: eastFenceReturnZ, frontYardOpen: true, ordinanceVerified: false };
   group.add(fence);
   const cedar = mat('#976f4d');
-  function fenceRun(name, x1, z1, x2, z2, gate = false) {
+  function fenceRun(name, x1, z1, x2, z2, gate = false, wallEnds = []) {
     const run = new THREE.Group();
     run.name = name;
     run.position.set(x1, 0, z1);
@@ -1532,16 +1864,27 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     run.add(boards);
     for (const y of [-0.65, 3.5]) box(run, length / 2, y, fenceRailOffset, length, 0.14, fenceRailDepth, cedar);
     const posts = Math.ceil(length / 6);
-    for (let i = 0; i <= posts; i++) box(run, i * length / posts, 1.5, 0, 0.25, 6.25, 0.25, cedar).name = 'Cedar fence post';
+    const dx = (x2 - x1) / length, dz = (z2 - z1) / length;
+    for (let i = 0; i <= posts; i++) {
+      // Shared corner posts are built once; posts at the house stop at the masonry face.
+      let along = i * length / posts;
+      if (i === 0 && wallEnds.includes('start')) along += 0.125;
+      if (i === posts && wallEnds.includes('end')) along -= 0.125;
+      const key = `${(x1 + dx * along).toFixed(2)},${(z1 + dz * along).toFixed(2)}`;
+      if (fencePostKeys.has(key)) continue;
+      fencePostKeys.add(key);
+      box(run, along, 1.5, 0, 0.25, 6.25, 0.25, cedar).name = 'Cedar fence post';
+    }
     if (gate) box(run, length - 0.3, 1.2, -0.14, 0.1, 0.5, 0.12, dark).name = 'Side gate latch';
   }
+  const fencePostKeys = new Set();
   fenceRun('Rear boundary fence', fenceLeft, fenceRear, fenceRight, fenceRear);
   fenceRun('West side fence', fenceLeft, fenceRear, fenceLeft, westFenceReturnZ);
   fenceRun('East side fence', fenceRight, fenceRear, fenceRight, eastFenceReturnZ);
   fenceRun('West fence return', fenceLeft, westFenceReturnZ, westGateCenterX - 2, westFenceReturnZ);
   fenceRun('West 4 ft pedestrian gate', westGateCenterX - 2, westFenceReturnZ, westGateCenterX + 2, westFenceReturnZ, true);
-  fenceRun('West wall connection', westGateCenterX + 2, westFenceReturnZ, -0.225, westFenceReturnZ);
-  fenceRun('East wall connection', 55.725, eastFenceReturnZ, 56.25, eastFenceReturnZ);
+  fenceRun('West wall connection', westGateCenterX + 2, westFenceReturnZ, -0.225, westFenceReturnZ, false, ['end']);
+  fenceRun('East wall connection', 55.725, eastFenceReturnZ, 56.25, eastFenceReturnZ, false, ['start']);
   fenceRun('East 4 ft pedestrian gate', 56.25, eastFenceReturnZ, 60.25, eastFenceReturnZ, true);
   fenceRun('East fence return', 60.25, eastFenceReturnZ, fenceRight, eastFenceReturnZ);
   const boundaryMaterial = new THREE.LineBasicMaterial({ color: '#4c5343' });
@@ -1674,8 +2017,16 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   wallDownlight('West side-entry downlight', -0.475, 8.6, 42, -Math.PI / 2, westGateCenterX, westFenceReturnZ, 30);
   for (const z of [18, 31]) wallDownlight('East side-path wall downlight', 55.975, 8.6, z, Math.PI / 2, 58.25, z, 26);
   wallDownlight('East side-entry downlight', 55.975, 8.6, garageSideDoorCenterZ, Math.PI / 2, 58.25, eastFenceReturnZ, 26);
-  wallDownlight('Dining patio steps wall downlight', 12.725, 8.2, 1, -Math.PI / 2, 10.95, 0.85, 26, -1.1);
-  wallDownlight('Rear dining path wall downlight', 20.0375, 8.6, livingFeatureWall.diningRearZ - 0.475, Math.PI, 20.0375, -3, 22, patioGrade);
+  // On the dining west brick face (x12.975, wall from z1.9) just south of the
+  // corner and below the canopy soffit: the old z1 mount had no wall behind it
+  // (1.5 in short of the canopy side fascia, whose inner face is concealed
+  // above the soffit) and its housing pierced the soffit.
+  wallDownlight('Dining patio steps wall downlight', 12.725, 8, 2.1, -Math.PI / 2, 10.95, 0.85, 26, -1.1);
+  // East pier of the symmetric dining rear wall (window head trim x23.36 to the
+  // finished corner x27.1), top aligned with the 8-ft window head: the former
+  // centred y8.6 mount ran 1.14 in into the low-roof gutter and fascia, and the
+  // window head trim rules out lowering it on the centreline.
+  wallDownlight('Rear dining path wall downlight', 25.23, 7.85, livingFeatureWall.diningRearZ - 0.475, Math.PI, 25.23, -3, 22, patioGrade);
   wallDownlight('Rear kitchen garden wall downlight', 38.75, 8.6, 6.525, Math.PI, 32, -1.75, 24, patioGrade);
   wallDownlight('Rear prep garden wall downlight', 53.5, 8.6, 6.525, Math.PI, 47.4, -1.75, 24, patioGrade);
   // Mount in the actual closed upper-roof underside, not at a guessed eave Y.
@@ -1715,7 +2066,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const cameraSchedule = [
     { id: 'C1', purpose: 'Front door visitor identification', position: [18.5, 4.2, 54.65], aim: [15.6, 61], doorbell: true },
     { id: 'C2', purpose: 'Garage doors and own driveway', position: [43, 7.8, 49.6], aim: [43, 80] },
-    { id: 'C3', purpose: 'Covered living-room patio, wall-mounted after post removal', position: [12.9, 8, 6.65], aim: [5, 1] },
+    { id: 'C3', purpose: 'Covered living-room patio, wall-mounted after post removal', position: [12.69, 7.45, 6.65], aim: [5, 1] },
     { id: 'C4', purpose: 'Rear lawn and rear fence approach', position: [25.8, 8.5, -0.5], aim: [22, -23] },
     { id: 'C5', purpose: 'West side path and gate', position: [-0.55, 7.5, 9], aim: [westGateCenterX, westFenceReturnZ] },
     { id: 'C6', purpose: 'East side access and gate', position: [56, 7.5, 15], aim: [58.25, eastFenceReturnZ] }
@@ -1749,11 +2100,13 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   }
   const mulch = mat('#65452f', 0.98);
   const foliage = mat('#4c6240');
-  const frontShrubRadius = 0.9;
+  // 0.85 ft keeps five shrubs per bed with 3-inch gaps now that both beds stop at the 10.8 ft entry steps.
+  const frontShrubRadius = 0.85;
   const frontShrubCount = 5;
   const frontBedEdge = mat('#b8b09e', 0.9);
   const lowFoliage = mat('#839277', 0.95);
-  for (const [name, left, right] of [['West front porch mulch bed', 0, 10.7], ['East front porch mulch bed', 20.5, drivewayLeft]]) {
+  const frontStepLeft = 15.6 - 10.8 / 2, frontStepRight = 15.6 + 10.8 / 2;
+  for (const [name, left, right] of [['West front porch mulch bed', 0, frontStepLeft], ['East front porch mulch bed', frontStepRight, drivewayLeft]]) {
     const bed = box(group, (left + right) / 2, -1.65, (frontPorchEdgeZ + 64.5 + frontShift) / 2, right - left, 0.1, 64.5 - 61.2, mulch);
     bed.name = name;
     bed.userData = { surface: 'Brown mulch / soil planting bed', limits: { left, right, rear: frontPorchEdgeZ, front: 64.5 + frontShift }, topFeet: -1.6 };
@@ -1786,13 +2139,140 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
         1 / 6, 0.16, bedFrontZ - frontPorchEdgeZ - 1 / 6, frontBedEdge).name = 'Front planting-bed stone edge return';
     }
   }
-  for (const [start, end, z] of [[32, 54, 8]]) {
-    for (let x = start; x <= end; x += 1.7) {
+  // Rear foundation shrubs sit on the kitchen-prep garden soil outside the z7 wall's stone face (z6.78), clear of each other.
+  for (const [start, end, z] of [[32, 54, 6.75 - 0.9 - 0.1]]) {
+    for (let x = start; x <= end; x += 2.05) {
       const shrub = new THREE.Mesh(new THREE.SphereGeometry(0.9, 10, 7), foliage);
       shrub.name = 'Concept foundation planting';
-      shrub.position.set(x, -0.05, z);
+      shrub.position.set(x, -1.64 + 0.9, z);
       group.add(shrub);
     }
   }
+  // Finished masonry stop for every low roof (dining projection, garage and
+  // service returns, living-patio canopy, porch/entry): roof skins, closed
+  // undersides, edge soffits, eaves/rake fascia, hips, ridges, flashing and
+  // canopy finishes end exactly at the brick/stone face. Only constituent
+  // triangles inside finished masonry are removed; no slope, eave or opening
+  // moves. The cut faces lie on the masonry face, so the ends read as clean.
+  group.updateMatrixWorld(true);
+  // Exact solids of the fitted garage closures, using the same faces/segments
+  // and datums that build them above (gable at z49; east wall head at x55.5).
+  for (const face of setbackPlan.faces) {
+    const polygon = HomeRoof.intersectPolygons([[31.2, 49 - wallThickness / 2], [55.5, 49 - wallThickness / 2],
+      [55.5, 49 + wallThickness / 2], [31.2, 49 + wallThickness / 2]], face.polygon);
+    if (polygon.length) masonrySolids.push(prismMasonrySolid('Garage front gable fitted brick wall-head closure', polygon, garageFacadeEaves, [face.plane[0], face.plane[1], face.plane[2] - 0.16]));
+  }
+  for (const segment of HomeRoof.wallHeadSegments(setbackPlan, [55.5, 15], [55.5, 49], 9)) {
+    const [x1, y1, z1] = segment.start, [x2, y2, z2] = segment.end, run = Math.hypot(x2 - x1, z2 - z1);
+    const ux = (x2 - x1) / run, uz = (z2 - z1) / run, half = wallThickness / 2;
+    const a = (y2 - y1) * ux / run, b = (y2 - y1) * uz / run;
+    masonrySolids.push(prismMasonrySolid('Lower setback fitted wall-head closure', [[x1 + uz * half, z1 - ux * half], [x2 + uz * half, z2 - ux * half],
+      [x2 - uz * half, z2 + ux * half], [x1 - uz * half, z1 + ux * half]], 9, [a, b, y1 + 0.01 - a * x1 - b * z1]));
+  }
+  const masonryStopSolids = [...masonrySolids, livingPatioCanopy.closureSolid];
+  group.traverse((wallGroup) => {
+    if (!wallGroup.isGroup || !wallGroup.name.startsWith('Exterior brick wall: ')) return;
+    for (const part of wallGroup.children) {
+      if (!part.isMesh || part.geometry.type !== 'BoxGeometry') continue;
+      masonryStopSolids.push({ ...boxMasonrySolid(part), box: new THREE.Box3().setFromObject(part) });
+    }
+  });
+  const masonryStopParts = [];
+  for (const root of [setbackRoofs, porchRoof]) root.traverse((part) => { if (part.isMesh && !/closure/i.test(part.name)) masonryStopParts.push(part); });
+  livingPatio.traverse((part) => {
+    if (part.isMesh && /^(Graphite-gray shingle covered patio roof|Post-free canopy|Cantilever canopy|Canopy )/.test(part.name) && !/tapered closure/.test(part.name)) masonryStopParts.push(part);
+  });
+  const masonryStop = { solids: masonryStopSolids.length, clipped: [], removed: [] };
+  // Ground exterior wall centre lines (same wall() calls as above).
+  const groundEnvelope = [[0, livingFeatureWall.returnWallZ], [13.2, livingFeatureWall.returnWallZ], [13.2, livingFeatureWall.diningRearZ],
+    [26.875, livingFeatureWall.diningRearZ], [26.875, 7], [55.5, 7], [55.5, 49], [31.2, 49], [31.2, frontWallZ], [0, frontWallZ]];
+  for (const part of masonryStopParts) {
+    part.updateWorldMatrix(true, false);
+    const input = part.geometry.index ? part.geometry.toNonIndexed() : part.geometry;
+    const p = input.attributes.position, uv = input.attributes.uv;
+    let triangles = [];
+    for (let i = 0; i + 2 < p.count; i += 3) {
+      triangles.push([0, 1, 2].map((j) => {
+        const v = new THREE.Vector3().fromBufferAttribute(p, i + j).applyMatrix4(part.matrixWorld);
+        return [v.x, v.y, v.z, uv ? uv.getX(i + j) : 0, uv ? uv.getY(i + j) : 0];
+      }));
+    }
+    if (input !== part.geometry) input.dispose();
+    const bounds = new THREE.Box3().setFromObject(part);
+    const solidMember = part.geometry.type === 'BoxGeometry' || /fascia|flashing|abutment|Connected roof (hip|ridge|valley)/i.test(part.name);
+    let changed = false;
+    for (const solid of masonryStopSolids) {
+      if (solid.box && !solid.box.intersectsBox(bounds)) continue;
+      if (!penetratesMasonry(triangles, solid.planes)) continue;
+      triangles = HomeRoof.trianglesOutsideConvex(triangles, solidMember ? fitMasonrySolidToMember(triangles, solid.planes) : solid.planes);
+      changed = true;
+      if (!triangles.length) break;
+    }
+    if (!changed) continue;
+    const label = `${part.name} (${part.parent?.name ?? ''})`;
+    // Separate a solid member's surviving connected pieces so each is its own
+    // constituent with tight bounds (for example the two ends of a fascia cut
+    // by a wall). Sheets (skins, undersides, soffits) stay one constituent.
+    const inverse = part.matrixWorld.clone().invert();
+    // A solid member's leftover lying wholly inside a ground-floor room volume
+    // (within the ground wall lines, at or below the 9-ft wall head) is a hidden
+    // fragment past the brick, not a visible end; it is omitted like a buried gutter.
+    const insideGroundRooms = (piece) => piece.every((triangle) => triangle.every((vertex) =>
+      vertex[1] <= 9 + 1e-6 && pointInPlanPolygon(groundEnvelope, [vertex[0], vertex[2]])));
+    const worldPieces = (solidMember ? connectedTrianglePieces(triangles) : [triangles])
+      .filter((piece) => piece.length && !(solidMember && insideGroundRooms(piece)));
+    let pieces = worldPieces.map((piece) => piece.map((triangle) => triangle.map((vertex) =>
+      [...new THREE.Vector3(vertex[0], vertex[1], vertex[2]).applyMatrix4(inverse).toArray(), vertex[3], vertex[4]])));
+    // Pieces whose local bounds still overlap (an oblique cut) stay one constituent.
+    const localBounds = (piece) => [0, 1, 2].map((axis) => {
+      const values = piece.flatMap((triangle) => triangle.map((vertex) => vertex[axis]));
+      return [Math.min(...values), Math.max(...values)];
+    });
+    for (let merged = true; merged && pieces.length > 1;) {
+      merged = false;
+      for (let i = 0; i < pieces.length && !merged; i++) for (let j = i + 1; j < pieces.length && !merged; j++) {
+        const a = localBounds(pieces[i]), b = localBounds(pieces[j]);
+        if (a.every(([low, high], axis) => Math.min(high, b[axis][1]) - Math.max(low, b[axis][0]) > 1e-6)) {
+          pieces[i] = pieces[i].concat(pieces[j]);
+          pieces.splice(j, 1);
+          merged = true;
+        }
+      }
+    }
+    if (!pieces.length) {
+      part.removeFromParent();
+      part.geometry.dispose();
+      masonryStop.removed.push(label);
+      continue;
+    }
+    const pieceGeometry = (piece) => {
+      const positions = [], textureUV = [];
+      for (const triangle of piece) for (const vertex of triangle) {
+        positions.push(vertex[0], vertex[1], vertex[2]);
+        textureUV.push(vertex[3], vertex[4]);
+      }
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      if (uv) geometry.setAttribute('uv', new THREE.Float32BufferAttribute(textureUV, 2));
+      geometry.computeVertexNormals();
+      return geometry;
+    };
+    part.geometry.dispose();
+    part.geometry = pieceGeometry(pieces[0]);
+    part.userData.stopsAtMasonryFace = true;
+    for (const piece of pieces.slice(1)) {
+      const extra = new THREE.Mesh(pieceGeometry(piece), part.material);
+      extra.name = part.name;
+      extra.position.copy(part.position);
+      extra.quaternion.copy(part.quaternion);
+      extra.scale.copy(part.scale);
+      extra.castShadow = part.castShadow;
+      extra.receiveShadow = part.receiveShadow;
+      extra.userData = { ...part.userData };
+      part.parent.add(extra);
+    }
+    masonryStop.clipped.push(pieces.length > 1 ? `${label} x${pieces.length}` : label);
+  }
+  group.userData.masonryStop = masonryStop;
   return group;
 }
