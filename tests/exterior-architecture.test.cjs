@@ -20,19 +20,19 @@ test('paired cross-gables center on fixed bedroom banks with measured rise and s
     const [left,right,rear,frontZ] = g.bounds, center = (left+right)/2;
     close(center, (windows[i*2].center+windows[i*2+1].center)/2);
     close(right-left, 14.35);
-    close(Math.hypot(g.planes[0][0],g.planes[0][1])*12, 6.2/7.175*12);
-    close(height([g],center,frontZ),25.4);
+    close(Math.hypot(g.planes[0][0],g.planes[0][1])*12, 7.6/7.175*12);
+    close(height([g],center,frontZ),26.8);
     close(rear,40.5);
   });
-  const garage = defs.find(d => d.id === 'Garage hip');
+  const garage = defs.find(d => d.id === 'Garage room-in-roof');
   const measured = upper.getUpstairsMeasuredGeometry();
-  const attic = defs.find(d => d.id === 'Garage attic storage roof');
-  close(height([garage],43.25,42.7),9.65);
+  const attic = defs.find(d => d.id === 'Garage rear metal lean-to');
+  close(height([garage],43.25,42.7),25.2916666667);
   assert.ok(height(defs,43.25,39)>20.6,'Shared upper wing roofs the actual full-height service rooms');
-  close(attic.bounds[0]-measured.east,-.225);
-  assert.ok(height([attic],measured.east,30.7)-.16>19+1.5,
-    'Raised shed overlaps the wing wall above its window heads and full loft assembly');
-  assert.ok(height(defs,attic.bounds[0],30.7)-.16>18,'Attic eave remains above the 8-ft laundry window head');
+  close(attic.bounds[0]-measured.east,.225);
+  assert.ok(height([attic],attic.bounds[0],23)<13,
+    'Rear metal roof remains below the unchanged bedroom window sills');
+  assert.ok(height(defs,measured.east,30.7)-.16>19,'Room-in-roof and retained wing cover the laundry side');
 });
 
 test('cross-gable union never reduces the accepted headroom envelope and leaves rear solar surfaces unchanged', () => {

@@ -258,6 +258,6 @@ test('modeled room doors, cabinet pullouts and exterior overhead leaves carry cl
   assert.match(source, /interactiveHouseDoor: \{ operation: 'sliding', axis: 'z', open: false, closedCenterX: 0, openCenterX: 1\.75 \}/);
   assert.match(source, /powderLeaf\.userData = \{ interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 90, maxAngleDegrees: 90, openRotationSign: 1 \}/);
   assert.match(exteriorSource, /interactiveHouseDoor: \{ operation: 'overhead', open: false, maxAngleDegrees: 90/);
-  assert.match(exteriorSource, /buildArchedFrontEntry\(THREE,/);
+  assert.match(exteriorSource, /buildRectangularFrontEntry\(THREE,/);
   assert.match(fs.readFileSync(require.resolve('../assets/js/floor-plan-ground.js'), 'utf8'), /interactiveHouseDoor: \{ operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 110/);
 });

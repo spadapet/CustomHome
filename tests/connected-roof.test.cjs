@@ -73,9 +73,9 @@ test('paired true cross-gables articulate the front while the garage remains sub
   const roof = buildRoofEnvelope(getConnectedRoofDefinitions());
   assert.deepEqual([...new Set(roof.faces.filter(face => /^(?:East|West) front gable$/.test(face.roof)).map(face => face.roof))].sort(),
     ['East front gable', 'West front gable']);
-  const garage = roof.faces.filter((face) => face.roof === 'Garage front gable');
+  const garage = roof.faces.filter((face) => face.roof === 'Garage room-in-roof');
   assert.ok(garage.length >= 2);
-  assert.ok(garage.every((face) => face.polygon.every((point) => heightAt(face.plane, point) <= 24 + 1e-7)));
+  assert.ok(garage.every((face) => face.polygon.every((point) => heightAt(face.plane, point) <= 25.292 + 1e-7)));
   const api=require('../assets/js/floor-plan-roof.js');
   const upper=require('../assets/js/floor-plan-upstairs.js').getUpstairsDefaultPlan(require('../assets/js/upstairs-layout.js').stairOpening());
   const serviceRooms=upper.rooms.filter(r=>['Laundry (relocated)','Shared bath east','Mechanical (relocated)'].includes(r.name));
@@ -83,42 +83,36 @@ test('paired true cross-gables articulate the front while the garage remains sub
   for(const face of garage)for(const room of serviceRooms){
     const footprint=[[room.x+.175,room.z+.175],[room.x+room.w-.175,room.z+.175],
       [room.x+room.w-.175,room.z+room.d-.175],[room.x+.175,room.z+room.d-.175]];
-    assert.ok(Math.abs(api.signedArea(api.intersectPolygons(face.polygon,footprint)))<1e-7,
-      'Lower visible garage gable never overlaps the full-height service interiors');
+    const intersection=api.intersectPolygons(face.polygon,footprint);
+    for(const point of intersection)assert.ok(heightAt(face.plane,point)>=20.5-1e-7,
+      'Garage roof over service interiors stays above nine-foot ceilings and the provisional roof zone');
   }
   const abutment=[g.serviceEast-.5,g.bedNorth+.75];
   const wingAtAbutment=roof.faces.filter(face=>api.contains(face.polygon,abutment));
-  assert.ok(wingAtAbutment.some(face=>['East rear wing','Garage service return'].includes(face.roof)
+  assert.ok(wingAtAbutment.some(face=>['East rear wing','Garage room-in-roof'].includes(face.roof)
     &&heightAt(face.plane,abutment)-.16>=19+1.5),
   'Wing or coordinated raised return covers the service south abutment above full room framing');
 });
 
-test('compact main and wing have 3:12 hips with a framing allowance; garage retains its low 6:12 minimum hip', () => {
+test('main roof has a transverse ridge with 3:12 front/rear slopes; garage is one 10:12 gable', () => {
   const definitions = getConnectedRoofDefinitions();
   const main = definitions.find((definition) => definition.id === 'Main house');
-  for (const plane of main.planes) close(Math.hypot(plane[0], plane[1]), 1 / 4);
-  const center = g.southEast / 2, halfWidth = (g.southEast + 1.5) / 2;
-  for (const point of [[center, 25], [center, 35]]) {
-    close(Math.min(...main.planes.map((plane) => heightAt(plane, point))), 20.6 + halfWidth / 4);
-  }
+  for (const plane of main.planes.slice(0,2)) close(Math.hypot(plane[0], plane[1]), 1 / 4);
+  const ridgeZ=(main.bounds[2]+main.bounds[3])/2, crown=20.6+(ridgeZ-main.bounds[2])/4;
+  for(const x of [10,15,20])close(Math.min(...main.planes.map(p=>heightAt(p,[x,ridgeZ]))),crown);
   const plan = buildRoofEnvelope(definitions);
   const ridge = plan.joins.filter((join) => join.type === 'ridge' && join.roofs.every((roof) => roof === 'Main house'));
-  close(ridge.reduce((length, join) => length + Math.abs(join.end[2] - join.start[2]), 0), g.south - g.north - g.southEast);
+  assert.ok(ridge.length);
   for (const join of ridge) for (const point of [join.start, join.end]) {
-    close(point[0], center);
-    close(point[1], 20.6 + halfWidth / 4);
+    close(point[2],ridgeZ);
+    close(point[1],crown);
   }
   const wing = definitions.find((definition) => definition.id === 'East rear wing');
   for (const plane of wing.planes) close(Math.hypot(plane[0], plane[1]), 1 / 4);
-  for (const name of ['Garage hip']) {
+  for (const name of ['Garage room-in-roof']) {
     const gable = definitions.find(({ id }) => id === name);
-    for (const plane of gable.planes) close(Math.hypot(plane[0], plane[1]), 0.5);
-    if (name !== 'Garage hip') {
-      close(gable.bounds[2], 1.35);
-      const ridge = plan.joins.filter((join) => join.type === 'ridge' && join.roofs.every((roof) => roof === name));
-      assert.ok(ridge.some((join) => Math.min(join.start[2], join.end[2]) < 9),
-        'Rear hip must join the actual long main ridge, not expose detached front tips');
-    }
+    for (const plane of gable.planes) close(Math.hypot(plane[0], plane[1]), 10/12);
+    close(gable.bounds[2],(g.atticNorth+g.atticSouth)/2-.75);
   }
 });
 
@@ -154,7 +148,7 @@ test('wall-head constituents close the actual gap to the roof, with no change to
       Math.hypot(b[0] - a[0], b[1] - a[1]));
     for (const segment of segments) for (const point of [segment.start, segment.end]) {
       close(segment.bottom, 19);
-      assert.ok(point[1] > 19 && point[1] <= 25.24 + 1e-6);
+      assert.ok(point[1] > 19 && point[1] <= 26.64 + 1e-6);
       assert.ok(plan.faces.some((face) => Math.abs(heightAt(face.plane, [point[0], point[2]]) - 0.16 - point[1]) < 1e-6));
     }
   }

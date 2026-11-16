@@ -6,7 +6,7 @@ function getWindowProductIntent(width, height, picture = false, privacy = false)
   const unitWidth = width / columns, unitHeight = height / rows;
   return {
     manufacturer: 'Andersen', series: '100 Series', material: 'Fibrex composite',
-    exteriorFinish: 'Dark Bronze', interiorFinish: 'White', grilles: 'none',
+    exteriorFinish: 'Dark Bronze', interiorFinish: 'White', grilles: 'traditional 2 wide by 3 high; short units 2 wide by 2 high',
     operation: picture ? 'fixed picture window' : columns === 3 ? 'casement / fixed picture / casement' : 'casement',
     pictureColumns: picture ? [0] : columns === 3 ? [1] : [],
     columns, rows, widthFeet: width, heightFeet: height,
@@ -40,18 +40,19 @@ function getGroundFrontLayout() {
   const porchDepth = 7;
   return { extension, wallZ, porchDepth, porchEdgeZ: wallZ + porchDepth };
 }
-// Historical October 27 six-light colonial concept; not called while the Nov 15
-// exterior configuration specifies no grilles. Not a selected Andersen option.
-function addFrontWindowGrilles(parent, box, material, width, height, columns = 1, rows = 1, glassDepth = 0.04, inset = 0.235) {
+// Applied grille study, not a selected Andersen factory option.
+function addFrontWindowGrilles(parent, box, material, width, height, columns = 1, rows = 1, glassDepth = 0.04, inset = 0.235, interiorMaterial = material, interiorSide = 1) {
   for (let row = 0; row < rows; row++) for (let column = 0; column < columns; column++) {
     const w = width / columns - inset * 2, h = height / rows - inset * 2;
     const x = -width / 2 + (column + 0.5) * width / columns;
     const bottom = row * height / rows + inset;
+    const fractions = h < 2 ? [0.5] : [1 / 3, 2 / 3];
     for (const side of [-1, 1]) {
       const z = side * (glassDepth / 2 + 0.022);
-      box(parent, x, bottom + h / 2, z, 0.0625, h, 0.035, material).name = 'Front colonial grille vertical';
-      for (const fraction of [1 / 3, 2 / 3])
-        box(parent, x, bottom + h * fraction, z, w, 0.0625, 0.035, material).name = 'Front colonial grille horizontal';
+      const finish = side === interiorSide ? interiorMaterial : material;
+      box(parent, x, bottom + h / 2, z, 0.0625, h, 0.035, finish).name = 'Front colonial grille vertical';
+      for (const fraction of fractions)
+        box(parent, x, bottom + h * fraction, z, w, 0.0625, 0.035, finish).name = 'Front colonial grille horizontal';
     }
   }
 }
@@ -98,21 +99,18 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
   }
 
   function getFrontEntryLayout() {
-    const width = 5, height = 8, spring = 7.1;
-    const radius = ((width / 2) ** 2 + (height - spring) ** 2) / (2 * (height - spring));
-    return { x: 15.6, z: getGroundFrontLayout().wallZ, width, height, spring, radius, centerY: height - radius, surroundWidth: 0.65, hingeZ: -0.34 };
+    return { x: 15.6, z: getGroundFrontLayout().wallZ, width: 5, height: 8, surroundWidth: 0.65, hingeZ: -0.34 };
   }
 
-  function buildArchedFrontEntry(THREE, { box, wood, trim, hardware, field, oakMaps, oakFinish = null, surroundFinish = trim }, parent) {
+  function buildRectangularFrontEntry(THREE, { box, wood, trim, hardware, field, oakMaps, oakFinish = null, surroundFinish = trim }, parent) {
     const layout = getFrontEntryLayout();
     const half = layout.width / 2;
-    const topAt = (x, radius = layout.radius) => layout.centerY + Math.sqrt(Math.max(0, radius * radius - x * x));
     // Natural warm medium oak, matte: tint/roughness come from the shared exterior configuration.
     const leafWood = oakMaps ? new THREE.MeshStandardMaterial({ ...oakMaps, color: oakFinish?.leafTint ?? '#fff2d8', roughness: oakFinish?.roughness ?? 0.72, normalScale: new THREE.Vector2(0.15, 0.15) }) : wood;
     const leafField = oakMaps ? leafWood.clone() : field;
     if (oakMaps) leafField.color.set(oakFinish?.fieldTint ?? '#eee0c8');
     function mesh(shape, depth, material, name, target = parent, z = 0) {
-      const geometry = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 40 });
+      const geometry = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false });
       if (oakMaps && (material === leafWood || material === leafField)) {
         const positions = geometry.attributes.position, uv = geometry.attributes.uv;
         for (let index = 0; index < positions.count; index++) uv.setXY(index, (positions.getX(index) + target.position.x) / 2.43, positions.getY(index) / 8);
@@ -122,62 +120,44 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       part.name = name;
       part.position.z = z;
       part.castShadow = part.receiveShadow = true;
-      part.userData = { archedEntryPart: true, tourObstacle: true };
+      part.userData = { rectangularEntryPart: true, tourObstacle: true };
       target.add(part);
       return part;
     }
-    function archBand(innerHalf, outerHalf, innerRadius, outerRadius, bottom) {
+    function rectangularBand(innerHalf, outerHalf, innerHeight, outerHeight, bottom) {
       const shape = new THREE.Shape();
       shape.moveTo(-outerHalf, bottom);
-      for (let index = 0; index <= 40; index++) {
-        const x = -outerHalf + outerHalf * 2 * index / 40;
-        shape.lineTo(x, topAt(x, outerRadius));
-      }
+      shape.lineTo(-outerHalf, outerHeight);
+      shape.lineTo(outerHalf, outerHeight);
       shape.lineTo(outerHalf, bottom);
       shape.lineTo(innerHalf, bottom);
-      for (let index = 0; index <= 40; index++) {
-        const x = innerHalf - innerHalf * 2 * index / 40;
-        shape.lineTo(x, topAt(x, innerRadius));
-      }
+      shape.lineTo(innerHalf, innerHeight);
+      shape.lineTo(-innerHalf, innerHeight);
       shape.lineTo(-innerHalf, bottom);
       shape.closePath();
       return shape;
     }
-    const surround = archBand(half, half + layout.surroundWidth, layout.radius, layout.radius + layout.surroundWidth, 0);
-    mesh(surround, 0.28, surroundFinish, 'Deep cast-stone arched entry surround', parent, 0.19);
-    mesh(surround, 0.12, trim, 'Interior arched entry casing', parent, -0.31);
-    mesh(archBand(half + 0.48, half + 0.72, layout.radius + 0.48, layout.radius + 0.72, 0.1), 0.1, surroundFinish, 'Projecting outer arch molding', parent, 0.47);
-    for (const side of [-1, 1]) {
-      const spandrel = new THREE.Shape();
-      const outerX = side * half;
-      spandrel.moveTo(outerX, layout.height);
-      spandrel.lineTo(0, layout.height);
-      for (let index = 0; index <= 30; index++) {
-        const x = side * half * index / 30;
-        spandrel.lineTo(x, topAt(x));
-      }
-      spandrel.closePath();
-      mesh(spandrel, 0.35, surroundFinish, 'Arch-shaped wall closure above door', parent, -0.175);
-    }
+    const surround = rectangularBand(half, half + layout.surroundWidth, layout.height, layout.height + layout.surroundWidth, 0);
+    mesh(surround, 0.28, surroundFinish, 'Deep cast-stone rectangular entry surround', parent, 0.19);
+    mesh(surround, 0.12, trim, 'Interior rectangular entry casing', parent, -0.31);
+    mesh(rectangularBand(half + 0.48, half + 0.72, layout.height + 0.48, layout.height + 0.72, 0.1), 0.1, surroundFinish, 'Projecting straight entry molding', parent, 0.47);
     const leaves = [];
     for (const side of [-1, 1]) {
       const leaf = new THREE.Group();
-      leaf.name = `Front entry ${side < 0 ? 'left' : 'right'} arched oak door leaf`;
+      leaf.name = `Front entry ${side < 0 ? 'left' : 'right'} rectangular oak door leaf`;
       leaf.position.x = side * 2.47;
       leaf.position.z = layout.hingeZ;
-      leaf.userData = { arched: true, crownHeightFeet: 8, springHeightFeet: 7.1, interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 110, openRotationSign: -side } };
+      leaf.userData = { rectangular: true, crownHeightFeet: 8, interactiveHouseDoor: { operation: 'hinged', openAngleDegrees: 0, maxAngleDegrees: 110, openRotationSign: -side } };
       parent.add(leaf);
       const min = side < 0 ? -2.45 : 0.02, max = side < 0 ? -0.02 : 2.45;
       const localX = (x) => x - leaf.position.x;
       const shape = new THREE.Shape();
       shape.moveTo(localX(min), 0.04);
       shape.lineTo(localX(max), 0.04);
-      for (let index = 0; index <= 40; index++) {
-        const x = max - (max - min) * index / 40;
-        shape.lineTo(localX(x), topAt(x) - 0.015);
-      }
+      shape.lineTo(localX(max), layout.height - 0.015);
+      shape.lineTo(localX(min), layout.height - 0.015);
       shape.closePath();
-      mesh(shape, 0.18, leafWood, 'Curved oak entry leaf body', leaf, -0.09);
+      mesh(shape, 0.18, leafWood, 'Rectangular oak entry leaf body', leaf, -0.09);
       const center = localX((min + max) / 2), panelWidth = max - min - 0.56;
       for (const face of [-1, 1]) {
         box(leaf, center, 1.15, face * 0.11, panelWidth, 1.25, 0.04, leafField).name = 'Recessed lower oak entry panel';
@@ -186,22 +166,24 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
         const upper = new THREE.Shape();
         upper.moveTo(localX(min + 0.28), 2.15);
         upper.lineTo(localX(max - 0.28), 2.15);
-        for (let index = 0; index <= 24; index++) {
-          const x = max - 0.28 - (max - min - 0.56) * index / 24;
-          upper.lineTo(localX(x), topAt(x) - 0.4);
-        }
+        upper.lineTo(localX(max - 0.28), layout.height - 0.4);
+        upper.lineTo(localX(min + 0.28), layout.height - 0.4);
         upper.closePath();
-        mesh(upper, 0.025, leafField, 'Arched recessed upper oak panel', leaf, face > 0 ? 0.1 : -0.125);
+        mesh(upper, 0.025, leafField, 'Rectangular recessed upper oak panel', leaf, face > 0 ? 0.1 : -0.125);
+        for (const edge of [-1, 1])
+          box(leaf, center + edge * (panelWidth / 2 + 0.04), 4.875, face * 0.14, 0.08, 5.45, 0.06, leafWood).name = 'Straight upper entry panel stile';
+        for (const y of [2.15, 7.6])
+          box(leaf, center, y, face * 0.14, panelWidth, 0.08, 0.06, leafWood).name = 'Straight upper entry panel rail';
         for (let x = min + 0.5; x < max - 0.4; x += 0.36) {
-          const top = topAt(x) - 0.43;
+          const top = layout.height - 0.43;
           box(leaf, localX(x), (top + 2.18) / 2, face * 0.14, 0.012, top - 2.18, 0.012, leafWood).name = 'Fine vertical oak panel joint';
         }
-        box(leaf, -side * 2.24, 3.55, face * 0.2, 0.07, 0.9, 0.1, hardware).name = 'Arched entry dark pull';
+        box(leaf, -side * 2.24, 3.55, face * 0.2, 0.07, 0.9, 0.1, hardware).name = 'Rectangular entry dark pull';
       }
       leaves.push(leaf);
     }
-    box(parent, 0, 0.015, 0, 5, 0.03, 0.5, hardware).name = 'Arched entry threshold';
-    parent.userData = { ...parent.userData, arched: true, heightInches: 96, springHeightInches: 85.2, widthInches: 60, productSelected: false, clearanceVerified: false };
+    box(parent, 0, 0.015, 0, 5, 0.03, 0.5, hardware).name = 'Rectangular entry threshold';
+    parent.userData = { ...parent.userData, rectangular: true, heightInches: 96, widthInches: 60, productSelected: false, clearanceVerified: false };
     return leaves;
   }
 
@@ -349,6 +331,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
     if (!Number.isFinite(exteriorWallThickness) || exteriorWallThickness <= 0) throw new Error('Cannot calculate livable area from invalid exterior wall thickness.');
     const floors = plan.floors.filter((floor) => !/^(Garage|Front porch)/.test(floor.room ?? floor.name ?? ''));
     const garage = plan.floors.filter((floor) => /^Garage/.test(floor.room ?? floor.name ?? ''));
+    const areaExclusions=plan.areaExclusions ?? [];
     const voids = [];
     if (includeStairs) {
       if (!plan.stairs) throw new Error('Cannot calculate livable area without the stair footprint.');
@@ -356,7 +339,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       floors.push({ x, z, w, d });
       voids.push(...(plan.stairs.voids ?? []));
     }
-    for (const floor of [...floors, ...garage, ...voids]) {
+    for (const floor of [...floors, ...garage, ...voids, ...areaExclusions]) {
       if (![floor.x, floor.z, floor.w, floor.d].every(Number.isFinite) || floor.w < 0 || floor.d < 0) throw new Error('Cannot calculate livable area from invalid floor geometry.');
     }
     for (const cut of voids) {
@@ -427,7 +410,12 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
         if (width && depth) gross.push({ x: cornerX, z: cornerZ, w: width, d: depth });
       }
     }
-    return unionArea(gross) - unionArea(voids);
+    const exclusions=[...voids,...areaExclusions].flatMap(cut=>gross.flatMap(rect=>{
+      const x=Math.max(cut.x,rect.x),z=Math.max(cut.z,rect.z);
+      const w=Math.min(cut.x+cut.w,rect.x+rect.w)-x,d=Math.min(cut.z+cut.d,rect.z+rect.d)-z;
+      return w>0&&d>0 ? [{x,z,w,d}] : [];
+    }));
+    return unionArea(gross) - unionArea(exclusions);
   }
 
   function getGroundFloorDefaultPlan() {
@@ -526,7 +514,7 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
 
   root.getLivingRoomFeatureLayout = getLivingRoomFeatureLayout;
   root.getFrontEntryLayout = getFrontEntryLayout;
-  root.buildArchedFrontEntry = buildArchedFrontEntry;
+  root.buildRectangularFrontEntry = buildRectangularFrontEntry;
   root.getGarageClerestoryLayout = getGarageClerestoryLayout;
   root.getGuestEntryLayout = getGuestEntryLayout;
   root.getGuestSuiteLayout = getGuestSuiteLayout;
@@ -580,5 +568,5 @@ if (typeof module !== 'undefined' && module.exports) Object.assign(module.export
       }
     };
   };
-  if (typeof module !== 'undefined' && module.exports) module.exports = { addWindowShadeDivisions, addSingleHungSashes, getGroundFrontWindows, getGroundFrontLayout, getWindowProductIntent, getGroundFloorDefaultPlan, getKitchenPassageLayout, getKitchenRefrigerationLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getFrontEntryLayout, buildArchedFrontEntry };
+  if (typeof module !== 'undefined' && module.exports) module.exports = { addWindowShadeDivisions, addFrontWindowGrilles, addSingleHungSashes, getGroundFrontWindows, getGroundFrontLayout, getWindowProductIntent, getGroundFloorDefaultPlan, getKitchenPassageLayout, getKitchenRefrigerationLayout, getPrepWindowLayout, getPrepWindowBankLayout, getKitchenWindowBankLayout, getLivableFloorArea, getLivingRoomFeatureLayout, getGarageClerestoryLayout, getGuestEntryLayout, getGuestSuiteLayout, getFrontEntryLayout, buildRectangularFrontEntry };
 })(typeof globalThis !== 'undefined' ? globalThis : this);

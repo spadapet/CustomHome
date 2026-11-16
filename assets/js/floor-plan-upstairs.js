@@ -681,6 +681,13 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     bounds: { ...footprint, z: g.atticNorth, d: footprint.z - g.atticNorth } };
   group.add(attic);
   function finishedPanel(name, x1, x2, z1, z2, bottom, ceiling = false) {
+    const splits=[x1,...section.breaks.filter(x=>x>x1+1e-6&&x<x2-1e-6),x2];
+    if(splits.length>2) {
+      const parts=[];
+      for(let index=1;index<splits.length;index++)
+        parts.push(finishedPanel(name,splits[index-1],splits[index],z1,z2,bottom,ceiling));
+      return parts[0];
+    }
     const points = [];
     for (const [x, z] of [[x1,z1],[x2,z1],[x2,z2],[x1,z2]]) points.push([x, ceiling ? section.heightAt(x) : bottom, z]);
     for (const [x, z] of [[x1,z1],[x2,z1],[x2,z2],[x1,z2]]) points.push([x, section.heightAt(x) + (ceiling ? .05 : 0), z]);
@@ -712,10 +719,12 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     box(loft, footprint.x+.03125, 1/3, (start+end)/2, .0625, 2/3, end-start, windowTrim).name = 'Finished loft west white baseboard';
   }
   box(loft, g.east+.2, 8.5, 31.3, .05, 1, 3, wallMaterial).name = 'Finished loft retained doorway head lining';
-  const ceiling = finishedPanel('Finished loft flat nine-foot painted ceiling', footprint.x, g.atticEast,
+  const ceiling = finishedPanel('Finished loft flat-to-sloped painted ceiling', footprint.x, g.atticEast,
     footprint.z, g.atticSouth, 0, true);
-  ceiling.userData.tourCeiling = true;
-  ceiling.visible = false; // Cutaway views; restored for the actual room tour.
+  for(const panel of loft.children.filter(part=>part.name==='Finished loft flat-to-sloped painted ceiling')){
+    panel.userData.tourCeiling=true;
+    panel.visible=false;
+  }
   // Three inches north clears the new south baseboard at full 36-in leaf travel.
   const atticBases = furniture('Finished loft retained standard bases', 49.8, 36.05);
   atticBases.userData = { finishedIntent: true, supportApproved: false };

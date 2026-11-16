@@ -145,7 +145,7 @@ test('both floors use resolved floor geometry and changes recalculate the displa
     { openingId: 'upstairs-pair', units: 2, picture: false },
     { openingId: 'garage', units: 1, picture: true }
   ];
-  const context = { getLivableFloorArea, groundBaseline: ground, groundLayoutPreview: null, upstairs, windowInstallations,
+  const context = { HomeRoof:require('../assets/js/floor-plan-roof.js'), getLivableFloorArea, groundBaseline: ground, groundLayoutPreview: null, upstairs, windowInstallations,
     document: { getElementById: id => ({
       'window-count': windowOutput, 'livable-area': output,
       'first-floor-area': firstFloorOutput, 'second-floor-area': secondFloorOutput
@@ -156,7 +156,7 @@ test('both floors use resolved floor geometry and changes recalculate the displa
   assert.ok(start >= 0 && end > start);
   vm.runInNewContext(source.slice(start, end), context);
   const groundArea = getLivableFloorArea(ground, { includeStairs: true });
-  const upstairsArea = getLivableFloorArea({ ...upstairs.plan, stairs: upper.stairs, floors: [...upstairs.plan.floors, upper.arrival] }, { includeStairs: true });
+  const upstairsArea = getLivableFloorArea({ ...upstairs.plan, areaExclusions:require('../assets/js/floor-plan-roof.js').getFinishedLoftAreaExclusions(), stairs: upper.stairs, floors: [...upstairs.plan.floors, upper.arrival] }, { includeStairs: true });
   const expectedText = (first, second) => {
     const format = (area) => Math.round(area).toLocaleString('en-US');
     return `Area: ~${format(first + second)} sq ft`;
@@ -182,8 +182,9 @@ test('both floors use resolved floor geometry and changes recalculate the displa
   assert.match(output.title, /Shared garage walls measured to the garage-side finish/);
   assert.match(output.title, /including the mechanical closet, are finished and conditioned/);
   assert.match(output.title, /Not a certified appraisal/);
-  assert.equal(output.textContent, 'Area: ~3,945 sq ft');
-  assertFloorOutputs(1924.3327083333343, 2020.7629166666663);
+  assert.equal(output.textContent, 'Area: ~3,920 sq ft');
+  assertFloorOutputs(1924.3327083333343, 1995.4010416666663);
+  assert.match(output.title,/below five feet is excluded/);
   context.groundLayoutPreview = { plan: layout.resolve(ground, layout.empty()) };
   context.updateLivableArea();
   assertFloorOutputs(groundArea, upstairsArea);

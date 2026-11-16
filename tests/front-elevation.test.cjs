@@ -10,7 +10,7 @@ function drawMeasuredUpper(context) {
   const start = source.indexOf('  const measuredUpper =');
   const end = source.indexOf('  const garageFacadeEaves =', start);
   assert.ok(start > 0 && end > start);
-  vm.runInNewContext(source.slice(start, end), { ...upperPlan, upper: 10, eaves: 19, ...context });
+  vm.runInNewContext(source.slice(start, end), { ...upperPlan, HomeRoof: require('../assets/js/floor-plan-roof.js'), upper: 10, eaves: 19, ...context });
 }
 
 test('one whole-house window policy distinguishes product intent from orderable sizes', () => {
@@ -19,7 +19,7 @@ test('one whole-house window policy distinguishes product intent from orderable 
     const data = intent(w,h,picture);
     assert.equal(data.series, '100 Series');
     assert.equal(data.material, 'Fibrex composite');
-    assert.equal(data.grilles, 'none');
+    assert.match(data.grilles, /traditional 2 wide by 3 high/);
     assert.equal(data.productSelected, false);
     assert.equal(data.standardSizeVerified, false);
     assert.equal(data.columns, picture ? 1 : Math.ceil(w/3));
@@ -34,7 +34,7 @@ test('one whole-house window policy distinguishes product intent from orderable 
 test('upper corner leaders follow different upper/lower walls with a short canopy bypass', () => {
   const routes=[];
   const measuredUpper = upperPlan.getUpstairsMeasuredGeometry();
-  const context={measuredUpper,group:{},drainageRoute(parent,name,points,brackets){routes.push({name,points,brackets});}};
+  const context={HomeRoof:require('../assets/js/floor-plan-roof.js'),floorToFloor:10,measuredUpper,group:{},drainageRoute(parent,name,points,brackets){routes.push({name,points,brackets});}};
   const start=source.indexOf('  for (const east of [false, true])');
   vm.runInNewContext(source.slice(start,source.indexOf('  // Dining is hipped',start)),context);
   assert.equal(routes.length,2);
@@ -53,14 +53,14 @@ test('upper corner leaders follow different upper/lower walls with a short canop
   }
 });
 
-test('arched entry is coordinated through the same builder for furnished and exterior views', () => {
+test('rectangular entry is coordinated through the same builder for furnished and exterior views', () => {
   const layout = require('../assets/js/floor-plan-ground.js').getFrontEntryLayout();
   assert.equal(layout.width, 5);
   assert.equal(layout.height, 8);
-  assert.equal(layout.spring, 7.1);
-  assert.match(source, /archedEntry\.position\.set\(15\.6, 0, frontWallZ\)/);
-  assert.match(source, /buildArchedFrontEntry\(THREE, .*archedEntry\)/);
-  assert.match(fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8'), /const frontEntryLeaves = buildArchedFrontEntry/);
+  assert.equal(layout.spring, undefined);
+  assert.match(source, /rectangularEntry\.position\.set\(15\.6, 0, frontWallZ\)/);
+  assert.match(source, /buildRectangularFrontEntry\(THREE, .*rectangularEntry\)/);
+  assert.match(fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8'), /const frontEntryLeaves = buildRectangularFrontEntry/);
 });
 
 test('porch keeps four straight square warm cream columns and one straight beam clear of the eight-foot door', () => {
@@ -115,7 +115,7 @@ test('slim column lantern constituents mount at the face without positive embedd
     constructor(){this.position={set(x,y,z){Object.assign(this,{x,y,z});}};}
     add(o){o.parent=this;}
   }
-  const context={THREE:{Group,PointLight:class extends Group{}},group:{},dark:{},glow:{},lanternBronze:{name:'bronze'},
+  const context={facadePrototype:false,HomeRoof:{studyAlternative:'historical'},THREE:{Group,PointLight:class extends Group{}},group:{},dark:{},glow:{},lanternBronze:{name:'bronze'},
     finishes:{lantern:{name:'Dark bronze European lantern',kelvin:2700}},
     mat:()=>({}),box(parent,x,y,z,w,h,d){
       const m={x,y,z,w,h,d,parent};parts.push(m);return m;
@@ -156,7 +156,7 @@ test('procedural fallback brick retains the original bond and applies warm ivory
   assert.deepEqual(written, [232,214,184,255, 248,239,219,255]);
 });
 
-test('Dark Bronze window frames have no grilles on any elevation; sills and heads stay warm cream', () => {
+test('Dark Bronze window frames have restrained six-light grilles on every elevation; sills and heads stay warm cream', () => {
   const meshes = [];
   class Group {
     constructor() { this.userData = {}; this.position = { set() {} }; }
@@ -164,7 +164,7 @@ test('Dark Bronze window frames have no grilles on any elevation; sills and head
     updateWorldMatrix() {}
     localToWorld(vector) { return vector; }
   }
-  const context = { windowInstallations: [], wallThickness: 0.45, getWindowProductIntent: require('../assets/js/floor-plan-ground.js').getWindowProductIntent, THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, dark: {}, trim: { name: 'trim' }, windowBronze: { name: 'bronze' }, windowBlack: {}, glass: {}, privacyGlass: {}, box(parent, x, y, z, w, h, d, material) { const mesh = { x, y, z, w, h, d, material, parent }; parent.add(mesh); return mesh; } };
+  const context = { facadePrototype: false, windowInstallations: [], wallThickness: 0.45, getWindowProductIntent: require('../assets/js/floor-plan-ground.js').getWindowProductIntent, THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, dark: {}, trim: { name: 'trim' }, windowBronze: { name: 'bronze' }, windowBlack: {}, glass: {}, privacyGlass: {}, box(parent, x, y, z, w, h, d, material) { const mesh = { x, y, z, w, h, d, material, parent }; parent.add(mesh); return mesh; } };
   vm.createContext(context);
   const groundSource = fs.readFileSync(require.resolve('../assets/js/floor-plan-ground.js'), 'utf8');
   context.addWindowShadeDivisions = require('../assets/js/floor-plan-ground.js').addWindowShadeDivisions;
@@ -175,7 +175,7 @@ test('Dark Bronze window frames have no grilles on any elevation; sills and head
     meshes.length = 0;
     context.front = front;
     vm.runInContext('windowUnit(new THREE.Group(), 6, 3, 6, 5, false, false, true, front)', context);
-    assert.equal(meshes.filter((mesh) => /grille/i.test(mesh.name ?? '')).length, 0, 'No decorative grilles or muntins');
+    assert.equal(meshes.filter((mesh) => /grille/i.test(mesh.name ?? '')).length, 12, 'Two units, two faces, one vertical and two horizontal bars');
     assert.equal(meshes.filter((mesh) => mesh.name === 'Dark Bronze joined-unit mullion cover' && mesh.d === 0.5 && mesh.w === 3.5 / 12).length, 1);
     const frameParts = meshes.filter((mesh) => mesh.material && mesh.material !== context.glass && !/depth allowance/.test(mesh.name ?? '') && mesh.y > 0 && mesh.y < 5 && mesh.parent.userData.manufacturer);
     assert.ok(frameParts.length >= 5 && frameParts.every((mesh) => mesh.material === context.windowBronze), 'Slim frames, sashes and mullions are Dark Bronze');
@@ -184,12 +184,12 @@ test('Dark Bronze window frames have no grilles on any elevation; sills and head
     assert.ok(surround.every((mesh) => mesh.material === context.trim), 'Sill and head trim stay warm cream, not bright white');
   }
   assert.match(source, /exteriorTrim: 'Dark Bronze'/);
-  assert.equal(vm.runInContext('finishes.window.frontGrilles', context), false);
+  assert.equal(vm.runInContext('finishes.window.frontGrilles', context), true);
   assert.equal(require('../assets/js/floor-plan-ground.js').getWindowProductIntent(3, 5).exteriorFinish, 'Dark Bronze');
   const viewer = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'), 'utf8');
   assert.match(viewer, /const windowExterior = mat\(getExteriorMaterialConfig\(\)\.window\.exterior, 0\.6\);/);
   assert.match(viewer, /const exteriorFinish = 'Dark Bronze';/);
-  assert.doesNotMatch(viewer, /frontGrid: true|addFrontWindowGrilles\(/);
+  assert.match(viewer, /addFrontWindowGrilles\(grilles, box, exteriorMaterial/);
   assert.doesNotMatch(fs.readFileSync(require.resolve('../assets/js/floor-plan-upstairs.js'), 'utf8'), /frontGrid/);
 });
 
@@ -217,7 +217,7 @@ test('full brick constituents respect every fixed opening without stone bands, a
     constructor() { this.userData = {}; this.position = { set() {} }; this.rotation = {}; }
     add(mesh) { mesh.wall = this; meshes.push(mesh); }
   }
-  const context = { stoneTexture: { clone: () => ({repeat:{set(){}}}) }, THREE: { Group }, white: {}, trim: {}, garageFloorY: -1.25, group: { add(wall) { walls.push(wall); } }, wallThickness: 0.45, box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'siding' }; parent.add(mesh); return mesh; }, brickBox(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'brick' }; parent.add(mesh); return mesh; }, windowUnit() {}, getUpstairsExteriorSegments: () => [] };
+  const context = { facadePrototype: false, stoneTexture: { clone: () => ({repeat:{set(){}}}) }, THREE: { Group }, white: {}, trim: {}, garageFloorY: -1.25, group: { add(wall) { walls.push(wall); } }, wallThickness: 0.45, box(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'siding' }; parent.add(mesh); return mesh; }, brickBox(parent, x, y, z, w, h, d) { const mesh = { x, y, z, w, h, d, finish: 'brick' }; parent.add(mesh); return mesh; }, windowUnit() {}, getUpstairsExteriorSegments: () => [] };
   context.brickSoldierBox = context.brickBox;
   vm.createContext(context);
   vm.runInContext(source.slice(0, source.indexOf('function buildExteriorModel')) + '\nconst cladding = getExteriorCladdingStudy();', context);
@@ -317,7 +317,7 @@ test('brick gables and tapered closures use the same physical course scale', () 
 test('hipped exterior removes applied front gables and retains fixed openings without adding a floor', () => {
   const walls = [], gables = [];
   const getUpstairsFrontWindows = require('../assets/js/floor-plan-upstairs.js').getUpstairsFrontWindows;
-  const context = { group: { userData: {} }, dark: {}, box() { return {}; }, wall(name, ...args) { const value = { name, args, userData: {} }; walls.push(value); return value; }, win(center, width, sill = 3, height = 5) { return { center, width, sill, height }; }, floorToFloor: 10, upper: 10, eaves: 19 };
+  const context = { HomeRoof:require('../assets/js/floor-plan-roof.js'),group: { userData: {} }, dark: {}, box() { return {}; }, wall(name, ...args) { const value = { name, args, userData: {} }; walls.push(value); return value; }, win(center, width, sill = 3, height = 5) { return { center, width, sill, height }; }, floorToFloor: 10, upper: 10, eaves: 19 };
   context.getUpstairsFrontWindows = getUpstairsFrontWindows;
   context.getGroundFrontWindows = require('../assets/js/floor-plan-ground.js').getGroundFrontWindows;
   context.frontWallZ = require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().wallZ;

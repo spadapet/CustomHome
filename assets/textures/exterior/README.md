@@ -20,8 +20,13 @@ Brick faces grade to warm ivory RGB(232,214,184) at scan luminance 128,
 shade 0.26 x (L-128) plus a bounded +/-6 warm variation from source chroma;
 the scan's pale low-chroma joints (chroma<24, L>115) become light cream
 mortar RGB(242,233,213). Stone Wall grades to warm cream cast stone
-RGB(224,214,192), used only at the front entrance. Roof Slates 03 grades to
-charcoal RGB(84,81,76) as a dimensional-shingle display proxy. The oak scan
+RGB(224,214,192), used only at the front entrance. Main roof surfaces now use
+original procedural charcoal RGB(84,81,76) courses, irregular laminated tabs
+and fine granules with 4.92-in exposure per 3 m texture tile. Original
+procedural albedo and bump relief are generated locally; no third-party
+asphalt photograph or selected shingle product is claimed. Roof Slates 03
+remains bundled as an unused historical source, not re-labeled as asphalt.
+The oak scan
 also supplies the porch tongue-and-groove ceiling with drawn board joints.
 Independent diffuse Sources retain original normal/roughness maps; no new
 assets or manufacturer photography; the CC0 provenance above is retained.
@@ -44,14 +49,11 @@ their previous backgrounds and lighting. The original HDR was checked
 against the Poly Haven files API MD5. The lawn uses the original Grass Ground
 scan with a mild green tint, tiled at a provisional 12 ft visual scale;
 it is not a verified species/site photograph.
-The oak scan supplies the shared arched-entry bodies and recessed panels;
+The oak scan supplies the shared rectangular-entry bodies and recessed panels;
 grain runs vertically at a provisional 2.43 ft-wide by 8 ft-high visual
 tile. It is not manufacturer door CAD or a specified exterior finish.
-The main roof surfaces use Roof Slates 03 at the source's nominal 3 m
-tile scale with separate normal/roughness maps. This is a slate-style
-appearance reference, not a selected asphalt shingle or approved roof
-assembly. The porch and entry roofs remain standing-seam metal.
-Runtime crops the top 5% of all three slate maps consistently to exclude
-the scan's pale flashing strip; the original JPG files remain unchanged.
+The main roof surfaces use procedural color/bump maps, not the slate normals
+or roughness; the porch remains standing-seam metal. The existing historical
+slate loader retains its crop behavior; original JPGs remain unchanged.
 Material weathering, scan scale and surface relief do not establish actual
 product availability, wall assembly, structural support or construction fit.

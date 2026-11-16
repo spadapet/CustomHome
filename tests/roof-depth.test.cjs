@@ -34,7 +34,7 @@ function render(metal = false, override = null) {
       Float32BufferAttribute: class { constructor(array) { this.array = array; } },
       Mesh: class extends Group { constructor(geometry, material) { super(); Object.assign(this, { geometry, material }); } }
     },
-    HomeRoof, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: { name: 'gutter' }, mat: () => ({}),
+    HomeRoof, facadePrototype: false, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: { name: 'gutter' }, mat: () => ({}),
     box(parent, x, y, z, width, height, depth, material) {
       const mesh = new Group();
       Object.assign(mesh, { geometry: { width, height, depth }, material });
@@ -61,7 +61,12 @@ test('roof edges receive closed soffits and deep trim only along the envelope pe
   assert.equal(surfaces.length, model.userData.faceCount);
   const fascia = model.children.filter((part) => /Connected roof (rake|eaves) fascia/.test(part.name));
   assert.ok(fascia.length > 5);
-  for (const part of fascia) assert.equal(part.geometry.height, 0.45);
+  for (const part of fascia) {
+    const frontRake = part.name === 'Connected roof rake fascia' && part.position.z > 48 && part.geometry.height === 0.7;
+    assert.equal(part.geometry.height, frontRake ? 0.7 : 0.45);
+    if (frontRake) assert.equal(part.geometry.depth, 0.4);
+  }
+  assert.ok(model.children.some(part => part.name === 'Front gable stepped cream rake molding'));
   assert.ok(model.children.some((part) => part.name === 'Connected roof closed edge soffit'));
   assert.ok(model.children.some((part) => part.name === 'Connected roof perimeter gutter'));
   assert.ok(model.children.some((part) => part.name === 'Stepped roof wall-abutment flashing'));
@@ -73,13 +78,13 @@ test('roof edges receive closed soffits and deep trim only along the envelope pe
   assert.ok(undersides.every((part) => part.userData.noExteriorShadow));
 });
 
-test('garage roof is one full-width front gable joined to the retained hip, with real roof faces and no brow canopy', () => {
+test('garage roof is one full-width room-in-roof gable and an independent eyebrow preserves openings', () => {
   const { model, definitions } = render(false, HomeRoof.getLowerRoofDefinitions());
   const plan = HomeRoof.buildRoofEnvelope(definitions);
-  const gable = definitions.find(({ id }) => id === 'Garage front gable');
-  assert.deepEqual(gable.bounds, [30.3, 56.2, 37.5, 49.85]);
-  close(Math.hypot(gable.planes[0][0], gable.planes[0][1]) * 12, 7.2 / 12.95 * 12);
-  close(HomeRoof.heightAt(gable.planes[0], [43.25, 49.85]), 16.1);
+  const gable = definitions.find(({ id }) => id === 'Garage room-in-roof');
+  assert.deepEqual(gable.bounds, [30.3, 56.2, 26.975, 49.85]);
+  close(Math.hypot(gable.planes[0][0], gable.planes[0][1]) * 12, 10);
+  close(HomeRoof.heightAt(gable.planes[0], [43.25, 49.85]), 25.2916666667);
   const garageFaces = model.children.filter((part) => part.userData.roofSurface && part.userData.roof === gable.id);
   assert.ok(garageFaces.length >= 2, 'The actual roof mesh contains both broad gable slopes');
   for (const part of garageFaces) {
@@ -92,12 +97,13 @@ test('garage roof is one full-width front gable joined to the retained hip, with
   }
   const frontApex = plan.faces.find((face) => face.roof === gable.id && HomeRoof.contains(face.polygon, [43.25, 49.225]));
   assert.ok(frontApex);
-  close(HomeRoof.heightAt(frontApex.plane, [43.25, 49.225]), 15.73562753036437);
-  assert.ok(plan.joins.some((join) => join.type === 'valley' && join.roofs.includes(gable.id) && join.roofs.includes('Garage service return')));
+  close(HomeRoof.heightAt(frontApex.plane, [43.25, 49.225]), 25.2916666667);
+  assert.ok(!definitions.some(d=>d.id==='Garage service return'));
   const undersides = model.children.filter((part) => part.name === 'Closed connected roof underside');
   assert.equal(undersides.length, model.children.filter((part) => part.userData.roofSurface).length);
   const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
-  assert.doesNotMatch(source, /Garage metal canopy|Garage brow|GarageCanopyDefinitions/);
+  assert.match(source, /'Adopted garage eyebrow metal roof'/);
+  assert.equal(HomeRoof.getGarageEyebrowDefinitions()[0].bounds[3]-HomeRoof.getGarageEyebrowDefinitions()[0].bounds[2],2);
   function close(actual, expected) { assert.ok(Math.abs(actual - expected) < 1e-5, `${actual} != ${expected}`); }
 });
 
@@ -134,10 +140,8 @@ test('lower mixed roof renders clipped metal ribs and opaque undersides on the d
       assert.ok(Math.abs(positions[i + 1] - HomeRoof.heightAt(face.plane, [positions[i], positions[i + 2]])) < 1e-5);
     }
   }
-  assert.ok(!model.children.some(p => p.name === 'Clipped standing-seam roof rib'), 'Orphan metal loft transition has been removed');
-  const metalPerimeter = model.children.filter(p => /Connected roof .*fascia/.test(p.name) &&
-    p.position.x > 55.7 && p.position.z < 35.55);
-  assert.ok(metalPerimeter.length >= 1, 'The replacement slate lean-to now receives actual perimeter fascia');
+  assert.ok(model.children.some(p => p.name === 'Clipped standing-seam roof rib'), 'Low rear roof has clipped standing-seam ribs');
+  assert.ok(definitions.some(d=>d.id==='Garage rear metal lean-to'&&d.finish==='metal'));
 });
 
 test('metal ribs follow clipped porch/entry polygons with one shared finish and no standalone intersecting panels', () => {

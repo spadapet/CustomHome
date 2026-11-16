@@ -359,7 +359,7 @@ test('lower-roof gutters stop at the finished brick face with end caps and never
   function render(masonryFootprints, definitions) {
     const context = {
       THREE: { Group, Vector3: Vector, DoubleSide: 2, BufferGeometry: class { setAttribute() {} computeVertexNormals() {} }, Float32BufferAttribute: class {}, Mesh: class extends Group {} },
-      HomeRoof, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: {}, mat: () => ({}), masonryFootprints,
+      HomeRoof, facadePrototype: false, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: {}, mat: () => ({}), masonryFootprints,
       box(parent, x, y, z, width, height, depth) { const mesh = new Group(); mesh.geometry = { width, height, depth }; Object.assign(mesh.position, { x, y, z }); parent.add(mesh); return mesh; }
     };
     vm.createContext(context);
@@ -369,10 +369,10 @@ test('lower-roof gutters stop at the finished brick face with end caps and never
   }
   const lower = HomeRoof.getLowerRoofDefinitions();
   // The living-patio canopy's east brick closure rises from y9 on the dining roof's west eave line.
-  const frameContext = {};
+  const frameContext = {getUpstairsMeasuredGeometry:require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry};
   vm.runInNewContext(slice(exteriorSource, 'function getLivingPatioCanopyFrame(', 'function buildExteriorModel(') + '\nthis.frame = getLivingPatioCanopyFrame(0.45, ' + ground.getLivingRoomFeatureLayout().returnWallZ + ');', frameContext);
   const canopy = frameContext.frame;
-  assert.ok(Math.abs(canopy.closureStart - 1.772) < 0.001 && Math.abs(canopy.front - 9.275) < 1e-9 && canopy.right === 13.2, `Closure z${canopy.closureStart}..${canopy.front}`);
+  assert.ok(Math.abs(canopy.closureStart - 1.772) < 0.001 && Math.abs(canopy.front - 7.175) < 1e-9 && canopy.right === 13.2, `Closure z${canopy.closureStart}..${canopy.front}`);
   const closurePush = exteriorSource.indexOf('masonryFootprints.push(livingPatioCanopy.closureFootprint);');
   assert.ok(closurePush > 0 && closurePush < exteriorSource.indexOf("renderRoofEnvelope('Closed ground-floor setback roofs'"), 'Closure registered before the setback gutters are cut');
   assert.match(exteriorSource, /\[patioSideClosureStart, livingPatioCanopy\.closureStart\]/, 'Canopy builder checks its closure against the shared frame');
@@ -396,24 +396,23 @@ test('lower-roof gutters stop at the finished brick face with end caps and never
       assert.ok(penetration(g, brick) <= JOINT, `${part.name} at x${part.position.x.toFixed(2)} z${part.position.z.toFixed(2)} enters ${wall.name} by ${(penetration(g, brick) * 12).toFixed(2)} in`);
     }
   }
-  // Kitchen/prep rear (east eave) run ends at the face with a cap; the runs along the upper
-  // bath rear and along the patio canopy's east closure (dining west eave) lay wholly inside
-  // masonry and are omitted (roof-to-wall abutments).
+  // The lowered dining roof's west gutter now stops at the shared canopy
+  // closure. The east eave ends exactly at the upper rear wall face.
   assert.equal(caps.length, 1);
   const capFaces = caps.map((cap) => [+cap.position.x.toFixed(3), +cap.position.z.toFixed(3)]);
-  assert.ok(caps.some((cap) => Math.abs(cap.position.x - 27.525) < 1e-6 && Math.abs(extent(cap).maxZ - 6.775) < 1e-9), `Kitchen/prep brick face cap ${JSON.stringify(capFaces)}`);
+  assert.ok(caps.some((cap) => Math.abs(cap.position.x - 12.975) < 1e-6 && Math.abs(extent(cap).maxZ - canopy.closureStart) < 1e-9), `Canopy abutment end cap ${JSON.stringify(capFaces)}`);
   assert.ok(!gutterParts.some((part) => extent(part).minX < 13.2 + 0.225 && extent(part).maxZ > canopy.closureStart), 'No dining west-eave gutter in the patio canopy closure, roof, soffit or fascia');
   for (const cap of caps) {
     const trough = gutterParts.find((part) => part.userData.stopsAtMasonryFace && Math.abs(part.position.x - cap.position.x) < 1e-6);
     assert.ok(trough && Math.abs(extent(trough).maxZ - extent(cap).minZ) < 1e-9, 'Trough meets its cap without overlap');
   }
-  assert.ok(!gutterParts.some((part) => Math.abs(part.position.x - 27.525) < 0.2 && extent(part).maxZ > 6.775 + 1e-9), 'No gutter fragment past the kitchen/prep brick face');
+  assert.ok(!gutterParts.some((part) => Math.abs(part.position.x - 27.525) < 0.2 && extent(part).maxZ > 7.175 + 1e-9), 'No gutter fragment past the upper rear finished brick face');
   assert.ok(!gutterParts.some((part) => Math.abs(part.axis.x) > 0.5 && extent(part).maxZ > 7.175 + JOINT && extent(part).minZ < 7.625), 'No gutter run along the upper bath rear wall');
   // Main-house eaves gutters are untouched by the masonry clip.
   const main = HomeRoof.getConnectedRoofDefinitions(floorToFloor).filter(({ id }) => !id.startsWith('Garage') && id !== 'Dining rear projection');
   const count = (m) => m.children.filter((part) => part.name === 'Connected roof perimeter gutter').length;
   assert.equal(count(render(footprints, main)), count(render([], main)));
-  assert.equal(count(model), count(render([], lower)) - 2, 'Only the buried upper-bath-rear and canopy-closure runs are removed');
+  assert.equal(count(model), count(render([], lower)) - 1, 'Only the canopy-closure run is removed; dining now ends directly at the upper rear face');
   // Rear dining path wall light (backplate 0.3 x 0.3 ft, housing projecting 0.4 ft from the face) sits on the
   // east pier: at least 1 in below the rear eave gutter/fascia it used to enter, clear of the window head trim.
   const lightCall = lines.find((line) => line.includes("wallDownlight('Rear dining path wall downlight'"));
@@ -434,7 +433,7 @@ test('lower-roof gutters stop at the finished brick face with end caps and never
 // Exterior masonry-stop helpers (convex masonry solids, penetration test) and the
 // shared canopy frame, evaluated from the production source.
 function masonryStopContext() {
-  const context = {};
+  const context = {getUpstairsMeasuredGeometry:require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry};
   vm.runInNewContext(slice(exteriorSource, 'function getLivingPatioCanopyFrame(', 'function buildExteriorModel(')
     + '\nthis.frame = getLivingPatioCanopyFrame; this.prism = prismMasonrySolid; this.penetrates = penetratesMasonry; this.boxSolid = boxMasonrySolid;'
     + ' this.fit = fitMasonrySolidToMember; this.pieces = connectedTrianglePieces; this.inPlan = pointInPlanPolygon;', context);

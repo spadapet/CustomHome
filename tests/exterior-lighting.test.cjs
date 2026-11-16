@@ -9,7 +9,7 @@ const viewerSource = fs.readFileSync(require.resolve('../assets/js/floor-plan-3d
 
 test('exterior daylight isolates the raking sun, sky and exposure and restores both interior modes', () => {
   const context = {
-    activeFloor: 'exterior', nightLighting: false, exteriorSun: {}, scene: {},
+    activeFloor: 'exterior', nightLighting: false, facadePrototype: false, exteriorSun: {}, scene: {},
     outdoorSky: {}, indoorBackground: {}, outdoorReflection: { texture: {} },
     ambientLight: {}, studioFill: {}, renderer: {}
   };
@@ -56,7 +56,7 @@ class Group {
     this.children = [];
     this.userData = {};
     this.rotation = { y: 0 };
-    this.scale = { x: 1, y: 1, z: 1 };
+    this.scale = { x: 1, y: 1, z: 1, setScalar(value){this.x=this.y=this.z=value;} };
     this.position = {
       x: 0, y: 0, z: 0,
       set(x, y, z) { Object.assign(this, { x, y, z }); },
@@ -89,9 +89,12 @@ function buildLighting() {
     HomeRoof: require('../assets/js/floor-plan-roof.js'), floorToFloor: 10, garageFloorY: -1.25, wallThickness: 0.45, white: {},
     measuredUpper: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry(),
     frontShift: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().extension,
-    frontWallZ: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().wallZ,
+    frontWallZ: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().wallZ, porchCeilingHeight: 9.6,
     THREE: {
       Group, Mesh, Vector3: Vector,
+      MeshPhysicalMaterial:class{constructor(options){Object.assign(this,options);}},
+      ConeGeometry:class{constructor(radius,height,sides){this.parameters={radius,height,sides};}},
+      PointLight:class extends Group{constructor(color,intensity,distance,decay){super();Object.assign(this,{color,intensity,distance,decay,isLight:true});}},
       CylinderGeometry: class {
         constructor(radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded) {
           this.parameters = { radiusTop, radiusBottom, height, radialSegments, heightSegments, openEnded };
@@ -104,7 +107,7 @@ function buildLighting() {
         }
       }
     },
-    group, dark: {}, mat: () => ({ metalness: 0 }), glow: { emissiveIntensity: 0.8, emissive: { getHex: () => 0xffbf68 } }, patioGrade: -1.625,
+    group, facadePrototype: false, dark: {}, mat: () => ({ metalness: 0 }), glow: { emissiveIntensity: 0.8, emissive: { getHex: () => 0xffbf68 } }, patioGrade: -1.625,
     patioRoofCenterX: 6.6, patioRoofWidth: 13.2, livingPatioCenterZ: 3.725,
     patioRoofUndersideAt: (z) => 8.26780663414694 + z * 3 / 16,
     westGateCenterX: -10.605, westFenceReturnZ: 45, eastFenceReturnZ: 41, garageSideDoorCenterZ: 45.5,
@@ -119,6 +122,9 @@ function buildLighting() {
   vm.createContext(context);
   vm.runInContext(exteriorSource.slice(0, exteriorSource.indexOf('function buildExteriorModel')) + '\nconst finishes = getExteriorMaterialConfig();', context);
   Object.assign(context, { lanternBronze: { name: 'bronze' }, trim: { name: 'trim' } });
+  const lanternStart=exteriorSource.indexOf('  function lantern('),lanternEnd=exteriorSource.indexOf('  for (const pillar of porchPillars',lanternStart);
+  assert.ok(lanternStart>0&&lanternEnd>lanternStart);
+  vm.runInContext(exteriorSource.slice(lanternStart,lanternEnd),context);
   vm.runInContext(exteriorSource.match(/  const canopyLightXs = .*;/)[0], context);
   vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const canopyDepth ='), exteriorSource.indexOf('  function canopySection(')), context);
   vm.runInContext(exteriorSource.slice(exteriorSource.indexOf('  const porchCanopyHeight ='), exteriorSource.indexOf('  const porchMetal =')), context);
@@ -127,12 +133,18 @@ function buildLighting() {
 }
 
 test('warm downward fixtures cover entrances, side paths, garden and patio without path posts', () => {
-  const { lighting, context } = buildLighting();
+  const { group, lighting, context } = buildLighting();
   const fixtures = lighting.children.filter((part) => part.userData.mount);
   const sources = lighting.children.filter((part) => part.isLight);
-  assert.equal(fixtures.length, 30);
-  assert.equal(sources.length, 30);
-  assert.equal(fixtures.filter((part) => part.userData.mount === 'wall').length, 13);
+  assert.equal(fixtures.length, 28);
+  assert.equal(sources.length, 28);
+  assert.equal(fixtures.filter((part) => part.userData.mount === 'wall').length, 11);
+  const lanterns=group.children.filter(part=>part.name==='Prototype traditional bronze garage lantern');
+  assert.equal(lanterns.length,2);
+  for(const lantern of lanterns){
+    assert.equal(lantern.position.y,9.35);
+    assert.ok(lantern.children.some(part=>part.isLight&&part.intensity===15));
+  }
   for (const fixture of fixtures) {
     assert.equal(fixture.userData.colorTemperatureKelvin, 2700);
     assert.equal(fixture.userData.downwardOnly, true);
@@ -188,7 +200,9 @@ test('wall lights have correctly oriented mounting plates and porch housings mee
     else close(wallZ, 6.775);
   }
   for (const fixture of fixtures.filter((part) => part.name === 'Front porch approach ceiling light')) {
-    close(fixture.position.y + 0.075, context.porchCanopyUndersideAt(fixture.position.z));
+    close(fixture.position.y + 0.075, context.porchCeilingHeight);
+    for (const part of fixture.children)
+      assert.ok(fixture.position.y + part.position.y + part.height * part.scale.y / 2 <= context.porchCeilingHeight + 1e-9, 'Fixture cannot penetrate horizontal wood lining');
   }
   const upper = fixtures.filter(part => part.userData.mount === 'upper soffit recessed');
   assert.equal(upper.length, 12);

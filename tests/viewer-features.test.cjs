@@ -277,7 +277,8 @@ test('attic approval warning stays in optional room notes, not clipped onto the 
   assert.match(optional, /<strong>Finished eastern loft is exactly the southern half:/);
   assert.match(optional, /Northern unfinished roof void stays area-excluded and not a tour floor/);
   assert.match(optional, /Floor loads\/support, roof support, garage fire separation/);
-  assert.match(optional, /flat 9-ft \/108-inch ceiling throughout/);
+  assert.match(optional, /slopes to about 3\.58 ft at the east edge/);
+  assert.match(optional, /Low-side space below five feet is excluded from Area/);
   assert.doesNotMatch(source, /mudroomLabel\([^\n]*ATTIC: STORAGE ONLY/);
 });
 

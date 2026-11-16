@@ -71,7 +71,7 @@
     return { id, finish, bounds: [left, right, rear, front], planes };
   }
 
-  function getConnectedRoofDefinitions(floorToFloor = 10) {
+  function getHistoricalRoofDefinitions(floorToFloor = 10) {
     const diningRearZ = typeof getLivingRoomFeatureLayout === 'function' ? getLivingRoomFeatureLayout().diningRearZ
       : require('./floor-plan-ground.js').getLivingRoomFeatureLayout().diningRearZ;
     const eaves = floorToFloor + 9;
@@ -143,6 +143,41 @@
     ];
   }
 
+  function getConnectedRoofDefinitions(floorToFloor = 10) {
+    const g = upperGeometry(), roofs = getHistoricalRoofDefinitions(floorToFloor)
+      .filter(roof => !roof.id.startsWith('Garage'));
+    const main = roofs.find(roof => roof.id === 'Main house');
+    const [left, right, rear, front] = main.bounds, base = floorToFloor + 10.6;
+    const ridgeZ = (rear + front) / 2, crown = base + (ridgeZ - rear) / 4;
+    const hipRun = (g.southClosetWest / 2) - left;
+    main.planes = [[0,.25,base-.25*rear],[0,-.25,base+.25*front],
+      [(crown-base)/hipRun,0,base-(crown-base)/hipRun*left],
+      [-(crown-base)/hipRun,0,base+(crown-base)/hipRun*right]];
+    for (const roof of roofs.filter(roof => /front gable/.test(roof.id))) {
+      const [l,r,b] = roof.bounds, slope = 7.6 / ((r-l)/2), eave = floorToFloor + 9.2;
+      roof.planes = [[slope,0,eave-slope*l],[-slope,0,eave+slope*r],[0,slope,eave-slope*b]];
+    }
+    const loftNorth = (g.atticNorth + g.atticSouth) / 2;
+    roofs.push({ id: 'Garage room-in-roof', bounds: [30.3,g.atticEast+.7,loftNorth-.75,49.85],
+      planes: [[10/12,0,14.5-(10/12)*30.3],[-10/12,0,14.5+(10/12)*(g.atticEast+.7)]] });
+    roofs.push({ id: 'Garage rear metal lean-to', finish: 'metal',
+      bounds: [g.east+.225,g.atticEast+.7,7-.225,loftNorth-.225],
+      planes: [[-3/16,0,9.3+(3/16)*(g.atticEast+.7)]] });
+    roofs.push({id:'Kitchen rear setback metal',finish:'metal',
+      bounds:[27.525,g.east+.225,7-.225,g.north-.225],
+      planes:[[0,.25,9.3-.25*(g.north-.225)]]});
+    const dining = roofs.find(roof => roof.id === 'Dining rear projection');
+    const dl = 13.2-.225, dr = dining.bounds[1], slope = (12.2-9.3)/((dr-dl)/2);
+    dining.bounds = [dl,dr,dining.bounds[2],g.north-.225];
+    dining.planes = [[slope,0,9.3-slope*dl],[-slope,0,9.3+slope*dr],[0,slope,9.3-slope*dining.bounds[2]]];
+    return roofs;
+  }
+
+  function getGarageEyebrowDefinitions() {
+    return [{ id: 'Garage eyebrow metal', finish: 'metal', bounds: [30.75,55.75,49.225,51.225],
+      planes: [[0,-.25,8.2+.25*49.225]] }];
+  }
+
   function getSetbackRoofDefinitions() {
     const g = upperGeometry();
     // No separate transition roof: the storage roof and garage returns share the envelope.
@@ -150,13 +185,13 @@
   }
 
   function getLowerRoofDefinitions() {
-    return getConnectedRoofDefinitions().filter(({ id }) => id.startsWith('Garage') || id === 'Dining rear projection');
+    return getConnectedRoofDefinitions().filter(({ id,finish }) => id.startsWith('Garage') || id === 'Dining rear projection' || finish==='metal');
   }
 
   function getSetbackAbutments() {
     const g = upperGeometry();
-    return [[g.east - .225, 15, g.east - .225, g.bedNorth + .225],
-      [g.southEast + .225, g.bedNorth + .225, g.serviceEast + .225, g.bedNorth + .225]];
+    return [[g.east + .225, 7-.225, g.east + .225, (g.atticNorth+g.atticSouth)/2-.225],
+      [27.525,g.north-.225,g.east+.225,g.north-.225]];
   }
 
   function getPorchRoofDefinitions() {
@@ -375,11 +410,23 @@
   function getFinishedLoftSection(floorToFloor = 10) {
     // Vertical allowances, not a specified rafter or insulation assembly.
     const ceilingHeightFeet = 9, skinDepthFeet = .16, framingReserveFeet = 1.5, liningDepthFeet = .05;
-    return { plane: [0, 0, floorToFloor + ceilingHeightFeet], ceilingHeightFeet,
+    const garage = getConnectedRoofDefinitions(floorToFloor).find(roof=>roof.id==='Garage room-in-roof');
+    const allowance = framingReserveFeet;
+    const planes = [[0,0,ceilingHeightFeet], ...garage.planes.map(([a,b,c])=>[a,b,c-floorToFloor-allowance])];
+    const breakX = (ceilingHeightFeet-planes[2][2])/planes[2][0];
+    return { plane: planes[2], planes, breaks: [breakX], ceilingHeightFeet,
       skinDepthFeet, framingReserveFeet, liningDepthFeet,
-      heightAt: () => ceilingHeightFeet };
+      heightAt: (x) => Math.min(...planes.map(plane=>heightAt(plane,[x,0]))),
+      eastLimitAtHeight: height => (height-planes[2][2])/planes[2][0] };
   }
-  const api = { getFinishedLoftSection, getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, trianglesOutsideConvex, wallHeadSegments };
+  function getFinishedLoftAreaExclusions(floorToFloor = 10) {
+    const g=upperGeometry(),section=getFinishedLoftSection(floorToFloor);
+    const x=Math.max(g.east+.225,section.eastLimitAtHeight(5)),right=g.atticEast+.225;
+    const north=(g.atticNorth+g.atticSouth)/2-.225;
+    return right>x ? [{x,z:north,w:right-x,d:g.atticSouth+.225-north}] : [];
+  }
+
+  const api = { getFinishedLoftSection, getFinishedLoftAreaExclusions, getHistoricalRoofDefinitions, getGarageEyebrowDefinitions, getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, trianglesOutsideConvex, wallHeadSegments };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.HomeRoof = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

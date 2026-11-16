@@ -1,13 +1,16 @@
 # CustomHome
 
-Current exterior material study (October 27): neutral warm-white main brick
-is unchanged; decorative red-brown scanned queen brick wraps the raised lower
-walls, porch exposed foundation, column bases, landing nose and step risers.
-Pale coping, porch paving and stone treads retain contrast. The base remains
-30 inches above house floor; slim 12-inch column shafts and architecture remain.
-Brick/mortar sample panels, veneer support/flashing and coping/drips need design
-review. Walking finishes need separate exterior slip/frost and drainage approval;
-wall veneer is not an approved paver. See [elevations](elevations.html).
+Current English-French exterior study (November 15): the adopted coordinated
+roof has a transverse main ridge, paired bedroom gables, a room-in-roof
+garage with a sloped loft ceiling, lower rear roofs and a garage eyebrow.
+Room footprints and openings remain unchanged. Full warm ivory brick, entrance-only straight
+cast-stone surround, rectangular 60 x 96-in oak double entry, Dark Bronze
+windows with traditional grids, original procedural charcoal shingles,
+taupe garage doors and four square cream porch columns. The unchanged
+31 ft 2.4 in x 7 ft porch has a true horizontal wood ceiling at 9.6 ft.
+Experimental facade materials remain opt-in, separate from the adopted roof.
+Materials, structural support, waterproofing, fixtures and occupied operation
+remain unapproved. See [elevations](elevations.html).
 
 A furnished Three.js home-design study with two-floor views, tours, exterior
 studies and a one-foot floor grid. Dimensions and storage/access arrangements

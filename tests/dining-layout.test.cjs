@@ -183,7 +183,7 @@ test('dining rear wall moves exactly two feet with coordinated side walls, floor
   assert.equal(plan.walls.find(([name]) => name === 'Mudroom north')[2], 15);
   const exterior = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const diningRoof = require('../assets/js/floor-plan-roof.js').getConnectedRoofDefinitions().find((roof) => roof.id === 'Dining rear projection');
-  assert.equal(diningRoof.bounds[0], 13.2, 'Dining west roof stops at the shared canopy wall');
+  assert.equal(diningRoof.bounds[0], 12.975, 'Dining west roof reaches the shared finished canopy wall face');
   assert.equal(diningRoof.bounds[2], 1.25);
   assert.doesNotMatch(exterior, /gable\('Dining rear projection roof'/, 'Hipped dining roof has no obsolete triangle piercing its surface');
   const lot = exterior.match(/const lot = (\{[^\n]+\});/);

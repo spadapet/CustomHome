@@ -19,8 +19,9 @@ test('one exterior material configuration names every specified finish', () => {
     assert.ok(finishes[key]?.name || finishes[key]?.color, key);
   assert.match(finishes.castStone.use, /entrance/i);
   assert.match(finishes.castStone.use, /no foundation band/i);
-  assert.equal(finishes.window.grilles, 'none');
-  assert.equal(finishes.window.frontGrilles, false);
+  assert.match(finishes.window.grilles, /traditional 2 wide by 3 high/);
+  assert.equal(finishes.window.frontGrilles, true);
+  assert.equal(finishes.window.allGrilles, true);
   assert.match(finishes.window.name, /Andersen 100 Series Fibrex, Dark Bronze/);
   assert.match(finishes.brick.coverage, /All four elevations, both floors, every gable and the garage/);
   // Dark bronze, not pure black: warm, low but non-zero value.

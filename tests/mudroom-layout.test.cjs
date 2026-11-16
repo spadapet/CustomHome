@@ -19,7 +19,7 @@ test('mudroom and kitchen lighting stay scoped and restore other floor/view sett
   const context = {
     THREE: { AmbientLight: Light, PointLight: Light, SpotLight: Light, DirectionalLight: Light, VSMShadowMap: 'VSM', PCFSoftShadowMap: 'PCFSoft' },
     scene: { add() {}, updateMatrixWorld() {} }, renderer: { shadowMap: { enabled: false } },
-    activeFloor: 'ground', currentView: 'mudroom', nightLighting: true, renderFrame: null, pickTargets: null,
+    activeFloor: 'ground', currentView: 'mudroom', nightLighting: true, renderFrame: null, pickTargets: null, facadePrototype: false,
     exteriorSun: { visible: false },
     indoorBackground: {}, outdoorSky: {}, outdoorReflection: { texture: {} },
     updateKitchenLighting() {}, updateHomeLighting() {}, updateStairLighting() {}, updateExteriorLighting() {}

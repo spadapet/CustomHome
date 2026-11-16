@@ -1336,9 +1336,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     frame.userData.casingMaterial = (options.casingMaterial ?? windowTrim).name;
     if (!options.fixed || picture) Object.assign(frame.userData, intent);
     if (options.singleHung) Object.assign(frame.userData, { operation: 'single-hung', grilles: 'upper sash only: four lights; clear lower sash', upperSash: 'fixed', lowerSash: 'slides vertically', productSelected: false, assemblyApproved: false, sizeReview: 'Dealer standard single-hung size, rough opening, grille and factory combination review required; nominal envelope only' });
-    // Nov 15 specification: no decorative grilles on any elevation (supersedes the
-    // October 27 front six-light grids); frontGrid is retained only as metadata.
-    frame.userData.frontGrid = false;
+    frame.userData.frontGrid = options.frontGrid === true;
     if (options.standardSizeCode) Object.assign(frame.userData, { nominalStudyCode: options.standardSizeCode, standardSizeCode: options.standardSizeCode, standardSizeVerified: false, productSelected: false });
     if (options.privacyLowerHalf) Object.assign(frame.userData, { privacyLowerHalf: true, privacyGlassTopFeet: sill + height / 2, privacyVerified: false });
     parent.add(frame);
@@ -1400,6 +1398,13 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     }
     if (isWindow && columns > 1) addWindowShadeDivisions(frame, box, windowTrim,
       Array.from({ length: columns - 1 }, (_, index) => -width / 2 + width * (index + 1) / columns), 0, height, faceDepth, interiorSide);
+    if (isWindow && !options.singleHung && getExteriorMaterialConfig().window.allGrilles) {
+      const grilles = new THREE.Group();
+      grilles.name = 'Traditional window grilles';
+      grilles.position.z = normalOffset;
+      frame.add(grilles);
+      addFrontWindowGrilles(grilles, box, exteriorMaterial, width, height, columns, rows, 0.04, 0.235, windowTrim, interiorSide);
+    }
     if (options.casing !== false) openingCasing(frame, 0, 0, width, height, faceDepth, interiorSide, isWindow, options);
     return frame;
   }
@@ -4411,7 +4416,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   const frontDoor = furnishing('Double front entry', 15.6, groundFrontWallZ);
   frontDoor.userData = { heightInches: 96, lockBrand: 'Wyze', lockModel: null, activeLeafHandingVerified: false, hardwareCompatibilityVerified: false };
   const exteriorFinishes = getExteriorMaterialConfig();
-  const frontEntryLeaves = buildArchedFrontEntry(THREE, { box, wood: mat('#b98f5f'), field: mat('#a98257'), oakMaps: masonryMaps.oak, oakFinish: exteriorFinishes.entryDoor, trim: windowTrim, hardware: black }, frontDoor);
+  const frontEntryLeaves = buildRectangularFrontEntry(THREE, { box, wood: mat('#b98f5f'), field: mat('#a98257'), oakMaps: masonryMaps.oak, oakFinish: exteriorFinishes.entryDoor, trim: windowTrim, hardware: black }, frontDoor);
   const activeFrontEntryLeaf = frontEntryLeaves[1];
   const entrySmartLock = new THREE.Group();
   entrySmartLock.name = 'Wyze smart-lock selection placeholder';
@@ -4547,11 +4552,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   let groundLayoutPreview = null;
   function updateLivableArea() {
     const groundArea = getLivableFloorArea({ ...groundBaseline, ...groundLayoutPreview?.plan }, { includeStairs: true });
-    const upstairsArea = getLivableFloorArea({ ...upstairs.plan, stairs: upstairs.baseline.stairs, floors: [...upstairs.plan.floors, upstairs.baseline.arrival] }, { includeStairs: true });
+    const upstairsArea = getLivableFloorArea({ ...upstairs.plan, areaExclusions: HomeRoof.getFinishedLoftAreaExclusions(), stairs: upstairs.baseline.stairs, floors: [...upstairs.plan.floors, upstairs.baseline.arrival] }, { includeStairs: true });
     const format = (area) => Math.round(area).toLocaleString('en-US');
     const output = document.getElementById('livable-area');
     output.textContent = `Area: ~${format(groundArea + upstairsArea)} sq ft`;
-    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs count on the floor from which they descend: first-floor basement stairs and second-floor stairs included; open stair gaps excluded. Active Version H; assumes modeled indoor rooms, including the mechanical closet, are finished and conditioned. Includes southern finished loft intent once with a flat nine-foot ceiling, subject to conditioning and finished-area eligibility review; northern unfinished roof void excluded. Excludes garage, open porch, unfinished attic and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
+    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs count on the floor from which they descend: first-floor basement stairs and second-floor stairs included; open stair gaps excluded. Active Version H; assumes modeled indoor rooms, including the mechanical closet, are finished and conditioned.     Includes southern loft intent once with a flat-to-sloped ceiling; modeled gross area below five feet is excluded. Conditioning, the seven-foot-height proportion and finished-area eligibility require professional review; northern unfinished roof void excluded. Excludes garage, open porch, unfinished attic and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
     const firstFloorOutput = document.getElementById('first-floor-area');
     firstFloorOutput.textContent = `1st: ~${format(groundArea)} sq ft`;
     firstFloorOutput.title = output.title;
@@ -5137,8 +5142,9 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     // Use actual garage floor pieces rather than its overlapping room envelope.
     for (const [x, z] of [[49.8, 21], [42, 30.5], [42, 41.5]]) fixture(scene, 'Garage', x, ceilingHeight + garageFloorY, z, 2 / 12, 30, 'ground');
     for (const room of upstairs.rooms) {
-      const x = room.x + room.w / 2;
+      let x = room.x + room.w / 2;
       const loftSection = room.ceilingProfile === 'garage-loft' ? HomeRoof.getFinishedLoftSection(upstairs.group.userData.elevationFeet) : null;
+      if(loftSection)x=Math.min(x,loftSection.breaks[0]-.5);
       fixture(upstairs.group, room.name, x, loftSection ? loftSection.heightAt(x) : upstairs.group.userData.ceilingHeightFeet, room.z + room.d / 2, 2 / 12, /closet|toilet|Linen/.test(room.name) ? 9 : 22, 'upstairs');
     }
     const upperDimensions = getUpstairsMeasuredGeometry();
@@ -5229,21 +5235,39 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   furnishKitchenStorage();
   const kitchenPracticalLights = buildKitchenLighting();
   const homeLighting = buildHomeLighting();
-  const exterior = buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations }, stairFloorToFloor, garageFloorY);
+  const facadePrototype = new URLSearchParams(window.location.search).get('prototype') === 'facade';
+  const roofStudy = new URLSearchParams(window.location.search).get('roof-study');
+  const roofLibrary = facadePrototype && roofStudy ? HomeRoofStudies.library(HomeRoof, roofStudy) : HomeRoof;
+  const exterior = buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations, facadePrototype }, stairFloorToFloor, garageFloorY, roofLibrary);
+  if (facadePrototype) {
+    exterior.traverse(part => {
+      if (!part.isMesh) return;
+      for (const material of Array.isArray(part.material) ? part.material : [part.material]) {
+        for (const key of ['map', 'normalMap', 'roughnessMap', 'bumpMap']) {
+          if (material[key]) material[key].anisotropy = Math.min(16, renderer.capabilities.getMaxAnisotropy());
+        }
+      }
+    });
+  }
   const exteriorFurniture = [];
   exterior.traverse((object) => {
     if (object.userData.viewerFurniture) exteriorFurniture.push(object);
   });
   scene.add(exterior);
-  const exteriorSun = new THREE.DirectionalLight('#fff7eb', 2.5);
+  const exteriorSun = new THREE.DirectionalLight('#fff7eb', 2.2);
   exteriorSun.name = 'Exterior afternoon sun with architectural shadows';
-  exteriorSun.position.set(-65, 52, 65);
+  exteriorSun.position.set(-45, 65, 85);
   exteriorSun.target.position.set(25, 5, 25);
   exteriorSun.castShadow = true;
   exteriorSun.shadow.mapSize.set(2048, 2048);
   Object.assign(exteriorSun.shadow.camera, { left: -65, right: 65, top: 65, bottom: -65, near: 1, far: 200 });
   exteriorSun.shadow.normalBias = 0.04;
   exteriorSun.shadow.bias = -0.0001;
+  if (facadePrototype) {
+    exteriorSun.shadow.mapSize.set(4096, 4096);
+    Object.assign(exteriorSun.shadow.camera, { left: -38, right: 38, top: 38, bottom: -38 });
+    exteriorSun.shadow.normalBias = 0.015;
+  }
   exteriorSun.visible = false;
   scene.add(exteriorSun, exteriorSun.target);
   const outdoorEnvironmentGenerator = new THREE.PMREMGenerator(renderer);
@@ -5553,6 +5577,11 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
   function canWalkAt(x, z) {
     const elevation = walkElevationAt(x, z);
     if (elevation === null) return false;
+    if(activeFloor==='upstairs'){
+      const loft=getUpstairsLoftGeometry(),section=HomeRoof.getFinishedLoftSection(upstairs.group.userData.elevationFeet);
+      if(x+walkRadius>loft.x&&x-walkRadius<loft.x+loft.w&&z+walkRadius>loft.z&&z-walkRadius<loft.z+loft.d
+        &&section.heightAt(Math.min(loft.x+loft.w,x+walkRadius))<walkHeight+.5)return false;
+    }
     for (const [dx, dz] of [[-walkRadius, -walkRadius], [-walkRadius, walkRadius], [walkRadius, -walkRadius], [walkRadius, walkRadius]]) {
       const corner = walkElevationAt(x + dx, z + dz);
       if (corner === null || Math.abs(corner - elevation) > garageRise + 0.0001) return false;
@@ -6259,8 +6288,8 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     scene.background = exteriorDaylight ? outdoorSky : indoorBackground;
     scene.backgroundIntensity = exteriorDaylight ? 0.25 : 1;
     scene.environment = exteriorDaylight ? outdoorReflection.texture : null;
-    scene.environmentIntensity = exteriorDaylight ? 0.15 : 1;
-    ambientLight.intensity = exteriorDaylight ? 0.55 : nightLighting ? 0.8 : 2.5;
+    scene.environmentIntensity = exteriorDaylight ? facadePrototype ? 0.65 : 0.15 : 1;
+    ambientLight.intensity = exteriorDaylight ? facadePrototype ? 0.18 : 0.55 : nightLighting ? 0.8 : 2.5;
     studioFill.intensity = exteriorDaylight ? 0 : nightLighting ? 325 : 650;
     studioFill.visible = !exteriorDaylight;
     renderer.toneMappingExposure = exteriorDaylight ? 0.95 : nightLighting ? 0.9 : 1.25;

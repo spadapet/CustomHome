@@ -1,5 +1,17 @@
 # Viewer reference notes
 
+Current November 15 English-French follow-up: keep all existing roof
+planes/pitches, footprints, openings and saved layouts; optional east hip/eave
+rise is not adopted. No exact approved reference image is identified.
+The actual 60 x 96-in oak entry, panels and cast-stone surround are rectangular.
+All window elevations have traditional Dark Bronze exterior/White interior
+grids (2 x 3 lights; short units 2 x 2), superseding the earlier no-grid study.
+The unchanged 31 ft 2.4 in x 7 ft porch has horizontal wood lining at y9.6 ft,
+0.75 in thick, shallow fixtures wholly below it and separate outer eave
+undersides. Original procedural charcoal shingle courses replace the slate
+display maps without changing roof geometry. Product details, structure,
+waterproofing, fixture depth and occupied operation remain unapproved.
+
 ## Compact viewer
 
 November 14 follow-up: north-entry kids → full-width rectangular bath →

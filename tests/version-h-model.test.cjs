@@ -59,7 +59,7 @@ test('H furnished openings and exterior cuts coordinate without new attic or lof
     assert.ok(host, tuple[0]);
   }
   const roof = require('../assets/js/floor-plan-roof.js').getConnectedRoofDefinitions();
-  assert.ok(roof.some(r => r.id === 'Garage attic storage roof'));
+  assert.ok(roof.some(r => r.id === 'Garage room-in-roof'));
   assert.ok(!roof.some(r => /Loft/i.test(r.id)));
   close(roof.find(r => r.id === 'Dining rear projection').bounds[2], 1.25);
 });

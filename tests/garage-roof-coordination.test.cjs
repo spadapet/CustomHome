@@ -40,7 +40,7 @@ test('all compact exterior opening projections agree with furnished window hosts
     assert.equal(plan.rooms.find(r=>r.name===name).z,g.north);
 });
 
-test('actual roof envelope reserves nine-foot walls and 18-inch framing above every upstairs floor', () => {
+test('roof reserves nine-foot service rooms and the adopted flat-to-sloped loft roof zone', () => {
   const envelope=roof.buildRoofEnvelope(roof.getConnectedRoofDefinitions());
   let count=0;
   for(const r of plan.floors) for(let x=r.x+.2;x<r.x+r.w;x+=.65)for(let z=r.z+.2;z<r.z+r.d;z+=.65){
@@ -50,26 +50,26 @@ test('actual roof envelope reserves nine-foot walls and 18-inch framing above ev
     if(r.room==='Finished loft'){
       const section=roof.getFinishedLoftSection();
       const lining=10+section.heightAt(x);
-      assert.ok(skin-section.skinDepthFeet-section.framingReserveFeet-section.liningDepthFeet>=lining-1e-7,
-        `Loft flat lining and full provisional framing reserve at ${x},${z}`);
-      assert.equal(lining,19,`Nine-foot loft ceiling at ${x},${z}`);
+      assert.ok(skin-section.framingReserveFeet>=lining-1e-7,
+        `Loft lining and provisional total roof zone at ${x},${z}`);
+      assert.ok(lining<=19&&lining>=13.5,`Loft ceiling follows the roof at ${x},${z}`);
       assert.equal(section.framingReserveFeet,1.5);
     }else{
-      assert.ok(skin-.16-1.5>=19-1e-7,`Nine-foot wall/framing clearance at ${x},${z}: ${skin}`);
+      assert.ok(skin-1.5>=19-1e-7,`Nine-foot wall and provisional total roof-zone clearance at ${x},${z}: ${skin}`);
     }
     count++;
   }
   assert.ok(count>3000);
   assert.ok(!roof.getConnectedRoofDefinitions().some(d=>/Loft/.test(d.id)));
-  assert.ok(roof.getLowerRoofDefinitions().some(d=>d.id==='Garage service return'));
+  assert.ok(roof.getLowerRoofDefinitions().some(d=>d.id==='Garage rear metal lean-to'));
 });
 
-test('raised shed covers every loft edge with nine-foot ceiling, lining and 18-inch framing', () => {
+test('room-in-roof covers the retained loft footprint with explicit low side headroom', () => {
   const definitions=roof.getConnectedRoofDefinitions();
   const envelope=roof.buildRoofEnvelope(definitions);
-  const attic=definitions.find(d=>d.id==='Garage attic storage roof');
+  const attic=definitions.find(d=>d.id==='Garage room-in-roof');
   assert.ok(attic);
-  assert.deepEqual(attic.bounds,[g.east-.225,g.atticEast+.7,g.atticNorth-.75,g.atticSouth+.225]);
+  assert.deepEqual(attic.bounds,[30.3,g.atticEast+.7,(g.atticNorth+g.atticSouth)/2-.75,49.85]);
   const routeZ=(29.8+32.8)/2;
   let minimum=Infinity;
   for(let x=g.east;x<=g.atticEast;x+=.25){
@@ -78,21 +78,17 @@ test('raised shed covers every loft edge with nine-foot ceiling, lining and 18-i
     const underside=Math.max(...faces.map(f=>roof.heightAt(f.plane,[x,routeZ])))-.16;
     minimum=Math.min(minimum,underside-10);
   }
-  assert.ok(minimum>=9+1.5+.05-1e-7,`Access-path assembly height is ${minimum} ft`);
+  assert.ok(minimum>4.9&&minimum<5.1,`Outer loft underside now has reduced headroom (${minimum} ft), not a full-height access route`);
   const loft=upper.getUpstairsLoftGeometry(),section=roof.getFinishedLoftSection();
   for(const x of [loft.x,g.atticEast,g.atticEast+.175])for(const z of [loft.z-.175,loft.z+loft.d+.175]){
     const faces=envelope.faces.filter(f=>roof.contains(f.polygon,[x,z]));
     assert.ok(faces.length,`Roof covers finished loft wall at ${x},${z}`);
     const skin=Math.max(...faces.map(f=>roof.heightAt(f.plane,[x,z])));
-    assert.ok(skin-section.skinDepthFeet-section.framingReserveFeet-section.liningDepthFeet>=19-1e-7,
-      `Full loft assembly clears actual envelope at ${x},${z}: ${skin}`);
-    assert.equal(section.heightAt(x),9);
+    assert.ok(skin-section.framingReserveFeet>=10+section.heightAt(x)-1e-7,
+      `Sloped loft assembly clears actual envelope at ${x},${z}: ${skin}`);
+    assert.ok(section.heightAt(x)<=9);
   }
-  const service=definitions.find(d=>d.id==='Garage service return');
-  for(let x=attic.bounds[0];x<=attic.bounds[1];x+=.25){
-    const p=[x,attic.bounds[3]];
-    const a=roof.heightAt(attic.planes[0],p),b=Math.min(...service.planes.map(plane=>roof.heightAt(plane,p)));
-    assert.ok(Math.abs(a-b)<1e-7,`Continuous shed/service return at ${x}`);
-  }
-  assert.ok(roof.getLowerRoofDefinitions().some(d=>d.id==='Garage attic storage roof'));
+  assert.ok(!definitions.some(d=>d.id==='Garage service return'));
+  assert.ok(Math.abs(section.heightAt(g.atticEast)-3.5833333333)<1e-6);
+  assert.ok(roof.getLowerRoofDefinitions().some(d=>d.id==='Garage room-in-roof'));
 });

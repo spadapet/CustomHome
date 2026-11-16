@@ -339,7 +339,7 @@ test('exterior prep openings match the furnished windows and the picture pane ha
   assert.ok(helperStart >= 0 && helperEnd > helperStart);
   vm.runInNewContext(exterior.slice(helperStart, helperEnd) + '\nwindowUnit(new THREE.Group(), 8.1, 4.25, 5, 3.5, false, true);', {
     getWindowProductIntent: require('../assets/js/floor-plan-ground.js').getWindowProductIntent,
-    windowInstallations: [], wallThickness: 0.45,
+    windowInstallations: [], wallThickness: 0.45, facadePrototype: false,
     THREE: { Group, Vector3: class { constructor(x,y,z) { Object.assign(this,{x,y,z}); } } }, glass: {}, privacyGlass: {}, windowBlack: {}, trim: {}, windowBronze: {}, finishes: { window: { frontGrilles: false } },
     box(parent, x, y, z, w, h, d) { const part = { x, y, z, w, h, d }; parts.push(part); return part; }
   });

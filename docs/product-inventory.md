@@ -306,11 +306,12 @@ measured rooms without changing these sizes/counts.
   and [manufacturer guide, third-party-hosted picture tables](https://incosteelbuildings.com/wp-content/uploads/2026/03/100-series-product-guide.pdf).
   They are not approved joined-assembly SKUs. Prep's 107 x 60 combined opening
   is provisional; individual frame sizes do not approve factory mulling.
-- **Grilles:** the furnished model currently applies front-only conceptual
-  six-light grilles (2 columns x 3 rows per unit), eight openings/fourteen
-  units. Some general selection paragraphs still say no grilles throughout.
-  Treat final order grille specification as **unresolved documentation
-  coordination**, not blanket manufacturer approval. Side/rear glass is clear.
+- **Current November 15 grilles:** traditional 2 columns x 3 rows per
+  standard unit on every elevation, 2 x 2 on short units. Dark Bronze
+  outside / White inside; the earlier no-grille/front-only studies are
+  superseded. Current count is 27 openings /47 units, 39 casements and
+  8 fixed pictures, no roof windows. Factory grille construction/finish,
+  sizes and joining remain unapproved; door glazing is excluded.
 - All 18 grouped openings have 22 white full-depth joint covers, 3.5 wide
   x 6 deep, full frame height. These are mull-cover/shade-bay concepts, not
   structural piers or approved shade mounts.
@@ -334,18 +335,18 @@ Internal sources: [window requirements/sources](../windows.html),
 [current ground model](../assets/js/floor-plan-3d.js),
 [upper window definitions](../assets/js/floor-plan-upstairs.js#L53).
 Some older consolidated-plan rows retain removed windows/old totals; the
-current furnished definitions and the 32/55 count govern this inventory.
+current furnished definitions and the 27/47 count govern this inventory.
 
 ## 3. Doors and opening-related products
 
-All house doors have **96-inch nominal height**; an arched crown does not
-mean 96 inches clear at its sides. No door manufacturer or complete hardware
+All house doors have **96-inch nominal height**; the front entry now has
+actual rectangular leaves and a straight surround. No door manufacturer or complete hardware
 package is selected.
 
 | Location / type | Qty / current nominal W x H | Source / status |
 |---|---|---|
-| Front entry, arched oak double leaves | 1 pair; 60 x 96 overall at crown | Owner-reference/custom geometry; arch spring 85.2 high. Door maker TBD. |
-| Entry smart lock | 1, active leaf only | **Wyze brand direction**, exact model/finish TBD; confirm compatibility with selected arched door. |
+| Front entry, rectangular oak double leaves | 1 pair; unchanged 60 x 96 opening | Straight oak panels/cast-stone surround; closed/110-degree inward study. Door maker, fitting gaps and occupied swing TBD. |
+| Entry smart lock | 1, active leaf only | **Wyze brand direction**, exact model/finish TBD; confirm compatibility with selected rectangular oak door. |
 | Dining west glazed patio door | 1; 36 x 96 | White inward-opening concept, closed by default; manufacturer TBD. |
 | Office 10-lite French doors | 1 pair; 60 x 96 opening, two nominal 30 leaves | White owner-photo reference, gold knobs/dark hinges; manufacturer TBD. |
 | Mudroom north solid French doors | 1 pair; 48 x 96 opening, two nominal 24 leaves | Cabinet off-white; conceptual assembly reserve 50 x 98, **not an approved rough opening**. |
@@ -461,7 +462,7 @@ does not duplicate that entire library. In particular:
    verify cutouts, supports, ventilation, services, hot-dish landing and
    reachable controls. Reconcile laundry products with generic model shapes.
 4. Select complete 96-inch door assemblies, garage rated separation and
-   arched entry/lock hardware; verify openings, clear passage and operation.
+   rectangular entry/lock hardware; verify openings, clear passage and operation.
 5. Approve physical cabinet/metal/stone/brick/flooring samples and listed
    lighting products. Model fit, texture realism and sampled clearances do
    not establish construction, code or occupied-operation approval.

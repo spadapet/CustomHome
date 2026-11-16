@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const { getFrontEntryLayout, buildArchedFrontEntry } = require('../assets/js/floor-plan-ground.js');
+const { getFrontEntryLayout, buildRectangularFrontEntry } = require('../assets/js/floor-plan-ground.js');
 
 class Group {
   constructor() {
@@ -29,7 +29,7 @@ function build() {
     Mesh: class extends Group { constructor(geometry, material) { super(); Object.assign(this, { geometry, material }); } }
   };
   const parent = new Group();
-  const leaves = buildArchedFrontEntry(THREE, {
+  const leaves = buildRectangularFrontEntry(THREE, {
     wood: {}, trim: {}, hardware: {}, field: {},
     box(target, x, y, z, width, height, depth, material) {
       const part = new Group();
@@ -42,39 +42,91 @@ function build() {
   return { parent, leaves };
 }
 
-test('actual curved leaf contours follow the shared arch, not a rectangle under decorative trim', () => {
+test('actual leaf contours have full-height straight heads in the unchanged 60 by 96 inch opening', () => {
   const { parent, leaves } = build();
   const layout = getFrontEntryLayout();
   assert.equal(leaves.length, 2);
   assert.equal(layout.height, 8);
   assert.equal(parent.userData.heightInches, 96);
   for (const leaf of leaves) {
-    const body = leaf.children.find((part) => part.name === 'Curved oak entry leaf body');
+    const body = leaf.children.find((part) => part.name === 'Rectangular oak entry leaf body');
     const points = body.geometry.shape.points.map(([x, y]) => [x + leaf.position.x, y]);
     assert.ok(points.every(([x, y]) => x >= -2.45 && x <= 2.45 && y >= 0.04 && y <= 8));
     const crown = Math.max(...points.map(([, y]) => y));
     const outerEdge = points.filter(([x]) => Math.abs(x) > 2.44);
     assert.ok(crown > 7.98);
-    assert.ok(Math.max(...outerEdge.map(([, y]) => y)) < 7.2, 'Outer corners genuinely curve down from the crown');
+    assert.ok(Math.abs(Math.max(...outerEdge.map(([, y]) => y)) - 7.985) < 1e-10, 'Outer corners are full-height, not arched');
     assert.equal(leaf.userData.interactiveHouseDoor.openAngleDegrees, 0);
     assert.equal(leaf.userData.interactiveHouseDoor.maxAngleDegrees, 110);
     assert.equal(body.userData.tourObstacle, true);
   }
-  assert.equal(parent.children.filter((part) => part.name === 'Arch-shaped wall closure above door').length, 2);
+  assert.equal(parent.children.filter((part) => /arch|spandrel|curved/i.test(part.name)).length, 0);
 });
 
-test('cast-stone arched surround, molded oak panels and paired pulls form one entry in both model surfaces', () => {
+test('straight cast-stone surround, molded oak panels and paired pulls form one entry in both model surfaces', () => {
   const { parent, leaves } = build();
-  const surround = parent.children.find((part) => part.name === 'Deep cast-stone arched entry surround');
+  const surround = parent.children.find((part) => part.name === 'Deep cast-stone rectangular entry surround');
   assert.equal(surround.geometry.options.depth, 0.28);
   assert.equal(surround.position.z, 0.19);
-  assert.ok(parent.children.some((part) => part.name === 'Projecting outer arch molding'));
+  assert.ok(parent.children.some((part) => part.name === 'Projecting straight entry molding'));
   for (const leaf of leaves) {
-    assert.equal(leaf.children.filter((part) => part.name === 'Arched recessed upper oak panel').length, 2);
+    assert.equal(leaf.children.filter((part) => part.name === 'Rectangular recessed upper oak panel').length, 2);
     assert.equal(leaf.children.filter((part) => part.name === 'Recessed lower oak entry panel').length, 2);
-    assert.equal(leaf.children.filter((part) => part.name === 'Arched entry dark pull').length, 2);
+    assert.equal(leaf.children.filter((part) => part.name === 'Rectangular entry dark pull').length, 2);
     assert.ok(!leaf.children.some((part) => /glazing/i.test(part.name)));
   }
+});
+
+test('horizontal porch lining has constant finished height and physical clearance beneath every retained roof corner', () => {
+  const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
+  const front = require('../assets/js/floor-plan-ground.js').getGroundFrontLayout();
+  const roof = require('../assets/js/floor-plan-roof.js');
+  const parts = [];
+  const context = { group: {}, frontWallZ: front.wallZ, frontLayout: front, porchCeilingFinish: {}, trim: {},
+    box(parent, x, y, z, w, h, d, material) {
+      const points = [-1, 1].flatMap(a => [-1, 1].flatMap(b => [-1, 1].map(c => [a*w/2, b*h/2, c*d/2])));
+      const part = { position: {x,y,z}, w,h,d, material, geometry: { attributes: {
+        position: { count: points.length, getX: i => points[i][0], getY: i => points[i][1], getZ: i => points[i][2] },
+        uv: { setXY() {} }
+      } } };
+      parts.push(part);
+      return part;
+    } };
+  const start = source.indexOf('  const porchCeilingHeight =');
+  const end = source.indexOf('  porchRoof.userData.ceiling =', start);
+  assert.ok(start >= 0 && end > start);
+  vm.runInNewContext(source.slice(start,end),context);
+  const lining = parts.find(p => p.name === 'Horizontal warm wood porch ceiling');
+  assert.equal(lining.w,31.2);
+  assert.equal(lining.d,7);
+  assert.equal(lining.h,0.0625);
+  assert.equal(lining.position.y-lining.h/2,9.6);
+  assert.equal(lining.position.z-lining.d/2,front.wallZ);
+  assert.equal(lining.position.z+lining.d/2,front.porchEdgeZ);
+  const envelope = roof.buildRoofEnvelope(roof.getPorchRoofDefinitions());
+  for (const x of [0,31.2]) for (const z of [front.wallZ,front.porchEdgeZ]) {
+    const face = envelope.faces.find(f => roof.contains(f.polygon,[x,z]));
+    assert.ok(face, 'Every lining corner is beneath retained roof coverage');
+    assert.ok(roof.heightAt(face.plane,[x,z])-0.16-(lining.position.y+lining.h/2)>0.1, 'Over 1.2 in between lining top and roof underside');
+  }
+  assert.doesNotMatch(source, /HomeRoof\.getPorchRoofDefinitions\(\), porchMetal, true, null, porchCeilingFinish/, 'Sloping roof underside is not a second finished wood ceiling');
+});
+
+test('window grille geometry fits sash apertures and keeps white interior and bronze exterior faces', () => {
+  const { addFrontWindowGrilles } = require('../assets/js/floor-plan-ground.js');
+  const white = {}, bronze = {}, parts = [];
+  const box = (parent,x,y,z,w,h,d,material) => {const part={x,y,z,w,h,d,material};parts.push(part);return part;};
+  addFrontWindowGrilles({},box,bronze,3,5,1,1,0.04,0.235,white,-1);
+  assert.equal(parts.length,6);
+  assert.equal(parts.filter(p => p.material === white && p.z < 0).length,3);
+  assert.equal(parts.filter(p => p.material === bronze && p.z > 0).length,3);
+  for (const p of parts) {
+    assert.ok(p.x-p.w/2>=-1.265-1e-10 && p.x+p.w/2<=1.265+1e-10);
+    assert.ok(p.y-p.h/2>=0.235-1e-10 && p.y+p.h/2<=4.765+1e-10);
+  }
+  parts.length=0;
+  addFrontWindowGrilles({},box,bronze,6,1.5);
+  assert.equal(parts.length,4, 'Short picture uses four lights, not compressed six lights');
 });
 
 test('wider front stairs have equal risers, flush nosings and join the existing approach without overlapping it', () => {
@@ -85,6 +137,8 @@ test('wider front stairs have equal risers, flush nosings and join the existing 
     THREE: { Group: Steps, PointLight: class extends Steps {} }, group: new Steps(),
     stepStone: {}, stepEdge: {}, glow: {},
     frontShift: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().extension,
+    frontLayout:require('../assets/js/floor-plan-ground.js').getGroundFrontLayout(),
+    frontWallZ:require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().wallZ,
     box(parent, x, y, z, width, height, depth) { const part = { x, y, z, width, height, depth }; parts.push(part); parent.add(part); return part; }
   };
   const start = source.indexOf('  function exteriorSteps('), end = source.indexOf('  const livingAccess =', start);
@@ -95,23 +149,25 @@ test('wider front stairs have equal risers, flush nosings and join the existing 
   vm.runInContext(call, context);
   const treads = parts.filter((part) => part.name === 'Darker stone entry tread');
   const nosings = parts.filter((part) => part.name === 'Contrasting step nosing');
-  assert.equal(treads.length, 3);
+  assert.equal(treads.length, 2);
   for (const [index, tread] of treads.entries()) {
     assert.equal(tread.width, 10.8);
-    assert.equal(tread.depth, 1.05);
+    assert.equal(tread.depth, 1);
     assert.ok(Math.abs(tread.y + tread.height / 2 + (index + 1) * 0.45) < 1e-9);
     assert.ok(Math.abs(nosings[index].y + 0.025 - tread.y - tread.height / 2) < 1e-9);
   }
-  assert.ok(Math.abs(treads.at(-1).z + treads.at(-1).depth / 2 - (64.5 + context.frontShift)) < 1e-9);
+  assert.ok(Math.abs(treads.at(-1).z + treads.at(-1).depth / 2 - (context.frontWallZ+context.frontLayout.porchDepth+.15+2)) < 1e-9);
   let approach;
   Object.assign(context, {
     westPaverEdgeX: -11.355, drivewayLeft: 30.9, pathWidth: 3.5,
     addWalk(name, x, z, width, depth) { approach = { name, x, z, width, depth }; }
   });
-  const approachCall = source.split('\n').find(line => line.includes("addWalk('Front paver walk west of driveway'"));
-  assert.ok(approachCall);
-  vm.runInContext(approachCall, context);
+  const approachStart=source.indexOf("  addWalk('Front two-tread stair approach'");
+  const approachEnd=source.indexOf(';',approachStart)+1;
+  assert.ok(approachStart>0&&approachEnd>approachStart);
+  vm.runInContext(source.slice(approachStart,approachEnd), context);
   assert.ok(Math.abs(treads.at(-1).z + treads.at(-1).depth / 2 - approach.z) < 1e-9, 'Final tread meets the real approach without duplicate paving');
+  assert.ok(Math.abs(approach.z+approach.depth-(64.5+context.frontShift))<1e-9);
 });
 
 test('exterior taps reach the entry-door picker while orbit drags do not open doors', () => {
@@ -159,7 +215,7 @@ test('porch fascia remains below the sloped metal underside instead of striping 
   const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   const parts = [];
   const context = {
-    group: {}, trim: {}, entryPortal: {}, frontShift: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().extension,
+    HomeRoof: require('../assets/js/floor-plan-roof.js'), group: {}, trim: {}, entryPortal: {}, frontShift: require('../assets/js/floor-plan-ground.js').getGroundFrontLayout().extension,
     box(parent, x, y, z, width, height, depth) { const part = { x, y, z, width, height, depth }; parts.push(part); return part; }
   };
   vm.createContext(context);

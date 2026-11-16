@@ -30,6 +30,7 @@ function buildRoof() {
     traverse() {}
   }
   const context = {
+    getUpstairsMeasuredGeometry:require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry,
     projectionWest: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathWest - .225,
     projectionEast: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathEast + .225,
     projectionRear: require('../assets/js/floor-plan-upstairs.js').getUpstairsMeasuredGeometry().bathNorth - .225,
@@ -60,6 +61,8 @@ function buildRoof() {
   const end = source.indexOf('  const portableFirepit =', start);
   assert.ok(start >= 0 && end > start);
   vm.createContext(context);
+  vm.runInContext(source.slice(0,source.indexOf('function buildExteriorModel'))
+    +'\nconst livingPatioCanopy=getLivingPatioCanopyFrame(wallThickness,livingFeatureWall.returnWallZ);',context);
   const siteStart = source.indexOf('  const fenceLeft =');
   const siteEnd = source.indexOf('  const eaves =', siteStart);
   assert.ok(siteStart >= 0 && siteEnd > siteStart);
@@ -77,23 +80,19 @@ test('sloping cover relocates behind living room and leaves both kitchen frontag
   const roof = meshes.find((mesh) => mesh.name === 'Charcoal shingle covered patio roof');
   assert.equal(roof.userData.pitch, 3 / 16);
   assert.equal(roof.userData.limits.rear, -0.325);
-  assert.ok(Math.abs(roof.userData.limits.front - 9.275) < 1e-9);
+  assert.ok(Math.abs(roof.userData.limits.front - 7.175) < 1e-9);
   assert.equal(roof.userData.limits.left, 0);
   assert.equal(roof.userData.limits.right, 13.2);
   assert.equal(roof.geometry.parameters.width, 13.2);
   assert.equal(roof.position.x, 6.6);
-  assert.ok(Math.abs(roof.position.y - (9.5 + 1.05 * roof.userData.pitch / 2)) < 1e-9, 'Extended roof preserves the existing plane and yard-edge height');
+  assert.ok(Math.abs(roof.position.y+(4.475-roof.position.z)*roof.userData.pitch-(9.5+1.05*roof.userData.pitch/2))<1e-9,'Trimmed canopy preserves the existing pitch and yard-edge height');
   assert.ok(underside(0.625) > 8.35, 'Roof clears the dining west-window head trim including its projection beyond the opening');
   assert.equal(roof.userData.kitchenAndPrepFrontageOpen, true);
   assert.equal(roof.userData.coversDiningLanding, false);
   assert.equal(roof.userData.livingRoomDaylightReduced, true);
   assert.equal(roof.userData.daylightPerformanceVerified, false);
   const headwall = walls.find((wall) => wall.name === 'Patio roof raised headwall');
-  assert.equal(headwall.x1, 13.2);
-  assert.equal(headwall.x2, 0);
-  assert.ok(Math.abs(headwall.z1 - 9.05) < 1e-9);
-  assert.equal(headwall.bottom, 9);
-  assert.ok(headwall.top >= underside(8 + 0.225), 'Wall reaches the underside across its full thickness');
+  assert.equal(headwall,undefined,'The canopy abuts the retained upper wall, not a second headwall inside the room');
   assert.ok(!walls.some((wall) => wall.name === 'Patio roof upper-wall return'), 'No obsolete prep-side upper return remains');
 });
 
@@ -119,7 +118,7 @@ test('canopy finishes share exact slope, closed endpoints and nine-inch vertical
   const soffit = meshes.find((m) => m.name?.startsWith('Post-free canopy warm cream'));
   const vertices = worldVertices(soffit);
   close(Math.min(...vertices.map((p) => p.z)), -0.325);
-  close(Math.max(...vertices.map((p) => p.z)), 9.275);
+  close(Math.max(...vertices.map((p) => p.z)), 7.175);
   for (const p of vertices) {
     const gap = underside(p.z) - p.y;
     assert.ok(Math.abs(gap - 0.75) < 1e-8 || Math.abs(gap - 0.69) < 1e-8);

@@ -1,15 +1,118 @@
 # Ground-floor design context
 
+## Adopted coordinated roof sketch - November 15
+
+Owner authorizes the corrected multi-view sketch in 3D. This supersedes
+the retained shed/apron and full-width flat loft-ceiling instructions below.
+Main front/rear slopes are 3:12 with a transverse 26.5875 ft ridge;
+bedroom gables retain their centers/openings and rise to 26.8 ft.
+The garage has one 10:12 room-in-roof gable, 14.5 ft eaves and a
+25.2917 ft crown, beginning z=26.975 behind the east bedroom windows.
+A separate 2.25:12 metal rear roof covers prep/the unoccupied garage bay
+below those windows. The dining roof crown drops to 12.2 ft; the rear
+canopy stops at the upper wall, with the floor projection closed below.
+
+Add a 25 x 2 ft metal garage eyebrow at y=8.2–7.7 ft, corner drainage
+and bronze lanterns clear above it. Front entry has two 12-inch treads,
+three 5.4-inch rises and a paving connector after the retained landing nose.
+Garage/house footprints, room boundaries, windows/doors, furniture and saved
+JSON remain unchanged. Experimental facade materials stay opt-in.
+
+The loft ceiling is flat to x=49 then slopes to 43 inches at x=55.5.
+Laundry/mechanical retain nine-foot ceilings. The 18-inch vertical roof zone
+is provisional; about 67.7% of the loft footprint has seven-foot clearance.
+Exclude modeled gross space below five feet from displayed area (25.3619
+sq ft including edge allowances); tours cannot enter the low-ceiling edge.
+This is not certified ANSI area or occupied-use approval. Architect/engineer
+review remains required for framing/bearings, garage headers/fire separation,
+insulation, windows, waterproofing, eyebrow support, gutters/outlets and grades.
+
+## Connected roof follow-up D - November 15, unselected
+
+`prototype=facade&roof-study=D` tests a compact 3:12 attic hip joined
+to the garage by one 15.38:12 service plane, rather than B/C's exposed
+upper wall. Roof at the loft front edge is 20.66 ft, garage eave 8.9 ft,
+with only 9.175 ft run. Main/gable/garage crowns and all rooms/openings
+remain unchanged. This improves the section connection but still leaves
+a large visible roof face; it is not a successful reference-match claim.
+See the [section and comparisons](artifacts/roof-study-D-review.html).
+No alternative is adopted; structural and drainage feasibility unresolved.
+
+## Roof massing alternatives - November 15, no selection
+
+Three independent opt-in roof configurations are available with
+`prototype=facade&roof-study=A`, `B` or `C`. A retains every original
+plane/pitch. B replaces the raised shed with a 3:12 hip and the steep
+service apron with a low linking hip. C changes coordinated upper hips,
+bedroom-gable heights and garage roof pitches. Neither B nor C is approved.
+All studies retain roof footprints, actual rooms and openings; the
+documented finished-loft south wall finish is present consistently in
+each study. No normal-viewer or unselected prototype roof is overwritten.
+See the local [comparison report](artifacts/roof-study-report.html) for
+dimensions, five identical-camera comparisons and structural/drainage limits.
+
+## Prototype roof and garage detail study - November 15
+
+Roof definitions, pitches and footprints are unchanged. The large raised
+attic shed/service return remains the massing issue; caps and gutter
+detailing do not resolve that architectural silhouette.
+Opt-in detail changes: folded ridge/hip caps fitted to visible planes,
+five-inch ogee gutters with open mitered corners and terminal end caps,
+three-by-two-inch hollow leaders with rounded elbow transitions, and
+porch-front collection to column-side leaders. Outlet capacity, seams,
+attachment, ground discharge and flashing remain unapproved.
+Two bronze lanterns replace the prototype garage goosenecks, one over
+each retained nine-by-eight-foot door; normal-viewer fixtures stay as-is.
+Garage panel rails/stiles have real recess depth and upper-lite openings
+through the door skin. Masonry, window and entrance studies are unchanged.
+
+## Opt-in facade rendering study - November 15
+
+Use `?view=exterior-threequarter&prototype=facade` to inspect existing
+facade geometry with physical transmission glass, environment-led fill,
+tighter 4096-pixel sun shadows. The interior SSAO pass was tested and
+rejected for this exterior study because it produced background artifacts.
+The normal viewer is unchanged. No roof, opening or floor geometry is
+altered. This is an approval prototype, not a photorealism claim or a
+whole-house rollout. Roof composition and simplified landscape remain
+separate unresolved appearance issues.
+
+Prototype front masonry uses instanced 8 x 3.125-inch courses with
+1/4-inch mortar joints, restrained face relief and deterministic clay
+grain/color variation. One shared material and one batch per wall replace
+the earlier per-fill batches. Alpha-blended physical glass with dielectric
+clearcoat replaces screen-space transmission's extra scene pass.
+Prototype window frames are brown bronze, grille width reduced 45%;
+entrance cast stone uses matte fine grain rather than the veined scan.
+Front windows include shallow room-back and reveal proxies with folded
+linen curtains, not approved interior redesigns. Front beds use clustered
+instanced foliage in place of the main spherical plant envelopes. These
+are experimental detail constructions and still require visual approval.
+
+## Approved sample refinement - November 15
+
+The newly supplied paired-gable sample is the appearance reference.
+Deepen front rake fascia to 8.4 inches with a restrained stepped cream
+molding; retain the roof planes, openings and floor plan. Its entrance
+arch and additional center window are not adopted: the owner requested
+a rectangular entrance and no unapproved opening changes.
+
 ## English-French Transitional exterior — November 15
 
-Owner specification (sample image is reference only; geometry is not
-regenerated). Supersedes the October 30 Linen palette, the 24-in stone
-wainscot/coping, white windows and the October 27 front grilles.
+Latest detailed owner text governs this restrained English-French study.
+No exact approved image has been identified among the historical references;
+no exact-image match is claimed. All existing roof planes, pitches, ridges and
+footprints are retained, including both bedroom gables and the garage gable.
+The optional east-hip/eave-raising proposal is not approved or implemented.
+This follow-up supersedes the earlier same-day arched entry, no-grille
+specification and sloping porch lining; it does not change room layouts.
 
 - Materials live in `getExteriorMaterialConfig()` (`floor-plan-exterior.js`):
   warm ivory/cream brick with light cream mortar graded from
   `brick_wall_001`; warm cream cast stone from `stone_wall`; charcoal
-  shingle from `roof_slates_03`; oak door and porch T&G ceiling from
+  original procedural charcoal architectural shingles (4.92-in course exposure,
+  irregular laminated tabs and granules), not slate re-labeled as asphalt;
+  oak door and porch T&G ceiling from
   `oak_veneer_01`. Display approximations only; no product selected.
 - Full brick from footing to eaves on all four elevations, both floors,
   every gable and the garage. Stone wainscot and coping removed. Former
@@ -19,17 +122,21 @@ wainscot/coping, white windows and the October 27 front grilles.
   caps, sills, heads, fascia and soffits are warm cream trim (#e9ddc6).
   The open north gable of the unfinished attic void (x42.8-55.7, z14.55-15,
   y9 to roof underside) is closed in brick so the rear reads as masonry.
-- Cast stone only at the entrance: arched surround, outer molding, arch
-  closure, entry steps and landing nose. Porch foundation faces are brick.
+- Cast stone only at the entrance: straight surround/lintel and outer
+  molding, entry steps and landing nose. Porch foundation faces are brick.
 - Andersen 100 Series Fibrex intent, Dark Bronze exterior (#3f362e), White
-  interior (supplier to confirm). No grilles on any elevation; the owner's
-  October 27 front six-light grids are superseded by this newer
-  specification (conflict noted, newer spec followed).
-- Front doors keep the 5 x 8 ft arched double leaves; matte natural warm
-  medium oak. Garage doors keep 9 x 8 ft openings: warm taupe recessed-panel
+  interior (supplier to confirm). Traditional 2-wide by 3-high grilles on
+  every window elevation, 2-wide by 2-high on short units; existing
+  single-hung helper retains four upper lights/clear lower sash (none in
+  the current 47-unit schedule). No new openings or door-glazing grids.
+- Front entry keeps its 5 x 8 ft opening, outer hinge axes and closed
+  110-degree inward interaction. Actual oak leaves, upper panels, casing
+  and cast-stone lintel are rectangular, not an arch hidden by trim.
+  Leaves have small modeled fitting gaps; nominal height remains 96 in.
+  Garage doors keep 9 x 8 ft openings: warm taupe recessed-panel
   carriage doors, minimal bronze pulls. Gutters, leaders, brackets and all
   lanterns/downlights are Dark Bronze; light stays 2700 K.
-- Porch: 31 ft 2 in x 7 ft unchanged; four straight square warm cream
+- Porch: 31 ft 2.4 in x 7 ft (31.2 ft) unchanged; four straight square warm cream
   columns with simple square bases/caps; one straight beam and fascia line
   (entry segmental arch band and portal piers/imposts removed). Low-slope
   porch roof stays standing-seam (about 1.6:12 is below shingle minimums),
@@ -44,7 +151,11 @@ wainscot/coping, white windows and the October 27 front grilles.
   fascia spans x-0.65-31.85 at y9.462-9.762. Charcoal counterflashing lines
   the bedroom faces, bay piers and recess; seams end beneath it. The T&G
   ceiling now continues uninterrupted over the entry bay. Column positions,
-  9.7-ft beam underside, door surround/leaves, lanterns and cans unchanged.
+  9.7-ft beam underside and lantern positions unchanged. The finished wood
+  ceiling is a separate horizontal plane at y9.6 ft, 0.0625 ft thick, over
+  the original porch footprint, below the retained sloping roof skin.
+  Two shallow downlights mount entirely below it; selected fixture depth,
+  framing, ventilation and recess details remain unapproved.
   Two mirrored seating groups (chairs x3.2/8
   and x23.2/28, tables x5.6/25.6) and two bronze planters flank the steps.
 - Landscaping: alternating boxwood/hydrangea shrubs, ornamental grass and

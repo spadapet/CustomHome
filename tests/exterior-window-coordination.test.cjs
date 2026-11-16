@@ -51,22 +51,21 @@ test('Version H front window pairs retain their measured centers and clear the a
   close((windows[2].center+windows[3].center)/2,25.025);
   close(g.south,53.8);
   const definitions=roof.getConnectedRoofDefinitions();
-  const attic=definitions.find(d=>d.id==='Garage attic storage roof');
+  const attic=definitions.find(d=>d.id==='Garage room-in-roof');
   assert.ok(attic);
   assert.ok(attic.bounds[3]<g.south,'Attic roof stops well before the front bedroom windows');
-  close(definitions.find(d=>d.id==='East rear wing').bounds[1]-attic.bounds[0],.975);
+  assert.ok(attic.bounds[2]>25,'Room roof starts behind the retained east bedroom windows');
   assert.ok(!plan.windows.some(w=>/Loft/i.test(w[0])));
 });
 
-test('raised attic roof overlaps the wing wall above, not through, the unchanged side-window heads', () => {
+test('low rear metal roof stays below east-bedroom windows while room roof starts behind them', () => {
   const eastWindows=getUpstairsExteriorOpenings(g.east,g.bedroom2North,g.east,g.laundryNorth);
   assert.ok(eastWindows.length>=2);
-  const attic=roof.getConnectedRoofDefinitions().find(d=>d.id==='Garage attic storage roof');
-  close(attic.bounds[0]-g.east,-.225);
+  const attic=roof.getConnectedRoofDefinitions().find(d=>d.id==='Garage rear metal lean-to');
+  close(attic.bounds[0]-g.east,.225);
   for(const window of eastWindows){
-    const head=window.sill+window.height;
-    assert.ok(roof.heightAt(attic.planes[0],[attic.bounds[0],window.center+g.bedroom2North])-.16>=head,
-      `${window.name}: attic eave underside remains above the 8-ft window head`);
+    assert.ok(roof.heightAt(attic.planes[0],[attic.bounds[0],window.center+g.bedroom2North])<window.sill,
+      `${window.name}: low roof is below the sill, not above the window as a blocking shed`);
   }
   const source = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'assets/js/floor-plan-exterior.js'), 'utf8');
   assert.ok(source.includes('getUpstairsExteriorSegments()'), 'Exterior uses the same measured perimeter');

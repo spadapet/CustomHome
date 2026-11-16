@@ -33,7 +33,7 @@ function runExteriorWalls() {
     bronze: named('bronze'), castStone: named('castStone') };
   const c = { ...ground, ...upper, HomeRoof, group, box, trim: materials.trim, glass: materials.glass, white: {}, dark: {},
     windowBlack: {}, privacyGlass: {}, windowBronze: materials.bronze, castStone: { clone: () => materials.castStone }, lanternBronze: named('lanternBronze'),
-    masonryMaps: null, mat: () => ({}), wallThickness: 0.45, windowInstallations: [],
+    masonryMaps: null, mat: () => ({}), wallThickness: 0.45, windowInstallations: [], facadePrototype: false,
     floorToFloor: 10, eaves: 19, garageFloorY: -1.25, frontWallZ: ground.getGroundFrontLayout().wallZ,
     entryWood: {}, oakDoorFinish: {}, THREE: { Group, Vector3: class { constructor(x, y, z) { Object.assign(this, { x, y, z }); } } },
     brickBox(parent, x, y, z, w, h, d, base = false) {
@@ -56,7 +56,7 @@ function runExteriorWalls() {
   run(source, '  function windowUnit(', '  const win =');
   const actualWall = c.wall;
   c.wall = (...args) => { walls.push(JSON.parse(JSON.stringify(args))); return actualWall(...args); };
-  c.buildArchedFrontEntry = () => {};
+  c.buildRectangularFrontEntry = () => {};
   run(source, '  const win =', '  const garageFacadeEaves =');
   return { c, group, meshes, walls, materials, run, Group, source };
 }

@@ -611,17 +611,20 @@ test('finished eastern loft is exactly the southern half, with one floor and nor
   close(gallery.x,14.35);close(gallery.z,26.75);close(gallery.d,8.35);
 });
 
-test('loft actual panel vertices provide a flat nine-foot ceiling and keep the laundry door approach clear',()=>{
+test('loft actual panel vertices follow the flat-to-sloped ceiling and keep the laundry door approach clear',()=>{
   const roof=require('../assets/js/floor-plan-roof.js'),section=roof.getFinishedLoftSection();
   const loft=model.group.children.find(o=>o.userData.finishedIntent&&o.userData.areaCounted);
-  const ceiling=loft.children.find(o=>o.userData.tourCeiling);
-  assert.equal(ceiling.visible,false);
-  const vertices=ceiling.geometry.attributes.position.array;
-  for(let i=0;i<12;i+=3)close(vertices[i+1],9);
-  for(let i=12;i<vertices.length;i+=3)close(vertices[i+1],9.05);
-  close(section.heightAt(55.5)*12,108);
+  const ceilings=loft.children.filter(o=>o.userData.tourCeiling);
+  assert.equal(ceilings.length,2);
+  for(const ceiling of ceilings){
+    assert.equal(ceiling.visible,false);
+    const vertices=ceiling.geometry.attributes.position.array;
+    for(let i=0;i<vertices.length;i+=3)
+      close(vertices[i+1],section.heightAt(vertices[i])+(i>=12?.05:0));
+  }
+  close(section.heightAt(55.5)*12,43);
   close(section.framingReserveFeet,1.5);
-  close(loft.userData.minimumModeledHeadroomFeet,9);
+  close(loft.userData.minimumModeledHeadroomFeet,43/12);
   for(const key of ['supportApproved','walkOnApproved','headroomApproved','conditioningApproved'])assert.equal(loft.userData[key],false);
   const custom=loft.children.filter(o=>o.geometry?.attributes?.position&&!o.userData.tourCeiling).map(m=>{
     const v=m.geometry.attributes.position.array,x=[],y=[],z=[];

@@ -21,7 +21,7 @@ function fixture() {
     o.vertices = [-1, 1].flatMap(a => [-1, 1].flatMap(b => [-1, 1].map(c => [a*w/2,b*h/2,c*d/2])));
     o.position.set(x,y,z); parent.add(o); return o;
   }
-  const context = { getLivingRoomFeatureLayout: require('../assets/js/floor-plan-ground.js').getLivingRoomFeatureLayout, group, box, brickBox: box, trim: {}, mat: () => ({}),
+  const context = { facadePrototype: false, getLivingRoomFeatureLayout: require('../assets/js/floor-plan-ground.js').getLivingRoomFeatureLayout, group, box, brickBox: box, trim: {}, mat: () => ({}),
     THREE: { Group, BoxGeometry: class {}, InstancedMesh: class extends Group {
       constructor() { super(); this.instanceMatrix = {}; } setMatrixAt() {}
     }, Matrix4: class { makeTranslation() {} } } };

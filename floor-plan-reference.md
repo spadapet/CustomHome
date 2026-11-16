@@ -1,22 +1,87 @@
 # Ground-floor plan reference
 
+## Adopted sketch roof and sloped loft - November 15
+
+The corrected coordinated-roof sketch is adopted into the normal 3D model,
+not the experimental facade material package. Main roof bounds stay
+x=-0.75–31.95/z=6.65–54.55 ft; transverse ridge y=26.5875 at z=30.6.
+Paired gables retain their 14.35 ft widths/centers, with 26.8 ft crowns.
+Garage gable: x=30.3–56.2/z=26.975–49.85, 10:12, eave14.5/crown25.2917.
+Rear metal roof: x=42.8083–56.2/z=6.775–27.5, 2.25:12, east eave9.3.
+Dining crown12.2; patio canopy ends at z7.175 without changing its pitch.
+Garage eyebrow: x30.75–55.75/z49.225–51.225, y8.2–7.7, 3:12 metal.
+
+Room, floor, opening and furniture layouts are preserved. Loft ceiling:
+9 ft until x49, then sloped to 3.5833 ft at east edge55.5; allowance18 in
+vertical total roof zone, unverified. Low-side gross area below5 ft is
+excluded from Area; nominal loft floor remains161.5015 sq ft.
+Two front treads are 10.8 ft wide with12 in goings; three5.4 in rises
+join the 16.2 in lower approach. Treads start after the retained1.8 in
+landing nose; matching paving fills to the existing front path.
+Professional support/framing, fire separation, insulation, egress,
+flashing/drainage, exterior fixtures and occupied use remain unapproved.
+
+## Unselected experimental roof alternatives - November 15
+
+A retains the existing roof planes. B: attic 3:12 hip, eave 20.66 ft,
+ridge 22.390 ft; lower service-link hip 6:12. C: main/rear hips 3.5:12,
+bedroom-gable crowns 26.5 ft, attic hip 3.5:12, garage crown 15.2 ft
+and lower hips 4.5:12. The 31.2 x 7 ft porch footprint/pitch is retained.
+No floor, room, opening, garage footprint or permanent roof is changed.
+All framing, bearing, insulation, flashing and drainage changes remain
+conceptual and approval-required. [Detailed local report](artifacts/roof-study-report.html).
+
+## Opt-in roof drainage and garage detailing - November 15
+
+The facade prototype retains the shared main hip, paired bedroom gables,
+garage gable/hip, attic shed, service return and standing-seam porch planes.
+Only cap/gutter/leader and garage finish assemblies change. Gutters are
+5 W x 3.5 H inches; leaders are nominal 3 x 2 inches. Garage lantern
+centers are (37,8.45,49.555) and (48.5,8.45,49.555) ft. Doors and
+garage footprint remain unchanged. Roof massing is not declared corrected;
+all drainage, supports, fixtures and selected-product details require review.
+
+## Isolated facade prototype refinement - November 15
+
+The `prototype=facade` experiment retains all wall/window/door and roof
+dimensions. Brick courses retain 8 x 3.125-inch modules, with 1/4-inch
+joints and restrained face depth. Bronze grids are 45% thinner; the
+rectangular entrance has matte cream cast-stone grain, not marble veining.
+No prototype material or geometry is approved for normal-viewer rollout.
+
+## Paired-gable sample detailing - November 15
+
+Front-facing rake fascia is 8.4 inches deep and 4.8 inches thick, with
+a 1.44-inch stepped cream molding. Other eaves remain unchanged.
+Roof footprints/pitches, window openings and rectangular entrance remain
+as modeled; the supplied sample informs detailing, not new rooms.
+
 ## English-French Transitional exterior — November 15
 
-Finish-only exterior update; plans, footprint, floor datums, all 27 window
+Nonstructural architectural-detail update; plans, footprint, floor datums, all 27 window
 openings / 47 units, doors, garage, porch (31 ft 2 in x 7 ft at x0-31.2,
 z54.679-61.679) and every main/lower roof face match the HEAD 1e61f87
-baseline. The porch roof intentionally differs (straight-roof bullet below).
+baseline. The porch roof retains its previously adopted straight plane
+(straight-roof bullet below); no roof surface changes in this follow-up.
+Both primary gables, main 3:12 hips, garage gable and east loft shed/apron
+remain. The optional east hip/eave rise is not adopted. Historical images
+are inspiration only; the exact approved image is unidentified.
 
 - Full warm ivory brick, light cream mortar, footing to eaves on every
   elevation, gable and garage wall; stone wainscot/coping removed. Upper
   sills/heads/jambs/belt/frieze are brick; trim warm cream #e9ddc6.
-- Cast stone only at the arched entry surround, steps and landing nose.
-- Dark Bronze window exteriors (White interiors to confirm), no grilles
-  (supersedes October 27 front grids). Oak 5 x 8 ft arched doors unchanged.
-- Charcoal shingles; charcoal standing-seam porch roof; taupe garage doors;
+- Cast stone only at the straight rectangular entry surround/lintel,
+  steps and landing nose. Nominal 60 x 96-in opening and hinges unchanged;
+  actual full-height oak leaves and upper panels are now rectangular.
+- Dark Bronze window exteriors (White interiors to confirm), traditional
+  2-wide x 3-high grilles on all elevations; short units 2-wide x 2-high.
+- Original procedural charcoal architectural shingles, 4.92-in course
+  exposure (not a selected product); charcoal standing-seam porch roof; taupe garage doors;
   Dark Bronze gutters/leaders/lanterns; 2700 K porch cans.
 - Porch: four straight square cream columns, one straight beam/fascia,
-  flat T&G ceiling; segmental arch band and portal piers removed. Seating
+  true horizontal T&G ceiling at y9.6 ft, 0.75-in lining over the unchanged
+  31 ft 2.4 in x 7 ft porch; shallow fixtures wholly below the lining.
+  Segmental arch band and portal piers removed. Seating
   groups at x3.2/8 and x23.2/28 (tables x5.6/25.6, z56.629); planters
   x10.3/20.9, z60.979; all clear of the x10.6-20.6 entry envelope.
 - Straight porch roof: the segmental entry barrel (9.15 ft, 19.2-in rise),

@@ -22,7 +22,7 @@ test('six retained ground/compact upper front openings have no shutters; loft op
   }
   const windows = [];
   const context = {
-    THREE: { Group }, group: new Group(), wallThickness: 0.45, trim: {},
+    THREE: { Group }, group: new Group(), wallThickness: 0.45, trim: {}, facadePrototype: false,
     box(parent, x, y, z, w, h, d) {
       const mesh = { x, y, z, w, h, d };
       parent.add(mesh);
