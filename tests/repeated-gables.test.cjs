@@ -5,6 +5,25 @@ const roof = require('../assets/js/floor-plan-roof.js');
 const { runExteriorWalls } = require('./exterior-geometry-harness.cjs');
 const close = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-6, `${actual} != ${expected} ft`);
 
+test('balanced main slopes have equal 23.95-ft runs without raising the adopted ridge', () =>
+{
+  const definitions = roof.getConnectedRoofDefinitions();
+  const main = definitions.find(definition => definition.id === 'Main house');
+  const [rear,front] = main.bounds.slice(2),ridgeZ = (rear+front)/2;
+  close(ridgeZ,30.6);
+  close(ridgeZ-rear,23.95);
+  close(front-ridgeZ,23.95);
+  assert.equal(main.planes.length,2);
+  close(main.planes[0][1],.375);
+  close(main.planes[1][1],-.375);
+  for(const x of [-.5,15,31])close(Math.min(...main.planes.map(plane=>roof.heightAt(plane,[x,ridgeZ]))),29.58125);
+  for(const offset of [0,2,7,12,23.95])
+    close(Math.min(...main.planes.map(plane=>roof.heightAt(plane,[15,ridgeZ-offset]))),
+      Math.min(...main.planes.map(plane=>roof.heightAt(plane,[15,ridgeZ+offset]))));
+  for(const definition of definitions.filter(definition=>['East rear wing','Main garage extension'].includes(definition.id)))
+    assert.deepEqual(definition.planes,main.planes);
+});
+
 test('three equal gables share one front line while the main roof covers the fixed recessed garage', () =>
 {
   const definitions = roof.getConnectedRoofDefinitions();

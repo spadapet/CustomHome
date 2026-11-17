@@ -22,7 +22,7 @@ test('paired cross-gables center on fixed bedroom banks with measured rise and s
     close(right-left, 14.35);
     close(Math.hypot(g.planes[0][0],g.planes[0][1])*12,12);
     close(height([g],center,frontZ),27.775);
-    close(rear,42.575);
+    close(rear,30.6);
   });
   const garage = defs.find(d => d.id === 'Garage room-in-roof');
   const measured = upper.getUpstairsMeasuredGeometry();

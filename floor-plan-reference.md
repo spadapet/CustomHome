@@ -8,7 +8,9 @@ Main roof bounds are x=-1–31.95/z6.65–54.55 ft; the west roof edge aligns
 with the front gable instead of retaining a separate three-inch strip.
 Walls stay fixed. Coplanar returns
 extend east to x56.2, over the garage only south of z26.975 at its east side.
-Main pitch is 9:12 front /3:12 rear; ridge z42.575/y29.58125.
+Balanced follow-up: main pitch 4.5:12 on both sides, centered ridge
+z30.6/y29.58125, with equal 23.95-ft front/rear runs. This supersedes
+the asymmetric 9:12 front /3:12 rear option without raising the roof.
 All three front gables are 14.35 ft wide, 12:12, peak y27.775, front z54.55.
 Bedroom centers stay x6.175/25.025; garage center x43.25.
 

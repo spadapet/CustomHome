@@ -1,8 +1,9 @@
 # Viewer reference notes
 
-Current November 17 adoption: shared 9:12 front /3:12 rear main roof with
+Current November 17 balanced follow-up: equal4.5:12 front/rear main roof with
 three matching 14.35-ft-wide 12:12 front gables. Main ridge29.58125 ft,
-three peaks27.775 ft. Main roof projects5.325 ft beyond the recessed
+three peaks27.775 ft. The ridge is centered atz30.6; both runs are23.95 ft,
+superseding the asymmetric roof without a height increase. Main roof projects5.325 ft beyond the recessed
 garage front; a closed framed pediment aligns with the other gable faces.
 The eyebrow is removed, with two gooseneck lights retained. Add two3 x5-ft
 garage attic windows atx41.25/45.25, sill13/head18; unfinished front roof

@@ -94,12 +94,12 @@ test('three true cross-gables repeat across the full-width common roof', () => {
   'Wing or coordinated raised return covers the service south abutment above full room framing');
 });
 
-test('main roof has coordinated 9:12 front and 3:12 rear slopes; garage repeats a 12:12 gable', () => {
+test('main roof has equal 4.5:12 front and rear slopes; garage repeats a 12:12 gable', () => {
   const definitions = getConnectedRoofDefinitions();
   const main = definitions.find((definition) => definition.id === 'Main house');
-  close(Math.abs(main.planes[0][1]),.25);
-  close(Math.abs(main.planes[1][1]),.75);
-  const ridgeZ=.75*main.bounds[3]+.25*main.bounds[2], crown=20.6+(ridgeZ-main.bounds[2])/4;
+  close(Math.abs(main.planes[0][1]),.375);
+  close(Math.abs(main.planes[1][1]),.375);
+  const ridgeZ=(main.bounds[3]+main.bounds[2])/2, crown=20.6+(ridgeZ-main.bounds[2])*.375;
   for(const x of [10,15,20])close(Math.min(...main.planes.map(p=>heightAt(p,[x,ridgeZ]))),crown);
   const plan = buildRoofEnvelope(definitions);
   const ridge = plan.joins.filter((join) => join.type === 'ridge' && join.roofs.every((roof) => roof === 'Main house'));

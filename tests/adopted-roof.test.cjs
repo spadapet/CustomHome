@@ -12,9 +12,9 @@ const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} should equal ${b}`);
 test('adopted November 17 geometry repeats three matching gables across the common roof',()=>{
   const definitions=roof.getConnectedRoofDefinitions();
   const main=definitions.find(d=>d.id==='Main house');
-  close(Math.min(...main.planes.map(p=>roof.heightAt(p,[15.6,42.575]))),29.58125);
+  close(Math.min(...main.planes.map(p=>roof.heightAt(p,[15.6,30.6]))),29.58125);
   const garage=definitions.find(d=>d.id==='Garage room-in-roof');
-  [36.075,50.425,42.575,54.55].forEach((value,index)=>close(garage.bounds[index],value));
+  [36.075,50.425,30.6,54.55].forEach((value,index)=>close(garage.bounds[index],value));
   close(Math.min(...garage.planes.map(p=>roof.heightAt(p,[43.25,49]))),27.775);
   assert.deepEqual(roof.getGarageEyebrowDefinitions(),[]);
   for(const gable of definitions.filter(d=>/front gable/.test(d.id)||d.id==='Garage room-in-roof')){

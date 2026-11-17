@@ -179,8 +179,8 @@
     const bounds = previous.find(roof => roof.id === 'Main house').bounds.slice();
     bounds[0] = previous.find(roof => roof.id === 'West front gable').bounds[0];
     const garage = previous.find(roof => roof.id === 'Garage room-in-roof').bounds;
-    const eave = floorToFloor + 10.6, ridgeZ = (.75 * bounds[3] + .25 * bounds[2]);
-    const planes = [[0,.25,eave-.25*bounds[2]],[0,-.75,eave+.75*bounds[3]]];
+    const eave = floorToFloor + 10.6, ridgeZ = (bounds[2] + bounds[3]) / 2;
+    const planes = [[0,.375,eave-.375*bounds[2]],[0,-.375,eave+.375*bounds[3]]];
     const center = (garage[0] + garage[1]) / 2;
     const roofs = [
       {id:'Main house',bounds,planes},

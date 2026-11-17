@@ -414,7 +414,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   palePaving.name = 'Natural warm limestone-look porch and path pavers - exterior performance unverified';
   garageSurround.bumpMap = masonryMaps ? null : stoneTexture;
   garageSurround.bumpScale = 0.025;
-  group.userData.materialStudy = 'November 17 adopted repeated-gable roof: full-width common roof, 9:12 front / 3:12 rear and three matching 12:12 front gables. Two garage attic windows added without room/floor changes. Main roof projects 5.325 feet beyond the recessed garage wall; framed pediment supports are unapproved. No garage eyebrow. Ivory brick, cream mortar, entrance-only cast stone, oak doors, bronze grids, taupe garage doors and flat wood porch ceiling remain; experimental facade materials stay opt-in. Products, structure, waterproofing, fixtures and occupied use remain unapproved.';
+  group.userData.materialStudy = 'November 17 balanced follow-up: full-width common roof, equal 4.5:12 front/rear slopes, centered ridge and three matching 12:12 front gables. Roof/eave heights and perimeter stay fixed. Two garage attic windows remain without room/floor changes. Main roof projects 5.325 feet beyond the recessed garage wall; framed pediment supports are unapproved. No garage eyebrow. Ivory brick, cream mortar, entrance-only cast stone, oak doors, bronze grids, taupe garage doors and flat wood porch ceiling remain; experimental facade materials stay opt-in. Products, structure, waterproofing, fixtures and occupied use remain unapproved.';
   const roofCanvas = document.createElement('canvas');
   roofCanvas.width = roofCanvas.height = 1024;
   const roofPaint = roofCanvas.getContext('2d');
@@ -1472,7 +1472,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       houseRoof.add(closure);
     }
   }
-  houseRoof.userData.drainageIntent = 'November 17: full-width shared main roof, 9:12 front / 3:12 rear and three matching 12:12 cross-gables. Main roof projects 5.325 feet beyond the recessed garage wall. The framed front pediment is not a new room or approved cantilever; no eyebrow canopy. Nine-foot loft ceiling is provisional. Framing, bearings, headers, fire separation, insulation, eave supports, valley collection, overflow and lawful discharge require professional design.';
+  houseRoof.userData.drainageIntent = 'November 17 balanced follow-up: full-width common roof with equal 4.5:12 front/rear slopes, equal 23.95-foot runs and centered ridge z30.6/y29.58125. Three matching 12:12 cross-gables and the 5.325-foot projection beyond the recessed garage wall remain. The framed front pediment is not a new room or approved cantilever; no eyebrow canopy. Nine-foot loft ceiling is provisional. Framing, bearings, headers, fire separation, insulation, eave supports, valley collection, overflow and lawful discharge require professional design.';
   houseRoof.userData.framingAllowanceInches = 18;
   houseRoof.userData.framingAllowanceVerified = false;
 

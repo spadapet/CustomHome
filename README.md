@@ -2,7 +2,7 @@
 
 Current English-French exterior study (November 17): the adopted common roof
 extends across the garage with three matching front gables. Its main slopes
-are 9:12 front / 3:12 rear; the three cross-gables are 12:12.
+are equal 4.5:12 front and rear with a centered ridge; the three cross-gables are 12:12.
 Two new garage-front attic windows match the other front pairs; no rooms,
 floors or existing openings move. The loft has nine-foot ceiling intent.
 The roof projects 5.325 ft beyond the recessed garage wall, with a framed

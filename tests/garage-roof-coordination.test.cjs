@@ -69,7 +69,7 @@ test('common roof covers the retained loft footprint above a full nine-foot ceil
   const envelope=roof.buildRoofEnvelope(definitions);
   const attic=definitions.find(d=>d.id==='Garage room-in-roof');
   assert.ok(attic);
-  [36.075,50.425,42.575,54.55].forEach((value,index)=>assert.ok(Math.abs(attic.bounds[index]-value)<1e-6));
+  [36.075,50.425,30.6,54.55].forEach((value,index)=>assert.ok(Math.abs(attic.bounds[index]-value)<1e-6));
   const routeZ=(29.8+32.8)/2;
   let minimum=Infinity;
   for(let x=g.east;x<=g.atticEast;x+=.25){

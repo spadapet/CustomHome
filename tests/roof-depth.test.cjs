@@ -82,7 +82,7 @@ test('garage roof repeats the matching front gables and the rejected eyebrow is 
   const { model, definitions } = render(false, HomeRoof.getLowerRoofDefinitions());
   const plan = HomeRoof.buildRoofEnvelope(definitions);
   const gable = definitions.find(({ id }) => id === 'Garage room-in-roof');
-  [36.075,50.425,42.575,54.55].forEach((value,index)=>close(gable.bounds[index],value));
+  [36.075,50.425,30.6,54.55].forEach((value,index)=>close(gable.bounds[index],value));
   close(Math.hypot(gable.planes[0][0], gable.planes[0][1]) * 12,12);
   close(HomeRoof.heightAt(gable.planes[0], [43.25, 49.85]),27.775);
   const garageFaces = model.children.filter((part) => part.userData.roofSurface && part.userData.roof === gable.id);

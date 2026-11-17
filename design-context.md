@@ -3,7 +3,10 @@
 ## Adopted repeated-gable roof and garage attic windows - November 17
 
 The owner authorizes applying the current coordinated HTML sketch to 3D.
-Main roof: 9:12 front / 3:12 rear, transverse ridge at z42.575/y29.58125 ft.
+Latest owner follow-up adopts the balanced 2D option: 4.5:12 front and rear,
+equal 23.95-ft runs, centered transverse ridge z30.6/y29.58125 ft.
+This supersedes the earlier asymmetric 9:12 front /3:12 rear option,
+without increasing ridge/eave heights or changing the roof perimeter.
 It continues to x56.2 over the garage; three 14.35-ft-wide, 12:12 front
 cross-gables share the z54.55 roof front and y27.775 peaks.
 Align the main west roof edge to x=-1, matching the front gable and removing
