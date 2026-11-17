@@ -274,11 +274,12 @@ test('attic approval warning stays in optional room notes, not clipped onto the 
   const html = read('floor-plan-3d.html');
   const source = read('assets/js/floor-plan-3d.js');
   const optional=html.slice(html.indexOf('<aside class="design-notes"'),html.indexOf('</aside>'));
-  assert.match(optional, /<strong>Finished eastern loft is exactly the southern half:/);
+  assert.match(optional, /<strong>Finished eastern loft remains the southern half:/);
   assert.match(optional, /Northern unfinished roof void stays area-excluded and not a tour floor/);
-  assert.match(optional, /Floor loads\/support, roof support, garage fire separation/);
-  assert.match(optional, /slopes to about 3\.58 ft at the east edge/);
-  assert.match(optional, /Low-side space below five feet is excluded from Area/);
+  assert.match(optional, /Floor loads\/support, the 5\.325-ft roof projection and framed pediment, garage fire separation/);
+  assert.match(optional, /flat nine-foot loft ceiling/);
+  assert.match(optional, /old low-side area exclusion is removed/);
+  assert.match(optional, /two added garage-front attic windows serve unfinished space/);
   assert.doesNotMatch(source, /mudroomLabel\([^\n]*ATTIC: STORAGE ONLY/);
 });
 

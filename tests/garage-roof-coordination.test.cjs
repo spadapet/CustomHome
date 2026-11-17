@@ -64,12 +64,12 @@ test('roof reserves nine-foot service rooms and the adopted flat-to-sloped loft 
   assert.ok(roof.getLowerRoofDefinitions().some(d=>d.id==='Garage rear metal lean-to'));
 });
 
-test('room-in-roof covers the retained loft footprint with explicit low side headroom', () => {
+test('common roof covers the retained loft footprint above a full nine-foot ceiling', () => {
   const definitions=roof.getConnectedRoofDefinitions();
   const envelope=roof.buildRoofEnvelope(definitions);
   const attic=definitions.find(d=>d.id==='Garage room-in-roof');
   assert.ok(attic);
-  assert.deepEqual(attic.bounds,[30.3,g.atticEast+.7,(g.atticNorth+g.atticSouth)/2-.75,49.85]);
+  [36.075,50.425,42.575,54.55].forEach((value,index)=>assert.ok(Math.abs(attic.bounds[index]-value)<1e-6));
   const routeZ=(29.8+32.8)/2;
   let minimum=Infinity;
   for(let x=g.east;x<=g.atticEast;x+=.25){
@@ -78,7 +78,7 @@ test('room-in-roof covers the retained loft footprint with explicit low side hea
     const underside=Math.max(...faces.map(f=>roof.heightAt(f.plane,[x,routeZ])))-.16;
     minimum=Math.min(minimum,underside-10);
   }
-  assert.ok(minimum>4.9&&minimum<5.1,`Outer loft underside now has reduced headroom (${minimum} ft), not a full-height access route`);
+  assert.ok(minimum>=10.34,`Outer loft roof underside (${minimum} ft) clears the nine-foot ceiling plus the roof-zone reserve`);
   const loft=upper.getUpstairsLoftGeometry(),section=roof.getFinishedLoftSection();
   for(const x of [loft.x,g.atticEast,g.atticEast+.175])for(const z of [loft.z-.175,loft.z+loft.d+.175]){
     const faces=envelope.faces.filter(f=>roof.contains(f.polygon,[x,z]));
@@ -89,6 +89,6 @@ test('room-in-roof covers the retained loft footprint with explicit low side hea
     assert.ok(section.heightAt(x)<=9);
   }
   assert.ok(!definitions.some(d=>d.id==='Garage service return'));
-  assert.ok(Math.abs(section.heightAt(g.atticEast)-3.5833333333)<1e-6);
+  assert.equal(section.heightAt(g.atticEast),9);
   assert.ok(roof.getLowerRoofDefinitions().some(d=>d.id==='Garage room-in-roof'));
 });

@@ -1,15 +1,24 @@
 # Viewer reference notes
 
-Current November 15 English-French follow-up: keep all existing roof
-planes/pitches, footprints, openings and saved layouts; optional east hip/eave
-rise is not adopted. No exact approved reference image is identified.
+Current November 17 adoption: shared 9:12 front /3:12 rear main roof with
+three matching 14.35-ft-wide 12:12 front gables. Main ridge29.58125 ft,
+three peaks27.775 ft. Main roof projects5.325 ft beyond the recessed
+garage front; a closed framed pediment aligns with the other gable faces.
+The eyebrow is removed, with two gooseneck lights retained. Add two3 x5-ft
+garage attic windows atx41.25/45.25, sill13/head18; unfinished front roof
+void only, not a new loft room. Existing room/wall/opening positions and
+saved layouts stay fixed. Main west eave aligns to the front gable atx-1,
+removing the redundant three-inch strip. Full nine-foot loft ceiling intent
+removes the former low-headroom area deduction. Projection support,
+headers/fire separation, insulation, height limits, flashing/overflow and
+lawful drainage require professional design.
 The actual 60 x 96-in oak entry, panels and cast-stone surround are rectangular.
 All window elevations have traditional Dark Bronze exterior/White interior
 grids (2 x 3 lights; short units 2 x 2), superseding the earlier no-grid study.
 The unchanged 31 ft 2.4 in x 7 ft porch has horizontal wood lining at y9.6 ft,
 0.75 in thick, shallow fixtures wholly below it and separate outer eave
 undersides. Original procedural charcoal shingle courses replace the slate
-display maps without changing roof geometry. Product details, structure,
+display maps; roof geometry follows the November17 adoption. Product details, structure,
 waterproofing, fixture depth and occupied operation remain unapproved.
 
 ## Compact viewer
@@ -128,7 +137,8 @@ The owner's exterior-measurement preference supersedes the earlier
 inside-wall and once-only stair rules. Latest downstairs wall shifts, z18
 fireplace/seating and kitchen/prep remain; living piano removal supersedes the piano bay study.
 H is active in the normal viewer; I SVG and saved JSON remain comparisons.
-Whole house: 27 openings /47 units; upstairs: 12 openings /17 casements.
+Whole house: 29 openings /49 units; original upstairs rooms: 12 openings /
+17 casements, plus two separate garage attic openings/units.
 The current actual stairs, stepped stringers and full upper-flight guard stay.
 Tooltips retain assumptions: this is not certified appraisal GLA, and actual
 finishes, conditioning, grade and ceiling heights still require verification.

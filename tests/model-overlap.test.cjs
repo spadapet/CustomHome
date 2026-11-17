@@ -359,7 +359,7 @@ test('lower-roof gutters stop at the finished brick face with end caps and never
   function render(masonryFootprints, definitions) {
     const context = {
       THREE: { Group, Vector3: Vector, DoubleSide: 2, BufferGeometry: class { setAttribute() {} computeVertexNormals() {} }, Float32BufferAttribute: class {}, Mesh: class extends Group {} },
-      HomeRoof, facadePrototype: false, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: {}, mat: () => ({}), masonryFootprints,
+      HomeRoof, finishes:{brick:{face:[232,214,184]}},facadePrototype: false, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: {}, mat: () => ({}), masonryFootprints,
       box(parent, x, y, z, width, height, depth) { const mesh = new Group(); mesh.geometry = { width, height, depth }; Object.assign(mesh.position, { x, y, z }); parent.add(mesh); return mesh; }
     };
     vm.createContext(context);

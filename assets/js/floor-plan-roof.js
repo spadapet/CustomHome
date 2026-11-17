@@ -143,7 +143,7 @@
     ];
   }
 
-  function getConnectedRoofDefinitions(floorToFloor = 10) {
+  function getNovember15RoofDefinitions(floorToFloor = 10) {
     const g = upperGeometry(), roofs = getHistoricalRoofDefinitions(floorToFloor)
       .filter(roof => !roof.id.startsWith('Garage'));
     const main = roofs.find(roof => roof.id === 'Main house');
@@ -173,9 +173,56 @@
     return roofs;
   }
 
+  function getConnectedRoofDefinitions(floorToFloor = 10)
+  {
+    const g = upperGeometry(), previous = getNovember15RoofDefinitions(floorToFloor);
+    const bounds = previous.find(roof => roof.id === 'Main house').bounds.slice();
+    bounds[0] = previous.find(roof => roof.id === 'West front gable').bounds[0];
+    const garage = previous.find(roof => roof.id === 'Garage room-in-roof').bounds;
+    const eave = floorToFloor + 10.6, ridgeZ = (.75 * bounds[3] + .25 * bounds[2]);
+    const planes = [[0,.25,eave-.25*bounds[2]],[0,-.75,eave+.75*bounds[3]]];
+    const center = (garage[0] + garage[1]) / 2;
+    const roofs = [
+      {id:'Main house',bounds,planes},
+      {id:'East rear wing',bounds:[g.bathEast-.75,center,bounds[2],bounds[3]],planes},
+      {id:'Main garage extension',bounds:[center,garage[1],garage[2],bounds[3]],planes}
+    ];
+    for (const roof of previous.filter(roof => /front gable/.test(roof.id)))
+    {
+      const [left,right] = roof.bounds;
+      roofs.push({id:roof.id,bounds:[left,right,ridgeZ,bounds[3]],
+        planes:[[1,0,eave-left],[-1,0,eave+right]]});
+    }
+    const halfWidth = (roofs.find(roof => roof.id === 'West front gable').bounds[1]
+      - roofs.find(roof => roof.id === 'West front gable').bounds[0]) / 2;
+    roofs.push({id:'Garage room-in-roof',bounds:[center-halfWidth,center+halfWidth,ridgeZ,bounds[3]],
+      planes:[[1,0,eave-center+halfWidth],[-1,0,eave+center+halfWidth]]});
+    roofs.push(...previous.filter(roof => ['Dining rear projection','Garage rear metal lean-to','Kitchen rear setback metal'].includes(roof.id)));
+    return roofs;
+  }
+
+  function getGarageAtticWindows(floorToFloor = 10)
+  {
+    const roof = getConnectedRoofDefinitions(floorToFloor).find(roof => roof.id === 'Garage room-in-roof');
+    const center = (roof.bounds[0] + roof.bounds[1]) / 2;
+    return [-2,2].map((offset,index) => ({name:`Garage attic window ${index+1}`,x:center+offset,z:49,
+      width:3,sill:floorToFloor+3,height:5,atticOnly:true}));
+  }
+
+  function getGarageFrontPediment(floorToFloor = 10)
+  {
+    const g = upperGeometry(), definitions = getConnectedRoofDefinitions(floorToFloor);
+    const main = definitions.find(roof => roof.id === 'Main house');
+    const garage = definitions.find(roof => roof.id === 'Garage room-in-roof');
+    const center = (garage.bounds[0] + garage.bounds[1]) / 2, z = g.south;
+    const base = Math.min(...main.planes.map(plane => heightAt(plane,[center,z])));
+    const eave = heightAt(garage.planes[0],[garage.bounds[0],z]), inset = base - eave;
+    return [[garage.bounds[0]+inset,base-.16,z],[garage.bounds[1]-inset,base-.16,z],
+      [center,Math.min(...garage.planes.map(plane => heightAt(plane,[center,z])))-.16,z]];
+  }
+
   function getGarageEyebrowDefinitions() {
-    return [{ id: 'Garage eyebrow metal', finish: 'metal', bounds: [30.75,55.75,49.225,51.225],
-      planes: [[0,-.25,8.2+.25*49.225]] }];
+    return [];
   }
 
   function getSetbackRoofDefinitions() {
@@ -410,23 +457,17 @@
   function getFinishedLoftSection(floorToFloor = 10) {
     // Vertical allowances, not a specified rafter or insulation assembly.
     const ceilingHeightFeet = 9, skinDepthFeet = .16, framingReserveFeet = 1.5, liningDepthFeet = .05;
-    const garage = getConnectedRoofDefinitions(floorToFloor).find(roof=>roof.id==='Garage room-in-roof');
-    const allowance = framingReserveFeet;
-    const planes = [[0,0,ceilingHeightFeet], ...garage.planes.map(([a,b,c])=>[a,b,c-floorToFloor-allowance])];
-    const breakX = (ceilingHeightFeet-planes[2][2])/planes[2][0];
-    return { plane: planes[2], planes, breaks: [breakX], ceilingHeightFeet,
+    const planes = [[0,0,ceilingHeightFeet]];
+    return { plane: planes[0], planes, breaks: [], ceilingHeightFeet,
       skinDepthFeet, framingReserveFeet, liningDepthFeet,
-      heightAt: (x) => Math.min(...planes.map(plane=>heightAt(plane,[x,0]))),
-      eastLimitAtHeight: height => (height-planes[2][2])/planes[2][0] };
+      heightAt: () => ceilingHeightFeet,
+      eastLimitAtHeight: height => height <= ceilingHeightFeet ? upperGeometry().atticEast : null };
   }
   function getFinishedLoftAreaExclusions(floorToFloor = 10) {
-    const g=upperGeometry(),section=getFinishedLoftSection(floorToFloor);
-    const x=Math.max(g.east+.225,section.eastLimitAtHeight(5)),right=g.atticEast+.225;
-    const north=(g.atticNorth+g.atticSouth)/2-.225;
-    return right>x ? [{x,z:north,w:right-x,d:g.atticSouth+.225-north}] : [];
+    return [];
   }
 
-  const api = { getFinishedLoftSection, getFinishedLoftAreaExclusions, getHistoricalRoofDefinitions, getGarageEyebrowDefinitions, getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, trianglesOutsideConvex, wallHeadSegments };
+  const api = { getFinishedLoftSection, getFinishedLoftAreaExclusions, getHistoricalRoofDefinitions, getNovember15RoofDefinitions, getGarageAtticWindows, getGarageFrontPediment, getGarageEyebrowDefinitions, getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, trianglesOutsideConvex, wallHeadSegments };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.HomeRoof = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

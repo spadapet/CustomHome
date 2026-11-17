@@ -182,9 +182,9 @@ test('both floors use resolved floor geometry and changes recalculate the displa
   assert.match(output.title, /Shared garage walls measured to the garage-side finish/);
   assert.match(output.title, /including the mechanical closet, are finished and conditioned/);
   assert.match(output.title, /Not a certified appraisal/);
-  assert.equal(output.textContent, 'Area: ~3,920 sq ft');
-  assertFloorOutputs(1924.3327083333343, 1995.4010416666663);
-  assert.match(output.title,/below five feet is excluded/);
+  assert.equal(output.textContent,'Area: ~3,945 sq ft');
+  assertFloorOutputs(1924.3327083333343,2020.7629166666663);
+  assert.match(output.title,/no modeled low-headroom deduction remains/);
   context.groundLayoutPreview = { plan: layout.resolve(ground, layout.empty()) };
   context.updateLivableArea();
   assertFloorOutputs(groundArea, upstairsArea);

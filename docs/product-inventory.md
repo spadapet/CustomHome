@@ -306,12 +306,16 @@ measured rooms without changing these sizes/counts.
   and [manufacturer guide, third-party-hosted picture tables](https://incosteelbuildings.com/wp-content/uploads/2026/03/100-series-product-guide.pdf).
   They are not approved joined-assembly SKUs. Prep's 107 x 60 combined opening
   is provisional; individual frame sizes do not approve factory mulling.
-- **Current November 15 grilles:** traditional 2 columns x 3 rows per
+- **Current November 17 grilles:** traditional 2 columns x 3 rows per
   standard unit on every elevation, 2 x 2 on short units. Dark Bronze
   outside / White inside; the earlier no-grille/front-only studies are
-  superseded. Current count is 27 openings /47 units, 39 casements and
+  superseded. Current count is 29 openings /49 units, 41 casements and
   8 fixed pictures, no roof windows. Factory grille construction/finish,
   sizes and joining remain unapproved; door glazing is excluded.
+- The two added 3 x 5-ft garage-front windows serve unfinished attic volume:
+  no new loft room, floor or egress approval. They match the front-pair intent
+  but still need actual frame/rough-opening, header, safety-glazing and
+  garage-separation review.
 - All 18 grouped openings have 22 white full-depth joint covers, 3.5 wide
   x 6 deep, full frame height. These are mull-cover/shade-bay concepts, not
   structural piers or approved shade mounts.
@@ -335,7 +339,7 @@ Internal sources: [window requirements/sources](../windows.html),
 [current ground model](../assets/js/floor-plan-3d.js),
 [upper window definitions](../assets/js/floor-plan-upstairs.js#L53).
 Some older consolidated-plan rows retain removed windows/old totals; the
-current furnished definitions and the 27/47 count govern this inventory.
+current model definitions and the 29/49 count govern this inventory.
 
 ## 3. Doors and opening-related products
 

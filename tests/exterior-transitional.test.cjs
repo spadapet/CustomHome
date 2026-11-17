@@ -14,13 +14,13 @@ const baseline = require('./fixtures/exterior-geometry-baseline.json');
 const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
 const round = (value) => JSON.parse(JSON.stringify(value, (key, x) => typeof x === 'number' ? Math.round(x * 1e6) / 1e6 : x));
 
-test('every exterior wall opening, window and door matches the pre-change baseline exactly', () => {
+test('existing openings stay fixed while two approved garage attic windows are added', () => {
   const { walls } = runExteriorWalls();
-  const openingGeometry=wall=>wall.filter((value,index)=>index!==6);
+  const openingGeometry=wall=>wall.map((value,index)=>index===7&&wall[0]==='garage front'?value.filter(opening=>opening.door):value).filter((value,index)=>index!==6);
   assert.deepEqual(round(walls.map(openingGeometry)), baseline.exteriorWalls.map(openingGeometry), 'wall lines, datums and every opening tuple unchanged; garage wall head intentionally rises');
   const openings = walls.flatMap((wall) => wall[7] ?? []);
   assert.equal(openings.filter((o) => o.door).length, baseline.exteriorWalls.flatMap((w) => w[7] ?? []).filter((o) => o.door).length);
-  assert.equal(openings.length, 32, 'no window or door added or removed');
+  assert.equal(openings.length,34,'two attic windows added; existing openings retained');
   assert.deepEqual(round(ground.getGroundFrontWindows()), baseline.groundFrontWindows);
   const { spring, radius, centerY, ...rectangularEntry } = baseline.frontEntry;
   assert.deepEqual(round(ground.getFrontEntryLayout()), rectangularEntry, 'entry x/z/width/height, hinge and surround width unchanged; arch profile explicitly superseded');
@@ -135,7 +135,7 @@ test('former applied stone is brick (soldier/rowlock/jamb) or warm cream trim; c
   // The unfinished attic void's north gable end is closed in brick (rear elevation), butting the east closure.
   assert.match(source, /'Loft north fitted brick closure'/);
   assert.match(source, /'Garage rear roof-zone brick infill'/);
-  const lower = HomeRoof.buildRoofEnvelope(HomeRoof.getLowerRoofDefinitions());
+  const lower = HomeRoof.buildRoofEnvelope(HomeRoof.getConnectedRoofDefinitions());
   const [segment] = HomeRoof.wallHeadSegments(lower, [42.583333333333336 + 0.225, 27.725], [55.5, 27.725], 9);
   assert.ok(segment && segment.start[1] > 14 && segment.end[1] > 14, 'closure rises from the 9 ft wall head to the actual garage gable underside');
 });
@@ -170,7 +170,7 @@ test('garage doors are warm taupe recessed-panel carriage doors in the unchanged
   assert.match(source, /const garageDoorFinish = mat\(finishes\.garageDoor\.color, finishes\.garageDoor\.roughness\)/);
   const { walls } = runExteriorWalls();
   const garage = walls.find(([name]) => name === 'garage front')[7];
-  assert.deepEqual(garage.map(({ center, width, height }) => [center, width, height]), [[5.8, 9, 8], [17.3, 9, 8]]);
+  assert.deepEqual(garage.filter(opening=>opening.door).map(({ center, width, height }) => [center, width, height]), [[5.8, 9, 8], [17.3, 9, 8]]);
 });
 
 test('front entry keeps its 5 x 8 ft opening with rectangular matte natural oak double doors', () => {

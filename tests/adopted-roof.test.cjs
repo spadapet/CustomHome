@@ -9,36 +9,49 @@ const ground=require('../assets/js/floor-plan-ground.js');
 const layout=require('../assets/js/upstairs-layout.js');
 const close=(a,b)=>assert.ok(Math.abs(a-b)<1e-6,`${a} should equal ${b}`);
 
-test('adopted geometry matches the approved multi-view sketch dimensions rather than an experimental study',()=>{
+test('adopted November 17 geometry repeats three matching gables across the common roof',()=>{
   const definitions=roof.getConnectedRoofDefinitions();
   const main=definitions.find(d=>d.id==='Main house');
-  close(Math.min(...main.planes.map(p=>roof.heightAt(p,[15.6,30.6]))),26.5875);
+  close(Math.min(...main.planes.map(p=>roof.heightAt(p,[15.6,42.575]))),29.58125);
   const garage=definitions.find(d=>d.id==='Garage room-in-roof');
-  assert.deepEqual(garage.bounds,[30.3,56.2,26.975,49.85]);
-  close(Math.min(...garage.planes.map(p=>roof.heightAt(p,[43.25,40]))),25.2916666667);
-  const eyebrow=roof.getGarageEyebrowDefinitions()[0];
-  assert.deepEqual(eyebrow.bounds,[30.75,55.75,49.225,51.225]);
-  close(roof.heightAt(eyebrow.planes[0],[37,49.225]),8.2);
-  close(roof.heightAt(eyebrow.planes[0],[37,51.225]),7.7);
+  [36.075,50.425,42.575,54.55].forEach((value,index)=>close(garage.bounds[index],value));
+  close(Math.min(...garage.planes.map(p=>roof.heightAt(p,[43.25,49]))),27.775);
+  assert.deepEqual(roof.getGarageEyebrowDefinitions(),[]);
+  for(const gable of definitions.filter(d=>/front gable/.test(d.id)||d.id==='Garage room-in-roof')){
+    close(gable.bounds[1]-gable.bounds[0],14.35);
+    close(gable.bounds[3],54.55);
+    assert.equal(gable.planes.length,2);
+    close(Math.abs(gable.planes[0][0]),1);
+  }
+  const extension=definitions.find(d=>d.id==='Main garage extension');
+  close(extension.bounds[1],56.2);
+  close(extension.bounds[3]-49.225,5.325);
+  assert.equal(roof.getGarageAtticWindows().length,2);
   assert.ok(!definitions.some(d=>/storage roof|service return|Garage hip/.test(d.id)));
 });
 
-test('loft headroom is a true flat-to-sloped section with stated five/seven/nine-foot limits',()=>{
+test('the common roof covers the entire retained loft with nine-foot ceiling and no low-side area exclusion',()=>{
   const section=roof.getFinishedLoftSection(),loft=upper.getUpstairsLoftGeometry();
-  assert.deepEqual(section.breaks,[49]);
+  assert.deepEqual(section.breaks,[]);
   close(section.heightAt(loft.x),9);
   close(section.heightAt(49),9);
-  close(section.heightAt(55.5),43/12);
-  close(section.eastLimitAtHeight(5),53.8);
-  const sevenWidth=section.eastLimitAtHeight(7)-loft.x;
-  close(sevenWidth,8.5916666667);
-  const exclusion=roof.getFinishedLoftAreaExclusions()[0];
-  close(exclusion.w*exclusion.d,25.361875);
+  close(section.heightAt(55.5),9);
+  close(section.eastLimitAtHeight(5),55.5);
+  assert.deepEqual(roof.getFinishedLoftAreaExclusions(),[]);
+  const envelope=roof.buildRoofEnvelope(roof.getConnectedRoofDefinitions());
+  const boundary=[[loft.x,loft.z],[loft.x+loft.w,loft.z],[loft.x+loft.w,loft.z+loft.d],[loft.x,loft.z+loft.d]];
+  let area=0;
+  for(const face of envelope.faces){
+    const clipped=roof.intersectPolygons(face.polygon,boundary);
+    area+=Math.abs(roof.signedArea(clipped));
+    for(const point of clipped)assert.ok(roof.heightAt(face.plane,point)>=20.5-1e-6,'Reserve 18 inches above a 9-ft ceiling at floor y10');
+  }
+  close(area,loft.w*loft.d);
   const plan=upper.getUpstairsDefaultPlan(layout.stairOpening());
   const complete={...plan,floors:[...plan.floors,plan.arrival]};
   const raw=ground.getLivableFloorArea(complete,{includeStairs:true});
-  const adjusted=ground.getLivableFloorArea({...complete,areaExclusions:[exclusion]},{includeStairs:true});
-  close(raw-adjusted,25.361875);
+  const adjusted=ground.getLivableFloorArea({...complete,areaExclusions:roof.getFinishedLoftAreaExclusions()},{includeStairs:true});
+  close(raw,adjusted);
 });
 
 test('rear roof remains below the unchanged bedroom windows and the patio roof ends at the upper face',()=>{
@@ -58,7 +71,7 @@ test('rear roof remains below the unchanged bedroom windows and the patio roof e
   close(frame.undersideAt(0),oldY-oldCenter*(3/16)-.18/(2*Math.cos(Math.atan(3/16))));
 });
 
-test('tour cannot walk through the low side of the loft while its entry remains available',()=>{
+test('tour can use the retained loft footprint below the new nine-foot ceiling without affecting downstairs',()=>{
   const source=fs.readFileSync(require.resolve('../assets/js/floor-plan-3d.js'),'utf8');
   const start=source.indexOf('  function canWalkAt('),end=source.indexOf('  function findWalkStart(',start);
   assert.ok(start>0&&end>start);
@@ -67,7 +80,7 @@ test('tour cannot walk through the low side of the loft while its entry remains 
     walkElevationAt:()=>10,walkObstacles:[],THREE:{MathUtils:{clamp:(n,a,b)=>Math.max(a,Math.min(n,b))}}};
   vm.runInNewContext(source.slice(start,end),context);
   assert.equal(context.canWalkAt(44,31.3),true);
-  assert.equal(context.canWalkAt(55,34),false);
+  assert.equal(context.canWalkAt(55,34),true);
   context.activeFloor='ground';
   assert.equal(context.canWalkAt(55,34),true,'The upstairs ceiling restriction must not affect the downstairs garage');
 });

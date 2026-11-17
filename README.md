@@ -1,9 +1,13 @@
 # CustomHome
 
-Current English-French exterior study (November 15): the adopted coordinated
-roof has a transverse main ridge, paired bedroom gables, a room-in-roof
-garage with a sloped loft ceiling, lower rear roofs and a garage eyebrow.
-Room footprints and openings remain unchanged. Full warm ivory brick, entrance-only straight
+Current English-French exterior study (November 17): the adopted common roof
+extends across the garage with three matching front gables. Its main slopes
+are 9:12 front / 3:12 rear; the three cross-gables are 12:12.
+Two new garage-front attic windows match the other front pairs; no rooms,
+floors or existing openings move. The loft has nine-foot ceiling intent.
+The roof projects 5.325 ft beyond the recessed garage wall, with a framed
+front pediment; supports, headers and drainage require professional design.
+The separate garage eyebrow is removed. Full warm ivory brick, entrance-only straight
 cast-stone surround, rectangular 60 x 96-in oak double entry, Dark Bronze
 windows with traditional grids, original procedural charcoal shingles,
 taupe garage doors and four square cream porch columns. The unchanged

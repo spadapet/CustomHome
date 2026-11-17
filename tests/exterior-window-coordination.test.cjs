@@ -53,7 +53,8 @@ test('Version H front window pairs retain their measured centers and clear the a
   const definitions=roof.getConnectedRoofDefinitions();
   const attic=definitions.find(d=>d.id==='Garage room-in-roof');
   assert.ok(attic);
-  assert.ok(attic.bounds[3]<g.south,'Attic roof stops well before the front bedroom windows');
+  close(attic.bounds[3],g.south+.75);
+  assert.ok(attic.bounds[0]>g.southEast,'The matching garage cross-gable stays east of the retained bedroom windows');
   assert.ok(attic.bounds[2]>25,'Room roof starts behind the retained east bedroom windows');
   assert.ok(!plan.windows.some(w=>/Loft/i.test(w[0])));
 });

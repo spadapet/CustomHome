@@ -34,7 +34,7 @@ function render(metal = false, override = null) {
       Float32BufferAttribute: class { constructor(array) { this.array = array; } },
       Mesh: class extends Group { constructor(geometry, material) { super(); Object.assign(this, { geometry, material }); } }
     },
-    HomeRoof, facadePrototype: false, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: { name: 'gutter' }, mat: () => ({}),
+    HomeRoof, finishes:{brick:{face:[232,214,184]}},facadePrototype: false, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: { name: 'gutter' }, mat: () => ({}),
     box(parent, x, y, z, width, height, depth, material) {
       const mesh = new Group();
       Object.assign(mesh, { geometry: { width, height, depth }, material });
@@ -78,13 +78,13 @@ test('roof edges receive closed soffits and deep trim only along the envelope pe
   assert.ok(undersides.every((part) => part.userData.noExteriorShadow));
 });
 
-test('garage roof is one full-width room-in-roof gable and an independent eyebrow preserves openings', () => {
+test('garage roof repeats the matching front gables and the rejected eyebrow is absent', () => {
   const { model, definitions } = render(false, HomeRoof.getLowerRoofDefinitions());
   const plan = HomeRoof.buildRoofEnvelope(definitions);
   const gable = definitions.find(({ id }) => id === 'Garage room-in-roof');
-  assert.deepEqual(gable.bounds, [30.3, 56.2, 26.975, 49.85]);
-  close(Math.hypot(gable.planes[0][0], gable.planes[0][1]) * 12, 10);
-  close(HomeRoof.heightAt(gable.planes[0], [43.25, 49.85]), 25.2916666667);
+  [36.075,50.425,42.575,54.55].forEach((value,index)=>close(gable.bounds[index],value));
+  close(Math.hypot(gable.planes[0][0], gable.planes[0][1]) * 12,12);
+  close(HomeRoof.heightAt(gable.planes[0], [43.25, 49.85]),27.775);
   const garageFaces = model.children.filter((part) => part.userData.roofSurface && part.userData.roof === gable.id);
   assert.ok(garageFaces.length >= 2, 'The actual roof mesh contains both broad gable slopes');
   for (const part of garageFaces) {
@@ -97,13 +97,13 @@ test('garage roof is one full-width room-in-roof gable and an independent eyebro
   }
   const frontApex = plan.faces.find((face) => face.roof === gable.id && HomeRoof.contains(face.polygon, [43.25, 49.225]));
   assert.ok(frontApex);
-  close(HomeRoof.heightAt(frontApex.plane, [43.25, 49.225]), 25.2916666667);
+  close(HomeRoof.heightAt(frontApex.plane, [43.25, 49.225]),27.775);
   assert.ok(!definitions.some(d=>d.id==='Garage service return'));
   const undersides = model.children.filter((part) => part.name === 'Closed connected roof underside');
   assert.equal(undersides.length, model.children.filter((part) => part.userData.roofSurface).length);
   const source = fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'), 'utf8');
   assert.match(source, /'Adopted garage eyebrow metal roof'/);
-  assert.equal(HomeRoof.getGarageEyebrowDefinitions()[0].bounds[3]-HomeRoof.getGarageEyebrowDefinitions()[0].bounds[2],2);
+  assert.deepEqual(HomeRoof.getGarageEyebrowDefinitions(),[]);
   function close(actual, expected) { assert.ok(Math.abs(actual - expected) < 1e-5, `${actual} != ${expected}`); }
 });
 

@@ -1,6 +1,33 @@
 # Ground-floor plan reference
 
-## Adopted sketch roof and sloped loft - November 15
+## Current repeated-gable roof - November 17
+
+The coordinated HTML roof/window study is adopted into the actual model.
+Room, wall, floor, furniture and saved-layout coordinates are unchanged.
+Main roof bounds are x=-1–31.95/z6.65–54.55 ft; the west roof edge aligns
+with the front gable instead of retaining a separate three-inch strip.
+Walls stay fixed. Coplanar returns
+extend east to x56.2, over the garage only south of z26.975 at its east side.
+Main pitch is 9:12 front /3:12 rear; ridge z42.575/y29.58125.
+All three front gables are 14.35 ft wide, 12:12, peak y27.775, front z54.55.
+Bedroom centers stay x6.175/25.025; garage center x43.25.
+
+Garage-front wall stays z49 (finished face49.225): main-roof projection
+5.325 ft, not new floor area. The framed front gable face is at z53.8.
+No independent garage eyebrow remains. Two attic windows, x41.25/45.25,
+3 x 5 ft, sill13/head18, are cut in the fixed recessed wall. They do not
+open into the rear loft or establish occupied/conditioned attic use.
+Modeled count: 29 openings/49 units; existing door and window poses stay fixed.
+The loft's unchanged slab now has flat nine-foot ceiling intent and no
+low-side area exclusion. Combined modeled gross-area intent is ~3,945 sq ft.
+
+Porch planes, low rear roofs, dining/patio arrangement and two-tread front
+steps remain. The 56-ft frontage is nominal; existing finished-wall span
+is 55.950 ft. Projection support, framing/fire separation, headers, glazing,
+height limits, insulation, flashing/drainage and finished-area eligibility
+remain approval-required.
+
+## Previous sketch roof and sloped loft - November 15 (superseded)
 
 The corrected coordinated-roof sketch is adopted into the normal 3D model,
 not the experimental facade material package. Main roof bounds stay

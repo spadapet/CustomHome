@@ -136,11 +136,11 @@ test('warm downward fixtures cover entrances, side paths, garden and patio witho
   const { group, lighting, context } = buildLighting();
   const fixtures = lighting.children.filter((part) => part.userData.mount);
   const sources = lighting.children.filter((part) => part.isLight);
-  assert.equal(fixtures.length, 28);
-  assert.equal(sources.length, 28);
-  assert.equal(fixtures.filter((part) => part.userData.mount === 'wall').length, 11);
+  assert.equal(fixtures.length,30);
+  assert.equal(sources.length,30);
+  assert.equal(fixtures.filter((part) => part.userData.mount === 'wall').length,13);
   const lanterns=group.children.filter(part=>part.name==='Prototype traditional bronze garage lantern');
-  assert.equal(lanterns.length,2);
+  assert.equal(lanterns.length,0);
   for(const lantern of lanterns){
     assert.equal(lantern.position.y,9.35);
     assert.ok(lantern.children.some(part=>part.isLight&&part.intensity===15));

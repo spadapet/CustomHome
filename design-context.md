@@ -1,6 +1,35 @@
 # Ground-floor design context
 
-## Adopted coordinated roof sketch - November 15
+## Adopted repeated-gable roof and garage attic windows - November 17
+
+The owner authorizes applying the current coordinated HTML sketch to 3D.
+Main roof: 9:12 front / 3:12 rear, transverse ridge at z42.575/y29.58125 ft.
+It continues to x56.2 over the garage; three 14.35-ft-wide, 12:12 front
+cross-gables share the z54.55 roof front and y27.775 peaks.
+Align the main west roof edge to x=-1, matching the front gable and removing
+the redundant three-inch lower strip; this changes roof overhang only.
+The garage wall/doors remain at z49; the common roof projects 5.325 ft
+beyond its finished front face. A closed framed pediment sits at z53.8,
+not a relocated exterior room wall. No structural support is approved.
+The small garage eyebrow is removed; retain two bronze gooseneck lights.
+
+Add two attic windows centered x41.25/45.25 at z49, nominal 3 x 5 ft,
+sill y13/head y18, matching bronze grids. They serve unfinished front
+garage roof void, not the existing loft; no floor/room/occupied area is added.
+Whole-house modeled count becomes 29 openings /49 units (41 casements,
+8 fixed pictures). Frame sizes, headers, access, safety glazing and fire
+separation need selected-product/professional review.
+
+Existing rooms, furniture, saved JSON, porch and garage slabs stay fixed.
+The common roof clears the retained loft's full nine-foot ceiling with the
+provisional 18-inch vertical roof zone; remove the previous 25.361875-sq-ft
+low-headroom deduction. Displayed combined gross-area intent is about
+3,945 sq ft, not certified finished/conditioned area. Historical shed,
+sloped-loft, eyebrow and distinct-garage-gable instructions below are superseded.
+Review roof loads/bearings, the deep garage projection and framed face,
+height limits, insulation, veneer, flashing, gutters/overflow and lawful drainage.
+
+## Previous coordinated roof sketch - November 15 (superseded)
 
 Owner authorizes the corrected multi-view sketch in 3D. This supersedes
 the retained shed/apron and full-width flat loft-ceiling instructions below.

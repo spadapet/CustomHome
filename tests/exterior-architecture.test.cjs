@@ -20,14 +20,14 @@ test('paired cross-gables center on fixed bedroom banks with measured rise and s
     const [left,right,rear,frontZ] = g.bounds, center = (left+right)/2;
     close(center, (windows[i*2].center+windows[i*2+1].center)/2);
     close(right-left, 14.35);
-    close(Math.hypot(g.planes[0][0],g.planes[0][1])*12, 7.6/7.175*12);
-    close(height([g],center,frontZ),26.8);
-    close(rear,40.5);
+    close(Math.hypot(g.planes[0][0],g.planes[0][1])*12,12);
+    close(height([g],center,frontZ),27.775);
+    close(rear,42.575);
   });
   const garage = defs.find(d => d.id === 'Garage room-in-roof');
   const measured = upper.getUpstairsMeasuredGeometry();
   const attic = defs.find(d => d.id === 'Garage rear metal lean-to');
-  close(height([garage],43.25,42.7),25.2916666667);
+  close(height([garage],43.25,42.7),27.775);
   assert.ok(height(defs,43.25,39)>20.6,'Shared upper wing roofs the actual full-height service rooms');
   close(attic.bounds[0]-measured.east,.225);
   assert.ok(height([attic],attic.bounds[0],23)<13,

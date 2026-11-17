@@ -719,9 +719,9 @@ function buildUpstairsModel(THREE, { box, mat, wood, wallMaterial, windowTrim, o
     box(loft, footprint.x+.03125, 1/3, (start+end)/2, .0625, 2/3, end-start, windowTrim).name = 'Finished loft west white baseboard';
   }
   box(loft, g.east+.2, 8.5, 31.3, .05, 1, 3, wallMaterial).name = 'Finished loft retained doorway head lining';
-  const ceiling = finishedPanel('Finished loft flat-to-sloped painted ceiling', footprint.x, g.atticEast,
+  const ceiling = finishedPanel('Finished loft flat painted ceiling', footprint.x, g.atticEast,
     footprint.z, g.atticSouth, 0, true);
-  for(const panel of loft.children.filter(part=>part.name==='Finished loft flat-to-sloped painted ceiling')){
+  for(const panel of loft.children.filter(part=>part.name==='Finished loft flat painted ceiling')){
     panel.userData.tourCeiling=true;
     panel.visible=false;
   }

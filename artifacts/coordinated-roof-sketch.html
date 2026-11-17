@@ -1,0 +1,1146 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coordinated roof sketch - 2D plan and matching 3D-style sketch</title>
+<style>body{font:17px/1.5 system-ui;max-width:1450px;margin:25px auto;padding:20px;background:#faf8f1;color:#342f27}svg,.comparison-image{width:100%;height:auto;background:#fffefa;border:1px solid #d5cdbf}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}h2{font-size:21px}.note{padding:15px;background:#eee3cf}table{width:100%;border-collapse:collapse;font-size:14px}td,th{border:1px solid #cfc4af;padding:8px;text-align:left;overflow-wrap:anywhere}@media(max-width:850px){.grid{grid-template-columns:1fr}}</style>
+<script src="../assets/js/upstairs-layout.js"></script>
+<script src="../assets/js/floor-plan-ground.js"></script>
+<script src="../assets/js/floor-plan-upstairs.js"></script>
+<script src="../assets/js/floor-plan-roof.js"></script>
+<script src="../assets/js/floor-plan-exterior.js"></script>
+<style>
+#roof-plan-study{background:white;padding:12px}
+#roof-plan{display:block;width:100%;height:auto;background:white;font-family:Arial,Helvetica,sans-serif}
+#roof-plan .note{padding:0;background:none}
+#earlier-roof-study{margin-top:24px}
+#earlier-roof-study>summary{cursor:pointer;font-size:20px;font-weight:bold}
+#roof-plan .perimeter{fill:none;stroke:#080808;stroke-width:2.4;stroke-linejoin:round}
+#roof-plan .ridge{fill:none;stroke:#000;stroke-width:1.9;stroke-dasharray:10 6}
+#roof-plan .valley{fill:none;stroke:#000;stroke-width:3.2}
+#roof-plan .hip{fill:none;stroke:#000;stroke-width:1}
+#roof-plan .wall{fill:none;stroke:#aaa;stroke-width:.8;stroke-dasharray:2 3}
+#roof-plan .dimension{fill:none;stroke:#111;stroke-width:.8}
+#roof-plan .label{font-size:13px;fill:#fff;paint-order:stroke;stroke:#35393c;stroke-width:3;stroke-linejoin:round}
+#roof-plan .small{font-size:12px;fill:#222}
+#roof-plan .note{font-size:13px;fill:#222}
+@media print{body{margin:0;padding:0;max-width:none;background:white}#earlier-roof-study,.roof-study-heading{display:none}#roof-plan-study{padding:0}@page{size:landscape;margin:8mm}}
+</style>
+<h1 class="roof-study-heading">Coordinated roof sketch</h1>
+<p class="roof-study-heading">Repeated-gable option: extend the common main roof to the garage's outer edge and repeat the two front gables above the garage. All three cross-gables have the same 14.35-ft width, 12:12 pitch, peak height and front roof line. The recessed garage wall and its doors do not move. This creates a 5.325-ft main-roof projection in front of that wall, not a new room or a small eyebrow canopy. Its framing/support and the closed front pediment require professional design; this roof and window study is now applied to the actual model.</p>
+<section id="roof-plan-study" aria-label="Current dimensioned 2D roof plan">
+<svg id="roof-plan" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1120" role="img" aria-labelledby="plan-title plan-description">
+<title id="plan-title">Dimensioned top-down roof plan with three front-facing gables</title>
+<desc id="plan-description">2D roof proposal. Existing house, garage and porch footprints retained. One main gable, two bedroom cross-gables and one garage cross-gable. The companion sketch below uses these same roof definitions; the production model now adopts this study.</desc>
+<defs>
+<marker id="arrow" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto-start-reverse"><path d="M7 3.5 0 0 0 7Z" fill="#111"/></marker>
+</defs>
+<text x="50" y="38" font-size="25" font-weight="bold">ROOF PLAN</text>
+<text x="50" y="62" font-size="13">TOP-DOWN ORTHOGRAPHIC · 2D DESIGN STUDY ONLY · NOVEMBER 17</text>
+<g id="roof-fills"></g>
+<g id="wall-outlines"></g>
+<g id="roof-edges"></g>
+<g id="roof-joins"></g>
+<g id="roof-labels"></g>
+<g id="dimensions"></g>
+<g id="schedule"></g>
+<g id="legend" transform="translate(875 145)">
+<text font-size="17" font-weight="bold">LINE CONVENTIONS</text>
+<path d="M0 30H90" class="ridge"/><text x="105" y="34" class="note">Ridge — dashed</text>
+<path d="M0 60H90" class="hip"/><text x="105" y="64" class="note">Hip — thin solid</text>
+<path d="M0 90H90" class="valley"/><text x="105" y="94" class="note">Valley — heavy solid</text>
+<path d="M0 120H90" class="perimeter"/><text x="105" y="124" class="note">Roof / eave outline</text>
+<path d="M0 150H90" class="wall"/><text x="105" y="154" class="note">Fixed wall / slab below</text>
+<text y="190" class="note">Main and front gables: no hips.</text>
+<text y="210" class="note">H1: retained rear dining hips.</text>
+<text y="230" class="note">No separate service hip or ridge.</text>
+<path d="M0 260H90" fill="none" stroke="#2c6579" stroke-width="3"/><text x="105" y="264" class="note">Proposed attic glazing below</text>
+</g>
+<g transform="translate(875 430)" class="note">
+<text font-size="17" font-weight="bold">FIXED DIMENSIONS</text>
+<text y="30">House frontage: nominal 56 ft.</text>
+<text y="51">Exact finished-wall width: 55.950 ft.</text>
+<text y="72">No wall or opening is relocated.</text>
+<text y="103">Garage stepped span: 24.30 × 34 ft.</text>
+<text y="124">Porch slab: 31.20 × 7.00 ft.</text>
+<text y="155">Garage wall to roof edge: 5.325 ft.</text>
+<text y="176">Roof projection only; wall stays.</text>
+</g>
+<g transform="translate(875 650)" class="note">
+<text font-size="17" font-weight="bold">DESIGN LIMITS</text>
+<text y="30">Main slopes: 9:12 front / 3:12 rear.</text>
+<text y="51">Rise: 8.981 ft above its eaves.</text>
+<text y="82">Asymmetric gable, not equal pitches.</text>
+<text y="103">Height limits, framing, bearings,</text>
+<text y="124">fire separation, insulation, valley</text>
+<text y="145">flashing and outlets need design.</text>
+<text y="176">No loft usability or construction</text>
+<text y="197">approval is established by this plan.</text>
+</g>
+<text x="50" y="1040" font-size="14" font-weight="bold">FRONT / STREET — THREE FRONT-FACING GABLES</text>
+<text x="50" y="1065" class="note">Reference is a style guide, not dimensional evidence: its 65-ft depth is not imposed on the existing house.</text>
+<text x="50" y="1088" class="note">Lower roofs and porch stay. No separate eyebrow canopy; the deep main-roof projection is shown and requires design. Adopted in the house model; construction review required.</text>
+</svg>
+</section>
+<section id="matching-roof-sketch" aria-labelledby="matching-sketch-title">
+<h2 id="matching-sketch-title">3D-style sketch - same November 17 roof plan</h2>
+<div class="grid">
+<section aria-labelledby="front-sketch-title">
+<h3 id="front-sketch-title">Front - straight on</h3>
+<svg id="roof-plan-front" viewBox="0 0 1100 650" role="img" aria-label="Straight-on front of the house with the same proposed roof, porch, two garage doors and existing windows"></svg>
+</section>
+<section>
+<h3>Three-quarter</h3>
+<svg id="roof-plan-axonometric" viewBox="0 0 1100 650" role="img" aria-label="Three-quarter sketch of three front gables and the lower asymmetric main roof shown in the plan"></svg>
+</section>
+</div>
+<p>The main ridge and front eave continue to the garage's outer roof edge. All three front gables match: 14.35 ft wide, 12:12 pitch and 27.775-ft peaks. The third gable has a closed framed pediment aligned with the existing front gable faces; the garage wall, doors, lights and slab stay recessed in their original positions. A proposed pair of 3 x 5-ft bronze-grid windows is centered under the garage gable at the same sill/head heights as the other front pairs. No extra floor or separate door canopy is added.</p>
+<p><strong>Proposed garage windows W1/W2:</strong> sill 13 ft / head 18 ft above house-floor datum; 1-ft gap between the pair. They are in the existing recessed garage-front wall, not the projecting pediment. That volume is currently unfinished roof space; the loft ends farther back. These are attic-glazing concepts, not loft/bedroom windows or occupied-space approval. Actual framing, headers, glass safety, access, flashing, product size and garage fire separation require review. The model window count now includes these two attic windows; existing room openings remain unchanged.</p>
+<p><strong>Projection trade-off:</strong> the common roof extends 5 ft 3.9 in beyond the garage's finished front wall (4 ft 8.4 in beyond its previous roof edge). The front pediment is finish/framing over that projection, not a relocated masonry wall. No unsupported cantilever, beam, column, foundation or attachment is approved by this sketch. All rooms remain covered; upper-room height, roof-to-wall flashing, valley collection, overflow, height limits and structure require professional design. Adopted in the Three.js model on November 17; construction approval remains unresolved.</p>
+</section>
+<script>
+(() =>
+{
+'use strict';
+const ns='http://www.w3.org/2000/svg';
+const svg=document.getElementById('roof-plan');
+const geometry=getUpstairsMeasuredGeometry(),front=getGroundFrontLayout();
+const scale=11.2,originX=150,originY=150,rearDatum=1.25;
+const point=([x,z])=>[originX+x*scale,originY+(z-rearDatum)*scale];
+const ground=getGroundFloorDefaultPlan();
+const originalRoofData=JSON.stringify(HomeRoof.getConnectedRoofDefinitions());
+const sourceRoofs=HomeRoof.getNovember15RoofDefinitions();
+const mainBounds=sourceRoofs.find(roof=>roof.id==='Main house').bounds.slice();
+mainBounds[0]=sourceRoofs.find(roof=>roof.id==='West front gable').bounds[0];
+const garageBounds=sourceRoofs.find(roof=>roof.id==='Garage room-in-roof').bounds.slice();
+const mainPitch=9/12,rearPitch=3/12,mainEaveDatum=20.6;
+const mainRidgeZ=(mainPitch*mainBounds[3]+rearPitch*mainBounds[2])/(mainPitch+rearPitch);
+const mainRidgeHeight=mainEaveDatum+mainPitch*(mainBounds[3]-mainRidgeZ);
+const mainPlanes=[[0,rearPitch,mainEaveDatum-rearPitch*mainBounds[2]],
+ [0,-mainPitch,mainEaveDatum+mainPitch*mainBounds[3]]];
+const mainReturnRight=(garageBounds[0]+garageBounds[1])/2;
+const mainDefinitions=[
+ {id:'Main gable',bounds:mainBounds,planes:mainPlanes},
+ {id:'Main service return',bounds:[geometry.bathEast-.75,mainReturnRight,mainBounds[2],mainBounds[3]],planes:mainPlanes},
+ {id:'Main garage extension',bounds:[mainReturnRight,garageBounds[1],garageBounds[2],mainBounds[3]],planes:mainPlanes}
+];
+const frontGables=sourceRoofs.filter(roof=>/front gable/.test(roof.id)).map((roof,index)=>
+{
+ const [left,right]=roof.bounds,base=20.6,pitch=1;
+ return {id:index?'G2 Center front gable':'G1 Left front gable',
+  bounds:[left,right,mainRidgeZ,mainBounds[3]],
+  planes:[[pitch,0,base-pitch*left],[-pitch,0,base+pitch*right]]};
+});
+const garagePitch=1,garageEaveDatum=mainEaveDatum;
+const garageGableCenter=(garageBounds[0]+garageBounds[1])/2;
+const garageGableHalfWidth=(frontGables[0].bounds[1]-frontGables[0].bounds[0])/2;
+const garageDefinition={id:'G3 Garage front gable',
+ bounds:[garageGableCenter-garageGableHalfWidth,garageGableCenter+garageGableHalfWidth,mainRidgeZ,mainBounds[3]],
+ planes:[[garagePitch,0,garageEaveDatum-garagePitch*(garageGableCenter-garageGableHalfWidth)],
+ [-garagePitch,0,garageEaveDatum+garagePitch*(garageGableCenter+garageGableHalfWidth)]]};
+const garageWallFaceZ=ground.walls.find(wall=>wall[0]==='Garage south')[2]+.225;
+const garageProjection=mainBounds[3]-garageWallFaceZ;
+const garagePedimentZ=geometry.south;
+const pedimentBaseY=Math.min(...mainPlanes.map(plane=>HomeRoof.heightAt(plane,[garageGableCenter,garagePedimentZ])));
+const pedimentInset=(pedimentBaseY-garageEaveDatum)/garagePitch;
+const garagePediment=[
+ [garageDefinition.bounds[0]+pedimentInset,pedimentBaseY-.16,garagePedimentZ],
+ [garageDefinition.bounds[1]-pedimentInset,pedimentBaseY-.16,garagePedimentZ],
+ [garageGableCenter,garageEaveDatum+garageGableHalfWidth*garagePitch-.16,garagePedimentZ]
+];
+const garageUpperWindows=[-2,2].map((offset,index)=>({
+ name:`Proposed garage attic window W${index+1}`,x:garageGableCenter+offset,
+ width:3,sill:13,height:5,z:garageWallFaceZ
+}));
+const upperDefinitions=[...mainDefinitions,...frontGables,garageDefinition];
+const upperPlan=HomeRoof.buildRoofEnvelope(upperDefinitions);
+const lowerDefinitions=sourceRoofs.filter(roof=>
+ ['Dining rear projection','Garage rear metal lean-to','Kitchen rear setback metal'].includes(roof.id));
+const canopyFrame=getLivingPatioCanopyFrameForPlan();
+function getLivingPatioCanopyFrameForPlan()
+{
+ // Same measured section as getLivingPatioCanopyFrame; no solid is constructed.
+ const thickness=.18,wallThickness=.45,returnWall=getLivingRoomFeatureLayout().returnWallZ;
+ const roofFront=geometry.north-.225;
+ const rear=-.1-wallThickness/2,right=13.2,pitch=3/16;
+ const nominalFront=returnWall+wallThickness/2,center=(rear+roofFront)/2;
+ const roofY=9.5+(returnWall-8)*pitch/2+(center-(rear+nominalFront)/2)*pitch;
+ const topAtZero=roofY-center*pitch+thickness/(2*Math.cos(Math.atan(pitch)));
+ return {id:'Rear patio canopy',finish:'metal',bounds:[0,right,rear,roofFront],
+  planes:[[0,pitch,topAtZero]]};
+}
+const porchDefinitions=HomeRoof.getPorchRoofDefinitions();
+const visiblePlan=HomeRoof.buildRoofEnvelope([...upperDefinitions,...lowerDefinitions,canopyFrame,...porchDefinitions]);
+const allDefinitions=visiblePlan.definitions;
+function mergedJoins(joins)
+{
+ const result=joins.map(join=>({...join,start:join.start.slice(),end:join.end.slice(),
+  key:join.roofs.map(name=>name.startsWith('Main ')?'Main':name).sort().join('|')}));
+ for(let changed=true;changed;)
+ {
+  changed=false;
+  for(let i=0;i<result.length&&!changed;i++)for(let j=i+1;j<result.length;j++)
+  {
+   const a=result[i],b=result[j];
+   if(a.type!==b.type||a.key!==b.key)continue;
+   const delta=[a.end[0]-a.start[0],a.end[2]-a.start[2]];
+   const other=[b.end[0]-b.start[0],b.end[2]-b.start[2]];
+   if(Math.abs(delta[0]*other[1]-delta[1]*other[0])>1e-6)continue;
+   const near=(p,q)=>Math.hypot(p[0]-q[0],p[1]-q[1],p[2]-q[2])<1e-6;
+   if(near(a.end,b.start))a.end=b.end;
+   else if(near(a.end,b.end))a.end=b.start;
+   else if(near(a.start,b.end))a.start=b.start;
+   else if(near(a.start,b.start))a.start=b.end;
+   else continue;
+   result.splice(j,1);changed=true;break;
+  }
+ }
+ return result;
+}
+const drawnJoins=mergedJoins(visiblePlan.joins);
+function element(parent,tag,attributes,text)
+{
+ const node=document.createElementNS(ns,tag);
+ for(const [name,value]of Object.entries(attributes))node.setAttribute(name,value);
+ if(text!==undefined)node.textContent=text;
+ parent.append(node);return node;
+}
+const groups=Object.fromEntries(['roof-fills','wall-outlines','roof-edges','roof-joins','roof-labels','dimensions','schedule'].map(id=>[id,document.getElementById(id)]));
+function line(parent,a,b,kind,extra={})
+{
+ const p=point(a),q=point(b);
+ return element(parent,'line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],class:kind,...extra});
+}
+function label(x,z,text,extra={})
+{
+ const p=point([x,z]);
+ return element(groups['roof-labels'],'text',{x:p[0],y:p[1],class:'label','text-anchor':'middle',...extra},text);
+}
+function feet(value)
+{
+ return `${value.toFixed(3).replace(/0+$/,'').replace(/\.$/,'')} ft`;
+}
+function horizontalDimension(left,right,z,text)
+{
+ line(groups.dimensions,[left,z],[right,z],'dimension',{'marker-start':'url(#arrow)','marker-end':'url(#arrow)'});
+ for(const x of[left,right])line(groups.dimensions,[x,z-.45],[x,z+.45],'dimension');
+ const p=point([(left+right)/2,z]);
+ element(groups.dimensions,'text',{x:p[0],y:p[1]-7,'text-anchor':'middle',class:'small',fill:'#111',
+  'paint-order':'stroke',stroke:'white','stroke-width':4},text);
+}
+function verticalDimension(rear,forward,x,text)
+{
+ line(groups.dimensions,[x,rear],[x,forward],'dimension',{'marker-start':'url(#arrow)','marker-end':'url(#arrow)'});
+ for(const z of[rear,forward])line(groups.dimensions,[x-.45,z],[x+.45,z],'dimension');
+ const p=point([x,(rear+forward)/2]);
+ element(groups.dimensions,'text',{x:p[0]-8,y:p[1],'text-anchor':'middle',class:'small',
+  transform:`rotate(-90 ${p[0]-8} ${p[1]})`,'paint-order':'stroke',stroke:'white','stroke-width':4},text);
+}
+for(const face of visiblePlan.faces)
+{
+ const lower=/porch|patio|Dining|lean-to|setback/i.test(face.roof);
+ const fill=lower?'#777b7d':face.plane[0]>.01?'#565b5f':face.plane[0]<-.01?'#454a4e':face.plane[1]>0?'#62676b':'#4c5155';
+ element(groups['roof-fills'],'polygon',{points:face.polygon.map(p=>point(p).join(',')).join(' '),
+  fill,stroke:fill,'stroke-width':.45,'data-roof':face.roof});
+}
+const exteriorNames=new Set(['Living north','Dining west','Dining north','Dining east','Kitchen north','Prep north','Prep east',
+ 'Garage east','Garage south','Guest east','House south','Office west','Living west']);
+for(const [name,x1,z1,x2,z2]of ground.walls)
+{
+ if(!exteriorNames.has(name))continue;
+ line(groups['wall-outlines'],[x1,z1],[x2,z2],'wall',{'data-wall':name});
+}
+const porchSlab=[[0,front.wallZ],[31.2,front.wallZ],[31.2,front.porchEdgeZ],[0,front.porchEdgeZ]];
+element(groups['wall-outlines'],'polygon',{points:porchSlab.map(p=>point(p).join(',')).join(' '),class:'wall','data-fixed':'porch-slab'});
+for(const [name,x1,z1,x2,z2]of getUpstairsExteriorSegments())
+ line(groups['wall-outlines'],[x1,z1],[x2,z2],'wall',{'data-upper-wall':name});
+for(const edge of visiblePlan.boundaries)
+ line(groups['roof-edges'],[edge.start[0],edge.start[2]],[edge.end[0],edge.end[2]],'perimeter',{'data-roof':edge.roof});
+for(const join of drawnJoins)
+{
+ const a=[join.start[0],join.start[2]],b=[join.end[0],join.end[2]];
+ line(groups['roof-joins'],a,b,join.type,{'data-roofs':join.roofs.join('|')});
+}
+const ridgeLeft=mainBounds[0],ridgeRight=garageBounds[1];
+// One uninterrupted dashed main-ridge stroke replaces collinear solver segments.
+for(const node of [...groups['roof-joins'].querySelectorAll('.ridge')])
+{
+ const names=node.dataset.roofs.split('|');
+ if(names.includes('Main gable')&&names.every(name=>name.startsWith('Main ')))node.remove();
+}
+const mainRidge=line(groups['roof-joins'],[ridgeLeft,mainRidgeZ],[ridgeRight,mainRidgeZ],'ridge',{id:'main-ridge'});
+label(26,mainRidgeZ-1.3,'MAIN RIDGE R0');
+label(17,17,'MAIN REAR SLOPE · 3:12');
+label(18,19.1,'street-facing slope remains 9:12');
+for(const [index,roof]of [...frontGables,garageDefinition].entries())
+{
+ const ridge=visiblePlan.joins.find(join=>join.type==='ridge'&&join.roofs.every(name=>name===roof.id));
+ if(!ridge)throw new Error(`Missing visible secondary ridge: ${roof.id}`);
+ const x=(roof.bounds[0]+roof.bounds[1])/2,z=roof.bounds[3]-1.4;
+ label(x,z,`G${index+1} · ${index===2?'GARAGE':index===0?'LEFT':'CENTER'}`,{'font-size':12});
+ label(x,z-1.65,'12:12 · R'+(index+1),{'font-size':12});
+}
+const gableValleys=drawnJoins.filter(join=>join.type==='valley'&&join.roofs.some(name=>/^G[123] /.test(name)));
+gableValleys.forEach((join,index)=>
+{
+ const x=(join.start[0]+join.end[0])/2,z=(join.start[2]+join.end[2])/2;
+ label(x+(index%2?.9:-.9),z-.5,`V${index+1}`,{'font-size':12});
+});
+const diningHips=drawnJoins.filter(join=>join.type==='hip');
+for(const join of diningHips)label((join.start[0]+join.end[0])/2,(join.start[2]+join.end[2])/2,
+ join.roofs.includes('Dining rear projection')?'H1':'H2',{'font-size':11});
+label(15.6,59.2,'PORCH · EXISTING LOWER ROOF',{'font-size':12});
+label(15.6,61,'~1.57:12 · metal · falls to front',{'font-size':11});
+label(49,16,'REAR LOW ROOF',{'font-size':11});
+label(49,18,'2.25:12 · east fall',{'font-size':11});
+label(6.5,4.4,'REAR PATIO',{'font-size':10});
+label(20,4.2,'DINING',{'font-size':10});
+const garageOutline=garageBounds;
+const garagePoints=[[garageOutline[0],garageOutline[2]],[garageOutline[1],garageOutline[2]],
+ [garageOutline[1],garageOutline[3]],[garageOutline[0],garageOutline[3]]];
+element(groups['wall-outlines'],'polygon',{points:garagePoints.map(p=>point(p).join(',')).join(' '),
+ class:'wall',id:'garage-roof-footprint'});
+for(const window of garageUpperWindows)
+{
+ line(groups['wall-outlines'],[window.x-window.width/2,window.z],[window.x+window.width/2,window.z],'',
+  {stroke:'#a8d1de','stroke-width':3,'data-proposed-window':window.name});
+ label(window.x,window.z-1,window.name.endsWith('W1')?'W1':'W2',{'font-size':11});
+}
+const roofLeft=Math.min(...allDefinitions.map(roof=>roof.bounds[0]));
+const roofRight=Math.max(...allDefinitions.map(roof=>roof.bounds[1]));
+const roofRear=Math.min(...allDefinitions.map(roof=>roof.bounds[2]));
+const roofFront=Math.max(...allDefinitions.map(roof=>roof.bounds[3]));
+horizontalDimension(roofLeft,roofRight,-3.3,`${feet(roofRight-roofLeft)} overall roof / overhangs`);
+verticalDimension(roofRear,roofFront,-7.2,`${feet(roofFront-roofRear)} overall roof depth`);
+verticalDimension(mainBounds[2],mainBounds[3],-3.8,`${feet(mainBounds[3]-mainBounds[2])} main span`);
+horizontalDimension(-.225,55.725,72,'56 ft nominal frontage · 55.950 ft exact finished-wall span');
+horizontalDimension(porchSlab[0][0],porchSlab[1][0],67,`${feet(31.2)} porch slab`);
+verticalDimension(front.wallZ,front.porchEdgeZ,35.8,'7 ft porch slab');
+horizontalDimension(31.2,55.5,55.3,`${feet(24.3)} garage slab`);
+verticalDimension(15,49,60.3,'34 ft garage slab');
+horizontalDimension(frontGables[0].bounds[0],frontGables[0].bounds[1],mainRidgeZ-8.5,'14.35 ft G1 roof width');
+horizontalDimension(frontGables[1].bounds[0],frontGables[1].bounds[1],mainRidgeZ-5.8,'14.35 ft G2 roof width');
+horizontalDimension(garageDefinition.bounds[0],garageDefinition.bounds[1],mainRidgeZ-3,'14.35 ft G3 roof width');
+verticalDimension(garageWallFaceZ,mainBounds[3],58.3,`${feet(garageProjection)} projection`);
+verticalDimension(mainRidgeZ,mainBounds[3],-1.8,`${feet(mainBounds[3]-mainRidgeZ)} front run`);
+const annotation=element(groups['roof-labels'],'g',{transform:'translate(52 920)'});
+element(annotation,'path',{d:'M0 40V0M-6 10 0 0 6 10',fill:'none',stroke:'#111','stroke-width':1.5});
+element(annotation,'text',{x:0,y:-10,'text-anchor':'middle',class:'small'},'N / REAR');
+const schedule=groups.schedule;
+const notes=[
+ 'R0: one continuous main ridge, west–east.',
+ 'R1 / R2 / R3: perpendicular front ridges.',
+ 'G1 / G2: existing front bedroom centers.',
+ 'G1 / G2 / G3: matching 14.35-ft gables.',
+ 'Garage wall is NOT extended forward.',
+ '5.325-ft roof projection needs design.',
+ 'Visible roof intersections are clipped;',
+ 'buried portions are not double-drawn.',
+ 'Dotted G3 box: fixed garage envelope.',
+ 'Porch slab is dotted below its roof.'
+];
+notes.forEach((text,index)=>element(schedule,'text',{x:875,y:940+index*15,class:'small'},text));
+for(const text of groups.dimensions.querySelectorAll('text'))
+{
+ text.removeAttribute('stroke');text.removeAttribute('stroke-width');
+ const box=text.getBBox(),background=document.createElementNS(ns,'rect');
+ background.setAttribute('x',box.x-3);background.setAttribute('y',box.y-1);
+ background.setAttribute('width',box.width+6);background.setAttribute('height',box.height+2);
+ background.setAttribute('fill','white');
+ if(text.hasAttribute('transform'))background.setAttribute('transform',text.getAttribute('transform'));
+ groups.dimensions.insertBefore(background,text);
+}
+if(JSON.stringify(HomeRoof.getConnectedRoofDefinitions())!==originalRoofData)
+ throw new Error('Production roof data changed during 2D drawing.');
+document.addEventListener('DOMContentLoaded',()=>
+{
+ const hosts=new Map([
+  ['Garage room-in-roof',null],
+  ['Garage rear metal lean-to',allDefinitions.find(roof=>roof.id==='Garage rear metal lean-to')]
+ ]);
+ draw('roof-plan-axonometric',-22,24,[visiblePlan],visiblePlan,hosts,[garagePediment],garageUpperWindows);
+ draw('roof-plan-front',0,0,[visiblePlan],visiblePlan,hosts,[garagePediment],garageUpperWindows);
+});
+
+})();
+</script>
+<details id="earlier-roof-study">
+<summary>Earlier coordinated study - November 16 (reference only)</summary>
+<p>This preserved study uses the earlier 3:12 main roof and 6:12 garage roof. Its elevations, perspectives and headroom notes are historical, not representations of the new November 17 roof plan.</p>
+<h1>Roof, garage lights and rear wall - HTML only</h1>
+<p>Drawing refinement: clipped soffits, solid square porch posts, consistent ivory masonry, traditional window grids, paneled garage doors and a straight cast-stone entry surround. Roof planes, rooms and openings are unchanged. Garage brick detailing below is an optional finish study, not a new structural lintel.</p>
+<p class="note"><strong>November 16 revision, not approved.</strong> The 3D model is unchanged. The small canopy over the garage doors is removed; the two wall lights remain. The main/service roof still continues over the west garage bay to meet the 6:12 garage gable, rather than stopping above the exposed triangular wall. Loft headroom, floor levels, doors and windows stay fixed. Framing and drainage require professional design.</p>
+<h2>The circled junction - same camera</h2>
+<div class="grid" id="junction-comparison">
+<section><h3>Previous HTML - exposed wall wedge</h3><img class="comparison-image" src="junction-before-fix-nov16.png" width="1100" height="650" alt="Previous HTML study showing the pale triangular wall between the main roof and garage roof"></section>
+<section><h3>Continuous roof - no patch roof</h3><svg id="junction-after" viewBox="0 0 1100 650" role="img" aria-label="Continuous main roof over the existing west garage bay meeting the garage gable in a sloping valley"></svg></section>
+</div>
+<p>The main/service roof extends 8 ft 7.8 in farther forward, within the already roofed garage footprint. Its front wall head is fitted to the combined roof. This is a new spanning/framing arrangement over existing garage space, not an unsupported nine-foot cantilever off veneer. The former service-wall boundary stays in place under the roof.</p>
+<h2>Garage - no canopy over the doors</h2>
+<svg id="garage-light-detail" viewBox="0 0 1100 620" role="img" aria-label="Garage doors and two centered bronze gooseneck lights with no canopy"></svg>
+<p id="garage-light-check"></p>
+<p>The canopy is rejected. Retain the two centered bronze wall lights, existing taupe doors, ivory brick and opening locations. No upper windows or white siding are copied from the reference. The fixtures are concept shapes, not selected products; exposed-weather suitability, wiring, wet-location listing and operating clearance require review.</p>
+<h2>Rear wall - remove the extra-roof appearance</h2>
+<div class="grid" id="rear-cap-comparison">
+<section><h3>Current dark strip and fascia</h3><svg id="rear-cap-current" viewBox="0 0 1100 380" role="img" aria-label="Current rear setback with a dark roof strip and deep fascia above the kitchen window"></svg></section>
+<section><h3>Wall-matched weathering cap</h3><svg id="rear-cap-proposed" viewBox="0 0 1100 380" role="img" aria-label="Proposed rear masonry head with a slim matching cap instead of a separate dark roof band"></svg></section>
+</div>
+<p>The 4.8-inch-deep wall setback stays covered by a sloped, finish-matched metal weathering cap over a closed masonry head. It ends at the lower wall face: no added canopy, dark roof band or deep trim fascia. Concealed flashing, a drip and end transitions still need detailing; the weathering cover is not simply deleted.</p>
+<h2>Loft headroom - unchanged from the 6:12 study</h2>
+<div class="grid" id="loft-section-comparison">
+<section><h2>Current loft - 10:12</h2><svg id="current-loft-section" viewBox="0 0 1100 650" role="img" aria-label="Current loft section with a low east ceiling edge"></svg></section>
+<section><h2>Proposed loft - 6:12</h2><svg id="loft-section" viewBox="0 0 1100 650" role="img" aria-label="Shallower proposed loft roof with higher eaves and improved headroom"></svg></section>
+</div>
+<p id="loft-summary"></p>
+<table id="loft-roof-comparison" aria-label="Current versus proposed loft roof and headroom"></table>
+<h2>Whole-roof comparison</h2>
+<p>The proposed views also retain the earlier cross-gable/service-roof drainage revisions. The current views use the unchanged 3D roof definitions.</p>
+<div class="grid" id="whole-roof-comparison">
+<section><h2>Current - rear overhead</h2><svg id="current-rear" viewBox="0 0 1100 650" role="img" aria-label="Current roof showing the separate service wing hip"></svg></section>
+<section><h2>Reworked - same camera</h2><svg id="proposed-rear" viewBox="0 0 1100 650" role="img" aria-label="Reworked service gable and garage junction with sloping valleys"></svg></section>
+<section><h2>Current roof plan</h2><svg id="current-plan" viewBox="0 0 1100 650" role="img" aria-label="Current overhead roof plan"></svg></section>
+<section><h2>Reworked roof plan</h2><svg id="proposed-plan" viewBox="0 0 1100 650" role="img" aria-label="Reworked overhead roof plan with downhill valley arrows"></svg></section>
+</div>
+<p id="junction-check"></p>
+<p>Blue arrows show downhill valley flow; red lines identify level valleys in the current roof. The revised main-to-garage valley continues to the garage front. Its eave collector, overflow and leader route still need design; a roof edge alone is not a completed outlet.</p>
+<table id="drainage-table" aria-label="Current versus reworked geometric valley checks"></table>
+<h2>Front three-quarter</h2><svg id="perspective" viewBox="0 0 1100 650" role="img" aria-label="Three quarter roof concept without a garage-door canopy"></svg>
+<div class="grid">
+<section><h2>Front</h2><svg id="front" viewBox="0 0 1100 650" role="img" aria-label="Front elevation with garage wall lights and no door canopy"></svg></section>
+<section><h2>Rear</h2><svg id="rear" viewBox="0 0 1100 650" role="img" aria-label="Rear elevation of the same roof concept"></svg></section>
+<section><h2>West side</h2><svg id="west" viewBox="0 0 1100 650" role="img" aria-label="West side of the same concept"></svg></section>
+<section><h2>East / garage side</h2><svg id="east" viewBox="0 0 1100 650" role="img" aria-label="Garage side showing sloped room-in-roof envelope"></svg></section>
+</div>
+<h2>Entry stair interpretation</h2>
+<svg viewBox="0 0 1000 280" role="img" aria-label="Two treads with three rises to the porch landing">
+<path d="M70 215H340V163H485V111H630V59H925" fill="none" stroke="#847156" stroke-width="8"/>
+<g font-family="system-ui" font-size="21" fill="#3c3429">
+<text x="90" y="250">Approach</text><text x="355" y="198">Tread 1</text><text x="500" y="147">Tread 2</text><text x="670" y="95">Porch landing</text>
+<text x="80" y="35">Two walking treads; three equal rises — not two risers</text>
+</g></svg>
+<p class="note">Retained from the current model: two 12-inch walking treads and three equal 5.4-inch rises between the approach and porch. No stair change is proposed.</p>
+<h2>What changed in this sketch</h2>
+<ul>
+<li><strong>Front:</strong> extend both front gables back into the main roof instead of closing them with opposing rear slopes. Their crowns lower 3.6 inches, from 26.8 to 26.5 ft, just below the main ridge. Side pitches become approximately 12.21:12; opening locations and widths stay unchanged.</li>
+<li><strong>Service/garage:</strong> retain the west main hip and shared 3:12 main/service slopes. Continue the existing service-roof footprint forward from z41.2 to z49.85 over the west garage bay. The former exposed service-wall wedge is enclosed behind this continuous roof, which meets the garage gable along a diagonal valley. Main ridge stays 26.588 ft; garage gable peak stays 24.975 ft.</li>
+<li><strong>Loft:</strong> use a 6:12 garage gable with an 18.5-ft eave and 24.975-ft ridge above house-floor datum. Raising the eave four feet, rather than flattening the old low roof in place, raises the calculated low ceiling edge to about 7 ft 4 in. The nominal loft slab remains 161.50 sq ft; this is not occupied-use approval.</li>
+<li><strong>Clean side eave:</strong> remove the west front gable's 3-inch outboard strip, which created a second, lower straight roof/soffit above the two side windows. Align it with the main roof edge instead. Retain the main roof's normal eave, closed soffit and weathering coverage. The matching garage-side gable edge remains trimmed 3 inches to avoid a level valley; walls, windows, roof pitches and ridge centers do not move.</li>
+<li><strong>Removed:</strong> the separate garage wall cricket and both reinstated lower roof strips beneath the upper overhangs. The continuous upper roof replaces those exterior surfaces, instead of hiding the junction behind extra roof layers. Service walls and garage front-wall location stay; the garage front closure rises to the combined roof head.</li>
+<li><strong>Garage canopy removed:</strong> delete the small metal roof over both doors, including its fascia and soffit. Keep the two bronze gooseneck wall lights centered on the unchanged openings, clear of an 8-inch head-trim allowance. The main garage/loft roof is retained.</li>
+<li><strong>Rear wall:</strong> replace the dark rear-kitchen mini-roof appearance with a thin wall-colored weathering cap on a closed masonry head. Preserve its full 4.8-inch setback coverage and outward fall; no wall or opening moves.</li>
+<li><strong>Trade-off:</strong> replacing the low west-garage roof with the main-roof continuation raises its surface locally by up to approximately 7 ft 10 in versus the current 3D roof, checked at intersected roof-face vertices. This is not a rise in the main ridge or a new occupied floor. It changes garage framing, wall heads and silhouette, requiring owner and professional review.</li>
+<li><strong>Retained:</strong> main garage roof footprint, rear prep/garage lean-to, dining/patio roofs and porch. The tiny primary-bath roof definition is omitted only because the main roof already completely covers it.</li>
+<li>Every room, window and door stays in place. Bronze subdivisions are joined-window units, not new openings. The loft ceiling remains partly sloped; headroom is measured below, not inferred from the exterior silhouette.</li>
+<li>Framing, bearings, taller wall support, fire separation, insulation, roofing-system suitability and drainage remain unresolved. The new garage-front valley/eave collector must discharge away from the lights and doors, and the four house-front valleys need gutter/outlet coordination above the porch. Zero level valleys does not establish a complete drainage system.</li>
+</ul>
+<p id="validation"></p>
+<div id="issues" class="note"></div>
+<h2>Room fit — checked against this sketch's roof</h2>
+<p>Green/amber/red in the plan below means calculated ceiling clearance of at least 7 ft / 5–7 ft / below 5 ft. This uses a provisional <strong>18-inch vertical roof zone</strong> above the ceiling, not a designed assembly. It is not a code floor-area calculation.</p>
+<svg id="room-fit" viewBox="0 0 1100 650" role="img" aria-label="Measured headroom over the retained laundry mechanical room and loft"></svg>
+<table id="room-fit-table"></table>
+<p>No production files or 3D geometry are changed by this page. Review this proposal before any model update.</p>
+<script>
+const ns='http://www.w3.org/2000/svg',g=getUpstairsMeasuredGeometry(),front=getGroundFrontLayout();
+const mainBounds=[-.75,31.95,6.65,54.55],ridgeZ=30.6,mainBase=20.6;
+const crown=mainBase+(ridgeZ-mainBounds[2])*.25;
+const currentRoofs=HomeRoof.getNovember15RoofDefinitions();
+const roofs=currentRoofs.filter(r=>r.id!=='Primary bath rear').map(r=>({...r,bounds:r.bounds.slice(),planes:r.planes.map(p=>p.slice())}));
+const main=roofs.find(r=>r.id==='Main house');
+const serviceWing=roofs.find(r=>r.id==='East rear wing');
+main.planes=main.planes.slice(0,3);
+serviceWing.planes=main.planes.map(plane=>plane.slice());
+for(const roof of roofs.filter(roof=>/front gable/.test(roof.id)))
+{
+ const [left,right]=roof.bounds,slope=7.3/((right-left)/2);
+ roof.bounds[2]=ridgeZ;
+ roof.planes=[[slope,0,19.2-slope*left],[-slope,0,19.2+slope*right]];
+ if(roof.id==='West front gable')roof.bounds[0]=main.bounds[0];
+ if(roof.id==='East front gable')roof.bounds[1]=main.bounds[1];
+}
+const loftNorth=(g.atticNorth+g.atticSouth)/2;
+const garageRoof=roofs.find(r=>r.id==='Garage room-in-roof');
+const garagePitch=6/12,garageEave=18.5;
+garageRoof.planes=[[garagePitch,0,garageEave-garagePitch*garageRoof.bounds[0]],
+ [-garagePitch,0,garageEave+garagePitch*garageRoof.bounds[1]]];
+const previousJunctionRoofs=roofs.map(roof=>({...roof,bounds:roof.bounds.slice(),planes:roof.planes.map(plane=>plane.slice())}));
+const previousServiceFront=serviceWing.bounds[3];
+serviceWing.bounds[3]=garageRoof.bounds[3];
+const diningRoof=roofs.find(roof=>roof.id==='Dining rear projection');
+const rearLeanTo=roofs.find(r=>r.id==='Garage rear metal lean-to');
+const rearWallCap=roofs.find(roof=>roof.id==='Kitchen rear setback metal');
+rearWallCap.id='Rear wall weathering cap';
+rearWallCap.finish='wall-cap';
+const porch=HomeRoof.getPorchRoofDefinitions();
+const currentEyebrow={id:'Garage eyebrow metal',bounds:[30.75,55.75,49.225,51.225],
+ planes:[[0,-.25,8.2+.25*49.225]]};
+const garageFront=getGroundFloorDefaultPlan().walls.find(wall=>wall[0]==='Garage south');
+const garageFrontFaceZ=garageFront[2]+.225;
+const garageDoorTrim=8/12;
+function gooseneckFixture(x)
+{
+ const wallZ=garageFrontFaceZ,parts=[];
+ const arm=[[x,8.48,wallZ+.025],[x,8.78,wallZ+.205],[x,8.96,wallZ+.435],
+  [x,8.90,wallZ+.695],[x,8.66,wallZ+.895],[x,8.45,wallZ+.895]];
+ parts.push({points:[[x-.12,8.15,wallZ+.02],[x+.12,8.15,wallZ+.02],
+  [x+.12,8.65,wallZ+.02],[x-.12,8.65,wallZ+.02]],fill:'#66503a'});
+ parts.push({points:arm,line:true,stroke:'#66503a',width:3});
+ const top=[],rim=[],lens=[];
+ for(let i=0;i<20;i++)
+ {
+  const angle=i*Math.PI/10,dx=Math.cos(angle),dz=Math.sin(angle);
+  top.push([x+.08*dx,8.45,wallZ+.895+.08*dz]);
+  rim.push([x+.42*dx,8.06,wallZ+.895+.42*dz]);
+  lens.push([x+.36*dx,8.02,wallZ+.895+.36*dz]);
+ }
+ for(let i=0;i<20;i++)parts.push({points:[top[i],top[(i+1)%20],rim[(i+1)%20],rim[i]],fill:'#927344'});
+ parts.push({points:lens,fill:'#f2d89a'});
+ return {x,wallZ,parts,points:parts.flatMap(part=>part.points)};
+}
+const garageFixtures=garageFront[5].map(hole=>gooseneckFixture(garageFront[1]+(hole[0]+hole[1])/2));
+const masonryColor='#e7d8bc';
+const porchPostCenters=[1,11.65,19.55,30.2];
+function clippedSoffits(plan)
+{
+ const pieces=[];
+ for(const edge of plan.boundaries)
+ {
+  if(edge.roof===rearWallCap.id)continue;
+  const a=edge.start,b=edge.end,dx=b[0]-a[0],dz=b[2]-a[2],length=Math.hypot(dx,dz);
+  if(length<.001)continue;
+  const ribbon=[[a[0],a[2]],[b[0],b[2]],[b[0]-dz/length*.8,b[2]+dx/length*.8],
+   [a[0]-dz/length*.8,a[2]+dx/length*.8]];
+  for(const face of plan.faces)
+  {
+   const polygon=HomeRoof.intersectPolygons(ribbon,face.polygon);
+   if(polygon.length<3||Math.abs(HomeRoof.signedArea(polygon))<1e-8)continue;
+   pieces.push({polygon,plane:face.plane,roof:face.roof});
+  }
+ }
+ return pieces;
+}
+const patioFrame=getLivingPatioCanopyFrame(.45,getLivingRoomFeatureLayout().returnWallZ);
+const patioTopOffset=patioFrame.thickness/Math.cos(Math.atan(patioFrame.pitch));
+const patioRoof={id:'Retained rear patio canopy',bounds:[0,patioFrame.right,patioFrame.rear,Math.min(patioFrame.front,g.north-.225)],
+ planes:[[0,patioFrame.pitch,patioFrame.undersideAt(0)+patioTopOffset]]};
+const envelope=HomeRoof.buildRoofEnvelope(roofs),faces=envelope.faces;
+const upperRoofPlan=HomeRoof.buildRoofEnvelope(roofs.filter(r=>r.id!==diningRoof.id));
+const rearLowRoofPlan=HomeRoof.buildRoofEnvelope([diningRoof,patioRoof]);
+const allRoofPlans=[upperRoofPlan,HomeRoof.buildRoofEnvelope(porch),rearLowRoofPlan];
+const currentEnvelope=HomeRoof.buildRoofEnvelope(currentRoofs);
+const currentRoofPlans=[HomeRoof.buildRoofEnvelope(currentRoofs.filter(r=>r.id!==diningRoof.id)),
+ allRoofPlans[1],HomeRoof.buildRoofEnvelope([currentEyebrow]),rearLowRoofPlan];
+const walls=[],openings=[];
+const groundNormals={
+ 'Living north':[0,-1],'Dining west':[-1,0],'Dining north':[0,-1],'Dining east':[1,0],
+ 'Kitchen north':[0,-1],'Prep north':[0,-1],'Prep east':[1,0],'Garage east':[1,0],
+ 'Garage south':[0,1],'Guest east':[1,0],'House south':[0,1],
+ 'Office west':[-1,0],'Living west':[-1,0]
+};
+function upperNormal(name){
+ if(name==='west'||name==='closet 4 west return')return[-1,0];
+ if(['east rooms','service east','bedroom east return','closet 4 east return'].includes(name))return[1,0];
+ if(name.includes('rear'))return[0,-1];
+ return[0,1];
+}
+function addWall(name,x1,z1,x2,z2,bottom,top,normal,holes=[],upper=false,host=null){
+ const length=Math.hypot(x2-x1,z2-z1),u=[(x2-x1)/length,(z2-z1)/length];
+ const at=(d,y,offset=.225)=>[x1+u[0]*d+normal[0]*offset,y,z1+u[1]*d+normal[1]*offset];
+ const wall={name,x1,z1,x2,z2,bottom,top,normal,holes,length,u,at,upper,host};
+ walls.push(wall);
+ holes.forEach(([left,right,sill,head])=>{
+  const width=right-left,height=head-sill;
+  const intent=getWindowProductIntent(width,height,false,false);
+  const opening={name,wall,left,right,sill,head,normal,door:sill<1,columns:intent.columns,
+   points:[at(left,sill,.25),at(right,sill,.25),at(right,head,.25),at(left,head,.25)]};
+  const samples=[];
+  for(let i=0;i<=12;i++)for(let j=0;j<=4;j++)samples.push(at(left+(right-left)*i/12,sill+(head-sill)*j/4,.25));
+  opening.conflict=samples.some(p=>p[1]>roofTop(p[0],p[2])-.16);
+  opening.covered=samples.some(p=>roofBlocksView(p,normal));
+  openings.push(opening);
+ });
+ return wall;
+}
+for(const[name,x1,z1,x2,z2,holes=[]]of getGroundFloorDefaultPlan().walls){
+ if(!groundNormals[name])continue;
+ const garage=name==='Garage east'||name==='Garage south';
+ addWall(name,x1,z1,x2,z2,garage?-1.25:0,name==='Garage south'?14.5:9,groundNormals[name],holes);
+}
+for(const[name,x1,z1,x2,z2]of getUpstairsExteriorSegments()){
+ const holes=name==='front bedrooms'||name==='front bedroom 4'
+  ?getUpstairsFrontWindows().filter(w=>w.center-w.width/2>=x1&&w.center+w.width/2<=x2).map(w=>[w.center-x1-w.width/2,w.center-x1+w.width/2,10+w.sill,10+w.sill+w.height])
+  :getUpstairsExteriorOpenings(x1,z1,x2,z2,10).map(w=>[w.center-w.width/2,w.center+w.width/2,w.sill,w.sill+w.height]);
+ addWall('Upper '+name,x1,z1,x2,z2,9,19.2,upperNormal(name),holes,true);
+}
+addWall('Rear prep roof head',g.east+.225,7,55.5,7,9,14.5,[0,-1],[],true,rearLeanTo);
+const garageFrontClosure=addWall('Garage roof front closure',31.2,49,55.5,49,14.5,14.5,[0,1],[],true);
+garageFrontClosure.currentHost=currentRoofs.find(roof=>roof.id===garageRoof.id);
+addWall('Garage roof rear closure',g.east+.225,loftNorth,g.atticEast,loftNorth,9,19.2,[0,-1],[],true,garageRoof);
+addWall('Garage rear roof-zone infill above room ceilings',31.2,loftNorth,g.east+.225,loftNorth,19,19,[0,-1],[],true,garageRoof);
+// This existing finished-loft boundary was hidden behind the old roof apron.
+addWall('Retained loft south',g.east+.225,g.atticSouth,g.atticEast,g.atticSouth,9,19.2,[0,1],[],true);
+addWall('Rear prep and garage east wall head',g.atticEast,7,g.atticEast,loftNorth-.225,9,14.5,[1,0],[],true,rearLeanTo);
+addWall('Proposed garage east knee-wall enclosure',g.atticEast,loftNorth-.225,g.atticEast,49,9,14.5,[1,0],[],true,garageRoof);
+function roofTop(x,z){
+ const ds=roofs.filter(r=>x>=r.bounds[0]&&x<=r.bounds[1]&&z>=r.bounds[2]&&z<=r.bounds[3]);
+ return ds.length?Math.max(...ds.map(r=>Math.min(...r.planes.map(p=>HomeRoof.heightAt(p,[x,z]))))):Infinity;
+}
+function roofBlocksView(point,normal){
+ for(const face of allRoofPlans.flatMap(plan=>plan.faces)){
+  const denominator=face.plane[0]*normal[0]+face.plane[1]*normal[1];
+  if(Math.abs(denominator)<1e-8)continue;
+  const distance=(point[1]-HomeRoof.heightAt(face.plane,[point[0],point[2]]))/denominator;
+  if(distance>.05&&HomeRoof.contains(face.polygon,[point[0]+normal[0]*distance,point[2]+normal[1]*distance]))return true;
+ }
+ return false;
+}
+function hostTop(w,x,z){
+ return w.host?Math.min(...w.host.planes.map(p=>HomeRoof.heightAt(p,[x,z]))):roofTop(x,z);
+}
+function draw(id,yaw,pitch,roofPlans=allRoofPlans,wallEnvelope=envelope,roofOverrides=null,framedPediments=[],additionalWindows=[]){
+ const svg=document.getElementById(id),raw=[];
+ const rad=yaw*Math.PI/180,tilt=pitch*Math.PI/180;
+ function projection(p){const horizontal=p[0]*Math.cos(rad)-p[2]*Math.sin(rad),depth=p[0]*Math.sin(rad)+p[2]*Math.cos(rad);return [horizontal,-p[1]*Math.cos(tilt)+depth*Math.sin(tilt),p[1]*Math.sin(tilt)+depth*Math.cos(tilt)];}
+ const rearLimit=Math.min(0,...roofPlans.flatMap(plan=>plan.definitions.map(roof=>roof.bounds[2])));
+ const maxHeight=roofOverrides?Math.max(28,...roofPlans.flatMap(plan=>plan.faces.flatMap(face=>
+  face.polygon.map(p=>HomeRoof.heightAt(face.plane,p))))):28;
+ const outline=[-1,56.2].flatMap(x=>[-1.35,maxHeight].flatMap(y=>[rearLimit,front.wallZ+12].map(z=>projection([x,y,z]))));
+ const minX=Math.min(...outline.map(p=>p[0])),maxX=Math.max(...outline.map(p=>p[0])),minY=Math.min(...outline.map(p=>p[1])),maxY=Math.max(...outline.map(p=>p[1]));
+ const scale=Math.min(13.8,1000/(maxX-minX),550/(maxY-minY)),offsetX=(1100-(maxX-minX)*scale)/2,offsetY=(650-(maxY-minY)*scale)/2;
+ const point=p=>{const q=projection(p);return[offsetX+(q[0]-minX)*scale,offsetY+(q[1]-minY)*scale];};
+ const visible=normal=>normal[0]*Math.sin(rad)+normal[1]*Math.cos(rad)>0.001;
+ function polygon(points,fill,stroke='none',width=0){
+  if(points.some(p=>p.some(v=>!Number.isFinite(v))))throw new Error('Sketch contains a nonfinite geometry vertex.');
+  raw.push({points,fill,stroke,width,depth:points.reduce((s,p)=>s+projection(p)[2],0)/points.length});
+ }
+ function triangle(a,b,c,fill){
+  const length=Math.max(Math.hypot(...a.map((v,i)=>v-b[i])),Math.hypot(...a.map((v,i)=>v-c[i])),Math.hypot(...b.map((v,i)=>v-c[i])));
+  if(length>2.5){
+   const ab=a.map((v,i)=>(v+b[i])/2),ac=a.map((v,i)=>(v+c[i])/2),bc=b.map((v,i)=>(v+c[i])/2);
+   triangle(a,ab,ac,fill);triangle(ab,b,bc,fill);triangle(ac,bc,c,fill);triangle(ab,bc,ac,fill);
+  }else polygon([a,b,c],fill);
+ }
+ function surface(points,fill){for(let i=1;i<points.length-1;i++)triangle(points[0],points[i],points[i+1],fill);}
+ const quad=(x1,z1,x2,z2,b,t,fill)=>polygon([[x1,b,z1],[x2,b,z2],[x2,t,z2],[x1,t,z1]],fill);
+ const displayWalls=walls.map(wall=>
+ {
+  if(!['Garage south','Garage roof front closure'].includes(wall.name)||!additionalWindows.length)return wall;
+  const holes=additionalWindows.map(window=>[window.x-window.width/2-wall.x1,window.x+window.width/2-wall.x1,
+   window.sill,window.sill+window.height]);
+  return {...wall,holes:[...wall.holes,...holes]};
+ });
+ const garageWall=displayWalls.find(wall=>wall.name==='Garage south');
+ if(additionalWindows.length&&!garageWall)throw new Error('Proposed garage windows require the existing front wall.');
+ const newOpenings=additionalWindows.map(window=>
+ {
+  const left=window.x-window.width/2-garageWall.x1,right=left+window.width;
+  const head=window.sill+window.height;
+  const opening={name:window.name,wall:garageWall,left,right,sill:window.sill,head,normal:garageWall.normal,door:false,
+   columns:getWindowProductIntent(window.width,window.height).columns,
+   points:[garageWall.at(left,window.sill,.25),garageWall.at(right,window.sill,.25),
+    garageWall.at(right,head,.25),garageWall.at(left,head,.25)],conflict:false,covered:false};
+  for(const point of opening.points)
+  {
+   const containing=roofPlans.flatMap(plan=>plan.faces).filter(face=>HomeRoof.contains(face.polygon,[point[0],point[2]]));
+   if(!containing.length)throw new Error(`Proposed window is outside the roof coverage: ${window.name}`);
+   if(point[1]>Math.max(...containing.map(face=>HomeRoof.heightAt(face.plane,[point[0],point[2]])))-.16)opening.conflict=true;
+   for(const face of roofPlans.flatMap(plan=>plan.faces))
+   {
+    const denominator=face.plane[0]*opening.normal[0]+face.plane[1]*opening.normal[1];
+    if(Math.abs(denominator)<1e-8)continue;
+    const distance=(point[1]-HomeRoof.heightAt(face.plane,[point[0],point[2]]))/denominator;
+    if(distance>.05&&HomeRoof.contains(face.polygon,[point[0]+opening.normal[0]*distance,point[2]+opening.normal[1]*distance]))
+     opening.covered=true;
+   }
+  }
+  return opening;
+ });
+ for(const w of displayWalls){
+  if(!visible(w.normal))continue;
+  const boundaries=[-.225,w.length+.225,...w.holes.flatMap(h=>h.slice(0,2))].sort((a,b)=>a-b);
+  for(let i=1;i<boundaries.length;i++){
+   const left=boundaries[i-1],right=boundaries[i];if(right-left<.001)continue;
+   const holes=w.holes.filter(h=>(left+right)/2>h[0]-.001&&(left+right)/2<h[1]+.001).sort((a,b)=>a[2]-b[2]);
+   const spans=[],wallTop=w.upper?40:w.top;
+   let cursor=w.bottom;
+   for(const hole of holes)
+   {
+    if(hole[3]<=cursor)continue;
+    if(hole[2]>=wallTop)break;
+    if(hole[2]>cursor)spans.push([cursor,Math.min(wallTop,hole[2])]);
+    cursor=Math.max(cursor,hole[3]);
+   }
+   if(cursor<wallTop)spans.push([cursor,wallTop]);
+   for(const[bottom,requestedTop]of spans){
+    if(requestedTop<=bottom)continue;
+    if(!w.upper){
+     surface([w.at(left,bottom),w.at(right,bottom),w.at(right,requestedTop),w.at(left,requestedTop)],masonryColor);
+     continue;
+    }
+    const wallHost=roofOverrides&&w.host?roofOverrides.get(w.host.id):wallEnvelope===currentEnvelope
+     ?w.currentHost||(w.host&&currentRoofs.find(roof=>roof.id===w.host.id)):w.host;
+    if(w.host&&!wallHost&&!(roofOverrides&&roofOverrides.has(w.host.id)))throw new Error(`Missing roof host for ${w.name}.`);
+    const a=w.at(left,0),b=w.at(right,0),plan=wallHost?HomeRoof.buildRoofEnvelope([wallHost]):wallEnvelope;
+    // Clip the wall head at every actual roof-plane breakpoint. Uniform
+    // sampling leaves triangular gaps at ridges and height discontinuities.
+    for(const segment of HomeRoof.wallHeadSegments(plan,[a[0],a[2]],[b[0],b[2]],bottom,.16)){
+     const topA=Math.min(requestedTop,segment.start[1]),topB=Math.min(requestedTop,segment.end[1]);
+     if(topA<=bottom&&topB<=bottom)continue;
+     surface([[segment.start[0],bottom,segment.start[2]],[segment.end[0],bottom,segment.end[2]],
+      [segment.end[0],topB,segment.end[2]],[segment.start[0],topA,segment.start[2]]],masonryColor);
+    }
+   }
+  }
+ }
+ for(const pediment of framedPediments)surface(pediment,masonryColor);
+ for(const w of [...openings,...newOpenings]){
+  if(!visible(w.normal))continue;
+  function field(left,right,bottom,top,fill,offset=.30)
+  {
+   surface([w.wall.at(left,bottom,offset),w.wall.at(right,bottom,offset),
+    w.wall.at(right,top,offset),w.wall.at(left,top,offset)],fill);
+  }
+  function frame(left,right,bottom,top,width,fill,offset=.30)
+  {
+   field(left-width,left,bottom,top+width,fill,offset);
+   field(right,right+width,bottom,top+width,fill,offset);
+   field(left,right,top,top+width,fill,offset);
+   field(left-width,right+width,bottom-width,bottom,fill,offset);
+  }
+  surface(w.points,w.door?(w.name==='Garage south'?'#ad9c84':'#a67b45'):'#91a39c');
+  raw.push({points:[...w.points,w.points[0]],line:true,stroke:w.conflict||w.covered?'#a23c30':'#5c4c39',width:w.conflict||w.covered?2.5:1.6,depth:w.points.reduce((s,p)=>s+projection(p)[2],0)/4+.04});
+  const divisions=w.door?2:w.columns;
+  for(let i=1;i<divisions;i++){
+   const d=w.left+(w.right-w.left)*i/divisions;
+   const a=w.wall.at(d,w.sill,.27),b=w.wall.at(d,w.head,.27);
+   raw.push({points:[a,b],line:true,stroke:'#5c4c39',width:1,depth:(projection(a)[2]+projection(b)[2])/2+.05});
+  }
+  if(!w.door)
+  {
+   frame(w.left,w.right,w.sill,w.head,.13,'#5c4c39');
+   const unit=(w.right-w.left)/w.columns,rows=w.head-w.sill<3?2:3;
+   for(let column=0;column<w.columns;column++)
+   {
+    const mid=w.left+(column+.5)*unit;
+    field(mid-.018,mid+.018,w.sill,w.head,'#5c4c39',.32);
+    for(let row=1;row<rows;row++)
+    {
+     const y=w.sill+(w.head-w.sill)*row/rows;
+     field(w.left+column*unit,w.left+(column+1)*unit,y-.018,y+.018,'#5c4c39',.32);
+    }
+   }
+  }
+  else if(w.name==='Garage south')
+  {
+   frame(w.left,w.right,w.sill,w.head,.5,'#f1e7d2');
+   field(w.left-.5,w.right+.5,w.head,w.head+garageDoorTrim,'#f1e7d2');
+   const width=w.right-w.left;
+   for(let column=0;column<4;column++)for(let row=0;row<3;row++)
+   {
+    const l=w.left+column*width/4+.16,r=w.left+(column+1)*width/4-.16;
+    const bottom=w.sill+.25+row*1.9,top=bottom+1.6;
+    field(l,r,bottom,top,'#a08f7a',.32);
+    frame(l,r,bottom,top,.045,'#c0af97',.34);
+   }
+   for(let column=0;column<4;column++)
+   {
+    const l=w.left+column*width/4+.18,r=w.left+(column+1)*width/4-.18;
+    field(l,r,w.head-1.25,w.head-.25,'#91a39c',.32);
+    frame(l,r,w.head-1.25,w.head-.25,.055,'#c0af97',.34);
+   }
+   field(w.left-.5,w.right+.5,w.head+garageDoorTrim+.05,w.head+garageDoorTrim+.35,'#d7c6a9',.28);
+   for(let x=w.left-.45;x<w.right+.5;x+=.5)
+    field(x,x+.025,w.head+garageDoorTrim+.05,w.head+garageDoorTrim+.35,'#c5b697',.31);
+   for(const side of[-1,1])
+   {
+    const x=(w.left+w.right)/2+side*.17;
+    field(x-.035,x+.035,w.sill+3,w.sill+3.45,'#514334',.36);
+   }
+  }
+  else if(w.name==='House south')
+  {
+   frame(w.left,w.right,w.sill,w.head,.45,'#f1e7d2');
+   field(w.left-.6,w.right+.6,w.head+.45,w.head+.65,'#e5d7bd',.38);
+   const width=(w.right-w.left)/2;
+   for(let leaf=0;leaf<2;leaf++)for(const [bottom,top]of[[.45,3.2],[3.6,7.5]])
+   {
+    const l=w.left+leaf*width+.2,r=w.left+(leaf+1)*width-.2;
+    field(l,r,bottom,top,'#99713f',.32);
+    frame(l,r,bottom,top,.06,'#bf9865',.34);
+   }
+  }
+ }
+ // Real porch landing, two intermediate treads, and the existing approach.
+ surface([[0,0,front.wallZ],[31.2,0,front.wallZ],[31.2,0,front.wallZ+7],[0,0,front.wallZ+7]],'#d6c6a9');
+ surface([[0,9.03,g.north-.225],[13.2,9.03,g.north-.225],
+  [13.2,9.03,getLivingRoomFeatureLayout().returnWallZ],[0,9.03,getLivingRoomFeatureLayout().returnWallZ]],'#e8dfcb');
+ for(const c of porchPostCenters){
+  const z=60.5+front.extension;
+  for(const [left,right,rear,forward,bottom,top]of[
+   [c-.5,c+.5,z-.5,z+.5,0,9.7],
+   [c-.58,c+.58,z-.58,z+.58,0,.25],
+   [c-.58,c+.58,z-.58,z+.58,9.45,9.7]])
+  {
+   surface([[left,bottom,forward],[right,bottom,forward],[right,top,forward],[left,top,forward]],'#f7eedc');
+   surface([[left,bottom,rear],[left,bottom,forward],[left,top,forward],[left,top,rear]],'#e5dac4');
+   surface([[right,bottom,forward],[right,bottom,rear],[right,top,rear],[right,top,forward]],'#e5dac4');
+   surface([[right,bottom,rear],[left,bottom,rear],[left,top,rear],[right,top,rear]],'#f7eedc');
+   surface([[left,top,rear],[left,top,forward],[right,top,forward],[right,top,rear]],'#f7eedc');
+  }
+ }
+ quad(0,60.5+front.extension,31.2,60.5+front.extension,9.3,9.7,'#eee1c8');
+ for(const x of[0,31.2])
+ {
+  const z=60.5+front.extension;
+  surface([[x,9.3,z-.5],[x,9.3,z+.5],[x,9.7,z+.5],[x,9.7,z-.5]],'#eee1c8');
+ }
+ for(const plan of roofPlans)for(const face of plan.faces){
+  const normal=[-face.plane[0],1,-face.plane[1]];
+  if(normal[0]*Math.sin(rad)*Math.cos(tilt)+normal[1]*Math.sin(tilt)+normal[2]*Math.cos(rad)*Math.cos(tilt)<=.00001)continue;
+  surface(face.polygon.map(p=>[p[0],HomeRoof.heightAt(face.plane,p),p[1]]),face.roof===rearWallCap.id?'#e7d8bc':face.roof.toLowerCase().includes('metal')?'#5c6059':face.plane[0]>.01?'#555950':'#64675e');
+ }
+ for(const plan of roofPlans)for(const edge of plan.boundaries){
+  const a=edge.start,b=edge.end,dx=b[0]-a[0],dz=b[2]-a[2],length=Math.hypot(dx,dz);
+  if(length<.001||!visible([dz/length,-dx/length]))continue;
+  if(edge.roof===rearWallCap.id)
+  {
+   surface([a,b,[b[0],9,b[2]],[a[0],9,a[2]]],masonryColor);
+   continue;
+  }
+  surface([a,b,[b[0],b[1]-.2,b[2]],[a[0],a[1]-.2,a[2]]],'#e8dfcb');
+ }
+ for(const edge of rearLowRoofPlan.boundaries){
+  const a=edge.start,b=edge.end,dx=b[0]-a[0],dz=b[2]-a[2],length=Math.hypot(dx,dz);
+  if(length<.001)continue;
+  const outside=[(a[0]+b[0])/2+dz/length*.002,(a[2]+b[2])/2-dx/length*.002];
+  const neighbour=rearLowRoofPlan.faces.find(face=>HomeRoof.contains(face.polygon,outside));
+  if(!neighbour)continue;
+  const lowerA=HomeRoof.heightAt(neighbour.plane,[a[0],a[2]]),lowerB=HomeRoof.heightAt(neighbour.plane,[b[0],b[2]]);
+  if((a[1]+b[1])/2<=(lowerA+lowerB)/2+.001)continue;
+  surface([a,b,[b[0],lowerB,b[2]],[a[0],lowerA,a[2]]],'#ded3bd');
+ }
+ // Fit each ribbon to the actual owning roof face, including hip corners.
+ for(const plan of roofPlans)for(const piece of clippedSoffits(plan)){
+  surface(piece.polygon.map(p=>[p[0],HomeRoof.heightAt(piece.plane,p)-.2,p[1]]),'#e8dfcb');
+ }
+ for(const plan of roofPlans)for(const j of plan.joins)
+ {
+  if(j.roofs.includes(rearWallCap.id))continue;
+  const valley=j.type==='valley',flat=valley&&Math.abs(j.start[1]-j.end[1])<1e-6;
+  raw.push({points:[j.start,j.end],line:true,stroke:flat?'#b74836':valley?'#276775':'#303e34',width:valley?2.2:2});
+  if(!valley||flat||pitch<30)continue;
+  const [high,low]=j.start[1]>j.end[1]?[j.start,j.end]:[j.end,j.start];
+  const dx=low[0]-high[0],dz=low[2]-high[2],run=Math.hypot(dx,dz);
+  if(run<1)continue;
+  const tip=high.map((v,i)=>v+(low[i]-v)*.68),tail=high.map((v,i)=>v+(low[i]-v)*.36);
+  tip[1]+=.06;tail[1]+=.06;
+  const wings=[-1,1].map(side=>[tip[0]-dx/run*.45+side*dz/run*.22,tip[1]+(high[1]-low[1])/run*.45,tip[2]-dz/run*.45-side*dx/run*.22]);
+  raw.push({points:[tail,tip],line:true,stroke:'#276775',width:3});
+  raw.push({points:[wings[0],tip,wings[1]],line:true,stroke:'#276775',width:3});
+ }
+ const stairRear=front.wallZ+7+.15;
+ for(let i=0;i<2;i++){
+  const y=-(i+1)*.45,z=stairRear+i,width=10.8;
+  surface([[15.6-width/2,y,z],[15.6+width/2,y,z],[15.6+width/2,y,z+1],[15.6-width/2,y,z+1]],'#d6c6a9');
+  quad(15.6-width/2,z,15.6+width/2,z,y,y+.45,'#c4b391');
+ }
+ quad(10.2,stairRear+2,21,stairRear+2,-1.35,-.9,'#c4b391');
+ surface([[10.2,-1.35,stairRear+2],[21,-1.35,stairRear+2],[21,-1.35,stairRear+4],[10.2,-1.35,stairRear+4]],'#ddd3bd');
+ if(wallEnvelope!==currentEnvelope)for(const fixture of garageFixtures)for(const part of fixture.parts)
+ {
+  if(part.line)raw.push(part);
+  else surface(part.points,part.fill);
+ }
+ // Orthographic software depth buffer: whole-polygon painter ordering is
+ // incorrect where roof planes, recesses and long wall faces intersect.
+ const canvas=document.createElement('canvas'),resolution=1.5,W=1650,H=975;
+ canvas.width=W;canvas.height=H;
+ const context=canvas.getContext('2d');
+ if(!context)throw new Error('Sketch depth rendering requires a canvas context.');
+ const image=context.createImageData(W,H),depth=new Float64Array(W*H);
+ depth.fill(-Infinity);
+ const rgb=color=>[1,3,5].map(i=>parseInt(color.slice(i,i+2),16));
+ for(let i=0;i<image.data.length;i+=4){image.data[i]=255;image.data[i+1]=254;image.data[i+2]=250;image.data[i+3]=255;}
+ const screen=p=>{const q=point(p);return[q[0]*resolution,q[1]*resolution,projection(p)[2]];};
+ function write(x,y,z,color,bias=0){
+  if(x<0||y<0||x>=W||y>=H)return;
+  const index=y*W+x;
+  if(z+bias<depth[index]-1e-7)return;
+  depth[index]=z+bias;const offset=index*4;
+  image.data[offset]=color[0];image.data[offset+1]=color[1];image.data[offset+2]=color[2];
+ }
+ function raster(a,b,c,color){
+  const area=(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
+  if(Math.abs(area)<1e-8)return;
+  const left=Math.max(0,Math.floor(Math.min(a[0],b[0],c[0]))),right=Math.min(W-1,Math.ceil(Math.max(a[0],b[0],c[0])));
+  const top=Math.max(0,Math.floor(Math.min(a[1],b[1],c[1]))),bottom=Math.min(H-1,Math.ceil(Math.max(a[1],b[1],c[1])));
+  for(let y=top;y<=bottom;y++)for(let x=left;x<=right;x++){
+   const px=x+.5,py=y+.5;
+   const u=((b[0]-px)*(c[1]-py)-(b[1]-py)*(c[0]-px))/area;
+   const v=((c[0]-px)*(a[1]-py)-(c[1]-py)*(a[0]-px))/area,w=1-u-v;
+   if(u>=-1e-8&&v>=-1e-8&&w>=-1e-8)write(x,y,u*a[2]+v*b[2]+w*c[2],color);
+  }
+ }
+ for(const shape of raw.filter(s=>!s.line)){
+  const points=shape.points.map(screen),color=rgb(shape.fill);
+  for(let i=1;i<points.length-1;i++)raster(points[0],points[i],points[i+1],color);
+ }
+ for(const shape of raw.filter(s=>s.line)){
+  const points=shape.points.map(screen),color=rgb(shape.stroke),radius=Math.max(0,Math.floor(shape.width*resolution/2));
+  for(let i=1;i<points.length;i++){
+   const a=points[i-1],b=points[i],steps=Math.max(1,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])*1.5));
+   for(let step=0;step<=steps;step++){
+    const f=step/steps,x=Math.round(a[0]+(b[0]-a[0])*f),y=Math.round(a[1]+(b[1]-a[1])*f),z=a[2]+(b[2]-a[2])*f;
+    for(let dx=-radius;dx<=radius;dx++)for(let dy=-radius;dy<=radius;dy++)write(x+dx,y+dy,z,color,.05);
+   }
+  }
+ }
+ context.putImageData(image,0,0);
+ const rendered=document.createElementNS(ns,'image');
+ rendered.setAttribute('href',canvas.toDataURL('image/png'));
+ rendered.setAttribute('width','1100');rendered.setAttribute('height','650');
+ svg.append(rendered);
+ svg.dataset.surfaceCount=raw.filter(s=>!s.line).length;
+ svg.dataset.clippedVertexCount=raw.flatMap(shape=>shape.points).map(point).filter(p=>p[0]<0||p[0]>1100||p[1]<0||p[1]>650).length;
+ if(roofOverrides)
+ {
+  svg.dataset.roofDefinitions=JSON.stringify(roofPlans.flatMap(plan=>plan.definitions));
+  svg.dataset.roofFaceCount=roofPlans.reduce((sum,plan)=>sum+plan.faces.length,0);
+  svg.dataset.maximumRoofHeightFeet=maxHeight;
+  svg.dataset.framedPediments=JSON.stringify(framedPediments);
+  svg.dataset.proposedWindows=JSON.stringify(additionalWindows);
+  svg.dataset.displayOpeningCount=openings.length+newOpenings.length;
+  svg.dataset.proposedOpeningPoints=JSON.stringify(newOpenings.map(opening=>opening.points));
+  svg.dataset.proposedWindowConflicts=JSON.stringify(newOpenings.filter(opening=>opening.conflict||opening.covered).map(opening=>opening.name));
+  svg.dataset.modifiedOpeningWalls=JSON.stringify(displayWalls.filter(wall=>wall!==walls.find(source=>source.name===wall.name))
+   .map(wall=>({name:wall.name,holes:wall.holes})));
+ }
+}
+draw('perspective',-22,15);draw('front',0,0);draw('rear',180,0);draw('west',-90,0);draw('east',90,0);
+draw('junction-after',-22,15);
+draw('current-rear',155,35,currentRoofPlans,currentEnvelope);draw('proposed-rear',155,35);
+draw('current-plan',180,90,currentRoofPlans,currentEnvelope);draw('proposed-plan',180,90);
+document.getElementById('junction-check').textContent='Same cameras and scale in each pair. The service roof now continues to the garage front, retaining its existing planes rather than adding a patch roof. The garage front closure follows the combined roof; all room boundaries and openings stay fixed. Framing and collector/outlet design remain unresolved.';
+const conflicts=openings.filter(w=>w.conflict);
+const covered=openings.filter(w=>w.covered);
+document.getElementById('validation').textContent=`Layered roof drawing: ${allRoofPlans.reduce((sum,plan)=>sum+plan.faces.length,0)} clipped face pieces; ${allRoofPlans.reduce((sum,plan)=>sum+plan.joins.filter(j=>j.type==='valley').length,0)} segmented valley edges. ${openings.length} existing opening envelopes are represented, including doors. Proposed views share one geometry; the current comparison uses the unchanged production definitions.`;
+document.getElementById('issues').textContent=(conflicts.length
+ ?`Not resolved architecturally: ${conflicts.length} existing opening envelope(s) conflict with the proposed roof: ${conflicts.map(w=>w.name).join(', ')}. These are highlighted, not approved for removal. No loft-room or roof proposal should be adopted until these conflicts, headroom and hidden intersections are designed.`
+ :'No roof-height or outward-view obstruction detected in 65 samples per opening. This is not a continuous clearance, egress, daylight or structural approval.')
+ +(covered.length?` Existing east-room windows also face into the proposed garage roof volume (${covered.length} opening envelopes). They cannot be treated as unobstructed exterior windows. This remains an unresolved design conflict, not permission to conceal or remove them.`:'');
+const roofZone=1.5,roomFloor=10;
+const fitRooms=getUpstairsDefaultPlan(UpstairsLayout.stairOpening()).rooms.filter(r=>/Laundry|Mechanical|Finished loft/.test(r.name));
+function clipHeight(polygon,plane,threshold){
+ const result=[];
+ for(let i=0;i<polygon.length;i++){
+  const a=polygon[i],b=polygon[(i+1)%polygon.length];
+  const av=HomeRoof.heightAt(plane,a)-threshold,bv=HomeRoof.heightAt(plane,b)-threshold;
+  if(av>=0)result.push(a);
+  if((av<0&&bv>0)||(av>0&&bv<0)){
+   const fraction=av/(av-bv);result.push([a[0]+(b[0]-a[0])*fraction,a[1]+(b[1]-a[1])*fraction]);
+  }
+ }
+ return result;
+}
+function measureRoomFit(room,roofFaces)
+{
+ const boundary=[[room.x,room.z],[room.x+room.w,room.z],[room.x+room.w,room.z+room.d],[room.x,room.z+room.d]];
+ const pieces=roofFaces.map(face=>({plane:face.plane,polygon:HomeRoof.intersectPolygons(face.polygon,boundary)})).filter(p=>p.polygon.length>=3);
+ const heights=pieces.flatMap(piece=>piece.polygon.map(p=>Math.min(9,HomeRoof.heightAt(piece.plane,p)-roofZone-roomFloor)));
+ const areaAt=height=>pieces.reduce((sum,piece)=>sum+Math.abs(HomeRoof.signedArea(clipHeight(piece.polygon,piece.plane,roomFloor+roofZone+height))),0);
+ return {room,pieces,min:Math.min(...heights),max:Math.max(...heights),area:room.w*room.d,area5:areaAt(5),area7:areaAt(7),area9:areaAt(9)};
+}
+const roomFits=fitRooms.map(room=>measureRoomFit(room,faces));
+const currentRoomFits=fitRooms.map(room=>measureRoomFit(room,currentEnvelope.faces));
+function svgElement(svg,tag,attributes,text){
+ const node=document.createElementNS(ns,tag);
+ for(const[name,value]of Object.entries(attributes))node.setAttribute(name,value);
+ if(text)node.textContent=text;
+ svg.append(node);return node;
+}
+const garageLightChecks=garageFixtures.map((fixture,index)=>
+{
+ const hole=garageFront[5][index],minY=Math.min(...fixture.points.map(point=>point[1]))-.03;
+ return {centerX:fixture.x,doorCenterX:garageFront[1]+(hole[0]+hole[1])/2,
+  aboveTrim:minY-hole[3]-garageDoorTrim};
+});
+document.getElementById('garage-light-check').textContent=
+ `No canopy over the garage doors. The two retained lights are centered on the openings, with at least `+
+ `${(Math.min(...garageLightChecks.map(check=>check.aboveTrim))*12).toFixed(1)} in above an 8-inch head-trim allowance, including a small tube allowance. `+
+ 'These are drawn-envelope checks, not product, exposed-weather or installation approval.';
+function drawGarageLightDetail()
+{
+ const svg=document.getElementById('garage-light-detail');
+ const point=p=>[70+(p[0]-30.3)*37,550-(p[1]+1.25)*37];
+ const polygon=(points,fill)=>svgElement(svg,'polygon',{points:points.map(p=>point(p).join(',')).join(' '),fill});
+ polygon([[31.2,-1.25],[55.5,-1.25],[55.5,10.65],[31.2,10.65]],'#e7d8bc');
+ for(const hole of garageFront[5])
+ {
+  const left=garageFront[1]+hole[0],right=garageFront[1]+hole[1],sill=hole[2],head=hole[3];
+  polygon([[left-garageDoorTrim,sill],[right+garageDoorTrim,sill],[right+garageDoorTrim,head+garageDoorTrim],[left-garageDoorTrim,head+garageDoorTrim]],'#f4ecd8');
+  polygon([[left,sill],[right,sill],[right,head],[left,head]],'#ad9c84');
+  const mid=(left+right)/2;
+  const a=point([mid,sill]),b=point([mid,head]);
+  svgElement(svg,'line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:'#766852','stroke-width':2});
+  svgElement(svg,'text',{x:point([mid,0])[0],y:580,'text-anchor':'middle','font-size':18},'Existing 9 x 8 ft opening');
+ }
+ for(const fixture of garageFixtures)for(const part of fixture.parts)
+ {
+  if(part.line)svgElement(svg,'polyline',{points:part.points.map(p=>point(p).join(',')).join(' '),fill:'none',stroke:part.stroke,'stroke-width':part.width});
+  else polygon(part.points,part.fill);
+ }
+ svgElement(svg,'text',{x:70,y:38,'font-size':21},'No garage-door canopy; both lights and door openings stay fixed');
+ svgElement(svg,'text',{x:70,y:610,'font-size':17},'Cropped facade detail only. Fixtures, exposed-weather suitability and wiring are not approved.');
+}
+function drawRearCapDetail(id,proposed)
+{
+ const svg=document.getElementById(id),[left,right,rear,back]=rearWallCap.bounds;
+ const point=p=>[70+(right-p[0])*60,70+(10.1-p[1])*60];
+ const polygon=(points,fill)=>svgElement(svg,'polygon',{points:points.map(p=>point(p).join(',')).join(' '),fill});
+ polygon([[left,6.1],[right,6.1],[right,10.3],[left,10.3]],'#e7d8bc');
+ polygon([[left,6.1],[right,6.1],[right,9.2],[left,9.2]],'#eee2cb');
+ const wall=getGroundFloorDefaultPlan().walls.find(wall=>wall[0]==='Kitchen north');
+ for(const hole of wall[5])
+ {
+  const a=wall[1]+hole[0],b=wall[1]+hole[1],sill=Math.max(6.1,hole[2]),head=hole[3];
+  polygon([[a-.2,sill],[b+.2,sill],[b+.2,head+.2],[a-.2,head+.2]],'#f4ecd8');
+  polygon([[a,sill],[b,sill],[b,head],[a,head]],'#91a39c');
+  const intent=getWindowProductIntent(b-a,head-hole[2],false,false);
+  for(let i=1;i<intent.columns;i++)
+  {
+   const x=a+(b-a)*i/intent.columns,p=point([x,sill]),q=point([x,head]);
+   svgElement(svg,'line',{x1:p[0],y1:p[1],x2:q[0],y2:q[1],stroke:'#5c4c39','stroke-width':2});
+  }
+ }
+ const nearY=HomeRoof.heightAt(rearWallCap.planes[0],[left,rear]),farY=HomeRoof.heightAt(rearWallCap.planes[0],[left,back]);
+ polygon([[left,nearY],[right,nearY],[right,farY],[left,farY]],proposed?'#e7d8bc':'#5c6059');
+ polygon([[left,proposed?9:8.88],[right,proposed?9:8.88],[right,nearY],[left,nearY]],proposed?'#eee2cb':'#ded3bd');
+ svgElement(svg,'text',{x:70,y:35,'font-size':20},proposed?'Sloped cap blends with the masonry; no projecting fascia':'Current dark weathering strip and deep fascia');
+ svgElement(svg,'text',{x:70,y:350,'font-size':17},'Kitchen window cropped for detail; opening, wall faces and 4.8-inch setback stay fixed.');
+}
+drawGarageLightDetail();
+drawRearCapDetail('rear-cap-current',false);
+drawRearCapDetail('rear-cap-proposed',true);
+function valleyMetrics(plans)
+{
+ const valleys=plans.flatMap((plan,index)=>plan.joins.filter(join=>join.type==='valley').map(join=>
+ {
+  const run=Math.hypot(join.end[0]-join.start[0],join.end[2]-join.start[2]);
+  const fall=Math.abs(join.end[1]-join.start[1]);
+  return {plan:index,start:join.start,end:join.end,run,fall,pitch:run>1e-7?12*fall/run:0};
+ })).filter(valley=>valley.run>.001);
+ return {valleys,flat:valleys.filter(valley=>valley.pitch<.001),
+  minPitch:Math.min(...valleys.map(valley=>valley.pitch))};
+}
+const drainageCurrent=valleyMetrics(currentRoofPlans),drainageProposed=valleyMetrics(allRoofPlans);
+const drainageTable=document.getElementById('drainage-table');
+for(const [index,values]of [
+ ['Check','Current 3D geometry','Reworked HTML geometry'],
+ ['Level valley length',`${drainageCurrent.flat.reduce((sum,valley)=>sum+valley.run,0).toFixed(2)} ft`,
+  `${drainageProposed.flat.reduce((sum,valley)=>sum+valley.run,0).toFixed(2)} ft`],
+ ['Lowest calculated valley fall','Contains level channels',`${drainageProposed.minPitch.toFixed(2)} inches per horizontal foot`],
+ ['Garage valley discharge','Existing junctions unresolved','Continuous valley to garage-front eave; collector, overflow and leader unresolved']
+].entries())
+{
+ const row=document.createElement('tr');
+ for(const value of values)
+ {
+  const cell=document.createElement(index===0?'th':'td');cell.textContent=value;row.append(cell);
+ }
+ drainageTable.append(row);
+}
+if(drainageProposed.flat.length)
+{
+ document.getElementById('issues').textContent+=` Drainage check failed: ${drainageProposed.flat.length} level valley segment(s) remain.`;
+}
+const fitSvg=document.getElementById('room-fit'),fitX=x=>100+(x-30.5)*34,fitZ=z=>85+(z-26)*34;
+for(const fit of roomFits){
+ for(const[threshold,color]of[[0,'#e6b5a3'],[5,'#ead69a'],[7,'#b7ceb1']]){
+  for(const piece of fit.pieces){
+   const polygon=clipHeight(piece.polygon,piece.plane,roomFloor+roofZone+threshold);
+   if(polygon.length<3)continue;
+   svgElement(fitSvg,'polygon',{points:polygon.map(p=>[fitX(p[0]),fitZ(p[1])].join(',')).join(' '),fill:color});
+  }
+ }
+ const r=fit.room;
+ svgElement(fitSvg,'rect',{x:fitX(r.x),y:fitZ(r.z),width:r.w*34,height:r.d*34,fill:'none',stroke:'#625741','stroke-width':2});
+ svgElement(fitSvg,'text',{x:fitX(r.x+r.w/2),y:fitZ(r.z+r.d/2),'text-anchor':'middle','font-size':16,fill:'#332d23'},r.name.replace(' (relocated)',''));
+}
+svgElement(fitSvg,'text',{x:100,y:38,'font-size':19},'NORTH / rear at top — existing room outlines retained');
+svgElement(fitSvg,'text',{x:100,y:610,'font-size':17},'Headroom overlay only: furniture, door operation and equipment clearances are not approved.');
+const table=document.getElementById('room-fit-table');
+const header=document.createElement('tr');
+for(const text of ['Existing room','Size (ft)','Calculated ceiling clearance','Floor with ≥7 ft','Floor with ≥9 ft']){
+ const th=document.createElement('th');th.textContent=text;header.append(th);
+}table.append(header);
+for(const fit of roomFits){
+ const row=document.createElement('tr'),r=fit.room;
+ for(const text of [r.name,`${r.w.toFixed(2)} × ${r.d.toFixed(2)}`,`${fit.min.toFixed(2)}–${fit.max.toFixed(2)} ft`,
+  `${(fit.area7/fit.area*100).toFixed(1)}%`,`${(fit.area9/fit.area*100).toFixed(1)}%`]){
+  const cell=document.createElement('td');cell.textContent=text;row.append(cell);
+ }table.append(row);
+}
+const loft=fitRooms.find(r=>r.name==='Finished loft'),sectionZ=loft.z+loft.d/2;
+const proposedLoftFit=roomFits.find(fit=>fit.room===loft),currentLoftFit=currentRoomFits.find(fit=>fit.room===loft);
+const currentGarageRoof=currentRoofs.find(roof=>roof.id===garageRoof.id);
+const garageCenter=(garageRoof.bounds[0]+garageRoof.bounds[1])/2;
+const garageCrown=Math.min(...garageRoof.planes.map(plane=>HomeRoof.heightAt(plane,[garageCenter,sectionZ])));
+const currentGarageCrown=Math.min(...currentGarageRoof.planes.map(plane=>HomeRoof.heightAt(plane,[garageCenter,sectionZ])));
+document.getElementById('loft-summary').textContent=
+ `Calculated loft ceiling: ${currentLoftFit.min.toFixed(2)}–${currentLoftFit.max.toFixed(2)} ft currently, `+
+ `${proposedLoftFit.min.toFixed(2)}–${proposedLoftFit.max.toFixed(2)} ft proposed. `+
+ `${(proposedLoftFit.area7/proposedLoftFit.area*100).toFixed(1)}% of the retained floor has at least 7-ft clearance; `+
+ `${(proposedLoftFit.area9/proposedLoftFit.area*100).toFixed(1)}% reaches the 9-ft flat ceiling. `+
+ 'These use the same provisional 18-inch vertical roof zone; structure and occupied use are not approved.';
+const loftComparison=document.getElementById('loft-roof-comparison');
+for(const [index,values]of [
+ ['Check','Current 3D roof','Proposed HTML roof'],
+ ['Garage roof pitch','10:12','6:12'],
+ ['Eave above house floor','14.50 ft',`${garageEave.toFixed(2)} ft (+4 ft)`],
+ ['Garage roof peak',`${currentGarageCrown.toFixed(3)} ft`,`${garageCrown.toFixed(3)} ft`],
+ ['Lowest loft ceiling',`${currentLoftFit.min.toFixed(2)} ft`,`${proposedLoftFit.min.toFixed(2)} ft`],
+ ['Floor with at least 7-ft clearance',`${(currentLoftFit.area7/currentLoftFit.area*100).toFixed(1)}%`,`${(proposedLoftFit.area7/proposedLoftFit.area*100).toFixed(1)}%`],
+ ['Floor with 9-ft ceiling',`${(currentLoftFit.area9/currentLoftFit.area*100).toFixed(1)}%`,`${(proposedLoftFit.area9/proposedLoftFit.area*100).toFixed(1)}%`]
+].entries())
+{
+ const row=document.createElement('tr');
+ for(const value of values)
+ {
+  const cell=document.createElement(index===0?'th':'td');cell.textContent=value;row.append(cell);
+ }
+ loftComparison.append(row);
+}
+function drawLoftSection(id,definitions,label)
+{
+ const section=document.getElementById(id),sectionX=x=>160+(x-30.3)*30,sectionY=y=>570-(y-roomFloor)*30;
+ const topAt=x=>
+ {
+  const candidates=definitions.filter(roof=>x>=roof.bounds[0]&&x<=roof.bounds[1]&&sectionZ>=roof.bounds[2]&&sectionZ<=roof.bounds[3]);
+  if(!candidates.length)throw new Error(`Uncovered loft section at x=${x}.`);
+  return Math.max(...candidates.map(roof=>Math.min(...roof.planes.map(plane=>HomeRoof.heightAt(plane,[x,sectionZ])))));
+ };
+ function sectionPolygon(points,fill,stroke='#71634a')
+ {
+  return svgElement(section,'polygon',{points:points.map(p=>[sectionX(p[0]),sectionY(p[1])].join(',')).join(' '),fill,stroke,'stroke-width':1.5});
+ }
+ const topProfile=[];
+ for(let i=0;i<=120;i++)
+ {
+  const x=30.3+(56.2-30.3)*i/120;topProfile.push([x,topAt(x)]);
+ }
+ sectionPolygon([...topProfile,...topProfile.slice().reverse().map(([x,y])=>[x,y-roofZone])],'#72796e');
+ const roomProfile=[[loft.x,roomFloor],[loft.x+loft.w,roomFloor]];
+ for(let i=120;i>=0;i--)
+ {
+  const x=loft.x+loft.w*i/120;roomProfile.push([x,Math.min(roomFloor+9,topAt(x)-roofZone)]);
+ }
+ sectionPolygon(roomProfile,'#dcd0b6');
+ svgElement(section,'rect',{x:sectionX(loft.x),y:sectionY(roomFloor+9),width:loft.w*30,height:9*30,fill:'none',stroke:'#ab5744','stroke-width':2,'stroke-dasharray':'7 5'});
+ svgElement(section,'line',{x1:sectionX(30.3),x2:sectionX(56.2),y1:sectionY(roomFloor),y2:sectionY(roomFloor),stroke:'#8c7350','stroke-width':6});
+ svgElement(section,'text',{x:100,y:35,'font-size':20},`${label}; main roof at left; dashed = 9-ft reference`);
+ svgElement(section,'text',{x:100,y:610,'font-size':18},'Garage below. Equal horizontal/vertical scale; feet. Same room and floor level.');
+ svgElement(section,'text',{x:100,y:638,'font-size':17},'Roof-zone thickness, framing, insulation and fire separation remain unverified.');
+}
+drawLoftSection('current-loft-section',currentRoofs,'Current 10:12 roof');
+drawLoftSection('loft-section',roofs,'Proposed 6:12 roof');
+</script>
+</details>
+</html>

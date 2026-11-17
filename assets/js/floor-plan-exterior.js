@@ -414,7 +414,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   palePaving.name = 'Natural warm limestone-look porch and path pavers - exterior performance unverified';
   garageSurround.bumpMap = masonryMaps ? null : stoneTexture;
   garageSurround.bumpScale = 0.025;
-  group.userData.materialStudy = 'November 15 adopted coordinated-roof sketch: transverse main ridge, paired bedroom gables, room-in-roof garage, low rear metal roof and garage eyebrow. Room footprints and openings retained. Existing warm ivory brick, cream mortar, entrance-only cast stone, oak doors, bronze windows, taupe garage doors and horizontal wood porch ceiling remain; experimental facade materials stay opt-in. CC0 maps and procedural shingles are display references, not products. Samples, veneer/roof/ceiling support, waterproofing, fixtures, paving and occupied operation remain unapproved.';
+  group.userData.materialStudy = 'November 17 adopted repeated-gable roof: full-width common roof, 9:12 front / 3:12 rear and three matching 12:12 front gables. Two garage attic windows added without room/floor changes. Main roof projects 5.325 feet beyond the recessed garage wall; framed pediment supports are unapproved. No garage eyebrow. Ivory brick, cream mortar, entrance-only cast stone, oak doors, bronze grids, taupe garage doors and flat wood porch ceiling remain; experimental facade materials stay opt-in. Products, structure, waterproofing, fixtures and occupied use remain unapproved.';
   const roofCanvas = document.createElement('canvas');
   roofCanvas.width = roofCanvas.height = 1024;
   const roofPaint = roofCanvas.getContext('2d');
@@ -728,7 +728,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   }
   function wall(name, x1, z1, x2, z2, bottom, top, openings = []) {
     masonryFootprints.push({ name, x1, z1, x2, z2, bottom, top, thickness: wallThickness });
-    const front = ['front ground floor', 'upper front bedrooms', 'upper front bedroom 4', 'upper loft south'].includes(name);
+    const front = ['front ground floor', 'upper front bedrooms', 'upper front bedroom 4', 'upper loft south', 'garage front'].includes(name);
     const wallGroup = new THREE.Group();
     wallGroup.name = `Exterior brick wall: ${name}`;
     wallGroup.position.set(x1, 0, z1);
@@ -759,12 +759,24 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
         wallBricks.push(...placements);
       }
     }
-    let cursor = 0;
+    const divisions = [...new Set([0,length,...openings.flatMap(opening => [opening.center-opening.width/2,opening.center+opening.width/2])])].sort((a,b)=>a-b);
+    for (let index=1;index<divisions.length;index++)
+    {
+      const start=divisions[index-1],end=divisions[index],mid=(start+end)/2;
+      const cuts=openings.filter(opening=>mid>opening.center-opening.width/2&&mid<opening.center+opening.width/2)
+        .sort((a,b)=>a.sill-b.sill);
+      let cursor=bottom;
+      for (const opening of cuts)
+      {
+        if(opening.sill+opening.height<=cursor)continue;
+        if(opening.sill>=top)break;
+        fill(start,end,cursor,Math.min(top,opening.sill));
+        cursor=Math.max(cursor,opening.sill+opening.height);
+      }
+      fill(start,end,cursor,top);
+    }
     for (const opening of openings) {
       const { center, width, sill, height, door } = opening;
-      fill(cursor, center - width / 2, bottom, top);
-      fill(center - width / 2, center + width / 2, bottom, sill);
-      fill(center - width / 2, center + width / 2, sill + height, top);
       if (opening.units) {
         for (const unit of opening.units) windowUnit(wallGroup, center + opening.bankX - unit.x, unit.sill, unit.width, unit.height, false, unit.picture, false, false, unit.singleHung);
         const bankFrame = wallGroup.children.findLast(child => child.name === 'Andersen 100 Series exterior concept window');
@@ -775,9 +787,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
         box(wallGroup, center, opening.frameSill + opening.frameHeight + 0.2, 0.28, opening.frameWidth + 0.65, 0.3, 0.3, trim).name = `${opening.trimLabel ?? 'Prep'} bank continuous exterior header trim`;
       } else if (!door) windowUnit(wallGroup, center, opening.frameSill ?? sill, opening.frameWidth ?? width, opening.frameHeight ?? height, opening.privacyLowerHalf, opening.picture, !name.startsWith('upper '), front, false,
         name === 'front ground floor' ? groundFrontLintel.y - groundFrontLintel.height / 2 : Infinity);
-      cursor = center + width / 2;
     }
-    fill(cursor, length, bottom, top);
     if (wallBricks.length) {
       const geometry = prototypeBrickGeometry.clone();
       const shifts = new Float32Array(wallBricks.length * 2);
@@ -1026,10 +1036,20 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     box(garageSideLeaf, -0.35, 3.1, side * 0.14, 0.12, 0.5, 0.08, dark).name = 'Exterior door lockset';
     box(garageSideLeaf, -0.48, 3.1, side * 0.2, 0.35, 0.08, 0.1, dark).name = 'Exterior door lever';
   }
-  wall('garage front', 31.2, 49, 55.5, 49, garageFloorY - 0.3, HomeRoof.studyAlternative ? 9 : 14.5, [
+  const garageAtticWindows=HomeRoof.studyAlternative?[]:HomeRoof.getGarageAtticWindows(floorToFloor);
+  const garageFrontWall=wall('garage front', 31.2, 49, 55.5, 49, garageFloorY - 0.3, HomeRoof.studyAlternative ? 9 : floorToFloor+9, [
     { center: 5.8, width: 9, sill: garageFloorY, height: 8, door: true },
-    { center: 17.3, width: 9, sill: garageFloorY, height: 8, door: true }
+    { center: 17.3, width: 9, sill: garageFloorY, height: 8, door: true },
+    ...garageAtticWindows.map(window=>({...window,center:window.x-31.2}))
   ]);
+  for(const [index,window]of garageAtticWindows.entries())
+  {
+    const frame=garageFrontWall.children.filter(part=>part.name==='Andersen 100 Series exterior concept window')[index];
+    if(!frame)throw new Error(`Missing garage attic window frame: ${window.name}`);
+    Object.assign(frame.userData,{atticOnly:true,occupiedSpaceApproved:false,room:'Unfinished front garage roof void'});
+    windowInstallations.push({name:window.name,x:window.x,y:window.sill,z:window.z+.25,width:window.width,height:window.height,
+      openingId:`garage-attic-${index+1}`,units:1,picture:false,pictureUnits:0,singleHung:false,atticOnly:true});
+  }
   wall('garage porch return', 31.2, frontWallZ, 31.2, 49, -0.4, 9);
   const upper = floorToFloor;
   const measuredUpper = getUpstairsMeasuredGeometry();
@@ -1046,8 +1066,8 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     wall('upper retained finished loft south', ...studyLoftSouth, 9, eaves,
       getUpstairsExteriorOpenings(...studyLoftSouth, upper));
   // The southern attic half is a finished loft; the northern void is excluded.
-  const garageFacadeEaves = HomeRoof.studyAlternative ? 9 : 14.5;
-  group.userData.garageUpperVolume = 'Laundry and mechanical room retain nine-foot ceilings. The finished loft has a flat-to-sloped ceiling, about 3.58 to 9 feet clear with an assumed 18-inch vertical roof zone; low east-side space is not full-height usable area. The rear garage/prep bay has a separate low metal roof. Framing, bearings, insulation, garage separation and occupied use remain unapproved.';
+  const garageFacadeEaves = HomeRoof.studyAlternative ? 9 : floorToFloor+9;
+  group.userData.garageUpperVolume = 'November 17 repeated-gable roof: existing loft, laundry and mechanical room retain nine-foot ceiling intent below the shared roof. Garage front windows serve unfinished roof space, not the rear loft. The main roof projects 5.325 feet beyond the recessed garage wall; no new room, floor or support approval. Framing, bearings, headers, insulation, fire separation and occupied use remain unapproved.';
 
   function prototypeGutter(parent, start, end, neighbours = []) {
     const width = 5 / 12, height = 3.5 / 12, thickness = 0.025 / 12;
@@ -1104,6 +1124,8 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     group.add(model);
     const soffitFinish = undersideFinish ?? white.clone();
     soffitFinish.side = THREE.DoubleSide;
+    const wallCapFinish=mat(`#${finishes.brick.face.map(channel=>channel.toString(16).padStart(2,'0')).join('')}`,.8);
+    wallCapFinish.name='Wall-matched rear weathering cap - system unselected';
     function surface(polygon, plane, finish, label, offset = 0) {
       const triangles = [];
       const gradient = Math.hypot(plane[0], plane[1]);
@@ -1144,12 +1166,13 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       return part;
     }
     for (const face of plan.faces) {
-      const faceMaterial = face.finish === 'metal' && metalFinish ? metalFinish : material;
+      const wallCap=face.roof==='Kitchen rear setback metal'&&!HomeRoof.studyAlternative;
+      const faceMaterial = wallCap?wallCapFinish:face.finish === 'metal' && metalFinish ? metalFinish : material;
       const mesh = surface(face.polygon, face.plane, faceMaterial, `${face.roof} connected roof surface`);
       mesh.userData = { ...mesh.userData, roofSurface: true, roof: face.roof, patch: face.id, plane: face.plane, polygon: face.polygon };
       const underside = surface(face.polygon, face.plane, soffitFinish, 'Closed connected roof underside', -0.16);
       underside.userData.noExteriorShadow = true;
-      if (metal || face.finish === 'metal') {
+      if ((metal || face.finish === 'metal')&&!wallCap) {
         const [gx, gz] = face.plane, gradient = Math.hypot(gx, gz);
         const u = gradient ? [gz / gradient, -gx / gradient] : [1, 0];
         const projections = face.polygon.map(([x, z]) => x * u[0] + z * u[1]);
@@ -1234,7 +1257,6 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       // through adjoining roof slopes at both rear corners. Clip rake/eaves
       // strips to their actual visible face, including valley terminations.
       for (const face of plan.faces) {
-        if (!face.plane.every((value, i) => Math.abs(value - edge.plane[i]) < 1e-7)) continue;
         const polygon = HomeRoof.intersectPolygons([a, b, c, d], face.polygon);
         if (polygon.length) surface(polygon, face.plane,
           white, 'Connected roof closed edge soffit', -0.2);
@@ -1280,7 +1302,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   masonryFootprints.push(livingPatioCanopy.closureFootprint);
   const setbackRoofs = renderRoofEnvelope('Closed ground-floor setback roofs', HomeRoof.getLowerRoofDefinitions().filter(({id})=>id!=='Garage room-in-roof'), slateFinish, false, setbackFinish);
   setbackRoofs.userData.designReview = 'Illustrative low-slope metal roof closure; selected roofing minimum slope, tapered build-up, wall flashing, support, east-side drainage and the dining west slope draining against the patio canopy closure require design. No terrace or added room.';
-  const setbackPlan = HomeRoof.buildRoofEnvelope(HomeRoof.getLowerRoofDefinitions());
+  const setbackPlan = HomeRoof.buildRoofEnvelope(HomeRoof.studyAlternative?HomeRoof.getLowerRoofDefinitions():HomeRoof.getConnectedRoofDefinitions(floorToFloor));
   if (['B','C'].includes(HomeRoof.studyAlternative)) {
     const link = HomeRoof.getConnectedRoofDefinitions(floorToFloor).find(d=>d.id==='Garage service return');
     const left = link.bounds[0], right = measuredUpper.atticEast, z = link.bounds[2];
@@ -1344,15 +1366,34 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     closure.userData = { cladding: 'brick', finishOnly: true, structuralSupportDesigned: false };
     setbackRoofs.add(closure);
   }
+  if(!HomeRoof.studyAlternative)
+  {
+    const front=HomeRoof.getGarageFrontPediment(floorToFloor),positions=[];
+    const back=front.map(([x,y,z])=>[x,y,z-.18]);
+    const points=[...front,...back];
+    for(const indices of [[0,1,2],[5,4,3],[0,3,4],[0,4,1],[1,4,5],[1,5,2],[2,5,3],[2,3,0]])
+      for(const index of indices)positions.push(...points[index]);
+    const geometry=new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+    geometry.computeVertexNormals();
+    brickFaceUVs(geometry,'x');
+    const pediment=new THREE.Mesh(geometry,frontBrick);
+    pediment.name='Projecting garage framed gable face - support unverified';
+    pediment.userData={finishOnly:true,projectionFeet:5.325,structuralSupportDesigned:false,newRoom:false};
+    pediment.castShadow=pediment.receiveShadow=true;
+    houseRoof.add(pediment);
+  }
   for (const edge of setbackPlan.boundaries) {
     if (!edge.roof.includes('setback roof') && !['Garage rear metal lean-to','Kitchen rear setback metal'].includes(edge.roof)) continue;
     const y = t => edge.start[1] + (edge.end[1] - edge.start[1]) * t;
+    const wallCap=edge.roof==='Kitchen rear setback metal'&&!HomeRoof.studyAlternative;
     if (isSetbackAbutment(edge)) {
-      setbackSection('Setback roof wall counterflashing - design required', edge.start, edge.end, 0.06, t => y(t) - 0.03, t => y(t) + 0.35, setbackFinish);
+      setbackSection('Setback roof wall counterflashing - design required', edge.start, edge.end, 0.06, t => y(t) - 0.03, t => y(t) + 0.35, wallCap?trim:setbackFinish);
     } else {
       // A tall perimeter closure below a raised roof edge is wall, not fascia: brick.
       const tall = Math.max(edge.start[1], edge.end[1]) - 8.88 > 1.5;
-      const closure = setbackSection('Setback roof closed perimeter fascia', edge.start, edge.end, 0.12, () => 8.88, y, tall ? frontBrick : trim);
+      const closure = setbackSection(wallCap?'Rear wall cap closed masonry head':'Setback roof closed perimeter fascia',
+        edge.start, edge.end, 0.12, () => wallCap?9:8.88, y, wallCap||tall ? frontBrick : trim);
       if (tall) {
         mapBrickBoxUVs(closure.geometry, brickTextureWidthFeet, brickTextureHeightFeet);
         closure.userData.cladding = 'brick';
@@ -1431,7 +1472,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       houseRoof.add(closure);
     }
   }
-  houseRoof.userData.drainageIntent = 'Transverse main ridge and intersecting bedroom gables connect to the room-in-roof garage through computed valleys. The loft has a flat-to-sloped ceiling and a provisional 18-inch total vertical roof zone; low side areas are not full-height usable space. Garage and rear-roof collectors route to east corners, separate from the patio. Framing, bearings, headers, garage fire separation, insulation, eave attachments, valley drainage, overflow and discharge remain unapproved. Veneer carries no roof loads.';
+  houseRoof.userData.drainageIntent = 'November 17: full-width shared main roof, 9:12 front / 3:12 rear and three matching 12:12 cross-gables. Main roof projects 5.325 feet beyond the recessed garage wall. The framed front pediment is not a new room or approved cantilever; no eyebrow canopy. Nine-foot loft ceiling is provisional. Framing, bearings, headers, fire separation, insulation, eave supports, valley collection, overflow and lawful discharge require professional design.';
   houseRoof.userData.framingAllowanceInches = 18;
   houseRoof.userData.framingAllowanceVerified = false;
 
@@ -1494,9 +1535,12 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const atticRoofAt = x => Math.min(...atticRoof.planes.map(plane=>HomeRoof.heightAt(plane,[x,atticRoofSouth])));
   const atticRoofLow = atticRoofAt(atticRoofEast);
   if (!HomeRoof.studyAlternative) {
+    const extension=HomeRoof.getConnectedRoofDefinitions(floorToFloor).find(roof=>roof.id==='Main garage extension');
+    const front=extension.bounds[3],right=extension.bounds[1];
+    const eave=Math.min(...extension.planes.map(plane=>HomeRoof.heightAt(plane,[right,front])));
     drainageRoute(group,'Garage east eave to corner leader - capacity unverified',[
-      [atticRoofEast,atticRoofLow-.1,atticRoof.bounds[2]],
-      [atticRoofEast,atticRoofLow-.1,49.7],[55.95,13.7,48.8],
+      [31.85,eave-.1,front],[right,eave-.1,front],
+      [55.95,eave-1.3,48.8],
       [55.95,-1.35,48.8],[55.95,-1.6,49.2]
     ],[2,7,12].map(y=>[[55.725,y,48.8],[55.95,y,48.8]]));
     const lean = HomeRoof.getConnectedRoofDefinitions(floorToFloor).find(roof=>roof.id==='Garage rear metal lean-to');
@@ -1955,6 +1999,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const porchRoof = renderRoofEnvelope('Connected standing-seam porch and entry roof', HomeRoof.getPorchRoofDefinitions(), porchMetal, true);
   if (!HomeRoof.studyAlternative) {
     const browDefinitions=HomeRoof.getGarageEyebrowDefinitions();
+    if(browDefinitions.length) {
     const brow=renderRoofEnvelope('Adopted garage eyebrow metal roof',browDefinitions,porchMetal,true);
     const [left,right,,front]=browDefinitions[0].bounds;
     const y=HomeRoof.heightAt(browDefinitions[0].planes[0],[left,front]);
@@ -1967,6 +2012,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     drainageRoute(group,'Garage eyebrow outlet to corner leader - capacity unverified',[
       [right,y-.2,front+.2],[55.95,7.1,front+.2],[55.95,6.9,48.8]
     ]);
+    }
   }
   if (facadePrototype) {
     const porchDefinition = HomeRoof.getPorchRoofDefinitions()[0];
@@ -2518,7 +2564,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   }
   wallDownlight('Front door wall downlight', 15.6, 8.6, frontWallZ + 0.675, 0, 15.6, 59.5 + frontShift, 26, 0);
   for (const [index, x] of [37, 48.5].entries()) {
-    if (facadePrototype || !HomeRoof.studyAlternative) lantern(group, x, 9.35, 49.555);
+    if (facadePrototype && HomeRoof.studyAlternative) lantern(group, x, 9.35, 49.555);
     else garageGooseneck(`Garage door ${index + 1} bronze gooseneck wall light`, x);
   }
   for (const z of [14, 28]) wallDownlight('West side-path wall downlight', -0.475, 8.6, z, -Math.PI / 2, westGateCenterX, z, 30);

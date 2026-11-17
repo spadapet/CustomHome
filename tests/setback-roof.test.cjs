@@ -34,14 +34,19 @@ test('old loft transition is removed and roof abutments follow the Version H ser
     }
   }
 });
-test('garage return intersections are clipped to unique highest lower faces',()=>{
-  const plan=roof.buildRoofEnvelope(roof.getLowerRoofDefinitions());
+test('garage return intersections have unique highest heights and no positive-area face overlap',()=>{
+  const plan=roof.buildRoofEnvelope(roof.getConnectedRoofDefinitions());
+  for(let i=0;i<plan.faces.length;i++)for(let j=i+1;j<plan.faces.length;j++){
+    const overlap=roof.intersectPolygons(plan.faces[i].polygon,plan.faces[j].polygon);
+    assert.ok(Math.abs(roof.signedArea(overlap))<1e-6,'Shared edges are allowed, overlapping surface areas are not');
+  }
   let samples=0;
   for(let x=31.5;x<56.2;x+=.37)for(let z=41.3;z<49.85;z+=.31){
     const p=[x,z],faces=plan.faces.filter(f=>roof.contains(f.polygon,p));
-    assert.equal(faces.length,1,`Unique face at ${p}`);
+    assert.ok(faces.length>=1,`Roof covers ${p}`);
     const candidates=plan.patches.filter(f=>roof.contains(f.polygon,p));
-    assert.ok(Math.abs(roof.heightAt(faces[0].plane,p)-Math.max(...candidates.map(f=>roof.heightAt(f.plane,p))))<1e-6);
+    for(const face of faces)
+      assert.ok(Math.abs(roof.heightAt(face.plane,p)-Math.max(...candidates.map(f=>roof.heightAt(f.plane,p))))<1e-6);
     samples++;
   }
   assert.ok(samples>1000);

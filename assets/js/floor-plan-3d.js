@@ -293,7 +293,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     });
     walkControls.hidden = !walking;
     viewport.classList.toggle('walking', walking);
-    viewport.setAttribute('aria-label', activeFloor === 'exterior' ? `3D paired-gable English-French Transitional full-brick exterior study. Drag to ${moving ? 'move' : 'rotate'}; scroll or pinch to zoom. Select Front, Rear, West side, or East side for elevations.` : walking
+    viewport.setAttribute('aria-label', activeFloor === 'exterior' ? `3D three-gable English-French Transitional full-brick exterior study. Drag to ${moving ? 'move' : 'rotate'}; scroll or pinch to zoom. Select Front, Rear, West side, or East side for elevations.` : walking
       ? `3D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground floor'} third-person tour. Click the floor or plan to travel; drag to look. Tour or Escape exits, Home resets.`
       : `3D ${activeFloor === 'upstairs' ? 'upstairs' : 'ground floor'}. Click the floor to enter the tour. Drag to ${moving ? 'move' : 'rotate'}; scroll or pinch to zoom. Keyboard: left/right arrows rotate, plus/minus zoom, Home resets.`);
     setTourStatus(walking ? 'Tour on.' : '');
@@ -4556,7 +4556,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     const format = (area) => Math.round(area).toLocaleString('en-US');
     const output = document.getElementById('livable-area');
     output.textContent = `Area: ~${format(groundArea + upstairsArea)} sq ft`;
-    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs count on the floor from which they descend: first-floor basement stairs and second-floor stairs included; open stair gaps excluded. Active Version H; assumes modeled indoor rooms, including the mechanical closet, are finished and conditioned.     Includes southern loft intent once with a flat-to-sloped ceiling; modeled gross area below five feet is excluded. Conditioning, the seven-foot-height proportion and finished-area eligibility require professional review; northern unfinished roof void excluded. Excludes garage, open porch, unfinished attic and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
+    output.title = `Ground floor: ~${format(groundArea)} sq ft; upstairs: ~${format(upstairsArea)} sq ft. ANSI-style above-grade gross finished-area estimate to modeled exterior finished faces, including interior walls. Shared garage walls measured to the garage-side finish. Stairs count on the floor from which they descend: first-floor basement stairs and second-floor stairs included; open stair gaps excluded. Active Version H; assumes modeled indoor rooms, including the mechanical closet, are finished and conditioned. Includes southern loft intent once with a nine-foot ceiling under the November 17 common roof; no modeled low-headroom deduction remains. Conditioning and finished-area eligibility require professional review. Front garage attic windows do not add rooms, floors or counted area. Excludes garage, open porch, unfinished attic and basement. Not a certified appraisal; actual finishes, conditioning, grade and ceiling-height eligibility require verification.`;
     const firstFloorOutput = document.getElementById('first-floor-area');
     firstFloorOutput.textContent = `1st: ~${format(groundArea)} sq ft`;
     firstFloorOutput.title = output.title;
@@ -5361,7 +5361,7 @@ function buildPreview(THREE, OrbitControls, RoundedBoxGeometry, savedUpstairsLay
     tourMapBounds.right = Math.max(...areas.map((area) => area.x + area.w));
     tourMapBounds.bottom = Math.max(...areas.map((area) => area.z + area.d));
     tourMapScale = (tourMap.width - 24) / Math.max(tourMapBounds.right - tourMapBounds.x, tourMapBounds.bottom - tourMapBounds.z);
-    viewport.setAttribute('aria-label', floor === 'exterior' ? '3D paired-gable English-French Transitional full-brick exterior study. Drag to orbit; select an elevation to view each facade.' : `3D ${floor === 'upstairs' ? 'upstairs' : 'ground floor'}. Click the floor to enter the tour. Drag to ${navigationMode === 'move' ? 'move' : 'rotate'}; scroll or pinch to zoom.`);
+    viewport.setAttribute('aria-label', floor === 'exterior' ? '3D three-gable English-French Transitional full-brick exterior study. Drag to orbit; select an elevation to view each facade.' : `3D ${floor === 'upstairs' ? 'upstairs' : 'ground floor'}. Click the floor to enter the tour. Drag to ${navigationMode === 'move' ? 'move' : 'rotate'}; scroll or pinch to zoom.`);
     tourMap.setAttribute('aria-label', `Clickable ${floor === 'upstairs' ? 'upstairs' : 'ground-floor'} plan. Arrow keys select a destination; Enter travels there.`);
     islandLightsInput.closest('details').hidden = floor !== 'ground';
     document.getElementById('exterior-views').hidden = floor !== 'exterior';

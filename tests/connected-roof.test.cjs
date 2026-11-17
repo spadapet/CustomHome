@@ -69,13 +69,13 @@ for (const [label, definitions] of [['main house', getConnectedRoofDefinitions()
   });
 }
 
-test('paired true cross-gables articulate the front while the garage remains subordinate', () => {
+test('three true cross-gables repeat across the full-width common roof', () => {
   const roof = buildRoofEnvelope(getConnectedRoofDefinitions());
   assert.deepEqual([...new Set(roof.faces.filter(face => /^(?:East|West) front gable$/.test(face.roof)).map(face => face.roof))].sort(),
     ['East front gable', 'West front gable']);
   const garage = roof.faces.filter((face) => face.roof === 'Garage room-in-roof');
   assert.ok(garage.length >= 2);
-  assert.ok(garage.every((face) => face.polygon.every((point) => heightAt(face.plane, point) <= 25.292 + 1e-7)));
+  assert.ok(garage.every((face) => face.polygon.every((point) => heightAt(face.plane, point) <= 27.775 + 1e-7)));
   const api=require('../assets/js/floor-plan-roof.js');
   const upper=require('../assets/js/floor-plan-upstairs.js').getUpstairsDefaultPlan(require('../assets/js/upstairs-layout.js').stairOpening());
   const serviceRooms=upper.rooms.filter(r=>['Laundry (relocated)','Shared bath east','Mechanical (relocated)'].includes(r.name));
@@ -94,11 +94,12 @@ test('paired true cross-gables articulate the front while the garage remains sub
   'Wing or coordinated raised return covers the service south abutment above full room framing');
 });
 
-test('main roof has a transverse ridge with 3:12 front/rear slopes; garage is one 10:12 gable', () => {
+test('main roof has coordinated 9:12 front and 3:12 rear slopes; garage repeats a 12:12 gable', () => {
   const definitions = getConnectedRoofDefinitions();
   const main = definitions.find((definition) => definition.id === 'Main house');
-  for (const plane of main.planes.slice(0,2)) close(Math.hypot(plane[0], plane[1]), 1 / 4);
-  const ridgeZ=(main.bounds[2]+main.bounds[3])/2, crown=20.6+(ridgeZ-main.bounds[2])/4;
+  close(Math.abs(main.planes[0][1]),.25);
+  close(Math.abs(main.planes[1][1]),.75);
+  const ridgeZ=.75*main.bounds[3]+.25*main.bounds[2], crown=20.6+(ridgeZ-main.bounds[2])/4;
   for(const x of [10,15,20])close(Math.min(...main.planes.map(p=>heightAt(p,[x,ridgeZ]))),crown);
   const plan = buildRoofEnvelope(definitions);
   const ridge = plan.joins.filter((join) => join.type === 'ridge' && join.roofs.every((roof) => roof === 'Main house'));
@@ -108,11 +109,11 @@ test('main roof has a transverse ridge with 3:12 front/rear slopes; garage is on
     close(point[1],crown);
   }
   const wing = definitions.find((definition) => definition.id === 'East rear wing');
-  for (const plane of wing.planes) close(Math.hypot(plane[0], plane[1]), 1 / 4);
+  assert.deepEqual(wing.planes,main.planes);
   for (const name of ['Garage room-in-roof']) {
     const gable = definitions.find(({ id }) => id === name);
-    for (const plane of gable.planes) close(Math.hypot(plane[0], plane[1]), 10/12);
-    close(gable.bounds[2],(g.atticNorth+g.atticSouth)/2-.75);
+    for (const plane of gable.planes) close(Math.hypot(plane[0], plane[1]), 1);
+    close(gable.bounds[2],ridgeZ);
   }
 });
 
@@ -148,7 +149,7 @@ test('wall-head constituents close the actual gap to the roof, with no change to
       Math.hypot(b[0] - a[0], b[1] - a[1]));
     for (const segment of segments) for (const point of [segment.start, segment.end]) {
       close(segment.bottom, 19);
-      assert.ok(point[1] > 19 && point[1] <= 26.64 + 1e-6);
+      assert.ok(point[1] > 19 && point[1] <= 29.58125-.16 + 1e-6);
       assert.ok(plan.faces.some((face) => Math.abs(heightAt(face.plane, [point[0], point[2]]) - 0.16 - point[1]) < 1e-6));
     }
   }
