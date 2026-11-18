@@ -32,6 +32,31 @@ sloped-loft, eyebrow and distinct-garage-gable instructions below are superseded
 Review roof loads/bearings, the deep garage projection and framed face,
 height limits, insulation, veneer, flashing, gutters/overflow and lawful drainage.
 
+## Adopted gutter cleanup - November 17
+
+Owner approves updating actual 3D from the coordinated gutter plan.
+Use open Dark Bronze ogee gutters and hollow leaders with rounded elbows;
+nominal 5 x 3.5-inch /3 x 2-inch sections do not establish drainage capacity.
+Give each front eave a connected outlet, remove the cross-garage pipe and
+old low-inlet zigzags, and add porch, rear-main, high-step and dining leaders.
+Keep high-step/low-roof collection separate and preserve the falling patio trough.
+Owner's reviewed follow-up is adopted: add D0's open west-valley receiver,
+open outlet transition and outside-porch sealed leader. Model all ten ogee
+troughs with 1/16-in/ft fall segments, outlet low points and end-tail returns;
+rear run center-high with 1.36/1.34-inch drops to west/east outlets.
+Keep roof planes fixed and fit drip aprons to the lowered troughs.
+D0's receiver dimensions, stand-off brackets and valley overshoot need design.
+AB1/D10 remains a held 2D collector/cricket concept, not a modeled assembly.
+The garage's shallow 4.95-ft return and high-step offset need designed supports.
+Entry-side D1 follows the stepped wall and requires a flashed porch
+penetration at x11.9/z55.1042 ft;
+the model collar is intent, not approved waterproofing.
+Dining-west wall drainage still needs a cricket/scupper and flashing;
+remove the isolated stub without concealing that problem.
+No roof planes, rooms, walls, openings, finishes outside drainage or saved
+layouts change. Size catchments/outlets and verify installed falls, overflow, ice/freeze,
+supports, maintenance and lawful ground connections professionally.
+
 ## Previous coordinated roof sketch - November 15 (superseded)
 
 Owner authorizes the corrected multi-view sketch in 3D. This supersedes

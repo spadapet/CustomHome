@@ -1069,7 +1069,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   const garageFacadeEaves = HomeRoof.studyAlternative ? 9 : floorToFloor+9;
   group.userData.garageUpperVolume = 'November 17 repeated-gable roof: existing loft, laundry and mechanical room retain nine-foot ceiling intent below the shared roof. Garage front windows serve unfinished roof space, not the rear loft. The main roof projects 5.325 feet beyond the recessed garage wall; no new room, floor or support approval. Framing, bearings, headers, insulation, fire separation and occupied use remain unapproved.';
 
-  function prototypeGutter(parent, start, end, neighbours = []) {
+  function prototypeGutter(parent, start, end, neighbours = [], stations = [{ t: 0, dropFeet: 0 }, { t: 1, dropFeet: 0 }]) {
     const width = 5 / 12, height = 3.5 / 12, thickness = 0.025 / 12;
     const profile = [[0, 0], [0, -height], [width * 0.65, -height], [width * 0.95, -height * 0.45],
       [width, -0.03], [width - thickness, -0.03], [width * 0.95 - thickness, -height * 0.45],
@@ -1090,19 +1090,28 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       const denominator = sum[0]*normal[0]+sum[1]*normal[1];
       return Math.abs(denominator) > 0.01 ? sum.map(v=>v/denominator) : normal;
     });
-    const vertex = (p, at) => [start[0] + dx * at + normals[at][0] * p[0],
-      start[1] + (end[1] - start[1]) * at + p[1] - 0.08,
-      start[2] + dz * at + normals[at][1] * p[0]];
+    const vertex = (p, station) =>
+    {
+      const { t, dropFeet } = station, outward = t === 0 ? normals[0] : t === 1 ? normals[1] : normal;
+      return [start[0] + dx * t + outward[0] * p[0], start[1] + (end[1] - start[1]) * t + p[1] - .08 - dropFeet,
+        start[2] + dz * t + outward[1] * p[0]];
+    };
     const positions = [];
     const triangle = (a, b, c) => positions.push(...a, ...b, ...c);
-    for (let index = 0; index < profile.length; index++) {
-      const next = (index + 1) % profile.length;
-      triangle(vertex(profile[index], 0), vertex(profile[next], 0), vertex(profile[next], 1));
-      triangle(vertex(profile[index], 0), vertex(profile[next], 1), vertex(profile[index], 1));
+    for (let section = 1; section < stations.length; section++)
+    {
+      const a = stations[section - 1], b = stations[section];
+      for (let index = 0; index < profile.length; index++)
+      {
+        const next = (index + 1) % profile.length;
+        triangle(vertex(profile[index], a), vertex(profile[next], a), vertex(profile[next], b));
+        triangle(vertex(profile[index], a), vertex(profile[next], b), vertex(profile[index], b));
+      }
     }
-    for (const face of THREE.ShapeUtils.triangulateShape(profile.map(p => new THREE.Vector2(...p)), [])) {
-      if (!connections[0]) triangle(...face.map(i => vertex(profile[i], 0)));
-      if (!connections[1]) triangle(...face.slice().reverse().map(i => vertex(profile[i], 1)));
+    const capProfile = [profile[0], profile[1], profile[2], profile[3], profile[4], [width, 0]];
+    for (const face of THREE.ShapeUtils.triangulateShape(capProfile.map(p => new THREE.Vector2(...p)), [])) {
+      if (!connections[0]) triangle(...face.map(i => vertex(capProfile[i], stations[0])));
+      if (!connections[1]) triangle(...face.slice().reverse().map(i => vertex(capProfile[i], stations.at(-1))));
     }
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -1110,10 +1119,32 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     const finish = gutterFinish.clone();
     finish.side = THREE.DoubleSide;
     const mesh = new THREE.Mesh(geometry, finish);
-    mesh.name = 'Prototype continuous five-inch ogee gutter with end caps';
-    mesh.userData = { start, end, widthInches: 5, heightInches: 3.5, miteredCorners: connections.filter(Boolean).length, outletSizingVerified: false };
+    mesh.name = 'Continuous five-inch ogee gutter with end caps';
+    mesh.userData = { start, end, stations, widthInches: 5, heightInches: 3.5, endCaps: connections.map(edge => !edge),
+      miteredCorners: connections.filter(Boolean).length, outletSizingVerified: false };
     mesh.castShadow = mesh.receiveShadow = true;
     parent.add(mesh);
+    if (stations.some(station => station.dropFeet > .0001))
+    {
+      const apronPositions = [];
+      for (let index = 1; index < stations.length; index++)
+      {
+        const corners = [stations[index - 1], stations[index]].flatMap(station =>
+        {
+          const x = start[0] + dx * station.t, z = start[2] + dz * station.t;
+          const roofY = start[1] + (end[1] - start[1]) * station.t;
+          return [[x, roofY - .02, z], [x + normal[0] * .18, roofY - .065 - station.dropFeet, z + normal[1] * .18]];
+        });
+        for (const indices of [[0, 1, 3], [0, 3, 2]]) for (const i of indices) apronPositions.push(...corners[i]);
+      }
+      const apronGeometry = new THREE.BufferGeometry();
+      apronGeometry.setAttribute('position', new THREE.Float32BufferAttribute(apronPositions, 3));
+      apronGeometry.computeVertexNormals();
+      const apron = new THREE.Mesh(apronGeometry, finish);
+      apron.name = 'Fitted drip apron to sloping gutter - flashing design required';
+      apron.userData = { dripApron: true, waterproofingApproved: false };
+      parent.add(apron);
+    }
     return mesh;
   }
   function renderRoofEnvelope(name, definitions, material, metal = false, metalFinish = null, undersideFinish = null) {
@@ -1261,7 +1292,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
         if (polygon.length) surface(polygon, face.plane,
           white, 'Connected roof closed edge soffit', -0.2);
       }
-      if (!rake) {
+      if (!rake && HomeRoof.studyAlternative) {
         // Stop the trough at the finished brick face with a closed end cap; a gutter
         // wholly behind the face (a roof-to-wall abutment) is omitted. No hangers or
         // outlets are modeled on these lower-roof runs; outlets remain unverified.
@@ -1285,6 +1316,15 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
             if (cap) cap.userData.endCap = true;
           }
         }
+      }
+    }
+    if (!HomeRoof.studyAlternative)
+    {
+      const layout = HomeRoof.getRoofDrainageLayout();
+      for (const gutter of layout.gutters.filter(run => definitions.some(roof => roof.id === run.roof)))
+      {
+        const trough = prototypeGutter(model, gutter.start, gutter.end, layout.gutters, gutter.stations);
+        Object.assign(trough.userData, { gutterId: gutter.id, fallModeled: true, drainageDesignApproved: false });
       }
     }
     return model;
@@ -1487,7 +1527,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     route.name = name;
     route.userData = { routePoints: points, sizingAndOutletVerified: false };
     parent.add(route);
-    if (facadePrototype) {
+    {
       const shape = new THREE.Shape();
       shape.moveTo(-0.125, -1 / 12); shape.lineTo(0.125, -1 / 12);
       shape.lineTo(0.125, 1 / 12); shape.lineTo(-0.125, 1 / 12); shape.closePath();
@@ -1497,7 +1537,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       shape.holes.push(hole);
       const path = new THREE.CurvePath();
       const firstRun = new THREE.Vector3(...points[1]).sub(new THREE.Vector3(...points[0]));
-      const collector = Math.hypot(firstRun.x, firstRun.z) > 5 && Math.abs(firstRun.y) < Math.hypot(firstRun.x, firstRun.z) / 4;
+      const collector = HomeRoof.studyAlternative && Math.hypot(firstRun.x, firstRun.z) > 5 && Math.abs(firstRun.y) < Math.hypot(firstRun.x, firstRun.z) / 4;
       if (collector) prototypeGutter(route, points[1], points[0]);
       const vertices = (collector ? points.slice(1) : points).map(p => new THREE.Vector3(...p));
       let previous = vertices[0];
@@ -1512,7 +1552,8 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       }
       path.add(new THREE.LineCurve3(previous, vertices.at(-1)));
       const pipe = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { steps: points.length * 8, bevelEnabled: false, extrudePath: path }), finish);
-      pipe.name = 'Prototype continuous three-by-two-inch leader with elbows';
+      pipe.name = 'Continuous three-by-two-inch leader with elbows';
+      pipe.userData = { widthInches: 3, depthInches: 2, hollow: true };
       pipe.castShadow = pipe.receiveShadow = true;
       route.add(pipe);
     }
@@ -1524,31 +1565,95 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
       pipe.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), delta.normalize());
       pipe.name = label;
     }
-    if (!facadePrototype) for (let i = 1; i < points.length; i++) segment(points[i - 1], points[i], 0.14, 'Connected rainwater leader segment', finish);
     for (const [a, b] of brackets) segment(a, b, 0.055, 'Wall-fixed rainwater bracket', gutterFinish);
     return route;
   }
-  // Follow the attic shed's east-falling edge, then drop beyond the garage
-  // wall. Pipe support, flashing, ice/overflow and capacity remain unverified.
+  if (!HomeRoof.studyAlternative)
+  {
+    const drainage = new THREE.Group();
+    drainage.name = 'Coordinated bronze gutters and independent leaders - design review required';
+    drainage.userData = { drainageDesignApproved: false, unresolved: HomeRoof.getRoofDrainageLayout(floorToFloor).unresolved };
+    group.add(drainage);
+    const layout = HomeRoof.getRoofDrainageLayout(floorToFloor);
+    for (const collector of layout.collectors)
+    {
+      const receiver = new THREE.Group();
+      receiver.name = 'West valley open receiver D0 - sizing and support unverified';
+      receiver.userData = { drainageCollectorId: collector.id, sizingApproved: false, supportApproved: false, valley: collector.valley };
+      drainage.add(receiver);
+      const [left, right, rear, front] = collector.bounds, bottom = collector.bottomFeet, top = collector.topFeet;
+      const [outletX, , outletZ] = collector.outlet, holeLeft = outletX - .17, holeRight = outletX + .17;
+      const holeRear = outletZ - .17, holeFront = outletZ + .17;
+      for (const [x1, x2, z1, z2] of [[left, holeLeft, rear, front], [holeRight, right, rear, front],
+        [holeLeft, holeRight, rear, holeRear], [holeLeft, holeRight, holeFront, front]])
+        box(receiver, (x1 + x2) / 2, bottom, (z1 + z2) / 2, x2 - x1, .02, z2 - z1, gutterFinish).name = 'D0 receiver base around open outlet';
+      for (const z of [rear, front])
+        box(receiver, (left + right) / 2, (bottom + top) / 2, z, right - left, top - bottom, .02, gutterFinish).name = 'D0 receiver upstand';
+      for (const x of [left, right])
+        box(receiver, x, (bottom + top) / 2, (rear + front) / 2, .02, top - bottom, front - rear, gutterFinish).name = 'D0 receiver end closure';
+    }
+    for (const item of layout.routes)
+    {
+      const route = drainageRoute(drainage, item.name, item.points);
+      Object.assign(route.userData, { drainageId: item.id, gutterId: item.gutterId, collectorId: item.collectorId,
+        supportRequired: !!item.supportRequired, waterproofingApproved: false, belowGradeConnectionApproved: false });
+      if (item.collectorId)
+      {
+        const collector = layout.collectors.find(part => part.id === item.collectorId);
+        const pipe = route.children.find(part => part.userData.hollow), p = pipe.geometry.attributes.position;
+        const [x, y, z] = item.points[0], inlet = [];
+        for (let index = 0; index < p.count; index++)
+          if (Math.abs(p.getY(index) - y) < 1e-4) inlet.push([p.getX(index), p.getZ(index)]);
+        if (!inlet.length) throw new Error(`Missing receiver leader inlet geometry: ${item.id}`);
+        const left = Math.min(...inlet.map(point => point[0])), right = Math.max(...inlet.map(point => point[0]));
+        const rear = Math.min(...inlet.map(point => point[1])), front = Math.max(...inlet.map(point => point[1]));
+        const top = [[x - .17, collector.bottomFeet + .01, z - .17], [x + .17, collector.bottomFeet + .01, z - .17],
+          [x + .17, collector.bottomFeet + .01, z + .17], [x - .17, collector.bottomFeet + .01, z + .17]];
+        const bottom = [[left, y, rear], [right, y, rear], [right, y, front], [left, y, front]], positions = [];
+        for (let i = 0; i < 4; i++)
+        {
+          const next = (i + 1) % 4;
+          for (const point of [top[i], bottom[i], bottom[next], top[i], bottom[next], top[next]]) positions.push(...point);
+        }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.computeVertexNormals();
+        const material = gutterFinish.clone();
+        material.side = THREE.DoubleSide;
+        const transition = new THREE.Mesh(geometry, material);
+        transition.name = 'D0 open receiver outlet transition to hollow leader - fitting unselected';
+        transition.userData = { outletTransition: true, sizingApproved: false };
+        route.add(transition);
+      }
+      if (item.supportRequired) route.userData.instruction = 'Support, access and connections require professional design; do not build from the model.';
+      // The entry-side pipe stays sealed through the porch instead of spilling
+      // onto it. This collar locates a required penetration, not approved flashing.
+      if (item.roofPenetration)
+      {
+        const [x, y, z] = item.roofPenetration;
+        const collar = box(drainage, x, y + .02, z, .6, .035, .6, gutterFinish);
+        collar.name = 'Entry-side leader porch penetration flashing - waterproofing design required';
+        collar.rotation.x = Math.atan(-HomeRoof.getPorchRoofDefinitions()[0].planes[0][1]);
+        collar.userData = { roofPenetration: true, waterproofingApproved: false };
+      }
+      const verticals = item.points.slice(1).map((end, index) => [item.points[index], end])
+        .filter(([a, b]) => Math.hypot(a[0] - b[0], a[2] - b[2]) < .001 && a[1] - b[1] > 4);
+      for (const [a, b] of verticals)
+      {
+        for (let y = Math.max(1, b[1] + 1); y < a[1] - .5; y += 4)
+        {
+          const strap = box(route, a[0], y, a[2], .29, .055, .21, gutterFinish);
+          strap.name = 'Bronze leader fixing strap - substrate design required';
+        }
+      }
+    }
+  }
+  // Historical roof alternatives retain their own routes, not the adopted layout.
   const atticRoof = HomeRoof.getConnectedRoofDefinitions(floorToFloor).find(({ id }) => id === 'Garage room-in-roof' || id === 'Garage attic storage roof');
   const [atticRoofWest, atticRoofEast, , atticRoofSouth] = atticRoof.bounds;
   const atticRoofAt = x => Math.min(...atticRoof.planes.map(plane=>HomeRoof.heightAt(plane,[x,atticRoofSouth])));
   const atticRoofLow = atticRoofAt(atticRoofEast);
-  if (!HomeRoof.studyAlternative) {
-    const extension=HomeRoof.getConnectedRoofDefinitions(floorToFloor).find(roof=>roof.id==='Main garage extension');
-    const front=extension.bounds[3],right=extension.bounds[1];
-    const eave=Math.min(...extension.planes.map(plane=>HomeRoof.heightAt(plane,[right,front])));
-    drainageRoute(group,'Garage east eave to corner leader - capacity unverified',[
-      [31.85,eave-.1,front],[right,eave-.1,front],
-      [55.95,eave-1.3,48.8],
-      [55.95,-1.35,48.8],[55.95,-1.6,49.2]
-    ],[2,7,12].map(y=>[[55.725,y,48.8],[55.95,y,48.8]]));
-    const lean = HomeRoof.getConnectedRoofDefinitions(floorToFloor).find(roof=>roof.id==='Garage rear metal lean-to');
-    drainageRoute(group,'Rear lean-to east eave collector and leader - capacity unverified',[
-      [lean.bounds[1],9.2,lean.bounds[3]],[lean.bounds[1],9.2,7],
-      [55.95,8.7,7.25],[55.95,-1.35,7.25],[55.95,-1.6,6.9]
-    ],[2,5,8].map(y=>[[55.725,y,7.25],[55.95,y,7.25]]));
-  } else {
+  if (HomeRoof.studyAlternative) {
   drainageRoute(group, 'Attic storage eave to east wall leader - capacity unverified', [
     [atticRoofWest, atticRoofAt(atticRoofWest) + 0.1, atticRoofSouth],
     [atticRoofEast, atticRoofAt(atticRoofEast) + 0.1, atticRoofSouth],
@@ -1569,7 +1674,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   }
   // Follow the REAL stepped walls. Only the short canopy bypass is stood off;
   // the upper/lower vertical runs are corner-mounted, not 20-foot free drops.
-  for (const east of [false, true]) {
+  if (HomeRoof.studyAlternative) for (const east of [false, true]) {
     const upperX = east ? measuredUpper.southEast + .4 : -0.4;
     const upperZ = measuredUpper.south - .15;
     const bypassX = east ? Math.max(32.1, upperX + .7) : -0.95;
@@ -1819,8 +1924,9 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
   for (const z of [gutterRear, gutterFront]) gutterPart('Canopy gutter upstand', gutterEndX / 2, z, gutterEndX, 0.22, 0.04, -0.11);
   for (const x of [0.02, gutterEndX - 0.02]) gutterPart('Canopy gutter end closure', x, (gutterRear + gutterFront) / 2, 0.04, 0.22, 0.3, -0.11);
   const leaderTop = gutterHigh - gutterEndX / 192 - 0.2;
-  box(livingPatio, gutterEndX - 0.08, (leaderTop + patioGrade - 0.3) / 2, gutterRear + 0.15,
-    0.14, leaderTop - patioGrade + 0.3, 0.14, gutterFinish).name = 'Canopy dining-wall rainwater leader - drain design required';
+  const patioLeader = drainageRoute(livingPatio, 'Canopy dining-wall rainwater leader - drain design required',
+    [[gutterEndX - .08, leaderTop + .025, gutterRear + .15], [gutterEndX - .08, patioGrade - .3, gutterRear + .15]]);
+  patioLeader.userData.drainageId = 'D5';
   for (const y of [1, 5, 8]) box(livingPatio, gutterEndX - 0.08, y, -0.47, 0.22, 0.08, 0.3, gutterFinish).name = 'Canopy leader wall bracket';
   patioRoof.userData.drainageIntent = 'East-falling open gutter to dining-wall leader; below-grade outlet placeholder, capacity and stormwater design unverified';
   // The upstairs bathroom occupies this footprint. Roof skin, deep soffit,
@@ -2014,7 +2120,7 @@ function buildExteriorModel(THREE, { box, mat, masonryMaps, windowInstallations 
     ]);
     }
   }
-  if (facadePrototype) {
+  if (facadePrototype && HomeRoof.studyAlternative) {
     const porchDefinition = HomeRoof.getPorchRoofDefinitions()[0];
     const [left,right,,front] = porchDefinition.bounds;
     const y = HomeRoof.heightAt(porchDefinition.planes[0], [left,front]);

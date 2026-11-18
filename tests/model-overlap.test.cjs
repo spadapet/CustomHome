@@ -358,13 +358,17 @@ test('lower-roof gutters stop at the finished brick face with end caps and never
   assert.match(exteriorSource, /const wallThickness = 0\.45;/);
   function render(masonryFootprints, definitions) {
     const context = {
-      THREE: { Group, Vector3: Vector, DoubleSide: 2, BufferGeometry: class { setAttribute() {} computeVertexNormals() {} }, Float32BufferAttribute: class {}, Mesh: class extends Group {} },
-      HomeRoof, finishes:{brick:{face:[232,214,184]}},facadePrototype: false, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: {}, mat: () => ({}), masonryFootprints,
+      THREE: { Group, Vector3: Vector, Vector2: class { constructor(x, y) { Object.assign(this, { x, y }); } },
+        ShapeUtils: { triangulateShape: () => [[0, 1, 2]] }, DoubleSide: 2,
+        BufferGeometry: class { constructor() { this.attributes = {}; } setAttribute(name, value) { this.attributes[name] = value; } computeVertexNormals() {} },
+        Float32BufferAttribute: class { constructor(array) { this.array = array; } },
+        Mesh: class extends Group { constructor(geometry) { super(); this.geometry = geometry; } } },
+      HomeRoof, finishes:{brick:{face:[232,214,184]}},facadePrototype: false, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: { clone: () => ({}) }, mat: () => ({}), masonryFootprints,
       box(parent, x, y, z, width, height, depth) { const mesh = new Group(); mesh.geometry = { width, height, depth }; Object.assign(mesh.position, { x, y, z }); parent.add(mesh); return mesh; }
     };
     vm.createContext(context);
     vm.runInContext(slice(exteriorSource, 'function clipGutterToMasonry(', 'function buildExteriorModel('), context);
-    vm.runInContext(slice(exteriorSource, '  function renderRoofEnvelope(', '  const slateFinish ='), context);
+    vm.runInContext(slice(exteriorSource, '  function prototypeGutter(', '  const slateFinish ='), context);
     return context.renderRoofEnvelope('Test roofs', definitions, {}, false, {});
   }
   const lower = HomeRoof.getLowerRoofDefinitions();
@@ -378,17 +382,23 @@ test('lower-roof gutters stop at the finished brick face with end caps and never
   assert.match(exteriorSource, /\[patioSideClosureStart, livingPatioCanopy\.closureStart\]/, 'Canopy builder checks its closure against the shared frame');
   footprints.push(canopy.closureFootprint);
   const model = render(footprints, lower);
-  const gutterParts = model.children.filter((part) => /^Connected roof (perimeter gutter|gutter end cap)/.test(part.name));
-  const caps = gutterParts.filter((part) => part.userData.endCap);
+  const gutterParts = model.children.filter((part) => part.userData.gutterId);
   // Plan/height box of a horizontal gutter part along its axis.
   const extent = (part) => {
+    if (part.geometry.attributes?.position)
+    {
+      const positions = part.geometry.attributes.position.array;
+      const axis = index => positions.filter((_, i) => i % 3 === index);
+      return { minX: Math.min(...axis(0)), maxX: Math.max(...axis(0)), minY: Math.min(...axis(1)), maxY: Math.max(...axis(1)),
+        minZ: Math.min(...axis(2)), maxZ: Math.max(...axis(2)) };
+    }
     const { x, y, z } = part.position, half = part.geometry.width / 2, across = part.geometry.depth / 2;
     const alongX = Math.abs(part.axis.x) > 0.5;
     return { minX: x - (alongX ? half : across), maxX: x + (alongX ? half : across), minY: y - part.geometry.height / 2, maxY: y + part.geometry.height / 2,
       minZ: z - (alongX ? across : half), maxZ: z + (alongX ? across : half) };
   };
   for (const part of gutterParts) {
-    assert.ok(Math.abs(part.axis.y) < 1e-6 && (Math.abs(part.axis.x) < 1e-9 || Math.abs(part.axis.z) < 1e-9), 'Level, plan-orthogonal gutter run');
+    assert.ok(part.userData.stations.some(station => station.dropFeet > 0), 'Actual trough mesh has modeled fall');
     const g = extent(part);
     for (const wall of footprints) {
       const brick = { minX: Math.min(wall.x1, wall.x2) - (wall.x1 === wall.x2 ? 0.225 : 0), maxX: Math.max(wall.x1, wall.x2) + (wall.x1 === wall.x2 ? 0.225 : 0),
@@ -396,32 +406,29 @@ test('lower-roof gutters stop at the finished brick face with end caps and never
       assert.ok(penetration(g, brick) <= JOINT, `${part.name} at x${part.position.x.toFixed(2)} z${part.position.z.toFixed(2)} enters ${wall.name} by ${(penetration(g, brick) * 12).toFixed(2)} in`);
     }
   }
-  // The lowered dining roof's west gutter now stops at the shared canopy
-  // closure. The east eave ends exactly at the upper rear wall face.
-  assert.equal(caps.length, 1);
-  const capFaces = caps.map((cap) => [+cap.position.x.toFixed(3), +cap.position.z.toFixed(3)]);
-  assert.ok(caps.some((cap) => Math.abs(cap.position.x - 12.975) < 1e-6 && Math.abs(extent(cap).maxZ - canopy.closureStart) < 1e-9), `Canopy abutment end cap ${JSON.stringify(capFaces)}`);
+  assert.equal(gutterParts.length, 3, 'Dining L-shaped collection and independent low east eave');
+  assert.ok(gutterParts.every(part => part.userData.endCaps.length === 2));
+  assert.ok(!gutterParts.some(part => part.userData.gutterId === 'dining-west'), 'No isolated stub beside the unresolved canopy closure');
   assert.ok(!gutterParts.some((part) => extent(part).minX < 13.2 + 0.225 && extent(part).maxZ > canopy.closureStart), 'No dining west-eave gutter in the patio canopy closure, roof, soffit or fascia');
-  for (const cap of caps) {
-    const trough = gutterParts.find((part) => part.userData.stopsAtMasonryFace && Math.abs(part.position.x - cap.position.x) < 1e-6);
-    assert.ok(trough && Math.abs(extent(trough).maxZ - extent(cap).minZ) < 1e-9, 'Trough meets its cap without overlap');
-  }
-  assert.ok(!gutterParts.some((part) => Math.abs(part.position.x - 27.525) < 0.2 && extent(part).maxZ > 7.175 + 1e-9), 'No gutter fragment past the upper rear finished brick face');
-  assert.ok(!gutterParts.some((part) => Math.abs(part.axis.x) > 0.5 && extent(part).maxZ > 7.175 + JOINT && extent(part).minZ < 7.625), 'No gutter run along the upper bath rear wall');
+  const eastGutter = gutterParts.find(part => part.userData.gutterId === 'dining-east');
+  assert.ok(Math.abs(extent(eastGutter).maxZ - 6.775) < 1e-9, 'East trough stops at the kitchen rear brick face');
+  assert.ok(!gutterParts.some(part => extent(part).maxX < 43 && extent(part).maxZ > 7.175 + JOINT && extent(part).minZ < 7.625), 'No gutter run along the upper bath rear wall');
   // Main-house eaves gutters are untouched by the masonry clip.
   const main = HomeRoof.getConnectedRoofDefinitions(floorToFloor).filter(({ id }) => !id.startsWith('Garage') && id !== 'Dining rear projection');
-  const count = (m) => m.children.filter((part) => part.name === 'Connected roof perimeter gutter').length;
+  const count = (m) => m.children.filter((part) => part.userData.gutterId).length;
   assert.equal(count(render(footprints, main)), count(render([], main)));
-  assert.equal(count(model), count(render([], lower)) - 1, 'Only the canopy-closure run is removed; dining now ends directly at the upper rear face');
+  assert.equal(count(model), count(render([], lower)), 'Shared drainage layout already excludes the wall abutment');
   // Rear dining path wall light (backplate 0.3 x 0.3 ft, housing projecting 0.4 ft from the face) sits on the
   // east pier: at least 1 in below the rear eave gutter/fascia it used to enter, clear of the window head trim.
   const lightCall = lines.find((line) => line.includes("wallDownlight('Rear dining path wall downlight'"));
   const [lightX, lightY] = lightCall.match(/downlight', ([\d.]+), ([\d.]+),/).slice(1).map(Number);
   const rearFace = ground.getLivingRoomFeatureLayout().diningRearZ - 0.225;
   const light = { minX: lightX - 0.15, maxX: lightX + 0.15, minY: lightY - 0.15, maxY: lightY + 0.15, minZ: rearFace - 0.4, maxZ: rearFace };
-  const eaveParts = model.children.filter((part) => /^Connected roof (eaves fascia|perimeter gutter)/.test(part.name) && Math.abs(part.axis.y) < 1e-6);
+  const eaveParts = model.children.filter(part => part.userData.gutterId || (part.name === 'Connected roof eaves fascia' && Math.abs(part.axis.y) < 1e-6));
   const rearEave = eaveParts.filter((part) => { const e = extent(part); return e.maxX > light.minX && e.minX < light.maxX && e.maxZ > light.minZ && e.minZ < light.maxZ; });
-  assert.equal(rearEave.length, 2, 'Rear eave fascia and gutter above the light');
+  assert.equal(rearEave.length, 1, 'Only the fascia overlaps the light in plan; the ogee trough is outboard');
+  assert.ok(extent(gutterParts.find(part => part.userData.gutterId === 'dining-rear')).minY - light.maxY >= 1 / 12,
+    'Outboard gutter also preserves the required modeled one-inch vertical gap');
   for (const part of rearEave) assert.ok(extent(part).minY - light.maxY >= 1 / 12 - 1e-9, `${part.name} clears the light by ${((extent(part).minY - light.maxY) * 12).toFixed(2)} in`);
   const diningRear = lines.find((line) => line.includes("wall('dining rear'"));
   const [wallEastX, windowOffset, windowWidth] = diningRear.match(/wall\('dining rear', ([\d.]+),.*win\(([\d.]+), ([\d.]+)\)/).slice(1).map(Number);

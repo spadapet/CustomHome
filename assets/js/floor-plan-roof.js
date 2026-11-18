@@ -209,6 +209,149 @@
       width:3,sill:floorToFloor+3,height:5,atticOnly:true}));
   }
 
+  function getRoofDrainageLayout(floorToFloor = 10)
+  {
+    const definitions = getConnectedRoofDefinitions(floorToFloor), g = upperGeometry();
+    const frontLayout = typeof getGroundFrontLayout === 'function'
+      ? getGroundFrontLayout() : require('./floor-plan-ground.js').getGroundFrontLayout();
+    const main = definitions.find(roof => roof.id === 'Main house');
+    const extension = definitions.find(roof => roof.id === 'Main garage extension');
+    const lean = definitions.find(roof => roof.id === 'Garage rear metal lean-to');
+    const dining = definitions.find(roof => roof.id === 'Dining rear projection');
+    const porch = getPorchRoofDefinitions()[0];
+    const gutters = buildRoofEnvelope(definitions).boundaries
+      .filter(edge => Math.abs(edge.start[1] - edge.end[1]) < .001 && edge.start[1] > floorToFloor + 9)
+      .map((edge, index) => ({ id: `upper-${index + 1}`, roof: edge.roof, start: edge.start, end: edge.end }));
+    const point = (roof, x, z) => [x, Math.min(...roof.planes.map(plane => heightAt(plane, [x, z]))), z];
+    gutters.push(
+      { id: 'dining-rear', roof: dining.id, start: point(dining, dining.bounds[0], dining.bounds[2]), end: point(dining, dining.bounds[1], dining.bounds[2]) },
+      { id: 'dining-east', roof: dining.id, start: point(dining, dining.bounds[1], dining.bounds[2]), end: point(dining, dining.bounds[1], 7 - .225) },
+      { id: 'rear-low', roof: lean.id, start: point(lean, lean.bounds[1], lean.bounds[2]), end: point(lean, lean.bounds[1], lean.bounds[3]) },
+      { id: 'porch', roof: porch.id, start: point(porch, porch.bounds[1], porch.bounds[3]), end: point(porch, porch.bounds[0], porch.bounds[3]) }
+    );
+    const routes = [];
+    function outlet(id, name, gutter, x, z, rest, label, details = {})
+    {
+      const dx = gutter.end[0] - gutter.start[0], dz = gutter.end[2] - gutter.start[2], length = Math.hypot(dx, dz);
+      const y = gutter.start[1] - .08 - 3.5 / 12 + .025;
+      const inlet = [x + dz / length * 5 / 24, y, z - dx / length * 5 / 24];
+      routes.push({ id, name, gutterId: gutter.id, points: [inlet, ...rest], label, ...details });
+    }
+    const front = main.bounds[3], eave = point(main, 15.6, front)[1];
+    const frontGutters = gutters.filter(run => Math.abs(run.start[2] - front) < .001 && Math.abs(run.end[2] - front) < .001)
+      .sort((a, b) => Math.min(a.start[0], a.end[0]) - Math.min(b.start[0], b.end[0]));
+    const porchPlane = porch.planes[0], pierX = g.southClosetWest - .45, frontPipeZ = g.south + .7;
+    const entryLowerZ = frontLayout.wallZ + .425;
+    outlet('D1', 'Front valley / entry-side leader', frontGutters[0], frontGutters[0].end[0] + .3, front,
+      [[pierX, eave - 1.15, frontPipeZ], [pierX, 12.1, frontPipeZ], [pierX, 11.65, entryLowerZ],
+        [pierX, -1.35, entryLowerZ], [pierX, -1.6, entryLowerZ + .3]],
+      [10, 57.5], { roofPenetration: [pierX, heightAt(porchPlane, [pierX, entryLowerZ]), entryLowerZ] });
+    const eastX = Math.max(porch.bounds[1] + .25, g.southEast + .55), eastZ = g.south - .15;
+    outlet('D2', 'Front valley / east return leader', frontGutters[1], frontGutters[1].end[0] + .3, front,
+      [[eastX, eave - 1.15, eastZ], [eastX, -1.35, eastZ], [eastX, -1.6, eastZ + .3]], [35, 57.5]);
+    outlet('D3', 'Garage eave / supported return to east wall', frontGutters[2], extension.bounds[1] - .3, front,
+      [[55.95, eave - .7, front - .1], [55.95, eave - .76, 49.5],
+        [55.95, eave - 1.3, 48.8], [55.95, -1.35, 48.8], [55.95, -1.6, 49.1]],
+      [59.3, 50.5], { supportRequired: true });
+    const low = gutters.find(run => run.id === 'rear-low');
+    outlet('D4', 'Rear low roof / independent east leader', low, lean.bounds[1], lean.bounds[2] + .7,
+      [[55.95, 8.5, 7.25], [55.95, -1.35, 7.25], [55.95, -1.6, 6.95]], [59.3, 8.5]);
+    const rear = gutters.filter(run => Math.abs(run.start[2] - main.bounds[2]) < .001 && Math.abs(run.end[2] - main.bounds[2]) < .001);
+    const rearWest = rear.find(run => Math.min(run.start[0], run.end[0]) === main.bounds[0]);
+    const rearEast = rear.find(run => Math.max(run.start[0], run.end[0]) === extension.bounds[0]);
+    outlet('D6', 'Main rear / west corner leader', rearWest, main.bounds[0] + .4, main.bounds[2],
+      [[-.45, eave - 1.15, g.north + .4], [-.45, -1.35, g.north + .4], [-.45, -1.6, g.north + .1]], [-4.7, 9.5]);
+    outlet('D7', 'Main rear / east corner leader', rearEast, extension.bounds[0] - .7, main.bounds[2],
+      [[42.2, eave - 1.15, g.north - .45], [42.2, 10.1, g.north - .45],
+        [42.2, 9.65, 6.4], [42.2, -1.35, 6.4], [42.2, -1.6, 6.1]], [44.5, 3.2]);
+    const step = gutters.find(run => Math.abs(run.start[2] - extension.bounds[2]) < .001 && Math.abs(run.end[2] - extension.bounds[2]) < .001);
+    outlet('D8', 'Upper rear step / independent east leader', step, extension.bounds[1] - .3, extension.bounds[2],
+      [[56.5, step.start[1] - 1, extension.bounds[2] + .9], [56.5, 8.5, extension.bounds[2] + .9],
+        [55.95, 8.1, 25.5], [55.95, -1.35, 25.5],
+        [55.95, -1.6, 25.2]], [59.3, 24.5], { supportRequired: true });
+    outlet('D9', 'Dining rear / east pier leader', gutters.find(run => run.id === 'dining-rear'), dining.bounds[1] - 1.1, dining.bounds[2],
+      [[dining.bounds[1] - 1.1, 8.4, 1.3], [dining.bounds[1] - 1.1, -1.35, 1.3],
+        [dining.bounds[1] - 1.1, -1.6, 1]], [29, -2.3]);
+    const porchGutter = gutters.find(run => run.id === 'porch');
+    for (const [id, x, side, label] of [['P1-W', 1, -1, [-4.5, 65.5]], ['P1-E', 30.2, 1, [35, 65.5]]])
+    {
+      const columnZ = 60.5 + (porch.bounds[3] - 62.25), y = porchGutter.start[1];
+      outlet(id, 'Porch gutter / column-side leader', porchGutter, x, porch.bounds[3],
+        [[x, y - .65, porch.bounds[3] + .2], [x + side * .8, y - .7, columnZ],
+          [x + side * .8, -1.35, columnZ], [x + side * .8, -1.6, columnZ + .3]], label);
+    }
+    const fallFeetPerFoot = 1 / 192;
+    const westOutlet = routes.find(route => route.id === 'D6').points[0][0];
+    const eastOutlet = routes.find(route => route.id === 'D7').points[0][0];
+    const rearHigh = (main.bounds[0] + extension.bounds[0]) / 2;
+    const diningOutlet = routes.find(route => route.id === 'D9').points[0][0];
+    const diningMaxRun = diningOutlet - dining.bounds[0];
+    for (const gutter of gutters)
+    {
+      const axis = Math.abs(gutter.end[0] - gutter.start[0]) > .001 ? 0 : 2;
+      const start = gutter.start[axis], end = gutter.end[axis];
+      let breaks, dropAt;
+      if (Math.abs(gutter.start[2] - main.bounds[2]) < .001 && Math.abs(gutter.end[2] - main.bounds[2]) < .001)
+      {
+        breaks = [westOutlet, rearHigh, eastOutlet];
+        dropAt = x => x < westOutlet ? rearHigh - westOutlet - (westOutlet - x)
+          : x <= rearHigh ? rearHigh - x : x <= eastOutlet ? x - rearHigh : eastOutlet - rearHigh - (x - eastOutlet);
+      }
+      else if (gutter.id === 'porch')
+      {
+        const left = 1, right = 30.2, high = (left + right) / 2;
+        breaks = [left, high, right];
+        dropAt = x => x < left ? high - left - (left - x)
+          : x <= high ? high - x : x <= right ? x - high : right - high - (x - right);
+      }
+      else if (gutter.id === 'dining-rear' || gutter.id === 'dining-east')
+      {
+        breaks = gutter.id === 'dining-rear' ? [diningOutlet] : [];
+        dropAt = value => diningMaxRun - (gutter.id === 'dining-rear' ? Math.abs(value - diningOutlet)
+          : dining.bounds[1] - diningOutlet + value - dining.bounds[2]);
+      }
+      else
+      {
+        const outlet = routes.find(route => route.gutterId === gutter.id).points[0][axis];
+        const maxRun = Math.max(Math.abs(start - outlet), Math.abs(end - outlet));
+        breaks = [outlet];
+        dropAt = value => maxRun - Math.abs(value - outlet);
+      }
+      const stations = [...new Set([0, 1, ...breaks.map(value => (value - start) / (end - start)).filter(t => t > 0 && t < 1)])].sort((a, b) => a - b);
+      gutter.stations = stations.map(t => ({ t, dropFeet: dropAt(start + (end - start) * t) * fallFeetPerFoot }));
+      gutter.fallFeetPerFoot = fallFeetPerFoot;
+    }
+    for (const route of routes)
+    {
+      const gutter = gutters.find(run => run.id === route.gutterId);
+      route.points[0][1] -= gutterDropAt(gutter, route.points[0]);
+    }
+    const collector = { id: 'D0', roof: 'West front gable', valley: [main.bounds[0], eave, front],
+      bounds: [main.bounds[0] - .4, main.bounds[0] + .4, front - .15, front + .75],
+      topFeet: eave - .08, bottomFeet: eave - .48, outlet: [main.bounds[0] - .05, eave - .68, front + .3] };
+    routes.unshift({ id: 'D0', name: 'West front valley receiver / outside-porch leader', collectorId: 'D0',
+      points: [collector.outlet.slice(), [collector.outlet[0], -1.35, collector.outlet[2]],
+        [collector.outlet[0], -1.6, collector.outlet[2] + .3]], label: [-5, 58.8], supportRequired: true });
+    return { gutters, collectors: [collector], routes, fallFeetPerFoot,
+      heldAssemblies: ['D1', 'D3', 'D8', 'AB1', 'D10'],
+      unresolved: ['Dining west abutment: flashing and cricket/scupper design required',
+        'D0 receiver, D1 penetration, D3 return and D8 bypass: sizing, attachment and waterproofing require design'] };
+  }
+
+  function gutterDropAt(gutter, point)
+  {
+    if (!gutter.stations || gutter.stations.length < 2) throw new Error(`Missing fall stations for gutter ${gutter.id}`);
+    const dx = gutter.end[0] - gutter.start[0], dz = gutter.end[2] - gutter.start[2], lengthSquared = dx * dx + dz * dz;
+    if (lengthSquared < 1e-8) throw new Error(`Zero-length gutter ${gutter.id}`);
+    const t = Math.max(0, Math.min(1, ((point[0] - gutter.start[0]) * dx + (point[2] - gutter.start[2]) * dz) / lengthSquared));
+    for (let index = 1; index < gutter.stations.length; index++)
+    {
+      const a = gutter.stations[index - 1], b = gutter.stations[index];
+      if (t <= b.t) return a.dropFeet + (b.dropFeet - a.dropFeet) * (t - a.t) / (b.t - a.t);
+    }
+    return gutter.stations.at(-1).dropFeet;
+  }
+
   function getGarageFrontPediment(floorToFloor = 10)
   {
     const g = upperGeometry(), definitions = getConnectedRoofDefinitions(floorToFloor);
@@ -467,7 +610,7 @@
     return [];
   }
 
-  const api = { getFinishedLoftSection, getFinishedLoftAreaExclusions, getHistoricalRoofDefinitions, getNovember15RoofDefinitions, getGarageAtticWindows, getGarageFrontPediment, getGarageEyebrowDefinitions, getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, trianglesOutsideConvex, wallHeadSegments };
+  const api = { gutterDropAt, getRoofDrainageLayout, getFinishedLoftSection, getFinishedLoftAreaExclusions, getHistoricalRoofDefinitions, getNovember15RoofDefinitions, getGarageAtticWindows, getGarageFrontPediment, getGarageEyebrowDefinitions, getConnectedRoofDefinitions, getSetbackRoofDefinitions, getLowerRoofDefinitions, getSetbackAbutments, getPorchRoofDefinitions, buildRoofEnvelope, heightAt, contains, signedArea, intersectPolygons, trianglesOutsideRectangle, trianglesOutsideConvex, wallHeadSegments };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   root.HomeRoof = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this);

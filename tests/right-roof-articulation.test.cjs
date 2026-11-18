@@ -60,18 +60,17 @@ test('garage wall-head solids retain wall depth and fit the new room-in-roof fro
   close(Math.max(...zs)-Math.min(...zs),.45);
 });
 
-test('garage and rear-roof collectors start at their actual eaves and descend at the wall corner',()=>{
-  const source=fs.readFileSync(require.resolve('../assets/js/floor-plan-exterior.js'),'utf8');
-  const start=source.indexOf('  const atticRoof ='),end=source.indexOf('  // Follow the REAL stepped walls.',start);
-  assert.ok(start>0&&end>start);
-  const routes=[];
-  vm.runInNewContext(source.slice(start,end),{group:{},HomeRoof:roof,measuredUpper:upper.getUpstairsMeasuredGeometry(),floorToFloor:10,
-    gutterFinish:{},drainageRoute:(parent,name,points)=>routes.push({name,points})});
-  assert.equal(routes.length,2);
-  const garage=routes.find(r=>/^Garage east/.test(r.name));
-  close(garage.points[0][1],20.5);
-  assert.ok(garage.points.slice(2).every(p=>p[0]>55.725));
-  assert.ok(garage.points.at(-1)[1]<0);
-  const rear=routes.find(r=>/^Rear lean-to/.test(r.name));
-  close(rear.points[0][1],9.2);
+test('garage and rear-roof leaders connect independently without a pipe across the front gable',()=>{
+  const { routes } = roof.getRoofDrainageLayout();
+  const garage = routes.find(route => route.id === 'D3');
+  assert.ok(garage.points.every(point => point[0] > 55.725));
+  assert.ok(garage.points[0][1] > 20.2);
+  assert.ok(garage.points.at(-1)[1] < 0);
+  assert.ok(garage.supportRequired, 'Deep soffit return is not approved construction');
+  const rear = routes.find(route => route.id === 'D4');
+  close(rear.points[0][1], 9.3 - .08 - 3.5 / 12 + .025 - (27.5 - 7.475) / 192);
+  const upperStep = routes.find(route => route.id === 'D8');
+  assert.ok(upperStep.points[0][1] > 27.8);
+  assert.ok(upperStep.points[1][2] - .125 > 27.5, 'High leader bypasses the lower gutter rather than crossing through it');
+  assert.notDeepEqual(upperStep.points, rear.points);
 });

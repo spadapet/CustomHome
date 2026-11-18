@@ -31,26 +31,22 @@ test('one whole-house window policy distinguishes product intent from orderable 
   assert.match(intent(2.5,4,false,true).privacyReview, /not a verified factory/);
 });
 
-test('upper corner leaders follow different upper/lower walls with a short canopy bypass', () => {
-  const routes=[];
-  const measuredUpper = upperPlan.getUpstairsMeasuredGeometry();
-  const context={HomeRoof:require('../assets/js/floor-plan-roof.js'),floorToFloor:10,measuredUpper,group:{},drainageRoute(parent,name,points,brackets){routes.push({name,points,brackets});}};
-  const start=source.indexOf('  for (const east of [false, true])');
-  vm.runInNewContext(source.slice(start,source.indexOf('  // Dining is hipped',start)),context);
-  assert.equal(routes.length,2);
-  for(const [index,r] of routes.entries()){
-    const p=r.points;
-    assert.equal(p.length,8);
-    assert.equal(p[0][2],measuredUpper.south + .75,'actual front gutter');
-    assert.equal(p[1][0],index?measuredUpper.southEast + .4:-0.4,'upper side-wall corner');
-    assert.equal(p[1][2],measuredUpper.south - .15);
-    assert.equal(p[5][0],index?30.9:-0.4,'different lower wall corner');
-    assert.equal(p[5][2],index?54.65:54.05);
-    assert.ok(p[3][0]+0.07 < -0.65 || p[3][0]-0.07>31.85,'canopy bypass');
-    assert.ok(p[3][2]-0.07>54.22,'garage-return clearance');
-    assert.ok(p.slice(1).every((v,i)=>v[1]<p[i][1]),'continuous descending route');
-    assert.ok(r.brackets.every(([a,b])=>Math.hypot(...a.map((v,i)=>v-b[i]))<0.24),'short wall-fixed brackets, not arms');
+test('front leaders connect to the actual valley gutters without the obsolete corner zigzags', () => {
+  const layout = require('../assets/js/floor-plan-roof.js').getRoofDrainageLayout();
+  const routes = layout.routes.filter(route => ['D1', 'D2'].includes(route.id));
+  assert.equal(routes.length, 2);
+  for (const route of routes)
+  {
+    const p = route.points;
+    assert.ok(p[0][1] > 20.2 && p[0][1] < 20.3, 'Inlet meets the current upper gutter, not y19.1');
+    assert.ok(p.length === (route.id === 'D1' ? 6 : 4), 'Only the entry route needs a lower-wall step');
+    assert.ok(p.slice(1).every((point, index) => point[1] < p[index][1]));
+    assert.equal(p.at(-3)[0], p.at(-2)[0]);
+    assert.equal(p.at(-3)[2], p.at(-2)[2]);
   }
+  assert.ok(routes[0].roofPenetration, 'Entry-side sealed pipe needs designed porch flashing');
+  assert.ok(routes[1].points[1][0] - .125 > 31.85, 'East route clears the porch side');
+  assert.match(source, /if \(HomeRoof\.studyAlternative\) for \(const east/, 'Old corner routes are historical only');
 });
 
 test('rectangular entry is coordinated through the same builder for furnished and exterior views', () => {

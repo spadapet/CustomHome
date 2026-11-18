@@ -77,4 +77,15 @@ test('prototype gutters have a five-inch open section, end caps and matched corn
   assert.equal(corner.userData.miteredCorners,1);
   const vertices = corner.geometry.position.array;
   assert.ok(vertices.some((x,i)=>i%3===0 && x > 0.4 && x < 0.5 && vertices[i+2] < -0.4));
+  const sloping = context.prototypeGutter(parent, [0, 10, 0], [10, 10, 0], [],
+    [{ t: 0, dropFeet: 0 }, { t: .5, dropFeet: 5 / 192 }, { t: 1, dropFeet: 0 }]);
+  const actual = sloping.geometry.position.array;
+  for (const [x, drop] of [[0, 0], [5, 5 / 192], [10, 0]])
+  {
+    const ys = actual.filter((_, i) => i % 3 === 1 && Math.abs(actual[i - 1] - x) < 1e-8);
+    assert.ok(ys.length);
+    assert.ok(Math.abs(Math.max(...ys) - (10 - .08 - drop)) < 1e-8, 'Actual gutter rim must follow the fall station');
+    assert.ok(Math.abs(Math.min(...ys) - (10 - .08 - drop - 3.5 / 12)) < 1e-8, 'Actual trough base follows the same fall');
+  }
+  assert.ok(parent.children.some(part => part.userData.dripApron), 'Sloped gutters receive a fitted roof-to-gutter apron');
 });

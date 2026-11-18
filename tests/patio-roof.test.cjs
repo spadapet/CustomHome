@@ -50,6 +50,14 @@ function buildRoof() {
   context.box = context.texturedBox;
   context.trim = {};
   context.gutterFinish = {};
+  context.drainageRoute = (parent, name, points) =>
+  {
+    const [a, b] = points;
+    const mesh = context.box(parent, a[0], (a[1] + b[1]) / 2, a[2], .25, a[1] - b[1], 2 / 12);
+    mesh.name = name;
+    mesh.userData.routePoints = points;
+    return mesh;
+  };
   context.paving = (parent, name, x, z, w, d, top = -1.35, thickness = 0.3) => {
     const mesh = context.box(parent, x + w / 2, top - thickness / 2, z + d / 2, w, thickness, d);
     mesh.name = name;

@@ -22,6 +22,24 @@ undersides. Original procedural charcoal shingle courses replace the slate
 display maps; roof geometry follows the November17 adoption. Product details, structure,
 waterproofing, fixture depth and occupied operation remain unapproved.
 
+## Coordinated gutters - November 17
+
+The normal model now has open Dark Bronze ogee gutters and hollow leaders
+with rounded elbows. Nominal 5 x 3.5-inch /3 x 2-inch profiles are not sized products.
+Separate front eave outlets replace the long cross-garage pipe and old zigzags.
+Porch, rear-main, high-step and dining outlets are modeled; patio fall stays.
+Reviewed follow-up adds D0's open west-valley receiver, open outlet transition
+and sealed outside-porch leader; receiver sizing and brackets remain unapproved.
+All ten ogee troughs now have physical 1/16-in/ft fall segments, outlet low
+points and end-tail returns, with fitted drip aprons. Rear center-high run
+drops1.36/1.34 inches to west/east outlets. Roof planes stay fixed.
+Dining-west abutment drainage still needs flashing/cricket/scupper design.
+AB1/D10 stays a held 2D concept, not an installed or modeled assembly.
+D1's sealed porch-roof penetration needs designed flashing; its collar is intent.
+D3's shallow garage return and D8's high-step bypass need supports and access.
+Capacity, installed gutter falls, overflow/freeze, attachment and lawful
+below-grade connections are unverified. Do not build from this study.
+
 ## Compact viewer
 
 November 14 follow-up: north-entry kids → full-width rectangular bath →

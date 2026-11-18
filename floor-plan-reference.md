@@ -29,6 +29,32 @@ is 55.950 ft. Projection support, framing/fire separation, headers, glazing,
 height limits, insulation, flashing/drainage and finished-area eligibility
 remain approval-required.
 
+## Coordinated gutters - November 17
+
+The normal 3D model adopts the coordinated gutter plan: open Dark Bronze
+5 x 3.5-inch ogee profiles and hollow 3 x 2-inch leaders, illustrative sizes.
+Three front eave outlets replace the old corner zigzags and cross-garage pipe.
+Reviewed follow-up adds D0: an open west-valley receiver with an open outlet
+transition to a sealed leader outside the porch. Its envelope and stand-off
+brackets are illustrative, not sized or structurally approved.
+All ten ogee troughs now have physical 1/16-in/ft fall segments, low points
+at outlets, short end-tail returns and matching corner elevations.
+The rear 44.25-ft run drops 1.36/1.34 inches from its center to west/east
+outlets. Fitted drip aprons meet the lowered troughs; roof eaves stay fixed.
+Porch, rear main, high rear step and dining collection now have leaders;
+the patio's existing falling trough stays. The garage uses a shallow
+4.95-ft return before its corner elbow; support and access need design.
+D1 follows the stepped wall and marks a sealed, approval-required porch
+penetration at x11.9/z55.1042 ft.
+D8 bypasses the low gutter rather than connecting the two roof levels.
+The dining west abutment remains unresolved: design flashing and a
+cricket/scupper; no isolated stub or trough through masonry.
+AB1/D10 remains a held 2D assembly, not new 3D geometry.
+Catchments, capacity, installed falls, overflow, ice/freeze,
+attachments and lawful below-grade connections remain unverified.
+Roof and room geometry, windows, doors and saved layouts are unchanged.
+See [gutters](gutters.html) and the [plan](artifacts/coordinated-roof-sketch.html#gutter-plan-study).
+
 ## Previous sketch roof and sloped loft - November 15 (superseded)
 
 The corrected coordinated-roof sketch is adopted into the normal 3D model,

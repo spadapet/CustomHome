@@ -30,11 +30,12 @@ function render(metal = false, override = null) {
   }
   const context = {
     THREE: {
-      Group, Vector3: Vector, DoubleSide: 2, BufferGeometry: Geometry,
+      Group, Vector3: Vector, Vector2: class { constructor(x, y) { Object.assign(this, { x, y }); } },
+      ShapeUtils: { triangulateShape: () => [[0, 1, 2]] }, DoubleSide: 2, BufferGeometry: Geometry,
       Float32BufferAttribute: class { constructor(array) { this.array = array; } },
       Mesh: class extends Group { constructor(geometry, material) { super(); Object.assign(this, { geometry, material }); } }
     },
-    HomeRoof, finishes:{brick:{face:[232,214,184]}},facadePrototype: false, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: { name: 'gutter' }, mat: () => ({}),
+    HomeRoof, finishes:{brick:{face:[232,214,184]}},facadePrototype: false, group: new Group(), white: { clone: () => ({}) }, trim: {}, gutterFinish: { name: 'gutter', clone: () => ({}) }, mat: () => ({}),
     box(parent, x, y, z, width, height, depth, material) {
       const mesh = new Group();
       Object.assign(mesh, { geometry: { width, height, depth }, material });
@@ -46,7 +47,7 @@ function render(metal = false, override = null) {
   vm.createContext(context);
   context.masonryFootprints = [];
   vm.runInContext(source.slice(source.indexOf('function clipGutterToMasonry('), source.indexOf('function buildExteriorModel(')), context);
-  const start = source.indexOf('  function renderRoofEnvelope('), end = source.indexOf('  const slateFinish =', start);
+  const start = source.indexOf('  function prototypeGutter('), end = source.indexOf('  const slateFinish =', start);
   assert.ok(start >= 0 && end > start);
   vm.runInContext(source.slice(start, end), context);
   const definitions = override || (metal ? HomeRoof.getPorchRoofDefinitions() : HomeRoof.getConnectedRoofDefinitions());
@@ -68,7 +69,8 @@ test('roof edges receive closed soffits and deep trim only along the envelope pe
   }
   assert.ok(model.children.some(part => part.name === 'Front gable stepped cream rake molding'));
   assert.ok(model.children.some((part) => part.name === 'Connected roof closed edge soffit'));
-  assert.ok(model.children.some((part) => part.name === 'Connected roof perimeter gutter'));
+  assert.ok(model.children.some((part) => part.userData.gutterId));
+  assert.ok(!model.children.some((part) => part.name === 'Connected roof perimeter gutter'));
   assert.ok(model.children.some((part) => part.name === 'Stepped roof wall-abutment flashing'));
   for (const join of model.children.filter((part) => part.userData.roofJoin === 'valley')) {
     assert.equal(join.geometry.height, 0.015, 'Valleys have slim flashing, not thick white eaves');
@@ -156,5 +158,8 @@ test('metal ribs follow clipped porch/entry polygons with one shared finish and 
   assert.ok(!model.children.some(part => /barrel|arch|curv|segment|tympan/i.test(`${part.name} ${part.userData.roof ?? ''}`)), 'No arched/curved porch roof part is rendered');
   assert.ok(ribs.every(part => Math.abs(part.axis.x) < 1e-8), 'Porch seams run straight down the single slope');
   assert.ok(!model.children.some(part => part.userData.roofJoin), 'Straight coplanar porch roof has no ridge, hip or valley joins');
-  assert.ok(!model.children.some((part) => /fascia|gutter/.test(part.name)), 'Preserve the corrected metal-roof perimeter trim rather than adding crossing white strips');
+  const gutters = model.children.filter(part => part.userData.gutterId);
+  assert.equal(gutters.length, 1, 'Only the outward-draining porch eave has a trough');
+  assert.equal(gutters[0].userData.gutterId, 'porch');
+  assert.ok(!model.children.some(part => /fascia/.test(part.name)), 'No crossing white strips');
 });
